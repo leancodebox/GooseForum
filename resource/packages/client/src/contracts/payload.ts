@@ -799,10 +799,15 @@ export interface PublishPageProps {
   }
 }
 
+export type AccessGroupsPageProps = Record<string, never>
+
 export interface PublishCategoryPayload {
   id: number
   name: string
   color: string
+  isRestricted: boolean
+  allowMultipleCategories: boolean
+  canCreate: boolean
 }
 
 export interface SearchPageProps {

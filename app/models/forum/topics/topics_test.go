@@ -74,6 +74,14 @@ func TestTopicRepositoryParity(t *testing.T) {
 	if len(page.Data) != 1 || page.Data[0].Id != 10 {
 		t.Fatalf("Page() filtered ids = %#v, want only topic 10", page.Data)
 	}
+	audiencePage := Page(PageQuery{Page: 1, PageSize: 10, FilterStatus: true, FilterAudience: true, ReadableCategoryIds: []uint64{4}, Sort: "new"})
+	if len(audiencePage.Data) != 1 || audiencePage.Data[0].Id != 20 {
+		t.Fatalf("Page() audience ids = %#v, want only topic 20", audiencePage.Data)
+	}
+	emptyAudiencePage := Page(PageQuery{Page: 1, PageSize: 10, FilterStatus: true, FilterAudience: true})
+	if len(emptyAudiencePage.Data) != 0 || emptyAudiencePage.HasNext {
+		t.Fatalf("Page() empty audience = %#v, want empty page", emptyAudiencePage)
+	}
 
 	moderationPage := PageForModeration(ModerationPageQuery{
 		Page:                1,

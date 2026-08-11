@@ -16,6 +16,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 
@@ -74,7 +75,14 @@ func RenderSitemapXml(c *gin.Context) {
 }
 
 func buildSitemapXML(host string) (string, error) {
-	list, _ := topics.GetLatestPublished(5000)
+	snapshot, err := accesscontrol.Resolve(0)
+	if err != nil {
+		return "", fmt.Errorf("resolve guest access for sitemap: %w", err)
+	}
+	list, err := topics.GetLatestPublishedForAudience(5000, snapshot.ReadableCategoryIDs(), true)
+	if err != nil {
+		return "", err
+	}
 
 	tpl, err := template.New("sitemap").Parse(sitemapTpl)
 	if err != nil {
@@ -91,6 +99,9 @@ func buildSitemapXML(host string) (string, error) {
 	}
 	categories := hotdataserve.GetCategory()
 	for _, cat := range categories {
+		if cat == nil || !snapshot.CanReadCategory(cat.Id) {
+			continue
+		}
 		slug := cat.Slug
 		if slug == "" {
 			slug = cat.Name
@@ -163,7 +174,11 @@ func cacheableSEOHost(host string) bool {
 
 func buildRSSXML(host string) (string, error) {
 	settingConfig := hotdataserve.GetSiteSettingsConfigCache()
-	topicList, err := topics.GetLatestPublished(100)
+	snapshot, err := accesscontrol.Resolve(0)
+	if err != nil {
+		return "", fmt.Errorf("resolve guest access for rss: %w", err)
+	}
+	topicList, err := topics.GetLatestPublishedForAudience(100, snapshot.ReadableCategoryIDs(), true)
 	if err != nil {
 		return "", err
 	}

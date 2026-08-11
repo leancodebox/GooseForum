@@ -1,6 +1,7 @@
 import { adminText } from '@/admin/runtime/i18n-text'
 import { resolveApiMessage } from '@/runtime/api-message'
 import type {
+  AccessControlOverview,
   ApiEnvelope,
   AdminTopic,
   AdminBadge,
@@ -166,6 +167,60 @@ export function saveRole(data: { id: number, roleName: string, permissions: numb
 
 export function deleteRole(id: number) {
   return postJson<unknown>('/api/admin/role-delete', { id }, adminText('k000y'))
+}
+
+export function getAccessControlOverview() {
+  return postJson<AccessControlOverview>('/api/admin/access-control/overview', {}, adminText('k000l'))
+}
+
+export function saveAccessGroup(data: {
+  id?: number
+  name: string
+  joinMode: 'invite_only' | 'application'
+  status: number
+}) {
+  return postJson<number>('/api/admin/access-group/save', data, adminText('k000l'))
+}
+
+export function deleteAccessGroup(id: number) {
+  return postJson<unknown>('/api/admin/access-group/delete', { id }, adminText('k000l'))
+}
+
+export function saveAccessGroupMember(data: {
+  groupId: number
+  userId?: number
+  username?: string
+  memberRole: 'member' | 'manager'
+}) {
+  return postJson<number>('/api/admin/access-group/member-save', data, adminText('k000l'))
+}
+
+export function deleteAccessGroupMember(groupId: number, memberId: number) {
+  return postJson<unknown>('/api/admin/access-group/member-delete', { groupId, memberId }, adminText('k000l'))
+}
+
+export function reviewAccessGroupApplication(groupId: number, memberId: number, approve: boolean) {
+  return postJson<unknown>(
+    '/api/admin/access-group/application-review',
+    { groupId, memberId, approve },
+    adminText('k000l'),
+  )
+}
+
+export function previewCategoryRestriction(categoryId: number) {
+  return postJson<{ conflictCount: number }>(
+    '/api/admin/category-access/restriction-preview',
+    { categoryId },
+    adminText('k000l'),
+  )
+}
+
+export function saveCategoryAccess(data: {
+  categoryId: number
+  grants: { accessGroupId: number; level: number }[]
+  strategy?: 'keep_category' | 'remove_category'
+}) {
+  return postJson<unknown>('/api/admin/category-access/save', data, adminText('k000l'))
 }
 
 export function getCategoryList() {

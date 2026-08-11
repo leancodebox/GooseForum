@@ -4,6 +4,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	forumcontroller "github.com/leancodebox/GooseForum/app/http/controllers/forum"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
+	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 	"github.com/leancodebox/GooseForum/app/service/unreadservice"
@@ -13,7 +14,11 @@ import (
 type GetUnreadCountReq struct{}
 
 func GetUnreadStatus(req component.BetterRequest[GetUnreadCountReq]) component.Response {
-	status := unreadservice.GetStatus(req.UserId)
+	snapshot, err := accesscontrol.Resolve(req.UserId)
+	if err != nil {
+		return component.FailResponse()
+	}
+	status := unreadservice.GetStatusForAudience(req.UserId, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
 	return component.SuccessResponse(component.DataMap{
 		"notifications":          status.Notifications,
 		"messages":               status.Messages,
@@ -44,18 +49,24 @@ func NotificationList(req component.BetterRequest[NotificationListReq]) componen
 	default:
 		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
 	}
+	snapshot, err := accesscontrol.Resolve(req.UserId)
+	if err != nil {
+		return component.FailResponse()
+	}
 
-	notifications, nextCursor, hasNext, err := notificationservice.GetNotificationCursorList(
+	notifications, nextCursor, hasNext, err := notificationservice.GetNotificationCursorListForAudience(
 		req.UserId,
 		req.Params.Limit,
 		req.Params.Cursor,
 		unreadOnly,
+		snapshot.ReadableCategoryIDs(),
+		!snapshot.HasGlobalManage(),
 	)
 	if err != nil {
 		return component.FailResponseCode(component.MessageRequestParseFailed, component.MessageParams{"error": err.Error()})
 	}
 
-	unreadCount, _ := eventNotification.GetUnreadCount(req.UserId)
+	unreadCount, _ := eventNotification.GetUnreadCountForAudience(req.UserId, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
 	return component.SuccessResponse(NotificationListResp{
 		Items:       forumcontroller.BuildNotificationPayloads(notifications),
 		NextCursor:  nextCursor,

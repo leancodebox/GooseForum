@@ -46,6 +46,15 @@ func JWTAuth(c *gin.Context) {
 	}
 }
 
+// JWTAuthSilent resolves an optional login without emitting activity events.
+// It is intended for high-frequency protected resources such as inline images.
+func JWTAuthSilent(c *gin.Context) {
+	if userID := JWTAuthGetUserId(c); userID != 0 {
+		c.Set("userId", userID)
+	}
+	c.Next()
+}
+
 func JWTAuthGetUserId(c *gin.Context) uint64 {
 	token := jwt.GetGinAccessToken(c)
 	if token == "" {

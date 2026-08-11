@@ -6,7 +6,7 @@
   "scripts": {
     "client:build": "pnpm --filter @gooseforum/client build",
     "client:test": "pnpm --filter @gooseforum/client test",
-    "dev": "pnpm client:build && pnpm --parallel --filter gooseforum-resource --filter @gooseforum/client run dev:watch",
+    "dev": "pnpm client:build && pnpm --parallel --include-workspace-root --filter gooseforum-resource --filter @gooseforum/client run dev:watch",
     "dev:watch": "vite --host 0.0.0.0",
     "build": "pnpm client:build && vue-tsc --noEmit && vite build",
     "typecheck": "pnpm client:build && vue-tsc --noEmit",

@@ -17,12 +17,12 @@ func handleActivityPost(ctx context.Context, event *TopicPublishedEvent) error {
 	if topicID == 0 || userID == 0 {
 		return nil
 	}
-	return userActivities.Record(userID, userActivities.ActionPost, userActivities.SubjectTopic, topicID, title)
+	return userActivities.RecordForTopic(userID, userActivities.ActionPost, userActivities.SubjectTopic, topicID, topicID, title)
 }
 
 // handleActivityLike 记录点赞行为
 func handleActivityLike(ctx context.Context, event *TopicLikedEvent) error {
-	return userActivities.Record(event.LikerId, userActivities.ActionLike, userActivities.SubjectTopic, event.TopicId, event.Title)
+	return userActivities.RecordForTopic(event.LikerId, userActivities.ActionLike, userActivities.SubjectTopic, event.TopicId, event.TopicId, event.Title)
 }
 
 // handleActivityFollow 记录关注行为
@@ -32,5 +32,5 @@ func handleActivityFollow(ctx context.Context, event *UserFollowedEvent) error {
 
 // handleActivityReply 记录回复行为
 func handleActivityReply(ctx context.Context, event *CommentCreatedEvent) error {
-	return userActivities.Record(event.UserId, userActivities.ActionComment, userActivities.SubjectPost, event.PostId, TakeUpTo64Chars(event.Content))
+	return userActivities.RecordForTopic(event.UserId, userActivities.ActionComment, userActivities.SubjectPost, event.PostId, event.TopicId, TakeUpTo64Chars(event.Content))
 }

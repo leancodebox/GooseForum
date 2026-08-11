@@ -135,5 +135,35 @@ func runVersionedDataMigrations() {
 		pageConfig.SyncMigrationVersion(12)
 		currentVersion = 12
 	}
+	if currentVersion < 13 {
+		result := datamigration.BackfillAccessControlDefaults()
+		slog.Info("app migration access control defaults done", "groups", result.Groups, "categories", result.Categories, "grants", result.Grants, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			slog.Error("app migration access control defaults has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
+			return
+		}
+		pageConfig.SyncMigrationVersion(13)
+		currentVersion = 13
+	}
+	if currentVersion < 14 {
+		result := datamigration.BackfillUserActivityTopicIDs()
+		slog.Info("app migration user activity topic ids done", "topics", result.Topics, "posts", result.Posts, "missing", result.Missing, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			slog.Error("app migration user activity topic ids has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
+			return
+		}
+		pageConfig.SyncMigrationVersion(14)
+		currentVersion = 14
+	}
+	if currentVersion < 15 {
+		result := datamigration.BackfillNotificationTopicIDs()
+		slog.Info("app migration notification topic ids done", "updated", result.Updated, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			slog.Error("app migration notification topic ids has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
+			return
+		}
+		pageConfig.SyncMigrationVersion(15)
+		currentVersion = 15
+	}
 	slog.Info("app migration end", "version", currentVersion)
 }

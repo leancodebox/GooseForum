@@ -5,6 +5,8 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
+	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 )
 
@@ -29,15 +31,16 @@ type CommentCreatedEvent struct {
 // handleCommentCreated 发送评论/回复通知
 func handleCommentCreated(ctx context.Context, event *CommentCreatedEvent) error {
 	contentPreview := TakeUpTo64Chars(event.Content)
+	topic := topics.GetSimple(event.TopicId)
 	// 如果不是主题作者自己发表评论，通知主题作者
-	if shouldNotifyTopicAuthor(event) {
+	if shouldNotifyTopicAuthor(event) && canReceiveTopicNotification(event.TopicAuthorId, topic) {
 		_ = notificationservice.SendCommentNotification(event.TopicAuthorId, event.TopicId, contentPreview, event.UserId, event.PostId)
 	}
 	// 如果是回复 post，且不是回复自己，通知原 post 作者
-	if shouldNotifyParentReplyAuthor(event) {
+	if shouldNotifyParentReplyAuthor(event) && canReceiveTopicNotification(event.ReplyToPostAuthorId, topic) {
 		_ = notificationservice.SendPostReplyNotification(event.ReplyToPostAuthorId, event.PostId, event.TopicId, contentPreview, event.UserId)
 	}
-	notifyTopicWatchers(event, contentPreview)
+	notifyTopicWatchers(event, topic, contentPreview)
 	return nil
 }
 
@@ -52,7 +55,7 @@ func shouldNotifyParentReplyAuthor(event *CommentCreatedEvent) bool {
 	return event.ReplyToPostId > 0 && event.ReplyToPostAuthorId > 0 && event.ReplyToPostAuthorId != event.UserId
 }
 
-func notifyTopicWatchers(event *CommentCreatedEvent, contentPreview string) {
+func notifyTopicWatchers(event *CommentCreatedEvent, topic topics.Entity, contentPreview string) {
 	excludeUserIds := commentNotificationExcludeUserIds(event)
 	afterUserId := uint64(0)
 	for {
@@ -60,12 +63,26 @@ func notifyTopicWatchers(event *CommentCreatedEvent, contentPreview string) {
 		if len(userIds) == 0 {
 			return
 		}
-		_ = notificationservice.SendTopicPostNotifications(userIds, event.TopicId, event.PostId, contentPreview, event.UserId)
+		readableUserIDs := make([]uint64, 0, len(userIds))
+		for _, userID := range userIds {
+			if canReceiveTopicNotification(userID, topic) {
+				readableUserIDs = append(readableUserIDs, userID)
+			}
+		}
+		_ = notificationservice.SendTopicPostNotifications(readableUserIDs, event.TopicId, event.PostId, contentPreview, event.UserId)
 		afterUserId = userIds[len(userIds)-1]
 		if len(userIds) < topicWatchNotifyBatchSize {
 			return
 		}
 	}
+}
+
+func canReceiveTopicNotification(userID uint64, topic topics.Entity) bool {
+	if userID == 0 || topic.Id == 0 || topic.Status != 1 || topic.ProcessStatus != 0 {
+		return false
+	}
+	snapshot, err := accesscontrol.Resolve(userID)
+	return err == nil && snapshot.CanReadAllCategories(topic.CategoryIds)
 }
 
 func commentNotificationExcludeUserIds(event *CommentCreatedEvent) []uint64 {

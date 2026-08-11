@@ -12,10 +12,11 @@ import (
 
 // SearchRequest is a topic search request.
 type SearchRequest struct {
-	Query      string   `json:"query"`
-	Categories []uint64 `json:"categories"`
-	Limit      int      `json:"limit"`
-	Offset     int      `json:"offset"`
+	Query              string   `json:"query"`
+	Categories         []uint64 `json:"categories"`
+	FilterByCategories bool     `json:"filterByCategories"`
+	Limit              int      `json:"limit"`
+	Offset             int      `json:"offset"`
 }
 
 // SearchResult is one search hit.
@@ -32,6 +33,9 @@ type SearchResponse struct {
 
 // SearchTopics returns topic IDs and titles directly from Meilisearch.
 func SearchTopics(req SearchRequest) (*SearchResponse, error) {
+	if req.FilterByCategories && len(req.Categories) == 0 {
+		return &SearchResponse{Results: []SearchResult{}}, nil
+	}
 	if !meiliconnect.IsAvailable() {
 		return &SearchResponse{
 			Results: []SearchResult{},
@@ -48,7 +52,7 @@ func SearchTopics(req SearchRequest) (*SearchResponse, error) {
 		Offset: int64(req.Offset),
 	}
 
-	if len(req.Categories) > 0 {
+	if req.FilterByCategories {
 		filters := lo.Map(req.Categories, func(categoryID uint64, _ int) string {
 			return fmt.Sprintf("category = %d", categoryID)
 		})

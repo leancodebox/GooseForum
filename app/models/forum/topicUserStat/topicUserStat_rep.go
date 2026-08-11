@@ -21,8 +21,12 @@ func Get(id uint64) (entity Entity) {
 }
 
 func IncrementUserPost(topicId, userId uint64) error {
+	return IncrementUserPostWithDB(builder(), topicId, userId)
+}
+
+func IncrementUserPostWithDB(db *gorm.DB, topicId, userId uint64) error {
 	now := time.Now()
-	return builder().Clauses(clause.OnConflict{
+	return db.Model(&Entity{}).Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "topic_id"}, {Name: "user_id"}},
 		DoUpdates: clause.Assignments(map[string]any{
 			"reply_count":   gorm.Expr("reply_count + 1"),
@@ -44,11 +48,16 @@ func DecrementUserPost(topicId, userId uint64) error {
 }
 
 func SyncTopicPosters(topicId uint64) []uint64 {
+	result, _ := SyncTopicPostersWithDB(builder(), topicId)
+	return result
+}
+
+func SyncTopicPostersWithDB(db *gorm.DB, topicId uint64) ([]uint64, error) {
 	var activeUserIDs []uint64
-	builder().
+	err := db.Model(&Entity{}).
 		Where("topic_id = ?", topicId).
 		Order("reply_count DESC, last_reply_at DESC").
 		Limit(3).
-		Pluck("user_id", &activeUserIDs)
-	return activeUserIDs
+		Pluck("user_id", &activeUserIDs).Error
+	return activeUserIDs, err
 }

@@ -13,6 +13,7 @@ export const pageLoaders = {
   'drafts.index': () => import('@/site/pages/DraftsPage.vue'),
   'moderation.index': () => import('@/site/pages/ModerationPage.vue'),
   'settings.index': () => import('@/site/pages/SettingsPage.vue'),
+  'access-groups.index': () => import('@/site/pages/AccessGroupsPage.vue'),
   'theme.preview': () => import('@/site/pages/ThemePreviewPage.vue'),
   'publish.index': () => import('@/site/pages/PublishPage.vue'),
   'search.index': () => import('@/site/pages/SearchPage.vue'),

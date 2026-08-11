@@ -20,7 +20,11 @@ func SaveNoUpdate(entity *Entity) error {
 }
 
 func Create(entity *Entity) error {
-	return builder().Create(entity).Error
+	return CreateWithDB(builder(), entity)
+}
+
+func CreateWithDB(db *gorm.DB, entity *Entity) error {
+	return db.Create(entity).Error
 }
 
 func Save(entity *Entity) error {

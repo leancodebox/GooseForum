@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
-import { Bold, ClipboardPaste, Code, Code2, CornerDownLeft, Eye, Heading, Image, Italic, Link, List, ListChecks, ListOrdered, MessageSquareQuote, Minus, Send, Strikethrough, Table2, X } from '@lucide/vue'
+import { Bold, ClipboardPaste, Code, Code2, CornerDownLeft, Eye, Heading, Image, Italic, Link, List, ListChecks, ListOrdered, Lock, MessageSquareQuote, Minus, Send, Strikethrough, Table2, X } from '@lucide/vue'
 import { submitTopic, uploadImage } from '@/runtime/api'
 import { processImageFile, validateImageFile } from '@/runtime/image'
 import { renderMarkdownPreview } from '@/runtime/markdown'
@@ -58,6 +58,8 @@ const isValid = computed(() => Boolean(title.value.trim() && content.value.trim(
 const categoryMissing = computed(() => validationAttempted.value && categoryIds.value.length === 0)
 const validationError = computed(() => validationAttempted.value && !isValid.value ? t('publish.validation.requiredFields') : '')
 const selectedCategories = computed(() => page.props.categories.filter((category) => categoryIds.value.includes(category.id)))
+const selectedRestrictedCategory = computed(() => selectedCategories.value.find((category) => !category.allowMultipleCategories))
+const canPublishSelection = computed(() => page.props.topic.topicStatus === 1 || selectedCategories.value.every((category) => category.canCreate))
 const renderedPreview = computed(() => renderMarkdownPreview(content.value))
 const draftSaveable = computed(() => isValid.value && !submitting.value && !uploading.value)
 const savedSnapshot = ref(editorSnapshot())
@@ -95,8 +97,18 @@ function toggleCategory(id: number) {
     categoryIds.value = categoryIds.value.filter((item) => item !== id)
     return
   }
+	const category = page.props.categories.find((item) => item.id === id)
+	if (!category?.canCreate) return
+	if (!category.allowMultipleCategories || selectedRestrictedCategory.value) {
+		categoryIds.value = [id]
+		return
+	}
   if (categoryIds.value.length >= 3) return
   categoryIds.value = [...categoryIds.value, id]
+}
+
+function categoryDisabled(category: PublishPageProps['categories'][number]) {
+	return !categoryIds.value.includes(category.id) && (!category.canCreate || (categoryIds.value.length >= 3 && !selectedRestrictedCategory.value))
 }
 
 async function validateRequiredFields() {
@@ -458,6 +470,10 @@ function handleEditorKeydown(event: KeyboardEvent) {
 
 async function save() {
   if (submitting.value || uploading.value || !(await validateRequiredFields())) return
+	if (!canPublishSelection.value) {
+		error.value = t('publish.noCreatePermission')
+		return
+	}
   submitting.value = true
   error.value = ''
   message.value = ''
@@ -539,7 +555,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                     {{ t('publish.validation.categoryRequired') }}
                   </span>
                 </div>
-                <span class="text-xs text-base-content/55">{{ t('publish.maxCategories') }}</span>
+                <span class="text-xs text-base-content/55">{{ selectedRestrictedCategory ? t('publish.restrictedSingleCategory') : t('publish.maxCategories') }}</span>
               </div>
               <div class="flex flex-wrap gap-2">
                 <button
@@ -548,11 +564,13 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                   type="button"
                   class="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
                   :class="categoryIds.includes(category.id) ? 'border-primary bg-info/10 text-primary' : 'border-line text-base-content/75 hover:border-line hover:bg-base-200'"
-                  :disabled="!categoryIds.includes(category.id) && categoryIds.length >= 3"
+                  :disabled="categoryDisabled(category)"
+                  :title="category.isRestricted ? t('publish.restrictedCategoryHint') : undefined"
                   @click="toggleCategory(category.id)"
                 >
                   <span class="h-2 w-2 rounded-[3px]" :style="{ backgroundColor: category.color }" />
                   {{ category.name }}
+				  <Lock v-if="category.isRestricted" class="h-3.5 w-3.5" />
                 </button>
               </div>
             </div>
@@ -704,7 +722,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
               <button
                 type="button"
                 class="gf-button gf-button-lg gf-button-primary"
-                :disabled="submitting || uploading"
+                :disabled="submitting || uploading || !canPublishSelection"
                 @click="save"
               >
                 <Send class="h-4 w-4" />

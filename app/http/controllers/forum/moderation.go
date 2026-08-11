@@ -21,6 +21,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
@@ -207,6 +208,11 @@ func UpdateModerationTopicStatus(req component.BetterRequest[ModerationTopicStat
 func CreateReport(req component.BetterRequest[CreateReportReq]) component.Response {
 	target, ok := reportTargetInfo(req.Params.TargetType, req.Params.TargetId, req.UserId)
 	if !ok {
+		return component.FailResponseCode(component.MessageReportTargetInvalid, nil)
+	}
+	topic := topics.GetSimple(target.TopicID)
+	snapshot, err := accesscontrol.Resolve(req.UserId)
+	if err != nil || topic.Id == 0 || topic.Status != 1 || topic.ProcessStatus != 0 || !snapshot.CanReadAllCategories(topic.CategoryIds) {
 		return component.FailResponseCode(component.MessageReportTargetInvalid, nil)
 	}
 	if target.UserID == req.UserId {

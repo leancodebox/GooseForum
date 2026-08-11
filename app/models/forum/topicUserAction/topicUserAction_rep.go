@@ -139,20 +139,44 @@ type LikedTopicRef struct {
 }
 
 func ListLikedTopicRefsBefore(userId uint64, cursor string, limit int) ([]LikedTopicRef, string) {
+	return listLikedTopicRefsBefore(userId, cursor, limit, nil, false, false)
+}
+
+func ListLikedTopicRefsBeforeForAudience(userId uint64, cursor string, limit int, readableCategoryIDs []uint64, filterAudience bool) ([]LikedTopicRef, string) {
+	return listLikedTopicRefsBefore(userId, cursor, limit, readableCategoryIDs, filterAudience, true)
+}
+
+func listLikedTopicRefsBefore(userId uint64, cursor string, limit int, readableCategoryIDs []uint64, filterAudience bool, filterPublished bool) ([]LikedTopicRef, string) {
 	if userId == 0 || limit <= 0 {
 		return nil, ""
+	}
+	if filterAudience && len(readableCategoryIDs) == 0 {
+		return []LikedTopicRef{}, ""
 	}
 
 	rows := make([]LikedTopicRef, 0, limit+1)
 	cursorID := parseLikedCursor(cursor)
 	query := builder().
-		Select("id", "topic_id", "liked_at").
-		Where(queryopt.Eq("user_id", userId)).
-		Where("liked_at IS NOT NULL")
-	if cursorID > 0 {
-		query = query.Where("id < ?", cursorID)
+		Select("topic_user_action.id", "topic_user_action.topic_id", "topic_user_action.liked_at").
+		Where(queryopt.Eq("topic_user_action.user_id", userId)).
+		Where("topic_user_action.liked_at IS NOT NULL")
+	if filterPublished {
+		query = query.
+			Joins("JOIN topics ON topics.id = topic_user_action.topic_id").
+			Where(queryopt.Eq("topics.status", 1)).
+			Where(queryopt.Eq("topics.process_status", 0))
 	}
-	query.Order("id DESC").Limit(limit + 1).Find(&rows)
+	if filterAudience {
+		query = query.Where(
+			`EXISTS (SELECT 1 FROM topic_category_index audience_idx WHERE audience_idx.topic_id = topics.id AND audience_idx.effective = ? AND audience_idx.category_id IN ?)`,
+			1,
+			readableCategoryIDs,
+		)
+	}
+	if cursorID > 0 {
+		query = query.Where("topic_user_action.id < ?", cursorID)
+	}
+	query.Order("topic_user_action.id DESC").Limit(limit + 1).Find(&rows)
 
 	hasNext := len(rows) > limit
 	if hasNext {

@@ -21,6 +21,7 @@ func SendCommentNotification(userId uint64, topicId uint64, commentContent strin
 
 	notification := &eventNotification.Entity{
 		UserId:    userId,
+		TopicId:   topicId,
 		EventType: eventNotification.EventTypeComment,
 		Payload:   payload,
 	}
@@ -47,6 +48,7 @@ func SendPostReplyNotification(userId uint64, postId uint64, topicId uint64, rep
 
 	notification := &eventNotification.Entity{
 		UserId:    userId,
+		TopicId:   topicId,
 		EventType: eventNotification.EventTypePostReply,
 		Payload:   payload,
 	}
@@ -70,6 +72,7 @@ func SendTopicPostNotifications(userIds []uint64, topicId uint64, postId uint64,
 		}
 		notifications = append(notifications, &eventNotification.Entity{
 			UserId:    userId,
+			TopicId:   topicId,
 			EventType: eventNotification.EventTypeTopicPost,
 			Payload: eventNotification.NotificationPayload{
 				Content:     commentContent,

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"gorm.io/gorm"
 )
 
 // Create 创建通知
@@ -23,35 +24,72 @@ func CreateBatch(entities []*Entity, batchSize int) error {
 
 // QueryByUserId 获取用户的通知列表
 func QueryByUserId(userId uint64, limit int, startId uint64, unreadOnly bool) (notifications []*Entity, err error) {
-	db := builder().Where(queryopt.Eq("user_id", userId))
-	if startId != 0 {
-		db = db.Where(queryopt.Lt("id", startId))
+	return QueryByUserIdForAudience(userId, limit, startId, unreadOnly, nil, false)
+}
+
+func QueryByUserIdForAudience(userID uint64, limit int, startID uint64, unreadOnly bool, readableCategoryIDs []uint64, filterAudience bool) (notifications []*Entity, err error) {
+	db := builder().Where(queryopt.Eq("event_notification.user_id", userID))
+	if startID != 0 {
+		db = db.Where(queryopt.Lt("event_notification.id", startID))
 	}
 	if unreadOnly {
-		db = db.Where(queryopt.Eq("is_read", false))
+		db = db.Where(queryopt.Eq("event_notification.is_read", false))
 	}
-	err = db.Order(queryopt.Desc(`id`)).
+	db = applyAudienceFilter(db, readableCategoryIDs, filterAudience)
+	err = db.Order(queryopt.Desc(`event_notification.id`)).
 		Limit(limit).
 		Find(&notifications).Error
 	return
 }
 
+func applyAudienceFilter(db *gorm.DB, readableCategoryIDs []uint64, filterAudience bool) *gorm.DB {
+	if !filterAudience {
+		return db
+	}
+	if len(readableCategoryIDs) == 0 {
+		return db.Where("event_notification.topic_id = 0")
+	}
+	return db.
+		Joins("LEFT JOIN topics ON topics.id = event_notification.topic_id").
+		Where(`event_notification.topic_id = 0 OR (
+			topics.id IS NOT NULL
+			AND topics.status = 1
+			AND topics.process_status = 0
+			AND EXISTS (
+				SELECT 1 FROM topic_category_index audience_idx
+				WHERE audience_idx.topic_id = topics.id
+				AND audience_idx.effective = 1
+				AND audience_idx.category_id IN ?
+			)
+		)`, readableCategoryIDs)
+}
+
 // GetLastUnread 获取用户未读通知数量
 func GetLastUnread(userId uint64) (entity Entity) {
-	builder().
-		Where(queryopt.Eq("user_id", userId)).
-		Where(queryopt.Eq("is_read", false)).
-		Order("id DESC").
+	return GetLastUnreadForAudience(userId, nil, false)
+}
+
+func GetLastUnreadForAudience(userID uint64, readableCategoryIDs []uint64, filterAudience bool) (entity Entity) {
+	query := builder().
+		Where(queryopt.Eq("event_notification.user_id", userID)).
+		Where(queryopt.Eq("event_notification.is_read", false))
+	query = applyAudienceFilter(query, readableCategoryIDs, filterAudience)
+	query.Order("event_notification.id DESC").
 		First(&entity)
 	return
 }
 
 // GetUnreadCount 获取用户未读通知数量
 func GetUnreadCount(userId uint64) (count int64, err error) {
-	err = builder().
-		Where(queryopt.Eq("user_id", userId)).
-		Where(queryopt.Eq("is_read", false)).
-		Count(&count).Error
+	return GetUnreadCountForAudience(userId, nil, false)
+}
+
+func GetUnreadCountForAudience(userID uint64, readableCategoryIDs []uint64, filterAudience bool) (count int64, err error) {
+	query := builder().
+		Where(queryopt.Eq("event_notification.user_id", userID)).
+		Where(queryopt.Eq("event_notification.is_read", false))
+	query = applyAudienceFilter(query, readableCategoryIDs, filterAudience)
+	err = query.Count(&count).Error
 	return
 }
 

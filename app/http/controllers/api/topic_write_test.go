@@ -6,7 +6,10 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/forum/accessGroupMembers"
+	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
+	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/models/forum/fileUsage"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderators"
@@ -21,6 +24,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
+	"github.com/leancodebox/GooseForum/app/service/datamigration"
 	"gorm.io/gorm"
 )
 
@@ -28,6 +33,9 @@ func setupTopicWriteTestDB(t *testing.T) *gorm.DB {
 	t.Helper()
 	conn := dbconnect.Connect()
 	err := conn.AutoMigrate(
+		&accessGroups.Entity{},
+		&accessGroupMembers.Entity{},
+		&categoryGroupPermissions.Entity{},
 		&users.EntityComplete{},
 		&userStatistics.Entity{},
 		&topics.Entity{},
@@ -47,7 +55,24 @@ func setupTopicWriteTestDB(t *testing.T) *gorm.DB {
 	if err != nil {
 		t.Fatalf("migrate topic write tables: %v", err)
 	}
+	ensureTopicWriteAccess(t, conn)
 	return conn
+}
+
+func ensureTopicWriteAccess(t *testing.T, conn *gorm.DB) {
+	t.Helper()
+	result := datamigration.BackfillAccessControlDefaultsWithDB(conn)
+	if result.Failed != 0 {
+		t.Fatalf("backfill access control: %s", result.LastFailed)
+	}
+	accesscontrol.InvalidateSystemGroups()
+	var groups []accessGroups.Entity
+	if err := conn.Find(&groups).Error; err != nil {
+		t.Fatalf("load access groups: %v", err)
+	}
+	for _, group := range groups {
+		accesscontrol.InvalidateGroup(group.Id)
+	}
 }
 
 func createTopicWriteUser(t *testing.T, conn *gorm.DB, id uint64, username string) {
@@ -67,6 +92,7 @@ func TestWriteTopicCreatesTopicAndFirstPost(t *testing.T) {
 	if err := conn.Create(&category.Entity{Id: 2001, Name: "General", Slug: "general"}).Error; err != nil {
 		t.Fatalf("create category: %v", err)
 	}
+	ensureTopicWriteAccess(t, conn)
 
 	res := WriteTopic(component.BetterRequest[WriteTopicReq]{
 		UserId: 1001,
@@ -100,8 +126,12 @@ func TestCreatePostWritesPostAndTopicStats(t *testing.T) {
 	conn := setupTopicWriteTestDB(t)
 	createTopicWriteUser(t, conn, 1101, "author")
 	createTopicWriteUser(t, conn, 1102, "replyer")
+	if err := conn.Create(&category.Entity{Id: 3002, Name: "Replies", Slug: "replies"}).Error; err != nil {
+		t.Fatalf("create category: %v", err)
+	}
+	ensureTopicWriteAccess(t, conn)
 	now := time.Now().Add(-time.Hour)
-	topic := topics.Entity{Id: 3001, Title: "Topic", UserId: 1101, Status: 1, PostCount: 1, PostSeq: 1, CreatedAt: now, UpdatedAt: now}
+	topic := topics.Entity{Id: 3001, Title: "Topic", CategoryIds: []uint64{3002}, UserId: 1101, Status: 1, PostCount: 1, PostSeq: 1, CreatedAt: now, UpdatedAt: now}
 	if err := conn.Create(&topic).Error; err != nil {
 		t.Fatalf("create topic: %v", err)
 	}
@@ -111,6 +141,9 @@ func TestCreatePostWritesPostAndTopicStats(t *testing.T) {
 	}
 	if err := conn.Model(&topics.Entity{}).Where("id = ?", topic.Id).Update("first_post_id", firstPost.Id).Error; err != nil {
 		t.Fatalf("set first post: %v", err)
+	}
+	if err := conn.Create(&topicCategoryIndex.Entity{TopicId: topic.Id, CategoryId: 3002, Effective: 1}).Error; err != nil {
+		t.Fatalf("create topic category index: %v", err)
 	}
 
 	res := CreatePost(component.BetterRequest[CreatePostReq]{
@@ -146,8 +179,15 @@ func TestTopicActionsUseTopicUserAction(t *testing.T) {
 	conn := setupTopicWriteTestDB(t)
 	createTopicWriteUser(t, conn, 1201, "author")
 	createTopicWriteUser(t, conn, 1202, "reader")
-	if err := conn.Create(&topics.Entity{Id: 4001, Title: "Topic", UserId: 1201, Status: 1}).Error; err != nil {
+	if err := conn.Create(&category.Entity{Id: 4002, Name: "Actions", Slug: "actions"}).Error; err != nil {
+		t.Fatalf("create category: %v", err)
+	}
+	ensureTopicWriteAccess(t, conn)
+	if err := conn.Create(&topics.Entity{Id: 4001, Title: "Topic", CategoryIds: []uint64{4002}, UserId: 1201, Status: 1}).Error; err != nil {
 		t.Fatalf("create topic: %v", err)
+	}
+	if err := conn.Create(&topicCategoryIndex.Entity{TopicId: 4001, CategoryId: 4002, Effective: 1}).Error; err != nil {
+		t.Fatalf("create topic category index: %v", err)
 	}
 
 	LikeTopic(component.BetterRequest[LikeTopicReq]{UserId: 1202, Params: LikeTopicReq{TopicId: 4001, Action: 1}})

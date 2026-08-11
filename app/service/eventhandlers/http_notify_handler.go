@@ -10,6 +10,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/httpnotifyservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 )
@@ -24,7 +25,7 @@ type ReportCreatedEvent struct {
 }
 
 func handleHttpNotifyTopicPublished(ctx context.Context, event *TopicPublishedEvent) error {
-	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventTopicPublished) {
+	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventTopicPublished) || event == nil || event.Topic == nil || !topicPubliclyReadable(*event.Topic) {
 		return nil
 	}
 	httpnotifyservice.Notify(httpnotifyservice.EventTopicPublished, topicEventNotifyPayload(event))
@@ -32,7 +33,7 @@ func handleHttpNotifyTopicPublished(ctx context.Context, event *TopicPublishedEv
 }
 
 func handleHttpNotifyTopicUpdated(ctx context.Context, event *TopicUpdatedEvent) error {
-	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventTopicUpdated) {
+	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventTopicUpdated) || event == nil || event.Topic == nil || !topicPubliclyReadable(*event.Topic) {
 		return nil
 	}
 	httpnotifyservice.Notify(httpnotifyservice.EventTopicUpdated, topicUpdatedEventNotifyPayload(event))
@@ -44,6 +45,9 @@ func handleHttpNotifyCommentCreated(ctx context.Context, event *CommentCreatedEv
 		return nil
 	}
 	topic := topics.GetSimple(event.TopicId)
+	if !topicPubliclyReadable(topic) {
+		return nil
+	}
 	topicPayload := topicNotifyPayloadFromSmall(topic)
 	commenter := userNotifyPayload(event.UserId)
 	post := posts.Get(event.PostId)
@@ -93,6 +97,9 @@ func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEven
 		return nil
 	}
 	topic := topics.GetSimple(event.TopicId)
+	if topic.Id > 0 && !topicPubliclyReadable(topic) {
+		return nil
+	}
 	payload := notifyEventData{
 		BaseURI:       baseURI(),
 		ReportID:      new(event.ReportId),
@@ -117,6 +124,14 @@ func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEven
 	}
 	httpnotifyservice.Notify(httpnotifyservice.EventReportCreated, payload)
 	return nil
+}
+
+func topicPubliclyReadable(topic topics.Entity) bool {
+	if topic.Id == 0 || topic.Status != 1 || topic.ProcessStatus != 0 {
+		return false
+	}
+	snapshot, err := accesscontrol.Resolve(0)
+	return err == nil && snapshot.CanReadAllCategories(topic.CategoryIds)
 }
 
 type notifyEventData struct {

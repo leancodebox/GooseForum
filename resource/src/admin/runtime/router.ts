@@ -27,6 +27,10 @@ export const adminRouter = createRouter({
       component: () => import('@/admin/pages/management/RolesManagementPage.vue'),
     },
     {
+      path: '/admin/access-groups',
+      component: () => import('@/admin/pages/management/AccessGroupsManagementPage.vue'),
+    },
+    {
       path: '/admin/categories',
       component: () => import('@/admin/pages/management/CategoriesManagementPage.vue'),
     },

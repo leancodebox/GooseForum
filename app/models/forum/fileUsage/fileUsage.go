@@ -5,16 +5,18 @@ import "time"
 const tableName = "file_usages"
 
 const (
-	TargetTopic       = "topic"
-	TargetPost        = "post"
-	TargetUser        = "user"
-	TargetAdminUpload = "admin_upload"
+	TargetTopic         = "topic"
+	TargetPost          = "post"
+	TargetUser          = "user"
+	TargetAdminUpload   = "admin_upload"
+	TargetPendingUpload = "pending_upload"
 )
 
 const (
-	UsageInlineImage = "inline_image"
-	UsageAvatar      = "avatar"
-	UsageAdminUpload = "admin_upload"
+	UsageInlineImage   = "inline_image"
+	UsageAvatar        = "avatar"
+	UsageAdminUpload   = "admin_upload"
+	UsagePendingUpload = "pending_upload"
 )
 
 type Entity struct {

@@ -14,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/fileaccessservice"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
 )
 
@@ -28,7 +29,7 @@ func GetFileByFileName(c *gin.Context) {
 	}
 	filename = strings.TrimPrefix(filename, "/")
 
-	entity, err := filedata.GetFileByName(filename)
+	metadata, err := filedata.GetFileMetadataByName(filename)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error":       "File not found",
@@ -36,8 +37,26 @@ func GetFileByFileName(c *gin.Context) {
 		})
 		return
 	}
+	decision, err := fileaccessservice.Resolve(component.LoginUserId(c), filename, metadata.UserId)
+	if err != nil || !decision.Allowed {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error":       "File not found",
+			"messageCode": component.MessagePageNotFound,
+		})
+		return
+	}
+	entity, err := filedata.GetFileByName(filename)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "File not found", "messageCode": component.MessagePageNotFound})
+		return
+	}
 	c.Header("Content-Disposition", "inline")
-	httputil.SetLongPublic(c)
+	if decision.Public {
+		httputil.SetLongPublic(c)
+	} else {
+		c.Header("Cache-Control", "private, max-age=300")
+		c.Header("Vary", "Cookie, Authorization")
+	}
 	c.Data(http.StatusOK, entity.Type, entity.Data)
 }
 
@@ -185,6 +204,9 @@ func saveImgByGinContext(c *gin.Context, adminUpload bool) {
 	}
 	if adminUpload {
 		fileusageservice.AddAdminUpload(userId, entity.Name)
+	} else if err := fileusageservice.AddPendingUpload(userId, entity.Name); err != nil {
+		c.JSON(http.StatusInternalServerError, component.FailDataCode(component.MessageUploadSaveFailed, nil))
+		return
 	}
 
 	c.JSON(http.StatusOK, component.SuccessDataCode(map[string]any{

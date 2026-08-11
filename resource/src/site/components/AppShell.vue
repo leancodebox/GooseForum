@@ -21,6 +21,7 @@ import {
   Moon,
   Sun,
   UserRound,
+	UsersRound,
 } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import GlobalFlash from './GlobalFlash.vue'
@@ -513,6 +514,9 @@ async function loadUserCard() {
                       <a href="/settings" class="gf-menu-item">
                         <Settings class="h-4 w-4 text-icon-muted" /> {{ t('shell.settings') }}
                       </a>
+					  <a href="/access-groups" class="gf-menu-item">
+						<UsersRound class="h-4 w-4 text-icon-muted" /> {{ t('accessGroups.groups') }}
+					  </a>
                       <a v-if="layout.viewer.canAccessAdmin" href="/theme-preview" class="gf-menu-item">
                         <Palette class="h-4 w-4 text-icon-muted" /> {{ t('shell.themePreview') }}
                       </a>

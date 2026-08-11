@@ -11,6 +11,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
@@ -36,6 +37,18 @@ func TopicDetail(c *gin.Context) {
 	}
 	loginUser := component.GetLoginUser(c)
 	if !canViewTopic(&topic, loginUser.UserId) {
+		renderNotFound(c)
+		return
+	}
+	snapshot, ok := requestAccessSnapshot(c)
+	if !ok {
+		return
+	}
+	if !snapshot.CanReadAllCategories(topic.CategoryIds) {
+		if loginUser.UserId == 0 {
+			redirectGuestToLogin(c)
+			return
+		}
 		renderNotFound(c)
 		return
 	}
@@ -89,6 +102,14 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 	if !canViewTopicSimple(&topicEntity, req.UserId) {
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
+	}
+	snapshot, err := accesscontrol.Resolve(req.UserId)
+	if err != nil {
+		slog.Error("resolve post window access snapshot failed", "userId", req.UserId, "topicId", topicID, "err", err)
+		return component.FailResponse()
+	}
+	if !snapshot.CanReadAllCategories(topicEntity.CategoryIds) {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 

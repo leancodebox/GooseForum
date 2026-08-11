@@ -28,6 +28,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/chatservice"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
@@ -522,9 +523,12 @@ type PublishPageProps struct {
 }
 
 type PublishCategoryPayload struct {
-	ID    uint64 `json:"id"`
-	Name  string `json:"name"`
-	Color string `json:"color"`
+	ID                      uint64 `json:"id"`
+	Name                    string `json:"name"`
+	Color                   string `json:"color"`
+	IsRestricted            bool   `json:"isRestricted"`
+	AllowMultipleCategories bool   `json:"allowMultipleCategories"`
+	CanCreate               bool   `json:"canCreate"`
 }
 
 type ModerationPageProps struct {
@@ -567,7 +571,19 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 			AdminPermissions:          buildAdminPermissions(currentUser.UserId),
 		}
 	}
-	unread := buildUnreadStatus(viewer.ID)
+	snapshot, accessOK := requestAccessSnapshot(c)
+	unread := UnreadStatusPayload{}
+	if accessOK {
+		unread = buildUnreadStatus(viewer.ID, snapshot)
+	}
+	visibleCategories := []*category.Entity{}
+	if accessOK {
+		for _, item := range hotdataserve.GetCategory() {
+			if item != nil && snapshot.CanReadCategory(item.Id) {
+				visibleCategories = append(visibleCategories, item)
+			}
+		}
+	}
 
 	footerInfo := chrome.FooterInfo
 	footerPrimary := make([]string, 0, len(footerInfo.Primary))
@@ -592,7 +608,7 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 		Viewer: viewer,
 		Header: buildChromeNavItems(chrome.Header),
 		Sidebar: buildSidebarPayload(
-			hotdataserve.GetCategory(),
+			visibleCategories,
 			activeKey,
 		),
 		Footer: FooterPayload{
@@ -661,8 +677,8 @@ func buildAdminPermissions(userID uint64) []uint64 {
 	})
 }
 
-func buildUnreadStatus(userID uint64) UnreadStatusPayload {
-	status := unreadservice.GetStatus(userID)
+func buildUnreadStatus(userID uint64, snapshot accesscontrol.Snapshot) UnreadStatusPayload {
+	status := unreadservice.GetStatusForAudience(userID, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
 	return UnreadStatusPayload{
 		Notifications:          status.Notifications,
 		Messages:               status.Messages,
@@ -1452,7 +1468,7 @@ const (
 	userProfileConnectionLimit  = 24
 )
 
-func buildUserProfileProps(c *gin.Context, user users.EntityComplete, section string, activityTab string) UserProfileProps {
+func buildUserProfileProps(c *gin.Context, snapshot accesscontrol.Snapshot, user users.EntityComplete, section string, activityTab string) UserProfileProps {
 	currentUserID := component.LoginUserId(c)
 	isFollowing := userFollow.IsFollowing(currentUserID, user.Id)
 	userCard, ok := userservice.GetUserCard(user.Id)
@@ -1479,7 +1495,7 @@ func buildUserProfileProps(c *gin.Context, user users.EntityComplete, section st
 		switch activityTab {
 		case userProfileActivityTopics:
 			cursor := positiveUint(c.Query("cursor"))
-			topicPage, _ := topics.GetPublishedByUserBeforeId(user.Id, cursor, userProfileTopicPageSize+1)
+			topicPage, _ := topics.GetPublishedByUserBeforeIdForAudience(user.Id, cursor, userProfileTopicPageSize+1, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
 			hasNext := len(topicPage) > userProfileTopicPageSize
 			if hasNext {
 				topicPage = topicPage[:userProfileTopicPageSize]
@@ -1487,7 +1503,7 @@ func buildUserProfileProps(c *gin.Context, user users.EntityComplete, section st
 			topicPayloads = buildTopicPayloads(transform.Topics2Vo(topicPage, hotdataserve.CategoryMap()))
 			pagination = buildUserActivityTopicPagination(user.Id, topicPage, hasNext)
 		case userProfileActivityLikes:
-			refs, nextCursor := topicUserAction.ListLikedTopicRefsBefore(user.Id, c.Query("cursor"), userProfileTimelinePageSize)
+			refs, nextCursor := topicUserAction.ListLikedTopicRefsBeforeForAudience(user.Id, c.Query("cursor"), userProfileTimelinePageSize, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
 			likes = buildUserLikes(refs)
 			pagination = buildUserActivityLikePagination(user.Id, nextCursor)
 		case userProfileActivityFollowing:
@@ -1496,7 +1512,7 @@ func buildUserProfileProps(c *gin.Context, user users.EntityComplete, section st
 			followers = buildUserConnections(userFollow.GetFollowerList(user.Id, 1, userProfileConnectionLimit))
 		default:
 			cursor := positiveUint(c.Query("cursor"))
-			timeline, _ := userActivities.GetUserTimeline(user.Id, cursor, userProfileTimelinePageSize+1)
+			timeline, _ := userActivities.GetUserTimelineForAudience(user.Id, cursor, userProfileTimelinePageSize+1, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
 			hasNext := len(timeline) > userProfileTimelinePageSize
 			if hasNext {
 				timeline = timeline[:userProfileTimelinePageSize]
@@ -1508,9 +1524,9 @@ func buildUserProfileProps(c *gin.Context, user users.EntityComplete, section st
 		badges = userBadges
 	default:
 		badges = userBadges
-		latestTopics, _ := topics.GetLatestPublishedByUserId(user.Id, 8)
+		latestTopics, _ := topics.GetLatestPublishedByUserIdForAudience(user.Id, 8, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
 		topicPayloads = buildTopicPayloads(transform.Topics2Vo(latestTopics, hotdataserve.CategoryMap()))
-		timeline, _ := userActivities.GetUserTimeline(user.Id, 0, 5)
+		timeline, _ := userActivities.GetUserTimelineForAudience(user.Id, 0, 5, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
 		activities = buildUserActivities(timeline)
 	}
 
@@ -1979,8 +1995,12 @@ func buildSponsorsMeta(c *gin.Context) PageMeta {
 
 func buildNotificationsPageProps(c *gin.Context) NotificationsPageProps {
 	userID := component.LoginUserId(c)
-	notifications, nextCursor, hasNext, _ := notificationservice.GetNotificationCursorList(userID, notificationservice.DefaultNotificationPageSize, 0, false)
-	unreadCount, _ := eventNotification.GetUnreadCount(userID)
+	snapshot, ok := requestAccessSnapshot(c)
+	if !ok {
+		return NotificationsPageProps{Notifications: []NotificationPayload{}}
+	}
+	notifications, nextCursor, hasNext, _ := notificationservice.GetNotificationCursorListForAudience(userID, notificationservice.DefaultNotificationPageSize, 0, false, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
+	unreadCount, _ := eventNotification.GetUnreadCountForAudience(userID, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
 	items := BuildNotificationPayloads(notifications)
 	return NotificationsPageProps{
 		Total:         int64(len(items)),
@@ -2143,18 +2163,27 @@ func buildSettingsPageProps(user users.EntityComplete) SettingsPageProps {
 }
 
 func buildPublishPageProps(c *gin.Context, topicID uint64) (PublishPageProps, error) {
+	userID := component.LoginUserId(c)
+	actor, ok := requestAccessSnapshot(c)
+	if !ok {
+		return PublishPageProps{}, errors.New("access control unavailable")
+	}
+	everyone, err := accesscontrol.Resolve(0)
+	if err != nil {
+		return PublishPageProps{}, err
+	}
 	props := PublishPageProps{
-		TopicID:    topicID,
-		IsEditing:  topicID > 0,
-		Categories: buildPublishCategories(),
-		Topic:      PublishTopicPayload{},
+		TopicID:   topicID,
+		IsEditing: topicID > 0,
+		Topic:     PublishTopicPayload{},
 	}
 	if topicID == 0 {
+		props.Categories = buildPublishCategories(actor, everyone, nil)
 		return props, nil
 	}
 
 	topic := topics.Get(topicID)
-	if topic.Id == 0 || topic.UserId != component.LoginUserId(c) {
+	if topic.Id == 0 || topic.UserId != userID || !actor.CanReadAllCategories(topic.CategoryIds) {
 		return props, errors.New("topic not found")
 	}
 	firstPost := posts.Get(topic.FirstPostId)
@@ -2167,26 +2196,36 @@ func buildPublishPageProps(c *gin.Context, topicID uint64) (PublishPageProps, er
 		CategoryIDs: topic.CategoryIds,
 		TopicStatus: topic.Status,
 	}
+	props.Categories = buildPublishCategories(actor, everyone, topic.CategoryIds)
 	return props, nil
 }
 
-func buildPublishCategories() []PublishCategoryPayload {
+func buildPublishCategories(actor accesscontrol.Snapshot, everyone accesscontrol.Snapshot, includeIDs []uint64) []PublishCategoryPayload {
+	include := lo.SliceToMap(includeIDs, func(id uint64) (uint64, struct{}) { return id, struct{}{} })
 	categories := hotdataserve.GetCategory()
 	res := make([]PublishCategoryPayload, 0, len(categories))
 	for _, category := range categories {
 		if category == nil {
 			continue
 		}
+		_, selected := include[category.Id]
+		if !actor.CanCreateCategory(category.Id) && !selected {
+			continue
+		}
+		restricted := !everyone.CanReadCategory(category.Id)
 		res = append(res, PublishCategoryPayload{
-			ID:    category.Id,
-			Name:  category.Name,
-			Color: category.Color,
+			ID:                      category.Id,
+			Name:                    category.Name,
+			Color:                   category.Color,
+			IsRestricted:            restricted,
+			AllowMultipleCategories: !restricted,
+			CanCreate:               actor.CanCreateCategory(category.Id),
 		})
 	}
 	return res
 }
 
-func buildSearchPageProps(query string, page int) SearchPageProps {
+func buildSearchPageProps(c *gin.Context, query string, page int) SearchPageProps {
 	const pageSize = 10
 	props := SearchPageProps{
 		Query:  query,
@@ -2202,10 +2241,16 @@ func buildSearchPageProps(query string, page int) SearchPageProps {
 	if page < 1 {
 		page = 1
 	}
+	snapshot, ok := requestAccessSnapshot(c)
+	if !ok {
+		return props
+	}
 	result, err := searchservice.SearchTopics(searchservice.SearchRequest{
-		Query:  query,
-		Limit:  pageSize,
-		Offset: (page - 1) * pageSize,
+		Query:              query,
+		Categories:         snapshot.ReadableCategoryIDs(),
+		FilterByCategories: !snapshot.HasGlobalManage(),
+		Limit:              pageSize,
+		Offset:             (page - 1) * pageSize,
 	})
 	if err != nil || result == nil {
 		return props

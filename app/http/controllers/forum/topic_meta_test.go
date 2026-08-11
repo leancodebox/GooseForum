@@ -11,13 +11,18 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
+	"github.com/leancodebox/GooseForum/app/models/forum/accessGroupMembers"
+	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
+	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
+	"github.com/leancodebox/GooseForum/app/service/datamigration"
 )
 
 func TestTopicMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
@@ -297,6 +302,8 @@ func TestPostWindowDefaultLoadsFromFirstPost(t *testing.T) {
 	}
 
 	now := time.Date(2026, 7, 7, 13, 0, 0, 0, time.UTC)
+	categoryID := uint64(991000)
+	ensureForumTestAccessCategory(t, categoryID)
 	topicID := uint64(991010)
 	firstPostID := uint64(991100)
 	replyPostID := uint64(991101)
@@ -313,6 +320,7 @@ func TestPostWindowDefaultLoadsFromFirstPost(t *testing.T) {
 	conn.Create(&topics.Entity{
 		Id:            topicID,
 		Title:         "topic",
+		CategoryIds:   []uint64{categoryID},
 		UserId:        userID,
 		Status:        1,
 		ProcessStatus: 0,
@@ -353,6 +361,8 @@ func TestPostWindowAnchorPostNoCanLoadFirstPost(t *testing.T) {
 	}
 
 	now := time.Date(2026, 7, 7, 14, 0, 0, 0, time.UTC)
+	categoryID := uint64(993000)
+	ensureForumTestAccessCategory(t, categoryID)
 	topicID := uint64(993010)
 	firstPostID := uint64(993100)
 	replyPostID := uint64(993101)
@@ -369,6 +379,7 @@ func TestPostWindowAnchorPostNoCanLoadFirstPost(t *testing.T) {
 	conn.Create(&topics.Entity{
 		Id:          topicID,
 		Title:       "topic",
+		CategoryIds: []uint64{categoryID},
 		UserId:      userID,
 		Status:      1,
 		ReplyCount:  1,
@@ -406,6 +417,8 @@ func TestPostWindowAnchorPostNoFallsForwardAcrossDeletedReplies(t *testing.T) {
 	}
 
 	now := time.Date(2026, 7, 7, 13, 0, 0, 0, time.UTC)
+	categoryID := uint64(992000)
+	ensureForumTestAccessCategory(t, categoryID)
 	topicID := uint64(992010)
 	firstPostID := uint64(992100)
 	userID := uint64(992001)
@@ -421,6 +434,7 @@ func TestPostWindowAnchorPostNoFallsForwardAcrossDeletedReplies(t *testing.T) {
 	conn.Create(&topics.Entity{
 		Id:            topicID,
 		Title:         "topic",
+		CategoryIds:   []uint64{categoryID},
 		UserId:        userID,
 		Status:        1,
 		ProcessStatus: 0,
@@ -447,4 +461,44 @@ func TestPostWindowAnchorPostNoFallsForwardAcrossDeletedReplies(t *testing.T) {
 	if len(payload.Posts) != 2 || payload.Posts[0].PostNo != 1 || payload.Posts[1].PostNo != 4 || payload.BeforePostNo != 1 || payload.AfterPostNo != 4 || payload.MaxPostNo != 4 {
 		t.Fatalf("payload = %#v, want first post plus nearest remaining post no 4", payload)
 	}
+}
+
+func ensureForumTestAccessCategory(t *testing.T, categoryID uint64) {
+	t.Helper()
+	conn := dbconnect.Connect()
+	if err := conn.AutoMigrate(
+		&accessGroups.Entity{},
+		&accessGroupMembers.Entity{},
+		&categoryGroupPermissions.Entity{},
+		&category.Entity{},
+	); err != nil {
+		t.Fatalf("migrate access control test tables: %v", err)
+	}
+	conn.Delete(&categoryGroupPermissions.Entity{}, "category_id = ?", categoryID)
+	conn.Delete(&category.Entity{}, categoryID)
+	if err := conn.Create(&category.Entity{Id: categoryID, Name: "Access test"}).Error; err != nil {
+		t.Fatalf("create access test category: %v", err)
+	}
+	result := datamigration.BackfillAccessControlDefaultsWithDB(conn)
+	if result.Failed != 0 {
+		t.Fatalf("backfill access defaults: %+v", result)
+	}
+	groups, err := accessGroups.GetBySystemKeys([]string{
+		accessGroups.SystemKeyEveryone,
+		accessGroups.SystemKeyRegistered,
+	})
+	if err != nil {
+		t.Fatalf("load system access groups: %v", err)
+	}
+	accesscontrol.InvalidateSystemGroups()
+	for _, group := range groups {
+		accesscontrol.InvalidateGroup(group.Id)
+	}
+	t.Cleanup(func() {
+		conn.Delete(&categoryGroupPermissions.Entity{}, "category_id = ?", categoryID)
+		conn.Delete(&category.Entity{}, categoryID)
+		for _, group := range groups {
+			accesscontrol.InvalidateGroup(group.Id)
+		}
+	})
 }

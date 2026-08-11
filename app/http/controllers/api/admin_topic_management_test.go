@@ -6,13 +6,18 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/forum/accessGroupMembers"
+	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
+	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
+	"github.com/leancodebox/GooseForum/app/service/datamigration"
 	"gorm.io/gorm"
 )
 
@@ -20,6 +25,9 @@ func setupAdminTopicTestDB(t *testing.T) *gorm.DB {
 	t.Helper()
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(
+		&accessGroups.Entity{},
+		&accessGroupMembers.Entity{},
+		&categoryGroupPermissions.Entity{},
 		&users.EntityComplete{},
 		&topics.Entity{},
 		&posts.Entity{},
@@ -30,7 +38,24 @@ func setupAdminTopicTestDB(t *testing.T) *gorm.DB {
 	); err != nil {
 		t.Fatalf("migrate admin topic tables: %v", err)
 	}
+	ensureAdminTopicAccess(t, conn)
 	return conn
+}
+
+func ensureAdminTopicAccess(t *testing.T, conn *gorm.DB) {
+	t.Helper()
+	result := datamigration.BackfillAccessControlDefaultsWithDB(conn)
+	if result.Failed != 0 {
+		t.Fatalf("backfill access defaults: %s", result.LastFailed)
+	}
+	groups, err := accessGroups.All()
+	if err != nil {
+		t.Fatalf("load access groups: %v", err)
+	}
+	accesscontrol.InvalidateSystemGroups()
+	for _, group := range groups {
+		accesscontrol.InvalidateGroup(group.Id)
+	}
 }
 
 func seedAdminTopic(t *testing.T, conn *gorm.DB, topicID uint64) (uint64, uint64) {
@@ -45,6 +70,7 @@ func seedAdminTopic(t *testing.T, conn *gorm.DB, topicID uint64) (uint64, uint64
 	if err := conn.Create(&category.Entity{Id: categoryID, Name: "General", Slug: "general"}).Error; err != nil {
 		t.Fatalf("create category: %v", err)
 	}
+	ensureAdminTopicAccess(t, conn)
 	topic := topics.Entity{
 		Id:            topicID,
 		Title:         "Topic title",
@@ -105,7 +131,7 @@ func TestAdminEditTopicMutatesTopic(t *testing.T) {
 	if err := conn.Create(&category.Entity{Id: 922999, Name: "Second", Slug: "second"}).Error; err != nil {
 		t.Fatalf("create second category: %v", err)
 	}
-
+	ensureAdminTopicAccess(t, conn)
 	EditTopic(component.BetterRequest[EditTopicReq]{UserId: 1, Params: EditTopicReq{TopicId: 922001, ProcessStatus: 1}})
 	topic := topics.Get(922001)
 	if topic.ProcessStatus != 1 {
@@ -118,7 +144,10 @@ func TestAdminEditTopicMutatesTopic(t *testing.T) {
 		t.Fatalf("pin weight = %d, want 9", topic.PinWeight)
 	}
 
-	EditTopicCategories(component.BetterRequest[EditTopicCategoriesReq]{UserId: 1, Params: EditTopicCategoriesReq{TopicId: 922001, CategoryId: []uint64{922999}}})
+	response := EditTopicCategories(component.BetterRequest[EditTopicCategoriesReq]{UserId: 1, Params: EditTopicCategoriesReq{TopicId: 922001, CategoryId: []uint64{922999}}})
+	if response.Data.Code != component.SUCCESS {
+		t.Fatalf("edit topic categories response = %#v", response.Data)
+	}
 	topic = topics.Get(922001)
 	if len(topic.CategoryIds) != 1 || topic.CategoryIds[0] != 922999 {
 		t.Fatalf("topic categories = %#v", topic.CategoryIds)

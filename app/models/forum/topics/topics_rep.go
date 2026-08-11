@@ -78,9 +78,18 @@ func GetPointerMapByIds(ids []uint64) map[uint64]*Entity {
 }
 
 func GetLatestPublished(limit int) (entities []*Entity, err error) {
-	err = builder().
+	return GetLatestPublishedForAudience(limit, nil, false)
+}
+
+func GetLatestPublishedForAudience(limit int, readableCategoryIDs []uint64, filterAudience bool) (entities []*Entity, err error) {
+	if filterAudience && len(readableCategoryIDs) == 0 {
+		return []*Entity{}, nil
+	}
+	query := builder().
 		Where(queryopt.Eq("status", 1)).
-		Where(queryopt.Eq("process_status", 0)).
+		Where(queryopt.Eq("process_status", 0))
+	query = applyAudienceFilter(query, readableCategoryIDs, filterAudience)
+	err = query.
 		Order(queryopt.Desc("updated_at")).
 		Order(queryopt.Desc("id")).
 		Limit(limit).
@@ -88,12 +97,32 @@ func GetLatestPublished(limit int) (entities []*Entity, err error) {
 	return
 }
 
+func applyAudienceFilter(query *gorm.DB, readableCategoryIDs []uint64, filterAudience bool) *gorm.DB {
+	if !filterAudience {
+		return query
+	}
+	return query.Where(
+		`EXISTS (SELECT 1 FROM topic_category_index audience_idx WHERE audience_idx.topic_id = topics.id AND audience_idx.effective = ? AND audience_idx.category_id IN ?)`,
+		1,
+		readableCategoryIDs,
+	)
+}
+
 func GetLatestPublishedByUserId(userId uint64, limit int) ([]*Entity, error) {
+	return GetLatestPublishedByUserIdForAudience(userId, limit, nil, false)
+}
+
+func GetLatestPublishedByUserIdForAudience(userId uint64, limit int, readableCategoryIDs []uint64, filterAudience bool) ([]*Entity, error) {
+	if filterAudience && len(readableCategoryIDs) == 0 {
+		return []*Entity{}, nil
+	}
 	var entities []*Entity
-	err := builder().
+	query := builder().
 		Where(queryopt.Eq("user_id", userId)).
 		Where(queryopt.Eq("status", 1)).
-		Where(queryopt.Eq("process_status", 0)).
+		Where(queryopt.Eq("process_status", 0))
+	query = applyAudienceFilter(query, readableCategoryIDs, filterAudience)
+	err := query.
 		Order(queryopt.Desc("updated_at")).
 		Order(queryopt.Desc("id")).
 		Limit(limit).
@@ -102,6 +131,13 @@ func GetLatestPublishedByUserId(userId uint64, limit int) ([]*Entity, error) {
 }
 
 func GetPublishedByUserBeforeId(userId uint64, beforeId uint64, limit int) ([]*Entity, error) {
+	return GetPublishedByUserBeforeIdForAudience(userId, beforeId, limit, nil, false)
+}
+
+func GetPublishedByUserBeforeIdForAudience(userId uint64, beforeId uint64, limit int, readableCategoryIDs []uint64, filterAudience bool) ([]*Entity, error) {
+	if filterAudience && len(readableCategoryIDs) == 0 {
+		return []*Entity{}, nil
+	}
 	var entities []*Entity
 	query := builder().
 		Where(queryopt.Eq("user_id", userId)).
@@ -110,6 +146,7 @@ func GetPublishedByUserBeforeId(userId uint64, beforeId uint64, limit int) ([]*E
 	if beforeId > 0 {
 		query = query.Where(queryopt.Lt("id", beforeId))
 	}
+	query = applyAudienceFilter(query, readableCategoryIDs, filterAudience)
 	err := query.Order(queryopt.Desc("id")).Limit(limit).Find(&entities).Error
 	return entities, err
 }
@@ -133,12 +170,14 @@ func CantWriteNew(userId uint64, maxCount int64) bool {
 }
 
 type PageQuery struct {
-	Page, PageSize int
-	Search         string
-	UserId         uint64
-	FilterStatus   bool
-	CategoryId     uint64
-	Sort           string
+	Page, PageSize      int
+	Search              string
+	UserId              uint64
+	FilterStatus        bool
+	CategoryId          uint64
+	FilterAudience      bool
+	ReadableCategoryIds []uint64
+	Sort                string
 }
 
 type AdminPageQuery struct {
@@ -164,6 +203,14 @@ func Page(q PageQuery) struct {
 	q.Page = max(q.Page-1, 0)
 	q.PageSize = pageutil.BoundPageSize(q.PageSize)
 	queryLimit := q.PageSize + 1
+	if q.FilterAudience && len(q.ReadableCategoryIds) == 0 {
+		return struct {
+			Page     int
+			PageSize int
+			HasNext  bool
+			Data     []Entity
+		}{Page: q.Page + 1, PageSize: q.PageSize, Data: []Entity{}}
+	}
 	b := builder()
 	if q.Search != "" {
 		b.Where(queryopt.Like("title", q.Search))
@@ -181,6 +228,9 @@ func Page(q PageQuery) struct {
 			q.CategoryId,
 			1,
 		)
+	}
+	if q.FilterAudience {
+		b = applyAudienceFilter(b, q.ReadableCategoryIds, true)
 	}
 	applyPageSort(b, q.Sort)
 	b.Limit(queryLimit).Offset(q.PageSize * q.Page).Find(&list)
@@ -297,7 +347,11 @@ func IncrementViews(counts map[uint64]uint64) error {
 }
 
 func IncrementPostFast(topicId uint64, posters []Poster, lastPostID uint64, lastPostedAt time.Time) error {
-	return builder().Where("id = ?", topicId).Updates(map[string]any{
+	return IncrementPostFastWithDB(builder(), topicId, posters, lastPostID, lastPostedAt)
+}
+
+func IncrementPostFastWithDB(db *gorm.DB, topicId uint64, posters []Poster, lastPostID uint64, lastPostedAt time.Time) error {
+	return db.Model(&Entity{}).Where("id = ?", topicId).Updates(map[string]any{
 		"post_count":  gorm.Expr("post_count + 1"),
 		"reply_count": gorm.Expr("reply_count + 1"),
 		"posters":     jsonopt.Encode(posters),
@@ -324,7 +378,11 @@ func DecrementPostFast(topicId uint64, posters []Poster, lastPostID uint64, last
 }
 
 func ReservePostSequence(topicId uint64) (uint64, error) {
-	result := builder().
+	return ReservePostSequenceWithDB(builder(), topicId)
+}
+
+func ReservePostSequenceWithDB(db *gorm.DB, topicId uint64) (uint64, error) {
+	result := db.Model(&Entity{}).
 		Where("id = ?", topicId).
 		Update("post_seq", gorm.Expr("post_seq + 1"))
 	if result.Error != nil {
@@ -335,7 +393,7 @@ func ReservePostSequence(topicId uint64) (uint64, error) {
 	}
 
 	var postSeq uint64
-	err := builder().
+	err := db.Model(&Entity{}).
 		Select("post_seq").
 		Where("id = ?", topicId).
 		Scan(&postSeq).Error

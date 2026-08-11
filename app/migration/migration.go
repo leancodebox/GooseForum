@@ -11,8 +11,11 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/chat/imUserChatConfigs"
 	"github.com/leancodebox/GooseForum/app/models/chat/messages"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
+	"github.com/leancodebox/GooseForum/app/models/forum/accessGroupMembers"
+	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
+	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/fileUsage"
@@ -53,6 +56,9 @@ func migrateSchema() {
 
 	db := dbconnect.Connect()
 	if err = db.AutoMigrate(
+		&accessGroups.Entity{},
+		&accessGroupMembers.Entity{},
+		&categoryGroupPermissions.Entity{},
 		&badges.Entity{},
 		&eventNotification.Entity{},
 		&fileUsage.Entity{},

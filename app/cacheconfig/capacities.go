@@ -12,6 +12,8 @@ type Capacities struct {
 	UserPublicProfile  uint64
 	UserActivity       uint64
 	RolePermission     uint64
+	AccessGroupMembers uint64
+	AccessGroupGrants  uint64
 	UnreadStatus       uint64
 	ModerationStatus   uint64
 	ConversationAccess uint64
@@ -30,6 +32,8 @@ var current = Capacities{
 	UserPublicProfile:  1024,
 	UserActivity:       8192,
 	RolePermission:     256,
+	AccessGroupMembers: 2048,
+	AccessGroupGrants:  512,
 	UnreadStatus:       2048,
 	ModerationStatus:   2048,
 	ConversationAccess: 4096,

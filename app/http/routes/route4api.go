@@ -71,6 +71,7 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/drafts", middleware.CheckLogin, forum.Drafts)
 	viewRouteApp.GET("/moderation", middleware.CheckLogin, forum.Moderation)
 	viewRouteApp.GET("/settings", middleware.CheckLogin, forum.Settings)
+	viewRouteApp.GET("/access-groups", middleware.CheckLogin, forum.AccessGroups)
 	viewRouteApp.GET("/theme-preview", middleware.CheckLogin, middleware.CheckAnyPermissionOrNotFound, forum.ThemePreview)
 	viewRouteApp.GET("/notifications", middleware.CheckLogin, forum.Notifications)
 	viewRouteApp.GET("/publish", middleware.CheckLogin, forum.Publish)
@@ -120,7 +121,7 @@ func apiRoute(ginApp *gin.Engine) {
 	loginApi.GET("oauth/bindings", UpButterReq(api.GetOAuthBindings))
 
 	forumApi := baseApi.Group("forum")
-	forumApi.GET("get-site-statistics", ginUpNP(api.GetSiteStatistics))
+	forumApi.GET("get-site-statistics", middleware.JWTAuthCheck, middleware.CheckPermission(permission.Admin), ginUpNP(api.GetSiteStatistics))
 	forumApi.GET("posts/window", middleware.JWTAuth, middleware.NoUpdateUserActivity, UpQueryReq(forum.PostWindow))
 
 	forumLoginApi := forumApi.Use(middleware.JWTAuthCheck)
@@ -136,6 +137,10 @@ func apiRoute(ginApp *gin.Engine) {
 	forumLoginApi.POST("topics/like", middleware.CheckWritableAccount, UpButterReq(api.LikeTopic))
 	forumLoginApi.POST("topics/bookmark", middleware.CheckWritableAccount, UpButterReq(api.BookmarkTopic))
 	forumLoginApi.POST("topics/watch", middleware.CheckWritableAccount, UpButterReq(api.WatchTopic))
+	forumLoginApi.GET("access-groups", middleware.NoUpdateUserActivity, UpButterReq(api.ListJoinableAccessGroups))
+	forumLoginApi.POST("access-groups/apply", middleware.CheckWritableAccount, UpButterReq(api.ApplyToAccessGroup))
+	forumLoginApi.GET("access-groups/managed", middleware.NoUpdateUserActivity, UpButterReq(api.ListManagedAccessGroups))
+	forumLoginApi.POST("access-groups/managed/review", middleware.CheckWritableAccount, UpButterReq(api.ReviewManagedAccessGroupApplication))
 	forumLoginApi.POST("follow-user", middleware.CheckWritableAccount, UpButterReq(api.FollowUser))
 	forumLoginApi.POST("report", middleware.CheckWritableAccount, UpButterReq(forum.CreateReport))
 	forumLoginApi.POST("moderation/topic-status", middleware.CheckWritableAccount, UpButterReq(forum.UpdateModerationTopicStatus))
@@ -181,7 +186,15 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("get-permission-list", UpButterReq(api.GetPermissionList)).
 		POST("role-list", UpButterReq(api.RoleList)).
 		POST("role-save", UpButterReq(api.RoleSave)).
-		POST("role-delete", UpButterReq(api.RoleDel))
+		POST("role-delete", UpButterReq(api.RoleDel)).
+		POST("access-control/overview", UpButterReq(api.GetAccessControlOverview)).
+		POST("access-group/save", UpButterReq(api.SaveAccessGroup)).
+		POST("access-group/delete", UpButterReq(api.DeleteAccessGroup)).
+		POST("access-group/member-save", UpButterReq(api.SaveAccessGroupMember)).
+		POST("access-group/member-delete", UpButterReq(api.DeleteAccessGroupMember)).
+		POST("access-group/application-review", UpButterReq(api.ReviewAccessGroupApplication)).
+		POST("category-access/save", UpButterReq(api.SaveCategoryAccess)).
+		POST("category-access/restriction-preview", UpButterReq(api.PreviewCategoryRestriction))
 
 	adminApi.Group("", middleware.CheckPermission(permission.Admin)).
 		POST("opt-record-page", UpButterReq(api.OptRecordPage))
@@ -223,5 +236,5 @@ func apiRoute(ginApp *gin.Engine) {
 func fileServer(ginApp *gin.Engine) {
 	r := ginApp.Group("file")
 	r.POST("/img-upload", middleware.JWTAuthCheck, middleware.CheckWritableAccount, api.SaveImgByGinContext)
-	r.GET("/img/*filename", api.GetFileByFileName)
+	r.GET("/img/*filename", middleware.JWTAuthSilent, api.GetFileByFileName)
 }

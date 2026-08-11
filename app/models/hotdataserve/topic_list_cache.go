@@ -24,14 +24,25 @@ type TopicSimpleVoPage struct {
 var topicSimpleVoCache = &localcache.Cache[TopicSimpleVoPage]{MaxEntries: cacheconfig.Current().TopicList}
 
 func GetLatestTopicsSimpleVoPaginated(page int, sort string) TopicSimpleVoPage {
+	return GetLatestTopicsSimpleVoPaginatedForAudience(page, sort, "public", nil, false, true)
+}
+
+func GetLatestTopicsSimpleVoPaginatedForAudience(
+	page int,
+	sort string,
+	audience string,
+	readableCategoryIDs []uint64,
+	filterAudience bool,
+	cacheable bool,
+) TopicSimpleVoPage {
 	page = normalizeTopicPage(page)
 	sort = normalizeTopicSort(sort)
-	if !shouldCacheTopicPage(page) {
-		return loadLatestTopicsSimpleVoPaginated(page, sort)
+	if !cacheable || audience == "" || !shouldCacheTopicPage(page) {
+		return loadLatestTopicsSimpleVoPaginated(page, sort, readableCategoryIDs, filterAudience)
 	}
-	key := "home:GetLatestTopics:" + sort + ":" + strconv.Itoa(page)
+	key := "home:GetLatestTopics:" + audience + ":" + sort + ":" + strconv.Itoa(page)
 	return topicSimpleVoCache.GetOrLoad(key, func() (TopicSimpleVoPage, error) {
-		return loadLatestTopicsSimpleVoPaginated(page, sort), nil
+		return loadLatestTopicsSimpleVoPaginated(page, sort, readableCategoryIDs, filterAudience), nil
 	}, topicListCacheTTL)
 }
 
@@ -67,12 +78,14 @@ func shouldCacheTopicPage(page int) bool {
 	return page <= maxCachedTopicPage
 }
 
-func loadLatestTopicsSimpleVoPaginated(page int, sort string) TopicSimpleVoPage {
+func loadLatestTopicsSimpleVoPaginated(page int, sort string, readableCategoryIDs []uint64, filterAudience bool) TopicSimpleVoPage {
 	res := topics.Page(topics.PageQuery{
-		Page:         page,
-		PageSize:     20,
-		FilterStatus: true,
-		Sort:         sort,
+		Page:                page,
+		PageSize:            20,
+		FilterStatus:        true,
+		FilterAudience:      filterAudience,
+		ReadableCategoryIds: readableCategoryIDs,
+		Sort:                sort,
 	})
 	return TopicSimpleVoPage{
 		Topics:  transform.Topics2Vo(topicEntitiesToPointers(res.Data), CategoryMap()),

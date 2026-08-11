@@ -73,7 +73,7 @@ describe('page client', () => {
   })
 
   it('keeps the public page component list unique', () => {
-    expect(pageComponents).toHaveLength(17)
+    expect(pageComponents).toHaveLength(18)
     expect(new Set(pageComponents).size).toBe(pageComponents.length)
   })
 

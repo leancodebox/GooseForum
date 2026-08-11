@@ -1,11 +1,14 @@
-<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+<script setup lang="ts">
+import { adminText } from '@/admin/runtime/i18n-text'
 
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2, UserPlus, X } from '@lucide/vue'
+import { LockKeyhole, Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2, UserPlus, X } from '@lucide/vue'
+import { useI18n } from 'vue-i18n'
 import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
 import AdminSection from '@/admin/components/AdminSection.vue'
 import AdminToolbar from '@/admin/components/AdminToolbar.vue'
+import CategoryAccessDialog from '@/admin/components/CategoryAccessDialog.vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Button } from '@/admin/components/ui/button'
 import { Badge } from '@/admin/components/ui/badge'
@@ -26,13 +29,30 @@ import {
   TableHeader,
   TableRow,
 } from '@/admin/components/ui/table'
-import { addCategoryModerator, addGlobalModerator, deleteCategory, deleteCategoryModerator, deleteGlobalModerator, getCategoryList, getGlobalModeratorList, getUserList, saveCategory } from '@/admin/runtime/api'
+import { AdminPermission, hasAdminPermission } from '@/admin/runtime/access'
+import {
+  addCategoryModerator,
+  addGlobalModerator,
+  deleteCategory,
+  deleteCategoryModerator,
+  deleteGlobalModerator,
+  getAccessControlOverview,
+  getCategoryList,
+  getGlobalModeratorList,
+  getUserList,
+  saveCategory,
+} from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import type { AdminCategory, AdminCategoryModerator, AdminPayload, AdminUser, ManageHomeProps } from '@/admin/types'
 
 defineProps<{
   payload: AdminPayload<ManageHomeProps>
 }>()
+
+const { t } = useI18n()
+const canManageCategories = computed(() => hasAdminPermission(AdminPermission.TopicsManager))
+const canManageAccess = computed(() => hasAdminPermission(AdminPermission.RoleManager))
+const tableColumnCount = computed(() => 3 + (canManageCategories.value ? 4 : 0) + (canManageAccess.value ? 1 : 0))
 
 const presetColors = [
   '#64748b',
@@ -54,9 +74,11 @@ const saving = ref(false)
 const deleting = ref(false)
 const error = ref('')
 const rows = ref<AdminCategory[]>([])
+const categoryRestrictions = ref<Record<number, boolean>>({})
 const search = ref('')
 const dialogMode = ref<'create' | 'edit' | null>(null)
 const deletingRow = ref<AdminCategory | null>(null)
+const accessCategory = ref<AdminCategory | null>(null)
 const moderatorRow = ref<AdminCategory | null>(null)
 const moderatorSaving = ref(false)
 const moderatorUserInput = ref('')
@@ -93,7 +115,27 @@ async function loadCategories() {
   loading.value = true
   error.value = ''
   try {
-    rows.value = await getCategoryList()
+    if (canManageCategories.value) {
+      if (canManageAccess.value) {
+        const [categories, access] = await Promise.all([getCategoryList(), getAccessControlOverview()])
+        rows.value = categories
+        categoryRestrictions.value = Object.fromEntries(
+          access.categories.map((category) => [category.id, category.isRestricted]),
+        )
+      } else {
+        rows.value = await getCategoryList()
+      }
+    } else {
+      const access = await getAccessControlOverview()
+      rows.value = access.categories.map((category) => ({
+        id: category.id,
+        category: category.name,
+        color: category.color,
+      }))
+      categoryRestrictions.value = Object.fromEntries(
+        access.categories.map((category) => [category.id, category.isRestricted]),
+      )
+    }
   } catch (err) {
     error.value = err instanceof Error ? err.message : adminText('k0043')
   } finally {
@@ -101,7 +143,12 @@ async function loadCategories() {
   }
 }
 
+function updateCategoryRestriction(categoryId: number, isRestricted: boolean) {
+  categoryRestrictions.value = { ...categoryRestrictions.value, [categoryId]: isRestricted }
+}
+
 async function loadGlobalModerators() {
+  if (!canManageCategories.value) return
   try {
     globalModerators.value = await getGlobalModeratorList()
   } catch (err) {
@@ -350,7 +397,7 @@ async function removeModerator(id: number) {
 
 onMounted(() => {
   void loadCategories()
-  void loadGlobalModerators()
+  if (canManageCategories.value) void loadGlobalModerators()
 })
 </script>
 
@@ -362,7 +409,7 @@ onMounted(() => {
           <RefreshCw class="size-4" />
           {{ adminText('k004q') }}
         </Button>
-        <Button type="button" @click="openCreate">
+        <Button v-if="canManageCategories" type="button" @click="openCreate">
           <Plus class="size-4" />
           {{ adminText('k005m') }}
         </Button>
@@ -381,7 +428,10 @@ onMounted(() => {
                 {{ filteredRows.length }} {{ adminText('k00c1') }}
               </Badge>
             </AdminToolbar>
-            <div class="grid gap-2 px-3 py-2 lg:grid-cols-[auto_minmax(0,1fr)_20rem] lg:items-start">
+            <div
+              v-if="canManageCategories"
+              class="grid gap-2 px-3 py-2 lg:grid-cols-[auto_minmax(0,1fr)_20rem] lg:items-start"
+            >
               <div class="flex h-8 min-w-0 items-center gap-2 text-sm">
                 <ShieldCheck class="size-4 shrink-0 text-muted-foreground" />
                 <span class="shrink-0 font-medium">{{ adminText('k00es') }}</span>
@@ -447,22 +497,25 @@ onMounted(() => {
             <TableRow>
               <TableHead class="w-20">ID</TableHead>
               <TableHead>{{ adminText('k00c2') }}</TableHead>
-              <TableHead>Slug</TableHead>
-              <TableHead>{{ adminText('k00ag') }}</TableHead>
-              <TableHead class="w-48">{{ adminText('k00ex') }}</TableHead>
-              <TableHead class="w-24">{{ adminText('k00bf') }}</TableHead>
-              <TableHead class="w-32 text-right">{{ adminText('k007m') }}</TableHead>
+              <TableHead v-if="canManageAccess" class="w-28">{{ t('accessGroups.visibility') }}</TableHead>
+              <TableHead v-if="canManageCategories">Slug</TableHead>
+              <TableHead v-if="canManageCategories">{{ adminText('k00ag') }}</TableHead>
+              <TableHead v-if="canManageCategories" class="w-48">{{ adminText('k00ex') }}</TableHead>
+              <TableHead v-if="canManageCategories" class="w-24">{{ adminText('k00bf') }}</TableHead>
+              <TableHead class="text-right" :class="canManageCategories ? 'w-52' : 'w-28'">
+                {{ adminText('k007m') }}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow v-if="loading && rows.length === 0">
-              <TableCell colspan="7" class="h-28 text-center text-muted-foreground">{{ adminText('k0046') }}</TableCell>
+              <TableCell :colspan="tableColumnCount" class="h-28 text-center text-muted-foreground">{{ adminText('k0046') }}</TableCell>
             </TableRow>
             <TableRow v-else-if="error">
-              <TableCell colspan="7" class="h-28 text-center text-destructive">{{ error }}</TableCell>
+              <TableCell :colspan="tableColumnCount" class="h-28 text-center text-destructive">{{ error }}</TableCell>
             </TableRow>
             <TableRow v-else-if="filteredRows.length === 0">
-              <TableCell colspan="7" class="h-28 text-center text-muted-foreground">{{ adminText('k00c3') }}</TableCell>
+              <TableCell :colspan="tableColumnCount" class="h-28 text-center text-muted-foreground">{{ adminText('k00c3') }}</TableCell>
             </TableRow>
             <template v-else>
               <TableRow v-for="item in filteredRows" :key="item.id">
@@ -474,9 +527,15 @@ onMounted(() => {
                     <span class="font-medium">{{ item.category }}</span>
                   </div>
                 </TableCell>
-                <TableCell class="text-muted-foreground">{{ item.slug || '-' }}</TableCell>
-                <TableCell class="max-w-lg truncate text-muted-foreground">{{ item.desc || '-' }}</TableCell>
-                <TableCell>
+                <TableCell v-if="canManageAccess">
+                  <Badge :variant="categoryRestrictions[item.id] ? 'secondary' : 'outline'">
+                    <LockKeyhole v-if="categoryRestrictions[item.id]" class="size-3" />
+                    {{ t(categoryRestrictions[item.id] ? 'accessGroups.restricted' : 'accessGroups.public') }}
+                  </Badge>
+                </TableCell>
+                <TableCell v-if="canManageCategories" class="text-muted-foreground">{{ item.slug || '-' }}</TableCell>
+                <TableCell v-if="canManageCategories" class="max-w-lg truncate text-muted-foreground">{{ item.desc || '-' }}</TableCell>
+                <TableCell v-if="canManageCategories">
                   <button
                     class="inline-flex max-w-full items-center gap-1.5 rounded-md border bg-background px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
                     type="button"
@@ -499,14 +558,18 @@ onMounted(() => {
                     <span v-else>{{ adminText('k00ez') }}</span>
                   </button>
                 </TableCell>
-                <TableCell>{{ item.sort ?? 0 }}</TableCell>
+                <TableCell v-if="canManageCategories">{{ item.sort ?? 0 }}</TableCell>
                 <TableCell>
                   <div class="flex justify-end gap-2">
-                    <AdminActionButton @click="openEdit(item)">
+                    <AdminActionButton v-if="canManageAccess" @click="accessCategory = item">
+                      <LockKeyhole class="size-3.5" />
+                      {{ t('accessGroups.configureAccess') }}
+                    </AdminActionButton>
+                    <AdminActionButton v-if="canManageCategories" @click="openEdit(item)">
                       <Pencil class="size-3.5" />
                       {{ adminText('k005j') }}
                     </AdminActionButton>
-                    <AdminActionButton tone="danger" @click="deletingRow = item">
+                    <AdminActionButton v-if="canManageCategories" tone="danger" @click="deletingRow = item">
                       <Trash2 class="size-3.5" />
                       {{ adminText('k005i') }}
                     </AdminActionButton>
@@ -580,6 +643,13 @@ onMounted(() => {
         :loading="deleting"
         @update:open="(open) => !open && (deletingRow = null)"
         @confirm="confirmDelete"
+      />
+
+      <CategoryAccessDialog
+        :open="accessCategory !== null"
+        :category="accessCategory"
+        @saved="updateCategoryRestriction"
+        @update:open="(open) => !open && (accessCategory = null)"
       />
 
       <Dialog :open="moderatorRow !== null" @update:open="(open) => !open && (moderatorRow = null)">

@@ -27,6 +27,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/accessadminservice"
+	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
@@ -34,6 +36,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"github.com/leancodebox/GooseForum/app/service/themeservice"
+	"github.com/leancodebox/GooseForum/app/service/topicservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/samber/lo"
 )
@@ -605,14 +608,22 @@ func EditTopicCategories(req component.BetterRequest[EditTopicCategoriesReq]) co
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
-
-	oldCategoryIds := append([]uint64(nil), topic.CategoryIds...)
-	topic.CategoryIds = categoryIds
-	if err := topics.SaveNoUpdate(&topic); err != nil {
-		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	actor, err := accesscontrol.Resolve(req.UserId)
+	if err != nil {
+		return component.FailResponseCode(component.MessagePermissionResolveFailed, nil)
+	}
+	everyone, err := accesscontrol.Resolve(0)
+	if err != nil {
+		return component.FailResponseCode(component.MessagePermissionResolveFailed, nil)
+	}
+	categoryIds, err = accesscontrol.ValidateTopicCategoryWrite(actor, everyone, accesscontrol.TopicCategoryWrite{Current: topic.CategoryIds, Next: categoryIds})
+	if err != nil {
+		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 
-	if err := topicCategoryIndex.ReplaceTopicCategories(topic.Id, categoryIds); err != nil {
+	oldCategoryIds := append([]uint64(nil), topic.CategoryIds...)
+	if err := topicservice.SaveTopicCategories(&topic, categoryIds); err != nil {
+		slog.Error("failed to replace topic categories", "topicId", topic.Id, "categoryIds", categoryIds, "err", err)
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 	optlogger.UserOptCode(req.UserId, optlogger.EditTopic, topic.Id, "admin.opt.topic.categoriesChanged", optlogger.MessageParams{
@@ -1040,6 +1051,7 @@ func SaveCategory(req component.BetterRequest[CategorySaveReq]) component.Respon
 		return component.FailResponseCode(component.MessageAdminCategoryRequired, nil)
 	}
 
+	create := req.Params.Id == 0
 	entity := category.Get(req.Params.Id)
 	if req.Params.Id != 0 && entity.Id == 0 {
 		return component.FailResponseCode(component.MessageAdminCategoryDataNotFound, nil)
@@ -1051,7 +1063,10 @@ func SaveCategory(req component.BetterRequest[CategorySaveReq]) component.Respon
 	entity.Slug = req.Params.Slug
 	entity.Sort = req.Params.Sort
 
-	category.SaveOrCreateById(&entity)
+	if err := accessadminservice.SaveCategoryWithDefaults(&entity, create); err != nil {
+		slog.Error("save category with access defaults failed", "categoryId", entity.Id, "err", err)
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
 	hotdataserve.ClearCategoryCache()
 	return component.SuccessResponse(true)
 }
@@ -1070,7 +1085,10 @@ func DeleteCategory(req component.BetterRequest[struct {
 	if topicCategoryIndex.GetOneByCategoryId(entity.Id).Id > 0 {
 		return component.FailResponseCode(component.MessageAdminCategoryHasTopics, nil)
 	}
-	category.DeleteEntity(&entity)
+	if err := accessadminservice.DeleteCategory(&entity); err != nil {
+		slog.Error("delete category with access grants failed", "categoryId", entity.Id, "err", err)
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
 	hotdataserve.ClearCategoryCache()
 	return component.SuccessResponse(true)
 }

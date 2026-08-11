@@ -83,6 +83,15 @@ func GetFileByName(name string) (*Entity, error) {
 	return &entity, nil
 }
 
+func GetFileMetadataByName(name string) (*Entity, error) {
+	var entity Entity
+	err := builder().Select("id, name, assert_type, user_id, created_at, updated_at").Where(queryopt.Eq(fieldName, name)).First(&entity).Error
+	if err != nil || entity.Id == 0 {
+		return nil, errors.New("file not found")
+	}
+	return &entity, nil
+}
+
 func FileResourcePage(page, pageSize int) FileResourcePageResult {
 	if page < 1 {
 		page = 1

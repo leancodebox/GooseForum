@@ -7,11 +7,14 @@ export enum AdminPermission {
   SiteManager = 5,
 }
 
-const adminPathPermissions: Record<string, AdminPermission> = {
+type AdminPathPermission = AdminPermission | AdminPermission[]
+
+const adminPathPermissions: Record<string, AdminPathPermission> = {
   '/admin': AdminPermission.Admin,
   '/admin/users': AdminPermission.UserManager,
   '/admin/roles': AdminPermission.RoleManager,
-  '/admin/categories': AdminPermission.TopicsManager,
+  '/admin/access-groups': AdminPermission.RoleManager,
+  '/admin/categories': [AdminPermission.TopicsManager, AdminPermission.RoleManager],
   '/admin/posts': AdminPermission.TopicsManager,
   '/admin/links': AdminPermission.PageManager,
   '/admin/sponsors': AdminPermission.PageManager,
@@ -34,6 +37,7 @@ const adminEntryPaths = [
   '/admin/posts',
   '/admin/categories',
   '/admin/roles',
+  '/admin/access-groups',
   '/admin/links',
   '/admin/sponsors',
   '/admin/badges',
@@ -59,9 +63,13 @@ export function hasAdminPermission(permission: AdminPermission) {
   return permissions.has(AdminPermission.Admin) || permissions.has(permission)
 }
 
+export function hasAnyAdminPermission(required: AdminPathPermission) {
+  return Array.isArray(required) ? required.some(hasAdminPermission) : hasAdminPermission(required)
+}
+
 export function canVisitAdminPath(path: string) {
-  const permission = adminPathPermissions[path]
-  return permission !== undefined && hasAdminPermission(permission)
+  const required = adminPathPermissions[path]
+  return required !== undefined && hasAnyAdminPermission(required)
 }
 
 export function firstAdminPath() {

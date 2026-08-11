@@ -59,3 +59,18 @@ func TestFileResourcePageListsFilesByIDRangeWithoutContent(t *testing.T) {
 		t.Fatalf("url = %q, want image access path", page.List[0].URL)
 	}
 }
+
+func TestGetFileMetadataByNameDoesNotLoadBlob(t *testing.T) {
+	setupFileDataTestDB(t)
+	stored, err := SaveFile(7, "private/metadata.webp", "image/webp", []byte("secret-image"))
+	if err != nil {
+		t.Fatalf("save file: %v", err)
+	}
+	metadata, err := GetFileMetadataByName(stored.Name)
+	if err != nil {
+		t.Fatalf("get metadata: %v", err)
+	}
+	if metadata.Id != stored.Id || metadata.UserId != 7 || metadata.Type != "image/webp" || metadata.Data != nil {
+		t.Fatalf("metadata = %#v", metadata)
+	}
+}

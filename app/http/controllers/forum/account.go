@@ -63,6 +63,18 @@ func Settings(c *gin.Context) {
 	renderAppShell(c, payload)
 }
 
+func AccessGroups(c *gin.Context) {
+	payload := PagePayload{
+		Component: PageComponentAccessGroups,
+		Props:     struct{}{},
+		Meta:      buildSimpleMeta(c, "accessGroups.title"),
+		Layout:    buildLayout(c, "access-groups"),
+		URL:       buildPageURL(c),
+		Version:   payloadVersion,
+	}
+	renderAppShell(c, payload)
+}
+
 func Publish(c *gin.Context) {
 	topicID := cast.ToUint64(c.Query("id"))
 	props, err := buildPublishPageProps(c, topicID)

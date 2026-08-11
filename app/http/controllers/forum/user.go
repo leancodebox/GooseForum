@@ -26,8 +26,12 @@ func UserProfile(c *gin.Context) {
 		RenderNotFoundPage(c, component.MessagePageNotFound)
 		return
 	}
+	snapshot, ok := requestAccessSnapshot(c)
+	if !ok {
+		return
+	}
 
-	props := buildUserProfileProps(c, user, resolveUserProfileSection(c.Param("section")), resolveUserProfileActivitySection(c.Param("subsection")))
+	props := buildUserProfileProps(c, snapshot, user, resolveUserProfileSection(c.Param("section")), resolveUserProfileActivitySection(c.Param("subsection")))
 	payload := PagePayload{
 		Component: PageComponentUser,
 		Props:     props,

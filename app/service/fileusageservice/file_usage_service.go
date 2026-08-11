@@ -43,6 +43,20 @@ func AddAdminUpload(userId uint64, fileName string) {
 	}
 }
 
+func AddPendingUpload(userID uint64, fileName string) error {
+	name := fileNameFromURL(fileName)
+	if name == "" {
+		return nil
+	}
+	return fileUsage.Create(&fileUsage.Entity{
+		FileName:   name,
+		TargetType: fileUsage.TargetPendingUpload,
+		TargetId:   userID,
+		UsageType:  fileUsage.UsagePendingUpload,
+		UserId:     userID,
+	})
+}
+
 func namesToUsages(values []string, usageType string) []Usage {
 	usages := make([]Usage, 0, len(values))
 	seen := map[string]bool{}
@@ -73,6 +87,14 @@ func replace(targetType string, targetId uint64, usageTypes []string, userId uin
 	}
 	if err := fileUsage.ReplaceTargetUsages(targetType, targetId, usageTypes, rows); err != nil {
 		slog.Error("replace file usages failed", "targetType", targetType, "targetId", targetId, "err", err)
+		return
+	}
+	fileNames := make([]string, 0, len(rows))
+	for _, row := range rows {
+		fileNames = append(fileNames, row.FileName)
+	}
+	if err := fileUsage.DeletePendingByFileNames(userId, fileNames); err != nil {
+		slog.Error("delete claimed pending file usages failed", "userId", userId, "err", err)
 	}
 }
 

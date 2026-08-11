@@ -1,8 +1,10 @@
 package topicCategoryIndex
 
 import (
+	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/samber/lo"
+	"gorm.io/gorm"
 )
 
 func SaveOrCreateById(entity *Entity) int64 {
@@ -31,26 +33,34 @@ func GetOneByCategoryId(categoryId uint64) (entity Entity) {
 }
 
 func ReplaceTopicCategories(topicId uint64, categoryIDs []uint64) error {
+	return ReplaceTopicCategoriesWithDB(dbconnect.Connect(), topicId, categoryIDs)
+}
+
+func ReplaceTopicCategoriesWithDB(db *gorm.DB, topicId uint64, categoryIDs []uint64) error {
 	categoryIDMap := lo.SliceToMap(categoryIDs, func(id uint64) (uint64, bool) {
 		return id, true
 	})
-	for _, item := range GetByTopicId(topicId) {
+	var existing []*Entity
+	if err := db.Where("topic_id = ?", topicId).Find(&existing).Error; err != nil {
+		return err
+	}
+	for _, item := range existing {
 		if _, ok := categoryIDMap[item.CategoryId]; ok {
 			item.Effective = 1
-			if err := builder().Save(item).Error; err != nil {
+			if err := db.Save(item).Error; err != nil {
 				return err
 			}
 			delete(categoryIDMap, item.CategoryId)
 			continue
 		}
 		item.Effective = 0
-		if err := builder().Save(item).Error; err != nil {
+		if err := db.Save(item).Error; err != nil {
 			return err
 		}
 	}
 	for id := range categoryIDMap {
 		rs := &Entity{TopicId: topicId, CategoryId: id, Effective: 1}
-		if err := builder().Create(rs).Error; err != nil {
+		if err := db.Create(rs).Error; err != nil {
 			return err
 		}
 	}

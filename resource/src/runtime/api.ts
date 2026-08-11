@@ -67,6 +67,45 @@ export interface UpdatePostResult {
   updatedAt: string
 }
 
+export interface JoinableAccessGroup {
+  id: number
+  name: string
+  categories: string[]
+  status: number
+}
+
+export interface ManagedAccessGroup {
+  id: number
+  name: string
+  applications: { id: number, userId: number, username: string }[]
+}
+
+export async function getJoinableAccessGroups(): Promise<JoinableAccessGroup[]> {
+  const response = await fetch('/api/forum/access-groups', { headers: { Accept: 'application/json' } })
+  return readApiResponse<JoinableAccessGroup[]>(response, t('accessGroups.loadFailed'))
+}
+
+export async function applyToAccessGroup(groupId: number): Promise<boolean> {
+  const response = await fetch('/api/forum/access-groups/apply', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ groupId }),
+  })
+  return readApiResponse<boolean>(response, t('accessGroups.applicationFailed'))
+}
+
+export async function getManagedAccessGroups(): Promise<ManagedAccessGroup[]> {
+  const response = await fetch('/api/forum/access-groups/managed', { headers: { Accept: 'application/json' } })
+  return readApiResponse<ManagedAccessGroup[]>(response, t('accessGroups.loadFailed'))
+}
+
+export async function reviewManagedAccessGroupApplication(groupId: number, memberId: number, approve: boolean): Promise<boolean> {
+  const response = await fetch('/api/forum/access-groups/managed/review', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ groupId, memberId, approve }),
+  })
+  return readApiResponse<boolean>(response, t('accessGroups.memberSaveFailed'))
+}
+
 export async function createPost(topicId: number, content: string, replyToPostId = 0): Promise<CreatePostResult | number | boolean> {
   const response = await fetch('/api/forum/posts/create', {
     method: 'POST',

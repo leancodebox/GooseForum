@@ -17,6 +17,7 @@ import {
   PanelLeft,
   Tags,
   UserCog,
+  UsersRound,
   Webhook,
 } from '@lucide/vue'
 import { computed } from 'vue'
@@ -37,21 +38,21 @@ import { RouterLink, useRoute } from 'vue-router'
 import type { LayoutPayload } from '@gooseforum/client'
 import type { LucideIcon } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
-import { AdminPermission, hasAdminPermission } from '@/admin/runtime/access'
+import { AdminPermission, hasAnyAdminPermission } from '@/admin/runtime/access'
 
 defineProps<{
   layout: LayoutPayload
 }>()
 
 const route = useRoute()
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const currentPath = computed(() => route.path.replace(/\/+$/, '') || '/admin')
 
 interface NavItem {
   title: string
   url: string
   icon: LucideIcon
-  permission?: AdminPermission
+  permission?: AdminPermission | AdminPermission[]
   active?: boolean
   external?: boolean
   items?: NavItem[]
@@ -65,37 +66,85 @@ interface NavGroup {
 const navGroups = computed<NavGroup[]>(() => {
   locale.value
   return [
-  {
-    title: 'GooseForum',
-    items: [
-      { title: adminText('k004c'), url: '/admin', icon: Monitor, permission: AdminPermission.Admin },
-      { title: adminText('k006i'), url: '/admin/users', icon: UserCog, permission: AdminPermission.UserManager },
-      { title: adminText('k007f'), url: '/admin/roles', icon: ShieldCheck, permission: AdminPermission.RoleManager },
-      { title: adminText('k005l'), url: '/admin/categories', icon: Tags, permission: AdminPermission.TopicsManager },
-      { title: adminText('k005u'), url: '/admin/posts', icon: FileText, permission: AdminPermission.TopicsManager },
-      { title: adminText('k002j'), url: '/admin/links', icon: Link, permission: AdminPermission.PageManager },
-      { title: adminText('k004o'), url: '/admin/sponsors', icon: Heart, permission: AdminPermission.PageManager },
-      { title: adminText('k0058'), url: '/admin/badges', icon: Award, permission: AdminPermission.SiteManager },
-      { title: adminText('k00f6'), url: '/admin/files/resources', icon: Files, permission: AdminPermission.SiteManager },
-      { title: adminText('k007c'), url: '/admin/opt-records', icon: ListChecks, permission: AdminPermission.Admin },
-    ],
-  },
-  {
-    title: adminText('k007t'),
-    items: [
-      { title: adminText('k007u'), url: '/admin/settings/site-info', icon: PanelsTopLeft, permission: AdminPermission.SiteManager },
-      { title: adminText('k00d9'), url: '/admin/settings/site-chrome', icon: PanelLeft, permission: AdminPermission.SiteManager },
-      { title: adminText('k007v'), url: '/admin/settings/mail', icon: Mail, permission: AdminPermission.SiteManager },
-      { title: adminText('k0005'), url: '/admin/settings/security', icon: ShieldCheck, permission: AdminPermission.SiteManager },
-      { title: adminText('k007w'), url: '/admin/settings/posting', icon: FileText, permission: AdminPermission.SiteManager },
-      { title: adminText('k0009'), url: '/admin/settings/announcement', icon: Megaphone, permission: AdminPermission.PageManager },
-      { title: adminText('k00cj'), url: '/admin/settings/http-notify', icon: Webhook, permission: AdminPermission.SiteManager },
-    ],
-  },
-  ].map(group => ({
-    ...group,
-    items: group.items.filter(item => item.permission === undefined || hasAdminPermission(item.permission)),
-  })).filter(group => group.items.length > 0)
+    {
+      title: 'GooseForum',
+      items: [
+        { title: adminText('k004c'), url: '/admin', icon: Monitor, permission: AdminPermission.Admin },
+        { title: adminText('k006i'), url: '/admin/users', icon: UserCog, permission: AdminPermission.UserManager },
+        { title: adminText('k007f'), url: '/admin/roles', icon: ShieldCheck, permission: AdminPermission.RoleManager },
+        {
+          title: t('accessGroups.groups'),
+          url: '/admin/access-groups',
+          icon: UsersRound,
+          permission: AdminPermission.RoleManager,
+        },
+        {
+          title: adminText('k005l'),
+          url: '/admin/categories',
+          icon: Tags,
+          permission: [AdminPermission.TopicsManager, AdminPermission.RoleManager],
+        },
+        { title: adminText('k005u'), url: '/admin/posts', icon: FileText, permission: AdminPermission.TopicsManager },
+        { title: adminText('k002j'), url: '/admin/links', icon: Link, permission: AdminPermission.PageManager },
+        { title: adminText('k004o'), url: '/admin/sponsors', icon: Heart, permission: AdminPermission.PageManager },
+        { title: adminText('k0058'), url: '/admin/badges', icon: Award, permission: AdminPermission.SiteManager },
+        {
+          title: adminText('k00f6'),
+          url: '/admin/files/resources',
+          icon: Files,
+          permission: AdminPermission.SiteManager,
+        },
+        { title: adminText('k007c'), url: '/admin/opt-records', icon: ListChecks, permission: AdminPermission.Admin },
+      ],
+    },
+    {
+      title: adminText('k007t'),
+      items: [
+        {
+          title: adminText('k007u'),
+          url: '/admin/settings/site-info',
+          icon: PanelsTopLeft,
+          permission: AdminPermission.SiteManager,
+        },
+        {
+          title: adminText('k00d9'),
+          url: '/admin/settings/site-chrome',
+          icon: PanelLeft,
+          permission: AdminPermission.SiteManager,
+        },
+        { title: adminText('k007v'), url: '/admin/settings/mail', icon: Mail, permission: AdminPermission.SiteManager },
+        {
+          title: adminText('k0005'),
+          url: '/admin/settings/security',
+          icon: ShieldCheck,
+          permission: AdminPermission.SiteManager,
+        },
+        {
+          title: adminText('k007w'),
+          url: '/admin/settings/posting',
+          icon: FileText,
+          permission: AdminPermission.SiteManager,
+        },
+        {
+          title: adminText('k0009'),
+          url: '/admin/settings/announcement',
+          icon: Megaphone,
+          permission: AdminPermission.PageManager,
+        },
+        {
+          title: adminText('k00cj'),
+          url: '/admin/settings/http-notify',
+          icon: Webhook,
+          permission: AdminPermission.SiteManager,
+        },
+      ],
+    },
+  ]
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => item.permission === undefined || hasAnyAdminPermission(item.permission)),
+    }))
+    .filter((group) => group.items.length > 0)
 })
 
 function isActive(item: NavItem) {
@@ -114,7 +163,9 @@ function isActive(item: NavItem) {
             class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
             <a href="/" target="_blank" rel="noopener noreferrer" :title="adminText('k007s')">
-              <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              <div
+                class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
+              >
                 <GalleryVerticalEnd class="size-4" />
               </div>
               <div class="grid flex-1 text-left text-sm leading-tight">
@@ -133,12 +184,7 @@ function isActive(item: NavItem) {
         <SidebarMenu>
           <SidebarMenuItem v-for="item in group.items" :key="item.title">
             <SidebarMenuButton as-child :is-active="isActive(item)" :tooltip="item.title">
-              <a
-                v-if="item.external"
-                :href="item.url"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a v-if="item.external" :href="item.url" target="_blank" rel="noopener noreferrer">
                 <component :is="item.icon" />
                 <span>{{ item.title }}</span>
                 <ExternalLink class="ml-auto size-4" />

@@ -28,7 +28,10 @@ func TestMigrationUsesCleanTopicEdgeModels(t *testing.T) {
 	}
 
 	for _, cleanModel := range []string{
+		"models/forum/accessGroupMembers",
+		"models/forum/accessGroups",
 		"models/forum/category",
+		"models/forum/categoryGroupPermissions",
 		"models/forum/migrationMapping",
 		"models/forum/topicCategoryIndex",
 		"models/forum/topicUserAction",

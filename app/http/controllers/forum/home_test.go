@@ -10,6 +10,7 @@ import (
 )
 
 func TestHomePageRequestReturnsPayload(t *testing.T) {
+	ensureForumTestAccessCategory(t, 994001)
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 	router.GET("/", Home)
@@ -32,6 +33,7 @@ func TestHomePageRequestReturnsPayload(t *testing.T) {
 }
 
 func TestHomeHTMLReturnsNoJSContent(t *testing.T) {
+	ensureForumTestAccessCategory(t, 994002)
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 	router.GET("/", Home)

@@ -50,6 +50,42 @@ export interface AdminCategoryModerator {
   status: number
 }
 
+export interface AccessGroupMember {
+  id: number
+  userId: number
+  username: string
+  avatarUrl?: string
+  memberRole: 'member' | 'manager'
+  status: number
+}
+
+export interface AccessGroupGrant {
+  categoryId: number
+  level: number
+}
+
+export interface AccessGroup {
+  id: number
+  name: string
+  systemKey?: string
+  joinMode: 'system' | 'invite_only' | 'application'
+  status: number
+  members: AccessGroupMember[]
+  grants: AccessGroupGrant[]
+}
+
+export interface AccessCategory {
+  id: number
+  name: string
+  color: string
+  isRestricted: boolean
+}
+
+export interface AccessControlOverview {
+  groups: AccessGroup[]
+  categories: AccessCategory[]
+}
+
 export interface AdminUser {
   userId: number
   username: string

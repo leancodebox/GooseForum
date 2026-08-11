@@ -10,16 +10,17 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
-	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
+	"github.com/leancodebox/GooseForum/app/service/topicservice"
 	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
@@ -50,6 +51,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	if _, err := component.CheckUserPermission(&userEntity, component.PermissionActionPost); err != nil {
 		return component.FailResponseError(err)
 	}
+	isNew := req.Params.TopicId == 0
 
 	if len(req.Params.Title) < postingConfig.TextControl.MinTitleLength {
 		minLength := postingConfig.TextControl.MinTitleLength
@@ -88,7 +90,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	}
 
 	// 检查新用户冷却时间
-	if postingConfig.TextControl.NewUserPostCooldownMinutes > 0 {
+	if isNew && postingConfig.TextControl.NewUserPostCooldownMinutes > 0 {
 		cooldownTime := userEntity.CreatedAt.Add(time.Duration(postingConfig.TextControl.NewUserPostCooldownMinutes) * time.Minute)
 		if time.Now().Before(cooldownTime) {
 			minutes := postingConfig.TextControl.NewUserPostCooldownMinutes
@@ -101,72 +103,74 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		}
 	}
 
-	if topics.CantWriteNew(req.UserId, 10) {
-		return component.FailResponseCode(component.MessageTopicDailyLimit, nil)
-	}
 	var topic topics.Entity
 	var firstPost posts.Entity
+	wasPublished := false
 	if req.Params.TopicId != 0 {
 		topic = topics.Get(req.Params.TopicId)
-		if topic.UserId != req.UserId {
-			return component.FailResponseCode(component.MessageTopicOwnerMismatch, nil)
+		if topic.Id == 0 {
+			return component.FailResponseCode(component.MessageTopicNotFound, nil)
 		}
+		wasPublished = topic.Status == 1
 		firstPost = posts.Get(topic.FirstPostId)
 		if firstPost.Id == 0 {
 			firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
 		}
 	} else {
+		if topics.CantWriteNew(req.UserId, 10) {
+			return component.FailResponseCode(component.MessageTopicDailyLimit, nil)
+		}
 		topic.UserId = req.UserId
 	}
-	topic.CategoryIds = req.Params.CategoryId
+	categoryIDs, err := authorizeTopicCategoryWrite(
+		req.UserId,
+		&topic,
+		req.Params.CategoryId,
+		isNew,
+		!wasPublished && req.Params.TopicStatus == 1,
+	)
+	if err != nil {
+		return component.FailResponseCode(component.MessagePermissionDenied, nil)
+	}
+	if !isNew && topic.UserId != req.UserId {
+		return component.FailResponseCode(component.MessageTopicOwnerMismatch, nil)
+	}
+	topic.CategoryIds = categoryIDs
 	topic.Status = req.Params.TopicStatus
 	topic.Title = req.Params.Title
 	topic.Excerpt = markdown2html.ExtractDescription(req.Params.Content, 200)
 	topic.FirstImageURL = markdown2html.ExtractFirstImageURL(req.Params.Content)
-	if topic.Id > 0 {
+	if !isNew {
 		if firstPost.Id == 0 {
 			return component.FailResponseCode(component.MessageTopicNotFound, nil)
 		}
 		firstPost.Content = req.Params.Content
 		firstPost.RenderedHTML = ""
 		firstPost.RenderedVersion = markdown2html.GetPostVersion()
-		if err := topics.Save(&topic); err != nil {
-			return component.FailResponseCode(component.MessageOperationFailed, nil)
-		}
-		if err := posts.Save(&firstPost); err != nil {
-			return component.FailResponseCode(component.MessageOperationFailed, nil)
-		}
-		if err := topicCategoryIndex.ReplaceTopicCategories(topic.Id, req.Params.CategoryId); err != nil {
+		if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{
+			Topic: &topic, FirstPost: &firstPost, CategoryIDs: categoryIDs,
+		}); err != nil {
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
 		fileusageservice.ReplaceTopic(topic.Id, req.UserId, firstPost.Content)
 		hotdataserve.ClearTopicListCache()
-		if topic.Status == 1 {
+		if topic.Status == 1 && wasPublished {
 			eventbus.Publish(context.Background(), &eventhandlers.TopicUpdatedEvent{Topic: &topic, FirstPost: &firstPost})
+		} else if topic.Status == 1 {
+			userStatistics.WriteTopic(req.UserId)
+			eventbus.Publish(context.Background(), &eventhandlers.TopicPublishedEvent{Topic: &topic, FirstPost: &firstPost})
 		}
 	} else {
-		topic.PostCount = 1
-		topic.PostSeq = 1
 		topic.Posters = []topics.Poster{{UserID: req.UserId}}
-		if err := topics.Create(&topic); err != nil {
-			return component.FailResponseCode(component.MessageOperationFailed, nil)
-		}
 		firstPost = posts.Entity{
-			TopicId:         topic.Id,
-			PostNo:          1,
 			UserId:          req.UserId,
 			Content:         req.Params.Content,
 			RenderedHTML:    "",
 			RenderedVersion: markdown2html.GetPostVersion(),
 		}
-		if err := posts.Create(&firstPost); err != nil {
-			return component.FailResponseCode(component.MessageOperationFailed, nil)
-		}
-		topic.FirstPostId = firstPost.Id
-		topic.LastPostId = firstPost.Id
-		now := time.Now()
-		topic.LastPostedAt = &now
-		if err := topics.Save(&topic); err != nil {
+		if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{
+			Topic: &topic, FirstPost: &firstPost, CategoryIDs: categoryIDs, Create: true,
+		}); err != nil {
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
 		fileusageservice.ReplaceTopic(topic.Id, req.UserId, firstPost.Content)
@@ -174,9 +178,6 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 			userStatistics.WriteTopic(req.UserId)
 		}
 		userservice.InvalidateUserPublicProfileCache(req.UserId)
-		if err := topicCategoryIndex.ReplaceTopicCategories(topic.Id, req.Params.CategoryId); err != nil {
-			return component.FailResponseCode(component.MessageOperationFailed, nil)
-		}
 		hotdataserve.ClearTopicListCache()
 		if topic.Status == 1 {
 			eventbus.Publish(context.Background(), &eventhandlers.TopicPublishedEvent{Topic: &topic, FirstPost: &firstPost})
@@ -198,10 +199,14 @@ func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Re
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
+	nextStatus := req.Params.TopicStatus
+	publishing := topic.Status != 1 && nextStatus == 1
+	if _, err := authorizeTopicCategoryWrite(req.UserId, &topic, topic.CategoryIds, false, publishing); err != nil {
+		return component.FailResponseCode(component.MessagePermissionDenied, nil)
+	}
 	if topic.UserId != req.UserId {
 		return component.FailResponseCode(component.MessageTopicOperationDenied, nil)
 	}
-	nextStatus := req.Params.TopicStatus
 	if topic.Status == nextStatus {
 		return component.SuccessResponse(true)
 	}
@@ -271,7 +276,7 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 	}
 
 	topicEntity := topics.GetSimple(req.Params.TopicId)
-	if topicEntity.Id == 0 {
+	if err := authorizePublishedTopic(req.UserId, topicEntity, accesscontrol.CapabilityReply); err != nil {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 
@@ -347,6 +352,9 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 	if postEntity.Id == 0 || postEntity.PostNo <= 1 {
 		return component.FailResponseCode(component.MessagePostNotFound, nil)
 	}
+	if err := authorizePublishedTopic(req.UserId, topics.GetSimple(postEntity.TopicId), accesscontrol.CapabilityRead); err != nil {
+		return component.FailResponseCode(component.MessagePostNotFound, nil)
+	}
 	if postEntity.UserId != req.UserId {
 		return component.FailResponseCode(component.MessageTopicOperationDenied, nil)
 	}
@@ -397,6 +405,9 @@ func DeletePost(req component.BetterRequest[DeletePostReq]) component.Response {
 	if postEntity.Id == 0 || postEntity.PostNo <= 1 {
 		return component.FailResponseCode(component.MessagePostNotFound, nil)
 	}
+	if err := authorizePublishedTopic(req.UserId, topics.GetSimple(postEntity.TopicId), accesscontrol.CapabilityRead); err != nil {
+		return component.FailResponseCode(component.MessagePostNotFound, nil)
+	}
 	if postEntity.UserId != req.UserId {
 		return component.FailResponseCode(component.MessageTopicOperationDenied, nil)
 	}
@@ -416,7 +427,7 @@ type LikeTopicReq struct {
 
 func LikeTopic(req component.BetterRequest[LikeTopicReq]) component.Response {
 	topicEntity := topics.Get(req.Params.TopicId)
-	if topicEntity.Id == 0 {
+	if err := authorizePublishedTopic(req.UserId, topicEntity, accesscontrol.CapabilityRead); err != nil {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 	state := topicUserAction.GetByTopicId(req.UserId, topicEntity.Id)
@@ -462,7 +473,7 @@ type BookmarkTopicReq struct {
 
 func BookmarkTopic(req component.BetterRequest[BookmarkTopicReq]) component.Response {
 	topicEntity := topics.Get(req.Params.TopicId)
-	if topicEntity.Id == 0 {
+	if err := authorizePublishedTopic(req.UserId, topicEntity, accesscontrol.CapabilityRead); err != nil {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 
@@ -497,7 +508,7 @@ type WatchTopicReq struct {
 
 func WatchTopic(req component.BetterRequest[WatchTopicReq]) component.Response {
 	topicEntity := topics.Get(req.Params.TopicId)
-	if topicEntity.Id == 0 {
+	if err := authorizePublishedTopic(req.UserId, topicEntity, accesscontrol.CapabilityRead); err != nil {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 

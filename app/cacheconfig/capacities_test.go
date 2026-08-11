@@ -14,6 +14,8 @@ func TestCurrentCapacitiesPreserveExistingLimits(t *testing.T) {
 		UserPublicProfile:  1024,
 		UserActivity:       8192,
 		RolePermission:     256,
+		AccessGroupMembers: 2048,
+		AccessGroupGrants:  512,
 		UnreadStatus:       2048,
 		ModerationStatus:   2048,
 		ConversationAccess: 4096,

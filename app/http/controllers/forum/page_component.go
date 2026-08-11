@@ -14,6 +14,7 @@ const (
 	PageComponentDrafts        PageComponent = "drafts.index"
 	PageComponentModeration    PageComponent = "moderation.index"
 	PageComponentSettings      PageComponent = "settings.index"
+	PageComponentAccessGroups  PageComponent = "access-groups.index"
 	PageComponentThemePreview  PageComponent = "theme.preview"
 	PageComponentPublish       PageComponent = "publish.index"
 	PageComponentSearch        PageComponent = "search.index"

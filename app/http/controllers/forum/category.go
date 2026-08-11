@@ -15,6 +15,18 @@ func Category(c *gin.Context) {
 		renderNotFoundWithMessage(c, component.MessagePageNotFound)
 		return
 	}
+	snapshot, ok := requestAccessSnapshot(c)
+	if !ok {
+		return
+	}
+	if !snapshot.CanReadCategory(id) {
+		if component.LoginUserId(c) == 0 {
+			redirectGuestToLogin(c)
+			return
+		}
+		renderNotFound(c)
+		return
+	}
 
 	sort, _ := lo.Coalesce(c.Param("sort"), "latest")
 	page := lo.Ternary(cast.ToInt(c.Query("page")) <= 0, 1, cast.ToInt(c.Query("page")))

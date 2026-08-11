@@ -1,4 +1,5 @@
 import type {
+  AccessGroupsPageProps,
   CategoryPageProps,
   DraftsPageProps,
   ErrorPageProps,
@@ -31,6 +32,7 @@ export const pageComponents = [
   'drafts.index',
   'moderation.index',
   'settings.index',
+  'access-groups.index',
   'theme.preview',
   'publish.index',
   'search.index',
@@ -53,6 +55,7 @@ export interface PagePayloadMap {
   'drafts.index': DraftsPageProps
   'moderation.index': ModerationPageProps
   'settings.index': SettingsPageProps
+  'access-groups.index': AccessGroupsPageProps
   'theme.preview': ThemePreviewProps
   'publish.index': PublishPageProps
   'search.index': SearchPageProps

@@ -13,8 +13,12 @@ const (
 )
 
 func GetNotificationCursorList(userId uint64, pageSize int, cursor uint64, unreadOnly bool) ([]*eventNotification.Entity, uint64, bool, error) {
+	return GetNotificationCursorListForAudience(userId, pageSize, cursor, unreadOnly, nil, false)
+}
+
+func GetNotificationCursorListForAudience(userId uint64, pageSize int, cursor uint64, unreadOnly bool, readableCategoryIDs []uint64, filterAudience bool) ([]*eventNotification.Entity, uint64, bool, error) {
 	pageSize = normalizePageSize(pageSize)
-	notifications, err := eventNotification.QueryByUserId(userId, pageSize+1, cursor, unreadOnly)
+	notifications, err := eventNotification.QueryByUserIdForAudience(userId, pageSize+1, cursor, unreadOnly, readableCategoryIDs, filterAudience)
 	if err != nil {
 		return nil, 0, false, err
 	}

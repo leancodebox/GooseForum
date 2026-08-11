@@ -12,7 +12,19 @@ func Home(c *gin.Context) {
 	sort, _ := lo.Coalesce(c.Query("sort"), "latest")
 	page := lo.Ternary(cast.ToInt(c.Query("page")) <= 0, 1, cast.ToInt(c.Query("page")))
 
-	topicPage := hotdataserve.GetLatestTopicsSimpleVoPaginated(page, sort)
+	snapshot, ok := requestAccessSnapshot(c)
+	if !ok {
+		return
+	}
+	audience, cacheable := snapshot.ListCacheAudience()
+	topicPage := hotdataserve.GetLatestTopicsSimpleVoPaginatedForAudience(
+		page,
+		sort,
+		audience,
+		snapshot.ReadableCategoryIDs(),
+		!snapshot.HasGlobalManage(),
+		cacheable,
+	)
 	payload := PagePayload{
 		Component: PageComponentHome,
 		Props:     buildHomeProps(component.LoginUserId(c), page, sort, topicPage.Topics, topicPage.HasNext),

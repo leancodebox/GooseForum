@@ -4,10 +4,12 @@ import (
 	"log/slog"
 	"sync"
 
+	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserStat"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/samber/lo"
+	"gorm.io/gorm"
 )
 
 const topicSequenceLockShards = 256
@@ -19,18 +21,25 @@ func CreateTopicPost(entity *posts.Entity, topicEntity topics.Entity) error {
 	lock.Lock()
 	defer lock.Unlock()
 
-	postNo, err := topics.ReservePostSequence(entity.TopicId)
-	if err != nil {
-		return err
-	}
-
-	entity.PostNo = postNo
-	if err := posts.Create(entity); err != nil {
-		return err
-	}
-
-	SyncTopicPostStats(topicEntity, *entity, false)
-	return nil
+	return dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
+		postNo, err := topics.ReservePostSequenceWithDB(tx, entity.TopicId)
+		if err != nil {
+			return err
+		}
+		entity.PostNo = postNo
+		if err := posts.CreateWithDB(tx, entity); err != nil {
+			return err
+		}
+		if err := topicUserStat.IncrementUserPostWithDB(tx, topicEntity.Id, entity.UserId); err != nil {
+			return err
+		}
+		activeUserIDs, err := topicUserStat.SyncTopicPostersWithDB(tx, topicEntity.Id)
+		if err != nil {
+			return err
+		}
+		posters := buildPosters(topicEntity.UserId, activeUserIDs)
+		return topics.IncrementPostFastWithDB(tx, topicEntity.Id, posters, entity.Id, entity.CreatedAt)
+	})
 }
 
 func SyncTopicPostStats(topicEntity topics.Entity, postEntity posts.Entity, isDelete bool) {
@@ -46,16 +55,7 @@ func SyncTopicPostStats(topicEntity topics.Entity, postEntity posts.Entity, isDe
 	}
 
 	list := topicUserStat.SyncTopicPosters(topicEntity.Id)
-	filteredList := lo.Filter(list, func(userID uint64, _ int) bool {
-		return userID != topicEntity.UserId
-	})
-	finalList := append([]uint64{topicEntity.UserId}, filteredList...)
-
-	pList := lo.Map(finalList, func(userID uint64, _ int) topics.Poster {
-		return topics.Poster{
-			UserID: userID,
-		}
-	})
+	pList := buildPosters(topicEntity.UserId, list)
 
 	if isDelete {
 		lastPost, _ := posts.GetLastByTopicID(topicEntity.Id)
@@ -67,4 +67,18 @@ func SyncTopicPostStats(topicEntity topics.Entity, postEntity posts.Entity, isDe
 			slog.Error("failed to increment topic post count", "topicId", topicEntity.Id, "err", err)
 		}
 	}
+}
+
+func buildPosters(topicAuthorID uint64, activeUserIDs []uint64) []topics.Poster {
+	list := activeUserIDs
+	filteredList := lo.Filter(list, func(userID uint64, _ int) bool {
+		return userID != topicAuthorID
+	})
+	finalList := append([]uint64{topicAuthorID}, filteredList...)
+
+	return lo.Map(finalList, func(userID uint64, _ int) topics.Poster {
+		return topics.Poster{
+			UserID: userID,
+		}
+	})
 }
