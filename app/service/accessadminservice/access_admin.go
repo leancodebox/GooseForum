@@ -3,6 +3,7 @@ package accessadminservice
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
@@ -10,9 +11,11 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
+	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -291,6 +294,15 @@ func ReviewApplication(groupID, memberID uint64, approve bool) error {
 // be correct across. It is nil outside tests.
 var testHookBeforeRestrictionTx func()
 
+// rebuildTopicSearchDocument is a variable so tests can observe reindexing
+// without a running Meilisearch.
+var rebuildTopicSearchDocument = func(topic *topics.Entity) {
+	firstPost := posts.Get(topic.FirstPostId)
+	if _, err := searchservice.BuildSingleTopicSearchDocument(topic, &firstPost); err != nil {
+		slog.Error("reindex converted topic search document", "topicId", topic.Id, "err", err)
+	}
+}
+
 // PreviewRestriction sizes a pending conversion for the operator. It is not the
 // decision: the conversion is decided again inside the transaction, on locked
 // rows, because a topic can be created or edited into conflict in between.
@@ -340,9 +352,11 @@ func ReplaceCategoryGrants(categoryID uint64, grants []GrantInput, strategy stri
 		testHookBeforeRestrictionTx()
 	}
 
+	var converted []topics.Entity
 	err = dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
+		converted = nil
+		var affected []topics.Entity
 		if restricting {
-			var affected []topics.Entity
 			if err := restrictionConflictQuery(tx.Clauses(clause.Locking{Strength: "UPDATE"}), categoryID).Find(&affected).Error; err != nil {
 				return err
 			}
@@ -369,6 +383,7 @@ func ReplaceCategoryGrants(categoryID uint64, grants []GrantInput, strategy stri
 					return err
 				}
 			}
+			converted = affected
 		}
 		if err := tx.Model(&categoryGroupPermissions.Entity{}).Where("category_id = ?", categoryID).
 			Updates(map[string]any{"status": categoryGroupPermissions.StatusDisabled, "permission_level": 0}).Error; err != nil {
@@ -391,6 +406,13 @@ func ReplaceCategoryGrants(categoryID uint64, grants []GrantInput, strategy stri
 	})
 	if err != nil {
 		return err
+	}
+	// The conversion rewrote topics.category_ids, so the Meilisearch documents
+	// of those topics still carry the old category array and would keep them
+	// findable under a category they are no longer in. Reindex after the
+	// transaction commits: the search index cannot roll back with it.
+	for i := range converted {
+		rebuildTopicSearchDocument(&converted[i])
 	}
 	for groupID := range canonical {
 		accesscontrol.InvalidateGroup(groupID)

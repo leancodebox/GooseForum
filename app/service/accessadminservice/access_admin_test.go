@@ -188,6 +188,85 @@ func TestRestrictionConversionRedecidesInsideTheTransaction(t *testing.T) {
 	}
 }
 
+// Converting a topic rewrites topics.category_ids, which is the field the
+// search document mirrors. Without a reindex the document keeps the old
+// category and guest search keeps returning a topic that is now restricted.
+func TestRestrictionConversionReindexesConvertedTopics(t *testing.T) {
+	conn := dbconnect.Connect()
+	if err := conn.AutoMigrate(
+		&accessGroups.Entity{}, &accessGroupMembers.Entity{}, &categoryGroupPermissions.Entity{},
+		&category.Entity{}, &topics.Entity{}, &topicCategoryIndex.Entity{},
+	); err != nil {
+		t.Fatalf("migrate access admin tables: %v", err)
+	}
+	const restrictedCategoryID uint64 = 965001
+	const otherCategoryID uint64 = 965002
+	const topicID uint64 = 965101
+
+	original := rebuildTopicSearchDocument
+	reindexed := map[uint64][]uint64{}
+	rebuildTopicSearchDocument = func(topic *topics.Entity) {
+		reindexed[topic.Id] = append([]uint64(nil), topic.CategoryIds...)
+	}
+	conn.Unscoped().Delete(&topics.Entity{}, topicID)
+	conn.Where("topic_id = ?", topicID).Delete(&topicCategoryIndex.Entity{})
+	conn.Delete(&categoryGroupPermissions.Entity{}, "category_id in ?", []uint64{restrictedCategoryID, otherCategoryID})
+	conn.Unscoped().Delete(&category.Entity{}, []uint64{restrictedCategoryID, otherCategoryID})
+	t.Cleanup(func() {
+		rebuildTopicSearchDocument = original
+		conn.Unscoped().Delete(&topics.Entity{}, topicID)
+		conn.Where("topic_id = ?", topicID).Delete(&topicCategoryIndex.Entity{})
+		conn.Delete(&categoryGroupPermissions.Entity{}, "category_id in ?", []uint64{restrictedCategoryID, otherCategoryID})
+		conn.Unscoped().Delete(&category.Entity{}, []uint64{restrictedCategoryID, otherCategoryID})
+	})
+
+	if err := conn.Create(&[]category.Entity{
+		{Id: restrictedCategoryID, Name: "Going private"},
+		{Id: otherCategoryID, Name: "Other"},
+	}).Error; err != nil {
+		t.Fatalf("create categories: %v", err)
+	}
+	if result := datamigration.BackfillAccessControlDefaultsWithDB(conn); result.Failed != 0 {
+		t.Fatalf("backfill defaults: %s", result.LastFailed)
+	}
+	groups, err := accessGroups.GetBySystemKeys([]string{accessGroups.SystemKeyEveryone, accessGroups.SystemKeyRegistered})
+	if err != nil {
+		t.Fatalf("load system groups: %v", err)
+	}
+	groupID := func(key string) uint64 {
+		for _, group := range groups {
+			if group.SystemKey != nil && *group.SystemKey == key {
+				return group.Id
+			}
+		}
+		return 0
+	}
+	conn.Create(&topics.Entity{
+		Id: topicID, Title: "findable in the public category", UserId: 9, Status: 1,
+		CategoryIds: []uint64{restrictedCategoryID, otherCategoryID},
+	})
+	conn.Create(&[]topicCategoryIndex.Entity{
+		{TopicId: topicID, CategoryId: restrictedCategoryID, Effective: 1},
+		{TopicId: topicID, CategoryId: otherCategoryID, Effective: 1},
+	})
+
+	grants := []GrantInput{
+		{AccessGroupID: groupID(accessGroups.SystemKeyEveryone), Level: 0},
+		{AccessGroupID: groupID(accessGroups.SystemKeyRegistered), Level: categoryGroupPermissions.PermissionCreate},
+	}
+	if err := ReplaceCategoryGrants(restrictedCategoryID, grants, RestrictionKeepCategory); err != nil {
+		t.Fatalf("replace grants with conversion: %v", err)
+	}
+
+	categories, ok := reindexed[topicID]
+	if !ok {
+		t.Fatal("converted topic was never reindexed: its search document still lists the public category")
+	}
+	if !reflect.DeepEqual(categories, []uint64{restrictedCategoryID}) {
+		t.Fatalf("reindexed categories = %v, want only the restricted one", categories)
+	}
+}
+
 func TestApplicationOnlyActivatesMembershipAfterApproval(t *testing.T) {
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(&accessGroups.Entity{}, &accessGroupMembers.Entity{}); err != nil {
