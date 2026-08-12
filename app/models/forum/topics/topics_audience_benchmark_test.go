@@ -2,6 +2,7 @@ package topics
 
 import (
 	"fmt"
+	"path/filepath"
 	"slices"
 	"testing"
 	"time"
@@ -12,10 +13,28 @@ import (
 )
 
 func BenchmarkAudienceTopicList100K(b *testing.B) {
-	conn, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
+	benchmarkAudienceTopicList100K(b, ":memory:")
+}
+
+func BenchmarkAudienceTopicList100KFile(b *testing.B) {
+	benchmarkAudienceTopicList100K(b, filepath.Join(b.TempDir(), "topics.db"))
+}
+
+func benchmarkAudienceTopicList100K(b *testing.B, dsn string) {
+	b.Helper()
+	conn, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
 	if err != nil {
 		b.Fatalf("open sqlite: %v", err)
 	}
+	sqlDB, err := conn.DB()
+	if err != nil {
+		b.Fatalf("get sqlite database: %v", err)
+	}
+	b.Cleanup(func() {
+		if err := sqlDB.Close(); err != nil {
+			b.Errorf("close sqlite: %v", err)
+		}
+	})
 	if err := conn.AutoMigrate(&Entity{}); err != nil {
 		b.Fatalf("migrate benchmark tables: %v", err)
 	}
