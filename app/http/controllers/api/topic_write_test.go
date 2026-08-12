@@ -131,7 +131,7 @@ func TestCreatePostWritesPostAndTopicStats(t *testing.T) {
 	}
 	ensureTopicWriteAccess(t, conn)
 	now := time.Now().Add(-time.Hour)
-	topic := topics.Entity{Id: 3001, Title: "Topic", CategoryIds: []uint64{3002}, UserId: 1101, Status: 1, PostCount: 1, PostSeq: 1, CreatedAt: now, UpdatedAt: now}
+	topic := topics.Entity{Id: 3001, Title: "Topic", CategoryIds: []uint64{3002}, MainCategoryId: 3002, UserId: 1101, Status: 1, PostCount: 1, PostSeq: 1, CreatedAt: now, UpdatedAt: now}
 	if err := conn.Create(&topic).Error; err != nil {
 		t.Fatalf("create topic: %v", err)
 	}
@@ -183,7 +183,7 @@ func TestTopicActionsUseTopicUserAction(t *testing.T) {
 		t.Fatalf("create category: %v", err)
 	}
 	ensureTopicWriteAccess(t, conn)
-	if err := conn.Create(&topics.Entity{Id: 4001, Title: "Topic", CategoryIds: []uint64{4002}, UserId: 1201, Status: 1}).Error; err != nil {
+	if err := conn.Create(&topics.Entity{Id: 4001, Title: "Topic", CategoryIds: []uint64{4002}, MainCategoryId: 4002, UserId: 1201, Status: 1}).Error; err != nil {
 		t.Fatalf("create topic: %v", err)
 	}
 	if err := conn.Create(&topicCategoryIndex.Entity{TopicId: 4001, CategoryId: 4002, Effective: 1}).Error; err != nil {

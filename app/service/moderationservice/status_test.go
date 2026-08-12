@@ -24,7 +24,7 @@ func TestInvalidateTopicClearsCategoryStatusCache(t *testing.T) {
 	hotdataserve.ClearCategoryCache()
 
 	conn.Create(&category.Entity{Id: 970003, Name: "Moderated", Slug: "moderated"})
-	conn.Create(&topics.Entity{Id: 970010, Title: "reported topic", CategoryIds: []uint64{970003}, Status: 1})
+	conn.Create(&topics.Entity{Id: 970010, Title: "reported topic", CategoryIds: []uint64{970003}, MainCategoryId: 970003, Status: 1})
 	conn.Create(&topicCategoryIndex.Entity{TopicId: 970010, CategoryId: 970003, Effective: 1})
 
 	key := cacheKeyCategory(970003)

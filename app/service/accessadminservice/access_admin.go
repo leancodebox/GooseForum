@@ -2,7 +2,6 @@ package accessadminservice
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
@@ -10,28 +9,17 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
-	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
-	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
-
-const MaxRestrictionConversionTopics = 10000
 
 var (
 	ErrInvalidGroup          = errors.New("invalid access group")
 	ErrSystemGroupImmutable  = errors.New("system access group is immutable")
 	ErrInvalidMember         = errors.New("invalid access group member")
 	ErrInvalidGrant          = errors.New("invalid category grant")
-	ErrRestrictionStrategy   = errors.New("category restriction conversion strategy is required")
-	ErrRestrictionTooLarge   = errors.New("category restriction conversion is too large")
 	ErrApplicationNotAllowed = errors.New("access group does not accept applications")
-)
-
-const (
-	RestrictionKeepCategory   = "keep_category"
-	RestrictionRemoveCategory = "remove_category"
 )
 
 type GroupInput struct {
@@ -45,14 +33,6 @@ type GroupInput struct {
 type GrantInput struct {
 	AccessGroupID uint64 `json:"accessGroupId"`
 	Level         int8   `json:"level"`
-}
-
-type RestrictionConflictError struct {
-	Count int
-}
-
-func (err RestrictionConflictError) Error() string {
-	return fmt.Sprintf("%d multi-category topics require conversion", err.Count)
 }
 
 func SaveGroup(input GroupInput) (accessGroups.Entity, error) {
@@ -286,66 +266,21 @@ func ReviewApplication(groupID, memberID uint64, approve bool) error {
 	return ErrInvalidMember
 }
 
-func PreviewRestriction(categoryID uint64) (int, error) {
-	var count int64
-	err := restrictionConflictQuery(dbconnect.Connect(), categoryID).Count(&count).Error
-	return int(count), err
-}
-
-func ReplaceCategoryGrants(categoryID uint64, grants []GrantInput, strategy string) error {
-	canonical, groups, err := validateGrants(grants)
+// ReplaceCategoryGrants swaps a category's grants. Because visibility is read
+// from topics.main_category_id and never copied onto the topic, changing who
+// may read a category takes effect immediately for every topic in it, and no
+// topic row has to be touched.
+func ReplaceCategoryGrants(categoryID uint64, grants []GrantInput) error {
+	canonical, _, err := validateGrants(grants)
 	if err != nil {
 		return err
-	}
-	everyoneID := uint64(0)
-	for _, group := range groups {
-		if group.SystemKey != nil && *group.SystemKey == accessGroups.SystemKeyEveryone {
-			everyoneID = group.Id
-		}
-	}
-	if everyoneID == 0 {
-		return ErrInvalidGrant
 	}
 	existing, err := categoryGroupPermissions.ByCategoryIDs([]uint64{categoryID})
 	if err != nil {
 		return err
 	}
-	wasPublic := enabledLevel(existing, everyoneID) >= categoryGroupPermissions.PermissionRead
-	willBePublic := canonical[everyoneID] >= categoryGroupPermissions.PermissionRead
-	conflictCount := 0
-	if wasPublic && !willBePublic {
-		conflictCount, err = PreviewRestriction(categoryID)
-		if err != nil {
-			return err
-		}
-		if conflictCount > MaxRestrictionConversionTopics {
-			return ErrRestrictionTooLarge
-		}
-		if conflictCount > 0 && strategy != RestrictionKeepCategory && strategy != RestrictionRemoveCategory {
-			return RestrictionConflictError{Count: conflictCount}
-		}
-	}
 
 	err = dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
-		if conflictCount > 0 {
-			var affected []topics.Entity
-			if err := restrictionConflictQuery(tx.Clauses(clause.Locking{Strength: "UPDATE"}), categoryID).Find(&affected).Error; err != nil {
-				return err
-			}
-			for i := range affected {
-				categoryIDs := convertedCategories(affected[i].CategoryIds, categoryID, strategy)
-				if len(categoryIDs) == 0 {
-					return ErrRestrictionStrategy
-				}
-				affected[i].CategoryIds = categoryIDs
-				if err := tx.Save(&affected[i]).Error; err != nil {
-					return err
-				}
-				if err := topicCategoryIndex.ReplaceTopicCategoriesWithDB(tx, affected[i].Id, categoryIDs); err != nil {
-					return err
-				}
-			}
-		}
 		if err := tx.Model(&categoryGroupPermissions.Entity{}).Where("category_id = ?", categoryID).
 			Updates(map[string]any{"status": categoryGroupPermissions.StatusDisabled, "permission_level": 0}).Error; err != nil {
 			return err
@@ -377,12 +312,6 @@ func ReplaceCategoryGrants(categoryID uint64, grants []GrantInput, strategy stri
 	return nil
 }
 
-func restrictionConflictQuery(db *gorm.DB, categoryID uint64) *gorm.DB {
-	return db.Model(&topics.Entity{}).
-		Where(`EXISTS (SELECT 1 FROM topic_category_index selected_idx WHERE selected_idx.topic_id = topics.id AND selected_idx.category_id = ? AND selected_idx.effective = 1)`, categoryID).
-		Where(`(SELECT COUNT(*) FROM topic_category_index count_idx WHERE count_idx.topic_id = topics.id AND count_idx.effective = 1) > 1`)
-}
-
 func validateGrants(grants []GrantInput) (map[uint64]int8, map[uint64]accessGroups.Entity, error) {
 	all, err := accessGroups.All()
 	if err != nil {
@@ -402,28 +331,6 @@ func validateGrants(grants []GrantInput) (map[uint64]int8, map[uint64]accessGrou
 		canonical[grant.AccessGroupID] = grant.Level
 	}
 	return canonical, groups, nil
-}
-
-func enabledLevel(grants []categoryGroupPermissions.Entity, groupID uint64) int8 {
-	for _, grant := range grants {
-		if grant.AccessGroupId == groupID && grant.Status == categoryGroupPermissions.StatusEnabled {
-			return grant.PermissionLevel
-		}
-	}
-	return 0
-}
-
-func convertedCategories(current []uint64, target uint64, strategy string) []uint64 {
-	if strategy == RestrictionKeepCategory {
-		return []uint64{target}
-	}
-	result := make([]uint64, 0, len(current))
-	for _, categoryID := range current {
-		if categoryID != 0 && categoryID != target {
-			result = append(result, categoryID)
-		}
-	}
-	return result
 }
 
 func validJoinMode(value string) bool {

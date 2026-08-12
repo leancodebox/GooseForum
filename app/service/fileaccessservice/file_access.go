@@ -54,10 +54,10 @@ func Resolve(userID uint64, fileName string, uploaderID uint64) (Decision, error
 		if topic.Id == 0 {
 			continue
 		}
-		if topic.Status == 1 && topic.ProcessStatus == 0 && guest.CanReadAllCategories(topic.CategoryIds) {
+		if topic.Status == 1 && topic.ProcessStatus == 0 && guest.CanReadCategory(topic.MainCategoryId) {
 			return Decision{Allowed: true, Public: true}, nil
 		}
-		if userID != 0 && ((topic.Status == 1 && topic.ProcessStatus == 0 && viewer.CanReadAllCategories(topic.CategoryIds)) || topic.UserId == userID || viewer.HasGlobalManage()) {
+		if userID != 0 && ((topic.Status == 1 && topic.ProcessStatus == 0 && viewer.CanReadCategory(topic.MainCategoryId)) || topic.UserId == userID || viewer.HasGlobalManage()) {
 			return Decision{Allowed: true}, nil
 		}
 	}

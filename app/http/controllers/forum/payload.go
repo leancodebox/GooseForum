@@ -526,8 +526,7 @@ type PublishCategoryPayload struct {
 	ID                      uint64 `json:"id"`
 	Name                    string `json:"name"`
 	Color                   string `json:"color"`
-	IsRestricted            bool   `json:"isRestricted"`
-	AllowMultipleCategories bool   `json:"allowMultipleCategories"`
+	IsRestricted bool `json:"isRestricted"`
 	CanCreate               bool   `json:"canCreate"`
 }
 
@@ -2192,7 +2191,7 @@ func buildPublishPageProps(c *gin.Context, topicID uint64) (PublishPageProps, er
 	}
 
 	topic := topics.Get(topicID)
-	if topic.Id == 0 || topic.UserId != userID || !actor.CanReadAllCategories(topic.CategoryIds) {
+	if topic.Id == 0 || topic.UserId != userID || !actor.CanReadCategory(topic.MainCategoryId) {
 		return props, errors.New("topic not found")
 	}
 	firstPost := posts.Get(topic.FirstPostId)
@@ -2221,14 +2220,12 @@ func buildPublishCategories(actor accesscontrol.Snapshot, everyone accesscontrol
 		if !actor.CanCreateCategory(category.Id) && !selected {
 			continue
 		}
-		restricted := !everyone.CanReadCategory(category.Id)
 		res = append(res, PublishCategoryPayload{
-			ID:                      category.Id,
-			Name:                    category.Name,
-			Color:                   category.Color,
-			IsRestricted:            restricted,
-			AllowMultipleCategories: !restricted,
-			CanCreate:               actor.CanCreateCategory(category.Id),
+			ID:           category.Id,
+			Name:         category.Name,
+			Color:        category.Color,
+			IsRestricted: !everyone.CanReadCategory(category.Id),
+			CanCreate:    actor.CanCreateCategory(category.Id),
 		})
 	}
 	return res

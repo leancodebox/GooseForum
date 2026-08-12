@@ -207,18 +207,9 @@ export function reviewAccessGroupApplication(groupId: number, memberId: number, 
   )
 }
 
-export function previewCategoryRestriction(categoryId: number) {
-  return postJson<{ conflictCount: number }>(
-    '/api/admin/category-access/restriction-preview',
-    { categoryId },
-    adminText('k000l'),
-  )
-}
-
 export function saveCategoryAccess(data: {
   categoryId: number
   grants: { accessGroupId: number; level: number }[]
-  strategy?: 'keep_category' | 'remove_category'
 }) {
   return postJson<unknown>('/api/admin/category-access/save', data, adminText('k000l'))
 }

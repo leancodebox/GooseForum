@@ -44,7 +44,7 @@ func TopicDetail(c *gin.Context) {
 	if !ok {
 		return
 	}
-	if !snapshot.CanReadAllCategories(topic.CategoryIds) {
+	if !snapshot.CanReadCategory(topic.MainCategoryId) {
 		if loginUser.UserId == 0 {
 			redirectGuestToLogin(c)
 			return
@@ -109,7 +109,7 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		slog.Error("resolve post window access snapshot failed", "userId", req.UserId, "topicId", topicID, "err", err)
 		return component.FailResponse()
 	}
-	if !snapshot.CanReadAllCategories(topicEntity.CategoryIds) {
+	if !snapshot.CanReadCategory(topicEntity.MainCategoryId) {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 

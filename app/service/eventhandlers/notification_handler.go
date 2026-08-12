@@ -82,7 +82,7 @@ func canReceiveTopicNotification(userID uint64, topic topics.Entity) bool {
 		return false
 	}
 	snapshot, err := accesscontrol.Resolve(userID)
-	return err == nil && snapshot.CanReadAllCategories(topic.CategoryIds)
+	return err == nil && snapshot.CanReadCategory(topic.MainCategoryId)
 }
 
 func commentNotificationExcludeUserIds(event *CommentCreatedEvent) []uint64 {

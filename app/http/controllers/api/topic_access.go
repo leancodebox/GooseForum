@@ -51,13 +51,13 @@ func authorizePublishedTopic(userID uint64, topic topics.Entity, required access
 	allowed := false
 	switch required {
 	case accesscontrol.CapabilityReply:
-		allowed = snapshot.CanReplyAllCategories(topic.CategoryIds)
+		allowed = snapshot.CanReplyCategory(topic.MainCategoryId)
 	case accesscontrol.CapabilityCreate:
-		allowed = snapshot.CanCreateAllCategories(topic.CategoryIds)
+		allowed = snapshot.CanCreateCategory(topic.MainCategoryId)
 	case accesscontrol.CapabilityManage:
-		allowed = snapshot.CanManageAllCategories(topic.CategoryIds)
+		allowed = snapshot.CanManageCategory(topic.MainCategoryId)
 	default:
-		allowed = snapshot.CanReadAllCategories(topic.CategoryIds)
+		allowed = snapshot.CanReadCategory(topic.MainCategoryId)
 	}
 	if !allowed {
 		return ErrTopicUnavailable

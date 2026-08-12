@@ -167,11 +167,7 @@ func listLikedTopicRefsBefore(userId uint64, cursor string, limit int, readableC
 			Where(queryopt.Eq("topics.process_status", 0))
 	}
 	if filterAudience {
-		query = query.Where(
-			`EXISTS (SELECT 1 FROM topic_category_index audience_idx WHERE audience_idx.topic_id = topics.id AND audience_idx.effective = ? AND audience_idx.category_id IN ?)`,
-			1,
-			readableCategoryIDs,
-		)
+		query = query.Where("topics.main_category_id IN ?", readableCategoryIDs)
 	}
 	if cursorID > 0 {
 		query = query.Where("topic_user_action.id < ?", cursorID)

@@ -80,12 +80,7 @@ func GetUserTimelineForAudience(userID uint64, lastID uint64, limit int, readabl
 				topics.id IS NOT NULL
 				AND topics.status = 1
 				AND topics.process_status = 0
-				AND EXISTS (
-					SELECT 1 FROM topic_category_index audience_idx
-					WHERE audience_idx.topic_id = topics.id
-					AND audience_idx.effective = 1
-					AND audience_idx.category_id IN ?
-				)
+				AND topics.main_category_id IN ?
 			)`
 			query = query.Where("user_activities.topic_id = 0 OR "+topicVisible, readableCategoryIDs)
 		}

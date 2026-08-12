@@ -72,18 +72,19 @@ func seedAdminTopic(t *testing.T, conn *gorm.DB, topicID uint64) (uint64, uint64
 	}
 	ensureAdminTopicAccess(t, conn)
 	topic := topics.Entity{
-		Id:            topicID,
-		Title:         "Topic title",
-		Excerpt:       "Topic excerpt",
-		CategoryIds:   []uint64{categoryID},
-		UserId:        userID,
-		Status:        1,
-		ProcessStatus: 0,
-		PostCount:     1,
-		PostSeq:       1,
-		FirstPostId:   firstPostID,
-		CreatedAt:     now,
-		UpdatedAt:     now,
+		Id:             topicID,
+		Title:          "Topic title",
+		Excerpt:        "Topic excerpt",
+		CategoryIds:    []uint64{categoryID},
+		MainCategoryId: categoryID,
+		UserId:         userID,
+		Status:         1,
+		ProcessStatus:  0,
+		PostCount:      1,
+		PostSeq:        1,
+		FirstPostId:    firstPostID,
+		CreatedAt:      now,
+		UpdatedAt:      now,
 	}
 	if err := conn.Create(&topic).Error; err != nil {
 		t.Fatalf("create topic: %v", err)

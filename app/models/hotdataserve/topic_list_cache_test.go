@@ -30,20 +30,21 @@ func TestTopicListCacheReadsTopics(t *testing.T) {
 	conn.Create(&users.EntityComplete{Id: 1, Username: "author"})
 	conn.Create(&category.Entity{Id: 3, Name: "General", Slug: "general"})
 	conn.Create(&topics.Entity{
-		Id:            10,
-		Title:         "topic title",
-		Excerpt:       "topic excerpt",
-		FirstImageURL: "/a.png",
-		CategoryIds:   []uint64{3},
-		UserId:        1,
-		Status:        1,
-		ProcessStatus: 0,
-		ReplyCount:    2,
-		ViewCount:     9,
-		PinWeight:     7,
-		Posters:       []topics.Poster{{UserID: 1}},
-		CreatedAt:     now,
-		UpdatedAt:     now,
+		Id:             10,
+		Title:          "topic title",
+		Excerpt:        "topic excerpt",
+		FirstImageURL:  "/a.png",
+		CategoryIds:    []uint64{3},
+		MainCategoryId: 3,
+		UserId:         1,
+		Status:         1,
+		ProcessStatus:  0,
+		ReplyCount:     2,
+		ViewCount:      9,
+		PinWeight:      7,
+		Posters:        []topics.Poster{{UserID: 1}},
+		CreatedAt:      now,
+		UpdatedAt:      now,
 	})
 	conn.Create(&topicCategoryIndex.Entity{TopicId: 10, CategoryId: 3, Effective: 1})
 
@@ -56,9 +57,15 @@ func TestTopicListCacheReadsTopics(t *testing.T) {
 		t.Fatalf("topic list item mismatch: %#v", item)
 	}
 
-	categoryPage := GetTopicsByCategorySimpleVo(3, "latest", 1)
+	categoryPage := GetTopicsByCategorySimpleVo(3, "latest", 1, "public", []uint64{3}, true, false)
 	if len(categoryPage.Topics) != 1 || categoryPage.Topics[0].Id != 10 {
 		t.Fatalf("category topic page=%#v, want topic 10", categoryPage.Topics)
+	}
+	// Category 3 is browsed as an auxiliary tag by a viewer who cannot read the
+	// topic's main category: the listing must stay empty.
+	hiddenPage := GetTopicsByCategorySimpleVo(3, "latest", 1, "other", []uint64{4}, true, false)
+	if len(hiddenPage.Topics) != 0 {
+		t.Fatalf("auxiliary listing leaked topics: %#v", hiddenPage.Topics)
 	}
 }
 

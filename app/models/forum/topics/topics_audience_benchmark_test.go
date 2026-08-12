@@ -59,7 +59,7 @@ func seedAudienceBenchmark(b *testing.B, conn *gorm.DB, topicCount int, category
 		indexBatch := make([]topicCategoryIndex.Entity, 0, end-start)
 		for id := start; id < end; id++ {
 			categoryID := uint64((id-1)%categoryCount + 1)
-			topicsBatch = append(topicsBatch, Entity{Id: uint64(id), Title: "benchmark", CategoryIds: []uint64{categoryID}, Status: 1, UpdatedAt: now.Add(time.Duration(id) * time.Microsecond)})
+			topicsBatch = append(topicsBatch, Entity{Id: uint64(id), Title: "benchmark", CategoryIds: []uint64{categoryID}, MainCategoryId: categoryID, Status: 1, UpdatedAt: now.Add(time.Duration(id) * time.Microsecond)})
 			indexBatch = append(indexBatch, topicCategoryIndex.Entity{TopicId: uint64(id), CategoryId: categoryID, Effective: 1})
 		}
 		if err := conn.Create(&topicsBatch).Error; err != nil {

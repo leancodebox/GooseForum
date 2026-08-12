@@ -212,7 +212,7 @@ func CreateReport(req component.BetterRequest[CreateReportReq]) component.Respon
 	}
 	topic := topics.GetSimple(target.TopicID)
 	snapshot, err := accesscontrol.Resolve(req.UserId)
-	if err != nil || topic.Id == 0 || topic.Status != 1 || topic.ProcessStatus != 0 || !snapshot.CanReadAllCategories(topic.CategoryIds) {
+	if err != nil || topic.Id == 0 || topic.Status != 1 || topic.ProcessStatus != 0 || !snapshot.CanReadCategory(topic.MainCategoryId) {
 		return component.FailResponseCode(component.MessageReportTargetInvalid, nil)
 	}
 	if target.UserID == req.UserId {

@@ -131,7 +131,7 @@ func topicPubliclyReadable(topic topics.Entity) bool {
 		return false
 	}
 	snapshot, err := accesscontrol.Resolve(0)
-	return err == nil && snapshot.CanReadAllCategories(topic.CategoryIds)
+	return err == nil && snapshot.CanReadCategory(topic.MainCategoryId)
 }
 
 type notifyEventData struct {

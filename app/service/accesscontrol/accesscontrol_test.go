@@ -86,34 +86,40 @@ func TestGuestOnlyReceivesEveryoneGrants(t *testing.T) {
 	}
 }
 
-func TestAllCategoryChecksFailClosedForMixedOrEmptyTopics(t *testing.T) {
+func TestMainCategoryAloneDecidesReadability(t *testing.T) {
 	snapshot := Snapshot{levels: map[uint64]Capability{
 		1: CapabilityCreate,
 		2: CapabilityRead,
 	}}
-	if !snapshot.CanReadAllCategories([]uint64{2, 1, 1}) {
-		t.Fatal("read should accept all readable categories")
+	if !snapshot.CanReadCategory(MainCategoryOf([]uint64{2, 1})) {
+		t.Fatal("a readable main category should be readable")
 	}
-	if snapshot.CanCreateAllCategories([]uint64{1, 2}) {
-		t.Fatal("create should reject a mixed capability set")
+	if snapshot.CanReadCategory(MainCategoryOf([]uint64{3, 1, 2})) {
+		t.Fatal("an unreadable main category must fail closed whatever the auxiliary tags are")
 	}
-	if snapshot.CanReadAllCategories(nil) || snapshot.CanReadAllCategories([]uint64{0}) {
-		t.Fatal("empty category sets must fail closed")
+	if MainCategoryOf(nil) != 0 || MainCategoryOf([]uint64{0, 5}) != 5 {
+		t.Fatal("main category must be the first non-zero entry")
+	}
+	if snapshot.CanReadCategory(MainCategoryOf(nil)) {
+		t.Fatal("a topic with no categories must fail closed")
 	}
 }
 
-func TestValidateCategorySelectionPreservesOrderAndRestrictsPrivateTopics(t *testing.T) {
+func TestValidateCategorySelectionPreservesOrder(t *testing.T) {
 	actor := Snapshot{levels: map[uint64]Capability{1: CapabilityCreate, 2: CapabilityCreate, 3: CapabilityCreate}}
 	everyone := Snapshot{levels: map[uint64]Capability{1: CapabilityRead, 2: CapabilityRead}}
 
-	got, err := ValidateCategorySelection(actor, everyone, []uint64{2, 1, 2}, CapabilityCreate)
+	got, err := ValidateCategorySelection(actor, []uint64{2, 1, 2}, CapabilityCreate)
 	if err != nil || !reflect.DeepEqual(got, []uint64{2, 1}) {
 		t.Fatalf("public selection = %v, %v", got, err)
 	}
-	if _, err := ValidateCategorySelection(actor, everyone, []uint64{1, 3}, CapabilityCreate); !errors.Is(err, ErrRestrictedCategoryMustBeSingle) {
-		t.Fatalf("mixed restricted selection error = %v", err)
+	// 3 is restricted. Mixing it with a public category is allowed now: only the
+	// first entry decides visibility, so there is no combination to forbid.
+	got, err = ValidateCategorySelection(actor, []uint64{3, 1}, CapabilityCreate)
+	if err != nil || !reflect.DeepEqual(got, []uint64{3, 1}) {
+		t.Fatalf("restricted-main selection = %v, %v", got, err)
 	}
-	if _, err := ValidateCategorySelection(everyone, everyone, []uint64{3}, CapabilityCreate); !errors.Is(err, ErrCategoryPermissionDenied) {
+	if _, err := ValidateCategorySelection(everyone, []uint64{3}, CapabilityCreate); !errors.Is(err, ErrCategoryPermissionDenied) {
 		t.Fatalf("insufficient selection error = %v", err)
 	}
 }
@@ -134,6 +140,45 @@ func TestValidateTopicCategoryWritePolicies(t *testing.T) {
 	}
 	if got, err := ValidateTopicCategoryWrite(manager, everyone, TopicCategoryWrite{Current: []uint64{1}, Next: []uint64{3}}); err != nil || !reflect.DeepEqual(got, []uint64{3}) {
 		t.Fatalf("managed restricted move = %v, %v", got, err)
+	}
+	// Auxiliary categories carry no visibility, so tagging a restricted category
+	// onto a public topic is an ordinary edit, not a management operation.
+	if got, err := ValidateTopicCategoryWrite(creator, everyone, TopicCategoryWrite{Current: []uint64{1}, Next: []uint64{1, 3}}); err != nil || !reflect.DeepEqual(got, []uint64{1, 3}) {
+		t.Fatalf("adding a restricted auxiliary category = %v, %v", got, err)
+	}
+	// Reordering the same categories promotes 3 to main: that is a visibility
+	// change and needs manage, which is why selection comparison is ordered.
+	if _, err := ValidateTopicCategoryWrite(creator, everyone, TopicCategoryWrite{Current: []uint64{1, 3}, Next: []uint64{3, 1}}); !errors.Is(err, ErrCategoryPermissionDenied) {
+		t.Fatalf("promoting a restricted category to main error = %v", err)
+	}
+}
+
+// Removing the main category promotes the next one, which changes who can read
+// the topic. That is why the promotion goes through the same manage gate as any
+// other main-category change, and why an author cannot perform it.
+func TestRemovingMainCategoryPromotesTheNextOneUnderTheManageGate(t *testing.T) {
+	everyone := Snapshot{levels: map[uint64]Capability{1: CapabilityRead, 2: CapabilityRead}}
+	creator := Snapshot{levels: map[uint64]Capability{1: CapabilityCreate, 2: CapabilityCreate, 3: CapabilityCreate}}
+	manager := Snapshot{levels: map[uint64]Capability{1: CapabilityManage, 2: CapabilityManage, 3: CapabilityManage}}
+
+	// Both public: the promotion does not change the audience, so it is an
+	// ordinary edit and the author may do it.
+	got, err := ValidateTopicCategoryWrite(creator, everyone, TopicCategoryWrite{Current: []uint64{1, 2}, Next: []uint64{2}})
+	if err != nil || MainCategoryOf(got) != 2 {
+		t.Fatalf("public promotion = %v, %v, want main 2", got, err)
+	}
+	// Dropping a restricted main promotes a public one: the topic would become
+	// world-readable, so an author must not be able to do it.
+	if _, err := ValidateTopicCategoryWrite(creator, everyone, TopicCategoryWrite{Current: []uint64{3, 1}, Next: []uint64{1}}); !errors.Is(err, ErrCategoryPermissionDenied) {
+		t.Fatalf("author widening a restricted topic = %v, want denied", err)
+	}
+	if got, err := ValidateTopicCategoryWrite(manager, everyone, TopicCategoryWrite{Current: []uint64{3, 1}, Next: []uint64{1}}); err != nil || MainCategoryOf(got) != 1 {
+		t.Fatalf("manager widening = %v, %v, want main 1", got, err)
+	}
+	// The last category can never be removed: there would be no main category
+	// left and the topic would be readable by nobody.
+	if _, err := ValidateTopicCategoryWrite(creator, everyone, TopicCategoryWrite{Current: []uint64{1}, Next: []uint64{}}); !errors.Is(err, ErrCategoryRequired) {
+		t.Fatalf("removing the last category = %v, want ErrCategoryRequired", err)
 	}
 }
 

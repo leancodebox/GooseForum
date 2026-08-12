@@ -30,6 +30,7 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 		return errors.New("topic categories are required")
 	}
 	input.Topic.CategoryIds = append([]uint64(nil), input.CategoryIDs...)
+	input.Topic.MainCategoryId = input.CategoryIDs[0]
 	return conn.Transaction(func(tx *gorm.DB) error {
 		if input.Create {
 			input.Topic.PostCount = 1
@@ -69,6 +70,7 @@ func SaveTopicCategories(topic *topics.Entity, categoryIDs []uint64) error {
 		return errors.New("existing topic and categories are required")
 	}
 	topic.CategoryIds = append([]uint64(nil), categoryIDs...)
+	topic.MainCategoryId = categoryIDs[0]
 	return dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
 		if err := tx.Omit("updated_at").Save(topic).Error; err != nil {
 			return err

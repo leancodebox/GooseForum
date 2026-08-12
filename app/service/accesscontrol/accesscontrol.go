@@ -25,10 +25,9 @@ const (
 var ErrTooManyActiveGroups = errors.New("user exceeds active access group limit")
 
 var (
-	ErrCategoryRequired               = errors.New("at least one category is required")
-	ErrTooManyCategories              = errors.New("at most three categories are allowed")
-	ErrCategoryPermissionDenied       = errors.New("category capability is insufficient")
-	ErrRestrictedCategoryMustBeSingle = errors.New("a restricted topic must use exactly one category")
+	ErrCategoryRequired         = errors.New("at least one category is required")
+	ErrTooManyCategories        = errors.New("at most three categories are allowed")
+	ErrCategoryPermissionDenied = errors.New("category capability is insufficient")
 )
 
 type TopicCategoryWrite struct {
@@ -89,23 +88,19 @@ func (snapshot Snapshot) CanManageCategory(categoryID uint64) bool {
 	return snapshot.Capability(categoryID) >= CapabilityManage
 }
 
-func (snapshot Snapshot) CanReadAllCategories(categoryIDs []uint64) bool {
-	return snapshot.canAllCategories(categoryIDs, CapabilityRead)
+// MainCategoryOf returns the category a topic draws its visibility from: the
+// first one selected. The rest are auxiliary tags and never widen or narrow
+// who can read the topic.
+func MainCategoryOf(categoryIDs []uint64) uint64 {
+	for _, categoryID := range categoryIDs {
+		if categoryID != 0 {
+			return categoryID
+		}
+	}
+	return 0
 }
 
-func (snapshot Snapshot) CanReplyAllCategories(categoryIDs []uint64) bool {
-	return snapshot.canAllCategories(categoryIDs, CapabilityReply)
-}
-
-func (snapshot Snapshot) CanCreateAllCategories(categoryIDs []uint64) bool {
-	return snapshot.canAllCategories(categoryIDs, CapabilityCreate)
-}
-
-func (snapshot Snapshot) CanManageAllCategories(categoryIDs []uint64) bool {
-	return snapshot.canAllCategories(categoryIDs, CapabilityManage)
-}
-
-func ValidateCategorySelection(actor Snapshot, everyone Snapshot, categoryIDs []uint64, required Capability) ([]uint64, error) {
+func ValidateCategorySelection(actor Snapshot, categoryIDs []uint64, required Capability) ([]uint64, error) {
 	categoryIDs = uniqueNonZeroPreservingOrder(categoryIDs)
 	if len(categoryIDs) == 0 {
 		return nil, ErrCategoryRequired
@@ -118,21 +113,20 @@ func ValidateCategorySelection(actor Snapshot, everyone Snapshot, categoryIDs []
 			return nil, ErrCategoryPermissionDenied
 		}
 	}
-	if SelectionIsRestricted(everyone, categoryIDs) && len(categoryIDs) != 1 {
-		return nil, ErrRestrictedCategoryMustBeSingle
-	}
 	return categoryIDs, nil
 }
 
 // ValidateTopicCategoryWrite centralizes category authorization for topic
-// creation, editing, publishing, and category changes. Moving a topic into or
-// out of a restricted category is deliberately a management operation.
+// creation, editing, publishing, and category changes. Only the main category
+// decides who can read a topic, so only a change of main category changes
+// visibility, and only that is escalated to a management operation.
 func ValidateTopicCategoryWrite(actor Snapshot, everyone Snapshot, input TopicCategoryWrite) ([]uint64, error) {
 	if input.NewTopic {
-		return ValidateCategorySelection(actor, everyone, input.Next, CapabilityCreate)
+		return ValidateCategorySelection(actor, input.Next, CapabilityCreate)
 	}
 	current := uniqueNonZeroPreservingOrder(input.Current)
-	if len(current) == 0 || !actor.CanReadAllCategories(current) {
+	currentMain := MainCategoryOf(current)
+	if currentMain == 0 || !actor.CanReadCategory(currentMain) {
 		return nil, ErrCategoryPermissionDenied
 	}
 	required := CapabilityRead
@@ -140,32 +134,23 @@ func ValidateTopicCategoryWrite(actor Snapshot, everyone Snapshot, input TopicCa
 	if input.Publishing || changed {
 		required = CapabilityCreate
 	}
-	next, err := ValidateCategorySelection(actor, everyone, input.Next, required)
+	next, err := ValidateCategorySelection(actor, input.Next, required)
 	if err != nil {
 		return nil, err
 	}
-	if changed && (SelectionIsRestricted(everyone, current) || SelectionIsRestricted(everyone, next)) {
-		union := append(append([]uint64(nil), current...), next...)
-		if !actor.CanManageAllCategories(union) {
+	nextMain := MainCategoryOf(next)
+	if currentMain != nextMain && (!everyone.CanReadCategory(currentMain) || !everyone.CanReadCategory(nextMain)) {
+		if !actor.CanManageCategory(currentMain) || !actor.CanManageCategory(nextMain) {
 			return nil, ErrCategoryPermissionDenied
 		}
 	}
 	return next, nil
 }
 
-func SelectionIsRestricted(everyone Snapshot, categoryIDs []uint64) bool {
-	for _, categoryID := range uniqueNonZeroPreservingOrder(categoryIDs) {
-		if !everyone.CanReadCategory(categoryID) {
-			return true
-		}
-	}
-	return false
-}
-
+// SameCategorySelection compares order-sensitively: the first entry is the main
+// category, so reordering the same three categories is a real change.
 func SameCategorySelection(a []uint64, b []uint64) bool {
-	a = uniqueNonZero(a)
-	b = uniqueNonZero(b)
-	return slices.Equal(a, b)
+	return slices.Equal(uniqueNonZeroPreservingOrder(a), uniqueNonZeroPreservingOrder(b))
 }
 
 func (snapshot Snapshot) ReadableCategoryIDs() []uint64 {
@@ -193,19 +178,6 @@ func (snapshot Snapshot) categoryIDsAtLeast(required Capability) []uint64 {
 	}
 	slices.Sort(categoryIDs)
 	return categoryIDs
-}
-
-func (snapshot Snapshot) canAllCategories(categoryIDs []uint64, required Capability) bool {
-	categoryIDs = uniqueNonZero(categoryIDs)
-	if len(categoryIDs) == 0 {
-		return false
-	}
-	for _, categoryID := range categoryIDs {
-		if snapshot.Capability(categoryID) < required {
-			return false
-		}
-	}
-	return true
 }
 
 type Resolver struct {

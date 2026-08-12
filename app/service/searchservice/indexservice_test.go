@@ -14,13 +14,14 @@ func TestConvertTopicToSearchDocument(t *testing.T) {
 	createdAt := time.Unix(1700000000, 0)
 	updatedAt := time.Unix(1700000300, 0)
 	topic := &topics.Entity{
-		Id:            42,
-		Title:         "Searchable title",
-		CategoryIds:   []uint64{3, 5},
-		Status:        1,
-		ProcessStatus: 0,
-		CreatedAt:     createdAt,
-		UpdatedAt:     updatedAt,
+		Id:             42,
+		Title:          "Searchable title",
+		CategoryIds:    []uint64{3, 5},
+		MainCategoryId: 3,
+		Status:         1,
+		ProcessStatus:  0,
+		CreatedAt:      createdAt,
+		UpdatedAt:      updatedAt,
 	}
 	firstPost := &posts.Entity{Content: "# Heading\n\nVisible text with [link](https://example.com).\n\n```go\nhidden()\n```"}
 

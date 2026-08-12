@@ -30,7 +30,16 @@ func Category(c *gin.Context) {
 
 	sort, _ := lo.Coalesce(c.Param("sort"), "latest")
 	page := lo.Ternary(cast.ToInt(c.Query("page")) <= 0, 1, cast.ToInt(c.Query("page")))
-	topicPage := hotdataserve.GetTopicsByCategorySimpleVo(id, sort, page)
+	audience, cacheable := snapshot.ListCacheAudience()
+	topicPage := hotdataserve.GetTopicsByCategorySimpleVo(
+		id,
+		sort,
+		page,
+		audience,
+		snapshot.ReadableCategoryIDs(),
+		!snapshot.HasGlobalManage(),
+		cacheable,
+	)
 
 	payload := PagePayload{
 		Component: PageComponentCategory,

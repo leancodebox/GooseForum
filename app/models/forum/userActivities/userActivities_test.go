@@ -25,8 +25,8 @@ func TestGetUserTimelineForAudienceFiltersBeforePagination(t *testing.T) {
 	conn.Delete(&topicCategoryIndex.Entity{}, "topic_id IN ?", topicIDs)
 	conn.Unscoped().Delete(&topics.Entity{}, "id IN ?", topicIDs)
 	if err := conn.Create(&[]topics.Entity{
-		{Id: topicIDs[0], Title: "public", CategoryIds: []uint64{9871}, Status: 1},
-		{Id: topicIDs[1], Title: "private", CategoryIds: []uint64{9872}, Status: 1},
+		{Id: topicIDs[0], Title: "public", CategoryIds: []uint64{9871}, MainCategoryId: 9871, Status: 1},
+		{Id: topicIDs[1], Title: "private", CategoryIds: []uint64{9872}, MainCategoryId: 9872, Status: 1},
 	}).Error; err != nil {
 		t.Fatalf("create topics: %v", err)
 	}

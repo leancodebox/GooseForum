@@ -1,7 +1,6 @@
 package accessadminservice
 
 import (
-	"errors"
 	"reflect"
 	"testing"
 
@@ -16,7 +15,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/datamigration"
 )
 
-func TestReplaceCategoryGrantsRequiresExplicitConflictConversion(t *testing.T) {
+func TestRestrictingCategoryDoesNotTouchTopics(t *testing.T) {
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(
 		&accessGroups.Entity{}, &accessGroupMembers.Entity{}, &categoryGroupPermissions.Entity{},
@@ -48,7 +47,7 @@ func TestReplaceCategoryGrantsRequiresExplicitConflictConversion(t *testing.T) {
 	}
 	everyoneID := groupID(accessGroups.SystemKeyEveryone)
 	registeredID := groupID(accessGroups.SystemKeyRegistered)
-	topic := topics.Entity{Id: topicID, Title: "multi category", CategoryIds: []uint64{restrictedCategoryID, otherCategoryID}, UserId: 7, Status: 1}
+	topic := topics.Entity{Id: topicID, Title: "multi category", CategoryIds: []uint64{restrictedCategoryID, otherCategoryID}, MainCategoryId: restrictedCategoryID, UserId: 7, Status: 1}
 	if err := conn.Create(&topic).Error; err != nil {
 		t.Fatalf("create topic: %v", err)
 	}
@@ -58,31 +57,28 @@ func TestReplaceCategoryGrantsRequiresExplicitConflictConversion(t *testing.T) {
 	}).Error; err != nil {
 		t.Fatalf("create category indexes: %v", err)
 	}
+	// Making a public category private used to require rewriting every
+	// multi-category topic in it. Visibility now comes from main_category_id,
+	// which no permission change can invalidate, so there is nothing to convert
+	// and no strategy to ask the admin for.
 	grants := []GrantInput{{AccessGroupID: everyoneID, Level: 0}, {AccessGroupID: registeredID, Level: categoryGroupPermissions.PermissionCreate}}
-	err = ReplaceCategoryGrants(restrictedCategoryID, grants, "")
-	var conflict RestrictionConflictError
-	if !errors.As(err, &conflict) || conflict.Count != 1 {
-		t.Fatalf("restriction conflict = %v, want count 1", err)
+	if err := ReplaceCategoryGrants(restrictedCategoryID, grants); err != nil {
+		t.Fatalf("replace grants: %v", err)
 	}
 	unchanged := topics.GetSimple(topicID)
-	if len(unchanged.CategoryIds) != 2 {
-		t.Fatalf("topic mutated before strategy: %v", unchanged.CategoryIds)
+	if !reflect.DeepEqual(unchanged.CategoryIds, []uint64{restrictedCategoryID, otherCategoryID}) {
+		t.Fatalf("topic categories mutated: %v", unchanged.CategoryIds)
 	}
-
-	if err := ReplaceCategoryGrants(restrictedCategoryID, grants, RestrictionKeepCategory); err != nil {
-		t.Fatalf("replace grants with conversion: %v", err)
-	}
-	converted := topics.GetSimple(topicID)
-	if len(converted.CategoryIds) != 1 || converted.CategoryIds[0] != restrictedCategoryID {
-		t.Fatalf("converted categories = %v", converted.CategoryIds)
+	if unchanged.MainCategoryId != restrictedCategoryID {
+		t.Fatalf("main category mutated: %d", unchanged.MainCategoryId)
 	}
 	indexes := topicCategoryIndex.GetByTopicId(topicID)
 	active := make(map[uint64]int)
 	for _, index := range indexes {
 		active[index.CategoryId] = index.Effective
 	}
-	if active[restrictedCategoryID] != 1 || active[otherCategoryID] != 0 {
-		t.Fatalf("converted indexes = %v", active)
+	if active[restrictedCategoryID] != 1 || active[otherCategoryID] != 1 {
+		t.Fatalf("category indexes mutated: %v", active)
 	}
 	accesscontrol.InvalidateSystemGroups()
 	for _, group := range groups {

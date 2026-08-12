@@ -12,19 +12,20 @@ import (
 func TestTopicsWithUser2VoMapsListPayload(t *testing.T) {
 	now := time.Date(2026, 7, 9, 12, 30, 0, 0, time.UTC)
 	topic := &topics.Entity{
-		Id:            10,
-		Title:         "topic title",
-		Excerpt:       "topic excerpt",
-		FirstImageURL: "/cover.png",
-		CategoryIds:   []uint64{3, 4},
-		UserId:        1,
-		ReplyCount:    7,
-		ViewCount:     99,
-		PinWeight:     5,
-		ProcessStatus: 2,
-		Posters:       []topics.Poster{{UserID: 1}, {UserID: 2}},
-		CreatedAt:     now.Add(-time.Hour),
-		UpdatedAt:     now,
+		Id:             10,
+		Title:          "topic title",
+		Excerpt:        "topic excerpt",
+		FirstImageURL:  "/cover.png",
+		CategoryIds:    []uint64{3, 4},
+		MainCategoryId: 3,
+		UserId:         1,
+		ReplyCount:     7,
+		ViewCount:      99,
+		PinWeight:      5,
+		ProcessStatus:  2,
+		Posters:        []topics.Poster{{UserID: 1}, {UserID: 2}},
+		CreatedAt:      now.Add(-time.Hour),
+		UpdatedAt:      now,
 	}
 	categoryMap := map[uint64]*category.Entity{
 		3: {Id: 3, Name: "General"},

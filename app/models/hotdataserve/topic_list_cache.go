@@ -46,15 +46,27 @@ func GetLatestTopicsSimpleVoPaginatedForAudience(
 	}, topicListCacheTTL)
 }
 
-func GetTopicsByCategorySimpleVo(categoryId uint64, sort string, page int) TopicSimpleVoPage {
+// GetTopicsByCategorySimpleVo lists a category page. The category being browsed
+// may be an auxiliary tag on topics whose main category the viewer cannot read,
+// so the audience filter still applies here — it is the one place where the
+// tag being listed and the category deciding visibility differ.
+func GetTopicsByCategorySimpleVo(
+	categoryId uint64,
+	sort string,
+	page int,
+	audience string,
+	readableCategoryIDs []uint64,
+	filterAudience bool,
+	cacheable bool,
+) TopicSimpleVoPage {
 	page = normalizeTopicPage(page)
 	sort = normalizeTopicSort(sort)
-	if !shouldCacheTopicPage(page) {
-		return loadTopicsByCategorySimpleVo(categoryId, sort, page)
+	if !cacheable || audience == "" || !shouldCacheTopicPage(page) {
+		return loadTopicsByCategorySimpleVo(categoryId, sort, page, readableCategoryIDs, filterAudience)
 	}
-	key := "GetTopicsByCategory:" + strconv.FormatUint(categoryId, 10) + ":" + sort + ":" + strconv.Itoa(page)
+	key := "GetTopicsByCategory:" + audience + ":" + strconv.FormatUint(categoryId, 10) + ":" + sort + ":" + strconv.Itoa(page)
 	return topicSimpleVoCache.GetOrLoad(key, func() (TopicSimpleVoPage, error) {
-		return loadTopicsByCategorySimpleVo(categoryId, sort, page), nil
+		return loadTopicsByCategorySimpleVo(categoryId, sort, page, readableCategoryIDs, filterAudience), nil
 	}, topicListCacheTTL)
 }
 
@@ -93,13 +105,15 @@ func loadLatestTopicsSimpleVoPaginated(page int, sort string, readableCategoryID
 	}
 }
 
-func loadTopicsByCategorySimpleVo(categoryId uint64, sort string, page int) TopicSimpleVoPage {
+func loadTopicsByCategorySimpleVo(categoryId uint64, sort string, page int, readableCategoryIDs []uint64, filterAudience bool) TopicSimpleVoPage {
 	res := topics.Page(topics.PageQuery{
-		Page:         page,
-		PageSize:     20,
-		CategoryId:   categoryId,
-		FilterStatus: true,
-		Sort:         sort,
+		Page:                page,
+		PageSize:            20,
+		CategoryId:          categoryId,
+		FilterStatus:        true,
+		FilterAudience:      filterAudience,
+		ReadableCategoryIds: readableCategoryIDs,
+		Sort:                sort,
 	})
 	return TopicSimpleVoPage{
 		Topics:  transform.Topics2Vo(topicEntitiesToPointers(res.Data), CategoryMap()),

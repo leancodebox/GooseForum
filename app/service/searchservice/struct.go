@@ -11,6 +11,9 @@ type TopicSearchDocument struct {
 	TopicStatus   int8     `json:"topicStatus"`   // 可过滤字段
 	ProcessStatus int8     `json:"processStatus"` // 可过滤字段
 	Category      []uint64 `json:"category"`
-	CreatedAt     int64    `json:"createdAt"` // 时间戳(Unix)
-	UpdatedAt     int64    `json:"updatedAt"` // 时间戳(Unix)
+	// MainCategory is the only field the audience filter reads. It is a scalar,
+	// so a readable-set filter is "mainCategory = a OR mainCategory = b".
+	MainCategory uint64 `json:"mainCategory"`
+	CreatedAt    int64  `json:"createdAt"` // 时间戳(Unix)
+	UpdatedAt    int64  `json:"updatedAt"` // 时间戳(Unix)
 }

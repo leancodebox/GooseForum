@@ -14,8 +14,8 @@ func TestAudienceQueryFiltersBeforeNotificationLimitAndUnreadCount(t *testing.T)
 		t.Fatalf("migrate notification audience tables: %v", err)
 	}
 	const userID uint64 = 950001
-	publicTopic := topics.Entity{Id: 950101, Title: "public", CategoryIds: []uint64{1}, Status: 1}
-	privateTopic := topics.Entity{Id: 950102, Title: "private", CategoryIds: []uint64{2}, Status: 1}
+	publicTopic := topics.Entity{Id: 950101, Title: "public", CategoryIds: []uint64{1}, MainCategoryId: 1, Status: 1}
+	privateTopic := topics.Entity{Id: 950102, Title: "private", CategoryIds: []uint64{2}, MainCategoryId: 2, Status: 1}
 	if err := conn.Create(&[]topics.Entity{publicTopic, privateTopic}).Error; err != nil {
 		t.Fatalf("create topics: %v", err)
 	}

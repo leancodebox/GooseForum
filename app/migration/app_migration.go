@@ -165,5 +165,15 @@ func runVersionedDataMigrations() {
 		pageConfig.SyncMigrationVersion(15)
 		currentVersion = 15
 	}
+	if currentVersion < 16 {
+		result := datamigration.BackfillTopicMainCategory()
+		slog.Info("app migration topic main category done", "updated", result.Updated, "orphaned", result.Orphaned, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			slog.Error("app migration topic main category has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
+			return
+		}
+		pageConfig.SyncMigrationVersion(16)
+		currentVersion = 16
+	}
 	slog.Info("app migration end", "version", currentVersion)
 }

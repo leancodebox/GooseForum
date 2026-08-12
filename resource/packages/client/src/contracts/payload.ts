@@ -806,7 +806,6 @@ export interface PublishCategoryPayload {
   name: string
   color: string
   isRestricted: boolean
-  allowMultipleCategories: boolean
   canCreate: boolean
 }
 

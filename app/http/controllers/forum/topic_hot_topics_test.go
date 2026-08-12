@@ -49,11 +49,11 @@ func TestBuildTopicHotTopicsHidesRestrictedTopicsFromGuests(t *testing.T) {
 	conn.Create(&users.EntityComplete{Id: authorID, Username: "hot-topics-author"})
 	// The reply counts put both topics at the top of the "hot" ordering, restricted first.
 	conn.Create(&topics.Entity{
-		Id: publicTopicID, Title: "public hot topic", CategoryIds: []uint64{publicCategoryID},
+		Id: publicTopicID, Title: "public hot topic", CategoryIds: []uint64{publicCategoryID}, MainCategoryId: publicCategoryID,
 		UserId: authorID, Status: 1, ProcessStatus: 0, ReplyCount: 900001, CreatedAt: now, UpdatedAt: now,
 	})
 	conn.Create(&topics.Entity{
-		Id: restrictedTopicID, Title: "restricted hot topic", CategoryIds: []uint64{restrictedCategoryID},
+		Id: restrictedTopicID, Title: "restricted hot topic", CategoryIds: []uint64{restrictedCategoryID}, MainCategoryId: restrictedCategoryID,
 		UserId: authorID, Status: 1, ProcessStatus: 0, ReplyCount: 900002, CreatedAt: now, UpdatedAt: now,
 	})
 	conn.Create(&topicCategoryIndex.Entity{TopicId: publicTopicID, CategoryId: publicCategoryID, Effective: 1})

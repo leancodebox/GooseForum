@@ -101,11 +101,7 @@ func applyAudienceFilter(query *gorm.DB, readableCategoryIDs []uint64, filterAud
 	if !filterAudience {
 		return query
 	}
-	return query.Where(
-		`EXISTS (SELECT 1 FROM topic_category_index audience_idx WHERE audience_idx.topic_id = topics.id AND audience_idx.effective = ? AND audience_idx.category_id IN ?)`,
-		1,
-		readableCategoryIDs,
-	)
+	return query.Where("topics.main_category_id IN ?", readableCategoryIDs)
 }
 
 func GetLatestPublishedByUserId(userId uint64, limit int) ([]*Entity, error) {

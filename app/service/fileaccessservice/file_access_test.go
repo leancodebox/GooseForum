@@ -62,8 +62,8 @@ func TestResolveProtectsRestrictedTopicFilesAndPendingUploads(t *testing.T) {
 			t.Fatalf("create user %d: %v", userID, err)
 		}
 	}
-	publicTopic := topics.Entity{Id: 970101, Title: "public", CategoryIds: []uint64{publicCategory.Id}, UserId: 970012, Status: 1}
-	restrictedTopic := topics.Entity{Id: 970102, Title: "private", CategoryIds: []uint64{restrictedCategory.Id}, UserId: 970012, Status: 1}
+	publicTopic := topics.Entity{Id: 970101, Title: "public", CategoryIds: []uint64{publicCategory.Id}, MainCategoryId: publicCategory.Id, UserId: 970012, Status: 1}
+	restrictedTopic := topics.Entity{Id: 970102, Title: "private", CategoryIds: []uint64{restrictedCategory.Id}, MainCategoryId: restrictedCategory.Id, UserId: 970012, Status: 1}
 	if err := conn.Create(&[]topics.Entity{publicTopic, restrictedTopic}).Error; err != nil {
 		t.Fatalf("create topics: %v", err)
 	}

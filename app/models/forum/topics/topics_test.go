@@ -59,10 +59,10 @@ func TestTopicRepositoryParity(t *testing.T) {
 
 	now := time.Date(2026, 7, 7, 12, 0, 0, 0, time.UTC)
 	conn.Create(&[]Entity{
-		{Id: 10, Title: "zeta topic", CategoryIds: []uint64{3}, UserId: 1, Status: 1, ProcessStatus: 0, ReplyCount: 1, ViewCount: 9, PinWeight: 0, CreatedAt: now, UpdatedAt: now},
-		{Id: 20, Title: "alpha topic", CategoryIds: []uint64{4}, UserId: 2, Status: 1, ProcessStatus: 0, ReplyCount: 4, ViewCount: 3, PinWeight: 20, CreatedAt: now.Add(time.Minute), UpdatedAt: now.Add(time.Minute)},
-		{Id: 30, Title: "draft topic", CategoryIds: []uint64{3}, UserId: 1, Status: 0, ProcessStatus: 0, CreatedAt: now.Add(2 * time.Minute), UpdatedAt: now.Add(2 * time.Minute)},
-		{Id: 40, Title: "blocked topic", CategoryIds: []uint64{3}, UserId: 1, Status: 1, ProcessStatus: 1, CreatedAt: now.Add(3 * time.Minute), UpdatedAt: now.Add(3 * time.Minute)},
+		{Id: 10, Title: "zeta topic", CategoryIds: []uint64{3}, MainCategoryId: 3, UserId: 1, Status: 1, ProcessStatus: 0, ReplyCount: 1, ViewCount: 9, PinWeight: 0, CreatedAt: now, UpdatedAt: now},
+		{Id: 20, Title: "alpha topic", CategoryIds: []uint64{4}, MainCategoryId: 4, UserId: 2, Status: 1, ProcessStatus: 0, ReplyCount: 4, ViewCount: 3, PinWeight: 20, CreatedAt: now.Add(time.Minute), UpdatedAt: now.Add(time.Minute)},
+		{Id: 30, Title: "draft topic", CategoryIds: []uint64{3}, MainCategoryId: 3, UserId: 1, Status: 0, ProcessStatus: 0, CreatedAt: now.Add(2 * time.Minute), UpdatedAt: now.Add(2 * time.Minute)},
+		{Id: 40, Title: "blocked topic", CategoryIds: []uint64{3}, MainCategoryId: 3, UserId: 1, Status: 1, ProcessStatus: 1, CreatedAt: now.Add(3 * time.Minute), UpdatedAt: now.Add(3 * time.Minute)},
 	})
 	conn.Create(&[]topicCategoryIndex.Entity{
 		{TopicId: 10, CategoryId: 3, Effective: 1},

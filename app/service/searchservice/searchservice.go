@@ -54,7 +54,7 @@ func SearchTopics(req SearchRequest) (*SearchResponse, error) {
 
 	if req.FilterByCategories {
 		filters := lo.Map(req.Categories, func(categoryID uint64, _ int) string {
-			return fmt.Sprintf("category = %d", categoryID)
+			return fmt.Sprintf("mainCategory = %d", categoryID)
 		})
 		filterStr := fmt.Sprintf("(%s)", strings.Join(filters, " OR "))
 		searchReq.Filter = filterStr

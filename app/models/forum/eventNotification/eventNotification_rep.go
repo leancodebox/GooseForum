@@ -55,12 +55,7 @@ func applyAudienceFilter(db *gorm.DB, readableCategoryIDs []uint64, filterAudien
 			topics.id IS NOT NULL
 			AND topics.status = 1
 			AND topics.process_status = 0
-			AND EXISTS (
-				SELECT 1 FROM topic_category_index audience_idx
-				WHERE audience_idx.topic_id = topics.id
-				AND audience_idx.effective = 1
-				AND audience_idx.category_id IN ?
-			)
+			AND topics.main_category_id IN ?
 		)`, readableCategoryIDs)
 }
 

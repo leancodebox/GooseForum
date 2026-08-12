@@ -220,17 +220,18 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 	conn.Create(&users.EntityComplete{Id: replyerID, Username: "replyer"})
 	conn.Create(&category.Entity{Id: categoryID, Name: "General", Slug: "general"})
 	topic := topics.Entity{
-		Id:            topicID,
-		Title:         "topic title",
-		Excerpt:       "topic excerpt",
-		CategoryIds:   []uint64{categoryID},
-		UserId:        authorID,
-		Status:        1,
-		ProcessStatus: 0,
-		ReplyCount:    2,
-		PostSeq:       3,
-		CreatedAt:     now,
-		UpdatedAt:     now,
+		Id:             topicID,
+		Title:          "topic title",
+		Excerpt:        "topic excerpt",
+		CategoryIds:    []uint64{categoryID},
+		MainCategoryId: categoryID,
+		UserId:         authorID,
+		Status:         1,
+		ProcessStatus:  0,
+		ReplyCount:     2,
+		PostSeq:        3,
+		CreatedAt:      now,
+		UpdatedAt:      now,
 	}
 	conn.Create(&topic)
 	firstPost := posts.Entity{Id: firstPostID, TopicId: topicID, PostNo: 1, UserId: authorID, Content: "first", RenderedHTML: "<p>first</p>", RenderedVersion: 1, CreatedAt: now, UpdatedAt: now}
@@ -318,17 +319,18 @@ func TestPostWindowDefaultLoadsFromFirstPost(t *testing.T) {
 	conn.Unscoped().Delete(&users.EntityComplete{}, userID)
 	conn.Create(&users.EntityComplete{Id: userID, Username: "author"})
 	conn.Create(&topics.Entity{
-		Id:            topicID,
-		Title:         "topic",
-		CategoryIds:   []uint64{categoryID},
-		UserId:        userID,
-		Status:        1,
-		ProcessStatus: 0,
-		ReplyCount:    1,
-		PostSeq:       2,
-		FirstPostId:   firstPostID,
-		CreatedAt:     now,
-		UpdatedAt:     now,
+		Id:             topicID,
+		Title:          "topic",
+		CategoryIds:    []uint64{categoryID},
+		MainCategoryId: categoryID,
+		UserId:         userID,
+		Status:         1,
+		ProcessStatus:  0,
+		ReplyCount:     1,
+		PostSeq:        2,
+		FirstPostId:    firstPostID,
+		CreatedAt:      now,
+		UpdatedAt:      now,
 	})
 	conn.Create(&posts.Entity{Id: firstPostID, TopicId: topicID, PostNo: 1, UserId: userID, Content: "first", CreatedAt: now, UpdatedAt: now})
 	conn.Create(&posts.Entity{Id: replyPostID, TopicId: topicID, PostNo: 2, UserId: userID, Content: "reply", CreatedAt: now.Add(time.Minute), UpdatedAt: now.Add(time.Minute)})
@@ -377,16 +379,17 @@ func TestPostWindowAnchorPostNoCanLoadFirstPost(t *testing.T) {
 	conn.Unscoped().Delete(&users.EntityComplete{}, userID)
 	conn.Create(&users.EntityComplete{Id: userID, Username: "author"})
 	conn.Create(&topics.Entity{
-		Id:          topicID,
-		Title:       "topic",
-		CategoryIds: []uint64{categoryID},
-		UserId:      userID,
-		Status:      1,
-		ReplyCount:  1,
-		PostSeq:     2,
-		FirstPostId: firstPostID,
-		CreatedAt:   now,
-		UpdatedAt:   now,
+		Id:             topicID,
+		Title:          "topic",
+		CategoryIds:    []uint64{categoryID},
+		MainCategoryId: categoryID,
+		UserId:         userID,
+		Status:         1,
+		ReplyCount:     1,
+		PostSeq:        2,
+		FirstPostId:    firstPostID,
+		CreatedAt:      now,
+		UpdatedAt:      now,
 	})
 	conn.Create(&posts.Entity{Id: firstPostID, TopicId: topicID, PostNo: 1, UserId: userID, Content: "first", CreatedAt: now, UpdatedAt: now})
 	conn.Create(&posts.Entity{Id: replyPostID, TopicId: topicID, PostNo: 2, UserId: userID, Content: "reply", CreatedAt: now.Add(time.Minute), UpdatedAt: now.Add(time.Minute)})
@@ -432,17 +435,18 @@ func TestPostWindowAnchorPostNoFallsForwardAcrossDeletedReplies(t *testing.T) {
 	conn.Unscoped().Delete(&users.EntityComplete{}, userID)
 	conn.Create(&users.EntityComplete{Id: userID, Username: "author"})
 	conn.Create(&topics.Entity{
-		Id:            topicID,
-		Title:         "topic",
-		CategoryIds:   []uint64{categoryID},
-		UserId:        userID,
-		Status:        1,
-		ProcessStatus: 0,
-		ReplyCount:    1,
-		PostSeq:       4,
-		FirstPostId:   firstPostID,
-		CreatedAt:     now,
-		UpdatedAt:     now,
+		Id:             topicID,
+		Title:          "topic",
+		CategoryIds:    []uint64{categoryID},
+		MainCategoryId: categoryID,
+		UserId:         userID,
+		Status:         1,
+		ProcessStatus:  0,
+		ReplyCount:     1,
+		PostSeq:        4,
+		FirstPostId:    firstPostID,
+		CreatedAt:      now,
+		UpdatedAt:      now,
 	})
 	conn.Create(&posts.Entity{Id: firstPostID, TopicId: topicID, PostNo: 1, UserId: userID, Content: "first", CreatedAt: now, UpdatedAt: now})
 	conn.Create(&posts.Entity{Id: 992104, TopicId: topicID, PostNo: 4, UserId: userID, Content: "reply after deleted replies", CreatedAt: now.Add(time.Minute), UpdatedAt: now.Add(time.Minute)})

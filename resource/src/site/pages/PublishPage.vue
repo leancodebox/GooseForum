@@ -58,7 +58,8 @@ const isValid = computed(() => Boolean(title.value.trim() && content.value.trim(
 const categoryMissing = computed(() => validationAttempted.value && categoryIds.value.length === 0)
 const validationError = computed(() => validationAttempted.value && !isValid.value ? t('publish.validation.requiredFields') : '')
 const selectedCategories = computed(() => page.props.categories.filter((category) => categoryIds.value.includes(category.id)))
-const selectedRestrictedCategory = computed(() => selectedCategories.value.find((category) => !category.allowMultipleCategories))
+// The first selected category is the main one: it alone decides who can read the topic.
+const mainCategory = computed(() => selectedCategories.value.length > 1 ? page.props.categories.find((category) => category.id === categoryIds.value[0]) : undefined)
 const canPublishSelection = computed(() => page.props.topic.topicStatus === 1 || selectedCategories.value.every((category) => category.canCreate))
 const renderedPreview = computed(() => renderMarkdownPreview(content.value))
 const draftSaveable = computed(() => isValid.value && !submitting.value && !uploading.value)
@@ -84,7 +85,7 @@ function editorSnapshot() {
   return JSON.stringify({
     title: title.value.trim(),
     content: content.value.trim(),
-    categoryIds: [...categoryIds.value].sort((a, b) => a - b),
+    categoryIds: [...categoryIds.value],
   })
 }
 
@@ -99,16 +100,12 @@ function toggleCategory(id: number) {
   }
 	const category = page.props.categories.find((item) => item.id === id)
 	if (!category?.canCreate) return
-	if (!category.allowMultipleCategories || selectedRestrictedCategory.value) {
-		categoryIds.value = [id]
-		return
-	}
   if (categoryIds.value.length >= 3) return
   categoryIds.value = [...categoryIds.value, id]
 }
 
 function categoryDisabled(category: PublishPageProps['categories'][number]) {
-	return !categoryIds.value.includes(category.id) && (!category.canCreate || (categoryIds.value.length >= 3 && !selectedRestrictedCategory.value))
+	return !categoryIds.value.includes(category.id) && (!category.canCreate || categoryIds.value.length >= 3)
 }
 
 async function validateRequiredFields() {
@@ -555,7 +552,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                     {{ t('publish.validation.categoryRequired') }}
                   </span>
                 </div>
-                <span class="text-xs text-base-content/55">{{ selectedRestrictedCategory ? t('publish.restrictedSingleCategory') : t('publish.maxCategories') }}</span>
+                <span class="text-xs text-base-content/55">{{ mainCategory ? t('publish.mainCategoryHint', { category: mainCategory.name }) : t('publish.maxCategories') }}</span>
               </div>
               <div class="flex flex-wrap gap-2">
                 <button

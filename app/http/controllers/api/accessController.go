@@ -282,33 +282,18 @@ func ReviewManagedAccessGroupApplication(req component.BetterRequest[struct {
 type SaveCategoryAccessReq struct {
 	CategoryID uint64                          `json:"categoryId" validate:"required"`
 	Grants     []accessadminservice.GrantInput `json:"grants"`
-	Strategy   string                          `json:"strategy" validate:"omitempty,oneof=keep_category remove_category"`
 }
 
 func SaveCategoryAccess(req component.BetterRequest[SaveCategoryAccessReq]) component.Response {
 	if category.Get(req.Params.CategoryID).Id == 0 {
 		return component.FailResponseCode(component.MessageAdminCategoryNotFound, nil)
 	}
-	if err := accessadminservice.ReplaceCategoryGrants(req.Params.CategoryID, req.Params.Grants, req.Params.Strategy); err != nil {
-		var conflict accessadminservice.RestrictionConflictError
-		if errors.As(err, &conflict) {
-			return component.FailResponseCode(component.MessageOperationFailed, component.MessageParams{"restrictionConflictCount": conflict.Count})
-		}
+	if err := accessadminservice.ReplaceCategoryGrants(req.Params.CategoryID, req.Params.Grants); err != nil {
 		return accessAdminFailure("save category access", err)
 	}
 	hotdataserve.ClearCategoryCache()
 	hotdataserve.ClearTopicListCache()
 	return component.SuccessResponse(true)
-}
-
-func PreviewCategoryRestriction(req component.BetterRequest[struct {
-	CategoryID uint64 `json:"categoryId" validate:"required"`
-}]) component.Response {
-	count, err := accessadminservice.PreviewRestriction(req.Params.CategoryID)
-	if err != nil {
-		return accessAdminFailure("preview category restriction", err)
-	}
-	return component.SuccessResponse(map[string]int{"conflictCount": count})
 }
 
 func accessAdminFailure(operation string, err error) component.Response {

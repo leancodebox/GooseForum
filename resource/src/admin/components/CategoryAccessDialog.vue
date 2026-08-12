@@ -14,7 +14,7 @@ import {
 } from '@/admin/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/admin/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/admin/components/ui/table'
-import { getAccessControlOverview, previewCategoryRestriction, saveCategoryAccess } from '@/admin/runtime/api'
+import { getAccessControlOverview, saveCategoryAccess } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import type { AccessControlOverview, AccessGroup, AdminCategory } from '@/admin/types'
 
@@ -34,7 +34,6 @@ const saving = ref(false)
 const error = ref('')
 const overview = ref<AccessControlOverview>({ groups: [], categories: [] })
 const draft = ref<Record<number, number>>({})
-const restriction = ref<{ conflictCount: number; grants: { accessGroupId: number; level: number }[] } | null>(null)
 
 const groups = computed(() => {
   const priority = (group: AccessGroup) => {
@@ -103,42 +102,22 @@ function enabledGrants() {
     .map((group) => ({ accessGroupId: group.id, level: draft.value[group.id] || 0 }))
 }
 
+// Restricting a category no longer rewrites any topic, so saving grants is a
+// plain save: there is no conflict to preview and no strategy to choose.
 async function save() {
   const category = props.category
   const everyone = everyoneGroup.value
   if (!category || !everyone || loading.value || saving.value || !isDirty.value) return
-
-  const grants = enabledGrants()
-  const isMakingRestricted = currentLevel(everyone) >= 1 && (draft.value[everyone.id] || 0) < 1
-  if (isMakingRestricted) {
-    saving.value = true
-    try {
-      const preview = await previewCategoryRestriction(category.id)
-      if (preview.conflictCount > 0) {
-        restriction.value = { conflictCount: preview.conflictCount, grants }
-        return
-      }
-    } catch (err) {
-      adminToast.error(err, t('accessGroups.saveFailed'))
-      return
-    } finally {
-      saving.value = false
-    }
-  }
-  await persist(grants)
+  await persist(enabledGrants())
 }
 
-async function persist(
-  grants: { accessGroupId: number; level: number }[],
-  strategy?: 'keep_category' | 'remove_category',
-) {
+async function persist(grants: { accessGroupId: number; level: number }[]) {
   const category = props.category
   if (!category || saving.value) return
   saving.value = true
   try {
-    await saveCategoryAccess({ categoryId: category.id, grants, strategy })
+    await saveCategoryAccess({ categoryId: category.id, grants })
     const restricted = willBeRestricted.value
-    restriction.value = null
     adminToast.success(t('accessGroups.saved'))
     emit('saved', category.id, restricted)
     emit('update:open', false)
@@ -153,7 +132,6 @@ watch(
   () => [props.open, props.category?.id] as const,
   ([open]) => {
     if (open) void load()
-    else restriction.value = null
   },
 )
 </script>
@@ -273,47 +251,4 @@ watch(
     </DialogContent>
   </Dialog>
 
-  <Dialog :open="restriction !== null" @update:open="(value) => !value && !saving && (restriction = null)">
-    <DialogContent class="sm:max-w-lg">
-      <DialogHeader>
-        <div class="flex items-start gap-3">
-          <span class="mt-0.5 grid size-9 shrink-0 place-items-center rounded-md bg-amber-500/10 text-amber-600">
-            <AlertTriangle class="size-4" />
-          </span>
-          <div>
-            <DialogTitle>{{ t('accessGroups.restrictionTitle') }}</DialogTitle>
-            <DialogDescription class="mt-1">
-              {{
-                t('accessGroups.restrictionDescription', {
-                  category: category?.category,
-                  count: restriction?.conflictCount,
-                })
-              }}
-            </DialogDescription>
-          </div>
-        </div>
-      </DialogHeader>
-      <div class="rounded-md border border-amber-500/25 bg-amber-500/5 p-3 text-sm leading-6 text-muted-foreground">
-        {{ t('accessGroups.restrictionWarning') }}
-      </div>
-      <DialogFooter class="gap-2 sm:justify-between">
-        <Button variant="outline" type="button" :disabled="saving" @click="restriction = null">
-          {{ t('common.cancel') }}
-        </Button>
-        <div class="flex flex-col-reverse gap-2 sm:flex-row">
-          <Button
-            variant="outline"
-            type="button"
-            :disabled="saving"
-            @click="restriction && persist(restriction.grants, 'remove_category')"
-          >
-            {{ t('accessGroups.removeCategory') }}
-          </Button>
-          <Button type="button" :disabled="saving" @click="restriction && persist(restriction.grants, 'keep_category')">
-            {{ t('accessGroups.keepCategory') }}
-          </Button>
-        </div>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
 </template>

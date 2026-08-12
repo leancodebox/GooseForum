@@ -193,8 +193,7 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("access-group/member-save", UpButterReq(api.SaveAccessGroupMember)).
 		POST("access-group/member-delete", UpButterReq(api.DeleteAccessGroupMember)).
 		POST("access-group/application-review", UpButterReq(api.ReviewAccessGroupApplication)).
-		POST("category-access/save", UpButterReq(api.SaveCategoryAccess)).
-		POST("category-access/restriction-preview", UpButterReq(api.PreviewCategoryRestriction))
+		POST("category-access/save", UpButterReq(api.SaveCategoryAccess))
 
 	adminApi.Group("", middleware.CheckPermission(permission.Admin)).
 		POST("opt-record-page", UpButterReq(api.OptRecordPage))
