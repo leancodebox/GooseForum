@@ -59,6 +59,10 @@ const willBeRestricted = computed(() => {
   const group = everyoneGroup.value
   return !group || (draft.value[group.id] || 0) < 1
 })
+const isBecomingRestricted = computed(() => {
+  const group = everyoneGroup.value
+  return Boolean(group && currentLevel(group) >= 1 && willBeRestricted.value)
+})
 const hasReadableAudience = computed(() => {
   return groups.value.some((group) => group.status === 1 && (draft.value[group.id] || 0) >= 1)
 })
@@ -181,6 +185,14 @@ watch(
       >
         <AlertTriangle class="mt-0.5 size-4 shrink-0 text-amber-600" />
         {{ t('accessGroups.noReadableAudienceWarning') }}
+      </div>
+
+      <div
+        v-if="isBecomingRestricted && !loading"
+        class="flex gap-2 rounded-md border border-amber-500/25 bg-amber-500/5 p-3 text-sm text-muted-foreground"
+      >
+        <AlertTriangle class="mt-0.5 size-4 shrink-0 text-amber-600" />
+        {{ t('accessGroups.legacyImageVisibilityWarning') }}
       </div>
 
       <div class="max-h-[26rem] overflow-auto rounded-md border">

@@ -31,6 +31,10 @@ const uploadTotal = ref(0)
 const uploadDone = ref(0)
 const message = ref('')
 const error = ref('')
+const initialMainCategoryId = page.props.topic.categoryIds?.[0] || 0
+const pendingMainCategoryAction = ref<'remove' | 'publish' | null>(null)
+const pendingMainCategoryRemovalId = ref<number | null>(null)
+const confirmedMainCategoryId = ref<number | null>(null)
 const validationAttempted = ref(false)
 const titleInput = ref<HTMLInputElement | null>(null)
 const categorySection = ref<HTMLElement | null>(null)
@@ -59,7 +63,13 @@ const categoryMissing = computed(() => validationAttempted.value && categoryIds.
 const validationError = computed(() => validationAttempted.value && !isValid.value ? t('publish.validation.requiredFields') : '')
 const selectedCategories = computed(() => page.props.categories.filter((category) => categoryIds.value.includes(category.id)))
 // The first selected category is the main one: it alone decides who can read the topic.
-const mainCategory = computed(() => selectedCategories.value.length > 1 ? page.props.categories.find((category) => category.id === categoryIds.value[0]) : undefined)
+const mainCategory = computed(() => page.props.categories.find((category) => category.id === categoryIds.value[0]))
+const previousMainCategory = computed(() => page.props.categories.find((category) => category.id === (
+  pendingMainCategoryAction.value === 'remove' ? pendingMainCategoryRemovalId.value : initialMainCategoryId
+)))
+const nextMainCategory = computed(() => page.props.categories.find((category) => category.id === (
+  pendingMainCategoryAction.value === 'remove' ? categoryIds.value[1] : categoryIds.value[0]
+)))
 const canPublishSelection = computed(() => page.props.topic.topicStatus === 1 || selectedCategories.value.every((category) => category.canCreate))
 const renderedPreview = computed(() => renderMarkdownPreview(content.value))
 const draftSaveable = computed(() => isValid.value && !submitting.value && !uploading.value)
@@ -95,17 +105,41 @@ function syncSavedSnapshot() {
 
 function toggleCategory(id: number) {
   if (categoryIds.value.includes(id)) {
+    if (categoryIds.value[0] === id && categoryIds.value.length > 1) {
+      pendingMainCategoryRemovalId.value = id
+      pendingMainCategoryAction.value = 'remove'
+      return
+    }
     categoryIds.value = categoryIds.value.filter((item) => item !== id)
     return
   }
-	const category = page.props.categories.find((item) => item.id === id)
-	if (!category?.canCreate) return
+  const category = page.props.categories.find((item) => item.id === id)
+  if (!category?.canCreate) return
   if (categoryIds.value.length >= 3) return
   categoryIds.value = [...categoryIds.value, id]
 }
 
 function categoryDisabled(category: PublishPageProps['categories'][number]) {
-	return !categoryIds.value.includes(category.id) && (!category.canCreate || categoryIds.value.length >= 3)
+  return !categoryIds.value.includes(category.id) && (!category.canCreate || categoryIds.value.length >= 3)
+}
+
+function closeMainCategoryPrompt() {
+  pendingMainCategoryAction.value = null
+  pendingMainCategoryRemovalId.value = null
+}
+
+async function confirmMainCategoryChange() {
+  if (pendingMainCategoryAction.value === 'remove') {
+    const categoryId = pendingMainCategoryRemovalId.value
+    if (categoryId !== null && categoryIds.value[0] === categoryId && categoryIds.value.length > 1) {
+      categoryIds.value = categoryIds.value.filter((id) => id !== categoryId)
+      confirmedMainCategoryId.value = categoryIds.value[0] || null
+    }
+    closeMainCategoryPrompt()
+    return
+  }
+  closeMainCategoryPrompt()
+  await submitPublishedTopic()
 }
 
 async function validateRequiredFields() {
@@ -467,10 +501,18 @@ function handleEditorKeydown(event: KeyboardEvent) {
 
 async function save() {
   if (submitting.value || uploading.value || !(await validateRequiredFields())) return
-	if (!canPublishSelection.value) {
-		error.value = t('publish.noCreatePermission')
-		return
-	}
+  if (!canPublishSelection.value) {
+    error.value = t('publish.noCreatePermission')
+    return
+  }
+  if (page.props.topic.topicStatus === 1 && initialMainCategoryId !== categoryIds.value[0] && confirmedMainCategoryId.value !== categoryIds.value[0]) {
+    pendingMainCategoryAction.value = 'publish'
+    return
+  }
+  await submitPublishedTopic()
+}
+
+async function submitPublishedTopic() {
   submitting.value = true
   error.value = ''
   message.value = ''
@@ -567,7 +609,10 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                 >
                   <span class="h-2 w-2 rounded-[3px]" :style="{ backgroundColor: category.color }" />
                   {{ category.name }}
-				  <Lock v-if="category.isRestricted" class="h-3.5 w-3.5" />
+                  <span v-if="categoryIds[0] === category.id" class="rounded bg-primary/10 px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+                    {{ t('publish.mainCategoryBadge') }}
+                  </span>
+                  <Lock v-if="category.isRestricted" class="h-3.5 w-3.5" />
                 </button>
               </div>
             </div>
@@ -754,11 +799,33 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
               >
                 <span class="h-2 w-2 rounded-[3px]" :style="{ backgroundColor: category.color }" />
                 {{ category.name }}
+                <span v-if="categoryIds[0] === category.id" class="rounded bg-primary/10 px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                  {{ t('publish.mainCategoryBadge') }}
+                </span>
                 <X class="h-3 w-3" />
               </button>
             </div>
           </section>
         </aside>
+      </div>
+
+      <div v-if="pendingMainCategoryAction !== null" class="fixed inset-0 z-[100] flex items-center justify-center bg-neutral/50 px-4 backdrop-blur-sm" role="dialog" aria-modal="true">
+        <div class="gf-menu-surface w-full max-w-md overflow-hidden">
+          <div class="border-b border-line px-5 py-4">
+            <h2 class="text-base font-semibold text-base-content">{{ t('publish.mainCategoryChangeTitle') }}</h2>
+            <p class="mt-1 text-sm leading-6 text-base-content/55">
+              {{ t('publish.mainCategoryChangeDescription', { current: previousMainCategory?.name || '', next: nextMainCategory?.name || '' }) }}
+            </p>
+          </div>
+          <div class="flex items-center justify-end gap-2 bg-base-200 px-5 py-4">
+            <button type="button" class="gf-button gf-button-lg gf-button-muted" @click="closeMainCategoryPrompt">
+              {{ t('common.cancel') }}
+            </button>
+            <button type="button" class="gf-button gf-button-lg gf-button-primary" @click="confirmMainCategoryChange">
+              {{ t('publish.confirmMainCategoryChange') }}
+            </button>
+          </div>
+        </div>
       </div>
 
       <div v-if="leavePromptOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-neutral/50 px-4 backdrop-blur-sm" role="dialog" aria-modal="true">

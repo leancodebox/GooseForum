@@ -2,6 +2,7 @@
 import { adminText } from '@/admin/runtime/i18n-text'
 
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Ban, Eye, FileText, Heart, MessageSquare, Pin, RefreshCw, Search, Tags, Trash2, Undo2 } from '@lucide/vue'
 import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
@@ -43,6 +44,7 @@ defineProps<{
   payload: AdminPayload<ManageHomeProps>
 }>()
 
+const { t } = useI18n()
 const loading = ref(false)
 const saving = ref(false)
 const sourceLoading = ref(false)
@@ -56,6 +58,7 @@ const appliedSearch = ref('')
 const categories = ref<AdminCategory[]>([])
 const categoryDialogRow = ref<AdminTopic | null>(null)
 const selectedCategoryIds = ref<number[]>([])
+const pendingCategoryIds = ref<number[] | null>(null)
 const sourceDialogRow = ref<AdminTopic | null>(null)
 const source = ref<TopicSource | null>(null)
 const actionRow = ref<AdminTopic | null>(null)
@@ -91,6 +94,13 @@ const categoryDialogOptions = computed<CategoryOption[]>(() => {
 })
 const rangeStart = computed(() => (rows.value.length === 0 ? 0 : (page.value - 1) * pageSize.value + 1))
 const rangeEnd = computed(() => rows.value.length === 0 ? 0 : rangeStart.value + rows.value.length - 1)
+const currentMainCategoryName = computed(() => categoryName(categoryDialogRow.value?.categoryId?.[0]))
+const nextMainCategoryName = computed(() => categoryName(pendingCategoryIds.value?.[0]))
+
+function categoryName(id?: number) {
+  if (!id) return ''
+  return categoryMap.value.get(id)?.category || adminText('k00cc', { id })
+}
 
 function avatarText(post: AdminTopic) {
   return post.username.slice(0, 1).toUpperCase()
@@ -196,9 +206,26 @@ async function saveCategories() {
     adminToast.warning(adminText('k003u'))
     return
   }
+  if (categoryDialogRow.value.categoryId?.[0] !== validCategoryIds[0]) {
+    pendingCategoryIds.value = validCategoryIds
+    return
+  }
+  await persistCategories(validCategoryIds)
+}
+
+async function confirmCategoryChange() {
+  const categoryIds = pendingCategoryIds.value
+  if (!categoryIds) return
+  pendingCategoryIds.value = null
+  await persistCategories(categoryIds)
+}
+
+async function persistCategories(categoryIds: number[]) {
+  const topic = categoryDialogRow.value
+  if (!topic) return
   saving.value = true
   try {
-    await updateTopicCategories({ topicId: categoryDialogRow.value.id, categoryId: validCategoryIds })
+    await updateTopicCategories({ topicId: topic.id, categoryId: categoryIds })
     categoryDialogRow.value = null
     await loadPosts()
     adminToast.success(adminText('k003v'))
@@ -509,11 +536,31 @@ onMounted(() => {
             >
               <span class="size-2 rounded-[3px]" :style="{ backgroundColor: category.color || '#64748b' }" />
               <span class="max-w-48 truncate">{{ category.category }}</span>
+              <Badge v-if="selectedCategoryIds[0] === category.id" variant="secondary" class="px-1.5 py-0 text-[10px]">
+                {{ t('publish.mainCategoryBadge') }}
+              </Badge>
             </button>
           </div>
           <DialogFooter>
             <Button variant="outline" type="button" @click="categoryDialogRow = null">{{ adminText('k009q') }}</Button>
             <Button type="button" :disabled="saving" @click="saveCategories">{{ saving ? adminText('k005f') : adminText('k0061') }}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog :open="pendingCategoryIds !== null" @update:open="(open) => !open && (pendingCategoryIds = null)">
+        <DialogContent class="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{{ t('publish.mainCategoryChangeTitle') }}</DialogTitle>
+            <DialogDescription>
+              {{ t('publish.mainCategoryChangeDescription', { current: currentMainCategoryName, next: nextMainCategoryName }) }}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" type="button" :disabled="saving" @click="pendingCategoryIds = null">{{ adminText('k009q') }}</Button>
+            <Button type="button" :disabled="saving" @click="confirmCategoryChange">
+              {{ saving ? adminText('k005f') : t('publish.confirmMainCategoryChange') }}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
