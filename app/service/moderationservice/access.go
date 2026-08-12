@@ -99,6 +99,37 @@ func ScopeForUser(userID uint64) (bool, []uint64) {
 	return global, uniqueUint64(categoryIDs)
 }
 
+// FilterUserIDsForCategory evaluates a whole batch against one immutable
+// moderation snapshot instead of scanning the snapshot once per user.
+func FilterUserIDsForCategory(userIDs []uint64, categoryID uint64) []uint64 {
+	if len(userIDs) == 0 || categoryID == 0 {
+		return nil
+	}
+	candidates := make(map[uint64]struct{}, len(userIDs))
+	for _, userID := range userIDs {
+		if userID > 0 {
+			candidates[userID] = struct{}{}
+		}
+	}
+	readable := make(map[uint64]struct{})
+	for _, grant := range snapshot().Grants {
+		if _, ok := candidates[grant.UserID]; !ok {
+			continue
+		}
+		if grant.ScopeType == moderators.ScopeGlobal || (grant.ScopeType == moderators.ScopeCategory && grant.ScopeID == categoryID) {
+			readable[grant.UserID] = struct{}{}
+		}
+	}
+	result := make([]uint64, 0, len(readable))
+	for _, userID := range userIDs {
+		if _, ok := readable[userID]; ok {
+			result = append(result, userID)
+			delete(readable, userID)
+		}
+	}
+	return result
+}
+
 func Invalidate() {
 	snapshotValue.Store(Snapshot{})
 }

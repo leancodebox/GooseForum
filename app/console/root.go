@@ -14,10 +14,13 @@ var rootCmd = &cobra.Command{
 	Use:   "gooseforum",
 	Short: "GooseForum command line tools",
 	Long:  `GooseForum`,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		migration.M()
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		if err := migration.M(); err != nil {
+			return err
+		}
 		// 初始化并启动事件总线
 		eventbus.Start(eventhandlers.Handlers()...)
+		return nil
 	},
 	// Run: runWeb,
 }

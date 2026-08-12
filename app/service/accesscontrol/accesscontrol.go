@@ -12,6 +12,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroupMembers"
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
+	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
@@ -56,6 +58,10 @@ type Store interface {
 	SystemGroupIDs() (map[string]uint64, error)
 	ActiveCustomGroupIDs(userID uint64) ([]uint64, error)
 	EnabledCategoryGrants(groupID uint64) ([]CategoryGrant, error)
+}
+
+type batchReadableStore interface {
+	ActiveUserIDsWithCategoryCapability(userIDs []uint64, categoryID uint64, required Capability) ([]uint64, error)
 }
 
 type Snapshot struct {
@@ -189,6 +195,124 @@ type Resolver struct {
 
 	globalContentManager func(userID uint64) bool
 	moderationScope      func(userID uint64) (global bool, categoryIDs []uint64)
+	batchContentManagers func(userIDs []uint64) []uint64
+	batchModerators      func(userIDs []uint64, categoryID uint64) []uint64
+}
+
+// FilterReadableUserIDs filters a batch for a single category while preserving
+// input order. The default resolver uses one membership query for the entire
+// batch; custom resolvers fall back to Resolve so tests and integrations retain
+// exactly the same semantics without implementing the optional batch store.
+func (resolver *Resolver) FilterReadableUserIDs(userIDs []uint64, categoryID uint64) ([]uint64, error) {
+	userIDs = uniqueNonZeroPreservingOrder(userIDs)
+	if len(userIDs) == 0 || categoryID == 0 {
+		return []uint64{}, nil
+	}
+	if resolver == nil || resolver.store == nil {
+		return nil, errors.New("access control resolver is not configured")
+	}
+	batchStore, supportsBatch := resolver.store.(batchReadableStore)
+	if !supportsBatch {
+		return resolver.filterReadableUserIDsIndividually(userIDs, categoryID)
+	}
+
+	systemGroupIDs, err := resolver.loadSystemGroupIDs()
+	if err != nil {
+		return nil, err
+	}
+	for _, systemKey := range []string{accessGroups.SystemKeyEveryone, accessGroups.SystemKeyRegistered} {
+		groupID := systemGroupIDs[systemKey]
+		if groupID == 0 {
+			return nil, errors.New("required system access groups are missing")
+		}
+		grants, err := resolver.loadGroupGrants(groupID)
+		if err != nil {
+			return nil, err
+		}
+		for _, grant := range grants {
+			if grant.CategoryID == categoryID && grant.Capability >= CapabilityRead {
+				return userIDs, nil
+			}
+		}
+	}
+
+	readableUserIDs, err := batchStore.ActiveUserIDsWithCategoryCapability(userIDs, categoryID, CapabilityRead)
+	if err != nil {
+		return nil, fmt.Errorf("filter access group members: %w", err)
+	}
+	readable := make(map[uint64]struct{}, len(readableUserIDs))
+	for _, userID := range readableUserIDs {
+		readable[userID] = struct{}{}
+	}
+	if resolver.batchContentManagers != nil {
+		for _, userID := range resolver.batchContentManagers(userIDs) {
+			readable[userID] = struct{}{}
+		}
+	}
+	if resolver.batchModerators != nil {
+		for _, userID := range resolver.batchModerators(userIDs, categoryID) {
+			readable[userID] = struct{}{}
+		}
+	}
+	if resolver.batchContentManagers == nil || resolver.batchModerators == nil {
+		for _, userID := range userIDs {
+			if _, ok := readable[userID]; ok {
+				continue
+			}
+			if resolver.batchContentManagers == nil && resolver.globalContentManager != nil && resolver.globalContentManager(userID) {
+				readable[userID] = struct{}{}
+				continue
+			}
+			if resolver.batchModerators == nil && resolver.moderationScope != nil {
+				global, categoryIDs := resolver.moderationScope(userID)
+				if global || slices.Contains(categoryIDs, categoryID) {
+					readable[userID] = struct{}{}
+				}
+			}
+		}
+	}
+
+	result := make([]uint64, 0, len(readable))
+	for _, userID := range userIDs {
+		if _, ok := readable[userID]; ok {
+			result = append(result, userID)
+		}
+	}
+	return result, nil
+}
+
+func (resolver *Resolver) filterReadableUserIDsIndividually(userIDs []uint64, categoryID uint64) ([]uint64, error) {
+	result := make([]uint64, 0, len(userIDs))
+	for _, userID := range userIDs {
+		snapshot, err := resolver.Resolve(userID)
+		if err != nil {
+			return nil, err
+		}
+		if snapshot.CanReadCategory(categoryID) {
+			result = append(result, userID)
+		}
+	}
+	return result, nil
+}
+
+func (resolver *Resolver) loadSystemGroupIDs() (map[string]uint64, error) {
+	groupIDs, err := resolver.systemCache.GetOrLoadE("system", resolver.store.SystemGroupIDs, metadataTTL)
+	if err != nil {
+		return nil, fmt.Errorf("load system access groups: %w", err)
+	}
+	return groupIDs, nil
+}
+
+func (resolver *Resolver) loadGroupGrants(groupID uint64) ([]CategoryGrant, error) {
+	grants, err := resolver.grantCache.GetOrLoadE(
+		strconv.FormatUint(groupID, 10),
+		func() ([]CategoryGrant, error) { return resolver.store.EnabledCategoryGrants(groupID) },
+		metadataTTL,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("load category grants for group %d: %w", groupID, err)
+	}
+	return grants, nil
 }
 
 func NewResolver(
@@ -210,9 +334,9 @@ func (resolver *Resolver) Resolve(userID uint64) (Snapshot, error) {
 	if resolver == nil || resolver.store == nil {
 		return Snapshot{}, errors.New("access control resolver is not configured")
 	}
-	systemGroupIDs, err := resolver.systemCache.GetOrLoadE("system", resolver.store.SystemGroupIDs, metadataTTL)
+	systemGroupIDs, err := resolver.loadSystemGroupIDs()
 	if err != nil {
-		return Snapshot{}, fmt.Errorf("load system access groups: %w", err)
+		return Snapshot{}, err
 	}
 	everyoneID := systemGroupIDs[accessGroups.SystemKeyEveryone]
 	registeredID := systemGroupIDs[accessGroups.SystemKeyRegistered]
@@ -247,13 +371,9 @@ func (resolver *Resolver) Resolve(userID uint64) (Snapshot, error) {
 
 	levels := make(map[uint64]Capability)
 	for _, groupID := range groupIDs {
-		grants, err := resolver.grantCache.GetOrLoadE(
-			strconv.FormatUint(groupID, 10),
-			func() ([]CategoryGrant, error) { return resolver.store.EnabledCategoryGrants(groupID) },
-			metadataTTL,
-		)
+		grants, err := resolver.loadGroupGrants(groupID)
 		if err != nil {
-			return Snapshot{}, fmt.Errorf("load category grants for group %d: %w", groupID, err)
+			return Snapshot{}, err
 		}
 		mergeGrants(levels, grants)
 	}
@@ -377,15 +497,57 @@ func (modelStore) EnabledCategoryGrants(groupID uint64) ([]CategoryGrant, error)
 	return result, nil
 }
 
+func (modelStore) ActiveUserIDsWithCategoryCapability(userIDs []uint64, categoryID uint64, required Capability) ([]uint64, error) {
+	return accessGroupMembers.ActiveUserIDsWithCategoryCapability(userIDs, categoryID, int8(required))
+}
+
 func defaultGlobalContentManager(userID uint64) bool {
 	roleID, ok := userservice.GetUserRoleId(userID)
 	return ok && (permission.CheckRole(roleID, permission.Admin) || permission.CheckRole(roleID, permission.TopicsManager))
 }
 
-var Default = NewResolver(modelStore{}, defaultGlobalContentManager, moderationservice.ScopeForUser)
+func defaultBatchContentManagers(userIDs []uint64) []uint64 {
+	userMap := users.GetMapByIds(userIDs)
+	roleIDs := make([]uint64, 0, len(userMap))
+	for _, user := range userMap {
+		if user != nil && user.RoleId > 0 {
+			roleIDs = append(roleIDs, user.RoleId)
+		}
+	}
+	roleIDs = uniqueNonZero(roleIDs)
+	if len(roleIDs) == 0 {
+		return nil
+	}
+	permissionsByRole := rolePermissionRs.GetRsGroupByRoleIds(roleIDs)
+	result := make([]uint64, 0)
+	for _, userID := range userIDs {
+		user := userMap[userID]
+		if user == nil {
+			continue
+		}
+		permissions := permissionsByRole[user.RoleId]
+		if slices.Contains(permissions, permission.Admin.Id()) || slices.Contains(permissions, permission.TopicsManager.Id()) {
+			result = append(result, userID)
+		}
+	}
+	return result
+}
+
+func newDefaultResolver() *Resolver {
+	resolver := NewResolver(modelStore{}, defaultGlobalContentManager, moderationservice.ScopeForUser)
+	resolver.batchContentManagers = defaultBatchContentManagers
+	resolver.batchModerators = moderationservice.FilterUserIDsForCategory
+	return resolver
+}
+
+var Default = newDefaultResolver()
 
 func Resolve(userID uint64) (Snapshot, error) {
 	return Default.Resolve(userID)
+}
+
+func FilterReadableUserIDs(userIDs []uint64, categoryID uint64) ([]uint64, error) {
+	return Default.FilterReadableUserIDs(userIDs, categoryID)
 }
 
 func InvalidateUser(userID uint64) {

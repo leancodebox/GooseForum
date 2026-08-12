@@ -5,6 +5,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 )
 
+const categoryGrantStatusEnabled int8 = 1
+
 func ActiveGroupIDsByUser(userID uint64) ([]uint64, error) {
 	if userID == 0 {
 		return []uint64{}, nil
@@ -17,6 +19,27 @@ func ActiveGroupIDsByUser(userID uint64) ([]uint64, error) {
 		Order(queryopt.Asc("access_group_members.access_group_id")).
 		Pluck("access_group_members.access_group_id", &groupIDs).Error
 	return groupIDs, err
+}
+
+// ActiveUserIDsWithCategoryCapability filters a notification/audience batch in
+// one query. System groups are handled by accesscontrol before this call; this
+// query only considers enabled custom-group memberships and enabled grants.
+func ActiveUserIDsWithCategoryCapability(userIDs []uint64, categoryID uint64, minimumLevel int8) ([]uint64, error) {
+	if len(userIDs) == 0 || categoryID == 0 {
+		return []uint64{}, nil
+	}
+	var readableUserIDs []uint64
+	err := builder().
+		Distinct("access_group_members.user_id").
+		Joins("JOIN access_groups ON access_groups.id = access_group_members.access_group_id AND access_groups.status = ? AND access_groups.system_key IS NULL", accessGroups.StatusEnabled).
+		Joins("JOIN category_group_permissions ON category_group_permissions.access_group_id = access_group_members.access_group_id AND category_group_permissions.status = ?", categoryGrantStatusEnabled).
+		Where(queryopt.In("access_group_members.user_id", userIDs)).
+		Where(queryopt.Eq("access_group_members.status", StatusEnabled)).
+		Where(queryopt.Eq("category_group_permissions.category_id", categoryID)).
+		Where("category_group_permissions.permission_level >= ?", minimumLevel).
+		Order(queryopt.Asc("access_group_members.user_id")).
+		Pluck("access_group_members.user_id", &readableUserIDs).Error
+	return readableUserIDs, err
 }
 
 func ManagedGroupIDsByUser(userID uint64) ([]uint64, error) {

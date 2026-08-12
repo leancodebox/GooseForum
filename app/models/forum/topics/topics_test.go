@@ -28,7 +28,7 @@ func TestTopicAndPostSchemaMigrates(t *testing.T) {
 		t.Fatal("posts table was not created")
 	}
 
-	for _, column := range []string{"title", "category_id", "first_post_id", "last_post_id", "post_count", "reply_count", "excerpt"} {
+	for _, column := range []string{"title", "category_id", "main_category_id", "first_post_id", "last_post_id", "post_count", "reply_count", "excerpt"} {
 		if !conn.Migrator().HasColumn(&Entity{}, column) {
 			t.Fatalf("topics.%s column was not created", column)
 		}
@@ -45,6 +45,17 @@ func TestTopicAndPostSchemaMigrates(t *testing.T) {
 	}
 	if !conn.Migrator().HasIndex(&posts.Entity{}, "idx_posts_topic_created") {
 		t.Fatal("posts idx_posts_topic_created index was not created")
+	}
+	for _, index := range []string{
+		"idx_topics_main_category",
+		"idx_topics_list_default",
+		"idx_topics_list_hot",
+		"idx_topics_list_popular",
+		"idx_topics_list_new",
+	} {
+		if !conn.Migrator().HasIndex(&Entity{}, index) {
+			t.Fatalf("topics %s index was not created", index)
+		}
 	}
 }
 

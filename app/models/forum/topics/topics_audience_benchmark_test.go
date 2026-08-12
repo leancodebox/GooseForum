@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/glebarez/sqlite"
-	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -17,7 +16,7 @@ func BenchmarkAudienceTopicList100K(b *testing.B) {
 	if err != nil {
 		b.Fatalf("open sqlite: %v", err)
 	}
-	if err := conn.AutoMigrate(&Entity{}, &topicCategoryIndex.Entity{}); err != nil {
+	if err := conn.AutoMigrate(&Entity{}); err != nil {
 		b.Fatalf("migrate benchmark tables: %v", err)
 	}
 	seedAudienceBenchmark(b, conn, 100000, 100)
@@ -56,17 +55,12 @@ func seedAudienceBenchmark(b *testing.B, conn *gorm.DB, topicCount int, category
 	for start := 1; start <= topicCount; start += 1000 {
 		end := min(start+1000, topicCount+1)
 		topicsBatch := make([]Entity, 0, end-start)
-		indexBatch := make([]topicCategoryIndex.Entity, 0, end-start)
 		for id := start; id < end; id++ {
 			categoryID := uint64((id-1)%categoryCount + 1)
 			topicsBatch = append(topicsBatch, Entity{Id: uint64(id), Title: "benchmark", CategoryIds: []uint64{categoryID}, MainCategoryId: categoryID, Status: 1, UpdatedAt: now.Add(time.Duration(id) * time.Microsecond)})
-			indexBatch = append(indexBatch, topicCategoryIndex.Entity{TopicId: uint64(id), CategoryId: categoryID, Effective: 1})
 		}
 		if err := conn.Create(&topicsBatch).Error; err != nil {
 			b.Fatalf("seed topics: %v", err)
-		}
-		if err := conn.Create(&indexBatch).Error; err != nil {
-			b.Fatalf("seed category indexes: %v", err)
 		}
 	}
 }

@@ -23,10 +23,6 @@ type TopicSimpleVoPage struct {
 
 var topicSimpleVoCache = &localcache.Cache[TopicSimpleVoPage]{MaxEntries: cacheconfig.Current().TopicList}
 
-func GetLatestTopicsSimpleVoPaginated(page int, sort string) TopicSimpleVoPage {
-	return GetLatestTopicsSimpleVoPaginatedForAudience(page, sort, "public", nil, false, true)
-}
-
 func GetLatestTopicsSimpleVoPaginatedForAudience(
 	page int,
 	sort string,

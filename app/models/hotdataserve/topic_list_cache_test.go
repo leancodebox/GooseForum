@@ -48,7 +48,7 @@ func TestTopicListCacheReadsTopics(t *testing.T) {
 	})
 	conn.Create(&topicCategoryIndex.Entity{TopicId: 10, CategoryId: 3, Effective: 1})
 
-	page := GetLatestTopicsSimpleVoPaginated(1, "latest")
+	page := GetLatestTopicsSimpleVoPaginatedForAudience(1, "latest", "public", []uint64{3}, true, true)
 	if len(page.Topics) != 1 {
 		t.Fatalf("latest topics len=%d, want 1", len(page.Topics))
 	}

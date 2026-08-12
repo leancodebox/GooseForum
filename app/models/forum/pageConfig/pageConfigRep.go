@@ -46,9 +46,12 @@ func GetMigrationVersion() uint32 {
 	return cast.ToUint32(configEntity.Config)
 }
 
-func SyncMigrationVersion(version uint32) {
+func SyncMigrationVersion(version uint32) error {
 	configEntity := GetByPageType(Migration)
 	configEntity.PageType = Migration
 	configEntity.Config = cast.ToString(version)
-	CreateOrSave(&configEntity)
+	if configEntity.Id == 0 {
+		return builder().Create(&configEntity).Error
+	}
+	return builder().Save(&configEntity).Error
 }

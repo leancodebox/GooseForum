@@ -66,7 +66,9 @@ AND name NOT LIKE 'sqlite_autoindex%'
 	printStepDuration("drop indexes", stepStart)
 
 	stepStart = time.Now()
-	migration.M()
+	if err := migration.M(); err != nil {
+		return err
+	}
 	printStepDuration("rerun migrations", stepStart)
 
 	var afterCount int64

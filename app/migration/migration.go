@@ -2,6 +2,7 @@ package migration
 
 import (
 	_ "embed"
+	"fmt"
 	"log/slog"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
@@ -43,15 +44,17 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
-func M() {
+func M() error {
 	if !setting.UseMigration() {
-		return
+		return nil
 	}
-	migrateSchema()
-	runVersionedDataMigrations()
+	if err := migrateSchema(); err != nil {
+		return err
+	}
+	return runVersionedDataMigrations()
 }
 
-func migrateSchema() {
+func migrateSchema() error {
 	var err error
 
 	db := dbconnect.Connect()
@@ -91,6 +94,7 @@ func migrateSchema() {
 		&userActivities.Entity{},
 	); err != nil {
 		slog.Error("dbconnect migration err", "err", err)
+		return fmt.Errorf("migrate default database schema: %w", err)
 	} else {
 		slog.Info("dbconnect migration end")
 	}
@@ -100,8 +104,9 @@ func migrateSchema() {
 		&filedata.Entity{},
 	); err != nil {
 		slog.Error("db4fileconnect migration err", "err", err)
+		return fmt.Errorf("migrate file database schema: %w", err)
 	} else {
 		slog.Info("db4fileconnect migration end")
 	}
-
+	return nil
 }

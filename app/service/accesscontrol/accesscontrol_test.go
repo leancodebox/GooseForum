@@ -17,6 +17,18 @@ type fakeStore struct {
 	grantLoads  map[uint64]int
 }
 
+type batchFakeStore struct {
+	*fakeStore
+	readable   []uint64
+	batchErr   error
+	batchCalls int
+}
+
+func (store *batchFakeStore) ActiveUserIDsWithCategoryCapability(_ []uint64, _ uint64, _ Capability) ([]uint64, error) {
+	store.batchCalls++
+	return append([]uint64(nil), store.readable...), store.batchErr
+}
+
 func (store *fakeStore) SystemGroupIDs() (map[string]uint64, error) {
 	if store.err != nil {
 		return nil, store.err
@@ -191,6 +203,38 @@ func TestGlobalManagerBypassesCategoryMap(t *testing.T) {
 	}
 	if !snapshot.HasGlobalManage() || !snapshot.CanManageCategory(999999) {
 		t.Fatal("global manager did not bypass category grants")
+	}
+}
+
+func TestFilterReadableUserIDsUsesBatchSourcesAndPreservesOrder(t *testing.T) {
+	store := &batchFakeStore{fakeStore: newFakeStore(), readable: []uint64{3}}
+	resolver := NewResolver(store, nil, nil)
+	resolver.batchContentManagers = func([]uint64) []uint64 { return []uint64{4} }
+	resolver.batchModerators = func([]uint64, uint64) []uint64 { return []uint64{5} }
+
+	got, err := resolver.FilterReadableUserIDs([]uint64{0, 5, 3, 4, 3, 2}, 9)
+	if err != nil {
+		t.Fatalf("FilterReadableUserIDs: %v", err)
+	}
+	if want := []uint64{5, 3, 4}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("FilterReadableUserIDs = %v, want %v", got, want)
+	}
+	if store.batchCalls != 1 || store.memberLoads != 0 {
+		t.Fatalf("batch calls=%d member loads=%d, want 1 and 0", store.batchCalls, store.memberLoads)
+	}
+}
+
+func TestFilterReadableUserIDsShortCircuitsRegisteredGrant(t *testing.T) {
+	store := &batchFakeStore{fakeStore: newFakeStore()}
+	store.grants[11] = []CategoryGrant{{CategoryID: 9, Capability: CapabilityRead}}
+	resolver := NewResolver(store, nil, nil)
+
+	got, err := resolver.FilterReadableUserIDs([]uint64{3, 2, 3}, 9)
+	if err != nil || !reflect.DeepEqual(got, []uint64{3, 2}) {
+		t.Fatalf("FilterReadableUserIDs = %v, %v", got, err)
+	}
+	if store.batchCalls != 0 {
+		t.Fatalf("batch calls=%d, want 0", store.batchCalls)
 	}
 }
 

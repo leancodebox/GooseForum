@@ -203,3 +203,37 @@ func TestTopicActionsUseTopicUserAction(t *testing.T) {
 		t.Fatalf("like count = %d, want 1", topic.LikeCount)
 	}
 }
+
+func TestTopicOwnershipIsCheckedBeforeCategoryAuthorization(t *testing.T) {
+	conn := setupTopicWriteTestDB(t)
+	createTopicWriteUser(t, conn, 4301, "owner")
+	createTopicWriteUser(t, conn, 4302, "attacker")
+	if err := conn.Create(&category.Entity{Id: 4303, Name: "Private", Slug: "private-owner-check"}).Error; err != nil {
+		t.Fatalf("create category: %v", err)
+	}
+	if err := conn.Create(&topics.Entity{Id: 4304, Title: "Private topic", CategoryIds: []uint64{4303}, MainCategoryId: 4303, UserId: 4301, Status: 0}).Error; err != nil {
+		t.Fatalf("create topic: %v", err)
+	}
+
+	writeResponse := WriteTopic(component.BetterRequest[WriteTopicReq]{
+		UserId: 4302,
+		Params: WriteTopicReq{
+			TopicId:     4304,
+			Title:       "Attempted private topic edit",
+			Content:     "This content is long enough for the configured validation rules.",
+			CategoryId:  []uint64{4303},
+			TopicStatus: 0,
+		},
+	})
+	if writeResponse.Data.MessageCode != component.MessageTopicOwnerMismatch {
+		t.Fatalf("write message code = %q, want %q", writeResponse.Data.MessageCode, component.MessageTopicOwnerMismatch)
+	}
+
+	statusResponse := UpdateTopicStatus(component.BetterRequest[TopicStatusReq]{
+		UserId: 4302,
+		Params: TopicStatusReq{TopicId: 4304, TopicStatus: 1},
+	})
+	if statusResponse.Data.MessageCode != component.MessageTopicOperationDenied {
+		t.Fatalf("status message code = %q, want %q", statusResponse.Data.MessageCode, component.MessageTopicOperationDenied)
+	}
+}

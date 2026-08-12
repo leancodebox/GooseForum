@@ -39,6 +39,9 @@ func TestConvertTopicToSearchDocument(t *testing.T) {
 	if len(got.Category) != 2 || got.Category[0] != 3 || got.Category[1] != 5 {
 		t.Fatalf("Category = %#v, want [3 5]", got.Category)
 	}
+	if got.MainCategory != 3 {
+		t.Fatalf("MainCategory = %d, want 3", got.MainCategory)
+	}
 	if !strings.Contains(got.SearchContent, "Visible text") {
 		t.Fatalf("SearchContent should include readable text, got %q", got.SearchContent)
 	}

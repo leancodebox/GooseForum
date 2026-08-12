@@ -111,6 +111,9 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		if topic.Id == 0 {
 			return component.FailResponseCode(component.MessageTopicNotFound, nil)
 		}
+		if topic.UserId != req.UserId {
+			return component.FailResponseCode(component.MessageTopicOwnerMismatch, nil)
+		}
 		wasPublished = topic.Status == 1
 		firstPost = posts.Get(topic.FirstPostId)
 		if firstPost.Id == 0 {
@@ -131,9 +134,6 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	)
 	if err != nil {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
-	}
-	if !isNew && topic.UserId != req.UserId {
-		return component.FailResponseCode(component.MessageTopicOwnerMismatch, nil)
 	}
 	topic.CategoryIds = categoryIDs
 	topic.Status = req.Params.TopicStatus
@@ -199,13 +199,13 @@ func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Re
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
+	if topic.UserId != req.UserId {
+		return component.FailResponseCode(component.MessageTopicOperationDenied, nil)
+	}
 	nextStatus := req.Params.TopicStatus
 	publishing := topic.Status != 1 && nextStatus == 1
 	if _, err := authorizeTopicCategoryWrite(req.UserId, &topic, topic.CategoryIds, false, publishing); err != nil {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
-	}
-	if topic.UserId != req.UserId {
-		return component.FailResponseCode(component.MessageTopicOperationDenied, nil)
 	}
 	if topic.Status == nextStatus {
 		return component.SuccessResponse(true)

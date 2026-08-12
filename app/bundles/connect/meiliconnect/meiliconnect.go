@@ -26,6 +26,10 @@ func GetClient() meilisearch.ServiceManager {
 	return client
 }
 
+func IsConfigured() bool {
+	return client != nil
+}
+
 // IsAvailable 检查 Meilisearch 是否可用
 func IsAvailable() bool {
 	if client == nil {

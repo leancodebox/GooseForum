@@ -56,6 +56,9 @@ func shouldNotifyParentReplyAuthor(event *CommentCreatedEvent) bool {
 }
 
 func notifyTopicWatchers(event *CommentCreatedEvent, topic topics.Entity, contentPreview string) {
+	if topic.Id == 0 || topic.Status != 1 || topic.ProcessStatus != 0 {
+		return
+	}
 	excludeUserIds := commentNotificationExcludeUserIds(event)
 	afterUserId := uint64(0)
 	for {
@@ -63,11 +66,9 @@ func notifyTopicWatchers(event *CommentCreatedEvent, topic topics.Entity, conten
 		if len(userIds) == 0 {
 			return
 		}
-		readableUserIDs := make([]uint64, 0, len(userIds))
-		for _, userID := range userIds {
-			if canReceiveTopicNotification(userID, topic) {
-				readableUserIDs = append(readableUserIDs, userID)
-			}
+		readableUserIDs, err := accesscontrol.FilterReadableUserIDs(userIds, topic.MainCategoryId)
+		if err != nil {
+			return
 		}
 		_ = notificationservice.SendTopicPostNotifications(readableUserIDs, event.TopicId, event.PostId, contentPreview, event.UserId)
 		afterUserId = userIds[len(userIds)-1]
