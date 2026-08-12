@@ -1005,7 +1005,7 @@ func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *post
 			topic.PostSeq,
 			0,
 		),
-		HotTopics: buildTopicHotTopics(topic.Id),
+		HotTopics: buildTopicHotTopics(c, topic.Id),
 		Permissions: TopicPermissions{
 			IsOwnTopic:       currentUserID == topic.UserId,
 			CanPost:          currentUserID > 0,
@@ -1162,8 +1162,17 @@ func buildReplyTargetPayload(topicID, postID uint64, postMap map[uint64]*posts.E
 	return target
 }
 
-func buildTopicHotTopics(currentTopicID uint64) []TopicPayload {
-	topicPage := hotdataserve.GetLatestTopicsSimpleVoPaginated(1, "hot")
+func buildTopicHotTopics(c *gin.Context, currentTopicID uint64) []TopicPayload {
+	snapshot := cachedAccessSnapshot(c)
+	audience, cacheable := snapshot.ListCacheAudience()
+	topicPage := hotdataserve.GetLatestTopicsSimpleVoPaginatedForAudience(
+		1,
+		"hot",
+		audience,
+		snapshot.ReadableCategoryIDs(),
+		!snapshot.HasGlobalManage(),
+		cacheable,
+	)
 	filtered := make([]*vo.TopicsSimpleVo, 0, 6)
 	for _, topic := range topicPage.Topics {
 		if topic == nil || topic.Id == currentTopicID {

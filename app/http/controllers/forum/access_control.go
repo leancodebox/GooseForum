@@ -28,6 +28,19 @@ func requestAccessSnapshot(c *gin.Context) (accesscontrol.Snapshot, bool) {
 	return snapshot, true
 }
 
+// cachedAccessSnapshot returns the snapshot the handler already resolved for this
+// request. It never resolves nor aborts, so payload builders can stay side-effect
+// free; when no handler resolved one it falls back to the empty snapshot, which
+// reads as "nothing is readable" and keeps the caller fail-closed.
+func cachedAccessSnapshot(c *gin.Context) accesscontrol.Snapshot {
+	if value, ok := c.Get(accessSnapshotContextKey); ok {
+		if snapshot, valid := value.(accesscontrol.Snapshot); valid {
+			return snapshot
+		}
+	}
+	return accesscontrol.Snapshot{}
+}
+
 func redirectGuestToLogin(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/login?redirect="+url.QueryEscape(c.Request.URL.String()))
 }
