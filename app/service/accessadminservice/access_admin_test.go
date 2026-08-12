@@ -97,6 +97,97 @@ func TestReplaceCategoryGrantsRequiresExplicitConflictConversion(t *testing.T) {
 	}
 }
 
+// A topic can be created between the conflict preview and the transaction: at
+// that moment the category is still public, so the write is perfectly legal.
+// If the conversion trusts the preview, that topic survives as a
+// [public, restricted] topic, which the rest of the design assumes cannot exist.
+func TestRestrictionConversionRedecidesInsideTheTransaction(t *testing.T) {
+	conn := dbconnect.Connect()
+	if err := conn.AutoMigrate(
+		&accessGroups.Entity{}, &accessGroupMembers.Entity{}, &categoryGroupPermissions.Entity{},
+		&category.Entity{}, &topics.Entity{}, &topicCategoryIndex.Entity{},
+	); err != nil {
+		t.Fatalf("migrate access admin tables: %v", err)
+	}
+	const restrictedCategoryID uint64 = 964001
+	const otherCategoryID uint64 = 964002
+	const lateTopicID uint64 = 964101
+
+	conn.Unscoped().Delete(&topics.Entity{}, lateTopicID)
+	conn.Where("topic_id = ?", lateTopicID).Delete(&topicCategoryIndex.Entity{})
+	conn.Delete(&categoryGroupPermissions.Entity{}, "category_id in ?", []uint64{restrictedCategoryID, otherCategoryID})
+	conn.Unscoped().Delete(&category.Entity{}, []uint64{restrictedCategoryID, otherCategoryID})
+	t.Cleanup(func() {
+		testHookBeforeRestrictionTx = nil
+		conn.Unscoped().Delete(&topics.Entity{}, lateTopicID)
+		conn.Where("topic_id = ?", lateTopicID).Delete(&topicCategoryIndex.Entity{})
+		conn.Delete(&categoryGroupPermissions.Entity{}, "category_id in ?", []uint64{restrictedCategoryID, otherCategoryID})
+		conn.Unscoped().Delete(&category.Entity{}, []uint64{restrictedCategoryID, otherCategoryID})
+	})
+
+	if err := conn.Create(&[]category.Entity{
+		{Id: restrictedCategoryID, Name: "Going private"},
+		{Id: otherCategoryID, Name: "Other"},
+	}).Error; err != nil {
+		t.Fatalf("create categories: %v", err)
+	}
+	if result := datamigration.BackfillAccessControlDefaultsWithDB(conn); result.Failed != 0 {
+		t.Fatalf("backfill defaults: %s", result.LastFailed)
+	}
+	groups, err := accessGroups.GetBySystemKeys([]string{accessGroups.SystemKeyEveryone, accessGroups.SystemKeyRegistered})
+	if err != nil {
+		t.Fatalf("load system groups: %v", err)
+	}
+	groupID := func(key string) uint64 {
+		for _, group := range groups {
+			if group.SystemKey != nil && *group.SystemKey == key {
+				return group.Id
+			}
+		}
+		return 0
+	}
+
+	// Nothing conflicts yet, so the preview inside ReplaceCategoryGrants sees 0
+	// and an empty strategy is legitimate.
+	if count, err := PreviewRestriction(restrictedCategoryID); err != nil || count != 0 {
+		t.Fatalf("preview before the race = %d, %v, want 0", count, err)
+	}
+
+	// ...and now someone posts, while the category is still public.
+	testHookBeforeRestrictionTx = func() {
+		conn.Create(&topics.Entity{
+			Id: lateTopicID, Title: "posted just before the switch", UserId: 9,
+			CategoryIds: []uint64{restrictedCategoryID, otherCategoryID}, Status: 1,
+		})
+		conn.Create(&[]topicCategoryIndex.Entity{
+			{TopicId: lateTopicID, CategoryId: restrictedCategoryID, Effective: 1},
+			{TopicId: lateTopicID, CategoryId: otherCategoryID, Effective: 1},
+		})
+	}
+
+	grants := []GrantInput{
+		{AccessGroupID: groupID(accessGroups.SystemKeyEveryone), Level: 0},
+		{AccessGroupID: groupID(accessGroups.SystemKeyRegistered), Level: categoryGroupPermissions.PermissionCreate},
+	}
+	err = ReplaceCategoryGrants(restrictedCategoryID, grants, "")
+
+	var conflict RestrictionConflictError
+	if !errors.As(err, &conflict) || conflict.Count != 1 {
+		t.Fatalf("conversion result = %v, want a conflict for the topic created during the race", err)
+	}
+	survivor := topics.GetSimple(lateTopicID)
+	if len(survivor.CategoryIds) != 2 {
+		t.Fatalf("late topic categories = %v, want it left untouched by the aborted change", survivor.CategoryIds)
+	}
+	remaining, err := categoryGroupPermissions.ByCategoryIDs([]uint64{restrictedCategoryID})
+	if err != nil {
+		t.Fatalf("load grants: %v", err)
+	}
+	if enabledLevel(remaining, groupID(accessGroups.SystemKeyEveryone)) < categoryGroupPermissions.PermissionRead {
+		t.Fatal("category was restricted even though the conversion aborted")
+	}
+}
+
 func TestApplicationOnlyActivatesMembershipAfterApproval(t *testing.T) {
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(&accessGroups.Entity{}, &accessGroupMembers.Entity{}); err != nil {

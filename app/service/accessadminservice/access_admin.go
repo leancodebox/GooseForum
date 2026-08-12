@@ -286,6 +286,14 @@ func ReviewApplication(groupID, memberID uint64, approve bool) error {
 	return ErrInvalidMember
 }
 
+// testHookBeforeRestrictionTx lets a test interleave a concurrent write between
+// the preview and the transaction, which is exactly the window this code has to
+// be correct across. It is nil outside tests.
+var testHookBeforeRestrictionTx func()
+
+// PreviewRestriction sizes a pending conversion for the operator. It is not the
+// decision: the conversion is decided again inside the transaction, on locked
+// rows, because a topic can be created or edited into conflict in between.
 func PreviewRestriction(categoryID uint64) (int, error) {
 	var count int64
 	err := restrictionConflictQuery(dbconnect.Connect(), categoryID).Count(&count).Error
@@ -312,25 +320,41 @@ func ReplaceCategoryGrants(categoryID uint64, grants []GrantInput, strategy stri
 	}
 	wasPublic := enabledLevel(existing, everyoneID) >= categoryGroupPermissions.PermissionRead
 	willBePublic := canonical[everyoneID] >= categoryGroupPermissions.PermissionRead
-	conflictCount := 0
-	if wasPublic && !willBePublic {
-		conflictCount, err = PreviewRestriction(categoryID)
+	restricting := wasPublic && !willBePublic
+	if restricting {
+		// Fail early and cheaply so the operator gets the strategy prompt or the
+		// size error without opening a transaction.
+		previewCount, err := PreviewRestriction(categoryID)
 		if err != nil {
 			return err
 		}
-		if conflictCount > MaxRestrictionConversionTopics {
+		if previewCount > MaxRestrictionConversionTopics {
 			return ErrRestrictionTooLarge
 		}
-		if conflictCount > 0 && strategy != RestrictionKeepCategory && strategy != RestrictionRemoveCategory {
-			return RestrictionConflictError{Count: conflictCount}
+		if previewCount > 0 && !validRestrictionStrategy(strategy) {
+			return RestrictionConflictError{Count: previewCount}
 		}
 	}
 
+	if testHookBeforeRestrictionTx != nil {
+		testHookBeforeRestrictionTx()
+	}
+
 	err = dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
-		if conflictCount > 0 {
+		if restricting {
 			var affected []topics.Entity
 			if err := restrictionConflictQuery(tx.Clauses(clause.Locking{Strength: "UPDATE"}), categoryID).Find(&affected).Error; err != nil {
 				return err
+			}
+			// The preview above is advisory. What the conversion acts on is this
+			// locked read, so a topic that became conflicting after the preview
+			// is either converted here or aborts the whole change — it can never
+			// be left behind as a [public, restricted] topic.
+			if len(affected) > MaxRestrictionConversionTopics {
+				return ErrRestrictionTooLarge
+			}
+			if len(affected) > 0 && !validRestrictionStrategy(strategy) {
+				return RestrictionConflictError{Count: len(affected)}
 			}
 			for i := range affected {
 				categoryIDs := convertedCategories(affected[i].CategoryIds, categoryID, strategy)
@@ -375,6 +399,10 @@ func ReplaceCategoryGrants(categoryID uint64, grants []GrantInput, strategy stri
 		accesscontrol.InvalidateGroup(grant.AccessGroupId)
 	}
 	return nil
+}
+
+func validRestrictionStrategy(strategy string) bool {
+	return strategy == RestrictionKeepCategory || strategy == RestrictionRemoveCategory
 }
 
 func restrictionConflictQuery(db *gorm.DB, categoryID uint64) *gorm.DB {
