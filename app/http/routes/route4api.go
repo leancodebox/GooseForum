@@ -176,6 +176,7 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("category-list", UpButterReq(api.GetCategoryList)).
 		POST("category-save", UpButterReq(api.SaveCategory)).
 		POST("category-delete", UpButterReq(api.DeleteCategory)).
+		POST("category-deletion-preview", UpButterReq(api.PreviewCategoryDeletion)).
 		POST("global-moderator-list", UpButterReq(api.GetGlobalModeratorList)).
 		POST("global-moderator-add", UpButterReq(api.AddGlobalModerator)).
 		POST("global-moderator-delete", UpButterReq(api.DeleteGlobalModerator)).

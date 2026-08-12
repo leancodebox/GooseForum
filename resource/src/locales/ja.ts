@@ -1158,6 +1158,11 @@ export default {
     post: '投稿',
     comment: 'コメント',
   },
+  categoryDeletion: {
+    title: 'カテゴリーを削除',
+    checking: 'このカテゴリーの内容を確認しています…',
+    description: '「{category}」を削除すると、そこに属する {deleted} 件のトピックも削除され、参照しているだけの {untagged} 件からはタグが外れます。トピックは論理削除なのでデータベースからは復元できますが、この管理画面からは復元できません。',
+  },
   accessGroups: {
     title: 'アクセスグループとカテゴリ権限',
     description: 'アクセスグループでカテゴリの閲覧・返信・投稿・管理権限を管理します。',

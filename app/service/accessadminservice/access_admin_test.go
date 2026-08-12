@@ -140,10 +140,97 @@ func TestCategoryLifecycleKeepsDefaultGrantsTransactional(t *testing.T) {
 	if err != nil || len(grants) != 2 {
 		t.Fatalf("new category grants = %+v, %v", grants, err)
 	}
-	if err := DeleteCategory(&entity); err != nil {
+	if _, err := DeleteCategory(&entity); err != nil {
 		t.Fatalf("delete category: %v", err)
 	}
 	grants, err = categoryGroupPermissions.ByCategoryIDs([]uint64{entity.Id})
+	if err != nil || len(grants) != 0 {
+		t.Fatalf("deleted category grants = %+v, %v", grants, err)
+	}
+}
+
+// A topic's main category is its audience, so it cannot outlive that category.
+// A topic that merely carried the category as an auxiliary tag keeps its own
+// main category and loses only the tag.
+func TestDeletingCategoryRemovesItsTopicsAndUntagsTheRest(t *testing.T) {
+	conn := dbconnect.Connect()
+	if err := conn.AutoMigrate(
+		&accessGroups.Entity{}, &categoryGroupPermissions.Entity{},
+		&category.Entity{}, &topics.Entity{}, &topicCategoryIndex.Entity{},
+	); err != nil {
+		t.Fatalf("migrate category deletion tables: %v", err)
+	}
+	const doomedCategoryID uint64 = 963001
+	const survivingCategoryID uint64 = 963002
+	const doomedTopicID uint64 = 963101
+	const taggedTopicID uint64 = 963102
+
+	conn.Unscoped().Delete(&topics.Entity{}, []uint64{doomedTopicID, taggedTopicID})
+	conn.Where("topic_id in ?", []uint64{doomedTopicID, taggedTopicID}).Delete(&topicCategoryIndex.Entity{})
+	conn.Unscoped().Delete(&category.Entity{}, []uint64{doomedCategoryID, survivingCategoryID})
+	t.Cleanup(func() {
+		conn.Unscoped().Delete(&topics.Entity{}, []uint64{doomedTopicID, taggedTopicID})
+		conn.Where("topic_id in ?", []uint64{doomedTopicID, taggedTopicID}).Delete(&topicCategoryIndex.Entity{})
+		conn.Unscoped().Delete(&category.Entity{}, []uint64{doomedCategoryID, survivingCategoryID})
+	})
+
+	if result := datamigration.BackfillAccessControlDefaultsWithDB(conn); result.Failed != 0 {
+		t.Fatalf("ensure system groups: %s", result.LastFailed)
+	}
+	doomed := category.Entity{Id: doomedCategoryID, Name: "Doomed"}
+	surviving := category.Entity{Id: survivingCategoryID, Name: "Surviving"}
+	if err := SaveCategoryWithDefaults(&doomed, true); err != nil {
+		t.Fatalf("create doomed category: %v", err)
+	}
+	if err := SaveCategoryWithDefaults(&surviving, true); err != nil {
+		t.Fatalf("create surviving category: %v", err)
+	}
+
+	conn.Create(&topics.Entity{
+		Id: doomedTopicID, Title: "lives in the doomed category", Status: 1,
+		CategoryIds: []uint64{doomedCategoryID, survivingCategoryID}, MainCategoryId: doomedCategoryID,
+	})
+	conn.Create(&topics.Entity{
+		Id: taggedTopicID, Title: "merely tagged with it", Status: 1,
+		CategoryIds: []uint64{survivingCategoryID, doomedCategoryID}, MainCategoryId: survivingCategoryID,
+	})
+	for _, topicID := range []uint64{doomedTopicID, taggedTopicID} {
+		conn.Create(&topicCategoryIndex.Entity{TopicId: topicID, CategoryId: doomedCategoryID, Effective: 1})
+		conn.Create(&topicCategoryIndex.Entity{TopicId: topicID, CategoryId: survivingCategoryID, Effective: 1})
+	}
+
+	preview, err := PreviewCategoryDeletion(doomedCategoryID)
+	if err != nil || preview.DeletedTopics != 1 || preview.UntaggedTopics != 1 {
+		t.Fatalf("preview = %+v, %v, want 1 deleted and 1 untagged", preview, err)
+	}
+
+	impact, err := DeleteCategory(&doomed)
+	if err != nil || impact != preview {
+		t.Fatalf("delete impact = %+v, %v, want %+v", impact, err, preview)
+	}
+
+	if topics.GetSimple(doomedTopicID).Id != 0 {
+		t.Fatal("topic whose main category was deleted is still readable")
+	}
+	survivor := topics.GetSimple(taggedTopicID)
+	if !reflect.DeepEqual(survivor.CategoryIds, []uint64{survivingCategoryID}) {
+		t.Fatalf("survivor categories = %v, want only the surviving one", survivor.CategoryIds)
+	}
+	if survivor.MainCategoryId != survivingCategoryID {
+		t.Fatalf("survivor main category = %d, want unchanged", survivor.MainCategoryId)
+	}
+	for _, index := range topicCategoryIndex.GetByTopicId(taggedTopicID) {
+		if index.CategoryId == doomedCategoryID && index.Effective == 1 {
+			t.Fatal("survivor still indexed under the deleted category")
+		}
+	}
+	if topicCategoryIndex.GetOneByCategoryId(doomedCategoryID).Id != 0 {
+		t.Fatal("deleted category still has index rows")
+	}
+	if category.Get(doomedCategoryID).Id != 0 {
+		t.Fatal("category row survived")
+	}
+	grants, err := categoryGroupPermissions.ByCategoryIDs([]uint64{doomedCategoryID})
 	if err != nil || len(grants) != 0 {
 		t.Fatalf("deleted category grants = %+v, %v", grants, err)
 	}

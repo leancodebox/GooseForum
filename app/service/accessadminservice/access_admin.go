@@ -2,6 +2,8 @@ package accessadminservice
 
 import (
 	"errors"
+	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
@@ -9,7 +11,11 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
+	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -113,27 +119,148 @@ func SaveCategoryWithDefaults(entity *category.Entity, create bool) error {
 	return nil
 }
 
-func DeleteCategory(entity *category.Entity) error {
+// CategoryDeletionImpact is what deleting a category would do to its topics.
+// A topic whose main category is being deleted is deleted with it: the main
+// category is the topic's audience, and there is no honest way to reassign it.
+// A topic that only carried the category as an auxiliary tag keeps its main
+// category and simply loses the tag.
+type CategoryDeletionImpact struct {
+	DeletedTopics  int64 `json:"deletedTopics"`
+	UntaggedTopics int64 `json:"untaggedTopics"`
+}
+
+func PreviewCategoryDeletion(categoryID uint64) (CategoryDeletionImpact, error) {
+	impact := CategoryDeletionImpact{}
+	if categoryID == 0 {
+		return impact, errors.New("category is required")
+	}
+	conn := dbconnect.Connect()
+	if err := conn.Model(&topics.Entity{}).
+		Where("main_category_id = ?", categoryID).
+		Count(&impact.DeletedTopics).Error; err != nil {
+		return impact, err
+	}
+	if err := conn.Model(&topicCategoryIndex.Entity{}).
+		Where("category_id = ? AND topic_id NOT IN (?)", categoryID,
+			conn.Model(&topics.Entity{}).Select("id").Where("main_category_id = ?", categoryID)).
+		Distinct("topic_id").
+		Count(&impact.UntaggedTopics).Error; err != nil {
+		return impact, err
+	}
+	return impact, nil
+}
+
+// DeleteCategory removes a category together with the topics that belong to it.
+// Callers are expected to have shown the operator PreviewCategoryDeletion first:
+// this function does not ask, it acts.
+func DeleteCategory(entity *category.Entity) (CategoryDeletionImpact, error) {
+	impact := CategoryDeletionImpact{}
 	if entity == nil || entity.Id == 0 {
-		return errors.New("category is required")
+		return impact, errors.New("category is required")
 	}
 	grants, err := categoryGroupPermissions.ByCategoryIDs([]uint64{entity.Id})
 	if err != nil {
-		return err
+		return impact, err
 	}
+
+	var deleted []topics.Entity
+	var untagged []topics.Entity
 	err = dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("main_category_id = ?", entity.Id).Find(&deleted).Error; err != nil {
+			return err
+		}
+		deletedIDs := topicIDs(deleted)
+		if len(deletedIDs) > 0 {
+			if err := tx.Where("topic_id IN ?", deletedIDs).Delete(&topicCategoryIndex.Entity{}).Error; err != nil {
+				return err
+			}
+			// topics carries gorm.DeletedAt, so this is a soft delete and the
+			// rows remain recoverable by hand if an operator regrets it.
+			if err := tx.Where("id IN ?", deletedIDs).Delete(&topics.Entity{}).Error; err != nil {
+				return err
+			}
+		}
+
+		// The index rows of the deleted topics are already gone, so whatever
+		// still points at this category is an auxiliary tag.
+		var untaggedIDs []uint64
+		if err := tx.Model(&topicCategoryIndex.Entity{}).
+			Where("category_id = ?", entity.Id).
+			Distinct().
+			Pluck("topic_id", &untaggedIDs).Error; err != nil {
+			return err
+		}
+		if len(untaggedIDs) > 0 {
+			if err := tx.Where("id IN ?", untaggedIDs).Find(&untagged).Error; err != nil {
+				return err
+			}
+			for i := range untagged {
+				remaining := withoutCategory(untagged[i].CategoryIds, entity.Id)
+				if len(remaining) == 0 {
+					// Only reachable if main_category_id disagreed with
+					// category_ids, which the write paths do not allow.
+					return fmt.Errorf("topic %d would be left with no category", untagged[i].Id)
+				}
+				untagged[i].CategoryIds = remaining
+				untagged[i].MainCategoryId = remaining[0]
+				if err := tx.Omit("updated_at").Save(&untagged[i]).Error; err != nil {
+					return err
+				}
+				if err := topicCategoryIndex.ReplaceTopicCategoriesWithDB(tx, untagged[i].Id, remaining); err != nil {
+					return err
+				}
+			}
+		}
+
 		if err := tx.Where("category_id = ?", entity.Id).Delete(&categoryGroupPermissions.Entity{}).Error; err != nil {
 			return err
 		}
 		return tx.Delete(entity).Error
 	})
 	if err != nil {
-		return err
+		return impact, err
 	}
+
+	// Search documents are updated after the transaction commits, never inside
+	// it: Meilisearch cannot roll back with the database.
+	for i := range deleted {
+		deleted[i].ProcessStatus = 1
+		firstPost := posts.Get(deleted[i].FirstPostId)
+		if _, err := searchservice.BuildSingleTopicSearchDocument(&deleted[i], &firstPost); err != nil {
+			slog.Error("drop search document for deleted topic", "topicId", deleted[i].Id, "err", err)
+		}
+	}
+	for i := range untagged {
+		firstPost := posts.Get(untagged[i].FirstPostId)
+		if _, err := searchservice.BuildSingleTopicSearchDocument(&untagged[i], &firstPost); err != nil {
+			slog.Error("reindex search document for untagged topic", "topicId", untagged[i].Id, "err", err)
+		}
+	}
+
 	for _, grant := range grants {
 		accesscontrol.InvalidateGroup(grant.AccessGroupId)
 	}
-	return nil
+	impact.DeletedTopics = int64(len(deleted))
+	impact.UntaggedTopics = int64(len(untagged))
+	return impact, nil
+}
+
+func topicIDs(entities []topics.Entity) []uint64 {
+	ids := make([]uint64, 0, len(entities))
+	for i := range entities {
+		ids = append(ids, entities[i].Id)
+	}
+	return ids
+}
+
+func withoutCategory(categoryIDs []uint64, removed uint64) []uint64 {
+	remaining := make([]uint64, 0, len(categoryIDs))
+	for _, categoryID := range categoryIDs {
+		if categoryID != 0 && categoryID != removed {
+			remaining = append(remaining, categoryID)
+		}
+	}
+	return remaining
 }
 
 func DeleteGroup(groupID uint64) error {

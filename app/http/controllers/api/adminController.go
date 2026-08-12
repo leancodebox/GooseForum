@@ -1071,9 +1071,26 @@ func SaveCategory(req component.BetterRequest[CategorySaveReq]) component.Respon
 	return component.SuccessResponse(true)
 }
 
+// PreviewCategoryDeletion reports what deleting a category would do to its
+// topics, so the admin UI can ask before anything is destroyed.
+func PreviewCategoryDeletion(req component.BetterRequest[struct {
+	Id uint64 `json:"id" validate:"required"`
+}]) component.Response {
+	if category.Get(req.Params.Id).Id == 0 {
+		return component.FailResponseCode(component.MessageAdminCategoryNotFound, nil)
+	}
+	impact, err := accessadminservice.PreviewCategoryDeletion(req.Params.Id)
+	if err != nil {
+		slog.Error("preview category deletion failed", "categoryId", req.Params.Id, "err", err)
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
+	return component.SuccessResponse(impact)
+}
+
 // DeleteCategory 删除分类
 func DeleteCategory(req component.BetterRequest[struct {
-	Id uint64 `json:"id"`
+	Id      uint64 `json:"id"`
+	Confirm bool   `json:"confirm"`
 }]) component.Response {
 	entity := category.Get(req.Params.Id)
 	if entity.Id == 0 {
@@ -1082,15 +1099,24 @@ func DeleteCategory(req component.BetterRequest[struct {
 	if category.Count() == 1 {
 		return component.FailResponseCode(component.MessageAdminCategoryKeepOne, nil)
 	}
-	if topicCategoryIndex.GetOneByCategoryId(entity.Id).Id > 0 {
+	// Deleting a category deletes the topics that live in it. That is only ever
+	// done against an explicit confirmation of the previewed impact.
+	if !req.Params.Confirm && topicCategoryIndex.GetOneByCategoryId(entity.Id).Id > 0 {
 		return component.FailResponseCode(component.MessageAdminCategoryHasTopics, nil)
 	}
-	if err := accessadminservice.DeleteCategory(&entity); err != nil {
+	impact, err := accessadminservice.DeleteCategory(&entity)
+	if err != nil {
 		slog.Error("delete category with access grants failed", "categoryId", entity.Id, "err", err)
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 	hotdataserve.ClearCategoryCache()
-	return component.SuccessResponse(true)
+	hotdataserve.ClearTopicListCache()
+	optlogger.UserOptCode(req.UserId, optlogger.EditTopic, entity.Id, "admin.opt.category.deleted", optlogger.MessageParams{
+		"name":           entity.Name,
+		"deletedTopics":  impact.DeletedTopics,
+		"untaggedTopics": impact.UntaggedTopics,
+	})
+	return component.SuccessResponse(impact)
 }
 
 func GetFriendLinks(req component.BetterRequest[component.Null]) component.Response {

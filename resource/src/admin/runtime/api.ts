@@ -222,8 +222,16 @@ export function saveCategory(data: AdminCategory & { id: number }) {
   return postJson<unknown>('/api/admin/category-save', data, adminText('k0010'))
 }
 
-export function deleteCategory(id: number) {
-  return postJson<unknown>('/api/admin/category-delete', { id }, adminText('k0011'))
+export function previewCategoryDeletion(id: number) {
+  return postJson<{ deletedTopics: number, untaggedTopics: number }>(
+    '/api/admin/category-deletion-preview',
+    { id },
+    adminText('k0011'),
+  )
+}
+
+export function deleteCategory(id: number, confirm = false) {
+  return postJson<unknown>('/api/admin/category-delete', { id, confirm }, adminText('k0011'))
 }
 
 export function getGlobalModeratorList() {

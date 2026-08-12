@@ -40,6 +40,7 @@ import {
   getCategoryList,
   getGlobalModeratorList,
   getUserList,
+  previewCategoryDeletion,
   saveCategory,
 } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
@@ -78,6 +79,8 @@ const categoryRestrictions = ref<Record<number, boolean>>({})
 const search = ref('')
 const dialogMode = ref<'create' | 'edit' | null>(null)
 const deletingRow = ref<AdminCategory | null>(null)
+const deletionImpact = ref<{ deletedTopics: number, untaggedTopics: number } | null>(null)
+const deletionLoading = ref(false)
 const accessCategory = ref<AdminCategory | null>(null)
 const moderatorRow = ref<AdminCategory | null>(null)
 const moderatorSaving = ref(false)
@@ -203,12 +206,44 @@ async function submitCategory() {
   }
 }
 
+// Deleting a category takes its topics with it, so the operator is shown the
+// exact counts before confirming rather than a generic warning.
+async function openDelete(row: AdminCategory) {
+  deletingRow.value = row
+  deletionImpact.value = null
+  deletionLoading.value = true
+  try {
+    deletionImpact.value = await previewCategoryDeletion(row.id)
+  } catch (err) {
+    adminToast.error(err, adminText('k0011'))
+    deletingRow.value = null
+  } finally {
+    deletionLoading.value = false
+  }
+}
+
+const deleteDescription = computed(() => {
+  const row = deletingRow.value
+  if (!row) return ''
+  const impact = deletionImpact.value
+  if (deletionLoading.value || !impact) return t('categoryDeletion.checking')
+  if (impact.deletedTopics === 0 && impact.untaggedTopics === 0) {
+    return `${adminText('k00c7')}${row.category}${adminText('k00c8')}`
+  }
+  return t('categoryDeletion.description', {
+    category: row.category,
+    deleted: impact.deletedTopics,
+    untagged: impact.untaggedTopics,
+  })
+})
+
 async function confirmDelete() {
-  if (!deletingRow.value) return
+  if (!deletingRow.value || deletionLoading.value) return
   deleting.value = true
   try {
-    await deleteCategory(deletingRow.value.id)
+    await deleteCategory(deletingRow.value.id, true)
     deletingRow.value = null
+    deletionImpact.value = null
     await loadCategories()
     adminToast.success(adminText('k002u'))
   } catch (err) {
@@ -569,7 +604,7 @@ onMounted(() => {
                       <Pencil class="size-3.5" />
                       {{ adminText('k005j') }}
                     </AdminActionButton>
-                    <AdminActionButton v-if="canManageCategories" tone="danger" @click="deletingRow = item">
+                    <AdminActionButton v-if="canManageCategories" tone="danger" @click="openDelete(item)">
                       <Trash2 class="size-3.5" />
                       {{ adminText('k005i') }}
                     </AdminActionButton>
@@ -638,10 +673,10 @@ onMounted(() => {
 
       <AdminConfirmDialog
         :open="deletingRow !== null"
-        :title="adminText('k00c6')"
-        :description="`${adminText('k00c7')}${deletingRow?.category || ''}${adminText('k00c8')}`"
-        :loading="deleting"
-        @update:open="(open) => !open && (deletingRow = null)"
+        :title="t('categoryDeletion.title')"
+        :description="deleteDescription"
+        :loading="deleting || deletionLoading"
+        @update:open="(open) => !open && ((deletingRow = null), (deletionImpact = null))"
         @confirm="confirmDelete"
       />
 

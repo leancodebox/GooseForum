@@ -1158,6 +1158,11 @@ export default {
     post: '发帖',
     comment: '评论',
   },
+  categoryDeletion: {
+    title: '删除分类',
+    checking: '正在检查这个分类下的内容……',
+    description: '删除“{category}”会同时删除属于它的 {deleted} 个主题，并从另外 {untagged} 个仅引用它的主题上移除该标签。主题是软删除，可以从数据库恢复，但无法从这个后台恢复。',
+  },
   accessGroups: {
     title: '访问组与分类权限',
     description: '用访问组集中管理分类的读取、回复、发帖与管理能力。',

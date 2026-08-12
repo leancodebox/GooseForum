@@ -1158,6 +1158,11 @@ export default {
     post: 'post',
     comment: 'comment',
   },
+  categoryDeletion: {
+    title: 'Delete category',
+    checking: 'Checking what this category contains…',
+    description: 'Deleting “{category}” will also delete {deleted} topics that live in it, and remove the tag from {untagged} topics that only referenced it. Topics are soft-deleted and can be restored from the database, but not from this panel.',
+  },
   accessGroups: {
     title: 'Access groups and category permissions',
     description: 'Manage category read, reply, create, and manage capabilities through access groups.',

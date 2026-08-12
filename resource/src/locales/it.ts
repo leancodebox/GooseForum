@@ -1158,6 +1158,11 @@ export default {
     post: 'pubblicare',
     comment: 'commentare',
   },
+  categoryDeletion: {
+    title: 'Elimina categoria',
+    checking: 'Controllo del contenuto della categoria…',
+    description: 'Eliminando “{category}” verranno eliminate anche le {deleted} discussioni che le appartengono e la tag verrà rimossa dalle {untagged} discussioni che la citavano soltanto. Le discussioni sono eliminate in modo logico e recuperabili dal database, ma non da questo pannello.',
+  },
   accessGroups: {
     title: 'Gruppi di accesso e permessi',
     description: 'Gestisci lettura, risposte, creazione e moderazione delle categorie tramite gruppi.',
