@@ -747,7 +747,7 @@ func buildChromeNavItems(items []pageConfig.ChromeItem) []NavItemPayload {
 	return result
 }
 
-func buildHomeProps(userID uint64, page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) HomeProps {
+func buildHomeProps(snapshot accesscontrol.Snapshot, userID uint64, page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) HomeProps {
 	nextPage := 0
 	if hasNext {
 		nextPage = page + 1
@@ -757,7 +757,7 @@ func buildHomeProps(userID uint64, page int, sort string, topics []*vo.TopicsSim
 	return HomeProps{
 		Sort:   sort,
 		Tabs:   buildHomeTabs(sort),
-		Topics: buildTrackedTopicPayloads(userID, topics),
+		Topics: buildTrackedTopicPayloads(snapshot, userID, topics),
 		Pagination: PaginationPayload{
 			Page:     page,
 			NextPage: nextPage,
@@ -772,8 +772,8 @@ func buildHomeProps(userID uint64, page int, sort string, topics []*vo.TopicsSim
 	}
 }
 
-func buildTrackedTopicPayloads(userID uint64, topics []*vo.TopicsSimpleVo) []TopicPayload {
-	payloads := buildTopicPayloads(topics)
+func buildTrackedTopicPayloads(snapshot accesscontrol.Snapshot, userID uint64, topics []*vo.TopicsSimpleVo) []TopicPayload {
+	payloads := applyCategoryVisibility(snapshot, buildTopicPayloads(topics))
 	if userID == 0 || len(payloads) == 0 {
 		return payloads
 	}
@@ -1182,7 +1182,7 @@ func buildTopicHotTopics(c *gin.Context, currentTopicID uint64) []TopicPayload {
 			break
 		}
 	}
-	return buildTopicPayloads(filtered)
+	return applyCategoryVisibility(cachedAccessSnapshot(c), buildTopicPayloads(filtered))
 }
 
 func buildTopicDetailPayload(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity, userMap map[uint64]*users.EntityComplete) TopicDetailPayload {
@@ -1235,7 +1235,7 @@ func buildTopicDetailPayload(c *gin.Context, topic *topics.Entity, firstPost *po
 		ProcessStatus: topic.ProcessStatus,
 		Author:        authorPayload(topic.UserId),
 		Participants:  participants,
-		Categories:    categoryPayloads(topic.CategoryIds),
+		Categories:    readableCategoryPayloads(cachedAccessSnapshot(c), topic.CategoryIds),
 		ReplyCount:    topic.ReplyCount,
 		MaxPostNo:     topic.PostSeq,
 		ViewCount:     topic.ViewCount,
@@ -1246,6 +1246,40 @@ func buildTopicDetailPayload(c *gin.Context, topic *topics.Entity, firstPost *po
 		CreatedAt:     createdAt.Format(time.DateTime),
 		UpdatedAt:     updatedAt.Format(time.DateTime),
 	}
+}
+
+// readableCategoryPayloads hides auxiliary categories the viewer cannot read.
+// Only the main category decides who may read a topic, so a public topic can
+// carry restricted auxiliary categories; rendering those would disclose their
+// name, id and URL to everyone, and buildTopicMeta would additionally publish
+// them as SEO keywords and article tags. The main category is always kept: the
+// handler has already required read on it before rendering the page, so it is
+// readable by construction, and dropping it would empty the breadcrumb and the
+// page metadata.
+func readableCategoryPayloads(snapshot accesscontrol.Snapshot, ids []uint64) []TopicCategoryPayload {
+	return readableCategories(snapshot, categoryPayloads(ids))
+}
+
+// readableCategories drops every category after the first that the viewer cannot
+// read. See readableCategoryPayloads for why the first one is exempt.
+func readableCategories(snapshot accesscontrol.Snapshot, payloads []TopicCategoryPayload) []TopicCategoryPayload {
+	visible := make([]TopicCategoryPayload, 0, len(payloads))
+	for index, payload := range payloads {
+		if index == 0 || snapshot.CanReadCategory(payload.ID) {
+			visible = append(visible, payload)
+		}
+	}
+	return visible
+}
+
+// applyCategoryVisibility hides restricted auxiliary categories on list cards.
+// A list only contains topics whose main category the viewer can read, but those
+// topics may still carry auxiliary categories that they cannot.
+func applyCategoryVisibility(snapshot accesscontrol.Snapshot, payloads []TopicPayload) []TopicPayload {
+	for index := range payloads {
+		payloads[index].Categories = readableCategories(snapshot, payloads[index].Categories)
+	}
+	return payloads
 }
 
 func categoryPayloads(ids []uint64) []TopicCategoryPayload {
@@ -1508,7 +1542,7 @@ func buildUserProfileProps(c *gin.Context, snapshot accesscontrol.Snapshot, user
 			if hasNext {
 				topicPage = topicPage[:userProfileTopicPageSize]
 			}
-			topicPayloads = buildTopicPayloads(transform.Topics2Vo(topicPage, hotdataserve.CategoryMap()))
+			topicPayloads = applyCategoryVisibility(snapshot, buildTopicPayloads(transform.Topics2Vo(topicPage, hotdataserve.CategoryMap())))
 			pagination = buildUserActivityTopicPagination(user.Id, topicPage, hasNext)
 		case userProfileActivityLikes:
 			refs, nextCursor := topicUserAction.ListLikedTopicRefsBeforeForAudience(user.Id, c.Query("cursor"), userProfileTimelinePageSize, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
@@ -1533,7 +1567,7 @@ func buildUserProfileProps(c *gin.Context, snapshot accesscontrol.Snapshot, user
 	default:
 		badges = userBadges
 		latestTopics, _ := topics.GetLatestPublishedByUserIdForAudience(user.Id, 8, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
-		topicPayloads = buildTopicPayloads(transform.Topics2Vo(latestTopics, hotdataserve.CategoryMap()))
+		topicPayloads = applyCategoryVisibility(snapshot, buildTopicPayloads(transform.Topics2Vo(latestTopics, hotdataserve.CategoryMap())))
 		timeline, _ := userActivities.GetUserTimelineForAudience(user.Id, 0, 5, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
 		activities = buildUserActivities(timeline)
 	}
@@ -1800,7 +1834,7 @@ func buildUserMeta(c *gin.Context, user *vo.UserCard) PageMeta {
 	return meta
 }
 
-func buildCategoryPageProps(userID uint64, category *category.Entity, page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) CategoryPageProps {
+func buildCategoryPageProps(snapshot accesscontrol.Snapshot, userID uint64, category *category.Entity, page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) CategoryPageProps {
 	nextPage := 0
 	if hasNext {
 		nextPage = page + 1
@@ -1816,7 +1850,7 @@ func buildCategoryPageProps(userID uint64, category *category.Entity, page int, 
 		},
 		Sort:   sort,
 		Tabs:   buildCategoryTabs(category, sort),
-		Topics: buildTrackedTopicPayloads(userID, topics),
+		Topics: buildTrackedTopicPayloads(snapshot, userID, topics),
 		Pagination: PaginationPayload{
 			Page:     page,
 			NextPage: nextPage,
@@ -2276,7 +2310,7 @@ func buildSearchPageProps(c *gin.Context, query string, page int) SearchPageProp
 		nextPage = page + 1
 	}
 
-	props.Topics = buildTopicPayloads(transform.Topics2Vo(orderedTopics, hotdataserve.CategoryMap()))
+	props.Topics = applyCategoryVisibility(snapshot, buildTopicPayloads(transform.Topics2Vo(orderedTopics, hotdataserve.CategoryMap())))
 	props.Total = result.Total
 	props.TotalPages = totalPageCount
 	props.Pagination = PaginationPayload{

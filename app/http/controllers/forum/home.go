@@ -27,7 +27,7 @@ func Home(c *gin.Context) {
 	)
 	payload := PagePayload{
 		Component: PageComponentHome,
-		Props:     buildHomeProps(component.LoginUserId(c), page, sort, topicPage.Topics, topicPage.HasNext),
+		Props:     buildHomeProps(snapshot, component.LoginUserId(c), page, sort, topicPage.Topics, topicPage.HasNext),
 		Meta:      buildHomeMeta(c, page, sort, topicPage.HasNext),
 		Layout:    buildLayout(c, activeKeyForHome(sort)),
 		URL:       buildPageURL(c),
