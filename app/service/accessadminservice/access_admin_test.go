@@ -1,6 +1,7 @@
 package accessadminservice
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -13,9 +14,10 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/datamigration"
+	"github.com/leancodebox/GooseForum/app/service/topicservice"
 )
 
-func TestRestrictingCategoryDoesNotTouchTopics(t *testing.T) {
+func TestRestrictingCategoryRequiresSingleCategoryTopics(t *testing.T) {
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(
 		&accessGroups.Entity{}, &accessGroupMembers.Entity{}, &categoryGroupPermissions.Entity{},
@@ -57,13 +59,11 @@ func TestRestrictingCategoryDoesNotTouchTopics(t *testing.T) {
 	}).Error; err != nil {
 		t.Fatalf("create category indexes: %v", err)
 	}
-	// Making a public category private used to require rewriting every
-	// multi-category topic in it. Visibility now comes from main_category_id,
-	// which no permission change can invalidate, so there is nothing to convert
-	// and no strategy to ask the admin for.
 	grants := []GrantInput{{AccessGroupID: everyoneID, Level: 0}, {AccessGroupID: registeredID, Level: categoryGroupPermissions.PermissionCreate}}
-	if err := ReplaceCategoryGrants(restrictedCategoryID, grants); err != nil {
-		t.Fatalf("replace grants: %v", err)
+	err = ReplaceCategoryGrants(restrictedCategoryID, grants)
+	var conflict *CategoryRestrictionConflictError
+	if !errors.As(err, &conflict) || conflict.TopicCount != 1 {
+		t.Fatalf("restriction conflict = %#v, %v", conflict, err)
 	}
 	unchanged := topics.GetSimple(topicID)
 	if !reflect.DeepEqual(unchanged.CategoryIds, []uint64{restrictedCategoryID, otherCategoryID}) {
@@ -79,6 +79,12 @@ func TestRestrictingCategoryDoesNotTouchTopics(t *testing.T) {
 	}
 	if active[restrictedCategoryID] != 1 || active[otherCategoryID] != 1 {
 		t.Fatalf("category indexes mutated: %v", active)
+	}
+	if err := topicservice.SaveTopicCategories(&topic, []uint64{restrictedCategoryID}); err != nil {
+		t.Fatalf("resolve topic categories: %v", err)
+	}
+	if err := ReplaceCategoryGrants(restrictedCategoryID, grants); err != nil {
+		t.Fatalf("replace grants after resolving topics: %v", err)
 	}
 	accesscontrol.InvalidateSystemGroups()
 	for _, group := range groups {

@@ -74,16 +74,27 @@ func TestTopicRepositoryParity(t *testing.T) {
 		{Id: 20, Title: "alpha topic", CategoryIds: []uint64{4}, MainCategoryId: 4, UserId: 2, Status: 1, ProcessStatus: 0, ReplyCount: 4, ViewCount: 3, PinWeight: 20, CreatedAt: now.Add(time.Minute), UpdatedAt: now.Add(time.Minute)},
 		{Id: 30, Title: "draft topic", CategoryIds: []uint64{3}, MainCategoryId: 3, UserId: 1, Status: 0, ProcessStatus: 0, CreatedAt: now.Add(2 * time.Minute), UpdatedAt: now.Add(2 * time.Minute)},
 		{Id: 40, Title: "blocked topic", CategoryIds: []uint64{3}, MainCategoryId: 3, UserId: 1, Status: 1, ProcessStatus: 1, CreatedAt: now.Add(3 * time.Minute), UpdatedAt: now.Add(3 * time.Minute)},
+		{Id: 50, Title: "deleted topic", CategoryIds: []uint64{3}, MainCategoryId: 3, UserId: 1, Status: 1, ProcessStatus: 0, CreatedAt: now.Add(4 * time.Minute), UpdatedAt: now.Add(4 * time.Minute)},
 	})
 	conn.Create(&[]topicCategoryIndex.Entity{
 		{TopicId: 10, CategoryId: 3, Effective: 1},
 		{TopicId: 20, CategoryId: 4, Effective: 1},
 		{TopicId: 40, CategoryId: 3, Effective: 1},
+		{TopicId: 50, CategoryId: 3, Effective: 1},
 	})
+	conn.Delete(&Entity{}, 50)
 
 	page := Page(PageQuery{Page: 1, PageSize: 10, FilterStatus: true, CategoryId: 3, Sort: "new"})
 	if len(page.Data) != 1 || page.Data[0].Id != 10 {
 		t.Fatalf("Page() filtered ids = %#v, want only topic 10", page.Data)
+	}
+	wildcardPage := Page(PageQuery{Page: 1, PageSize: 10, Search: "%", CategoryId: 3, Sort: "new"})
+	if len(wildcardPage.Data) != 2 || wildcardPage.Data[0].Id != 40 || wildcardPage.Data[1].Id != 10 {
+		t.Fatalf("Page() sparse LIKE ids = %#v, want topics 40, 10", wildcardPage.Data)
+	}
+	hiddenAuxiliaryPage := Page(PageQuery{Page: 1, PageSize: 10, FilterStatus: true, CategoryId: 3, FilterAudience: true, ReadableCategoryIds: []uint64{4}, Sort: "new"})
+	if len(hiddenAuxiliaryPage.Data) != 0 || hiddenAuxiliaryPage.HasNext {
+		t.Fatalf("Page() hidden auxiliary category = %#v, want empty page", hiddenAuxiliaryPage)
 	}
 	audiencePage := Page(PageQuery{Page: 1, PageSize: 10, FilterStatus: true, FilterAudience: true, ReadableCategoryIds: []uint64{4}, Sort: "new"})
 	if len(audiencePage.Data) != 1 || audiencePage.Data[0].Id != 20 {

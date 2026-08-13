@@ -448,6 +448,7 @@ export default {
     mainCategoryChangeDescription: 'Removing “{current}” makes “{next}” the main category and changes who can read this topic.',
     confirmMainCategoryChange: 'Change main category',
     restrictedCategoryHint: 'Visible only to members who can access this category',
+    restrictedCategorySingleHint: 'A restricted category must be selected alone; selecting it replaces the current categories',
     noCreatePermission: 'You can no longer publish in the selected categories, but you can still save a draft.',
     markdownMode: 'Markdown',
     visualMode: 'Editor',
@@ -871,6 +872,9 @@ export default {
         tooShort: 'Content must be at least {minLength} characters',
         tooLong: 'Content cannot exceed {maxLength} characters',
       },
+      category: {
+        restrictedSingle: 'A restricted category must be the only category on this topic',
+      },
       post: {
         cooldown: 'New users can post after {minutes} minutes. Please try again after {availableAt}',
       },
@@ -955,6 +959,7 @@ export default {
         dataNotFound: 'Data not found',
         keepOne: 'Keep at least one category',
         hasTopics: 'This category still has active topics',
+        restrictionConflict: '{count} multi-category topics still reference this category. Make them single-category before restricting access',
       },
       topic: {
         categoryRequired: 'Select at least one category',
@@ -1181,6 +1186,7 @@ export default {
     visibilityDerivedHint: 'A category is public only when the Everyone group can read it.',
     noReadableAudienceWarning: 'No enabled group can read this category. Only global administrators may be able to recover it.',
     legacyImageVisibilityWarning: 'Older images without resource ownership records may remain reachable by their direct URLs. Newly tracked uploads are protected by the main category permissions.',
+    restrictionConflictWarning: '{count} multi-category topics still reference this category. Make them single-category before restricting the category.',
     group: 'Access group',
     groupType: 'Membership',
     permissionSummaryHint: 'Permissions are configured from the Categories page; this table is a read-only summary.',

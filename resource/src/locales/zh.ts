@@ -448,6 +448,7 @@ export default {
     mainCategoryChangeDescription: '移除“{current}”后，“{next}”将成为主分类，并决定谁能看到这个主题。',
     confirmMainCategoryChange: '确认更改',
     restrictedCategoryHint: '仅拥有该分类访问权限的成员可见',
+    restrictedCategorySingleHint: '受限分类必须单独选择；选择它会替换当前分类',
     noCreatePermission: '你已没有在所选分类发布主题的权限，可以继续保存草稿。',
     markdownMode: 'Markdown',
     visualMode: '编辑',
@@ -871,6 +872,9 @@ export default {
         tooShort: '正文长度不能少于 {minLength} 位',
         tooLong: '正文长度不能超过 {maxLength} 位',
       },
+      category: {
+        restrictedSingle: '受限分类必须是这个主题的唯一分类',
+      },
       post: {
         cooldown: '新用户注册 {minutes} 分钟后才能发帖，请在 {availableAt} 后再试',
       },
@@ -955,6 +959,7 @@ export default {
         dataNotFound: '数据不存在',
         keepOne: '至少保留1个分类',
         hasTopics: '当前分类存在有效主题',
+        restrictionConflict: '还有 {count} 个多分类主题引用此分类，请先将它们改为单分类后再限制访问',
       },
       topic: {
         categoryRequired: '至少选择一个分类',
@@ -1181,6 +1186,7 @@ export default {
     visibilityDerivedHint: '只有“所有访客与成员”组拥有读取能力时，该分类才是公开分类。',
     noReadableAudienceWarning: '当前没有任何启用的组可以读取此分类，可能只有全局管理员能够恢复访问。',
     legacyImageVisibilityWarning: '分类中的旧图片若没有资源归属记录，持有原始链接的人仍可能直接访问；新上传且已记录归属的图片会按主分类权限保护。',
+    restrictionConflictWarning: '此分类仍被 {count} 个多分类主题引用。请先把这些主题改为单分类，才能将该分类设为受限。',
     group: '访问组',
     groupType: '成员来源',
     permissionSummaryHint: '权限统一在分类管理页配置；此处仅显示只读授权摘要。',

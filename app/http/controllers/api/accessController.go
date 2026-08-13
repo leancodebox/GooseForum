@@ -10,6 +10,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/accessadminservice"
@@ -42,10 +43,11 @@ type AccessGroupItem struct {
 }
 
 type AccessCategoryItem struct {
-	ID           uint64 `json:"id"`
-	Name         string `json:"name"`
-	Color        string `json:"color"`
-	IsRestricted bool   `json:"isRestricted"`
+	ID                      uint64 `json:"id"`
+	Name                    string `json:"name"`
+	Color                   string `json:"color"`
+	IsRestricted            bool   `json:"isRestricted"`
+	MultiCategoryTopicCount int64  `json:"multiCategoryTopicCount"`
 }
 
 type AccessControlOverview struct {
@@ -68,6 +70,10 @@ func GetAccessControlOverview(req component.BetterRequest[struct{}]) component.R
 	categories := category.All()
 	categoryIDs := lo.Map(categories, func(item *category.Entity, _ int) uint64 { return item.Id })
 	grants, err := categoryGroupPermissions.ByCategoryIDs(categoryIDs)
+	if err != nil {
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
+	multiCategoryCounts, err := topicCategoryIndex.MultiCategoryTopicCounts(categoryIDs)
 	if err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
@@ -110,7 +116,11 @@ func GetAccessControlOverview(req component.BetterRequest[struct{}]) component.R
 		publicCategories[grant.CategoryId] = grant.Status == categoryGroupPermissions.StatusEnabled && grant.PermissionLevel >= categoryGroupPermissions.PermissionRead
 	}
 	categoryItems := lo.Map(categories, func(item *category.Entity, _ int) AccessCategoryItem {
-		return AccessCategoryItem{ID: item.Id, Name: item.Name, Color: item.Color, IsRestricted: !publicCategories[item.Id]}
+		return AccessCategoryItem{
+			ID: item.Id, Name: item.Name, Color: item.Color,
+			IsRestricted:            !publicCategories[item.Id],
+			MultiCategoryTopicCount: multiCategoryCounts[item.Id],
+		}
 	})
 	return component.SuccessResponse(AccessControlOverview{Groups: items, Categories: categoryItems})
 }
@@ -298,6 +308,10 @@ func SaveCategoryAccess(req component.BetterRequest[SaveCategoryAccessReq]) comp
 
 func accessAdminFailure(operation string, err error) component.Response {
 	slog.Error(operation+" failed", "err", err)
+	var restrictionConflict *accessadminservice.CategoryRestrictionConflictError
+	if errors.As(err, &restrictionConflict) {
+		return component.FailResponseCode(component.MessageAdminCategoryRestrictionConflict, component.MessageParams{"count": restrictionConflict.TopicCount})
+	}
 	if errors.Is(err, accessadminservice.ErrInvalidGroup) || errors.Is(err, accessadminservice.ErrSystemGroupImmutable) || errors.Is(err, accessadminservice.ErrInvalidMember) || errors.Is(err, accessadminservice.ErrInvalidGrant) || errors.Is(err, accessadminservice.ErrApplicationNotAllowed) || errors.Is(err, accesscontrol.ErrTooManyActiveGroups) {
 		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
 	}

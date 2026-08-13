@@ -8,6 +8,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
+	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"gorm.io/gorm"
 )
 
@@ -26,12 +27,16 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 	if conn == nil || input.Topic == nil || input.FirstPost == nil {
 		return errors.New("topic and first post are required")
 	}
-	if len(input.CategoryIDs) == 0 {
-		return errors.New("topic categories are required")
+	categoryIDs, err := accesscontrol.CanonicalTopicCategoryIDs(input.CategoryIDs)
+	if err != nil {
+		return err
 	}
-	input.Topic.CategoryIds = append([]uint64(nil), input.CategoryIDs...)
-	input.Topic.MainCategoryId = input.CategoryIDs[0]
 	return conn.Transaction(func(tx *gorm.DB) error {
+		if err := accesscontrol.ValidateRestrictedCategorySelectionWithDB(tx, categoryIDs); err != nil {
+			return err
+		}
+		input.Topic.CategoryIds = append([]uint64(nil), categoryIDs...)
+		input.Topic.MainCategoryId = categoryIDs[0]
 		if input.Create {
 			input.Topic.PostCount = 1
 			input.Topic.PostSeq = 1
@@ -61,17 +66,24 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 				return err
 			}
 		}
-		return topicCategoryIndex.ReplaceTopicCategoriesWithDB(tx, input.Topic.Id, input.CategoryIDs)
+		return topicCategoryIndex.ReplaceTopicCategoriesWithDB(tx, input.Topic.Id, categoryIDs)
 	})
 }
 
 func SaveTopicCategories(topic *topics.Entity, categoryIDs []uint64) error {
-	if topic == nil || topic.Id == 0 || len(categoryIDs) == 0 {
+	if topic == nil || topic.Id == 0 {
 		return errors.New("existing topic and categories are required")
 	}
-	topic.CategoryIds = append([]uint64(nil), categoryIDs...)
-	topic.MainCategoryId = categoryIDs[0]
+	categoryIDs, err := accesscontrol.CanonicalTopicCategoryIDs(categoryIDs)
+	if err != nil {
+		return err
+	}
 	return dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
+		if err := accesscontrol.ValidateRestrictedCategorySelectionWithDB(tx, categoryIDs); err != nil {
+			return err
+		}
+		topic.CategoryIds = append([]uint64(nil), categoryIDs...)
+		topic.MainCategoryId = categoryIDs[0]
 		if err := tx.Omit("updated_at").Save(topic).Error; err != nil {
 			return err
 		}

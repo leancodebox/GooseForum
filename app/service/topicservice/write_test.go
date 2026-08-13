@@ -1,12 +1,16 @@
 package topicservice
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/glebarez/sqlite"
+	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
+	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
+	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"gorm.io/gorm"
 )
 
@@ -63,14 +67,73 @@ func TestSaveTopicAndFirstPostPersistsBothCategoryRepresentations(t *testing.T) 
 	}
 }
 
+func TestSaveTopicAndFirstPostRechecksRestrictedSelectionInTransaction(t *testing.T) {
+	conn := openTopicWriteDB(t)
+	topic := &topics.Entity{Title: "restricted mix", UserId: 1, Status: 1}
+	firstPost := &posts.Entity{UserId: 1, Content: "body"}
+	err := SaveTopicAndFirstPostWithDB(conn, FirstPostWrite{
+		Topic: topic, FirstPost: firstPost, CategoryIDs: []uint64{3, 5}, Create: true,
+	})
+	if !errors.Is(err, accesscontrol.ErrRestrictedCategorySingle) {
+		t.Fatalf("restricted mixed write error = %v", err)
+	}
+	var topicCount, postCount, indexCount int64
+	conn.Model(&topics.Entity{}).Count(&topicCount)
+	conn.Model(&posts.Entity{}).Count(&postCount)
+	conn.Model(&topicCategoryIndex.Entity{}).Count(&indexCount)
+	if topicCount != 0 || postCount != 0 || indexCount != 0 {
+		t.Fatalf("rejected write persisted topic=%d post=%d indexes=%d", topicCount, postCount, indexCount)
+	}
+}
+
+func TestSaveTopicAndFirstPostCanonicalizesAndBoundsCategories(t *testing.T) {
+	conn := openTopicWriteDB(t)
+	topic := &topics.Entity{Title: "canonical", UserId: 1, Status: 1}
+	firstPost := &posts.Entity{UserId: 1, Content: "body"}
+	if err := SaveTopicAndFirstPostWithDB(conn, FirstPostWrite{
+		Topic: topic, FirstPost: firstPost, CategoryIDs: []uint64{0, 3, 3, 4}, Create: true,
+	}); err != nil {
+		t.Fatalf("canonical category write: %v", err)
+	}
+	if len(topic.CategoryIds) != 2 || topic.CategoryIds[0] != 3 || topic.CategoryIds[1] != 4 || topic.MainCategoryId != 3 {
+		t.Fatalf("canonical categories = %v main=%d", topic.CategoryIds, topic.MainCategoryId)
+	}
+
+	err := SaveTopicAndFirstPostWithDB(conn, FirstPostWrite{
+		Topic: &topics.Entity{Title: "too many"}, FirstPost: &posts.Entity{Content: "body"},
+		CategoryIDs: []uint64{1, 2, 3, 4}, Create: true,
+	})
+	if !errors.Is(err, accesscontrol.ErrTooManyCategories) {
+		t.Fatalf("too many categories error = %v", err)
+	}
+}
+
 func openTopicWriteDB(t *testing.T) *gorm.DB {
 	t.Helper()
 	conn, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("open sqlite: %v", err)
 	}
-	if err := conn.AutoMigrate(&topics.Entity{}, &posts.Entity{}, &topicCategoryIndex.Entity{}); err != nil {
+	if err := conn.AutoMigrate(
+		&accessGroups.Entity{}, &categoryGroupPermissions.Entity{},
+		&topics.Entity{}, &posts.Entity{}, &topicCategoryIndex.Entity{},
+	); err != nil {
 		t.Fatalf("migrate topic write tables: %v", err)
+	}
+	everyoneKey := accessGroups.SystemKeyEveryone
+	everyone := accessGroups.Entity{Id: 1, Name: "Everyone", SystemKey: &everyoneKey, JoinMode: accessGroups.JoinModeSystem, Status: accessGroups.StatusEnabled}
+	if err := conn.Create(&everyone).Error; err != nil {
+		t.Fatalf("create everyone group: %v", err)
+	}
+	for _, categoryID := range []uint64{3, 4} {
+		grant := categoryGroupPermissions.Entity{
+			CategoryId: categoryID, AccessGroupId: everyone.Id,
+			PermissionLevel: categoryGroupPermissions.PermissionRead,
+			Status:          categoryGroupPermissions.StatusEnabled,
+		}
+		if err := conn.Create(&grant).Error; err != nil {
+			t.Fatalf("create public category grant: %v", err)
+		}
 	}
 	return conn
 }

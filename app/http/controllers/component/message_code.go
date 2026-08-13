@@ -105,28 +105,29 @@ const (
 )
 
 const (
-	MessageTopicNotFound            MessageCode = "topic.notFound"            // 主题不存在。
-	MessageTopicOwnerMismatch       MessageCode = "topic.ownerMismatch"       // 不能修改或删除他人的主题。
-	MessageTopicOperationDenied     MessageCode = "topic.operationDenied"     // 当前主题不可操作。
-	MessageTopicSaveFailed          MessageCode = "topic.saveFailed"          // 主题保存失败。
-	MessageTopicDailyLimit          MessageCode = "topic.dailyLimit"          // 当天发布过多。
-	MessageTopicTitleTooShort       MessageCode = "topic.title.tooShort"      // 标题过短，params.minLength。
-	MessageTopicTitleTooLong        MessageCode = "topic.title.tooLong"       // 标题过长，params.maxLength。
-	MessageTopicContentTooShort     MessageCode = "topic.content.tooShort"    // 正文过短，params.minLength。
-	MessageTopicContentTooLong      MessageCode = "topic.content.tooLong"     // 正文过长，params.maxLength。
-	MessageTopicPostCooldown        MessageCode = "topic.post.cooldown"       // 新用户发帖冷却中，params.minutes/availableAt。
-	MessageCommentContentTooShort   MessageCode = "comment.content.tooShort"  // 评论过短，params.minLength。
-	MessageCommentContentTooLong    MessageCode = "comment.content.tooLong"   // 评论过长，params.maxLength。
-	MessageCommentPostCooldown      MessageCode = "comment.post.cooldown"     // 新用户评论冷却中，params.minutes/availableAt。
-	MessageCommentParentPostMissing MessageCode = "comment.parentPostMissing" // 父 post 不存在。
-	MessageCommentCreateFailed      MessageCode = "comment.createFailed"      // 评论创建失败，params.error 可带原始错误。
-	MessagePostNotFound             MessageCode = "post.notFound"             // post 不存在。
-	MessagePostUpdateFailed         MessageCode = "post.updateFailed"         // post 更新失败，params.error 可带原始错误。
-	MessageReportNotFound           MessageCode = "report.notFound"           // 举报不存在。
-	MessageReportTargetInvalid      MessageCode = "report.targetInvalid"      // 举报对象无效。
-	MessageReportOwnContent         MessageCode = "report.ownContent"         // 不能举报自己的内容。
-	MessageReportDuplicate          MessageCode = "report.duplicate"          // 已举报，等待处理。
-	MessageReportCreateFailed       MessageCode = "report.createFailed"       // 举报提交失败。
+	MessageTopicNotFound            MessageCode = "topic.notFound"                  // 主题不存在。
+	MessageTopicOwnerMismatch       MessageCode = "topic.ownerMismatch"             // 不能修改或删除他人的主题。
+	MessageTopicOperationDenied     MessageCode = "topic.operationDenied"           // 当前主题不可操作。
+	MessageTopicSaveFailed          MessageCode = "topic.saveFailed"                // 主题保存失败。
+	MessageTopicDailyLimit          MessageCode = "topic.dailyLimit"                // 当天发布过多。
+	MessageTopicTitleTooShort       MessageCode = "topic.title.tooShort"            // 标题过短，params.minLength。
+	MessageTopicTitleTooLong        MessageCode = "topic.title.tooLong"             // 标题过长，params.maxLength。
+	MessageTopicContentTooShort     MessageCode = "topic.content.tooShort"          // 正文过短，params.minLength。
+	MessageTopicContentTooLong      MessageCode = "topic.content.tooLong"           // 正文过长，params.maxLength。
+	MessageTopicRestrictedSingle    MessageCode = "topic.category.restrictedSingle" // 受限分类必须是主题唯一分类。
+	MessageTopicPostCooldown        MessageCode = "topic.post.cooldown"             // 新用户发帖冷却中，params.minutes/availableAt。
+	MessageCommentContentTooShort   MessageCode = "comment.content.tooShort"        // 评论过短，params.minLength。
+	MessageCommentContentTooLong    MessageCode = "comment.content.tooLong"         // 评论过长，params.maxLength。
+	MessageCommentPostCooldown      MessageCode = "comment.post.cooldown"           // 新用户评论冷却中，params.minutes/availableAt。
+	MessageCommentParentPostMissing MessageCode = "comment.parentPostMissing"       // 父 post 不存在。
+	MessageCommentCreateFailed      MessageCode = "comment.createFailed"            // 评论创建失败，params.error 可带原始错误。
+	MessagePostNotFound             MessageCode = "post.notFound"                   // post 不存在。
+	MessagePostUpdateFailed         MessageCode = "post.updateFailed"               // post 更新失败，params.error 可带原始错误。
+	MessageReportNotFound           MessageCode = "report.notFound"                 // 举报不存在。
+	MessageReportTargetInvalid      MessageCode = "report.targetInvalid"            // 举报对象无效。
+	MessageReportOwnContent         MessageCode = "report.ownContent"               // 不能举报自己的内容。
+	MessageReportDuplicate          MessageCode = "report.duplicate"                // 已举报，等待处理。
+	MessageReportCreateFailed       MessageCode = "report.createFailed"             // 举报提交失败。
 )
 
 const (
@@ -147,29 +148,30 @@ const (
 )
 
 const (
-	MessageAdminStatsFetchFailed       MessageCode = "admin.stats.fetchFailed"         // 管理后台统计数据读取失败。
-	MessageAdminBadgeNameRequired      MessageCode = "admin.badge.nameRequired"        // 徽章名称不能为空。
-	MessageAdminBadgeTypeInvalid       MessageCode = "admin.badge.typeInvalid"         // 徽章类型不合法。
-	MessageAdminBadgeCodeRequired      MessageCode = "admin.badge.codeRequired"        // 徽章编码不能为空。
-	MessageAdminBadgeGrantModeInvalid  MessageCode = "admin.badge.grantModeInvalid"    // 徽章授予方式不合法。
-	MessageAdminBadgeSystemNotFound    MessageCode = "admin.badge.systemNotFound"      // 系统徽章不存在。
-	MessageAdminBadgeSaveFailed        MessageCode = "admin.badge.saveFailed"          // 保存徽章失败。
-	MessageAdminBadgeSystemDeleteBlock MessageCode = "admin.badge.systemDeleteBlocked" // 系统默认徽章不可删除。
-	MessageAdminBadgeDeleteFailed      MessageCode = "admin.badge.deleteFailed"        // 删除徽章失败。
-	MessageAdminTargetUserFetchFailed  MessageCode = "admin.user.targetFetchFailed"    // 目标用户查询失败。
-	MessageAdminCategoryRequired       MessageCode = "admin.category.nameRequired"     // 分类名称不能为空。
-	MessageAdminCategoryNotFound       MessageCode = "admin.category.notFound"         // 分类不存在。
-	MessageAdminCategoryDataNotFound   MessageCode = "admin.category.dataNotFound"     // 分类数据不存在。
-	MessageAdminCategoryKeepOne        MessageCode = "admin.category.keepOne"          // 至少保留一个分类。
-	MessageAdminCategoryHasTopics      MessageCode = "admin.category.hasTopics"        // 分类下存在有效主题。
-	MessageAdminModeratorUserRequired  MessageCode = "admin.moderator.userRequired"    // 版主用户不能为空。
-	MessageAdminModeratorUserNotFound  MessageCode = "admin.moderator.userNotFound"    // 版主用户不存在。
-	MessageAdminModeratorNotFound      MessageCode = "admin.moderator.notFound"        // 版主记录不存在。
-	MessageAdminTopicCategoryRequired  MessageCode = "admin.topic.categoryRequired"    // 主题至少需要一个分类。
-	MessageAdminTopicCategoryTooMany   MessageCode = "admin.topic.categoryTooMany"     // 主题最多选择三个分类。
-	MessageAdminTopicDeleteFailed      MessageCode = "admin.topic.deleteFailed"        // 删除主题失败。
-	MessageAdminRoleNotFound           MessageCode = "admin.role.notFound"             // 角色不存在。
-	MessageAdminTestEmailRequired      MessageCode = "admin.mail.testEmailRequired"    // 测试邮箱不能为空。
-	MessageAdminTestEmailFailed        MessageCode = "admin.mail.testFailed"           // 邮件配置测试失败，params.error 可带原始错误。
-	MessageAdminTestEmailSuccess       MessageCode = "admin.mail.testSuccess"          // 邮件配置测试成功，params.email 表示测试邮箱。
+	MessageAdminStatsFetchFailed            MessageCode = "admin.stats.fetchFailed"            // 管理后台统计数据读取失败。
+	MessageAdminBadgeNameRequired           MessageCode = "admin.badge.nameRequired"           // 徽章名称不能为空。
+	MessageAdminBadgeTypeInvalid            MessageCode = "admin.badge.typeInvalid"            // 徽章类型不合法。
+	MessageAdminBadgeCodeRequired           MessageCode = "admin.badge.codeRequired"           // 徽章编码不能为空。
+	MessageAdminBadgeGrantModeInvalid       MessageCode = "admin.badge.grantModeInvalid"       // 徽章授予方式不合法。
+	MessageAdminBadgeSystemNotFound         MessageCode = "admin.badge.systemNotFound"         // 系统徽章不存在。
+	MessageAdminBadgeSaveFailed             MessageCode = "admin.badge.saveFailed"             // 保存徽章失败。
+	MessageAdminBadgeSystemDeleteBlock      MessageCode = "admin.badge.systemDeleteBlocked"    // 系统默认徽章不可删除。
+	MessageAdminBadgeDeleteFailed           MessageCode = "admin.badge.deleteFailed"           // 删除徽章失败。
+	MessageAdminTargetUserFetchFailed       MessageCode = "admin.user.targetFetchFailed"       // 目标用户查询失败。
+	MessageAdminCategoryRequired            MessageCode = "admin.category.nameRequired"        // 分类名称不能为空。
+	MessageAdminCategoryNotFound            MessageCode = "admin.category.notFound"            // 分类不存在。
+	MessageAdminCategoryDataNotFound        MessageCode = "admin.category.dataNotFound"        // 分类数据不存在。
+	MessageAdminCategoryKeepOne             MessageCode = "admin.category.keepOne"             // 至少保留一个分类。
+	MessageAdminCategoryHasTopics           MessageCode = "admin.category.hasTopics"           // 分类下存在有效主题。
+	MessageAdminCategoryRestrictionConflict MessageCode = "admin.category.restrictionConflict" // 多分类主题阻止分类转为受限，params.count。
+	MessageAdminModeratorUserRequired       MessageCode = "admin.moderator.userRequired"       // 版主用户不能为空。
+	MessageAdminModeratorUserNotFound       MessageCode = "admin.moderator.userNotFound"       // 版主用户不存在。
+	MessageAdminModeratorNotFound           MessageCode = "admin.moderator.notFound"           // 版主记录不存在。
+	MessageAdminTopicCategoryRequired       MessageCode = "admin.topic.categoryRequired"       // 主题至少需要一个分类。
+	MessageAdminTopicCategoryTooMany        MessageCode = "admin.topic.categoryTooMany"        // 主题最多选择三个分类。
+	MessageAdminTopicDeleteFailed           MessageCode = "admin.topic.deleteFailed"           // 删除主题失败。
+	MessageAdminRoleNotFound                MessageCode = "admin.role.notFound"                // 角色不存在。
+	MessageAdminTestEmailRequired           MessageCode = "admin.mail.testEmailRequired"       // 测试邮箱不能为空。
+	MessageAdminTestEmailFailed             MessageCode = "admin.mail.testFailed"              // 邮件配置测试失败，params.error 可带原始错误。
+	MessageAdminTestEmailSuccess            MessageCode = "admin.mail.testSuccess"             // 邮件配置测试成功，params.email 表示测试邮箱。
 )

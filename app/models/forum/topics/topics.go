@@ -13,8 +13,8 @@ type Entity struct {
 	Title       string   `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"`
 	CategoryIds []uint64 `gorm:"column:category_id;type:varchar(255);not null;default:'[]';serializer:json" json:"categoryIds"`
 	// MainCategoryId is CategoryIds[0]. It is the only category that decides who
-	// may read the topic; the remaining categories are auxiliary tags with no
-	// effect on visibility.
+	// may read the topic. Remaining categories are public auxiliary tags; a
+	// restricted category must be the topic's only category.
 	MainCategoryId uint64         `gorm:"column:main_category_id;type:bigint unsigned;not null;default:0;index:idx_topics_main_category;" json:"mainCategoryId"`
 	UserId         uint64         `gorm:"column:user_id;type:bigint unsigned;not null;default:0;index:idx_topics_user_status,priority:1;index:idx_topics_admin_user_list,priority:1;" json:"userId"`
 	Status         int8           `gorm:"column:status;type:tinyint;not null;default:0;index:idx_topics_user_status,priority:2;index:idx_topics_list_default,priority:1;index:idx_topics_list_hot,priority:1;index:idx_topics_list_popular,priority:1;index:idx_topics_list_new,priority:1;" json:"status"`

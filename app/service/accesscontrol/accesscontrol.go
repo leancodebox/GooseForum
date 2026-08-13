@@ -30,6 +30,7 @@ var (
 	ErrCategoryRequired         = errors.New("at least one category is required")
 	ErrTooManyCategories        = errors.New("at most three categories are allowed")
 	ErrCategoryPermissionDenied = errors.New("category capability is insufficient")
+	ErrRestrictedCategorySingle = errors.New("a restricted category must be the topic's only category")
 )
 
 type TopicCategoryWrite struct {
@@ -107,12 +108,9 @@ func MainCategoryOf(categoryIDs []uint64) uint64 {
 }
 
 func ValidateCategorySelection(actor Snapshot, categoryIDs []uint64, required Capability) ([]uint64, error) {
-	categoryIDs = uniqueNonZeroPreservingOrder(categoryIDs)
-	if len(categoryIDs) == 0 {
-		return nil, ErrCategoryRequired
-	}
-	if len(categoryIDs) > 3 {
-		return nil, ErrTooManyCategories
+	categoryIDs, err := CanonicalTopicCategoryIDs(categoryIDs)
+	if err != nil {
+		return nil, err
 	}
 	for _, categoryID := range categoryIDs {
 		if actor.Capability(categoryID) < required {
@@ -122,13 +120,45 @@ func ValidateCategorySelection(actor Snapshot, categoryIDs []uint64, required Ca
 	return categoryIDs, nil
 }
 
+// CanonicalTopicCategoryIDs enforces the persistence-level shape shared by
+// every topic write path while preserving the selected main-category order.
+func CanonicalTopicCategoryIDs(categoryIDs []uint64) ([]uint64, error) {
+	categoryIDs = uniqueNonZeroPreservingOrder(categoryIDs)
+	if len(categoryIDs) == 0 {
+		return nil, ErrCategoryRequired
+	}
+	if len(categoryIDs) > 3 {
+		return nil, ErrTooManyCategories
+	}
+	return categoryIDs, nil
+}
+
+func ValidateRestrictedCategorySelection(everyone Snapshot, categoryIDs []uint64) error {
+	if len(categoryIDs) <= 1 {
+		return nil
+	}
+	for _, categoryID := range categoryIDs {
+		if !everyone.CanReadCategory(categoryID) {
+			return ErrRestrictedCategorySingle
+		}
+	}
+	return nil
+}
+
 // ValidateTopicCategoryWrite centralizes category authorization for topic
 // creation, editing, publishing, and category changes. Only the main category
 // decides who can read a topic, so only a change of main category changes
 // visibility, and only that is escalated to a management operation.
 func ValidateTopicCategoryWrite(actor Snapshot, everyone Snapshot, input TopicCategoryWrite) ([]uint64, error) {
 	if input.NewTopic {
-		return ValidateCategorySelection(actor, input.Next, CapabilityCreate)
+		next, err := ValidateCategorySelection(actor, input.Next, CapabilityCreate)
+		if err != nil {
+			return nil, err
+		}
+		if err := ValidateRestrictedCategorySelection(everyone, next); err != nil {
+			return nil, err
+		}
+		return next, nil
 	}
 	current := uniqueNonZeroPreservingOrder(input.Current)
 	currentMain := MainCategoryOf(current)
@@ -142,6 +172,9 @@ func ValidateTopicCategoryWrite(actor Snapshot, everyone Snapshot, input TopicCa
 	}
 	next, err := ValidateCategorySelection(actor, input.Next, required)
 	if err != nil {
+		return nil, err
+	}
+	if err := ValidateRestrictedCategorySelection(everyone, next); err != nil {
 		return nil, err
 	}
 	nextMain := MainCategoryOf(next)

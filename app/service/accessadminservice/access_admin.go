@@ -9,6 +9,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -21,6 +22,14 @@ var (
 	ErrInvalidGrant          = errors.New("invalid category grant")
 	ErrApplicationNotAllowed = errors.New("access group does not accept applications")
 )
+
+type CategoryRestrictionConflictError struct {
+	TopicCount int64
+}
+
+func (err *CategoryRestrictionConflictError) Error() string {
+	return "category is used by multi-category topics"
+}
 
 type GroupInput struct {
 	ID        uint64
@@ -266,10 +275,9 @@ func ReviewApplication(groupID, memberID uint64, approve bool) error {
 	return ErrInvalidMember
 }
 
-// ReplaceCategoryGrants swaps a category's grants. Because visibility is read
-// from topics.main_category_id and never copied onto the topic, changing who
-// may read a category takes effect immediately for every topic in it, and no
-// topic row has to be touched.
+// ReplaceCategoryGrants swaps a category's grants. A public category cannot be
+// made restricted while it is still attached to multi-category topics: the
+// single-restricted-category invariant must hold before visibility narrows.
 func ReplaceCategoryGrants(categoryID uint64, grants []GrantInput) error {
 	canonical, _, err := validateGrants(grants)
 	if err != nil {
@@ -281,6 +289,21 @@ func ReplaceCategoryGrants(categoryID uint64, grants []GrantInput) error {
 	}
 
 	err = dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
+		everyoneID, publicCategories, err := accesscontrol.LockPublicCategoryStateWithDB(tx, []uint64{categoryID})
+		if err != nil {
+			return err
+		}
+		_, currentlyPublic := publicCategories[categoryID]
+		willBePublic := canonical[everyoneID] >= categoryGroupPermissions.PermissionRead
+		if currentlyPublic && !willBePublic {
+			counts, err := topicCategoryIndex.MultiCategoryTopicCountsWithDB(tx, []uint64{categoryID})
+			if err != nil {
+				return err
+			}
+			if counts[categoryID] > 0 {
+				return &CategoryRestrictionConflictError{TopicCount: counts[categoryID]}
+			}
+		}
 		if err := tx.Model(&categoryGroupPermissions.Entity{}).Where("category_id = ?", categoryID).
 			Updates(map[string]any{"status": categoryGroupPermissions.StatusDisabled, "permission_level": 0}).Error; err != nil {
 			return err

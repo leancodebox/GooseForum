@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -618,12 +619,18 @@ func EditTopicCategories(req component.BetterRequest[EditTopicCategoriesReq]) co
 	}
 	categoryIds, err = accesscontrol.ValidateTopicCategoryWrite(actor, everyone, accesscontrol.TopicCategoryWrite{Current: topic.CategoryIds, Next: categoryIds})
 	if err != nil {
+		if errors.Is(err, accesscontrol.ErrRestrictedCategorySingle) {
+			return component.FailResponseCode(component.MessageTopicRestrictedSingle, nil)
+		}
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 
 	oldCategoryIds := append([]uint64(nil), topic.CategoryIds...)
 	if err := topicservice.SaveTopicCategories(&topic, categoryIds); err != nil {
 		slog.Error("failed to replace topic categories", "topicId", topic.Id, "categoryIds", categoryIds, "err", err)
+		if errors.Is(err, accesscontrol.ErrRestrictedCategorySingle) {
+			return component.FailResponseCode(component.MessageTopicRestrictedSingle, nil)
+		}
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 	optlogger.UserOptCode(req.UserId, optlogger.EditTopic, topic.Id, "admin.opt.topic.categoriesChanged", optlogger.MessageParams{

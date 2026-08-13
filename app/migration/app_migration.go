@@ -214,6 +214,26 @@ func runVersionedDataMigrations() error {
 		}
 		currentVersion = 16
 	}
+	if currentVersion < 17 {
+		result := datamigration.EnforceSingleRestrictedTopicCategory()
+		slog.Info("app migration single restricted topic category done", "updated", result.Updated, "removedCategoryLinks", result.RemovedCategoryLinks, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			slog.Error("app migration single restricted topic category has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
+			return fmt.Errorf("enforce single restricted topic category: %s", result.LastFailed)
+		}
+		// Always retry the search rebuild while v17 is pending. The database repair
+		// may have committed on a previous start whose search rebuild then failed.
+		searchResult := datamigration.RebuildTopicMainCategorySearchIndex()
+		slog.Info("app migration single restricted topic category search index done", "skipped", searchResult.Skipped, "rebuilt", searchResult.Rebuilt, "processed", searchResult.ProcessedCount, "failedCount", searchResult.FailedCount, "failed", searchResult.Failed, "lastFailed", searchResult.LastFailed)
+		if searchResult.Failed > 0 || searchResult.FailedCount > 0 {
+			slog.Error("app migration single restricted topic category search index has failures", "failed", searchResult.Failed, "failedCount", searchResult.FailedCount, "lastFailed", searchResult.LastFailed)
+			return fmt.Errorf("rebuild single restricted topic category search index: %s", searchResult.LastFailed)
+		}
+		if err := syncMigrationVersion(17); err != nil {
+			return err
+		}
+		currentVersion = 17
+	}
 	slog.Info("app migration end", "version", currentVersion)
 	return nil
 }

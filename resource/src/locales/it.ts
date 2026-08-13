@@ -448,6 +448,7 @@ export default {
     mainCategoryChangeDescription: 'Rimuovendo “{current}”, “{next}” diventerà la categoria principale e cambierà chi può leggere questa discussione.',
     confirmMainCategoryChange: 'Cambia categoria principale',
     restrictedCategoryHint: 'Visibile solo ai membri con accesso a questa categoria',
+    restrictedCategorySingleHint: 'Una categoria riservata deve essere selezionata da sola; selezionandola sostituisci le categorie correnti',
     noCreatePermission: 'Non puoi più pubblicare nelle categorie selezionate, ma puoi ancora salvare una bozza.',
     markdownMode: 'Markdown',
     visualMode: 'Editor',
@@ -871,6 +872,9 @@ export default {
         tooShort: 'Il contenuto deve contenere almeno {minLength} caratteri',
         tooLong: 'Il contenuto non può superare i {maxLength} caratteri',
       },
+      category: {
+        restrictedSingle: 'Una categoria riservata deve essere l’unica categoria dell’argomento',
+      },
       post: {
         cooldown: 'I nuovi utenti possono pubblicare dopo {minutes} minuti. Riprova dopo {availableAt}',
       },
@@ -955,6 +959,7 @@ export default {
         dataNotFound: 'Dati non trovati',
         keepOne: 'Mantieni almeno una categoria',
         hasTopics: 'Questa categoria ha ancora topic attivi',
+        restrictionConflict: '{count} argomenti con più categorie fanno ancora riferimento a questa categoria. Rendili a categoria singola prima di limitarne l’accesso',
       },
       topic: {
         categoryRequired: 'Seleziona almeno una categoria',
@@ -1181,6 +1186,7 @@ export default {
     visibilityDerivedHint: 'Una categoria è pubblica solo quando il gruppo Tutti può leggerla.',
     noReadableAudienceWarning: 'Nessun gruppo attivo può leggere questa categoria. Potrebbero poterla recuperare solo gli amministratori globali.',
     legacyImageVisibilityWarning: 'Le immagini precedenti senza un record di proprietà potrebbero restare accessibili tramite URL diretto. I nuovi caricamenti tracciati sono protetti dai permessi della categoria principale.',
+    restrictionConflictWarning: '{count} argomenti con più categorie fanno ancora riferimento a questa categoria. Rendili a categoria singola prima di limitarla.',
     group: 'Gruppo di accesso',
     groupType: 'Appartenenza',
     permissionSummaryHint: 'I permessi si configurano nella pagina Categorie; questa tabella è un riepilogo in sola lettura.',

@@ -54,20 +54,17 @@ func benchmarkCategoryTopicQuery(b *testing.B, conn *gorm.DB, categoryID uint64,
 	samples := make([]time.Duration, b.N)
 	for i := 0; i < b.N; i++ {
 		started := time.Now()
-		var result []Entity
-		query := conn.Model(&Entity{}).
-			Where("status = ? AND process_status = ?", 1, 0).
-			Where(
-				`EXISTS (SELECT 1 FROM topic_category_index idx WHERE idx.topic_id = topics.id AND idx.category_id = ? AND idx.effective = ?)`,
-				categoryID,
-				1,
-			)
-		query = applyAudienceFilter(query, readable, true)
-		if err := query.
-			Order("pin_weight DESC, updated_at DESC, id DESC").
-			Limit(21).
-			Find(&result).Error; err != nil {
-			b.Fatal(err)
+		page := PageWithDB(conn, PageQuery{
+			Page: 1, PageSize: 20, CategoryId: categoryID,
+			FilterStatus: true, FilterAudience: true,
+			ReadableCategoryIds: readable,
+		})
+		if categoryID == categoryBenchmarkRareCategoryID {
+			if len(page.Data) != 10 || page.HasNext {
+				b.Fatalf("rare category page returned %d topics, hasNext=%v", len(page.Data), page.HasNext)
+			}
+		} else if len(page.Data) != 20 || !page.HasNext {
+			b.Fatalf("category page returned %d topics, hasNext=%v", len(page.Data), page.HasNext)
 		}
 		samples[i] = time.Since(started)
 	}

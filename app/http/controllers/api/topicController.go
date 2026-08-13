@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"strings"
 	"time"
@@ -133,6 +134,9 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		!wasPublished && req.Params.TopicStatus == 1,
 	)
 	if err != nil {
+		if errors.Is(err, accesscontrol.ErrRestrictedCategorySingle) {
+			return component.FailResponseCode(component.MessageTopicRestrictedSingle, nil)
+		}
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 	topic.CategoryIds = categoryIDs
@@ -150,6 +154,9 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{
 			Topic: &topic, FirstPost: &firstPost, CategoryIDs: categoryIDs,
 		}); err != nil {
+			if errors.Is(err, accesscontrol.ErrRestrictedCategorySingle) {
+				return component.FailResponseCode(component.MessageTopicRestrictedSingle, nil)
+			}
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
 		fileusageservice.ReplaceTopic(topic.Id, req.UserId, firstPost.Content)
@@ -171,6 +178,9 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{
 			Topic: &topic, FirstPost: &firstPost, CategoryIDs: categoryIDs, Create: true,
 		}); err != nil {
+			if errors.Is(err, accesscontrol.ErrRestrictedCategorySingle) {
+				return component.FailResponseCode(component.MessageTopicRestrictedSingle, nil)
+			}
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
 		fileusageservice.ReplaceTopic(topic.Id, req.UserId, firstPost.Content)
@@ -205,6 +215,9 @@ func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Re
 	nextStatus := req.Params.TopicStatus
 	publishing := topic.Status != 1 && nextStatus == 1
 	if _, err := authorizeTopicCategoryWrite(req.UserId, &topic, topic.CategoryIds, false, publishing); err != nil {
+		if errors.Is(err, accesscontrol.ErrRestrictedCategorySingle) {
+			return component.FailResponseCode(component.MessageTopicRestrictedSingle, nil)
+		}
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 	if topic.Status == nextStatus {

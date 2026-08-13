@@ -1,11 +1,15 @@
 package topics
 
 import (
+	"slices"
+	"sort"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"gorm.io/gorm"
 )
 
@@ -189,57 +193,133 @@ type ModerationPageQuery struct {
 	CategoryIDs         []uint64
 }
 
-func Page(q PageQuery) struct {
+type TopicPage struct {
 	Page     int
 	PageSize int
 	HasNext  bool
 	Data     []Entity
-} {
+}
+
+func Page(q PageQuery) TopicPage {
+	return PageWithDB(dbconnect.Connect(), q)
+}
+
+func PageWithDB(conn *gorm.DB, q PageQuery) TopicPage {
 	var list []Entity
 	q.Page = max(q.Page-1, 0)
 	q.PageSize = pageutil.BoundPageSize(q.PageSize)
 	queryLimit := q.PageSize + 1
-	if q.FilterAudience && len(q.ReadableCategoryIds) == 0 {
-		return struct {
-			Page     int
-			PageSize int
-			HasNext  bool
-			Data     []Entity
-		}{Page: q.Page + 1, PageSize: q.PageSize, Data: []Entity{}}
+	if conn == nil || q.FilterAudience && len(q.ReadableCategoryIds) == 0 {
+		return TopicPage{Page: q.Page + 1, PageSize: q.PageSize, Data: []Entity{}}
 	}
-	b := builder()
-	if q.Search != "" {
-		b.Where(queryopt.Like("title", q.Search))
-	}
-	if q.UserId != 0 {
-		b.Where(queryopt.Eq("user_id", q.UserId))
-	}
-	if q.FilterStatus {
-		b.Where(queryopt.Eq("status", 1))
-		b.Where(queryopt.Eq("process_status", 0))
-	}
+	b := conn.Table(tableName)
 	if q.CategoryId != 0 {
-		b.Where(
-			`EXISTS (SELECT 1 FROM topic_category_index idx WHERE idx.topic_id = topics.id AND idx.category_id = ? AND idx.effective = ?)`,
-			q.CategoryId,
-			1,
-		)
+		topicIDs, complete, err := topicCategoryIndex.ActiveTopicIDsByCategoryWithDB(conn, q.CategoryId, 256)
+		if err == nil && complete {
+			return pageSparseCategoryTopics(b, q, topicIDs)
+		} else {
+			b = b.Joins(
+				`JOIN topic_category_index category_idx ON category_idx.topic_id = topics.id AND category_idx.category_id = ? AND category_idx.effective = ?`,
+				q.CategoryId, 1,
+			)
+		}
 	}
+	b = applyTopicPageFilters(b, q)
 	if q.FilterAudience {
 		b = applyAudienceFilter(b, q.ReadableCategoryIds, true)
 	}
-	applyPageSort(b, q.Sort)
+	b = applyPageSort(b, q.Sort)
 	b.Limit(queryLimit).Offset(q.PageSize * q.Page).Find(&list)
 	hasNext := len(list) > q.PageSize
 	if hasNext {
 		list = list[:q.PageSize]
 	}
-	return struct {
-		Page     int
-		PageSize int
-		HasNext  bool
-		Data     []Entity
-	}{Page: q.Page + 1, PageSize: q.PageSize, Data: list, HasNext: hasNext}
+	return TopicPage{Page: q.Page + 1, PageSize: q.PageSize, Data: list, HasNext: hasNext}
+}
+
+func applyTopicPageFilters(query *gorm.DB, q PageQuery) *gorm.DB {
+	if q.Search != "" {
+		query = query.Where(queryopt.Like("topics.title", q.Search))
+	}
+	if q.UserId != 0 {
+		query = query.Where(queryopt.Eq("topics.user_id", q.UserId))
+	}
+	if q.FilterStatus {
+		query = query.Where(queryopt.Eq("topics.status", 1))
+		query = query.Where(queryopt.Eq("topics.process_status", 0))
+	}
+	return query
+}
+
+func pageSparseCategoryTopics(query *gorm.DB, q PageQuery, topicIDs []uint64) TopicPage {
+	if len(topicIDs) == 0 {
+		return TopicPage{Page: q.Page + 1, PageSize: q.PageSize, Data: []Entity{}}
+	}
+	query = query.Where("topics.id IN ?", topicIDs)
+	if q.Search != "" {
+		// Keep LIKE behavior (including database collation and wildcard semantics)
+		// consistent with the regular path while the primary-key candidate set is
+		// still bounded by the sparse-category threshold.
+		query = query.Where(queryopt.Like("topics.title", q.Search))
+	}
+	var list []Entity
+	query.Find(&list)
+	list = slices.DeleteFunc(list, func(topic Entity) bool {
+		if q.FilterStatus && (topic.Status != 1 || topic.ProcessStatus != 0) {
+			return true
+		}
+		if q.UserId != 0 && topic.UserId != q.UserId {
+			return true
+		}
+		return false
+	})
+	if q.FilterAudience {
+		readable := make(map[uint64]struct{}, len(q.ReadableCategoryIds))
+		for _, categoryID := range q.ReadableCategoryIds {
+			readable[categoryID] = struct{}{}
+		}
+		list = slices.DeleteFunc(list, func(topic Entity) bool {
+			_, ok := readable[topic.MainCategoryId]
+			return !ok
+		})
+	}
+	sortTopicPageEntities(list, q.Sort)
+	start := min(q.Page*q.PageSize, len(list))
+	end := min(start+q.PageSize+1, len(list))
+	list = list[start:end]
+	hasNext := len(list) > q.PageSize
+	if hasNext {
+		list = list[:q.PageSize]
+	}
+	return TopicPage{Page: q.Page + 1, PageSize: q.PageSize, Data: list, HasNext: hasNext}
+}
+
+func sortTopicPageEntities(list []Entity, sortKey string) {
+	sort.Slice(list, func(i, j int) bool {
+		left, right := list[i], list[j]
+		switch sortKey {
+		case "hot":
+			if left.ReplyCount != right.ReplyCount {
+				return left.ReplyCount > right.ReplyCount
+			}
+		case "popular":
+			if left.ViewCount != right.ViewCount {
+				return left.ViewCount > right.ViewCount
+			}
+		case "new":
+			if !left.CreatedAt.Equal(right.CreatedAt) {
+				return left.CreatedAt.After(right.CreatedAt)
+			}
+		default:
+			if left.PinWeight != right.PinWeight {
+				return left.PinWeight > right.PinWeight
+			}
+			if !left.UpdatedAt.Equal(right.UpdatedAt) {
+				return left.UpdatedAt.After(right.UpdatedAt)
+			}
+		}
+		return left.Id > right.Id
+	})
 }
 
 func PageForAdmin(q AdminPageQuery) struct {
@@ -396,15 +476,15 @@ func ReservePostSequenceWithDB(db *gorm.DB, topicId uint64) (uint64, error) {
 	return postSeq, err
 }
 
-func applyPageSort(b *gorm.DB, sort string) {
+func applyPageSort(b *gorm.DB, sort string) *gorm.DB {
 	switch sort {
 	case "hot":
-		b.Order(queryopt.Desc("reply_count")).Order(queryopt.Desc("id"))
+		return b.Order(queryopt.Desc("topics.reply_count")).Order(queryopt.Desc("topics.id"))
 	case "popular":
-		b.Order(queryopt.Desc("view_count")).Order(queryopt.Desc("id"))
+		return b.Order(queryopt.Desc("topics.view_count")).Order(queryopt.Desc("topics.id"))
 	case "new":
-		b.Order(queryopt.Desc("created_at")).Order(queryopt.Desc("id"))
+		return b.Order(queryopt.Desc("topics.created_at")).Order(queryopt.Desc("topics.id"))
 	default:
-		b.Order(queryopt.Desc("pin_weight")).Order(queryopt.Desc("updated_at")).Order(queryopt.Desc("id"))
+		return b.Order(queryopt.Desc("topics.pin_weight")).Order(queryopt.Desc("topics.updated_at")).Order(queryopt.Desc("topics.id"))
 	}
 }

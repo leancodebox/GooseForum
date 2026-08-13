@@ -125,11 +125,18 @@ func TestValidateCategorySelectionPreservesOrder(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(got, []uint64{2, 1}) {
 		t.Fatalf("public selection = %v, %v", got, err)
 	}
-	// 3 is restricted. Mixing it with a public category is allowed now: only the
-	// first entry decides visibility, so there is no combination to forbid.
 	got, err = ValidateCategorySelection(actor, []uint64{3, 1}, CapabilityCreate)
 	if err != nil || !reflect.DeepEqual(got, []uint64{3, 1}) {
-		t.Fatalf("restricted-main selection = %v, %v", got, err)
+		t.Fatalf("capability-only selection = %v, %v", got, err)
+	}
+	if err := ValidateRestrictedCategorySelection(everyone, got); !errors.Is(err, ErrRestrictedCategorySingle) {
+		t.Fatalf("restricted mixed selection error = %v", err)
+	}
+	if err := ValidateRestrictedCategorySelection(everyone, []uint64{1, 2}); err != nil {
+		t.Fatalf("public mixed selection = %v", err)
+	}
+	if err := ValidateRestrictedCategorySelection(everyone, []uint64{3}); err != nil {
+		t.Fatalf("single restricted selection = %v", err)
 	}
 	if _, err := ValidateCategorySelection(everyone, []uint64{3}, CapabilityCreate); !errors.Is(err, ErrCategoryPermissionDenied) {
 		t.Fatalf("insufficient selection error = %v", err)
@@ -153,15 +160,11 @@ func TestValidateTopicCategoryWritePolicies(t *testing.T) {
 	if got, err := ValidateTopicCategoryWrite(manager, everyone, TopicCategoryWrite{Current: []uint64{1}, Next: []uint64{3}}); err != nil || !reflect.DeepEqual(got, []uint64{3}) {
 		t.Fatalf("managed restricted move = %v, %v", got, err)
 	}
-	// Auxiliary categories carry no visibility, so tagging a restricted category
-	// onto a public topic is an ordinary edit, not a management operation.
-	if got, err := ValidateTopicCategoryWrite(creator, everyone, TopicCategoryWrite{Current: []uint64{1}, Next: []uint64{1, 3}}); err != nil || !reflect.DeepEqual(got, []uint64{1, 3}) {
-		t.Fatalf("adding a restricted auxiliary category = %v, %v", got, err)
+	if _, err := ValidateTopicCategoryWrite(creator, everyone, TopicCategoryWrite{Current: []uint64{1}, Next: []uint64{1, 3}}); !errors.Is(err, ErrRestrictedCategorySingle) {
+		t.Fatalf("adding a restricted auxiliary category error = %v", err)
 	}
-	// Reordering the same categories promotes 3 to main: that is a visibility
-	// change and needs manage, which is why selection comparison is ordered.
-	if _, err := ValidateTopicCategoryWrite(creator, everyone, TopicCategoryWrite{Current: []uint64{1, 3}, Next: []uint64{3, 1}}); !errors.Is(err, ErrCategoryPermissionDenied) {
-		t.Fatalf("promoting a restricted category to main error = %v", err)
+	if _, err := ValidateTopicCategoryWrite(manager, everyone, TopicCategoryWrite{Current: []uint64{1}, Next: []uint64{3, 1}}); !errors.Is(err, ErrRestrictedCategorySingle) {
+		t.Fatalf("manager restricted mixed selection error = %v", err)
 	}
 }
 
@@ -179,8 +182,8 @@ func TestRemovingMainCategoryPromotesTheNextOneUnderTheManageGate(t *testing.T) 
 	if err != nil || MainCategoryOf(got) != 2 {
 		t.Fatalf("public promotion = %v, %v, want main 2", got, err)
 	}
-	// Dropping a restricted main promotes a public one: the topic would become
-	// world-readable, so an author must not be able to do it.
+	// Legacy mixed selections may still be opened while migration is pending,
+	// but every next selection must satisfy the new invariant.
 	if _, err := ValidateTopicCategoryWrite(creator, everyone, TopicCategoryWrite{Current: []uint64{3, 1}, Next: []uint64{1}}); !errors.Is(err, ErrCategoryPermissionDenied) {
 		t.Fatalf("author widening a restricted topic = %v, want denied", err)
 	}

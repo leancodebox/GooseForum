@@ -79,6 +79,7 @@ export interface AccessCategory {
   name: string
   color: string
   isRestricted: boolean
+  multiCategoryTopicCount: number
 }
 
 export interface AccessControlOverview {

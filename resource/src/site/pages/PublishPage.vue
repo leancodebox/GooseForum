@@ -4,6 +4,7 @@ import { Bold, ClipboardPaste, Code, Code2, CornerDownLeft, Eye, Heading, Image,
 import { submitTopic, uploadImage } from '@/runtime/api'
 import { processImageFile, validateImageFile } from '@/runtime/image'
 import { renderMarkdownPreview } from '@/runtime/markdown'
+import { addTopicCategory, isTopicCategoryAdditionDisabled } from '@/runtime/topic-category-selection'
 import { createMarkdownTable, fencedCodeBlock, formatMarkdownLines, prefixMarkdownBlock, replaceMarkdownSelectionWithBlock, type MarkdownBlockType } from '@/runtime/markdown-editing'
 import { hasUnsupportedVisualMarkdown, markdownFromClipboard } from '@/runtime/rich-paste'
 import { useUnsavedDraftGuard } from '@/site/composables/useUnsavedDraftGuard'
@@ -64,6 +65,12 @@ const validationError = computed(() => validationAttempted.value && !isValid.val
 const selectedCategories = computed(() => page.props.categories.filter((category) => categoryIds.value.includes(category.id)))
 // The first selected category is the main one: it alone decides who can read the topic.
 const mainCategory = computed(() => page.props.categories.find((category) => category.id === categoryIds.value[0]))
+const selectedRestrictedCategory = computed(() => selectedCategories.value.find((category) => category.isRestricted))
+const categoryLimit = computed(() => selectedRestrictedCategory.value ? 1 : 3)
+const categorySelectionHint = computed(() => {
+  if (selectedRestrictedCategory.value) return t('publish.restrictedCategorySingleHint')
+  return mainCategory.value ? t('publish.mainCategoryHint', { category: mainCategory.value.name }) : t('publish.maxCategories')
+})
 const previousMainCategory = computed(() => page.props.categories.find((category) => category.id === (
   pendingMainCategoryAction.value === 'remove' ? pendingMainCategoryRemovalId.value : initialMainCategoryId
 )))
@@ -115,12 +122,11 @@ function toggleCategory(id: number) {
   }
   const category = page.props.categories.find((item) => item.id === id)
   if (!category?.canCreate) return
-  if (categoryIds.value.length >= 3) return
-  categoryIds.value = [...categoryIds.value, id]
+  categoryIds.value = addTopicCategory(categoryIds.value, category, page.props.categories)
 }
 
 function categoryDisabled(category: PublishPageProps['categories'][number]) {
-  return !categoryIds.value.includes(category.id) && (!category.canCreate || categoryIds.value.length >= 3)
+  return isTopicCategoryAdditionDisabled(categoryIds.value, category, page.props.categories)
 }
 
 function closeMainCategoryPrompt() {
@@ -594,7 +600,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                     {{ t('publish.validation.categoryRequired') }}
                   </span>
                 </div>
-                <span class="text-xs text-base-content/55">{{ mainCategory ? t('publish.mainCategoryHint', { category: mainCategory.name }) : t('publish.maxCategories') }}</span>
+                <span class="text-xs text-base-content/55">{{ categorySelectionHint }}</span>
               </div>
               <div class="flex flex-wrap gap-2">
                 <button
@@ -604,7 +610,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                   class="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
                   :class="categoryIds.includes(category.id) ? 'border-primary bg-info/10 text-primary' : 'border-line text-base-content/75 hover:border-line hover:bg-base-200'"
                   :disabled="categoryDisabled(category)"
-                  :title="category.isRestricted ? t('publish.restrictedCategoryHint') : undefined"
+                  :title="category.isRestricted ? t('publish.restrictedCategorySingleHint') : undefined"
                   @click="toggleCategory(category.id)"
                 >
                   <span class="h-2 w-2 rounded-[3px]" :style="{ backgroundColor: category.color }" />
@@ -782,7 +788,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
             </div>
             <ul class="mt-3 space-y-2 text-sm text-base-content/75">
               <li class="flex items-center justify-between gap-3"><span>{{ t('publish.fields.title') }}</span><span :class="title.trim() ? 'text-success' : 'text-base-content/55'">{{ title.trim() ? t('publish.checklist.done') : t('publish.checklist.pending') }}</span></li>
-              <li class="flex items-center justify-between gap-3"><span>{{ t('publish.fields.category') }}</span><span :class="categoryIds.length ? 'text-success' : 'text-base-content/55'">{{ categoryIds.length }}/3</span></li>
+              <li class="flex items-center justify-between gap-3"><span>{{ t('publish.fields.category') }}</span><span :class="categoryIds.length ? 'text-success' : 'text-base-content/55'">{{ categoryIds.length }}/{{ categoryLimit }}</span></li>
               <li class="flex items-center justify-between gap-3"><span>{{ t('publish.fields.body') }}</span><span :class="content.trim() ? 'text-success' : 'text-base-content/55'">{{ t('publish.checklist.characters', { count: content.trim().length }) }}</span></li>
             </ul>
           </section>

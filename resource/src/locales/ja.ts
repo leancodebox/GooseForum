@@ -448,6 +448,7 @@ export default {
     mainCategoryChangeDescription: '「{current}」を外すと「{next}」がメインカテゴリーになり、このトピックを読める人が変わります。',
     confirmMainCategoryChange: 'メインカテゴリーを変更',
     restrictedCategoryHint: 'このカテゴリーへのアクセス権を持つメンバーだけが閲覧できます',
+    restrictedCategorySingleHint: '制限カテゴリーは単独で選択する必要があります。選択すると現在のカテゴリーが置き換わります',
     noCreatePermission: '選択したカテゴリーには投稿できなくなりましたが、下書きは保存できます。',
     markdownMode: 'Markdown',
     visualMode: '編集',
@@ -871,6 +872,9 @@ export default {
         tooShort: '本文は {minLength} 文字以上にしてください',
         tooLong: '本文は {maxLength} 文字以下にしてください',
       },
+      category: {
+        restrictedSingle: '制限カテゴリーはこのトピックの唯一のカテゴリーである必要があります',
+      },
       post: {
         cooldown: '新規ユーザーは登録から {minutes} 分後に投稿できます。{availableAt} 以降に再試行してください',
       },
@@ -955,6 +959,7 @@ export default {
         dataNotFound: 'データが見つかりません',
         keepOne: 'カテゴリーを少なくとも1つ残してください',
         hasTopics: 'このカテゴリーには有効なトピックがあります',
+        restrictionConflict: 'このカテゴリーを参照する複数カテゴリーのトピックが {count} 件あります。先に単一カテゴリーへ変更してください',
       },
       topic: {
         categoryRequired: 'カテゴリーを少なくとも1つ選択してください',
@@ -1181,6 +1186,7 @@ export default {
     visibilityDerivedHint: '「全員」グループに閲覧権限がある場合のみ、カテゴリーは公開されます。',
     noReadableAudienceWarning: 'このカテゴリーを閲覧できる有効なグループがありません。復旧できるのは全体管理者のみになる可能性があります。',
     legacyImageVisibilityWarning: 'リソース所有記録のない古い画像は、元のURLを知る人が直接閲覧できる場合があります。新しく追跡されるアップロードはメインカテゴリーの権限で保護されます。',
+    restrictionConflictWarning: 'このカテゴリーを参照する複数カテゴリーのトピックが {count} 件あります。制限する前に単一カテゴリーへ変更してください。',
     group: 'アクセスグループ',
     groupType: '参加方式',
     permissionSummaryHint: '権限はカテゴリーページで設定します。この表は読み取り専用の概要です。',

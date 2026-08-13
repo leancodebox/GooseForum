@@ -63,6 +63,10 @@ const isBecomingRestricted = computed(() => {
   const group = everyoneGroup.value
   return Boolean(group && currentLevel(group) >= 1 && willBeRestricted.value)
 })
+const restrictionConflictCount = computed(() => {
+  return overview.value.categories.find((category) => category.id === props.category?.id)?.multiCategoryTopicCount || 0
+})
+const restrictionBlocked = computed(() => isBecomingRestricted.value && restrictionConflictCount.value > 0)
 const hasReadableAudience = computed(() => {
   return groups.value.some((group) => group.status === 1 && (draft.value[group.id] || 0) >= 1)
 })
@@ -106,12 +110,12 @@ function enabledGrants() {
     .map((group) => ({ accessGroupId: group.id, level: draft.value[group.id] || 0 }))
 }
 
-// Restricting a category no longer rewrites any topic, so saving grants is a
-// plain save: there is no conflict to preview and no strategy to choose.
+// Existing multi-category topics must be resolved before the public grant can
+// be removed; the backend repeats this check in the grant-write transaction.
 async function save() {
   const category = props.category
   const everyone = everyoneGroup.value
-  if (!category || !everyone || loading.value || saving.value || !isDirty.value) return
+  if (!category || !everyone || loading.value || saving.value || !isDirty.value || restrictionBlocked.value) return
   await persist(enabledGrants())
 }
 
@@ -195,6 +199,14 @@ watch(
         {{ t('accessGroups.legacyImageVisibilityWarning') }}
       </div>
 
+      <div
+        v-if="restrictionBlocked && !loading"
+        class="flex gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+      >
+        <AlertTriangle class="mt-0.5 size-4 shrink-0" />
+        {{ t('accessGroups.restrictionConflictWarning', { count: restrictionConflictCount }) }}
+      </div>
+
       <div class="max-h-[26rem] overflow-auto rounded-md border">
         <Table>
           <TableHeader>
@@ -256,7 +268,7 @@ watch(
 
       <DialogFooter>
         <Button variant="outline" type="button" :disabled="saving" @click="close">{{ t('common.cancel') }}</Button>
-        <Button type="button" :disabled="loading || saving || !everyoneGroup || !isDirty" @click="save">
+        <Button type="button" :disabled="loading || saving || !everyoneGroup || !isDirty || restrictionBlocked" @click="save">
           {{ saving ? t('common.saving') : t('common.save') }}
         </Button>
       </DialogFooter>
