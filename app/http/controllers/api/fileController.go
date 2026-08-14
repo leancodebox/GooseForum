@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"io"
+	"log/slog"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -204,7 +205,10 @@ func saveImgByGinContext(c *gin.Context, adminUpload bool) {
 	}
 	if adminUpload {
 		fileusageservice.AddAdminUpload(userId, entity.Name)
-	} else if err := fileusageservice.AddPendingUpload(userId, entity.Name); err != nil {
+	} else if err := fileusageservice.AddUploadOwner(userId, entity.Name); err != nil {
+		if cleanupErr := filedata.DeleteByName(entity.Name); cleanupErr != nil {
+			slog.Error("delete upload after owner usage failure", "fileName", entity.Name, "err", cleanupErr)
+		}
 		c.JSON(http.StatusInternalServerError, component.FailDataCode(component.MessageUploadSaveFailed, nil))
 		return
 	}

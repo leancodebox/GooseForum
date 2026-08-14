@@ -92,6 +92,10 @@ func GetFileMetadataByName(name string) (*Entity, error) {
 	return &entity, nil
 }
 
+func DeleteByName(name string) error {
+	return builder().Where(queryopt.Eq(fieldName, name)).Delete(&Entity{}).Error
+}
+
 func FileResourcePage(page, pageSize int) FileResourcePageResult {
 	if page < 1 {
 		page = 1

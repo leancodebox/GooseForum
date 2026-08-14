@@ -32,16 +32,12 @@ const moderationPageSize = 20
 
 func Moderation(c *gin.Context) {
 	userID := component.LoginUserId(c)
-	if !moderationservice.CanAccessModeration(userID) {
+	global, categoryIDs, ok := moderationAccessScope(userID)
+	if !ok {
 		renderNotFound(c)
 		return
 	}
 	page := moderationPage(c)
-	global, categoryIDs := moderationservice.ScopeForUser(userID)
-	if !global && len(categoryIDs) == 0 {
-		renderNotFound(c)
-		return
-	}
 	availableCategories := moderationCategories(global, categoryIDs)
 	if len(availableCategories) == 0 {
 		renderNotFound(c)
@@ -182,7 +178,7 @@ func UpdateModerationTopicStatus(req component.BetterRequest[ModerationTopicStat
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
-	if !moderationservice.CanModerateAnyCategory(req.UserId, topic.CategoryIds) {
+	if !accesscontrol.CanUserManageAnyCategory(req.UserId, topic.CategoryIds) {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 	nextStatus := moderationTargetStatus(req.Params.Action)
@@ -250,7 +246,7 @@ func UpdateModerationPostStatus(req component.BetterRequest[ModerationPostStatus
 		return component.FailResponseCode(component.MessagePostNotFound, nil)
 	}
 	topic := topics.GetSimple(post.TopicId)
-	if topic.Id == 0 || !moderationservice.CanModerateAnyCategory(req.UserId, topic.CategoryIds) {
+	if topic.Id == 0 || !accesscontrol.CanUserManageAnyCategory(req.UserId, topic.CategoryIds) {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 	nextStatus := moderationTargetStatus(req.Params.Action)
@@ -275,7 +271,7 @@ func UpdateModerationPostStatus(req component.BetterRequest[ModerationPostStatus
 }
 
 func ModerationReportList(req component.BetterRequest[ModerationReportListReq]) component.Response {
-	if !moderationservice.CanAccessModeration(req.UserId) {
+	if _, _, ok := moderationAccessScope(req.UserId); !ok {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 	pageSize := component.BoundPageSizeWithRange(req.Params.PageSize, 10, 50)
@@ -317,24 +313,14 @@ func UpdateModerationReportStatus(req component.BetterRequest[ModerationReportSt
 }
 
 func ModerationLogList(req component.BetterRequest[ModerationLogListReq]) component.Response {
-	if !moderationservice.CanAccessModeration(req.UserId) {
+	global, categoryIDs, ok := moderationAccessScope(req.UserId)
+	if !ok {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 	pageSize := component.BoundPageSizeWithRange(req.Params.PageSize, 10, 50)
-	records := moderationLog.CursorPage(moderationLog.CursorPageQuery{
-		Cursor:   req.Params.Cursor,
-		PageSize: uint64(pageSize + 1),
-	})
-	hasNext := len(records) > pageSize
-	if hasNext {
-		records = records[:pageSize]
-	}
-	nextCursor := uint64(0)
-	if hasNext && len(records) > 0 {
-		nextCursor = records[len(records)-1].Id
-	}
+	items, nextCursor, hasNext := moderationLogPage(global, categoryIDs, req.Params.Cursor, pageSize)
 	return component.SuccessResponse(ModerationLogListResponse{
-		Items:      buildModerationLogItems(records),
+		Items:      items,
 		NextCursor: nextCursor,
 		HasNext:    hasNext,
 	})
@@ -442,7 +428,7 @@ func buildReportLogSnapshot(record reports.Entity, resolution string) moderation
 
 func canModerateReportTarget(userID uint64, targetType string, targetID uint64) bool {
 	categoryIDs, ok := reportTargetCategories(targetType, targetID)
-	return ok && moderationservice.CanModerateAnyCategory(userID, categoryIDs)
+	return ok && accesscontrol.CanUserManageAnyCategory(userID, categoryIDs)
 }
 
 func reportTargetCategories(targetType string, targetID uint64) ([]uint64, bool) {
@@ -472,6 +458,14 @@ func moderationCategoryID(c *gin.Context, categories []TopicCategoryPayload) uin
 		}
 	}
 	return categories[0].ID
+}
+
+func moderationAccessScope(userID uint64) (global bool, categoryIDs []uint64, ok bool) {
+	global, categoryIDs, err := accesscontrol.ManagementScope(userID)
+	if err != nil || !global && len(categoryIDs) == 0 {
+		return false, nil, false
+	}
+	return global, categoryIDs, true
 }
 
 func buildModerationCategoryTabs(categories []TopicCategoryPayload, activeID uint64) []TabPayload {
@@ -538,23 +532,15 @@ func moderationEntityPointers(data []topics.Entity) []*topics.Entity {
 	return res
 }
 
-func buildModerationLogItems(records []moderationLog.Entity) []ModerationLogItem {
+func buildModerationLogItems(records []moderationLog.Entity, topicMap map[uint64]*topics.Entity) []ModerationLogItem {
 	if len(records) == 0 {
 		return []ModerationLogItem{}
 	}
 	actorIDs := make([]uint64, 0, len(records))
-	topicIDs := make([]uint64, 0, len(records))
 	for _, record := range records {
 		actorIDs = appendUniqueUint64(actorIDs, record.ActorUserId)
-		if record.Payload.Params != nil {
-			topicIDs = appendUniqueUint64(topicIDs, uint64FromParam(record.Payload.Params["topicId"]))
-		}
-		if record.SubjectType == moderationLog.SubjectTopic {
-			topicIDs = appendUniqueUint64(topicIDs, record.SubjectId)
-		}
 	}
 	userMap := users.GetMapByIds(actorIDs)
-	topicMap := topics.GetPointerMapByIds(topicIDs)
 	items := make([]ModerationLogItem, 0, len(records))
 	for _, record := range records {
 		payload := record.Payload
@@ -567,13 +553,102 @@ func buildModerationLogItems(records []moderationLog.Entity) []ModerationLogItem
 			Action:      record.Action,
 			Actor:       userPayload(record.ActorUserId, userMap),
 			Subject:     subject,
-			Categories:  moderationLogCategories(record, payload.Params, subject.ID, topicMap),
+			Categories:  moderationLogCategories(record, payload.Params, topicMap),
 			MessageCode: payload.MessageCode,
 			Params:      payload.Params,
 			CreatedAt:   record.CreatedAt.Format(time.DateTime),
 		})
 	}
 	return items
+}
+
+func moderationLogPage(global bool, categoryIDs []uint64, cursor uint64, pageSize int) ([]ModerationLogItem, uint64, bool) {
+	const scanBatchSize = 100
+	wanted := pageSize + 1
+	items := make([]ModerationLogItem, 0, wanted)
+	allowed := make(map[uint64]struct{}, len(categoryIDs))
+	for _, categoryID := range categoryIDs {
+		allowed[categoryID] = struct{}{}
+	}
+	for len(items) < wanted {
+		pageRecords := moderationLog.CursorPage(moderationLog.CursorPageQuery{Cursor: cursor, PageSize: scanBatchSize})
+		if len(pageRecords) == 0 {
+			break
+		}
+		topicMap := moderationLogTopicMap(pageRecords)
+		records := pageRecords
+		if !global {
+			records = moderationLogRecordsInScope(records, allowed, topicMap)
+		}
+		for _, item := range buildModerationLogItems(records, topicMap) {
+			items = append(items, item)
+			if len(items) == wanted {
+				break
+			}
+		}
+		cursor = pageRecords[len(pageRecords)-1].Id
+		if len(pageRecords) < scanBatchSize {
+			break
+		}
+	}
+	hasNext := len(items) > pageSize
+	if hasNext {
+		items = items[:pageSize]
+	}
+	nextCursor := uint64(0)
+	if hasNext && len(items) > 0 {
+		nextCursor = items[len(items)-1].ID
+	}
+	return items, nextCursor, hasNext
+}
+
+func moderationLogTopicMap(records []moderationLog.Entity) map[uint64]*topics.Entity {
+	topicIDs := make([]uint64, 0, len(records))
+	for _, record := range records {
+		if record.SubjectType == moderationLog.SubjectTopic {
+			topicIDs = appendUniqueUint64(topicIDs, record.SubjectId)
+		}
+		if record.Payload.Params != nil {
+			topicIDs = appendUniqueUint64(topicIDs, uint64FromParam(record.Payload.Params["topicId"]))
+		}
+	}
+	return topics.GetPointerMapByIds(topicIDs)
+}
+
+func moderationLogRecordsInScope(records []moderationLog.Entity, allowed map[uint64]struct{}, topicMap map[uint64]*topics.Entity) []moderationLog.Entity {
+	result := make([]moderationLog.Entity, 0, len(records))
+	for _, record := range records {
+		for _, categoryID := range moderationLogCategoryIDs(record, record.Payload.Params, topicMap) {
+			if _, ok := allowed[categoryID]; !ok {
+				continue
+			}
+			result = append(result, record)
+			break
+		}
+	}
+	return result
+}
+
+func moderationLogCategoryIDs(record moderationLog.Entity, params map[string]any, topicMap map[uint64]*topics.Entity) []uint64 {
+	if record.SubjectType == moderationLog.SubjectCategory {
+		return []uint64{record.SubjectId}
+	}
+	topicID := record.SubjectId
+	if record.SubjectType != moderationLog.SubjectTopic {
+		topicID = uint64FromParam(params["topicId"])
+	}
+	if topic := topicMap[topicID]; topic != nil {
+		return topic.CategoryIds
+	}
+	return nil
+}
+
+func moderationLogCategories(record moderationLog.Entity, params map[string]any, topicMap map[uint64]*topics.Entity) []TopicCategoryPayload {
+	categoryIDs := moderationLogCategoryIDs(record, params, topicMap)
+	if len(categoryIDs) > 0 {
+		return categoryPayloads(categoryIDs)
+	}
+	return []TopicCategoryPayload{}
 }
 
 func moderationLogSubject(record moderationLog.Entity, params map[string]any, topicMap map[uint64]*topics.Entity) ModerationLogSubject {
@@ -664,18 +739,6 @@ func uint64FromParam(value any) uint64 {
 	}
 }
 
-func moderationLogCategories(record moderationLog.Entity, params map[string]any, subjectID uint64, topicMap map[uint64]*topics.Entity) []TopicCategoryPayload {
-	topicID := subjectID
-	if record.SubjectType == moderationLog.SubjectPost || record.SubjectType == moderationLog.SubjectReport {
-		topicID = uint64FromParam(params["topicId"])
-	}
-	topic := topicMap[topicID]
-	if topic == nil {
-		return []TopicCategoryPayload{}
-	}
-	return categoryPayloads(topic.CategoryIds)
-}
-
 func moderationReportPage(userID uint64, status string, categoryID uint64, cursor uint64, pageSize int) ([]ModerationReportItem, uint64, bool) {
 	scopeCategoryIDs, ok := reportScopeCategoryIDs(userID, categoryID)
 	if !ok {
@@ -713,7 +776,10 @@ func moderationReportPage(userID uint64, status string, categoryID uint64, curso
 }
 
 func reportScopeCategoryIDs(userID uint64, categoryID uint64) ([]uint64, bool) {
-	global, categoryIDs := moderationservice.ScopeForUser(userID)
+	global, categoryIDs, ok := moderationAccessScope(userID)
+	if !ok {
+		return nil, false
+	}
 	if global {
 		if categoryID > 0 {
 			return []uint64{categoryID}, true
@@ -801,7 +867,7 @@ func reportCategoriesFromMaps(record reports.Entity, batchMaps moderationReportB
 
 func buildModerationReportItem(userID uint64, categoryID uint64, record reports.Entity, batchMaps moderationReportBatchMaps) (ModerationReportItem, bool) {
 	categoryIDs, ok := reportCategoriesFromMaps(record, batchMaps)
-	if !ok || !moderationservice.CanModerateAnyCategory(userID, categoryIDs) {
+	if !ok || !accesscontrol.CanUserManageAnyCategory(userID, categoryIDs) {
 		return ModerationReportItem{}, false
 	}
 	if categoryID > 0 && !slices.Contains(categoryIDs, categoryID) {

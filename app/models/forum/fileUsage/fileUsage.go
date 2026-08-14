@@ -10,6 +10,7 @@ const (
 	TargetUser          = "user"
 	TargetAdminUpload   = "admin_upload"
 	TargetPendingUpload = "pending_upload"
+	TargetUploadOwner   = "upload_owner"
 )
 
 const (
@@ -17,6 +18,7 @@ const (
 	UsageAvatar        = "avatar"
 	UsageAdminUpload   = "admin_upload"
 	UsagePendingUpload = "pending_upload"
+	UsageUploadOwner   = "upload_owner"
 )
 
 type Entity struct {

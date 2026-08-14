@@ -16,6 +16,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/datamigration"
+	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 )
 
 func TestResolveProtectsRestrictedTopicFilesAndPendingUploads(t *testing.T) {
@@ -51,7 +52,7 @@ func TestResolveProtectsRestrictedTopicFilesAndPendingUploads(t *testing.T) {
 	if err := conn.Create(&custom).Error; err != nil {
 		t.Fatalf("create custom group: %v", err)
 	}
-	if err := conn.Create(&categoryGroupPermissions.Entity{CategoryId: restrictedCategory.Id, AccessGroupId: custom.Id, PermissionLevel: categoryGroupPermissions.PermissionRead, Status: categoryGroupPermissions.StatusEnabled}).Error; err != nil {
+	if err := conn.Create(&categoryGroupPermissions.Entity{CategoryId: restrictedCategory.Id, AccessGroupId: custom.Id, PermissionLevel: categoryGroupPermissions.PermissionManage, Status: categoryGroupPermissions.StatusEnabled}).Error; err != nil {
 		t.Fatalf("create restricted grant: %v", err)
 	}
 	if err := conn.Create(&accessGroupMembers.Entity{AccessGroupId: custom.Id, UserId: 970010, MemberRole: accessGroupMembers.MemberRoleMember, Status: accessGroupMembers.StatusEnabled}).Error; err != nil {
@@ -64,12 +65,15 @@ func TestResolveProtectsRestrictedTopicFilesAndPendingUploads(t *testing.T) {
 	}
 	publicTopic := topics.Entity{Id: 970101, Title: "public", CategoryIds: []uint64{publicCategory.Id}, MainCategoryId: publicCategory.Id, UserId: 970012, Status: 1}
 	restrictedTopic := topics.Entity{Id: 970102, Title: "private", CategoryIds: []uint64{restrictedCategory.Id}, MainCategoryId: restrictedCategory.Id, UserId: 970012, Status: 1}
-	if err := conn.Create(&[]topics.Entity{publicTopic, restrictedTopic}).Error; err != nil {
+	hiddenTopic := topics.Entity{Id: 970103, Title: "hidden", CategoryIds: []uint64{restrictedCategory.Id}, MainCategoryId: restrictedCategory.Id, UserId: 970012, Status: 1, ProcessStatus: 1}
+	if err := conn.Create(&[]topics.Entity{publicTopic, restrictedTopic, hiddenTopic}).Error; err != nil {
 		t.Fatalf("create topics: %v", err)
 	}
 	if err := conn.Create(&[]fileUsage.Entity{
 		{FileName: "public.webp", TargetType: fileUsage.TargetTopic, TargetId: publicTopic.Id, UsageType: fileUsage.UsageInlineImage, UserId: publicTopic.UserId},
 		{FileName: "private.webp", TargetType: fileUsage.TargetTopic, TargetId: restrictedTopic.Id, UsageType: fileUsage.UsageInlineImage, UserId: restrictedTopic.UserId},
+		{FileName: "detached.webp", TargetType: fileUsage.TargetTopic, TargetId: restrictedTopic.Id, UsageType: fileUsage.UsageInlineImage, UserId: restrictedTopic.UserId},
+		{FileName: "hidden.webp", TargetType: fileUsage.TargetTopic, TargetId: hiddenTopic.Id, UsageType: fileUsage.UsageInlineImage, UserId: hiddenTopic.UserId},
 		{FileName: "pending.webp", TargetType: fileUsage.TargetPendingUpload, TargetId: 970012, UsageType: fileUsage.UsagePendingUpload, UserId: 970012},
 	}).Error; err != nil {
 		t.Fatalf("create file usages: %v", err)
@@ -85,8 +89,22 @@ func TestResolveProtectsRestrictedTopicFilesAndPendingUploads(t *testing.T) {
 	assertDecision(t, 0, "private.webp", 970012, Decision{})
 	assertDecision(t, 970010, "private.webp", 970012, Decision{Allowed: true})
 	assertDecision(t, 970011, "private.webp", 970012, Decision{})
+	assertDecision(t, 970010, "hidden.webp", 970012, Decision{Allowed: true})
+	assertDecision(t, 970011, "hidden.webp", 970012, Decision{})
+	if err := conn.Create(&moderators.Entity{UserId: 970011, ScopeType: moderators.ScopeCategory, ScopeId: restrictedCategory.Id, Status: moderators.StatusEnabled}).Error; err != nil {
+		t.Fatalf("create category moderator: %v", err)
+	}
+	moderationservice.Invalidate()
+	assertDecision(t, 970011, "hidden.webp", 970012, Decision{Allowed: true})
 	assertDecision(t, 970012, "pending.webp", 970012, Decision{Allowed: true})
 	assertDecision(t, 970011, "pending.webp", 970012, Decision{})
+	if err := fileUsage.ReplaceTargetUsages(fileUsage.TargetTopic, restrictedTopic.Id, []string{fileUsage.UsageInlineImage}, []fileUsage.Entity{
+		{FileName: "private.webp", TargetType: fileUsage.TargetTopic, TargetId: restrictedTopic.Id, UsageType: fileUsage.UsageInlineImage, UserId: restrictedTopic.UserId},
+	}); err != nil {
+		t.Fatalf("detach restricted topic file: %v", err)
+	}
+	assertDecision(t, 0, "detached.webp", 970012, Decision{})
+	assertDecision(t, 970012, "detached.webp", 970012, Decision{Allowed: true})
 }
 
 func assertDecision(t *testing.T, userID uint64, fileName string, uploaderID uint64, want Decision) {

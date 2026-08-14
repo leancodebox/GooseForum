@@ -173,7 +173,9 @@ CanReadCategory(categoryID uint64) bool
 CanReplyCategory(categoryID uint64) bool
 CanCreateCategory(categoryID uint64) bool
 CanManageCategory(categoryID uint64) bool
+CanManageAnyCategory(categoryIDs []uint64) bool
 ReadableCategoryIDs() []uint64
+ManageableCategoryIDs() []uint64
 ```
 
 不长期缓存 `userID -> merged map`，也不按 user/group 组合缓存主题列表。否则组授权变化需要反向清理全部成员，并产生大量低命中列表缓存 key。
@@ -223,6 +225,7 @@ AND topics.main_category_id IN (:readable_category_ids)
 - 爬虫等同游客。
 - RSS、Sitemap、JSON-LD、Open Graph、no-js、统计和建议词只输出 `everyone` 可读内容。
 - 自定义组授权变化无需重建搜索文档；主题换分类时才更新。
+- Meilisearch 只负责召回候选 ID，不是最终授权源；页面返回前仍按数据库中的发布态、审核态和当前主分类权限过滤。取消发布也必须触发索引删除。
 
 ## 写操作
 
@@ -230,7 +233,7 @@ AND topics.main_category_id IN (:readable_category_ids)
 - 创建回复：对主题访问分类拥有 `reply`。
 - 点赞、收藏、关注、举报：先校验 `read`。
 - 编辑、删除：先 `read`，再执行现有作者/管理规则。
-- 审核与批量接口：使用同一权限服务，不允许后台控制器旁路。
+- 审核、审核日志、举报与附件接口：统一使用合并后的 `manage` 能力，不允许旧版主控制器旁路访问组授权。
 
 主题、首帖、`topics.category_ids` 和 `topic_category_index` 必须在一个数据库事务内保存；提交成功后再清缓存、更新搜索/文件引用并发布事件。
 
@@ -251,6 +254,7 @@ AND topics.main_category_id IN (:readable_category_ids)
 
 - 入组/退组：只清该用户成员缓存，不改主题或搜索文档。
 - 自定义组授权变化：只清该组 capability map，不改主题或搜索文档。
+- 未读通知缓存键包含当前可读分类集合；通知状态变化通过固定分片版本号 O(1) 失效，不扫描整张本地缓存。
 - 删除 `everyone -> read` 会把公开分类转为受限分类。管理端批量统计冲突主题并预先禁用保存；服务端在事务内再次检查，只有冲突数为零时才写入 grant。
 - 同理，搜索文档不需要因为权限变化而重建：文档里的 `mainCategory` 不会因为分类权限改变而失效。
 - Role、版主和账号状态变化必须立即失效相关缓存。
@@ -267,7 +271,7 @@ AND topics.main_category_id IN (:readable_category_ids)
 - 创建、回复、编辑、删除、互动、举报、审核 API；
 - 图片与附件。
 
-当前实现通过 `file_usage -> post -> topic -> main_category_id` 保护已记录归属的帖子图片；新上传图片在被正文认领前只允许上传者读取。`file_usage` 引入前的旧图片若没有归属记录，持有原始链接的人仍可能直接访问。后台在把公开分类改成受限分类时明确提示这一兼容边界，不把历史公开 URL 悄悄表述成已撤销。
+当前实现通过 `file_usage -> post -> topic -> main_category_id` 保护已记录归属的帖子图片；每个新上传文件同时保存永久 `upload_owner` 标记，因此在被正文认领前以及从正文移除后都只允许上传者读取，正文引用替换不会把现代文件退化为历史公开文件。`file_usage` 引入前的旧图片若完全没有归属记录，持有原始链接的人仍可能直接访问。后台在把公开分类改成受限分类时明确提示这一兼容边界，不把历史公开 URL 悄悄表述成已撤销。
 
 若部署要求旧资源也具备严格保密性，上线前还需要扫描历史帖子正文并回填可验证的 `file_usage`，或迁移到短时签名 URL；不能仅依赖页面权限。
 

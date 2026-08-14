@@ -23,6 +23,10 @@ func HasOpenReports(userID uint64) bool {
 		return false
 	}
 	global, categoryIDs := ScopeForUser(userID)
+	return HasOpenReportsForScope(global, categoryIDs)
+}
+
+func HasOpenReportsForScope(global bool, categoryIDs []uint64) bool {
 	if global {
 		categoryIDs = allCategoryIDs()
 	}

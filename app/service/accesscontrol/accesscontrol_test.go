@@ -52,7 +52,7 @@ func TestResolveMergesSystemCustomAndModeratorGrants(t *testing.T) {
 	store.grants[10] = []CategoryGrant{{CategoryID: 1, Capability: CapabilityRead}}
 	store.grants[11] = []CategoryGrant{{CategoryID: 1, Capability: CapabilityCreate}, {CategoryID: 2, Capability: CapabilityCreate}}
 	store.grants[20] = []CategoryGrant{{CategoryID: 3, Capability: CapabilityRead}}
-	store.grants[30] = []CategoryGrant{{CategoryID: 3, Capability: CapabilityReply}, {CategoryID: 4, Capability: CapabilityCreate}}
+	store.grants[30] = []CategoryGrant{{CategoryID: 3, Capability: CapabilityReply}, {CategoryID: 4, Capability: CapabilityCreate}, {CategoryID: 6, Capability: CapabilityManage}}
 
 	resolver := NewResolver(store, func(uint64) bool { return false }, func(userID uint64) (bool, []uint64) {
 		if userID == 7 {
@@ -69,7 +69,14 @@ func TestResolveMergesSystemCustomAndModeratorGrants(t *testing.T) {
 	assertCapability(t, snapshot, 3, CapabilityReply)
 	assertCapability(t, snapshot, 4, CapabilityCreate)
 	assertCapability(t, snapshot, 5, CapabilityManage)
-	if got := snapshot.ReadableCategoryIDs(); !reflect.DeepEqual(got, []uint64{1, 2, 3, 4, 5}) {
+	assertCapability(t, snapshot, 6, CapabilityManage)
+	if !snapshot.CanManageAnyCategory([]uint64{4, 5}) || !snapshot.CanManageAnyCategory([]uint64{6}) || snapshot.CanManageAnyCategory([]uint64{3, 4}) {
+		t.Fatalf("unexpected manage scope: %v", snapshot.ManageableCategoryIDs())
+	}
+	if got := snapshot.ManageableCategoryIDs(); !reflect.DeepEqual(got, []uint64{5, 6}) {
+		t.Fatalf("ManageableCategoryIDs = %v", got)
+	}
+	if got := snapshot.ReadableCategoryIDs(); !reflect.DeepEqual(got, []uint64{1, 2, 3, 4, 5, 6}) {
 		t.Fatalf("ReadableCategoryIDs = %v", got)
 	}
 	if _, cacheable := snapshot.ListCacheAudience(); cacheable {

@@ -523,11 +523,11 @@ type PublishPageProps struct {
 }
 
 type PublishCategoryPayload struct {
-	ID                      uint64 `json:"id"`
-	Name                    string `json:"name"`
-	Color                   string `json:"color"`
-	IsRestricted bool `json:"isRestricted"`
-	CanCreate               bool   `json:"canCreate"`
+	ID           uint64 `json:"id"`
+	Name         string `json:"name"`
+	Color        string `json:"color"`
+	IsRestricted bool   `json:"isRestricted"`
+	CanCreate    bool   `json:"canCreate"`
 }
 
 type ModerationPageProps struct {
@@ -565,12 +565,15 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 			AvatarURL:                 currentUser.AvatarUrl,
 			IsAuthenticated:           currentUser.UserId > 0,
 			CanAccessAdmin:            currentUser.CanAccessAdmin,
-			IsModerator:               moderationservice.CanAccessModeration(currentUser.UserId),
+			IsModerator:               false,
 			RequiresEmailVerification: currentUser.UserId > 0 && securityConfig.EnableEmailVerification && currentUser.IsActivated == users.ActivationPending,
 			AdminPermissions:          buildAdminPermissions(currentUser.UserId),
 		}
 	}
 	snapshot, accessOK := requestAccessSnapshot(c)
+	if accessOK {
+		viewer.IsModerator = snapshot.HasAnyManage()
+	}
 	unread := UnreadStatusPayload{}
 	if accessOK {
 		unread = buildUnreadStatus(viewer.ID, snapshot)
@@ -681,7 +684,7 @@ func buildUnreadStatus(userID uint64, snapshot accesscontrol.Snapshot) UnreadSta
 	return UnreadStatusPayload{
 		Notifications:          status.Notifications,
 		Messages:               status.Messages,
-		ModerationReports:      moderationservice.HasOpenReports(userID),
+		ModerationReports:      moderationservice.HasOpenReportsForScope(snapshot.HasGlobalManage(), snapshot.ManageableCategoryIDs()),
 		LatestNotificationType: status.LatestNotificationType,
 	}
 }
@@ -989,7 +992,7 @@ func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *post
 		userIDs = append(userIDs, item.UserId)
 	}
 	userMap := users.GetMapByIds(userIDs)
-	canModerate := moderationservice.CanModerateAnyCategory(currentUserID, topic.CategoryIds)
+	canModerate := cachedAccessSnapshot(c).CanManageAnyCategory(topic.CategoryIds)
 
 	return TopicDetailProps{
 		Topic: buildTopicDetailPayload(c, topic, firstPost, userMap),
@@ -2266,10 +2269,10 @@ func buildSearchPageProps(c *gin.Context, query string, page int) SearchPageProp
 		return item.ID
 	})
 	topicMap := topics.GetPointerMapByIds(ids)
-	orderedTopics := lo.FilterMap(ids, func(id uint64, _ int) (*topics.Entity, bool) {
-		topic, ok := topicMap[id]
-		return topic, ok && topic != nil
+	readableCategoryIDs := lo.SliceToMap(snapshot.ReadableCategoryIDs(), func(categoryID uint64) (uint64, struct{}) {
+		return categoryID, struct{}{}
 	})
+	orderedTopics := filterCurrentSearchTopics(ids, topicMap, readableCategoryIDs, snapshot.HasGlobalManage())
 	totalPageCount := totalPages(result.Total, pageSize)
 	nextPage := 0
 	if page < totalPageCount {
@@ -2286,6 +2289,21 @@ func buildSearchPageProps(c *gin.Context, query string, page int) SearchPageProp
 		NextURL:  buildSearchURL(query, nextPage),
 	}
 	return props
+}
+
+func filterCurrentSearchTopics(ids []uint64, topicMap map[uint64]*topics.Entity, readableCategoryIDs map[uint64]struct{}, globalManage bool) []*topics.Entity {
+	return lo.FilterMap(ids, func(id uint64, _ int) (*topics.Entity, bool) {
+		topic, ok := topicMap[id]
+		if !ok || topic == nil || topic.Status != 1 || topic.ProcessStatus != 0 {
+			return nil, false
+		}
+		if !globalManage {
+			if _, readable := readableCategoryIDs[topic.MainCategoryId]; !readable {
+				return nil, false
+			}
+		}
+		return topic, true
+	})
 }
 
 func buildSearchURL(query string, page int) string {

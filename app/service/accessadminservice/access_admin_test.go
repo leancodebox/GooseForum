@@ -3,6 +3,7 @@ package accessadminservice
 import (
 	"errors"
 	"reflect"
+	"sync"
 	"testing"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
@@ -12,6 +13,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/datamigration"
 	"github.com/leancodebox/GooseForum/app/service/topicservice"
@@ -101,7 +103,7 @@ func TestRestrictingCategoryRequiresSingleCategoryTopics(t *testing.T) {
 
 func TestApplicationOnlyActivatesMembershipAfterApproval(t *testing.T) {
 	conn := dbconnect.Connect()
-	if err := conn.AutoMigrate(&accessGroups.Entity{}, &accessGroupMembers.Entity{}); err != nil {
+	if err := conn.AutoMigrate(&accessGroups.Entity{}, &accessGroupMembers.Entity{}, &users.EntityComplete{}); err != nil {
 		t.Fatalf("migrate application tables: %v", err)
 	}
 	group := accessGroups.Entity{Id: 961001, Name: "Applicants", JoinMode: accessGroups.JoinModeApplication, Status: accessGroups.StatusEnabled}
@@ -109,6 +111,10 @@ func TestApplicationOnlyActivatesMembershipAfterApproval(t *testing.T) {
 		t.Fatalf("create application group: %v", err)
 	}
 	const userID uint64 = 961010
+	conn.Unscoped().Delete(&users.EntityComplete{}, userID)
+	if err := conn.Create(&users.EntityComplete{Id: userID, Username: "application-user-961010"}).Error; err != nil {
+		t.Fatalf("create application user: %v", err)
+	}
 	if err := ApplyToGroup(group.Id, userID); err != nil {
 		t.Fatalf("apply to group: %v", err)
 	}
@@ -126,6 +132,72 @@ func TestApplicationOnlyActivatesMembershipAfterApproval(t *testing.T) {
 	active, err = accessGroupMembers.ActiveGroupIDsByUser(userID)
 	if err != nil || !reflect.DeepEqual(active, []uint64{group.Id}) {
 		t.Fatalf("active groups after review = %v, %v", active, err)
+	}
+}
+
+func TestConcurrentMemberActivationCannotExceedGroupLimit(t *testing.T) {
+	conn := dbconnect.Connect()
+	if err := conn.AutoMigrate(&accessGroups.Entity{}, &accessGroupMembers.Entity{}, &users.EntityComplete{}); err != nil {
+		t.Fatalf("migrate membership limit tables: %v", err)
+	}
+	const userID uint64 = 964010
+	const firstGroupID uint64 = 964100
+	conn.Where("user_id = ?", userID).Delete(&accessGroupMembers.Entity{})
+	for offset := uint64(0); offset < accesscontrol.MaxActiveCustomGroups+1; offset++ {
+		conn.Unscoped().Delete(&accessGroups.Entity{}, firstGroupID+offset)
+	}
+	conn.Unscoped().Delete(&users.EntityComplete{}, userID)
+	if err := conn.Create(&users.EntityComplete{Id: userID, Username: "group-limit-user-964010"}).Error; err != nil {
+		t.Fatalf("create group limit user: %v", err)
+	}
+	groups := make([]accessGroups.Entity, 0, accesscontrol.MaxActiveCustomGroups+1)
+	for offset := uint64(0); offset < accesscontrol.MaxActiveCustomGroups+1; offset++ {
+		groups = append(groups, accessGroups.Entity{Id: firstGroupID + offset, Name: "Limit group", JoinMode: accessGroups.JoinModeInviteOnly, Status: accessGroups.StatusEnabled})
+	}
+	if err := conn.Create(&groups).Error; err != nil {
+		t.Fatalf("create limit groups: %v", err)
+	}
+	for offset := uint64(0); offset < accesscontrol.MaxActiveCustomGroups-1; offset++ {
+		member := accessGroupMembers.Entity{AccessGroupId: firstGroupID + offset, UserId: userID, MemberRole: accessGroupMembers.MemberRoleMember, Status: accessGroupMembers.StatusEnabled}
+		if err := conn.Create(&member).Error; err != nil {
+			t.Fatalf("seed active member %d: %v", offset, err)
+		}
+	}
+
+	start := make(chan struct{})
+	errs := make(chan error, 2)
+	var wg sync.WaitGroup
+	for _, groupID := range []uint64{firstGroupID + accesscontrol.MaxActiveCustomGroups - 1, firstGroupID + accesscontrol.MaxActiveCustomGroups} {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			<-start
+			_, err := SaveMember(groupID, userID, accessGroupMembers.MemberRoleMember, 1)
+			errs <- err
+		}()
+	}
+	close(start)
+	wg.Wait()
+	close(errs)
+
+	successes := 0
+	limitErrors := 0
+	for err := range errs {
+		switch {
+		case err == nil:
+			successes++
+		case errors.Is(err, accesscontrol.ErrTooManyActiveGroups):
+			limitErrors++
+		default:
+			t.Fatalf("unexpected activation error: %v", err)
+		}
+	}
+	if successes != 1 || limitErrors != 1 {
+		t.Fatalf("activation results: successes=%d limitErrors=%d", successes, limitErrors)
+	}
+	count, err := accessGroupMembers.CountActiveCustomGroupsByUser(userID)
+	if err != nil || count != accesscontrol.MaxActiveCustomGroups {
+		t.Fatalf("active group count = %d, %v", count, err)
 	}
 }
 

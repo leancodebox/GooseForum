@@ -30,7 +30,7 @@ func Resolve(userID uint64, fileName string, uploaderID uint64) (Decision, error
 			topicIDs[usage.TargetId] = struct{}{}
 		case fileUsage.TargetPost:
 			postIDs = append(postIDs, usage.TargetId)
-		case fileUsage.TargetPendingUpload:
+		case fileUsage.TargetPendingUpload, fileUsage.TargetUploadOwner:
 			continue
 		default:
 			return Decision{Allowed: true, Public: true}, nil
@@ -57,7 +57,7 @@ func Resolve(userID uint64, fileName string, uploaderID uint64) (Decision, error
 		if topic.Status == 1 && topic.ProcessStatus == 0 && guest.CanReadCategory(topic.MainCategoryId) {
 			return Decision{Allowed: true, Public: true}, nil
 		}
-		if userID != 0 && ((topic.Status == 1 && topic.ProcessStatus == 0 && viewer.CanReadCategory(topic.MainCategoryId)) || topic.UserId == userID || viewer.HasGlobalManage()) {
+		if userID != 0 && ((topic.Status == 1 && topic.ProcessStatus == 0 && viewer.CanReadCategory(topic.MainCategoryId)) || topic.UserId == userID || viewer.CanManageAnyCategory(topic.CategoryIds)) {
 			return Decision{Allowed: true}, nil
 		}
 	}

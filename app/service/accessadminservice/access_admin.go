@@ -3,6 +3,7 @@ package accessadminservice
 import (
 	"errors"
 	"strings"
+	"sync"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroupMembers"
@@ -10,10 +11,13 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
+
+var membershipWriteLocks [256]sync.Mutex
 
 var (
 	ErrInvalidGroup          = errors.New("invalid access group")
@@ -181,27 +185,37 @@ func SaveMember(groupID, userID uint64, role string, actorID uint64) (accessGrou
 	if err != nil || group.Id == 0 || group.SystemKey != nil || group.Status != accessGroups.StatusEnabled || userID == 0 || (role != accessGroupMembers.MemberRoleMember && role != accessGroupMembers.MemberRoleManager) {
 		return accessGroupMembers.Entity{}, ErrInvalidMember
 	}
-	entity, findErr := accessGroupMembers.GetByGroupUser(groupID, userID)
-	if findErr != nil && !errors.Is(findErr, gorm.ErrRecordNotFound) {
-		return accessGroupMembers.Entity{}, findErr
-	}
-	if entity.Id == 0 || entity.Status != accessGroupMembers.StatusEnabled {
-		count, err := accessGroupMembers.CountActiveCustomGroupsByUser(userID)
-		if err != nil {
-			return accessGroupMembers.Entity{}, err
+	lock := membershipWriteLock(userID)
+	lock.Lock()
+	defer lock.Unlock()
+	var entity accessGroupMembers.Entity
+	err = dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
+		if err := lockMembershipUser(tx, userID); err != nil {
+			return err
 		}
-		if count >= accesscontrol.MaxActiveCustomGroups {
-			return accessGroupMembers.Entity{}, accesscontrol.ErrTooManyActiveGroups
+		findErr := tx.Where("access_group_id = ? AND user_id = ?", groupID, userID).First(&entity).Error
+		if findErr != nil && !errors.Is(findErr, gorm.ErrRecordNotFound) {
+			return findErr
 		}
-	}
-	entity.AccessGroupId = groupID
-	entity.UserId = userID
-	entity.MemberRole = role
-	entity.Status = accessGroupMembers.StatusEnabled
-	if entity.CreatedBy == 0 {
-		entity.CreatedBy = actorID
-	}
-	if err := accessGroupMembers.Save(&entity); err != nil {
+		if entity.Id == 0 || entity.Status != accessGroupMembers.StatusEnabled {
+			count, err := accessGroupMembers.CountActiveCustomGroupsByUserWithDB(tx, userID)
+			if err != nil {
+				return err
+			}
+			if count >= accesscontrol.MaxActiveCustomGroups {
+				return accesscontrol.ErrTooManyActiveGroups
+			}
+		}
+		entity.AccessGroupId = groupID
+		entity.UserId = userID
+		entity.MemberRole = role
+		entity.Status = accessGroupMembers.StatusEnabled
+		if entity.CreatedBy == 0 {
+			entity.CreatedBy = actorID
+		}
+		return tx.Save(&entity).Error
+	})
+	if err != nil {
 		return accessGroupMembers.Entity{}, err
 	}
 	accesscontrol.InvalidateUser(userID)
@@ -246,16 +260,29 @@ func ApplyToGroup(groupID, userID uint64) error {
 }
 
 func ReviewApplication(groupID, memberID uint64, approve bool) error {
-	members, err := accessGroupMembers.ByGroupID(groupID)
-	if err != nil {
+	var candidate accessGroupMembers.Entity
+	if err := dbconnect.Connect().Where("id = ? AND access_group_id = ? AND status = ?", memberID, groupID, accessGroupMembers.StatusPending).First(&candidate).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrInvalidMember
+		}
 		return err
 	}
-	for _, member := range members {
-		if member.Id != memberID || member.Status != accessGroupMembers.StatusPending {
-			continue
+	lock := membershipWriteLock(candidate.UserId)
+	lock.Lock()
+	defer lock.Unlock()
+	err := dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
+		if err := lockMembershipUser(tx, candidate.UserId); err != nil {
+			return err
+		}
+		var member accessGroupMembers.Entity
+		if err := tx.Where("id = ? AND access_group_id = ? AND status = ?", memberID, groupID, accessGroupMembers.StatusPending).First(&member).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ErrInvalidMember
+			}
+			return err
 		}
 		if approve {
-			count, err := accessGroupMembers.CountActiveCustomGroupsByUser(member.UserId)
+			count, err := accessGroupMembers.CountActiveCustomGroupsByUserWithDB(tx, member.UserId)
 			if err != nil {
 				return err
 			}
@@ -266,13 +293,38 @@ func ReviewApplication(groupID, memberID uint64, approve bool) error {
 		} else {
 			member.Status = accessGroupMembers.StatusDisabled
 		}
-		if err := accessGroupMembers.Save(&member); err != nil {
-			return err
+		return tx.Save(&member).Error
+	})
+	if err != nil {
+		return err
+	}
+	accesscontrol.InvalidateUser(candidate.UserId)
+	return nil
+}
+
+func membershipWriteLock(userID uint64) *sync.Mutex {
+	return &membershipWriteLocks[userID%uint64(len(membershipWriteLocks))]
+}
+
+func lockMembershipUser(tx *gorm.DB, userID uint64) error {
+	if tx.Dialector.Name() == "sqlite" {
+		result := tx.Model(&users.EntityComplete{}).Where("id = ?", userID).UpdateColumn("id", gorm.Expr("id"))
+		if result.Error != nil {
+			return result.Error
 		}
-		accesscontrol.InvalidateUser(member.UserId)
+		if result.RowsAffected == 0 {
+			return ErrInvalidMember
+		}
 		return nil
 	}
-	return ErrInvalidMember
+	var user users.EntityComplete
+	if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Select("id").Where("id = ?", userID).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrInvalidMember
+		}
+		return err
+	}
+	return nil
 }
 
 // ReplaceCategoryGrants swaps a category's grants. A public category cannot be

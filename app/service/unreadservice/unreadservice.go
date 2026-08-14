@@ -1,7 +1,10 @@
 package unreadservice
 
 import (
+	"slices"
 	"strconv"
+	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
@@ -13,6 +16,8 @@ import (
 const statusTTL = 2 * time.Minute
 
 var statusCache = localcache.Cache[Status]{MaxEntries: cacheconfig.Current().UnreadStatus}
+
+var audienceCacheGenerations [1024]atomic.Uint64
 
 type Status struct {
 	Notifications          bool   `json:"notifications"`
@@ -33,7 +38,7 @@ func GetStatusForAudience(userID uint64, readableCategoryIDs []uint64, filterAud
 	if userID == 0 {
 		return Status{}
 	}
-	return statusCache.GetOrLoad(cacheKey(userID)+":audience", func() (Status, error) {
+	return statusCache.GetOrLoad(audienceCacheKey(userID, readableCategoryIDs, filterAudience), func() (Status, error) {
 		return loadStatusForAudience(userID, readableCategoryIDs, filterAudience), nil
 	}, statusTTL)
 }
@@ -43,7 +48,7 @@ func Invalidate(userID uint64) {
 		return
 	}
 	statusCache.Delete(cacheKey(userID))
-	statusCache.Delete(cacheKey(userID) + ":audience")
+	audienceCacheGenerations[userID%uint64(len(audienceCacheGenerations))].Add(1)
 }
 
 func loadStatus(userID uint64) Status {
@@ -66,4 +71,26 @@ func statusFromLatest(userID uint64, latest eventNotification.Entity) Status {
 
 func cacheKey(userID uint64) string {
 	return "user:unread:status:" + strconv.FormatUint(userID, 10)
+}
+
+func audienceCacheKey(userID uint64, readableCategoryIDs []uint64, filterAudience bool) string {
+	generation := audienceCacheGenerations[userID%uint64(len(audienceCacheGenerations))].Load()
+	key := cacheKey(userID) + ":audience:" + strconv.FormatUint(generation, 10) + ":"
+	if !filterAudience {
+		return key + "all"
+	}
+	categoryIDs := append([]uint64(nil), readableCategoryIDs...)
+	slices.Sort(categoryIDs)
+	categoryIDs = slices.Compact(categoryIDs)
+	var builder strings.Builder
+	builder.WriteString(key)
+	builder.WriteString("categories")
+	for _, categoryID := range categoryIDs {
+		if categoryID == 0 {
+			continue
+		}
+		builder.WriteByte(':')
+		builder.WriteString(strconv.FormatUint(categoryID, 10))
+	}
+	return builder.String()
 }

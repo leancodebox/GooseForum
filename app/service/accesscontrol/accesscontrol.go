@@ -95,6 +95,18 @@ func (snapshot Snapshot) CanManageCategory(categoryID uint64) bool {
 	return snapshot.Capability(categoryID) >= CapabilityManage
 }
 
+func (snapshot Snapshot) CanManageAnyCategory(categoryIDs []uint64) bool {
+	if snapshot.globalManage {
+		return true
+	}
+	for _, categoryID := range categoryIDs {
+		if snapshot.CanManageCategory(categoryID) {
+			return true
+		}
+	}
+	return false
+}
+
 // MainCategoryOf returns the category a topic draws its visibility from: the
 // first one selected. The rest are auxiliary tags and never widen or narrow
 // who can read the topic.
@@ -198,6 +210,22 @@ func (snapshot Snapshot) ReadableCategoryIDs() []uint64 {
 
 func (snapshot Snapshot) CreatableCategoryIDs() []uint64 {
 	return snapshot.categoryIDsAtLeast(CapabilityCreate)
+}
+
+func (snapshot Snapshot) ManageableCategoryIDs() []uint64 {
+	return snapshot.categoryIDsAtLeast(CapabilityManage)
+}
+
+func (snapshot Snapshot) HasAnyManage() bool {
+	if snapshot.globalManage {
+		return true
+	}
+	for _, capability := range snapshot.levels {
+		if capability >= CapabilityManage {
+			return true
+		}
+	}
+	return false
 }
 
 func (snapshot Snapshot) HasGlobalManage() bool {
@@ -577,6 +605,19 @@ var Default = newDefaultResolver()
 
 func Resolve(userID uint64) (Snapshot, error) {
 	return Default.Resolve(userID)
+}
+
+func CanUserManageAnyCategory(userID uint64, categoryIDs []uint64) bool {
+	snapshot, err := Resolve(userID)
+	return err == nil && snapshot.CanManageAnyCategory(categoryIDs)
+}
+
+func ManagementScope(userID uint64) (global bool, categoryIDs []uint64, err error) {
+	snapshot, err := Resolve(userID)
+	if err != nil {
+		return false, nil, err
+	}
+	return snapshot.HasGlobalManage(), snapshot.ManageableCategoryIDs(), nil
 }
 
 func FilterReadableUserIDs(userIDs []uint64, categoryID uint64) ([]uint64, error) {

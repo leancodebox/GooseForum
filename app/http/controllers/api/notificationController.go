@@ -22,7 +22,7 @@ func GetUnreadStatus(req component.BetterRequest[GetUnreadCountReq]) component.R
 	return component.SuccessResponse(component.DataMap{
 		"notifications":          status.Notifications,
 		"messages":               status.Messages,
-		"moderationReports":      moderationservice.HasOpenReports(req.UserId),
+		"moderationReports":      moderationservice.HasOpenReportsForScope(snapshot.HasGlobalManage(), snapshot.ManageableCategoryIDs()),
 		"latestNotificationType": status.LatestNotificationType,
 	})
 }

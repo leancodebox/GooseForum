@@ -161,7 +161,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		}
 		fileusageservice.ReplaceTopic(topic.Id, req.UserId, firstPost.Content)
 		hotdataserve.ClearTopicListCache()
-		if topic.Status == 1 && wasPublished {
+		if wasPublished {
 			eventbus.Publish(context.Background(), &eventhandlers.TopicUpdatedEvent{Topic: &topic, FirstPost: &firstPost})
 		} else if topic.Status == 1 {
 			userStatistics.WriteTopic(req.UserId)
@@ -231,6 +231,8 @@ func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Re
 	hotdataserve.ClearTopicListCache()
 	if topic.Status == 1 {
 		eventbus.Publish(context.Background(), &eventhandlers.TopicPublishedEvent{Topic: &topic, FirstPost: &firstPost})
+	} else {
+		eventbus.Publish(context.Background(), &eventhandlers.TopicUpdatedEvent{Topic: &topic, FirstPost: &firstPost})
 	}
 	return component.SuccessResponse(true)
 }

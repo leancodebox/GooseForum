@@ -3,6 +3,7 @@ package accessGroupMembers
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
+	"gorm.io/gorm"
 )
 
 const categoryGrantStatusEnabled int8 = 1
@@ -58,11 +59,15 @@ func ManagedGroupIDsByUser(userID uint64) ([]uint64, error) {
 }
 
 func CountActiveCustomGroupsByUser(userID uint64) (int64, error) {
+	return CountActiveCustomGroupsByUserWithDB(builder(), userID)
+}
+
+func CountActiveCustomGroupsByUserWithDB(db *gorm.DB, userID uint64) (int64, error) {
 	if userID == 0 {
 		return 0, nil
 	}
 	var count int64
-	err := builder().
+	err := db.Model(&Entity{}).
 		Joins("JOIN access_groups ON access_groups.id = access_group_members.access_group_id AND access_groups.status = ? AND access_groups.system_key IS NULL", accessGroups.StatusEnabled).
 		Where(queryopt.Eq("access_group_members.user_id", userID)).
 		Where(queryopt.Eq("access_group_members.status", StatusEnabled)).

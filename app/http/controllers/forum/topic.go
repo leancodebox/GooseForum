@@ -12,12 +12,9 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
-	"github.com/leancodebox/GooseForum/app/service/moderationservice"
-	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
 	"github.com/leancodebox/GooseForum/app/service/topicviewservice"
-	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/spf13/cast"
 )
 
@@ -201,7 +198,7 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		userIDs = append(userIDs, item.UserId)
 	}
 	userMap := users.GetMapByIds(userIDs)
-	canModeratePosts := moderationservice.CanModerateAnyCategory(req.UserId, topicEntity.CategoryIds)
+	canModeratePosts := accesscontrol.CanUserManageAnyCategory(req.UserId, topicEntity.CategoryIds)
 	maxPostNo := uint64(0)
 	if topicEntity.PostSeq > 0 {
 		maxPostNo = topicEntity.PostSeq
@@ -230,7 +227,7 @@ func canViewTopic(entity *topics.Entity, userID uint64) bool {
 	if entity.Status != 1 {
 		return userID != 0 && userID == entity.UserId
 	}
-	if entity.ProcessStatus != 0 && !currentUserCanViewProcessedTopic(userID) && !moderationservice.CanModerateAnyCategory(userID, entity.CategoryIds) {
+	if entity.ProcessStatus != 0 && !accesscontrol.CanUserManageAnyCategory(userID, entity.CategoryIds) {
 		return false
 	}
 	return true
@@ -240,18 +237,10 @@ func canViewTopicSimple(entity *topics.Entity, userID uint64) bool {
 	if entity.Status != 1 {
 		return userID != 0 && userID == entity.UserId
 	}
-	if entity.ProcessStatus != 0 && !currentUserCanViewProcessedTopic(userID) && !moderationservice.CanModerateAnyCategory(userID, entity.CategoryIds) {
+	if entity.ProcessStatus != 0 && !accesscontrol.CanUserManageAnyCategory(userID, entity.CategoryIds) {
 		return false
 	}
 	return true
-}
-
-func currentUserCanViewProcessedTopic(userID uint64) bool {
-	if userID == 0 {
-		return false
-	}
-	roleID, ok := userservice.GetUserRoleId(userID)
-	return ok && permission.CheckRole(roleID, permission.TopicsManager)
 }
 
 func shouldCountTopicView(entity *topics.Entity) bool {
