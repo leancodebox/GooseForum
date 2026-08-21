@@ -37,7 +37,7 @@ chmod +x ./GooseForum
 
 环境要求：
 
-- Go 1.26+
+- Go 1.27+
 - Node.js 18+
 - pnpm
 

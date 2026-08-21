@@ -37,7 +37,7 @@ Open `http://localhost:5234`. The first registered user automatically becomes th
 
 Requirements:
 
-- Go 1.26+
+- Go 1.27+
 - Node.js 18+
 - pnpm
 

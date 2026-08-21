@@ -57,7 +57,7 @@ func TestTopicIndexUsesTopicName(t *testing.T) {
 }
 
 func TestTopicSearchDocumentDoesNotExposeLegacyType(t *testing.T) {
-	if _, ok := reflect.TypeOf(TopicSearchDocument{}).FieldByName("Type"); ok {
+	if _, ok := reflect.TypeFor[TopicSearchDocument]().FieldByName("Type"); ok {
 		t.Fatalf("TopicSearchDocument should not expose legacy Type field")
 	}
 }

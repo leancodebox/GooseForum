@@ -78,13 +78,13 @@ func ensureSystemAccessGroups(tx *gorm.DB) (map[string]accessGroups.Entity, erro
 	definitions := []accessGroups.Entity{
 		{
 			Name:      "Everyone",
-			SystemKey: stringPointer(accessGroups.SystemKeyEveryone),
+			SystemKey: new(accessGroups.SystemKeyEveryone),
 			JoinMode:  accessGroups.JoinModeSystem,
 			Status:    accessGroups.StatusEnabled,
 		},
 		{
 			Name:      "Registered",
-			SystemKey: stringPointer(accessGroups.SystemKeyRegistered),
+			SystemKey: new(accessGroups.SystemKeyRegistered),
 			JoinMode:  accessGroups.JoinModeSystem,
 			Status:    accessGroups.StatusEnabled,
 		},
@@ -121,6 +121,7 @@ func ensureSystemAccessGroups(tx *gorm.DB) (map[string]accessGroups.Entity, erro
 	return result, nil
 }
 
+//go:fix inline
 func stringPointer(value string) *string {
-	return &value
+	return new(value)
 }

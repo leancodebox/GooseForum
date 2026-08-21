@@ -126,7 +126,7 @@ func TestTopicMetaJSONLDLimitsPostStreamComments(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodGet, "https://example.com/p/post/440", nil)
 
 	postStream := []PostPayload{{ID: 100, PostNo: 1, Content: "first post", Author: TopicAuthorPayload{ID: 1, Username: "author"}, CreatedAt: "2026-07-08 10:00:00"}}
-	for i := 0; i < topicJSONLDCommentLimit+3; i++ {
+	for i := range topicJSONLDCommentLimit + 3 {
 		postStream = append(postStream, PostPayload{
 			ID:        uint64(101 + i),
 			PostNo:    uint64(2 + i),

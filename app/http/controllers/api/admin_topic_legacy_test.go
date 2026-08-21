@@ -6,10 +6,10 @@ import (
 )
 
 func TestAdminTopicPayloadsDoNotExposeLegacyTopicType(t *testing.T) {
-	if _, ok := reflect.TypeOf(TopicInfoAdminVo{}).FieldByName("Type"); ok {
+	if _, ok := reflect.TypeFor[TopicInfoAdminVo]().FieldByName("Type"); ok {
 		t.Fatal("TopicInfoAdminVo should not expose legacy topic type")
 	}
-	if _, ok := reflect.TypeOf(TopicSourceVo{}).FieldByName("Type"); ok {
+	if _, ok := reflect.TypeFor[TopicSourceVo]().FieldByName("Type"); ok {
 		t.Fatal("TopicSourceVo should not expose legacy topic type")
 	}
 }

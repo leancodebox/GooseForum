@@ -49,10 +49,7 @@ func TopicDetail(c *gin.Context) {
 		renderNotFound(c)
 		return
 	}
-	postNo := cast.ToUint64(c.Param("postNo"))
-	if postNo > topic.PostSeq {
-		postNo = topic.PostSeq
-	}
+	postNo := min(cast.ToUint64(c.Param("postNo")), topic.PostSeq)
 
 	firstPost := posts.Get(topic.FirstPostId)
 	if firstPost.Id == 0 {

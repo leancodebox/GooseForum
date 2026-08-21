@@ -143,7 +143,7 @@ func TestConcurrentMemberActivationCannotExceedGroupLimit(t *testing.T) {
 	const userID uint64 = 964010
 	const firstGroupID uint64 = 964100
 	conn.Where("user_id = ?", userID).Delete(&accessGroupMembers.Entity{})
-	for offset := uint64(0); offset < accesscontrol.MaxActiveCustomGroups+1; offset++ {
+	for offset := range uint64(accesscontrol.MaxActiveCustomGroups + 1) {
 		conn.Unscoped().Delete(&accessGroups.Entity{}, firstGroupID+offset)
 	}
 	conn.Unscoped().Delete(&users.EntityComplete{}, userID)
@@ -151,13 +151,13 @@ func TestConcurrentMemberActivationCannotExceedGroupLimit(t *testing.T) {
 		t.Fatalf("create group limit user: %v", err)
 	}
 	groups := make([]accessGroups.Entity, 0, accesscontrol.MaxActiveCustomGroups+1)
-	for offset := uint64(0); offset < accesscontrol.MaxActiveCustomGroups+1; offset++ {
+	for offset := range uint64(accesscontrol.MaxActiveCustomGroups + 1) {
 		groups = append(groups, accessGroups.Entity{Id: firstGroupID + offset, Name: "Limit group", JoinMode: accessGroups.JoinModeInviteOnly, Status: accessGroups.StatusEnabled})
 	}
 	if err := conn.Create(&groups).Error; err != nil {
 		t.Fatalf("create limit groups: %v", err)
 	}
-	for offset := uint64(0); offset < accesscontrol.MaxActiveCustomGroups-1; offset++ {
+	for offset := range uint64(accesscontrol.MaxActiveCustomGroups - 1) {
 		member := accessGroupMembers.Entity{AccessGroupId: firstGroupID + offset, UserId: userID, MemberRole: accessGroupMembers.MemberRoleMember, Status: accessGroupMembers.StatusEnabled}
 		if err := conn.Create(&member).Error; err != nil {
 			t.Fatalf("seed active member %d: %v", offset, err)
@@ -168,13 +168,11 @@ func TestConcurrentMemberActivationCannotExceedGroupLimit(t *testing.T) {
 	errs := make(chan error, 2)
 	var wg sync.WaitGroup
 	for _, groupID := range []uint64{firstGroupID + accesscontrol.MaxActiveCustomGroups - 1, firstGroupID + accesscontrol.MaxActiveCustomGroups} {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			<-start
 			_, err := SaveMember(groupID, userID, accessGroupMembers.MemberRoleMember, 1)
 			errs <- err
-		}()
+		})
 	}
 	close(start)
 	wg.Wait()

@@ -99,12 +99,7 @@ func (snapshot Snapshot) CanManageAnyCategory(categoryIDs []uint64) bool {
 	if snapshot.globalManage {
 		return true
 	}
-	for _, categoryID := range categoryIDs {
-		if snapshot.CanManageCategory(categoryID) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(categoryIDs, snapshot.CanManageCategory)
 }
 
 // MainCategoryOf returns the category a topic draws its visibility from: the

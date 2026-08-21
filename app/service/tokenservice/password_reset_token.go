@@ -16,12 +16,10 @@ type PasswordResetClaims struct {
 // GeneratePasswordResetToken creates a signed password reset token.
 func GeneratePasswordResetToken(userId uint64, email string) (string, error) {
 	claims := PasswordResetClaims{
-		UserId: userId,
-		Email:  email,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
+		UserId:    userId,
+		Email:     email,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

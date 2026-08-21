@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"log/slog"
 	"net/url"
+	"slices"
 	"strings"
 	"unicode/utf8"
 
@@ -409,8 +410,8 @@ func shouldInsertSpace(stack []ast.Node) bool {
 		return false
 	}
 
-	for i := len(stack) - 1; i >= 0; i-- {
-		switch stack[i].Kind() {
+	for _, s := range slices.Backward(stack) {
+		switch s.Kind() {
 		case ast.KindParagraph:
 			return true
 		case ast.KindHeading:

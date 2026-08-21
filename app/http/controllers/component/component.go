@@ -120,8 +120,7 @@ func FailDataError(err error) ResultStruct {
 	if err == nil {
 		return FailData()
 	}
-	var messageErr MessageError
-	if errors.As(err, &messageErr) {
+	if messageErr, ok := errors.AsType[MessageError](err); ok {
 		return FailDataCode(messageErr.Code, messageErr.Params)
 	}
 	return FailData()

@@ -24,12 +24,10 @@ func GenerateActivationTokenByUser(entity users.EntityComplete) (string, error) 
 // GenerateActivationToken creates a signed email activation token.
 func GenerateActivationToken(userId uint64, email string) (string, error) {
 	claims := ActivationClaims{
-		UserId: userId,
-		Email:  email,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
+		UserId:    userId,
+		Email:     email,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

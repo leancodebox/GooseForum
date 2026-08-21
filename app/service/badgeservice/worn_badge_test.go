@@ -8,8 +8,8 @@ import (
 
 func TestWornBadgeRequiresWearableBadge(t *testing.T) {
 	items := []UserBadge{
-		{Badge: Badge{Code: "plain", IsEnabled: true, IsWearable: false}},
-		{Badge: Badge{Code: "wearable", IsEnabled: true, IsWearable: true}},
+		{Code: "plain", IsEnabled: true, IsWearable: false},
+		{Code: "wearable", IsEnabled: true, IsWearable: true},
 	}
 
 	if got := WornBadgeFromList(items, "plain"); got != nil {

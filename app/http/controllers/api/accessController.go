@@ -308,8 +308,7 @@ func SaveCategoryAccess(req component.BetterRequest[SaveCategoryAccessReq]) comp
 
 func accessAdminFailure(operation string, err error) component.Response {
 	slog.Error(operation+" failed", "err", err)
-	var restrictionConflict *accessadminservice.CategoryRestrictionConflictError
-	if errors.As(err, &restrictionConflict) {
+	if restrictionConflict, ok := errors.AsType[*accessadminservice.CategoryRestrictionConflictError](err); ok {
 		return component.FailResponseCode(component.MessageAdminCategoryRestrictionConflict, component.MessageParams{"count": restrictionConflict.TopicCount})
 	}
 	if errors.Is(err, accessadminservice.ErrInvalidGroup) || errors.Is(err, accessadminservice.ErrSystemGroupImmutable) || errors.Is(err, accessadminservice.ErrInvalidMember) || errors.Is(err, accessadminservice.ErrInvalidGrant) || errors.Is(err, accessadminservice.ErrApplicationNotAllowed) || errors.Is(err, accesscontrol.ErrTooManyActiveGroups) {

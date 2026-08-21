@@ -443,17 +443,15 @@ func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
 				userAvatarUrl = user.GetWebAvatarUrl()
 			}
 			return TopicInfoAdminVo{
-				TopicAdminBaseVo: TopicAdminBaseVo{
-					Id:            t.Id,
-					Title:         t.Title,
-					Description:   t.Excerpt,
-					CategoryId:    t.CategoryIds,
-					UserId:        t.UserId,
-					TopicStatus:   t.Status,
-					ProcessStatus: t.ProcessStatus,
-					CreatedAt:     t.CreatedAt.Format(time.DateTime),
-					UpdatedAt:     t.UpdatedAt.Format(time.DateTime),
-				},
+				Id:            t.Id,
+				Title:         t.Title,
+				Description:   t.Excerpt,
+				CategoryId:    t.CategoryIds,
+				UserId:        t.UserId,
+				TopicStatus:   t.Status,
+				ProcessStatus: t.ProcessStatus,
+				CreatedAt:     t.CreatedAt.Format(time.DateTime),
+				UpdatedAt:     t.UpdatedAt.Format(time.DateTime),
 				Username:      username,
 				UserAvatarUrl: userAvatarUrl,
 				ViewCount:     t.ViewCount,
@@ -479,18 +477,16 @@ func TopicSource(req component.BetterRequest[TopicSourceReq]) component.Response
 	}
 
 	return component.SuccessResponse(TopicSourceVo{
-		TopicAdminBaseVo: TopicAdminBaseVo{
-			Id:            topic.Id,
-			Title:         topic.Title,
-			Description:   topic.Excerpt,
-			CategoryId:    topic.CategoryIds,
-			UserId:        topic.UserId,
-			TopicStatus:   topic.Status,
-			ProcessStatus: topic.ProcessStatus,
-			CreatedAt:     topic.CreatedAt.Format(time.DateTime),
-			UpdatedAt:     topic.UpdatedAt.Format(time.DateTime),
-		},
-		Content: firstPost.Content,
+		Id:            topic.Id,
+		Title:         topic.Title,
+		Description:   topic.Excerpt,
+		CategoryId:    topic.CategoryIds,
+		UserId:        topic.UserId,
+		TopicStatus:   topic.Status,
+		ProcessStatus: topic.ProcessStatus,
+		CreatedAt:     topic.CreatedAt.Format(time.DateTime),
+		UpdatedAt:     topic.UpdatedAt.Format(time.DateTime),
+		Content:       firstPost.Content,
 	})
 }
 
