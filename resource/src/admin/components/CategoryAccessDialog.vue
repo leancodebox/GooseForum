@@ -46,13 +46,13 @@ const groups = computed(() => {
   })
 })
 
-const levelOptions = computed(() => [
-  { value: 0, label: t('accessGroups.level.none') },
-  { value: 1, label: t('accessGroups.level.read') },
-  { value: 2, label: t('accessGroups.level.reply') },
-  { value: 3, label: t('accessGroups.level.create') },
-  { value: 4, label: t('accessGroups.level.manage') },
-])
+const levelOptions = computed(() => {
+  const keys = ['none', 'read', 'reply', 'create', 'manage'] as const
+  return keys.map((key, value) => ({
+    value,
+    label: `${t(`accessGroups.level.${key}`)} (${t(`accessGroups.levelHint.${key}`)})`,
+  }))
+})
 
 const everyoneGroup = computed(() => groups.value.find((group) => group.systemKey === 'everyone'))
 const willBeRestricted = computed(() => {
@@ -213,7 +213,7 @@ watch(
             <TableRow>
               <TableHead>{{ t('accessGroups.group') }}</TableHead>
               <TableHead>{{ t('accessGroups.groupType') }}</TableHead>
-              <TableHead class="w-48">{{ t('accessGroups.capability') }}</TableHead>
+              <TableHead class="w-72">{{ t('accessGroups.capability') }}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
