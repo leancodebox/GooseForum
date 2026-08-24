@@ -161,14 +161,7 @@ onMounted(loadRecords)
 </script>
 
 <template>
-  <BasicPage :title="adminText('k007c')" :description="adminText('k007d')" sticky>
-    <template #actions>
-      <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadRecords">
-        <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
-        {{ adminText('k004q') }}
-      </Button>
-    </template>
-
+  <BasicPage :title="adminText('k007c')" :description="adminText('k007d')">
       <ManagementTable
         :columns="columns"
         :loading="loading && rows.length === 0"
@@ -181,6 +174,14 @@ onMounted(loadRecords)
         @update:page="updatePage"
         @update:page-size="updatePageSize"
       >
+        <template #header>
+          <div class="flex justify-end">
+            <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadRecords">
+              <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
+              {{ adminText('k004q') }}
+            </Button>
+          </div>
+        </template>
         <tr v-if="rows.length === 0">
           <td :colspan="columns.length" class="h-28 px-4 text-center text-muted-foreground">{{ adminText('k007e') }}</td>
         </tr>

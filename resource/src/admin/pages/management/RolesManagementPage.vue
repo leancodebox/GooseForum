@@ -154,18 +154,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <BasicPage :title="adminText('k007f')" :description="adminText('k007g')" sticky>
-    <template #actions>
-      <div class="flex items-center gap-2">
-        <Button variant="outline" type="button" @click="loadRoles">
-          <RefreshCw class="size-4" />
-          {{ adminText('k004q') }}
-        </Button>
-        <Button type="button" @click="openAdd">
-          <Plus class="size-4" />
-          {{ adminText('k007h') }}
-        </Button>
-      </div>
+  <BasicPage :title="adminText('k007f')" :description="adminText('k007g')">
+    <template #primary-action>
+      <Button type="button" @click="openAdd">
+        <Plus class="size-4" />
+        {{ adminText('k007h') }}
+      </Button>
     </template>
 
       <ManagementTable
@@ -186,13 +180,19 @@ onMounted(() => {
                 <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <input v-model="search" class="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" :placeholder="adminText('k007q')" />
               </div>
-              <Button type="submit">{{ adminText('k00al') }}</Button>
+              <Button type="submit" class="h-10">{{ adminText('k00al') }}</Button>
             </form>
-            <select v-model="effectiveFilter" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" @change="page = 1">
-              <option value="">{{ adminText('k00am') }}</option>
-              <option value="1">{{ adminText('k007n') }}</option>
-              <option value="0">{{ adminText('k007o') }}</option>
-            </select>
+            <div class="flex items-center gap-2">
+              <select v-model="effectiveFilter" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" @change="page = 1">
+                <option value="">{{ adminText('k00am') }}</option>
+                <option value="1">{{ adminText('k007n') }}</option>
+                <option value="0">{{ adminText('k007o') }}</option>
+              </select>
+              <Button variant="outline" type="button" class="h-10" :disabled="loading" @click="loadRoles">
+                <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
+                {{ adminText('k004q') }}
+              </Button>
+            </div>
           </AdminToolbar>
         </template>
         <tr v-if="pagedRows.length === 0">

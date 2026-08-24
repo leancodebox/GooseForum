@@ -201,14 +201,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <BasicPage :title="adminText('k006i')" :description="adminText('k006j')" sticky>
-    <template #actions>
-      <Button variant="outline" type="button" @click="loadUsers">
-        <RefreshCw class="size-4" />
-        {{ adminText('k004q') }}
-      </Button>
-    </template>
-
+  <BasicPage :title="adminText('k006i')" :description="adminText('k006j')">
       <AdminSection>
         <template #header>
         <AdminToolbar class="-mx-3 -my-2 border-b-0">
@@ -227,6 +220,10 @@ onMounted(() => {
             </Button>
           </form>
           <div class="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadUsers">
+              <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
+              {{ adminText('k004q') }}
+            </Button>
             <span class="whitespace-nowrap">{{ rangeStart }}-{{ rangeEnd }} / {{ total }}</span>
             <select
               class="h-9 rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"

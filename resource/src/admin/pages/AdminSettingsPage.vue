@@ -452,8 +452,8 @@ onMounted(load)
 </script>
 
 <template>
-  <BasicPage :title="pageMeta.title" :description="pageMeta.description" sticky>
-    <template #actions>
+  <BasicPage :title="pageMeta.title" :description="pageMeta.description">
+    <template #primary-action>
       <Button type="button" :disabled="saving" @click="save">
         <Loader2 v-if="saving" class="size-4 animate-spin" />
         <Save v-else class="size-4" />

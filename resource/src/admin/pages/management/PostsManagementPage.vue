@@ -315,14 +315,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <BasicPage :title="adminText('k005u')" :description="adminText('k005v')" sticky>
-    <template #actions>
-      <Button variant="outline" type="button" @click="loadPosts">
-        <RefreshCw class="size-4" />
-        {{ adminText('k004q') }}
-      </Button>
-    </template>
-
+  <BasicPage :title="adminText('k005u')" :description="adminText('k005v')">
       <AdminSection>
         <template #header>
         <AdminToolbar class="-mx-3 -my-2 border-b-0">
@@ -337,6 +330,10 @@ onMounted(() => {
             </Button>
           </form>
           <div class="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadPosts">
+              <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
+              {{ adminText('k004q') }}
+            </Button>
             <span class="whitespace-nowrap">{{ rangeStart }}-{{ rangeEnd }}</span>
             <div class="h-4 w-px bg-border" />
             <div class="flex flex-wrap items-center gap-2">

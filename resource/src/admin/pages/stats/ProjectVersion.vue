@@ -47,7 +47,7 @@ function releaseTime(value: string) {
       </Button>
       </div>
     </template>
-      <div class="min-h-0 flex-1 overflow-y-auto" style="max-height: 383px">
+      <div class="min-h-80 min-w-0 flex-1 overflow-y-auto sm:min-h-80" style="max-height: 383px">
         <div v-if="loading" class="flex h-full w-full flex-col items-center justify-center space-y-2 text-muted-foreground">
           <Loader2 class="h-6 w-6 animate-spin" />
           <p class="text-sm">{{ adminText('k002b') }}</p>

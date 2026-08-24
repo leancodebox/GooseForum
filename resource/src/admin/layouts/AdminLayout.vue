@@ -24,9 +24,9 @@ if (!hasParentLayout) {
   <slot v-if="hasParentLayout" />
   <SidebarProvider v-else>
     <AppSidebar :layout="layout" />
-    <SidebarInset class="w-full max-w-full peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)] peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]">
+    <SidebarInset class="min-w-0 max-w-full peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)] peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]">
       <AdminTopbar :layout="layout" />
-      <div class="grow px-4 pb-4">
+      <div class="min-w-0 grow p-4">
         <slot />
       </div>
     </SidebarInset>

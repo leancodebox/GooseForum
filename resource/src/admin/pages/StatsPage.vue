@@ -157,26 +157,23 @@ onMounted(() => {
   <BasicPage
     :title="adminText('k004c')"
     :description="adminText('k004d')"
-    sticky
   >
-    <template #actions>
-      <div class="flex flex-wrap items-center gap-3">
-        <div class="inline-flex max-w-full items-center gap-2 rounded-md border bg-muted/35 px-2.5 py-1 text-xs text-muted-foreground">
-          <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-          <span class="shrink-0">{{ adminText('k002q') }}</span>
-          <span class="truncate font-semibold text-foreground">{{ serverVersionLoading ? adminText('k004e') : serverVersion?.version || 'dev' }}</span>
-          <span
-            v-if="!serverVersionLoading"
-            class="inline-flex h-5 shrink-0 items-center rounded-md bg-secondary px-1.5 text-[10px] font-medium text-secondary-foreground"
-          >
-            {{ modeLabel(serverVersion?.mode) }}
-          </span>
-          <span v-if="!serverVersionLoading && shortCommit(serverVersion?.commit)" class="hidden text-muted-foreground sm:inline">
-            #{{ shortCommit(serverVersion?.commit) }}
-          </span>
-        </div>
+    <div class="mb-3 flex justify-end">
+      <div class="inline-flex max-w-full items-center gap-2 rounded-md border bg-muted/35 px-2.5 py-1 text-xs text-muted-foreground">
+        <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+        <span class="shrink-0">{{ adminText('k002q') }}</span>
+        <span class="truncate font-semibold text-foreground">{{ serverVersionLoading ? adminText('k004e') : serverVersion?.version || 'dev' }}</span>
+        <span
+          v-if="!serverVersionLoading"
+          class="inline-flex h-5 shrink-0 items-center rounded-md bg-secondary px-1.5 text-[10px] font-medium text-secondary-foreground"
+        >
+          {{ modeLabel(serverVersion?.mode) }}
+        </span>
+        <span v-if="!serverVersionLoading && shortCommit(serverVersion?.commit)" class="hidden text-muted-foreground sm:inline">
+          #{{ shortCommit(serverVersion?.commit) }}
+        </span>
       </div>
-    </template>
+    </div>
 
       <AdminSection class="mb-4">
         <div class="grid sm:grid-cols-2 xl:grid-cols-4">
@@ -201,7 +198,7 @@ onMounted(() => {
       </AdminSection>
 
       <div class="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div class="min-w-0">
+        <div class="min-w-0 min-h-110">
           <TrafficOverview :data="traffic" :loading="trafficLoading">
             <template #headerAction>
               <DateRangePicker

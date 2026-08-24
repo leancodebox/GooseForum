@@ -11,7 +11,7 @@ defineProps<{
 </script>
 
 <template>
-  <BasicPage :title="title" :description="description" sticky>
+  <BasicPage :title="title" :description="description">
     <section class="rounded-xl border bg-card p-6 text-card-foreground shadow-sm">
       <div class="max-w-2xl">
         <p class="text-sm font-medium text-muted-foreground">Resource Admin</p>

@@ -402,18 +402,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <BasicPage :title="adminText('k005l')" :description="adminText('k0045')" sticky>
-    <template #actions>
-      <div class="flex items-center gap-2">
-        <Button variant="outline" type="button" @click="loadCategories">
-          <RefreshCw class="size-4" />
-          {{ adminText('k004q') }}
-        </Button>
-        <Button v-if="canManageCategories" type="button" @click="openCreate">
-          <Plus class="size-4" />
-          {{ adminText('k005m') }}
-        </Button>
-      </div>
+  <BasicPage :title="adminText('k005l')" :description="adminText('k0045')">
+    <template v-if="canManageCategories" #primary-action>
+      <Button type="button" @click="openCreate">
+        <Plus class="size-4" />
+        {{ adminText('k005m') }}
+      </Button>
     </template>
 
       <AdminSection>
@@ -424,9 +418,15 @@ onMounted(() => {
                 <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input v-model="search" class="pl-9" :placeholder="adminText('k005q')" />
               </div>
-              <Badge variant="secondary" class="h-9 rounded-md px-3">
-                {{ filteredRows.length }} {{ adminText('k00c1') }}
-              </Badge>
+              <div class="flex items-center gap-2">
+                <Badge variant="secondary" class="h-9 rounded-md px-3">
+                  {{ filteredRows.length }} {{ adminText('k00c1') }}
+                </Badge>
+                <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadCategories">
+                  <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
+                  {{ adminText('k004q') }}
+                </Button>
+              </div>
             </AdminToolbar>
             <div
               v-if="canManageCategories"

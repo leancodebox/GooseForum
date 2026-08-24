@@ -164,24 +164,24 @@ onMounted(() => {
 </script>
 
 <template>
-  <BasicPage :title="adminText('k0058')" :description="adminText('k0059')" sticky>
-    <template #actions>
-      <div class="flex items-center gap-2">
-        <Button variant="outline" type="button" @click="loadBadges">
-          <RefreshCw class="size-4" />
-          {{ adminText('k004q') }}
-        </Button>
-        <Button type="button" @click="openCreate">
-          <Plus class="size-4" />
-          {{ adminText('k005a') }}
-        </Button>
-      </div>
+  <BasicPage :title="adminText('k0058')" :description="adminText('k0059')">
+    <template #primary-action>
+      <Button type="button" @click="openCreate">
+        <Plus class="size-4" />
+        {{ adminText('k005a') }}
+      </Button>
     </template>
 
-      <div class="mb-3 flex flex-wrap gap-2 text-sm text-muted-foreground">
-        <Badge variant="secondary">{{ adminText('k00ba') }} {{ stats.system }}</Badge>
-        <Badge variant="outline">{{ adminText('k002n') }} {{ stats.custom }}</Badge>
-        <span v-if="loading">{{ adminText('k0046') }}</span>
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+        <div class="flex flex-wrap items-center gap-2">
+          <Badge variant="secondary">{{ adminText('k00ba') }} {{ stats.system }}</Badge>
+          <Badge variant="outline">{{ adminText('k002n') }} {{ stats.custom }}</Badge>
+          <span v-if="loading">{{ adminText('k0046') }}</span>
+        </div>
+        <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadBadges">
+          <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
+          {{ adminText('k004q') }}
+        </Button>
       </div>
 
       <div v-if="error" class="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{{ error }}</div>

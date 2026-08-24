@@ -103,15 +103,16 @@ onMounted(loadResources)
 </script>
 
 <template>
-  <BasicPage :title="adminText('k00f6')" :description="adminText('k00fe')" sticky>
-    <template #actions>
-      <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadResources">
-        <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
-        {{ adminText('k004q') }}
-      </Button>
-    </template>
-
+  <BasicPage :title="adminText('k00f6')" :description="adminText('k00fe')">
     <AdminSection>
+      <template #header>
+        <div class="flex justify-end">
+          <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadResources">
+            <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
+            {{ adminText('k004q') }}
+          </Button>
+        </div>
+      </template>
       <div v-if="loading && rows.length === 0" class="flex h-48 items-center justify-center text-sm text-muted-foreground">
         {{ adminText('k0046') }}
       </div>

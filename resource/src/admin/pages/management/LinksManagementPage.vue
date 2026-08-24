@@ -163,19 +163,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <BasicPage :title="adminText('k006u')" :description="adminText('k006v')" sticky>
-    <template #actions>
-      <div class="flex items-center gap-2">
-        <Button variant="outline" type="button" @click="loadLinks">
-          <RefreshCw class="size-4" />
+  <BasicPage :title="adminText('k006u')" :description="adminText('k006v')">
+    <template #primary-action>
+      <Button type="button" @click="openAddGroup">
+        <Plus class="size-4" />
+        {{ adminText('k006w') }}
+      </Button>
+    </template>
+
+      <div class="mb-3 flex justify-end">
+        <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadLinks">
+          <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
           {{ adminText('k004q') }}
         </Button>
-        <Button type="button" @click="openAddGroup">
-          <Plus class="size-4" />
-          {{ adminText('k006w') }}
-        </Button>
       </div>
-    </template>
 
       <div v-if="loading && !loaded" class="flex h-64 items-center justify-center rounded-lg border text-muted-foreground">{{ adminText('k0046') }}</div>
       <div v-else-if="error" class="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{{ error }}</div>

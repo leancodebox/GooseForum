@@ -7,19 +7,18 @@ defineProps<LayoutHeaderProps>()
 </script>
 
 <template>
-  <main class="space-y-4">
+  <div class="min-w-0">
     <BasicHeader
       :title="title"
       :description="description"
-      :sticky="sticky"
     >
-      <template #actions>
-        <slot name="actions" />
+      <template #primary-action>
+        <slot name="primary-action" />
       </template>
     </BasicHeader>
 
-    <main>
+    <main class="min-w-0">
       <slot />
     </main>
-  </main>
+  </div>
 </template>

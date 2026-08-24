@@ -233,18 +233,12 @@ onMounted(() => void loadOverview())
 </script>
 
 <template>
-  <BasicPage :title="t('accessGroups.title')" :description="t('accessGroups.description')" sticky>
-    <template #actions>
-      <div class="flex items-center gap-2">
-        <Button variant="outline" type="button" :disabled="loading" @click="loadOverview()">
-          <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
-          {{ t('common.refresh') }}
-        </Button>
-        <Button type="button" @click="openCreateGroup">
-          <Plus class="size-4" />
-          {{ t('accessGroups.create') }}
-        </Button>
-      </div>
+  <BasicPage :title="t('accessGroups.title')" :description="t('accessGroups.description')">
+    <template #primary-action>
+      <Button type="button" @click="openCreateGroup">
+        <Plus class="size-4" />
+        {{ t('accessGroups.create') }}
+      </Button>
     </template>
 
     <div
@@ -255,22 +249,28 @@ onMounted(() => void loadOverview())
       <Button variant="outline" size="sm" type="button" @click="loadOverview()">{{ t('common.retry') }}</Button>
     </div>
 
-    <div class="mb-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-      <Badge variant="secondary"
-        ><UsersRound class="size-3" />{{ t('accessGroups.customGroupCount', { count: customGroupCount }) }}</Badge
-      >
-      <Badge variant="outline"
-        ><LockKeyhole class="size-3" />{{
-          t('accessGroups.restrictedCategoryCount', { count: restrictedCategoryCount })
-        }}</Badge
-      >
-      <span v-if="loading && overview.groups.length" class="inline-flex items-center gap-1.5">
-        <RefreshCw class="size-3.5 animate-spin" />{{ t('accessGroups.refreshing') }}
-      </span>
+    <div class="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+      <div class="flex flex-wrap items-center gap-2">
+        <Badge variant="secondary"
+          ><UsersRound class="size-3" />{{ t('accessGroups.customGroupCount', { count: customGroupCount }) }}</Badge
+        >
+        <Badge variant="outline"
+          ><LockKeyhole class="size-3" />{{
+            t('accessGroups.restrictedCategoryCount', { count: restrictedCategoryCount })
+          }}</Badge
+        >
+        <span v-if="loading && overview.groups.length" class="inline-flex items-center gap-1.5">
+          <RefreshCw class="size-3.5 animate-spin" />{{ t('accessGroups.refreshing') }}
+        </span>
+      </div>
+      <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadOverview()">
+        <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
+        {{ t('common.refresh') }}
+      </Button>
     </div>
 
     <div class="grid items-start gap-4 xl:grid-cols-[17rem_minmax(0,1fr)]">
-      <AdminSection class="xl:sticky xl:top-36">
+      <AdminSection class="xl:sticky xl:top-[5.5rem]">
         <template #header>
           <div class="flex items-center justify-between gap-3">
             <div>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { adminText } from '@/admin/runtime/i18n-text'
 import { ref } from 'vue'
-import { ArrowLeft, Languages, Search } from '@lucide/vue'
+import { ArrowLeft, Languages } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/admin/components/ui/button'
 import { Separator } from '@/admin/components/ui/separator'
@@ -23,26 +23,19 @@ function switchLocale(nextLocale: Locale) {
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-3 bg-background p-4 transition-[width,height] ease-linear sm:gap-4">
-    <SidebarTrigger class="-ml-1" />
-    <Separator orientation="vertical" class="h-6" />
+  <header class="sticky top-0 z-50 flex h-[4.5rem] shrink-0 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur transition-[width,height] ease-linear supports-[backdrop-filter]:bg-background/85 sm:gap-4">
+    <SidebarTrigger class="-ml-1 shrink-0" />
+    <Separator orientation="vertical" class="h-8 shrink-0" />
 
-    <Button
-      variant="outline"
-      type="button"
-      class="hidden h-10 w-72 justify-start px-3 text-muted-foreground md:inline-flex"
-    >
-      <Search class="size-4" />
-      <span class="flex-1 text-left">Search Menu</span>
-      <kbd class="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-        ⌘ + K
-      </kbd>
-    </Button>
+    <div id="admin-topbar-page-context" class="min-w-0 flex-1" />
 
-    <div class="flex-1" />
+    <div
+      id="admin-topbar-primary-action"
+      class="flex max-w-[48vw] shrink-0 items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    />
 
-    <div class="ml-auto flex items-center space-x-4">
-      <div class="relative">
+    <div class="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+      <div class="relative hidden lg:block">
         <Button
           variant="outline"
           size="sm"
@@ -72,7 +65,7 @@ function switchLocale(nextLocale: Locale) {
           </Button>
         </div>
       </div>
-      <Button as-child class="hidden md:inline-flex">
+      <Button as-child class="hidden xl:inline-flex">
         <a href="/">
           <ArrowLeft class="size-4" />
           {{ adminText('k007y') }}
@@ -82,7 +75,7 @@ function switchLocale(nextLocale: Locale) {
         v-if="layout.viewer.isAuthenticated"
         :src="layout.viewer.avatarUrl"
         :alt="layout.viewer.username"
-        class="size-10 rounded-full object-cover"
+        class="hidden size-9 rounded-full object-cover sm:block"
       />
     </div>
   </header>
