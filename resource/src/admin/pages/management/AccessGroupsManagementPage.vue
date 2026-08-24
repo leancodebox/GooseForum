@@ -7,6 +7,7 @@ import {
   Pencil,
   Plus,
   RefreshCw,
+  Search,
   ShieldCheck,
   Trash2,
   UserPlus,
@@ -16,7 +17,6 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
-import AdminSection from '@/admin/components/AdminSection.vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Avatar, AvatarFallback, AvatarImage } from '@/admin/components/ui/avatar'
 import { Badge } from '@/admin/components/ui/badge'
@@ -57,6 +57,8 @@ const loading = ref(false)
 const error = ref('')
 const overview = ref<AccessControlOverview>({ groups: [], categories: [] })
 const selectedGroupId = ref(0)
+const activePanel = ref<'permissions' | 'members'>('permissions')
+const groupSearch = ref('')
 const groupDialogOpen = ref(false)
 const groupSaving = ref(false)
 const deletingGroup = ref<AccessGroup | null>(null)
@@ -82,6 +84,16 @@ const selectedMembers = computed(() => {
     return a.userId - b.userId
   })
 })
+const filteredGroups = computed(() => {
+  const query = groupSearch.value.trim().toLowerCase()
+  if (!query) return overview.value.groups
+  return overview.value.groups.filter((group) => {
+    const mode = group.systemKey
+      ? t(`accessGroups.systemKey.${group.systemKey}`)
+      : t(`accessGroups.joinMode.${group.joinMode}`)
+    return `${group.name} ${mode}`.toLowerCase().includes(query)
+  })
+})
 
 function activeMemberCount(group: AccessGroup) {
   return group.members.filter((member) => member.status === 1).length
@@ -90,11 +102,6 @@ function activeMemberCount(group: AccessGroup) {
 function pendingMemberCount(group: AccessGroup) {
   return group.members.filter((member) => member.status === 2).length
 }
-
-const customGroupCount = computed(() => overview.value.groups.filter((group) => !group.systemKey).length)
-const restrictedCategoryCount = computed(
-  () => overview.value.categories.filter((category) => category.isRestricted).length,
-)
 
 async function loadOverview(preferredGroupId = selectedGroupId.value) {
   loading.value = true
@@ -249,55 +256,43 @@ onMounted(() => void loadOverview())
       <Button variant="outline" size="sm" type="button" @click="loadOverview()">{{ t('common.retry') }}</Button>
     </div>
 
-    <div class="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
-      <div class="flex flex-wrap items-center gap-2">
-        <Badge variant="secondary"
-          ><UsersRound class="size-3" />{{ t('accessGroups.customGroupCount', { count: customGroupCount }) }}</Badge
-        >
-        <Badge variant="outline"
-          ><LockKeyhole class="size-3" />{{
-            t('accessGroups.restrictedCategoryCount', { count: restrictedCategoryCount })
-          }}</Badge
-        >
-        <span v-if="loading && overview.groups.length" class="inline-flex items-center gap-1.5">
-          <RefreshCw class="size-3.5 animate-spin" />{{ t('accessGroups.refreshing') }}
-        </span>
-      </div>
-      <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadOverview()">
-        <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
-        {{ t('common.refresh') }}
-      </Button>
-    </div>
-
-    <div class="grid items-start gap-4 xl:grid-cols-[17rem_minmax(0,1fr)]">
-      <AdminSection class="xl:sticky xl:top-[5.5rem]">
-        <template #header>
+    <div class="grid items-start border-y xl:grid-cols-[15rem_minmax(0,1fr)]">
+      <aside class="bg-muted/15 px-4 py-4 xl:sticky xl:top-[5.5rem] xl:border-r">
+        <header class="border-b pb-3">
           <div class="flex items-center justify-between gap-3">
-            <div>
-              <div class="flex items-center gap-2 text-sm font-semibold">
-                <UsersRound class="size-4" />{{ t('accessGroups.groups') }}
-              </div>
-              <p class="mt-0.5 text-xs text-muted-foreground">{{ t('accessGroups.systemGroupHint') }}</p>
+            <div class="flex items-center gap-2 text-sm font-semibold">
+              <UsersRound class="size-4" />{{ t('accessGroups.groups') }}
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono text-xs text-muted-foreground">{{ overview.groups.length }}</span>
+              <Button variant="ghost" size="icon-sm" type="button" :disabled="loading" :title="t('common.refresh')" @click="loadOverview()">
+                <RefreshCw class="size-3.5" :class="loading ? 'animate-spin' : ''" />
+              </Button>
             </div>
           </div>
-        </template>
-        <div v-if="loading && !overview.groups.length" class="space-y-2 p-3">
-          <div v-for="index in 4" :key="index" class="h-14 animate-pulse rounded-md bg-muted" />
+          <p class="mt-0.5 text-xs text-muted-foreground">{{ t('accessGroups.systemGroupHint') }}</p>
+          <label class="relative mt-3 block">
+            <Search class="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input v-model="groupSearch" class="h-9 pl-8 text-sm" :placeholder="t('accessGroups.groups')" />
+          </label>
+        </header>
+        <div v-if="loading && !overview.groups.length" class="space-y-2 py-3">
+          <div v-for="index in 4" :key="index" class="h-14 animate-pulse rounded-md bg-muted/70" />
         </div>
-        <div v-else-if="!overview.groups.length" class="p-8 text-center text-sm text-muted-foreground">
+        <div v-else-if="!overview.groups.length" class="py-8 text-center text-sm text-muted-foreground">
           {{ t('accessGroups.noGroups') }}
         </div>
-        <div v-else class="space-y-1 p-2">
+        <nav v-else-if="filteredGroups.length" class="-mx-2 divide-y" aria-label="Access groups">
           <button
-            v-for="group in overview.groups"
+            v-for="group in filteredGroups"
             :key="group.id"
             type="button"
-            class="group flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left outline-none transition-colors hover:bg-muted/70 focus-visible:ring-2 focus-visible:ring-ring"
+            class="group flex w-full items-center gap-3 px-2 py-2.5 text-left outline-none transition-colors hover:bg-muted/70 focus-visible:ring-2 focus-visible:ring-ring"
             :class="[
               selectedGroupId === group.id ? 'bg-primary/10 text-primary' : 'text-foreground',
               group.status !== 1 ? 'opacity-60' : '',
             ]"
-            @click="selectedGroupId = group.id"
+            @click="selectedGroupId = group.id; activePanel = 'permissions'"
           >
             <span
               class="grid size-8 shrink-0 place-items-center rounded-md border bg-background"
@@ -318,12 +313,15 @@ onMounted(() => void loadOverview())
             </span>
             <Badge variant="outline" class="min-w-7 px-1.5">{{ activeMemberCount(group) }}</Badge>
           </button>
+        </nav>
+        <div v-else class="py-8 text-center text-sm text-muted-foreground">
+          {{ t('accessGroups.noGroups') }}
         </div>
-      </AdminSection>
+      </aside>
 
-      <div v-if="selectedGroup" class="min-w-0 space-y-4">
-        <AdminSection>
-          <div class="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between">
+      <div v-if="selectedGroup" class="min-w-0 divide-y px-4 sm:px-8">
+        <section class="pb-4">
+          <div class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="min-w-0">
               <div class="flex flex-wrap items-center gap-2">
                 <h2 class="truncate text-lg font-semibold">{{ selectedGroup.name }}</h2>
@@ -334,14 +332,14 @@ onMounted(() => void loadOverview())
                   {{ t(selectedGroup.status === 1 ? 'accessGroups.enabled' : 'accessGroups.disabled') }}
                 </Badge>
               </div>
-              <p class="mt-1 text-sm leading-6 text-muted-foreground">
+              <p class="mt-1 text-sm leading-5 text-muted-foreground">
                 {{
                   selectedGroup.systemKey
                     ? t('accessGroups.systemImmutable')
                     : t(`accessGroups.joinModeDescription.${selectedGroup.joinMode}`)
                 }}
               </p>
-              <div class="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
+              <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                 <span>{{ t('accessGroups.memberCount', { count: activeMemberCount(selectedGroup) }) }}</span>
                 <span v-if="pendingMemberCount(selectedGroup)">
                   {{ t('accessGroups.pendingCount', { count: pendingMemberCount(selectedGroup) }) }}
@@ -363,24 +361,45 @@ onMounted(() => void loadOverview())
               >
             </div>
           </div>
-        </AdminSection>
+        </section>
 
-        <AdminSection>
-          <template #header>
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div class="flex items-center gap-2 text-sm font-semibold">
-                  <LockKeyhole class="size-4" />{{ t('accessGroups.categoryPermissions') }}
-                </div>
-                <p class="mt-0.5 text-xs text-muted-foreground">{{ t('accessGroups.permissionSummaryHint') }}</p>
-              </div>
-              <Button variant="outline" size="sm" as-child>
-                <RouterLink to="/admin/categories">
-                  <Pencil class="size-3.5" />{{ t('accessGroups.manageCategoryPermissions') }}
-                </RouterLink>
-              </Button>
-            </div>
-          </template>
+        <div class="flex min-w-0 items-center gap-1 border-b pt-1" role="tablist" :aria-label="t('accessGroups.title')">
+          <button
+            type="button"
+            role="tab"
+            :aria-selected="activePanel === 'permissions'"
+            class="relative inline-flex items-center gap-2 rounded-t-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            :class="activePanel === 'permissions' ? 'bg-muted/70 text-foreground' : ''"
+            @click="activePanel = 'permissions'"
+          >
+            <LockKeyhole class="size-4" />
+            {{ t('accessGroups.categoryPermissions') }}
+          </button>
+          <button
+            v-if="!selectedGroup.systemKey"
+            type="button"
+            role="tab"
+            :aria-selected="activePanel === 'members'"
+            class="relative inline-flex items-center gap-2 rounded-t-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            :class="activePanel === 'members' ? 'bg-muted/70 text-foreground' : ''"
+            @click="activePanel = 'members'"
+          >
+            <UsersRound class="size-4" />
+            {{ t('accessGroups.members') }}
+            <span v-if="pendingMemberCount(selectedGroup)" class="size-1.5 rounded-full bg-amber-500" />
+          </button>
+          <p v-if="activePanel === 'permissions'" class="ml-auto hidden truncate px-2 text-xs text-muted-foreground lg:block">
+            {{ t('accessGroups.permissionSummaryHint') }}
+          </p>
+          <Button v-if="activePanel === 'permissions'" variant="outline" size="sm" class="mb-1 ml-2" as-child>
+            <RouterLink to="/admin/categories">
+              <Pencil class="size-3.5" />{{ t('accessGroups.manageCategoryPermissions') }}
+            </RouterLink>
+          </Button>
+        </div>
+
+        <section v-if="activePanel === 'permissions'" class="py-4">
+          <div class="overflow-hidden rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -416,17 +435,13 @@ onMounted(() => void loadOverview())
               </TableRow>
             </TableBody>
           </Table>
-        </AdminSection>
+          </div>
+        </section>
 
-        <AdminSection v-if="!selectedGroup.systemKey">
-          <template #header>
-            <div>
-              <div class="flex items-center gap-2 text-sm font-semibold">
-                <UsersRound class="size-4" />{{ t('accessGroups.members') }}
-              </div>
-              <p class="mt-0.5 text-xs text-muted-foreground">{{ t('accessGroups.memberHint') }}</p>
-            </div>
-          </template>
+        <section v-if="!selectedGroup.systemKey && activePanel === 'members'" class="pt-4">
+          <header class="mb-3 flex items-center justify-between gap-3 border-b pb-3">
+            <p class="text-sm text-muted-foreground">{{ t('accessGroups.memberHint') }}</p>
+          </header>
           <form
             class="grid gap-3 border-b bg-muted/10 p-3 sm:grid-cols-[minmax(12rem,1fr)_10rem_auto] sm:items-end"
             @submit.prevent="addMember"
@@ -457,6 +472,7 @@ onMounted(() => void loadOverview())
               <UserPlus class="size-4" />{{ memberSaving ? t('common.saving') : t('accessGroups.addMember') }}
             </Button>
           </form>
+          <div class="overflow-hidden rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -520,14 +536,16 @@ onMounted(() => void loadOverview())
               </TableRow>
             </TableBody>
           </Table>
-        </AdminSection>
+          </div>
+        </section>
       </div>
 
-      <AdminSection v-else class="xl:col-start-2">
-        <div class="grid min-h-64 place-items-center p-8 text-center text-sm text-muted-foreground">
-          <div><UsersRound class="mx-auto mb-3 size-8 opacity-40" />{{ t('accessGroups.selectGroup') }}</div>
+      <div v-else class="grid min-h-64 place-items-center border-t px-8 text-center text-sm text-muted-foreground xl:col-start-2 xl:border-l xl:border-t-0">
+        <div>
+          <UsersRound class="mx-auto mb-3 size-8 opacity-40" />
+          {{ t('accessGroups.selectGroup') }}
         </div>
-      </AdminSection>
+      </div>
     </div>
 
     <Dialog :open="groupDialogOpen" @update:open="(open) => !groupSaving && (groupDialogOpen = open)">
