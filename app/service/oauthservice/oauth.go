@@ -14,9 +14,9 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/randopt"
 	"github.com/leancodebox/GooseForum/app/bundles/sessionstore"
-	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
+	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
@@ -362,7 +362,7 @@ func downloadAndSaveAvatar(userID uint64, avatarURL string) (string, error) {
 		}
 	}
 
-	fileEntity, err := filedata.SaveAvatar(userID, avatarData, filename)
+	fileEntity, err := filestorage.SaveAvatar(context.Background(), userID, avatarData, filename)
 	if err != nil {
 		return "", fmt.Errorf("保存头像失败: %w", err)
 	}

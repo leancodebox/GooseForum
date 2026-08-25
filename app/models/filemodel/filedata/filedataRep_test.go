@@ -1,6 +1,7 @@
 package filedata
 
 import (
+	"context"
 	"testing"
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
@@ -70,7 +71,60 @@ func TestGetFileMetadataByNameDoesNotLoadBlob(t *testing.T) {
 	if err != nil {
 		t.Fatalf("get metadata: %v", err)
 	}
-	if metadata.Id != stored.Id || metadata.UserId != 7 || metadata.Type != "image/webp" || metadata.Data != nil {
+	if metadata.Id != stored.Id || metadata.UserId != 7 || metadata.Type != "image/webp" || metadata.Size != int64(len("secret-image")) || metadata.Data != nil {
 		t.Fatalf("metadata = %#v", metadata)
+	}
+}
+
+func TestGetFileMetadataFallsBackToBlobSizeForLegacyRows(t *testing.T) {
+	setupFileDataTestDB(t)
+	result := builder().Create(map[string]any{
+		"name":           "legacy/image.webp",
+		"assert_type":    "image/webp",
+		"content":        []byte("legacy-content"),
+		"file_size":      0,
+		"storage_driver": "database",
+		"user_id":        9,
+	})
+	if result.Error != nil {
+		t.Fatalf("insert legacy file: %v", result.Error)
+	}
+	metadata, err := GetFileMetadataByName("legacy/image.webp")
+	if err != nil {
+		t.Fatalf("get metadata: %v", err)
+	}
+	if metadata.Size != int64(len("legacy-content")) || metadata.Data != nil {
+		t.Fatalf("metadata = %#v", metadata)
+	}
+}
+
+func TestPendingFileIsHiddenUntilMarkedReady(t *testing.T) {
+	setupFileDataTestDB(t)
+	ctx := context.Background()
+	metadata, err := CreateFileMetadata(ctx, 11, "pending/image.webp", "image/webp", 7, "database")
+	if err != nil {
+		t.Fatalf("create metadata: %v", err)
+	}
+	if metadata.StorageStatus != StorageStatusPending {
+		t.Fatalf("status = %q", metadata.StorageStatus)
+	}
+	if _, err := GetFileMetadataByName(metadata.Name); err == nil {
+		t.Fatal("pending metadata is publicly readable")
+	}
+	if page := FileResourcePage(1, 20); len(page.List) != 0 {
+		t.Fatalf("pending file listed: %#v", page.List)
+	}
+	if count := CountUserUploadsToday(11); count != 0 {
+		t.Fatalf("pending upload count = %d", count)
+	}
+	if err := UpdateFileContent(ctx, metadata.Name, []byte("content")); err != nil {
+		t.Fatalf("write content: %v", err)
+	}
+	ready, err := MarkFileReady(ctx, metadata.Name)
+	if err != nil {
+		t.Fatalf("mark ready: %v", err)
+	}
+	if ready.StorageStatus != StorageStatusReady || ready.Size != 7 {
+		t.Fatalf("ready metadata = %#v", ready)
 	}
 }

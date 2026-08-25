@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"log/slog"
 	"net/http"
@@ -16,6 +17,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/fileaccessservice"
+	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
 )
 
@@ -30,7 +32,7 @@ func GetFileByFileName(c *gin.Context) {
 	}
 	filename = strings.TrimPrefix(filename, "/")
 
-	metadata, err := filedata.GetFileMetadataByName(filename)
+	metadata, err := filestorage.Stat(c.Request.Context(), filename)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error":       "File not found",
@@ -46,11 +48,12 @@ func GetFileByFileName(c *gin.Context) {
 		})
 		return
 	}
-	entity, err := filedata.GetFileByName(filename)
+	object, err := filestorage.Open(c.Request.Context(), filename)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "File not found", "messageCode": component.MessagePageNotFound})
 		return
 	}
+	defer func() { _ = object.Body.Close() }()
 	c.Header("Content-Disposition", "inline")
 	if decision.Public {
 		httputil.SetLongPublic(c)
@@ -58,7 +61,7 @@ func GetFileByFileName(c *gin.Context) {
 		c.Header("Cache-Control", "private, max-age=300")
 		c.Header("Vary", "Cookie, Authorization")
 	}
-	c.Data(http.StatusOK, entity.Type, entity.Data)
+	c.DataFromReader(http.StatusOK, object.Metadata.Size, object.Metadata.ContentType, object.Body, nil)
 }
 
 // SaveImgByGinContext handles image uploads with size and content checks.
@@ -128,7 +131,7 @@ func saveImgByGinContext(c *gin.Context, adminUpload bool) {
 	}
 
 	configMaxSize := int64(postingConfig.UploadControl.MaxAttachmentSizeKb) * 1024
-	maxSize := int64(filedata.MaxFileSize)
+	maxSize := int64(filestorage.MaxFileSize)
 	if !isRoleUser && configMaxSize > 0 && configMaxSize < maxSize {
 		maxSize = configMaxSize
 	}
@@ -195,7 +198,7 @@ func saveImgByGinContext(c *gin.Context, adminUpload bool) {
 
 	folderName := time.Now().Format("2006/01/02")
 
-	entity, err := filedata.SaveFileFromUpload(userId, fileData, file.Filename, folderName)
+	entity, err := filestorage.SaveFileFromUpload(c.Request.Context(), userId, fileData, file.Filename, folderName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, component.FailDataCode(
 			component.MessageUploadSaveFailed,
@@ -206,7 +209,10 @@ func saveImgByGinContext(c *gin.Context, adminUpload bool) {
 	if adminUpload {
 		fileusageservice.AddAdminUpload(userId, entity.Name)
 	} else if err := fileusageservice.AddUploadOwner(userId, entity.Name); err != nil {
-		if cleanupErr := filedata.DeleteByName(entity.Name); cleanupErr != nil {
+		cleanupCtx, cleanupCancel := context.WithTimeout(context.WithoutCancel(c.Request.Context()), 5*time.Second)
+		cleanupErr := filestorage.Delete(cleanupCtx, entity.Name)
+		cleanupCancel()
+		if cleanupErr != nil {
 			slog.Error("delete upload after owner usage failure", "fileName", entity.Name, "err", cleanupErr)
 		}
 		c.JSON(http.StatusInternalServerError, component.FailDataCode(component.MessageUploadSaveFailed, nil))

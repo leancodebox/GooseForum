@@ -16,6 +16,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/emailactivationservice"
+	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
@@ -330,9 +331,9 @@ func UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	var fileEntities []*filedata.Entity
+	var fileEntities []*filestorage.Metadata
 	if files.AvatarMedium == nil {
-		fileEntity, err := filedata.SaveAvatar(userId, mainData, files.Main.Filename)
+		fileEntity, err := filestorage.SaveAvatar(c.Request.Context(), userId, mainData, files.Main.Filename)
 		if err != nil {
 			c.JSON(200, component.FailDataCode(
 				component.MessageUploadSaveFailed,
@@ -340,10 +341,10 @@ func UploadAvatar(c *gin.Context) {
 				component.MessageParams{"error": err.Error()}))
 			return
 		}
-		fileEntities = []*filedata.Entity{fileEntity}
+		fileEntities = []*filestorage.Metadata{fileEntity}
 	} else {
-		uploads := make([]filedata.AvatarUpload, 0, 2)
-		uploads = append(uploads, filedata.AvatarUpload{
+		uploads := make([]filestorage.AvatarUpload, 0, 2)
+		uploads = append(uploads, filestorage.AvatarUpload{
 			Filename: files.Main.Filename,
 			Data:     mainData,
 		})
@@ -352,12 +353,12 @@ func UploadAvatar(c *gin.Context) {
 			c.JSON(200, component.FailDataError(err))
 			return
 		}
-		uploads = append(uploads, filedata.AvatarUpload{
+		uploads = append(uploads, filestorage.AvatarUpload{
 			Filename: files.AvatarMedium.Filename,
 			Data:     fileData,
 		})
 
-		fileEntities, err = filedata.SaveAvatarSet(userId, uploads)
+		fileEntities, err = filestorage.SaveAvatarSet(c.Request.Context(), userId, uploads)
 		if err != nil {
 			c.JSON(200, component.FailDataCode(
 				component.MessageUploadSaveFailed,
@@ -417,7 +418,7 @@ func avatarFormFiles(c *gin.Context) (avatarUploadFiles, error) {
 }
 
 func avatarUploadMaxSize() int64 {
-	return int64(filedata.MaxFileSize)
+	return int64(filestorage.MaxFileSize)
 }
 
 func readAvatarUploadFile(file *multipart.FileHeader, maxSize int64, allowedExts []string) ([]byte, error) {

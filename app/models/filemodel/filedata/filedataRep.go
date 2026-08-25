@@ -1,6 +1,7 @@
 package filedata
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"path"
@@ -8,8 +9,6 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
-
-	"github.com/google/uuid"
 )
 
 type FileResource struct {
@@ -63,10 +62,13 @@ func SaveFile(userId uint64, name string, fileType string, data []byte) (*Entity
 		return nil, fmt.Errorf("file already exists: %s", name)
 	}
 	entity := &Entity{
-		Name:   name,
-		Type:   fileType,
-		Data:   data,
-		UserId: userId,
+		Name:          name,
+		Type:          fileType,
+		Data:          data,
+		Size:          int64(len(data)),
+		StorageDriver: "database",
+		StorageStatus: StorageStatusReady,
+		UserId:        userId,
 	}
 	affected := create(entity)
 	if affected == 0 {
@@ -76,16 +78,27 @@ func SaveFile(userId uint64, name string, fileType string, data []byte) (*Entity
 }
 
 func GetFileByName(name string) (*Entity, error) {
-	entity := GetByName(name)
-	if entity.Id == 0 {
+	return GetFileByNameContext(context.Background(), name)
+}
+
+func GetFileByNameContext(ctx context.Context, name string) (*Entity, error) {
+	var entity Entity
+	err := builder().WithContext(ctx).Where(queryopt.Eq(fieldName, name)).First(&entity).Error
+	if err != nil || entity.Id == 0 {
 		return nil, errors.New("file not found")
 	}
 	return &entity, nil
 }
 
 func GetFileMetadataByName(name string) (*Entity, error) {
+	return GetFileMetadataByNameContext(context.Background(), name)
+}
+
+func GetFileMetadataByNameContext(ctx context.Context, name string) (*Entity, error) {
 	var entity Entity
-	err := builder().Select("id, name, assert_type, user_id, created_at, updated_at").Where(queryopt.Eq(fieldName, name)).First(&entity).Error
+	err := builder().WithContext(ctx).
+		Select("id, name, assert_type, CASE WHEN file_size > 0 THEN file_size ELSE LENGTH(content) END AS file_size, storage_driver, storage_status, user_id, created_at, updated_at").
+		Where(queryopt.Eq(fieldName, name)).Where("storage_status = ?", StorageStatusReady).First(&entity).Error
 	if err != nil || entity.Id == 0 {
 		return nil, errors.New("file not found")
 	}
@@ -93,7 +106,53 @@ func GetFileMetadataByName(name string) (*Entity, error) {
 }
 
 func DeleteByName(name string) error {
-	return builder().Where(queryopt.Eq(fieldName, name)).Delete(&Entity{}).Error
+	return DeleteByNameContext(context.Background(), name)
+}
+
+func DeleteByNameContext(ctx context.Context, name string) error {
+	return builder().WithContext(ctx).Where(queryopt.Eq(fieldName, name)).Delete(&Entity{}).Error
+}
+
+func CreateFileMetadata(ctx context.Context, userId uint64, name string, fileType string, size int64, storageDriver string) (*Entity, error) {
+	var count int64
+	result := builder().WithContext(ctx).Where(queryopt.Eq(fieldName, name)).Count(&count)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if count > 0 {
+		return nil, fmt.Errorf("file already exists: %s", name)
+	}
+	entity := &Entity{Name: name, Type: fileType, Size: size, StorageDriver: storageDriver, StorageStatus: StorageStatusPending, UserId: userId}
+	result = builder().WithContext(ctx).Create(entity)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil, errors.New("failed to save file metadata, possibly duplicate name")
+	}
+	return entity, nil
+}
+
+func UpdateFileContent(ctx context.Context, name string, data []byte) error {
+	result := builder().WithContext(ctx).Where(queryopt.Eq(fieldName, name)).UpdateColumn("content", data)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("file metadata not found")
+	}
+	return nil
+}
+
+func MarkFileReady(ctx context.Context, name string) (*Entity, error) {
+	result := builder().WithContext(ctx).Where(queryopt.Eq(fieldName, name)).UpdateColumn("storage_status", StorageStatusReady)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil, errors.New("file metadata not found")
+	}
+	return GetFileMetadataByNameContext(ctx, name)
 }
 
 func FileResourcePage(page, pageSize int) FileResourcePageResult {
@@ -108,13 +167,13 @@ func FileResourcePage(page, pageSize int) FileResourcePageResult {
 	}
 
 	var maxId int64
-	builder().Select("id").Order("id DESC").Limit(1).Scan(&maxId)
+	builder().Where("storage_status = ?", StorageStatusReady).Select("id").Order("id DESC").Limit(1).Scan(&maxId)
 	upperId := maxId - int64((page-1)*pageSize)
 
 	var list []FileResource
 	builder().
-		Where("id <= ?", upperId).
-		Select("id, name, assert_type AS type, LENGTH(content) AS size, user_id, created_at").
+		Where("id <= ? AND storage_status = ?", upperId, StorageStatusReady).
+		Select("id, name, assert_type AS type, CASE WHEN file_size > 0 THEN file_size ELSE LENGTH(content) END AS size, user_id, created_at").
 		Order("id DESC").
 		Limit(pageSize).
 		Scan(&list)
@@ -133,82 +192,10 @@ func CountDailyUploads(userId uint64) int64 {
 	return CountUserUploadsToday(userId)
 }
 
-func SaveFileFromUpload(userId uint64, fileData []byte, filename string, customPath string) (*Entity, error) {
-	if len(fileData) > MaxFileSize {
-		return nil, fmt.Errorf("file size exceeds maximum limit of %dMB", MaxFileSize/(1024*1024))
-	}
-
-	contentType, err := CheckImageType(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	fileExt := path.Ext(filename)
-	newFilename := fmt.Sprintf("%s/%s%s",
-		customPath,
-		uuid.New().String(),
-		fileExt)
-
-	return SaveFile(userId, newFilename, contentType, fileData)
-}
-
-const (
-	MaxFileSize = 4 * 1024 * 1024 // 4MB
-	AvatarPath  = "avatars"
-)
-
-type AvatarUpload struct {
-	Filename string
-	Data     []byte
-}
-
-// SaveAvatar stores an uploaded avatar file.
-func SaveAvatar(userId uint64, fileData []byte, filename string) (*Entity, error) {
-	avatarPath := fmt.Sprintf("%s/avatar_%d_%d",
-		AvatarPath,
-		userId,
-		time.Now().Unix())
-
-	return SaveFileFromUpload(userId, fileData, filename, avatarPath)
-}
-
-func SaveAvatarSet(userId uint64, uploads []AvatarUpload) ([]*Entity, error) {
-	if len(uploads) == 0 {
-		return nil, errors.New("avatar files are required")
-	}
-	if len(uploads) > 2 {
-		return nil, errors.New("avatar files exceed maximum limit of 2")
-	}
-
-	avatarPath := fmt.Sprintf("%s/%d/%d", AvatarPath, userId, time.Now().UnixNano())
-	avatarNames := []string{"avatar", "avatar_medium"}
-	entities := make([]*Entity, 0, len(uploads))
-
-	for index, upload := range uploads {
-		if len(upload.Data) > MaxFileSize {
-			return nil, fmt.Errorf("file size exceeds maximum limit of %dMB", MaxFileSize/(1024*1024))
-		}
-
-		contentType, err := CheckImageType(upload.Filename)
-		if err != nil {
-			return nil, err
-		}
-
-		fileExt := strings.ToLower(path.Ext(upload.Filename))
-		entity, err := SaveFile(userId, fmt.Sprintf("%s/%s%s", avatarPath, avatarNames[index], fileExt), contentType, upload.Data)
-		if err != nil {
-			return nil, err
-		}
-		entities = append(entities, entity)
-	}
-
-	return entities, nil
-}
-
 // CountUserUploadsInTimeRange counts uploads for a user within a time range.
 func CountUserUploadsInTimeRange(userId uint64, startTime, endTime time.Time) int64 {
 	var count int64
-	builder().Where("user_id = ? AND created_at >= ? AND created_at <= ?", userId, startTime, endTime).Count(&count)
+	builder().Where("user_id = ? AND storage_status = ? AND created_at >= ? AND created_at <= ?", userId, StorageStatusReady, startTime, endTime).Count(&count)
 	return count
 }
 
