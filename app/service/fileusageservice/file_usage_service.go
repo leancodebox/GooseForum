@@ -48,7 +48,7 @@ func AddUploadOwner(userID uint64, fileName string) error {
 	if name == "" {
 		return nil
 	}
-	return fileUsage.Create(&fileUsage.Entity{
+	return fileUsage.CreateIfAbsent(&fileUsage.Entity{
 		FileName:   name,
 		TargetType: fileUsage.TargetUploadOwner,
 		TargetId:   userID,

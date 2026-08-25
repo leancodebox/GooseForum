@@ -119,3 +119,23 @@ func TestAdminTopicManagementRoutesUseTopicNames(t *testing.T) {
 		}
 	}
 }
+
+func TestDirectImageUploadRoutesAreRegistered(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	fileServer(router)
+
+	registered := map[string]bool{}
+	for _, route := range router.Routes() {
+		registered[route.Method+" "+route.Path] = true
+	}
+	for _, route := range []string{
+		"POST /file/img-upload/init",
+		"POST /file/img-upload/complete",
+		"POST /file/img-upload/abort",
+	} {
+		if !registered[route] {
+			t.Fatalf("%s was not registered", route)
+		}
+	}
+}

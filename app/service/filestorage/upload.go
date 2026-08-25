@@ -31,7 +31,7 @@ func SaveFileFromUpload(ctx context.Context, userId uint64, data []byte, filenam
 	if err != nil {
 		return nil, err
 	}
-	name := fmt.Sprintf("%s/%s%s", customPath, uuid.New().String(), path.Ext(filename))
+	name := NewUploadName(filename, customPath)
 	return Put(ctx, PutRequest{
 		Name:        name,
 		ContentType: contentType,
@@ -39,6 +39,10 @@ func SaveFileFromUpload(ctx context.Context, userId uint64, data []byte, filenam
 		UserId:      userId,
 		Body:        bytes.NewReader(data),
 	})
+}
+
+func NewUploadName(filename string, customPath string) string {
+	return fmt.Sprintf("%s/%s%s", customPath, uuid.New().String(), strings.ToLower(path.Ext(filename)))
 }
 
 func SaveAvatar(ctx context.Context, userId uint64, data []byte, filename string) (*Metadata, error) {

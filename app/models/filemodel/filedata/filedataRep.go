@@ -163,6 +163,21 @@ func MarkFileReady(ctx context.Context, name string) (*Entity, error) {
 	return GetFileMetadataByNameContext(ctx, name)
 }
 
+func ListPendingFilesBefore(ctx context.Context, before time.Time, limit int) ([]Entity, error) {
+	if limit < 1 {
+		limit = 100
+	}
+	if limit > 1000 {
+		limit = 1000
+	}
+	var entities []Entity
+	err := builder().WithContext(ctx).
+		Select("id, name, assert_type, file_size, storage_driver, storage_status, user_id, created_at, updated_at").
+		Where("storage_status = ? AND created_at < ?", StorageStatusPending, before).
+		Order("id ASC").Limit(limit).Find(&entities).Error
+	return entities, err
+}
+
 func FileResourcePage(page, pageSize int) FileResourcePageResult {
 	if page < 1 {
 		page = 1
@@ -197,7 +212,12 @@ func (itself FileResource) GetAccessPath() string {
 
 // CountDailyUploads returns the number of files uploaded by a user today.
 func CountDailyUploads(userId uint64) int64 {
-	return CountUserUploadsToday(userId)
+	now := time.Now()
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	endOfDay := startOfDay.Add(24 * time.Hour).Add(-time.Nanosecond)
+	var count int64
+	builder().Where("user_id = ? AND created_at >= ? AND created_at <= ?", userId, startOfDay, endOfDay).Count(&count)
+	return count
 }
 
 // CountUserUploadsInTimeRange counts uploads for a user within a time range.

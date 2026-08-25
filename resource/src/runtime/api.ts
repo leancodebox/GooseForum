@@ -12,11 +12,13 @@ interface ApiResponse<T> {
 
 class ApiResponseError extends Error {
   readonly messageCode?: string
+  readonly status?: number
 
-  constructor(message: string, messageCode?: string) {
+  constructor(message: string, messageCode?: string, status?: number) {
     super(message)
     this.name = 'ApiResponseError'
     this.messageCode = messageCode
+    this.status = status
   }
 }
 
@@ -31,7 +33,7 @@ function t(key: string) {
 async function readApiResponse<T>(response: Response, fallback: string): Promise<T> {
   const data = await response.json().catch(() => undefined) as ApiResponse<T> | undefined
   if (data?.code !== undefined && data.code !== 0) {
-    throw new ApiResponseError(responseMessage(data, fallback), data.messageCode)
+    throw new ApiResponseError(responseMessage(data, fallback), data.messageCode, response.status)
   }
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`)
@@ -48,7 +50,7 @@ async function readApiSuccessMessage(response: Response, successFallback: string
   }
   const data = (await response.json()) as ApiResponse<unknown>
   if (data.code !== undefined && data.code !== 0) {
-    throw new ApiResponseError(responseMessage(data, errorFallback), data.messageCode)
+    throw new ApiResponseError(responseMessage(data, errorFallback), data.messageCode, response.status)
   }
   return responseMessage(data, successFallback)
 }
@@ -405,6 +407,56 @@ export async function submitTopic(topic: SubmitTopicInput): Promise<number> {
 }
 
 export async function uploadImage(file: File): Promise<string> {
+  const initResponse = await fetch('/file/img-upload/init', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filename: file.name, contentType: file.type, size: file.size }),
+  })
+  const init = await readApiResponse<ImageUploadInitResult>(initResponse, t('api.imageUploadFailed'))
+  if (init.mode === 'proxy') return uploadImageThroughServer(file)
+  if (init.mode !== 'direct' || !init.name || !init.upload?.url || init.upload.method !== 'POST') {
+    if (init.name) await abortDirectImageUpload(init.name)
+    throw new Error(t('api.imageUploadEmpty'))
+  }
+
+  const formData = new FormData()
+  for (const [key, value] of Object.entries(init.upload.fields || {})) formData.append(key, value)
+  formData.append('file', file, file.name)
+  let uploadResponse: Response
+  try {
+    uploadResponse = await fetch(init.upload.url, { method: 'POST', body: formData })
+  } catch (uploadError) {
+    try {
+      return await completeDirectImageUpload(init.name)
+    } catch {
+      // The object request may still be in flight. The server expires pending uploads safely.
+      throw uploadError
+    }
+  }
+  if (!uploadResponse.ok) {
+    await abortDirectImageUpload(init.name)
+    throw new Error(`HTTP ${uploadResponse.status}`)
+  }
+  try {
+    return await completeDirectImageUpload(init.name)
+  } catch (error) {
+    if (!isTransientUploadError(error)) await abortDirectImageUpload(init.name)
+    throw error
+  }
+}
+
+interface ImageUploadInitResult {
+  mode: 'proxy' | 'direct'
+  name?: string
+  upload?: {
+    url: string
+    method: string
+    fields: Record<string, string>
+    expiresAt: string
+  }
+}
+
+async function uploadImageThroughServer(file: File): Promise<string> {
   const formData = new FormData()
   formData.append('file', file)
   const response = await fetch('/file/img-upload', {
@@ -416,6 +468,41 @@ export async function uploadImage(file: File): Promise<string> {
     throw new Error(t('api.imageUploadEmpty'))
   }
   return result.url
+}
+
+async function completeDirectImageUpload(name: string): Promise<string> {
+  const complete = async () => {
+    const response = await fetch('/file/img-upload/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    })
+    const result = await readApiResponse<{ url: string }>(response, t('api.imageUploadFailed'))
+    if (!result?.url) throw new Error(t('api.imageUploadEmpty'))
+    return result.url
+  }
+  try {
+    return await complete()
+  } catch (error) {
+    if (!isTransientUploadError(error)) throw error
+    return complete()
+  }
+}
+
+function isTransientUploadError(error: unknown) {
+  return error instanceof TypeError || (error instanceof ApiResponseError && (error.status || 0) >= 500)
+}
+
+async function abortDirectImageUpload(name: string) {
+  try {
+    await fetch('/file/img-upload/abort', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    })
+  } catch {
+    // Expired pending uploads are also removed by the server cleanup job.
+  }
 }
 
 export interface ChatMessagePayload {

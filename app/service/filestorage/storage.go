@@ -65,6 +65,7 @@ type metadataRepository interface {
 	Create(context.Context, Metadata) (*Metadata, error)
 	Get(context.Context, string) (*Metadata, error)
 	GetPending(context.Context, string) (*Metadata, error)
+	ListPendingBefore(context.Context, time.Time, int) ([]Metadata, error)
 	MarkReady(context.Context, string) (*Metadata, error)
 	Delete(context.Context, string) error
 }
@@ -162,9 +163,16 @@ func validateMetadataRequest(name, contentType string, size int64) error {
 }
 
 func (service *Service) rollbackPut(ctx context.Context, name string, cause error) error {
+	return service.rollbackStore(ctx, service.writeStore, name, cause)
+}
+
+func (service *Service) rollbackStore(ctx context.Context, store Store, name string, cause error) error {
 	cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer cancel()
-	return errors.Join(cause, service.writeStore.Delete(cleanupCtx, name), service.repository.Delete(cleanupCtx, name))
+	if err := store.Delete(cleanupCtx, name); err != nil {
+		return errors.Join(cause, err)
+	}
+	return errors.Join(cause, service.repository.Delete(cleanupCtx, name))
 }
 
 func (service *Service) Open(ctx context.Context, name string) (*Object, error) {

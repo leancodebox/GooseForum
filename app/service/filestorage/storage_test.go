@@ -6,18 +6,20 @@ import (
 	"errors"
 	"io"
 	"testing"
+	"time"
 
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 )
 
 type fakeStore struct {
-	driver  string
-	putName string
-	putSize int64
-	putData []byte
-	putErr  error
-	object  *StoredObject
-	deleted string
+	driver    string
+	putName   string
+	putSize   int64
+	putData   []byte
+	putErr    error
+	deleteErr error
+	object    *StoredObject
+	deleted   string
 }
 
 func (store *fakeStore) Driver() string { return store.driver }
@@ -35,7 +37,7 @@ func (store *fakeStore) Open(_ context.Context, _ string) (*StoredObject, error)
 
 func (store *fakeStore) Delete(_ context.Context, name string) error {
 	store.deleted = name
-	return nil
+	return store.deleteErr
 }
 
 type fakeMetadataRepository struct {
@@ -74,6 +76,13 @@ func (repository *fakeMetadataRepository) GetPending(_ context.Context, name str
 	}
 	copy := *repository.metadata
 	return &copy, nil
+}
+
+func (repository *fakeMetadataRepository) ListPendingBefore(_ context.Context, before time.Time, limit int) ([]Metadata, error) {
+	if repository.metadata == nil || repository.metadata.StorageStatus != filedata.StorageStatusPending || !repository.metadata.CreatedAt.Before(before) || limit == 0 {
+		return nil, nil
+	}
+	return []Metadata{*repository.metadata}, nil
 }
 
 func (repository *fakeMetadataRepository) Delete(ctx context.Context, name string) error {
@@ -196,6 +205,44 @@ func TestServiceRoutesExistingFilesToTheirStorageDriver(t *testing.T) {
 	}
 	if databaseStore.deleted != "legacy.webp" || s3Store.deleted != "" {
 		t.Fatalf("deleted database/s3 = %q/%q", databaseStore.deleted, s3Store.deleted)
+	}
+}
+
+func TestServiceCleansExpiredPendingUploads(t *testing.T) {
+	store := &fakeStore{driver: S3Driver}
+	repository := &fakeMetadataRepository{metadata: &Metadata{
+		Name: "pending.webp", StorageDriver: S3Driver, StorageStatus: filedata.StorageStatusPending,
+		CreatedAt: time.Now().Add(-3 * time.Hour),
+	}}
+	service, err := newService(store, repository)
+	if err != nil {
+		t.Fatalf("new service: %v", err)
+	}
+	removed, err := service.CleanupPending(context.Background(), time.Now().Add(-2*time.Hour), 10)
+	if err != nil || removed != 1 {
+		t.Fatalf("cleanup = %d, %v", removed, err)
+	}
+	if repository.metadata != nil || store.deleted != "pending.webp" {
+		t.Fatalf("cleanup state = metadata %#v deleted %q", repository.metadata, store.deleted)
+	}
+}
+
+func TestServiceRetainsPendingMetadataWhenObjectCleanupFails(t *testing.T) {
+	store := &fakeStore{driver: S3Driver, deleteErr: errors.New("temporary delete failure")}
+	repository := &fakeMetadataRepository{metadata: &Metadata{
+		Name: "pending.webp", StorageDriver: S3Driver, StorageStatus: filedata.StorageStatusPending,
+		CreatedAt: time.Now().Add(-3 * time.Hour),
+	}}
+	service, err := newService(store, repository)
+	if err != nil {
+		t.Fatalf("new service: %v", err)
+	}
+	removed, err := service.CleanupPending(context.Background(), time.Now().Add(-2*time.Hour), 10)
+	if err == nil || removed != 0 {
+		t.Fatalf("cleanup = %d, %v", removed, err)
+	}
+	if repository.metadata == nil {
+		t.Fatal("metadata was deleted after object cleanup failed")
 	}
 }
 

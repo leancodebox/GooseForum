@@ -3,6 +3,7 @@ package filedata
 import (
 	"context"
 	"testing"
+	"time"
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 )
@@ -141,6 +142,9 @@ func TestPendingFileIsHiddenUntilMarkedReady(t *testing.T) {
 	if count := CountUserUploadsToday(11); count != 0 {
 		t.Fatalf("pending upload count = %d", count)
 	}
+	if count := CountDailyUploads(11); count != 1 {
+		t.Fatalf("pending upload attempt count = %d", count)
+	}
 	if err := UpdateFileContent(ctx, metadata.Name, []byte("content")); err != nil {
 		t.Fatalf("write content: %v", err)
 	}
@@ -150,5 +154,32 @@ func TestPendingFileIsHiddenUntilMarkedReady(t *testing.T) {
 	}
 	if ready.StorageStatus != StorageStatusReady || ready.Size != 7 {
 		t.Fatalf("ready metadata = %#v", ready)
+	}
+}
+
+func TestListPendingFilesBeforeRespectsCutoffAndLimit(t *testing.T) {
+	setupFileDataTestDB(t)
+	ctx := context.Background()
+	old, err := CreateFileMetadata(ctx, 1, "pending/old.webp", "image/webp", 10, "s3")
+	if err != nil {
+		t.Fatalf("create old: %v", err)
+	}
+	newer, err := CreateFileMetadata(ctx, 1, "pending/new.webp", "image/webp", 10, "s3")
+	if err != nil {
+		t.Fatalf("create new: %v", err)
+	}
+	cutoff := time.Now().Add(-time.Hour)
+	if err := builder().Where("id = ?", old.Id).UpdateColumn("created_at", cutoff.Add(-time.Minute)).Error; err != nil {
+		t.Fatalf("age old: %v", err)
+	}
+	if err := builder().Where("id = ?", newer.Id).UpdateColumn("created_at", cutoff.Add(time.Minute)).Error; err != nil {
+		t.Fatalf("age new: %v", err)
+	}
+	items, err := ListPendingFilesBefore(ctx, cutoff, 1)
+	if err != nil {
+		t.Fatalf("list: %v", err)
+	}
+	if len(items) != 1 || items[0].Id != old.Id {
+		t.Fatalf("items = %#v", items)
 	}
 }

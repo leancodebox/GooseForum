@@ -18,6 +18,7 @@ type fakeS3Client struct {
 	putSize        int64
 	putData        []byte
 	opened         string
+	openErr        error
 	removed        string
 	stat           s3ObjectInfo
 	statErr        error
@@ -38,6 +39,9 @@ func (client *fakeS3Client) PutObject(_ context.Context, name string, body io.Re
 
 func (client *fakeS3Client) OpenObject(_ context.Context, name string) (io.ReadCloser, error) {
 	client.opened = name
+	if client.openErr != nil {
+		return nil, client.openErr
+	}
 	return io.NopCloser(bytes.NewReader([]byte("object"))), nil
 }
 
@@ -149,6 +153,10 @@ func TestServiceCoordinatesDirectUploadLifecycle(t *testing.T) {
 	if ready.StorageStatus != "ready" || ready.Name != request.Name {
 		t.Fatalf("ready metadata = %#v", ready)
 	}
+	retried, err := service.CompleteDirectUpload(context.Background(), CompleteDirectUploadRequest{Name: request.Name, UserId: request.UserId})
+	if err != nil || retried.Id != ready.Id {
+		t.Fatalf("idempotent complete = %#v, %v", retried, err)
+	}
 }
 
 func TestServiceRejectsCompletingAnotherUsersDirectUpload(t *testing.T) {
@@ -188,6 +196,78 @@ func TestServiceRollsBackFailedDirectUploadSigning(t *testing.T) {
 	}
 	if repository.metadata != nil || client.removed != "images/direct.webp" {
 		t.Fatalf("rollback = metadata %#v removed %q", repository.metadata, client.removed)
+	}
+}
+
+func TestServiceRemovesObjectRejectedByContentValidator(t *testing.T) {
+	client := &fakeS3Client{stat: s3ObjectInfo{Size: 6, ContentType: "image/webp"}}
+	store := newS3Store(client)
+	repository := &fakeMetadataRepository{}
+	service, err := newService(store, repository)
+	if err != nil {
+		t.Fatalf("new service: %v", err)
+	}
+	request := DirectUploadRequest{Name: "images/direct.webp", ContentType: "image/webp", Size: 6, UserId: 12, ExpiresIn: time.Minute}
+	if _, err := service.BeginDirectUpload(context.Background(), request); err != nil {
+		t.Fatalf("begin: %v", err)
+	}
+	_, err = service.CompleteDirectUpload(context.Background(), CompleteDirectUploadRequest{
+		Name: request.Name, UserId: request.UserId,
+		Validator: func(io.Reader, string) error { return ErrDirectUploadInvalidObject },
+	})
+	if !errors.Is(err, ErrDirectUploadInvalidObject) {
+		t.Fatalf("complete error = %v", err)
+	}
+	if repository.metadata != nil || client.removed != request.Name {
+		t.Fatalf("cleanup = metadata %#v removed %q", repository.metadata, client.removed)
+	}
+}
+
+func TestServiceKeepsPendingUploadOnTransientValidatorFailure(t *testing.T) {
+	client := &fakeS3Client{stat: s3ObjectInfo{Size: 6, ContentType: "image/webp"}}
+	store := newS3Store(client)
+	repository := &fakeMetadataRepository{}
+	service, err := newService(store, repository)
+	if err != nil {
+		t.Fatalf("new service: %v", err)
+	}
+	request := DirectUploadRequest{Name: "images/direct.webp", ContentType: "image/webp", Size: 6, UserId: 12, ExpiresIn: time.Minute}
+	if _, err := service.BeginDirectUpload(context.Background(), request); err != nil {
+		t.Fatalf("begin: %v", err)
+	}
+	_, err = service.CompleteDirectUpload(context.Background(), CompleteDirectUploadRequest{
+		Name: request.Name, UserId: request.UserId,
+		Validator: func(io.Reader, string) error { return errors.New("temporary stream failure") },
+	})
+	if err == nil {
+		t.Fatal("complete succeeded")
+	}
+	if repository.metadata == nil || repository.metadata.StorageStatus != "pending" || client.removed != "" {
+		t.Fatalf("pending state = metadata %#v removed %q", repository.metadata, client.removed)
+	}
+}
+
+func TestServiceKeepsPendingUploadOnTransientReadFailure(t *testing.T) {
+	client := &fakeS3Client{stat: s3ObjectInfo{Size: 6, ContentType: "image/webp"}, openErr: errors.New("temporary read failure")}
+	store := newS3Store(client)
+	repository := &fakeMetadataRepository{}
+	service, err := newService(store, repository)
+	if err != nil {
+		t.Fatalf("new service: %v", err)
+	}
+	request := DirectUploadRequest{Name: "images/direct.webp", ContentType: "image/webp", Size: 6, UserId: 12, ExpiresIn: time.Minute}
+	if _, err := service.BeginDirectUpload(context.Background(), request); err != nil {
+		t.Fatalf("begin: %v", err)
+	}
+	_, err = service.CompleteDirectUpload(context.Background(), CompleteDirectUploadRequest{
+		Name: request.Name, UserId: request.UserId,
+		Validator: func(io.Reader, string) error { return nil },
+	})
+	if err == nil {
+		t.Fatal("complete succeeded")
+	}
+	if repository.metadata == nil || repository.metadata.StorageStatus != "pending" || client.removed != "" {
+		t.Fatalf("pending state = metadata %#v removed %q", repository.metadata, client.removed)
 	}
 }
 

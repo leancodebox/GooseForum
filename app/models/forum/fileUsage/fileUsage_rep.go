@@ -11,6 +11,10 @@ func Create(entity *Entity) error {
 	return builder().Create(entity).Error
 }
 
+func CreateIfAbsent(entity *Entity) error {
+	return builder().Clauses(clause.OnConflict{DoNothing: true}).Create(entity).Error
+}
+
 func GetByFileName(fileName string) ([]Entity, error) {
 	if fileName == "" {
 		return []Entity{}, nil

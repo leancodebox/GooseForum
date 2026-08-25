@@ -163,10 +163,10 @@ func (store *S3Store) VerifyUpload(ctx context.Context, request DirectUploadRequ
 		return err
 	}
 	if info.Size != request.Size {
-		return fmt.Errorf("s3 object size mismatch: got %d, want %d", info.Size, request.Size)
+		return fmt.Errorf("%w: s3 object size mismatch: got %d, want %d", ErrDirectUploadInvalidObject, info.Size, request.Size)
 	}
 	if !strings.EqualFold(info.ContentType, request.ContentType) {
-		return fmt.Errorf("s3 object content type mismatch: got %q, want %q", info.ContentType, request.ContentType)
+		return fmt.Errorf("%w: s3 object content type mismatch: got %q, want %q", ErrDirectUploadInvalidObject, info.ContentType, request.ContentType)
 	}
 	return nil
 }

@@ -75,7 +75,7 @@ export async function canvasToImageFile(
   quality = 0.86,
 ): Promise<File> {
   const blob = await canvasToBlob(canvas, mimeType, quality)
-  return new File([blob], filename.replace(/\.[^/.]+$/, mimeType === 'image/webp' ? '.webp' : '.jpg'), {
+  return new File([blob], imageFilenameForMime(filename, mimeType), {
     type: mimeType,
     lastModified: Date.now(),
   })
@@ -91,11 +91,12 @@ async function compressImage(file: File, mimeType: string, quality: number): Pro
       convertSize: 0,
       success: (result) => {
         const extension = mimeType === 'image/webp' ? '.webp' : '.jpg'
-        if (result instanceof File && result.type === mimeType) {
+        const outputName = imageFilenameForMime(file.name, mimeType)
+        if (result instanceof File && result.type === mimeType && result.name.toLowerCase().endsWith(extension)) {
           resolve(result)
           return
         }
-        resolve(new File([result], file.name.replace(/\.[^/.]+$/, extension), {
+        resolve(new File([result], outputName, {
           type: mimeType,
           lastModified: Date.now(),
         }))
@@ -105,6 +106,11 @@ async function compressImage(file: File, mimeType: string, quality: number): Pro
       },
     })
   })
+}
+
+export function imageFilenameForMime(filename: string, mimeType: string): string {
+  const extension = mimeType === 'image/webp' ? '.webp' : '.jpg'
+  return /\.[^/.]+$/.test(filename) ? filename.replace(/\.[^/.]+$/, extension) : `${filename}${extension}`
 }
 
 async function createBitmap(file: File): Promise<ImageBitmap> {

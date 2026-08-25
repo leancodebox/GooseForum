@@ -1,6 +1,7 @@
 package job
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
+	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/robfig/cron/v3"
 )
 
@@ -44,6 +46,13 @@ func Run() {
 		}
 	}))
 	slog.Info("reg cron", "entryID", entryID, "spec", backupSpec, "err", err)
+	entryID, err = scheduler.AddFunc("17 * * * *", upCmd(func() {
+		removed, cleanupErr := filestorage.CleanupPending(context.Background(), time.Now().Add(-2*time.Hour), 500)
+		if cleanupErr != nil || removed > 0 {
+			slog.Info("cleanup pending uploads", "removed", removed, "err", cleanupErr)
+		}
+	}))
+	slog.Info("reg pending upload cleanup", "entryID", entryID, "err", err)
 	running = true
 	scheduler.Start()
 }

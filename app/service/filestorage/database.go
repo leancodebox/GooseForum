@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 )
@@ -78,6 +79,18 @@ func (databaseMetadataRepository) GetPending(ctx context.Context, name string) (
 	}
 	result := metadataFromEntity(entity)
 	return &result, nil
+}
+
+func (databaseMetadataRepository) ListPendingBefore(ctx context.Context, before time.Time, limit int) ([]Metadata, error) {
+	entities, err := filedata.ListPendingFilesBefore(ctx, before, limit)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]Metadata, 0, len(entities))
+	for index := range entities {
+		result = append(result, metadataFromEntity(&entities[index]))
+	}
+	return result, nil
 }
 
 func (databaseMetadataRepository) MarkReady(ctx context.Context, name string) (*Metadata, error) {
