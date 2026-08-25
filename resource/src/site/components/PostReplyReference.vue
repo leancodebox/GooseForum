@@ -2,6 +2,7 @@
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { vContentEnhancements } from '@/runtime/content-enhancements'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import type { ReplyTargetPayload } from '@gooseforum/client'
 
@@ -77,6 +78,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
             'reply-reference-content--collapsed': !expanded,
             'reply-reference-content--faded': !expanded && overflowing,
           }"
+          v-content-enhancements="target.renderedContent"
           v-html="target.renderedContent"
         />
       </div>

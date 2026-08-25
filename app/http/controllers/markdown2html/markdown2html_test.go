@@ -38,6 +38,16 @@ func TestMarkdownToHTMLRendersGFM(t *testing.T) {
 	}
 }
 
+func TestMarkdownToHTMLPreservesMermaidCodeBlockForClientEnhancement(t *testing.T) {
+	html := MarkdownToHTML("```mermaid\ngraph TD\n  A --> B\n```")
+
+	for _, want := range []string{`<pre><code class="language-mermaid">`, "graph TD\n  A --&gt; B"} {
+		if !strings.Contains(html, want) {
+			t.Fatalf("expected Mermaid source HTML to contain %q, got %s", want, html)
+		}
+	}
+}
+
 func TestMarkdownCompatibilityFixtures(t *testing.T) {
 	for _, fixture := range loadMarkdownCompatFixtures(t) {
 		t.Run(fixture.Name, func(t *testing.T) {

@@ -8,6 +8,7 @@ import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
 import { showUserCard } from '@/runtime/user-card-events'
 import { measurePostViewportProgressFromRects } from '@/runtime/post-viewport-progress'
+import { vContentEnhancements } from '@/runtime/content-enhancements'
 import MarkdownImageViewer from '@/site/components/MarkdownImageViewer.vue'
 import PostPositionRail from '@/site/components/PostPositionRail.vue'
 import PostReplyReference from '@/site/components/PostReplyReference.vue'
@@ -1539,7 +1540,7 @@ async function removePost(postId: number) {
                 <div v-if="post.isHidden && !post.canModerate" class="rounded border border-line bg-base-200/60 px-3 py-2 text-sm text-base-content/45">
                   {{ t('topic.hiddenReplyPlaceholder') }}
                 </div>
-                <div v-else class="gf-prose gf-prose-post" v-html="post.renderedContent" />
+                <div v-else v-content-enhancements="post.renderedContent" class="gf-prose gf-prose-post" v-html="post.renderedContent" />
                 <div v-if="post.isHidden && post.canModerate" class="mt-2 inline-flex rounded bg-base-200 px-2 py-1 text-xs font-semibold text-base-content/45">
                   {{ t('topic.hiddenReplyBadge') }}
                 </div>
