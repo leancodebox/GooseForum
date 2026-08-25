@@ -71,6 +71,15 @@ func (databaseMetadataRepository) Get(ctx context.Context, name string) (*Metada
 	return &result, nil
 }
 
+func (databaseMetadataRepository) GetPending(ctx context.Context, name string) (*Metadata, error) {
+	entity, err := filedata.GetPendingFileMetadataByNameContext(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	result := metadataFromEntity(entity)
+	return &result, nil
+}
+
 func (databaseMetadataRepository) MarkReady(ctx context.Context, name string) (*Metadata, error) {
 	entity, err := filedata.MarkFileReady(ctx, name)
 	if err != nil {

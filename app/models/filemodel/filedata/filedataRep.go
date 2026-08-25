@@ -26,7 +26,7 @@ type FileResourcePageResult struct {
 	List     []FileResource
 	Page     int
 	PageSize int
-	MaxId    int64
+	Total    int64
 }
 
 var supportedImageTypes = map[string]string{
@@ -95,10 +95,18 @@ func GetFileMetadataByName(name string) (*Entity, error) {
 }
 
 func GetFileMetadataByNameContext(ctx context.Context, name string) (*Entity, error) {
+	return getFileMetadataByNameAndStatus(ctx, name, StorageStatusReady)
+}
+
+func GetPendingFileMetadataByNameContext(ctx context.Context, name string) (*Entity, error) {
+	return getFileMetadataByNameAndStatus(ctx, name, StorageStatusPending)
+}
+
+func getFileMetadataByNameAndStatus(ctx context.Context, name string, status string) (*Entity, error) {
 	var entity Entity
 	err := builder().WithContext(ctx).
 		Select("id, name, assert_type, CASE WHEN file_size > 0 THEN file_size ELSE LENGTH(content) END AS file_size, storage_driver, storage_status, user_id, created_at, updated_at").
-		Where(queryopt.Eq(fieldName, name)).Where("storage_status = ?", StorageStatusReady).First(&entity).Error
+		Where(queryopt.Eq(fieldName, name)).Where("storage_status = ?", status).First(&entity).Error
 	if err != nil || entity.Id == 0 {
 		return nil, errors.New("file not found")
 	}
@@ -166,21 +174,21 @@ func FileResourcePage(page, pageSize int) FileResourcePageResult {
 		pageSize = 50
 	}
 
-	var maxId int64
-	builder().Where("storage_status = ?", StorageStatusReady).Select("id").Order("id DESC").Limit(1).Scan(&maxId)
-	upperId := maxId - int64((page-1)*pageSize)
+	var total int64
+	builder().Where("storage_status = ?", StorageStatusReady).Count(&total)
 
 	var list []FileResource
 	builder().
-		Where("id <= ? AND storage_status = ?", upperId, StorageStatusReady).
+		Where("storage_status = ?", StorageStatusReady).
 		Select("id, name, assert_type AS type, CASE WHEN file_size > 0 THEN file_size ELSE LENGTH(content) END AS size, user_id, created_at").
 		Order("id DESC").
+		Offset((page - 1) * pageSize).
 		Limit(pageSize).
 		Scan(&list)
 	for index := range list {
 		list[index].URL = list[index].GetAccessPath()
 	}
-	return FileResourcePageResult{List: list, Page: page, PageSize: pageSize, MaxId: maxId}
+	return FileResourcePageResult{List: list, Page: page, PageSize: pageSize, Total: total}
 }
 
 func (itself FileResource) GetAccessPath() string {

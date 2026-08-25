@@ -18,6 +18,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/signalwatch"
 	"github.com/leancodebox/GooseForum/app/console/job"
 	"github.com/leancodebox/GooseForum/app/http/routes"
+	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
 	"github.com/spf13/cast"
@@ -78,6 +79,9 @@ func pprofMux() *http.ServeMux {
 }
 
 func ginServe() {
+	if err := filestorage.ConfigureFromPreferences(); err != nil {
+		panic(fmt.Errorf("configure file storage: %w", err))
+	}
 	preferences.OpenConfigChangeEvent()
 	// 初始化OAuth配置
 	oauthservice.InitOAuth()

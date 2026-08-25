@@ -33,8 +33,8 @@ func TestFileResourcePageListsFilesByIDRangeWithoutContent(t *testing.T) {
 	}
 
 	page := FileResourcePage(1, 2)
-	if page.MaxId != int64(second.Id) {
-		t.Fatalf("maxId = %d, want %d", page.MaxId, second.Id)
+	if page.Total != 3 {
+		t.Fatalf("total = %d, want 3", page.Total)
 	}
 	if len(page.List) != 2 {
 		t.Fatalf("len = %d, want 2", len(page.List))
@@ -58,6 +58,30 @@ func TestFileResourcePageListsFilesByIDRangeWithoutContent(t *testing.T) {
 	}
 	if page.List[0].URL != "/file/img/images/new.webp" {
 		t.Fatalf("url = %q, want image access path", page.List[0].URL)
+	}
+}
+
+func TestFileResourcePageHandlesPendingIDGaps(t *testing.T) {
+	setupFileDataTestDB(t)
+	first, err := SaveFile(1, "images/first.webp", "image/webp", []byte("first"))
+	if err != nil {
+		t.Fatalf("save first: %v", err)
+	}
+	if _, err := CreateFileMetadata(context.Background(), 1, "images/pending.webp", "image/webp", 7, "s3"); err != nil {
+		t.Fatalf("create pending: %v", err)
+	}
+	second, err := SaveFile(1, "images/second.webp", "image/webp", []byte("second"))
+	if err != nil {
+		t.Fatalf("save second: %v", err)
+	}
+
+	page1 := FileResourcePage(1, 1)
+	page2 := FileResourcePage(2, 1)
+	if page1.Total != 2 || page2.Total != 2 || len(page1.List) != 1 || len(page2.List) != 1 {
+		t.Fatalf("pages = %#v / %#v", page1, page2)
+	}
+	if page1.List[0].Id != second.Id || page2.List[0].Id != first.Id {
+		t.Fatalf("page ids = %d / %d, want %d / %d", page1.List[0].Id, page2.List[0].Id, second.Id, first.Id)
 	}
 }
 

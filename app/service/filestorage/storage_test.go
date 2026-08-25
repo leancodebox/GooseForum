@@ -61,7 +61,15 @@ func (repository *fakeMetadataRepository) MarkReady(_ context.Context, name stri
 }
 
 func (repository *fakeMetadataRepository) Get(_ context.Context, name string) (*Metadata, error) {
-	if repository.metadata == nil || repository.metadata.Name != name {
+	if repository.metadata == nil || repository.metadata.Name != name || repository.metadata.StorageStatus != filedata.StorageStatusReady {
+		return nil, errors.New("file not found")
+	}
+	copy := *repository.metadata
+	return &copy, nil
+}
+
+func (repository *fakeMetadataRepository) GetPending(_ context.Context, name string) (*Metadata, error) {
+	if repository.metadata == nil || repository.metadata.Name != name || repository.metadata.StorageStatus != filedata.StorageStatusPending {
 		return nil, errors.New("file not found")
 	}
 	copy := *repository.metadata
@@ -147,7 +155,7 @@ func TestServiceRollsBackMetadataWithUncancelledContext(t *testing.T) {
 
 func TestServiceRejectsMetadataForAnotherDriver(t *testing.T) {
 	store := &fakeStore{driver: "s3"}
-	repository := &fakeMetadataRepository{metadata: &Metadata{Name: "legacy.webp", StorageDriver: DatabaseDriver}}
+	repository := &fakeMetadataRepository{metadata: &Metadata{Name: "legacy.webp", StorageDriver: DatabaseDriver, StorageStatus: filedata.StorageStatusReady}}
 	service, err := newService(store, repository)
 	if err != nil {
 		t.Fatalf("new service: %v", err)
@@ -157,6 +165,37 @@ func TestServiceRejectsMetadataForAnotherDriver(t *testing.T) {
 	}
 	if err := service.Delete(context.Background(), "legacy.webp"); err == nil {
 		t.Fatal("delete with wrong driver succeeded")
+	}
+}
+
+func TestServiceRoutesExistingFilesToTheirStorageDriver(t *testing.T) {
+	s3Store := &fakeStore{driver: S3Driver}
+	databaseStore := &fakeStore{
+		driver: DatabaseDriver,
+		object: &StoredObject{Size: 6, Body: io.NopCloser(bytes.NewReader([]byte("legacy")))},
+	}
+	repository := &fakeMetadataRepository{metadata: &Metadata{
+		Name: "legacy.webp", ContentType: "image/webp", Size: 6,
+		StorageDriver: DatabaseDriver, StorageStatus: filedata.StorageStatusReady,
+	}}
+	service, err := newService(s3Store, repository, databaseStore)
+	if err != nil {
+		t.Fatalf("new service: %v", err)
+	}
+	object, err := service.Open(context.Background(), "legacy.webp")
+	if err != nil {
+		t.Fatalf("open: %v", err)
+	}
+	content, _ := io.ReadAll(object.Body)
+	_ = object.Body.Close()
+	if string(content) != "legacy" {
+		t.Fatalf("content = %q", content)
+	}
+	if err := service.Delete(context.Background(), "legacy.webp"); err != nil {
+		t.Fatalf("delete: %v", err)
+	}
+	if databaseStore.deleted != "legacy.webp" || s3Store.deleted != "" {
+		t.Fatalf("deleted database/s3 = %q/%q", databaseStore.deleted, s3Store.deleted)
 	}
 }
 
@@ -186,5 +225,8 @@ func TestServiceRejectsInvalidConfigurationAndPut(t *testing.T) {
 	}
 	if _, err := newService(store, nil); err == nil {
 		t.Fatal("newService(store, nil) succeeded")
+	}
+	if _, err := newService(store, &fakeMetadataRepository{}, &fakeStore{driver: store.driver}); err == nil {
+		t.Fatal("duplicate driver configuration succeeded")
 	}
 }

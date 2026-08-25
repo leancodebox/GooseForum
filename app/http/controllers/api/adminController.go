@@ -834,7 +834,7 @@ func FileResourcePage(req component.BetterRequest[FileResourcePageReq]) componen
 		}),
 		pageData.Page,
 		pageData.PageSize,
-		pageData.MaxId,
+		pageData.Total,
 	)
 }
 

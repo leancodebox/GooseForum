@@ -48,6 +48,19 @@ maxIdleConnections = 3
 maxOpenConnections = 5
 maxLifeSeconds = 300
 
+[storage]
+driver = "database" # database | s3
+
+[storage.s3]
+endpoint = ""
+bucket = ""
+accessKey = ""
+secretKey = ""
+sessionToken = ""
+region = ""
+secure = true
+pathStyle = false
+
 [meilisearch]
 url = "http://localhost:7700"
 masterkey = ""
