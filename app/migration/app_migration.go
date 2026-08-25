@@ -234,6 +234,18 @@ func runVersionedDataMigrations() error {
 		}
 		currentVersion = 17
 	}
+	if currentVersion < 18 {
+		result := datamigration.EnsurePostingSettingsTopicLimit()
+		slog.Info("app migration posting settings topic limit done", "updated", result.Updated, "skipped", result.Skipped, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			slog.Error("app migration posting settings topic limit has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
+			return fmt.Errorf("migrate posting settings topic limit: %s", result.LastFailed)
+		}
+		if err := syncMigrationVersion(18); err != nil {
+			return err
+		}
+		currentVersion = 18
+	}
 	slog.Info("app migration end", "version", currentVersion)
 	return nil
 }

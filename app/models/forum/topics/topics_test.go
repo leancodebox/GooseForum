@@ -59,6 +59,34 @@ func TestTopicAndPostSchemaMigrates(t *testing.T) {
 	}
 }
 
+func TestCantWriteNewBlocksAtConfiguredLimit(t *testing.T) {
+	conn := dbconnect.Connect()
+	if err := conn.AutoMigrate(&Entity{}); err != nil {
+		t.Fatalf("migrate topics: %v", err)
+	}
+
+	const userID uint64 = 990001
+	conn.Where("user_id = ?", userID).Delete(&Entity{})
+	t.Cleanup(func() {
+		conn.Where("user_id = ?", userID).Delete(&Entity{})
+	})
+
+	now := time.Now()
+	if err := conn.Create(&[]Entity{
+		{Title: "daily limit one", UserId: userID, CreatedAt: now},
+		{Title: "daily limit two", UserId: userID, CreatedAt: now},
+	}).Error; err != nil {
+		t.Fatalf("create topics: %v", err)
+	}
+
+	if !CantWriteNew(userID, 2) {
+		t.Fatal("CantWriteNew() = false at configured limit")
+	}
+	if CantWriteNew(userID, 3) {
+		t.Fatal("CantWriteNew() = true below configured limit")
+	}
+}
+
 func TestTopicRepositoryParity(t *testing.T) {
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(&Entity{}, &posts.Entity{}, &topicCategoryIndex.Entity{}); err != nil {

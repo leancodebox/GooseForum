@@ -285,6 +285,7 @@ export interface PostingSettings {
     minTitleLength: number
     maxTitleLength: number
     newUserPostCooldownMinutes: number
+    maxDailyTopicsPerUser: number
   }
   uploadControl: {
     allowAttachments: boolean

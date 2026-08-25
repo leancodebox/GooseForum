@@ -1329,7 +1329,7 @@ func SaveSecuritySettings(req component.BetterRequest[SaveSecuritySettingsReq]) 
 // GetPostingSettings 获取发布内容设置
 func GetPostingSettings(req component.BetterRequest[component.Null]) component.Response {
 	defaultSettings := defaultconfig.GetDefaultPostingSettingsConfig()
-	res := pageConfig.GetConfigByPageType(pageConfig.PostingSettings, defaultSettings)
+	res := pageConfig.GetPostingSettingsConfig(defaultSettings)
 	return component.SuccessResponse(res)
 }
 

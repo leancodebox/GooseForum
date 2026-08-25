@@ -201,6 +201,7 @@ type PostingContent struct {
 		MinTitleLength             int `json:"minTitleLength"`
 		MaxTitleLength             int `json:"maxTitleLength"`
 		NewUserPostCooldownMinutes int `json:"newUserPostCooldownMinutes"`
+		MaxDailyTopicsPerUser      int `json:"maxDailyTopicsPerUser"`
 	} `json:"textControl"`
 	UploadControl struct {
 		AllowAttachments             bool     `json:"allowAttachments"`

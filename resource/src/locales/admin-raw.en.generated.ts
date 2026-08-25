@@ -556,5 +556,6 @@ export default {
   "k00fg": "Copy URL",
   "k00fh": "Open resource",
   "k00fi": "Size",
-  "k00fj": "Max ID"
+  "k00fj": "Max ID",
+  "k00fk": "Maximum daily topics per user (0 means unlimited)"
 } as const

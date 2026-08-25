@@ -77,7 +77,7 @@ var postingSettingsConfigCache = &localcache.Cache[pageConfig.PostingContent]{Ma
 
 func GetPostingSettingsConfigCache() pageConfig.PostingContent {
 	return postingSettingsConfigCache.GetOrLoad("", func() (pageConfig.PostingContent, error) {
-		return pageConfig.GetConfigByPageType(pageConfig.PostingSettings, defaultconfig.GetDefaultPostingSettingsConfig()), nil
+		return pageConfig.GetPostingSettingsConfig(defaultconfig.GetDefaultPostingSettingsConfig()), nil
 	}, configFastCacheTTL)
 }
 

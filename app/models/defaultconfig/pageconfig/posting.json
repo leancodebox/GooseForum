@@ -4,7 +4,8 @@
     "maxPostLength": 50000,
     "minTitleLength": 5,
     "maxTitleLength": 100,
-    "newUserPostCooldownMinutes": 0
+    "newUserPostCooldownMinutes": 0,
+    "maxDailyTopicsPerUser": 10
   },
   "uploadControl": {
     "allowAttachments": true,

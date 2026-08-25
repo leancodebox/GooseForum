@@ -121,7 +121,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 			firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
 		}
 	} else {
-		if topics.CantWriteNew(req.UserId, 10) {
+		if postingConfig.TextControl.MaxDailyTopicsPerUser > 0 && topics.CantWriteNew(req.UserId, int64(postingConfig.TextControl.MaxDailyTopicsPerUser)) {
 			return component.FailResponseCode(component.MessageTopicDailyLimit, nil)
 		}
 		topic.UserId = req.UserId
