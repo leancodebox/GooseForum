@@ -336,7 +336,7 @@ defineExpose({
   word-wrap: break-word;
 }
 
-.visual-markdown-editor :deep(.ProseMirror:has(> p:only-child > br.ProseMirror-trailingBreak)::before) {
+.visual-markdown-editor :deep(.ProseMirror:has(> p:only-child > br.ProseMirror-trailingBreak:only-child)::before) {
   color: color-mix(in oklch, var(--gf-color-base-content) 45%, transparent);
   content: attr(data-placeholder);
   left: 0.25rem;
