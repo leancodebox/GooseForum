@@ -1700,13 +1700,14 @@ async function removePost(postId: number) {
             </div>
           </aside>
 
-          <section v-if="page.props.hotTopics.length" class="border-t border-line xl:col-span-2">
-            <div class="overflow-hidden bg-base-100 [border-bottom-left-radius:calc(var(--gf-radius-box)-1px)] [border-bottom-right-radius:calc(var(--gf-radius-box)-1px)]">
-              <TopicList :topics="page.props.hotTopics" home />
-            </div>
-          </section>
         </div>
       </section>
+
+      <div v-if="page.props.hotTopics.length" class="sm:mt-4 xl:w-[calc(100%+292px)]">
+        <section class="gf-card overflow-hidden">
+          <TopicList :topics="page.props.hotTopics" home />
+        </section>
+      </div>
 
       <TopicFloatingControls
         v-model:mobile-rail-open="mobilePostRailOpen"

@@ -52,8 +52,9 @@ const { t } = useI18n()
           :key="category.id"
           :href="category.url"
           class="gf-topic-chip"
+          :style="{ '--gf-topic-chip-color': category.color || 'var(--gf-color-primary)' }"
         >
-          <span class="h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: category.color }" />
+          <span class="gf-topic-chip-dot" />
           {{ category.name }}
         </a>
         <span v-if="showHot && topic.viewCount > 500" class="inline-flex h-5 items-center gap-1 text-[11px] font-semibold text-warning">
