@@ -3,6 +3,7 @@ package datamigration
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/glebarez/sqlite"
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
@@ -34,12 +35,13 @@ func TestEnforceSingleRestrictedTopicCategoryPreservesAudience(t *testing.T) {
 			t.Fatalf("create public grant: %v", err)
 		}
 	}
+	originalUpdatedAt := time.Date(2025, 2, 3, 4, 5, 6, 0, time.UTC)
 	rows := []topics.Entity{
-		{Id: 1, Title: "public main", CategoryIds: []uint64{1, 3, 2}, MainCategoryId: 1},
-		{Id: 2, Title: "restricted main", CategoryIds: []uint64{3, 1}, MainCategoryId: 3},
-		{Id: 3, Title: "all public", CategoryIds: []uint64{1, 2}, MainCategoryId: 1},
-		{Id: 4, Title: "single restricted", CategoryIds: []uint64{3}, MainCategoryId: 3},
-		{Id: 5, Title: "deleted restricted main", CategoryIds: []uint64{3, 2}, MainCategoryId: 3},
+		{Id: 1, Title: "public main", CategoryIds: []uint64{1, 3, 2}, MainCategoryId: 1, UpdatedAt: originalUpdatedAt},
+		{Id: 2, Title: "restricted main", CategoryIds: []uint64{3, 1}, MainCategoryId: 3, UpdatedAt: originalUpdatedAt},
+		{Id: 3, Title: "all public", CategoryIds: []uint64{1, 2}, MainCategoryId: 1, UpdatedAt: originalUpdatedAt},
+		{Id: 4, Title: "single restricted", CategoryIds: []uint64{3}, MainCategoryId: 3, UpdatedAt: originalUpdatedAt},
+		{Id: 5, Title: "deleted restricted main", CategoryIds: []uint64{3, 2}, MainCategoryId: 3, UpdatedAt: originalUpdatedAt},
 	}
 	if err := conn.Create(&rows).Error; err != nil {
 		t.Fatalf("create topics: %v", err)
@@ -67,6 +69,9 @@ func TestEnforceSingleRestrictedTopicCategoryPreservesAudience(t *testing.T) {
 		}
 		if !reflect.DeepEqual(row.CategoryIds, categoryIDs) || row.MainCategoryId != categoryIDs[0] {
 			t.Fatalf("topic %d categories=%v main=%d want=%v", topicID, row.CategoryIds, row.MainCategoryId, categoryIDs)
+		}
+		if !row.UpdatedAt.Equal(originalUpdatedAt) {
+			t.Fatalf("topic %d updated_at changed: got %s want %s", topicID, row.UpdatedAt, originalUpdatedAt)
 		}
 		var indexes []topicCategoryIndex.Entity
 		if err := conn.Where("topic_id = ? AND effective = ?", topicID, 1).Order("category_id").Find(&indexes).Error; err != nil {

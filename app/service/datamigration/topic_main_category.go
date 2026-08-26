@@ -65,7 +65,7 @@ func BackfillTopicMainCategoryWithDB(conn *gorm.DB) TopicMainCategoryMigrationRe
 				}
 				update := tx.Model(&topics.Entity{}).
 					Where("id = ?", row.Id).
-					Update("main_category_id", mainCategoryID)
+					UpdateColumn("main_category_id", mainCategoryID)
 				if update.Error != nil {
 					return fmt.Errorf("update topic %d: %w", row.Id, update.Error)
 				}

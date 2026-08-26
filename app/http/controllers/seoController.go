@@ -91,9 +91,13 @@ func buildSitemapXML(host string) (string, error) {
 
 	var sitemaps []SitemapURL
 	for _, topic := range list {
+		lastModified := topic.CreatedAt
+		if topic.LastPostedAt != nil && !topic.LastPostedAt.IsZero() {
+			lastModified = *topic.LastPostedAt
+		}
 		sitemaps = append(sitemaps, SitemapURL{
 			Loc:      host + urlconfig.PostDetail(topic.Id),
-			Lastmod:  topic.UpdatedAt.Format(time.RFC3339),
+			Lastmod:  lastModified.Format(time.RFC3339),
 			Priority: 0.7,
 		})
 	}

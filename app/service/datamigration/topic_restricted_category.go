@@ -71,6 +71,7 @@ func EnforceSingleRestrictedTopicCategoryWithDB(conn *gorm.DB) TopicRestrictedCa
 				row.MainCategoryId = next[0]
 				update := tx.Unscoped().Model(&row).
 					Select("CategoryIds", "MainCategoryId").
+					Omit("UpdatedAt").
 					Updates(&row)
 				if update.Error != nil {
 					return fmt.Errorf("update topic %d: %w", row.Id, update.Error)

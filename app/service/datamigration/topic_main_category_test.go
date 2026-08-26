@@ -3,6 +3,7 @@ package datamigration
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/glebarez/sqlite"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
@@ -18,10 +19,11 @@ func TestBackfillTopicMainCategoryUsesFirstNonZeroCategoryAndIsRerunnable(t *tes
 	if err := conn.AutoMigrate(&topics.Entity{}); err != nil {
 		t.Fatalf("migrate topics: %v", err)
 	}
+	originalUpdatedAt := time.Date(2025, 2, 3, 4, 5, 6, 0, time.UTC)
 	rows := []topics.Entity{
-		{Id: 1, Title: "first", CategoryIds: []uint64{0, 7, 8}},
-		{Id: 2, Title: "existing", CategoryIds: []uint64{9}, MainCategoryId: 10},
-		{Id: 3, Title: "orphan", CategoryIds: []uint64{}},
+		{Id: 1, Title: "first", CategoryIds: []uint64{0, 7, 8}, UpdatedAt: originalUpdatedAt},
+		{Id: 2, Title: "existing", CategoryIds: []uint64{9}, MainCategoryId: 10, UpdatedAt: originalUpdatedAt},
+		{Id: 3, Title: "orphan", CategoryIds: []uint64{}, UpdatedAt: originalUpdatedAt},
 	}
 	if err := conn.Create(&rows).Error; err != nil {
 		t.Fatalf("create topics: %v", err)
@@ -37,6 +39,9 @@ func TestBackfillTopicMainCategoryUsesFirstNonZeroCategoryAndIsRerunnable(t *tes
 	}
 	if migrated[0].MainCategoryId != 7 || migrated[1].MainCategoryId != 10 || migrated[2].MainCategoryId != 0 {
 		t.Fatalf("unexpected main categories: %d, %d, %d", migrated[0].MainCategoryId, migrated[1].MainCategoryId, migrated[2].MainCategoryId)
+	}
+	if !migrated[0].UpdatedAt.Equal(originalUpdatedAt) {
+		t.Fatalf("migration changed topic updated_at: got %s want %s", migrated[0].UpdatedAt, originalUpdatedAt)
 	}
 
 	rerun := BackfillTopicMainCategoryWithDB(conn)
