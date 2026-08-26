@@ -107,6 +107,24 @@
   transform: translateY(10px) scale(0.98);
 }
 
+.composer-dock-enter-active {
+  transition:
+    opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.composer-dock-leave-active {
+  transition:
+    opacity 0.16s ease-in,
+    transform 0.16s ease-in;
+}
+
+.composer-dock-enter-from,
+.composer-dock-leave-to {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
 .user-card-pop-enter-active,
 .user-card-pop-leave-active {
   transform-origin: top left;
@@ -150,6 +168,8 @@
   .gf-flash-move,
   .floating-reply-enter-active,
   .floating-reply-leave-active,
+  .composer-dock-enter-active,
+  .composer-dock-leave-active,
   .user-card-pop-enter-active,
   .user-card-pop-leave-active,
   .user-card-content-enter-active,
@@ -166,6 +186,8 @@
   .gf-modal-leave-to > *,
   .floating-reply-enter-from,
   .floating-reply-leave-to,
+  .composer-dock-enter-from,
+  .composer-dock-leave-to,
   .user-card-pop-enter-from,
   .user-card-pop-leave-to,
   .user-card-content-enter-from,

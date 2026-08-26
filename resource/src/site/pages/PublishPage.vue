@@ -6,8 +6,9 @@ import { processImageFile, validateImageFile } from '@/runtime/image'
 import { renderMarkdownPreview } from '@/runtime/markdown'
 import { vContentEnhancements } from '@/runtime/content-enhancements'
 import { addTopicCategory, isTopicCategoryAdditionDisabled } from '@/runtime/topic-category-selection'
-import { createMarkdownTable, fencedCodeBlock, formatMarkdownLines, prefixMarkdownBlock, replaceMarkdownSelectionWithBlock, type MarkdownBlockType } from '@/runtime/markdown-editing'
+import { createMarkdownTable, type MarkdownBlockType } from '@/runtime/markdown-editing'
 import { hasUnsupportedVisualMarkdown, markdownFromClipboard } from '@/runtime/rich-paste'
+import { useMarkdownTextarea, type MarkdownToolbarAction } from '@/site/composables/useMarkdownTextarea'
 import { useUnsavedDraftGuard } from '@/site/composables/useUnsavedDraftGuard'
 import PageHeader from '@/site/components/PageHeader.vue'
 import VisualMarkdownEditor from '@/site/components/VisualMarkdownEditor.vue'
@@ -59,6 +60,7 @@ const tablePickerCells = Array.from({ length: tablePickerMaxRows * tablePickerMa
   row: Math.floor(index / tablePickerMaxColumns) + 1,
   column: (index % tablePickerMaxColumns) + 1,
 }))
+const markdownEditor = useMarkdownTextarea({ content, editor })
 
 const isValid = computed(() => Boolean(title.value.trim() && content.value.trim() && categoryIds.value.length > 0))
 const categoryMissing = computed(() => validationAttempted.value && categoryIds.value.length === 0)
@@ -167,17 +169,7 @@ async function validateRequiredFields() {
 }
 
 function insert(before: string, after = '', placeholder = '') {
-  const el = editor.value
-  if (!el) return
-  const start = el.selectionStart
-  const end = el.selectionEnd
-  const selected = content.value.slice(start, end) || placeholder
-  content.value = `${content.value.slice(0, start)}${before}${selected}${after}${content.value.slice(end)}`
-  nextTick(() => {
-    el.focus()
-    const cursor = start + before.length + selected.length
-    el.setSelectionRange(start + before.length, cursor)
-  })
+  markdownEditor.insertInline(before, after, placeholder)
 }
 
 function imageAlt(filename: string) {
@@ -189,35 +181,7 @@ function insertMarkdownBlock(text: string) {
     visualEditor.value?.insertMarkdown(text)
     return
   }
-  const el = editor.value
-  if (!el) {
-    content.value = content.value ? `${content.value}\n${text}` : text
-    return
-  }
-
-  const start = el.selectionStart
-  const end = el.selectionEnd
-  const result = replaceMarkdownSelectionWithBlock(content.value, start, end, text)
-  content.value = result.value
-
-  nextTick(() => {
-    el.focus()
-    el.setSelectionRange(result.selectionEnd, result.selectionEnd)
-  })
-}
-
-function selectedMarkdownText(placeholder: string) {
-  const el = editor.value
-  if (!el) return placeholder
-  return content.value.slice(el.selectionStart, el.selectionEnd) || placeholder
-}
-
-function insertPrefixedMarkdownBlock(prefix: string, placeholder: string) {
-  insertMarkdownBlock(prefixMarkdownBlock(selectedMarkdownText(placeholder), prefix))
-}
-
-function insertFencedCodeBlock() {
-  insertMarkdownBlock(fencedCodeBlock(selectedMarkdownText('code')))
+  markdownEditor.insertBlock(text)
 }
 
 async function selectEditorMode(mode: 'markdown' | 'visual') {
@@ -252,20 +216,24 @@ async function togglePreview() {
   }
 }
 
-type ToolbarAction = 'bold' | 'italic' | 'strike' | 'inlineCode' | 'quote' | 'code' | 'bulletList' | 'orderedList' | 'horizontalRule' | 'hardBreak'
+type ToolbarAction = Exclude<MarkdownToolbarAction, 'link'> | 'horizontalRule' | 'hardBreak'
+
+function markdownPlaceholders() {
+  return {
+    bold: t('publish.placeholder.bold'),
+    italic: t('publish.placeholder.italic'),
+    strike: t('publish.placeholder.strike'),
+    link: t('publish.placeholder.link'),
+    quote: t('publish.placeholder.quote'),
+    listItem: t('publish.placeholder.listItem'),
+  }
+}
 
 function applyToolbarAction(action: ToolbarAction) {
   if (editorMode.value === 'markdown') {
-    if (action === 'bold') insert('**', '**', t('publish.placeholder.bold'))
-    else if (action === 'italic') insert('*', '*', t('publish.placeholder.italic'))
-    else if (action === 'strike') insert('~~', '~~', t('publish.placeholder.strike'))
-    else if (action === 'inlineCode') insert('`', '`', 'code')
-    else if (action === 'quote') insertPrefixedMarkdownBlock('> ', t('publish.placeholder.quote'))
-    else if (action === 'code') insertFencedCodeBlock()
-    else if (action === 'bulletList') insertPrefixedMarkdownBlock('- ', t('publish.placeholder.listItem'))
-    else if (action === 'orderedList') insertPrefixedMarkdownBlock('1. ', t('publish.placeholder.listItem'))
-    else if (action === 'horizontalRule') insertMarkdownBlock('---')
-    else insert('  \n')
+    if (action === 'horizontalRule') insertMarkdownBlock('---')
+    else if (action === 'hardBreak') insert('  \n')
+    else markdownEditor.applyAction(action, markdownPlaceholders())
     return
   }
 
@@ -285,21 +253,14 @@ function applyBlockType(block: MarkdownBlockType) {
     return
   }
   if (block === 'code_block') {
-    insertFencedCodeBlock()
+    markdownEditor.setBlock(block)
     return
   }
   setMarkdownLineType(block)
 }
 
 function setMarkdownLineType(block: Exclude<MarkdownBlockType, 'code_block'>) {
-  const el = editor.value
-  if (!el) return
-  const result = formatMarkdownLines(content.value, el.selectionStart, el.selectionEnd, block)
-  content.value = result.value
-  nextTick(() => {
-    el.focus()
-    el.setSelectionRange(result.selectionStart, result.selectionEnd)
-  })
+  markdownEditor.setBlock(block)
 }
 
 async function openLinkPicker() {

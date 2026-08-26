@@ -154,6 +154,29 @@
     @apply backdrop-blur;
   }
 
+  .gf-composer-dock,
+  .gf-composer-minimized {
+    border: var(--gf-border) solid var(--gf-color-line);
+    border-bottom: 0;
+    border-radius: var(--gf-radius-box) var(--gf-radius-box) 0 0;
+    background: var(--gf-color-base-100);
+    box-shadow:
+      0 -18px 48px -28px rgb(15 23 42 / calc(var(--gf-depth) * 0.48)),
+      0 -4px 18px -12px rgb(15 23 42 / calc(var(--gf-depth) * 0.3));
+  }
+
+  .gf-composer-tool {
+    @apply inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-base-content/55 transition hover:bg-base-200 hover:text-base-content focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary;
+  }
+
+  @media (max-width: 639.98px) {
+    .gf-composer-dock {
+      border-left: 0;
+      border-right: 0;
+      border-radius: var(--gf-radius-box) var(--gf-radius-box) 0 0;
+    }
+  }
+
   .gf-drawer-surface {
     background: var(--gf-color-base-100);
     box-shadow: 18px 0 42px -30px rgb(15 23 42 / calc(var(--gf-depth) * 0.55));

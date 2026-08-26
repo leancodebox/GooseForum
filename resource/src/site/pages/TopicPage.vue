@@ -25,7 +25,8 @@ const page = defineProps<{
 
 const { t } = useI18n()
 const { push: pushFlash } = useFlashMessages()
-const PostComposer = defineAsyncComponent(() => import('@/site/components/PostComposer.vue'))
+const loadPostComposer = () => import('@/site/components/PostComposer.vue')
+const PostComposer = defineAsyncComponent(loadPostComposer)
 const initialPostStream = page.props.postStream
 const initialPosts = initialPostStream.posts
 const postContent = ref('')
@@ -82,7 +83,7 @@ const mobileHeaderTitleVisible = ref(false)
 const effectiveShowHeaderTitle = computed(() => showHeaderTitle.value && (!isMobileHeaderViewport.value || mobileHeaderTitleVisible.value))
 const composerOpen = ref(false)
 const composerMode = computed(() => editingPostId.value ? 'edit' : 'create')
-const composerMounted = computed(() => composerOpen.value)
+const composerMounted = ref(false)
 const mobilePostRailOpen = ref(false)
 const activePostNo = ref(firstPostNo(initialPosts) || 1)
 const postRailProgressCurrent = ref(0)
@@ -172,6 +173,7 @@ const highlightedPostId = ref<number | null>(null)
 let highlightTimer: number | undefined
 let postBottomLoadFrame = 0
 let activePostScrollFrame = 0
+let cancelComposerPreload: (() => void) | undefined
 const navigationPhase = ref<'idle' | 'loading' | 'scrolling'>('idle')
 const navigationTargetPostNo = ref(0)
 const navigationTargetPostId = ref(0)
@@ -224,6 +226,7 @@ onMounted(() => {
   void nextTick(collectPostElements)
   void nextTick(scheduleActivePostFromScroll)
   setupPostBottomLoadFallback()
+  scheduleComposerPreload()
 })
 
 watch(
@@ -293,10 +296,25 @@ onBeforeUnmount(() => {
   window.cancelAnimationFrame(postRailResumeFrame)
   navigationTargetPostId.value = 0
   window.clearTimeout(highlightTimer)
+  cancelComposerPreload?.()
   shellState.headerTitle = ''
   shellState.headerTags = []
   shellState.showHeaderTitle = false
 })
+
+function scheduleComposerPreload() {
+  const preload = () => {
+    cancelComposerPreload = undefined
+    void loadPostComposer().catch(() => undefined)
+  }
+  if ('requestIdleCallback' in window) {
+    const handle = window.requestIdleCallback(preload, { timeout: 1500 })
+    cancelComposerPreload = () => window.cancelIdleCallback(handle)
+    return
+  }
+  const handle = setTimeout(preload, 600)
+  cancelComposerPreload = () => clearTimeout(handle)
+}
 
 function setupHeaderTitleBehavior() {
   lastHeaderScrollY = window.scrollY
@@ -851,6 +869,7 @@ function jumpToTopicBody() {
 
 function focusPostComposer() {
   mobilePostRailOpen.value = false
+  composerMounted.value = true
   composerOpen.value = true
 }
 
@@ -1741,6 +1760,8 @@ async function removePost(postId: number) {
         :submitting="editingPostId ? savingEditPostId > 0 : submitting"
         :success-message="successMessage"
         :target="targetPost"
+        :topic-title="page.props.topic.title"
+        :viewer="page.layout.viewer"
         @clear-target="cancelPostTarget"
         @clear-validation="clearPostValidation"
         @image-error="handlePostImageError"
