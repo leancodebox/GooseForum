@@ -29,7 +29,7 @@
     "markdown-it": "^14.2.0",
     "markdown-it-anchor": "^9.2.0",
     "markdown-it-task-lists": "^2.1.1",
-    "mermaid": "^11.17.2",
+    "mermaid": "11.17.1",
     "motion-v": "^2.2.1",
     "node-forge": "^1.4.0",
     "prosemirror-commands": "^1.7.1",
