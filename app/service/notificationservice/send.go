@@ -7,7 +7,7 @@ import (
 )
 
 // SendCommentNotification 发送评论通知
-func SendCommentNotification(userId uint64, topicId uint64, commentContent string, commenterId uint64, postId uint64) error {
+func SendCommentNotification(userId uint64, topicId uint64, commentContent string, commenterId uint64, postId uint64, postNo uint64) error {
 	payload := eventNotification.NotificationPayload{
 		Content:     commentContent,
 		TemplateKey: eventNotification.TemplateComment,
@@ -17,6 +17,7 @@ func SendCommentNotification(userId uint64, topicId uint64, commentContent strin
 		ActorId: commenterId,
 		TopicId: topicId,
 		PostId:  postId,
+		PostNo:  postNo,
 	}
 
 	notification := &eventNotification.Entity{
@@ -34,7 +35,7 @@ func SendCommentNotification(userId uint64, topicId uint64, commentContent strin
 }
 
 // SendPostReplyNotification 发送 post 回复通知
-func SendPostReplyNotification(userId uint64, postId uint64, topicId uint64, replyContent string, replierId uint64) error {
+func SendPostReplyNotification(userId uint64, postId uint64, postNo uint64, topicId uint64, replyContent string, replierId uint64) error {
 	payload := eventNotification.NotificationPayload{
 		Content:     replyContent,
 		TemplateKey: eventNotification.TemplatePostReply,
@@ -44,6 +45,7 @@ func SendPostReplyNotification(userId uint64, postId uint64, topicId uint64, rep
 		ActorId: replierId,
 		TopicId: topicId,
 		PostId:  postId,
+		PostNo:  postNo,
 	}
 
 	notification := &eventNotification.Entity{
@@ -60,7 +62,7 @@ func SendPostReplyNotification(userId uint64, postId uint64, topicId uint64, rep
 	return err
 }
 
-func SendTopicPostNotifications(userIds []uint64, topicId uint64, postId uint64, commentContent string, commenterId uint64) error {
+func SendTopicPostNotifications(userIds []uint64, topicId uint64, postId uint64, postNo uint64, commentContent string, commenterId uint64) error {
 	if len(userIds) == 0 {
 		return nil
 	}
@@ -83,6 +85,7 @@ func SendTopicPostNotifications(userIds []uint64, topicId uint64, postId uint64,
 				ActorId: commenterId,
 				TopicId: topicId,
 				PostId:  postId,
+				PostNo:  postNo,
 			},
 		})
 	}

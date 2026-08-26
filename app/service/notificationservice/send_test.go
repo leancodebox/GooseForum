@@ -13,7 +13,7 @@ func TestCommentNotificationsUseTopicPostPayload(t *testing.T) {
 		t.Fatalf("migrate notifications: %v", err)
 	}
 
-	if err := SendCommentNotification(1, 10, "hello", 2, 99); err != nil {
+	if err := SendCommentNotification(1, 10, "hello", 2, 99, 7); err != nil {
 		t.Fatalf("SendCommentNotification() err=%v", err)
 	}
 
@@ -21,7 +21,7 @@ func TestCommentNotificationsUseTopicPostPayload(t *testing.T) {
 	if err := conn.First(&notification).Error; err != nil {
 		t.Fatalf("load notification: %v", err)
 	}
-	if notification.Payload.TopicId != 10 || notification.Payload.PostId != 99 {
-		t.Fatalf("payload topic/post = %d/%d, want 10/99", notification.Payload.TopicId, notification.Payload.PostId)
+	if notification.Payload.TopicId != 10 || notification.Payload.PostId != 99 || notification.Payload.PostNo != 7 {
+		t.Fatalf("payload topic/post/no = %d/%d/%d, want 10/99/7", notification.Payload.TopicId, notification.Payload.PostId, notification.Payload.PostNo)
 	}
 }

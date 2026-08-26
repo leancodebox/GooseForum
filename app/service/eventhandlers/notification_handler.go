@@ -21,6 +21,7 @@ func TakeUpTo64Chars(s string) string {
 type CommentCreatedEvent struct {
 	TopicId             uint64
 	PostId              uint64 // 新创建的 post ID
+	PostNo              uint64 // 新创建的 post 楼层号
 	UserId              uint64 // 发表评论者 ID
 	Content             string
 	TopicAuthorId       uint64 // 主题作者 ID
@@ -34,11 +35,11 @@ func handleCommentCreated(ctx context.Context, event *CommentCreatedEvent) error
 	topic := topics.GetSimple(event.TopicId)
 	// 如果不是主题作者自己发表评论，通知主题作者
 	if shouldNotifyTopicAuthor(event) && canReceiveTopicNotification(event.TopicAuthorId, topic) {
-		_ = notificationservice.SendCommentNotification(event.TopicAuthorId, event.TopicId, contentPreview, event.UserId, event.PostId)
+		_ = notificationservice.SendCommentNotification(event.TopicAuthorId, event.TopicId, contentPreview, event.UserId, event.PostId, event.PostNo)
 	}
 	// 如果是回复 post，且不是回复自己，通知原 post 作者
 	if shouldNotifyParentReplyAuthor(event) && canReceiveTopicNotification(event.ReplyToPostAuthorId, topic) {
-		_ = notificationservice.SendPostReplyNotification(event.ReplyToPostAuthorId, event.PostId, event.TopicId, contentPreview, event.UserId)
+		_ = notificationservice.SendPostReplyNotification(event.ReplyToPostAuthorId, event.PostId, event.PostNo, event.TopicId, contentPreview, event.UserId)
 	}
 	notifyTopicWatchers(event, topic, contentPreview)
 	return nil
@@ -70,7 +71,7 @@ func notifyTopicWatchers(event *CommentCreatedEvent, topic topics.Entity, conten
 		if err != nil {
 			return
 		}
-		_ = notificationservice.SendTopicPostNotifications(readableUserIDs, event.TopicId, event.PostId, contentPreview, event.UserId)
+		_ = notificationservice.SendTopicPostNotifications(readableUserIDs, event.TopicId, event.PostId, event.PostNo, contentPreview, event.UserId)
 		afterUserId = userIds[len(userIds)-1]
 		if len(userIds) < topicWatchNotifyBatchSize {
 			return

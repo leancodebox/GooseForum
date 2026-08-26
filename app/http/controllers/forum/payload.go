@@ -2108,7 +2108,9 @@ func BuildNotificationPayload(notification *eventNotification.Entity) Notificati
 	}
 	if payload.TopicId > 0 {
 		topicURL := urlconfig.PostDetail(payload.TopicId)
-		if payload.PostId > 0 {
+		if payload.PostNo > 0 {
+			topicURL = fmt.Sprintf("%s/%d", topicURL, payload.PostNo)
+		} else if payload.PostId > 0 {
 			topicURL = fmt.Sprintf("%s#post-%d", topicURL, payload.PostId)
 		}
 		item.Topic = &NotificationTopicPayload{

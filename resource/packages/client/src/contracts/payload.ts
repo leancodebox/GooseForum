@@ -716,6 +716,7 @@ export interface NotificationPayload {
     actorName?: string
     topicId?: number
     postId?: number
+    postNo?: number
     topicTitle?: string
     metadata?: {
       followerName?: string

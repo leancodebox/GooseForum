@@ -338,6 +338,7 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 	eventbus.Publish(context.Background(), &eventhandlers.CommentCreatedEvent{
 		TopicId:             topicEntity.Id,
 		PostId:              postEntity.Id,
+		PostNo:              postEntity.PostNo,
 		UserId:              req.UserId,
 		Content:             req.Params.Content,
 		TopicAuthorId:       topicEntity.UserId,
