@@ -29,10 +29,12 @@ import { setLocale, supportedLocales, type Locale } from '@/runtime/i18n'
 import { useSiteTheme } from '@/runtime/site-theme'
 import { useNavigationState } from '@/runtime/navigation-state'
 import { useUnreadStatus } from '@/runtime/unread-status'
-import type { LayoutPayload } from '@gooseforum/client'
+import { createGooseClient, type LayoutPayload } from '@gooseforum/client'
 import type { UserCardShowDetail } from '@/runtime/user-card-events'
 import UserAvatar from './UserAvatar.vue'
 import type UserCardComponent from './UserCard.vue'
+
+const client = createGooseClient()
 
 const props = defineProps<{
   layout: LayoutPayload
@@ -202,7 +204,7 @@ function closeDrawer() {
 }
 
 async function logout() {
-  await fetch('/api/logout', { method: 'POST' })
+  await client.api.auth.logout()
   window.location.reload()
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "@gooseforum/client",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Framework-agnostic client and page payload contracts for GooseForum",
   "type": "module",
   "sideEffects": false,
@@ -17,6 +17,14 @@
     "./contracts": {
       "types": "./dist/contracts/index.d.ts",
       "import": "./dist/contracts/index.js"
+    },
+    "./api": {
+      "types": "./dist/api/index.d.ts",
+      "import": "./dist/api/index.js"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
     }
   },
   "scripts": {

@@ -1,8 +1,11 @@
-import type { AnyPagePayload } from './contracts/page-components.js'
+import type { PagePayload } from './contracts/payload.js'
 import type { PageClient } from './pages.js'
 import { GooseProtocolError } from './http/error.js'
 
-export function readInitialPayload(pages: PageClient, root: ParentNode = document): AnyPagePayload {
+export * from './browser-auth.js'
+export * from './document.js'
+
+export function readInitialPayload<TPage extends PagePayload>(pages: PageClient<TPage>, root: ParentNode = document): TPage {
   const element = root.querySelector('#goose-payload')
   if (!element?.textContent) {
     throw new GooseProtocolError('Missing GooseForum page payload')

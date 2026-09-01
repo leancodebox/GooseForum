@@ -2,11 +2,12 @@ import { computed, readonly, ref } from 'vue'
 import { i18n } from './i18n'
 import { resolveApiMessage } from './api-message'
 import { setUnreadMessagesDocumentTitle } from './document-title'
-import type { UnreadStatusPayload } from '@gooseforum/client'
+import { createGooseClient, GooseClientError, type UnreadStatusPayload } from '@gooseforum/client'
 
 const CACHE_KEY = 'goose:unread-status'
 const CACHE_TTL = 10_000
 const POLL_INTERVAL = 30_000
+const client = createGooseClient()
 
 const notifications = ref(false)
 const messages = ref(false)
@@ -66,21 +67,14 @@ function applyUnread(data: Partial<UnreadStatusPayload> | null | undefined) {
 }
 
 async function fetchUnreadStatus() {
-  const response = await fetch('/api/forum/unread-status', {
-    headers: {
-      Accept: 'application/json',
-    },
-  })
-  if (!response.ok) throw new Error(`HTTP ${response.status}`)
-  const data = await response.json() as {
-    code?: number
-    messageCode?: string
-    params?: Record<string, unknown>
-    result?: UnreadStatusPayload
-    data?: UnreadStatusPayload
+  try {
+    return normalizeStatus(await client.api.notifications.unread())
+  } catch (error) {
+    if (error instanceof GooseClientError && error.messageCode) {
+      throw new Error(resolveApiMessage(error, i18n.global.t('notifications.checkFailed')))
+    }
+    throw error
   }
-  if (data.code !== undefined && data.code !== 0) throw new Error(resolveApiMessage(data, i18n.global.t('notifications.checkFailed')))
-  return normalizeStatus(data.result ?? data.data)
 }
 
 async function refresh(force = false) {

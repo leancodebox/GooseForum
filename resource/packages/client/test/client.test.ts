@@ -63,6 +63,39 @@ describe('page client', () => {
     await expect(client.pages.fetch('/')).rejects.toBeInstanceOf(GooseProtocolError)
   })
 
+  it('supports extension page components without weakening the default client', () => {
+    const client = createGooseClient({ pages: { components: ['plugin.dashboard'] } })
+
+    expect(client.pages.parse(pagePayload({ component: 'plugin.dashboard' }))).toMatchObject({
+      component: 'plugin.dashboard',
+    })
+  })
+
+  it('can accept future components as generic payloads when explicitly enabled', () => {
+    const client = createGooseClient({ pages: { allowUnknownComponents: true } })
+
+    expect(client.pages.parse(pagePayload({ component: 'future.page' })).component).toBe('future.page')
+  })
+
+  it.each([
+    ['props', undefined, 'props'],
+    ['meta', undefined, 'meta'],
+    ['layout', undefined, 'layout'],
+    ['url', undefined, 'url'],
+  ])('rejects payloads missing the %s envelope field', (field, value, expected) => {
+    const client = createGooseClient()
+
+    expect(() => client.pages.parse(pagePayload({ [field]: value }))).toThrow(expected)
+  })
+
+  it('runs application-specific payload validation', () => {
+    const validate = vi.fn(() => { throw new Error('invalid site contract') })
+    const client = createGooseClient({ pages: { validate } })
+
+    expect(() => client.pages.parse(pagePayload())).toThrow('invalid site contract')
+    expect(validate).toHaveBeenCalledOnce()
+  })
+
   it('reads and validates the embedded initial payload', () => {
     const client = createGooseClient({ fetch: async () => jsonResponse({}) })
     const root = {
@@ -118,5 +151,53 @@ describe('API client', () => {
     const error = await client.request('/api/example').catch((reason) => reason)
     expect(error).toBeInstanceOf(GooseClientError)
     expect(error).toMatchObject({ code: 1001, messageCode: 'topic.notFound', params: { id: 7 } })
+  })
+
+  it('preserves successful message metadata when requested', async () => {
+    const client = createGooseClient({
+      fetch: async () => jsonResponse({
+        code: 0,
+        messageCode: 'auth.register.success',
+        params: { email: 'user@example.com' },
+        result: 42,
+      }),
+    })
+
+    await expect(client.requestWithMeta<number>('/api/example')).resolves.toEqual({
+      value: 42,
+      message: undefined,
+      messageCode: 'auth.register.success',
+      params: { email: 'user@example.com' },
+    })
+  })
+
+  it('exposes typed domain APIs with stable routes and payloads', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: true }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+
+    await client.api.topics.like(42, 1)
+    await client.api.notifications.list('unread', 10, 30)
+    await client.api.themes.publish()
+
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('https://forum.example/api/forum/topics/like')
+    expect(fetchMock.mock.calls[0]?.[1]?.body).toBe(JSON.stringify({ topicId: 42, action: 1 }))
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://forum.example/api/forum/notifications?filter=unread&cursor=10&limit=30')
+    expect(fetchMock.mock.calls[2]?.[0]).toBe('https://forum.example/api/admin/publish-site-theme')
+  })
+
+  it('sets JSON accept headers for GET domain APIs', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
+    const client = createGooseClient({ fetch: fetchMock })
+
+    await client.api.accessGroups.list()
+
+    expect(new Headers(fetchMock.mock.calls[0]?.[1]?.headers).get('Accept')).toBe('application/json')
+  })
+
+  it('rejects malformed API envelopes', async () => {
+    const client = createGooseClient({ fetch: async () => jsonResponse(null) })
+
+    await expect(client.api.notifications.unread()).rejects.toBeInstanceOf(GooseProtocolError)
   })
 })

@@ -41,8 +41,6 @@ export const pageComponents = [
   'error.index',
 ] as const
 
-export type PageComponent = typeof pageComponents[number]
-
 export interface PagePayloadMap {
   'home.index': HomeProps
   'topic.detail': TopicDetailProps
@@ -63,6 +61,9 @@ export interface PagePayloadMap {
   'auth.resetPassword': ResetPasswordPageProps
   'error.index': ErrorPageProps
 }
+
+/** Known page component names shipped by the core server. */
+export type PageComponent = keyof PagePayloadMap & string
 
 export type PageProps<TComponent extends PageComponent> = PagePayloadMap[TComponent]
 

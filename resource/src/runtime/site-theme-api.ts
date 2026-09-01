@@ -1,47 +1,24 @@
-import type { SiteThemeConfig } from '@gooseforum/client'
+import { createGooseClient, GooseClientError, type SiteThemeConfig } from '@gooseforum/client'
 import { resolveApiMessage } from './api-message'
 import { i18n } from './i18n'
 
-interface ApiResponse<T> {
-  code?: number
-  messageCode?: string
-  params?: Record<string, unknown>
-  result?: T
-  data?: T
-}
-
-function t(key: string) {
-  return i18n.global.t(key)
-}
-
-async function readApiResponse<T>(response: Response, fallback: string): Promise<T> {
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`)
-  }
-  const data = (await response.json()) as ApiResponse<T>
-  if (data.code !== undefined && data.code !== 0) {
-    throw new Error(resolveApiMessage(data, fallback))
-  }
-  return (data.result ?? data.data) as T
-}
+const client = createGooseClient()
 
 export async function saveSiteTheme(settings: SiteThemeConfig): Promise<SiteThemeConfig> {
-  const response = await fetch('/api/admin/save-site-theme', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ settings }),
-  })
-  return readApiResponse<SiteThemeConfig>(response, t('api.themeSaveFailed'))
+  return localize(() => client.api.themes.save(settings))
 }
 
 export async function publishSiteTheme(): Promise<SiteThemeConfig> {
-  const response = await fetch('/api/admin/publish-site-theme', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-  return readApiResponse<SiteThemeConfig>(response, t('api.themeSaveFailed'))
+  return localize(() => client.api.themes.publish())
+}
+
+async function localize<T>(request: () => Promise<T>) {
+  try {
+    return await request()
+  } catch (error) {
+    if (error instanceof GooseClientError && error.messageCode) {
+      throw new Error(resolveApiMessage(error, i18n.global.t('api.themeSaveFailed')))
+    }
+    throw error
+  }
 }
