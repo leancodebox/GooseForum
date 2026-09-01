@@ -74,6 +74,7 @@ See [configuration documentation](docs/user/configuration.md) for MySQL, mail, b
 ### Admin Commands
 
 ```bash
+./GooseForum migrate
 ./GooseForum set-user-admin <userId>
 ./GooseForum set-user-email <userId> <email>
 ./GooseForum set-user-password <userId> <password>

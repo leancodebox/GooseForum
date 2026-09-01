@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"net/http/pprof"
 	"os"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
@@ -17,7 +19,9 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/bundles/signalwatch"
 	"github.com/leancodebox/GooseForum/app/console/job"
+	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"github.com/leancodebox/GooseForum/app/http/routes"
+	"github.com/leancodebox/GooseForum/app/migration"
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
@@ -79,18 +83,44 @@ func pprofMux() *http.ServeMux {
 }
 
 func ginServe() {
+	if err := prepareServeRuntime(); err != nil {
+		panic(err)
+	}
+	port := preferences.GetString("server.port", 8080)
+	serverRuntime, err := newServeRuntime(port)
+	if err != nil {
+		panic(err)
+	}
+	serverRuntime.start()
+
+	slog.Info("GooseForum:listen " + port)
+	slog.Info("use port:" + port)
+	slog.Info("start use:" + cast.ToString(setting.GetUnitTime()))
+	fmt.Println("if in local you can http://localhost:" + port)
+
+	serverRuntime.wait()
+}
+
+func prepareServeRuntime() error {
 	if err := filestorage.ConfigureFromPreferences(); err != nil {
-		panic(fmt.Errorf("configure file storage: %w", err))
+		return fmt.Errorf("configure file storage: %w", err)
 	}
 	preferences.OpenConfigChangeEvent()
-	// 初始化OAuth配置
-	oauthservice.InitOAuth()
-	captchaOpt.StartCleanup()
-	mailservice.StartEmailProcessor()
-	job.Run()
+	return nil
+}
 
-	port := preferences.GetString("server.port", 8080)
+type serveRuntime struct {
+	server       *http.Server
+	startupGate  *middleware.StartupGate
+	listener     net.Listener
+	quit         chan os.Signal
+	shutdownOnce sync.Once
+}
+
+func newServeRuntime(port string) (*serveRuntime, error) {
 	engine := newGinEngine()
+	startupGate := middleware.NewStartupGate()
+	engine.Use(startupGate.Handler)
 	routes.RegisterByGin(engine)
 	host := ``
 	if setting.IsLocal() {
@@ -104,31 +134,59 @@ func ginServe() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		return nil, fmt.Errorf("listen on %s: %w", address, err)
+	}
+	return &serveRuntime{
+		server:      srv,
+		startupGate: startupGate,
+		listener:    listener,
+		quit:        make(chan os.Signal, 1),
+	}, nil
+}
 
-	quit := make(chan os.Signal, 1)
-	signalwatch.ListenSignal(quit)
+func (r *serveRuntime) start() {
+	signalwatch.ListenSignal(r.quit)
 	go func() {
 		defer paniclog.Recover("http_server")
-		if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+		if err := r.server.Serve(r.listener); !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("http serve ", "err", err)
 			fmt.Println("http serve ", "err", err)
-			quit <- os.Interrupt
+			r.requestShutdown()
 		}
 	}()
+	go func() {
+		if err := migration.M(); err != nil {
+			slog.Error("startup migration failed", "err", err)
+			r.requestShutdown()
+			return
+		}
+		oauthservice.InitOAuth()
+		captchaOpt.StartCleanup()
+		mailservice.StartEmailProcessor()
+		job.Run()
+		r.startupGate.Complete()
+	}()
+}
 
-	slog.Info("GooseForum:listen " + port)
-	slog.Info("use port:" + port)
-	slog.Info("start use:" + cast.ToString(setting.GetUnitTime()))
-	fmt.Println("if in local you can http://localhost:" + port)
+func (r *serveRuntime) requestShutdown() {
+	r.shutdownOnce.Do(func() {
+		select {
+		case r.quit <- os.Interrupt:
+		default:
+		}
+	})
+}
 
-	data := <-quit
-	slog.Info("Shutdown Server ...", "signal", data)
+func (r *serveRuntime) wait() {
+	signal := <-r.quit
+	slog.Info("Shutdown Server ...", "signal", signal)
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer shutdownCancel()
-	if err := srv.Shutdown(shutdownCtx); err != nil {
+	if err := r.server.Shutdown(shutdownCtx); err != nil {
 		slog.Info("Server Shutdown", "err", err)
 	}
-
 	slog.Info("Server exiting")
 }
 

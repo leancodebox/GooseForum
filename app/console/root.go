@@ -4,7 +4,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/closer"
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/console/cmd"
-	"github.com/leancodebox/GooseForum/app/migration"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/spf13/cobra"
 )
@@ -15,10 +14,7 @@ var rootCmd = &cobra.Command{
 	Short: "GooseForum command line tools",
 	Long:  `GooseForum`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		if err := migration.M(); err != nil {
-			return err
-		}
-		// 初始化并启动事件总线
+		// Initialize the event bus for commands that publish domain events.
 		eventbus.Start(eventhandlers.Handlers()...)
 		return nil
 	},

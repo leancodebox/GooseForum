@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <title>系统初始化中</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #172033;
+            --muted: #697386;
+            --accent: #f5a524;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body { min-height: 100vh; min-height: 100dvh; }
+
+        body {
+            margin: 0;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            background: #fffdf7;
+            color: var(--ink);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+        }
+
+        main {
+            width: min(220px, calc(100vw - 48px));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 13px;
+            letter-spacing: .08em;
+        }
+
+        .signal {
+            width: 100%;
+            height: 2px;
+            overflow: hidden;
+            background: #eee8dc;
+        }
+
+        .signal::after {
+            content: "";
+            display: block;
+            width: 34%;
+            height: 100%;
+            background: var(--accent);
+            animation: progress 1.6s ease-in-out infinite;
+        }
+
+        @keyframes progress {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(300%); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 2.5s !important; }
+        }
+    </style>
+</head>
+<body>
+    <main aria-label="系统正在初始化">
+        <div class="label">Loading</div>
+        <div class="signal" aria-hidden="true"></div>
+    </main>
+    <script>
+        window.setTimeout(function () {
+            window.location.reload();
+        }, 3000 + Math.random() * 3000);
+    </script>
+</body>
+</html>

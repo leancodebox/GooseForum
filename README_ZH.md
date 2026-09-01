@@ -74,6 +74,7 @@ MySQL、邮件、备份、安全和站点配置见 [配置文档](docs/user/conf
 ### 管理命令
 
 ```bash
+./GooseForum migrate
 ./GooseForum set-user-admin <用户ID>
 ./GooseForum set-user-email <用户ID> <邮箱>
 ./GooseForum set-user-password <用户ID> <密码>
