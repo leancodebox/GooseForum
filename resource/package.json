@@ -67,5 +67,11 @@
     "typescript": "~6.0.3",
     "vitest": "^4.1.9",
     "vue-tsc": "^3.3.7"
+  },
+  "pnpm": {
+    "overrides": {
+      "nanoid": "3.3.18",
+      "postcss": "8.5.26"
+    }
   }
 }
