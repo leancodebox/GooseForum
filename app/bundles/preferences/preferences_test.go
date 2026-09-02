@@ -1,6 +1,22 @@
 package preferences
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
+
+func TestGeneratedConfigLeavesOptionalMeilisearchDisabled(t *testing.T) {
+	config, err := GenerateConfig()
+	if err != nil {
+		t.Fatalf("GenerateConfig() error = %v", err)
+	}
+	if !strings.Contains(string(config), "[meilisearch]\n# Leave empty to disable Meilisearch.") {
+		t.Fatal("generated config is missing the disabled Meilisearch guidance")
+	}
+	if !strings.Contains(string(config), "url = \"\"\nmasterkey = \"\"") {
+		t.Fatal("generated config enables Meilisearch by default")
+	}
+}
 
 func TestSpliceConfig(t *testing.T) {
 	if got := GetIntSlice("missing.list"); len(got) != 0 {

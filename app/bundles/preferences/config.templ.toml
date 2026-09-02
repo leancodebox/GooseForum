@@ -62,7 +62,9 @@ secure = true
 pathStyle = false
 
 [meilisearch]
-url = "http://localhost:7700"
+# Leave empty to disable Meilisearch. Once configured, migrations require the
+# service to be reachable before the application starts serving requests.
+url = ""
 masterkey = ""
 
 [log]
