@@ -25,6 +25,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
+	"github.com/leancodebox/GooseForum/app/service/topicservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 )
 
@@ -185,11 +186,10 @@ func UpdateModerationTopicStatus(req component.BetterRequest[ModerationTopicStat
 	if topic.ProcessStatus == nextStatus {
 		return component.SuccessResponse(true)
 	}
-	if err := topics.UpdateProcessStatus(topic.Id, nextStatus); err != nil {
+	if err := topicservice.UpdateTopicProcessStatus(&topic, nextStatus); err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
-	topic.ProcessStatus = nextStatus
-	hotdataserve.ClearTopicListCache()
+	hotdataserve.ClearTopicCategoryCache()
 	firstPost := posts.Get(topic.FirstPostId)
 	if firstPost.Id == 0 {
 		firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)

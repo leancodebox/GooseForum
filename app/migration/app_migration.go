@@ -246,6 +246,18 @@ func runVersionedDataMigrations() error {
 		}
 		currentVersion = 18
 	}
+	if currentVersion < 19 {
+		result := datamigration.BackfillCategoryTopicCounts()
+		slog.Info("app migration category topic counts done", "categories", result.Categories, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			slog.Error("app migration category topic counts has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
+			return fmt.Errorf("backfill category topic counts: %s", result.LastFailed)
+		}
+		if err := syncMigrationVersion(19); err != nil {
+			return err
+		}
+		currentVersion = 19
+	}
 	slog.Info("app migration end", "version", currentVersion)
 	return nil
 }

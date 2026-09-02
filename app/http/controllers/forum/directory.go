@@ -1,7 +1,6 @@
 package forum
 
 import (
-	"log/slog"
 	"strconv"
 	"time"
 
@@ -9,7 +8,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
-	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
@@ -24,22 +22,15 @@ func Categories(c *gin.Context) {
 		return
 	}
 	visible := make([]*category.Entity, 0)
-	ids := make([]uint64, 0)
 	for _, item := range hotdataserve.GetCategory() {
 		if item == nil || !snapshot.CanReadCategory(item.Id) {
 			continue
 		}
 		visible = append(visible, item)
-		ids = append(ids, item.Id)
-	}
-	counts, err := topicCategoryIndex.PublishedTopicCountsForAudience(ids, snapshot.ReadableCategoryIDs())
-	if err != nil {
-		slog.Warn("load category directory topic counts failed", "err", err)
-		counts = map[uint64]int64{}
 	}
 	payload := PagePayload{
 		Component: PageComponentCategories,
-		Props:     buildCategoriesPageProps(visible, counts),
+		Props:     buildCategoriesPageProps(visible),
 		Meta:      buildDirectoryMeta(c, "meta.categories", "meta.categoriesDesc", "/categories", "", ""),
 		Layout:    buildLayout(c, "categories"),
 		URL:       buildPageURL(c),
@@ -79,7 +70,7 @@ func Members(c *gin.Context) {
 	renderPage(c, "members.gohtml", payload)
 }
 
-func buildCategoriesPageProps(items []*category.Entity, counts map[uint64]int64) CategoriesPageProps {
+func buildCategoriesPageProps(items []*category.Entity) CategoriesPageProps {
 	result := make([]CategoryDirectoryPayload, 0, len(items))
 	for _, item := range items {
 		if item == nil {
@@ -87,7 +78,7 @@ func buildCategoriesPageProps(items []*category.Entity, counts map[uint64]int64)
 		}
 		result = append(result, CategoryDirectoryPayload{
 			ID: item.Id, Name: item.Name, Description: item.Desc, Icon: item.Icon,
-			Color: item.Color, URL: categoryURL(item), TopicCount: counts[item.Id],
+			Color: item.Color, URL: categoryURL(item), TopicCount: int64(item.TopicCount),
 		})
 	}
 	return CategoriesPageProps{Categories: result, Total: len(result)}

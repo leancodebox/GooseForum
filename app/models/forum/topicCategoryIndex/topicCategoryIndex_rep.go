@@ -20,8 +20,25 @@ func GetByTopicId(topicId uint64) (entities []*Entity) {
 	return
 }
 
+func ActiveCategoryIDsByTopicWithDB(db *gorm.DB, topicID uint64) ([]uint64, error) {
+	if db == nil || topicID == 0 {
+		return []uint64{}, nil
+	}
+	var categoryIDs []uint64
+	err := db.Model(&Entity{}).
+		Where("topic_id = ? AND effective = ?", topicID, 1).
+		Order("category_id ASC").
+		Pluck("category_id", &categoryIDs).Error
+	return categoryIDs, err
+}
+
 func DeleteByTopicId(topicId uint64) int64 {
 	return builder().Where("topic_id = ?", topicId).Delete(&Entity{}).RowsAffected
+}
+
+func DeleteByTopicIdWithDB(db *gorm.DB, topicID uint64) (int64, error) {
+	result := db.Where("topic_id = ?", topicID).Delete(&Entity{})
+	return result.RowsAffected, result.Error
 }
 
 func GetOneByCategoryId(categoryId uint64) (entity Entity) {
@@ -57,31 +74,6 @@ func ActiveTopicIDsByCategory(categoryID uint64, maxIDs int) ([]uint64, bool, er
 type MultiCategoryTopicCount struct {
 	CategoryID uint64 `gorm:"column:category_id"`
 	TopicCount int64  `gorm:"column:topic_count"`
-}
-
-// PublishedTopicCountsForAudience returns published topic counts for the
-// requested categories, limited to topics whose main category is readable by
-// the current audience.
-func PublishedTopicCountsForAudience(categoryIDs, readableMainCategoryIDs []uint64) (map[uint64]int64, error) {
-	counts := make(map[uint64]int64, len(categoryIDs))
-	if len(categoryIDs) == 0 || len(readableMainCategoryIDs) == 0 {
-		return counts, nil
-	}
-	var rows []MultiCategoryTopicCount
-	err := dbconnect.Connect().Table(tableName+" AS category_idx").
-		Select("category_idx.category_id AS category_id, COUNT(DISTINCT category_idx.topic_id) AS topic_count").
-		Joins("JOIN topics ON topics.id = category_idx.topic_id AND topics.deleted_at IS NULL AND topics.status = ? AND topics.process_status = ?", 1, 0).
-		Where("category_idx.effective = ? AND category_idx.category_id IN ?", 1, categoryIDs).
-		Where("topics.main_category_id IN ?", readableMainCategoryIDs).
-		Group("category_idx.category_id").
-		Scan(&rows).Error
-	if err != nil {
-		return nil, err
-	}
-	for _, row := range rows {
-		counts[row.CategoryID] = row.TopicCount
-	}
-	return counts, nil
 }
 
 func MultiCategoryTopicCounts(categoryIDs []uint64) (map[uint64]int64, error) {

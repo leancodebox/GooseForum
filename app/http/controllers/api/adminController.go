@@ -520,10 +520,9 @@ func EditTopic(req component.BetterRequest[EditTopicReq]) component.Response {
 		return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 	}
 
-	if err := topics.UpdateProcessStatus(topic.Id, req.Params.ProcessStatus); err != nil {
+	if err := topicservice.UpdateTopicProcessStatus(&topic, req.Params.ProcessStatus); err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
-	topic.ProcessStatus = req.Params.ProcessStatus
 
 	// 记录操作日志
 	statusCode := "unblocked"
@@ -539,7 +538,7 @@ func EditTopic(req component.BetterRequest[EditTopicReq]) component.Response {
 	if _, err := searchservice.BuildSingleTopicSearchDocument(&topic, &firstPost); err != nil {
 		slog.Error("failed to rebuild topic search document", "topicId", topic.Id, "err", err)
 	}
-	hotdataserve.ClearTopicListCache()
+	hotdataserve.ClearTopicCategoryCache()
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 
@@ -554,11 +553,10 @@ func DeleteTopic(req component.BetterRequest[DeleteTopicReq]) component.Response
 	if _, err := searchservice.BuildSingleTopicSearchDocument(&topic, &firstPost); err != nil {
 		slog.Error("failed to delete topic search document", "topicId", topic.Id, "err", err)
 	}
-	topicCategoryIndex.DeleteByTopicId(topic.Id)
-	if rows := topics.Delete(&topic); rows == 0 {
+	if err := topicservice.DeleteTopic(&topic); err != nil {
 		return component.FailResponseCode(component.MessageAdminTopicDeleteFailed, nil)
 	}
-	hotdataserve.ClearTopicListCache()
+	hotdataserve.ClearTopicCategoryCache()
 	optlogger.UserOptCode(req.UserId, optlogger.EditTopic, topic.Id, "admin.opt.topic.deleted", optlogger.MessageParams{
 		"title": topic.Title,
 	})
@@ -638,7 +636,7 @@ func EditTopicCategories(req component.BetterRequest[EditTopicCategoriesReq]) co
 	if _, err := searchservice.BuildSingleTopicSearchDocument(&topic, &firstPost); err != nil {
 		slog.Error("failed to rebuild topic search document", "topicId", topic.Id, "err", err)
 	}
-	hotdataserve.ClearTopicListCache()
+	hotdataserve.ClearTopicCategoryCache()
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 

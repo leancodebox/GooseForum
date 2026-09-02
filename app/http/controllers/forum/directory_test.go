@@ -11,10 +11,10 @@ import (
 
 func TestBuildCategoriesPagePropsPreservesVisibleOrderAndCounts(t *testing.T) {
 	props := buildCategoriesPageProps([]*category.Entity{
-		{Id: 8, Name: "General", Slug: "general", Color: "#123456"},
+		{Id: 8, Name: "General", Slug: "general", Color: "#123456", TopicCount: 12},
 		nil,
-		{Id: 3, Name: "Design", Slug: "design", Color: "#abcdef"},
-	}, map[uint64]int64{8: 12, 3: 4})
+		{Id: 3, Name: "Design", Slug: "design", Color: "#abcdef", TopicCount: 4},
+	})
 
 	if props.Total != 2 || len(props.Categories) != 2 {
 		t.Fatalf("categories total/list = %d/%d", props.Total, len(props.Categories))

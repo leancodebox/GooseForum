@@ -11,15 +11,16 @@ import (
 const tableName = "category"
 
 type Entity struct {
-	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`
-	Name      string    `gorm:"column:name;type:varchar(64);not null;default:'';" json:"name"`
-	Desc      string    `gorm:"column:desc;type:varchar(255);not null;default:'';" json:"desc"`
-	Icon      string    `gorm:"column:icon;type:varchar(255);not null;default:'';" json:"icon"`
-	Color     string    `gorm:"column:color;type:varchar(255);not null;default:'';" json:"color"`
-	Slug      string    `gorm:"column:slug;type:varchar(255);not null;default:'';" json:"slug"`
-	Sort      int       `gorm:"column:sort;type:int;not null;default:0;index:idx_category_sort,priority:1;" json:"sort"`
-	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`
-	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
+	Id         uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`
+	Name       string    `gorm:"column:name;type:varchar(64);not null;default:'';" json:"name"`
+	Desc       string    `gorm:"column:desc;type:varchar(255);not null;default:'';" json:"desc"`
+	Icon       string    `gorm:"column:icon;type:varchar(255);not null;default:'';" json:"icon"`
+	Color      string    `gorm:"column:color;type:varchar(255);not null;default:'';" json:"color"`
+	Slug       string    `gorm:"column:slug;type:varchar(255);not null;default:'';" json:"slug"`
+	Sort       int       `gorm:"column:sort;type:int;not null;default:0;index:idx_category_sort,priority:1;" json:"sort"`
+	TopicCount uint64    `gorm:"column:topic_count;type:bigint unsigned;not null;default:0;" json:"topicCount"`
+	CreatedAt  time.Time `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`
+	UpdatedAt  time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 
 func (itself *Entity) TableName() string {

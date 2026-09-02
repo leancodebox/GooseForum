@@ -160,7 +160,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
 		fileusageservice.ReplaceTopic(topic.Id, req.UserId, firstPost.Content)
-		hotdataserve.ClearTopicListCache()
+		hotdataserve.ClearTopicCategoryCache()
 		if wasPublished {
 			eventbus.Publish(context.Background(), &eventhandlers.TopicUpdatedEvent{Topic: &topic, FirstPost: &firstPost})
 		} else if topic.Status == 1 {
@@ -188,7 +188,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 			userStatistics.WriteTopic(req.UserId)
 		}
 		userservice.InvalidateUserPublicProfileCache(req.UserId)
-		hotdataserve.ClearTopicListCache()
+		hotdataserve.ClearTopicCategoryCache()
 		if topic.Status == 1 {
 			eventbus.Publish(context.Background(), &eventhandlers.TopicPublishedEvent{Topic: &topic, FirstPost: &firstPost})
 		}
@@ -223,12 +223,11 @@ func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Re
 	if topic.Status == nextStatus {
 		return component.SuccessResponse(true)
 	}
-	topic.Status = nextStatus
-	if err := topics.Save(&topic); err != nil {
+	if err := topicservice.UpdateTopicStatus(&topic, nextStatus); err != nil {
 		return component.FailResponseCode(component.MessageTopicSaveFailed, nil)
 	}
 	firstPost := posts.Get(topic.FirstPostId)
-	hotdataserve.ClearTopicListCache()
+	hotdataserve.ClearTopicCategoryCache()
 	if topic.Status == 1 {
 		eventbus.Publish(context.Background(), &eventhandlers.TopicPublishedEvent{Topic: &topic, FirstPost: &firstPost})
 	} else {

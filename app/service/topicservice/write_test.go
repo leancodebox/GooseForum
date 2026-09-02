@@ -6,6 +6,7 @@ import (
 
 	"github.com/glebarez/sqlite"
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
+	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
@@ -108,6 +109,67 @@ func TestSaveTopicAndFirstPostCanonicalizesAndBoundsCategories(t *testing.T) {
 	}
 }
 
+func TestCategoryTopicCountsFollowTopicLifecycle(t *testing.T) {
+	conn := openTopicWriteDB(t)
+	topic := &topics.Entity{Title: "lifecycle", UserId: 1, Status: 0}
+	firstPost := &posts.Entity{UserId: 1, Content: "body"}
+	if err := SaveTopicAndFirstPostWithDB(conn, FirstPostWrite{
+		Topic: topic, FirstPost: firstPost, CategoryIDs: []uint64{3}, Create: true,
+	}); err != nil {
+		t.Fatalf("create draft: %v", err)
+	}
+	assertCategoryTopicCount(t, conn, 3, 0)
+
+	staleDraft := *topic
+	if err := UpdateTopicStatusWithDB(conn, topic, 1); err != nil {
+		t.Fatalf("publish topic: %v", err)
+	}
+	assertCategoryTopicCount(t, conn, 3, 1)
+	if err := UpdateTopicStatusWithDB(conn, &staleDraft, 1); err != nil {
+		t.Fatalf("repeat stale published status: %v", err)
+	}
+	assertCategoryTopicCount(t, conn, 3, 1)
+
+	if err := SaveTopicCategoriesWithDB(conn, topic, []uint64{4}); err != nil {
+		t.Fatalf("move topic category: %v", err)
+	}
+	assertCategoryTopicCount(t, conn, 3, 0)
+	assertCategoryTopicCount(t, conn, 4, 1)
+
+	staleUnblocked := *topic
+	if err := UpdateTopicProcessStatusWithDB(conn, topic, 1); err != nil {
+		t.Fatalf("block topic: %v", err)
+	}
+	assertCategoryTopicCount(t, conn, 4, 0)
+	if err := UpdateTopicProcessStatusWithDB(conn, &staleUnblocked, 1); err != nil {
+		t.Fatalf("repeat stale blocked status: %v", err)
+	}
+	assertCategoryTopicCount(t, conn, 4, 0)
+	if err := UpdateTopicProcessStatusWithDB(conn, topic, 0); err != nil {
+		t.Fatalf("unblock topic: %v", err)
+	}
+	assertCategoryTopicCount(t, conn, 4, 1)
+
+	// Search removal prepares a blocked copy before deletion; persisted state is
+	// authoritative for deciding whether the category count must be decremented.
+	topic.ProcessStatus = 1
+	if err := DeleteTopicWithDB(conn, topic); err != nil {
+		t.Fatalf("delete topic: %v", err)
+	}
+	assertCategoryTopicCount(t, conn, 4, 0)
+}
+
+func assertCategoryTopicCount(t *testing.T, conn *gorm.DB, categoryID, want uint64) {
+	t.Helper()
+	var item category.Entity
+	if err := conn.First(&item, categoryID).Error; err != nil {
+		t.Fatalf("load category %d: %v", categoryID, err)
+	}
+	if item.TopicCount != want {
+		t.Fatalf("category %d topic count = %d, want %d", categoryID, item.TopicCount, want)
+	}
+}
+
 func openTopicWriteDB(t *testing.T) *gorm.DB {
 	t.Helper()
 	conn, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
@@ -116,7 +178,7 @@ func openTopicWriteDB(t *testing.T) *gorm.DB {
 	}
 	if err := conn.AutoMigrate(
 		&accessGroups.Entity{}, &categoryGroupPermissions.Entity{},
-		&topics.Entity{}, &posts.Entity{}, &topicCategoryIndex.Entity{},
+		&topics.Entity{}, &posts.Entity{}, &category.Entity{}, &topicCategoryIndex.Entity{},
 	); err != nil {
 		t.Fatalf("migrate topic write tables: %v", err)
 	}
@@ -124,6 +186,9 @@ func openTopicWriteDB(t *testing.T) *gorm.DB {
 	everyone := accessGroups.Entity{Id: 1, Name: "Everyone", SystemKey: &everyoneKey, JoinMode: accessGroups.JoinModeSystem, Status: accessGroups.StatusEnabled}
 	if err := conn.Create(&everyone).Error; err != nil {
 		t.Fatalf("create everyone group: %v", err)
+	}
+	if err := conn.Create(&[]category.Entity{{Id: 3, Name: "three"}, {Id: 4, Name: "four"}, {Id: 5, Name: "five"}}).Error; err != nil {
+		t.Fatalf("create categories: %v", err)
 	}
 	for _, categoryID := range []uint64{3, 4} {
 		grant := categoryGroupPermissions.Entity{

@@ -79,16 +79,6 @@ func TestMultiCategoryTopicCountsIgnoresSingleAndDeletedTopics(t *testing.T) {
 	if counts[base+11] != 1 || counts[base+12] != 1 || counts[base+13] != 0 {
 		t.Fatalf("multi-category counts = %v", counts)
 	}
-	publicCounts, err := PublishedTopicCountsForAudience(
-		[]uint64{base + 11, base + 12, base + 13},
-		[]uint64{base + 11, base + 12, base + 13},
-	)
-	if err != nil {
-		t.Fatalf("PublishedTopicCountsForAudience: %v", err)
-	}
-	if publicCounts[base+11] != 1 || publicCounts[base+12] != 1 || publicCounts[base+13] != 0 {
-		t.Fatalf("public category counts = %v", publicCounts)
-	}
 	ids, complete, err := ActiveTopicIDsByCategoryWithDB(conn, base+12, 2)
 	if err != nil || !complete || len(ids) != 1 || ids[0] != base+1 {
 		t.Fatalf("sparse category ids=%v complete=%v err=%v", ids, complete, err)
