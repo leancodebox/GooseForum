@@ -402,6 +402,41 @@ type CategoryHeaderPayload struct {
 	URL         string `json:"url"`
 }
 
+type CategoriesPageProps struct {
+	Categories []CategoryDirectoryPayload `json:"categories"`
+	Total      int                        `json:"total"`
+}
+
+type CategoryDirectoryPayload struct {
+	ID          uint64 `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Icon        string `json:"icon"`
+	Color       string `json:"color"`
+	URL         string `json:"url"`
+	TopicCount  int64  `json:"topicCount"`
+}
+
+type MembersPageProps struct {
+	Members     []MemberDirectoryPayload `json:"members"`
+	PreviousURL string                   `json:"previousUrl"`
+	Pagination  PaginationPayload        `json:"pagination"`
+}
+
+type MemberDirectoryPayload struct {
+	ID           uint64 `json:"id"`
+	Username     string `json:"username"`
+	Nickname     string `json:"nickname"`
+	AvatarURL    string `json:"avatarUrl"`
+	Bio          string `json:"bio"`
+	Prestige     int64  `json:"prestige"`
+	TopicCount   uint   `json:"topicCount"`
+	ReplyCount   uint   `json:"replyCount"`
+	LastActiveAt string `json:"lastActiveAt,omitempty"`
+	JoinedAt     string `json:"joinedAt"`
+	URL          string `json:"url"`
+}
+
 type LinksPageProps struct {
 	Groups     []LinkGroupPayload `json:"groups"`
 	TotalCount int                `json:"totalCount"`

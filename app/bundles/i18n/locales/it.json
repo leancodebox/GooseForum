@@ -9,6 +9,13 @@
   "likes": "mi piace",
   "likesReceived": "Mi piace",
   "topics": "Argomenti",
+  "categoriesTitle": "Tutte le categorie",
+  "categoriesSummary": "{count} categorie disponibili.",
+  "categoryTopicCount": "{count} argomenti",
+  "categoriesEmpty": "Nessuna categoria disponibile.",
+  "membersTitle": "Tutti i membri",
+  "memberContribution": "{topics} argomenti, {replies} risposte",
+  "membersEmpty": "Nessun membro trovato.",
   "posts": "Post",
   "followers": "Follower",
   "profileStats": "Statistiche del profilo",
@@ -81,5 +88,9 @@
   "meta.topicDesc": "Leggi “{title}” e partecipa alla discussione su {site}.",
   "meta.communityDesc": "Partecipa alla discussione della community su {site}.",
   "meta.userDesc": "Scopri argomenti, attività e connessioni di {username} su {site}.",
-  "meta.categoryDesc": "Sfoglia gli argomenti nella categoria {category}."
+  "meta.categoryDesc": "Sfoglia gli argomenti nella categoria {category}.",
+  "meta.categories": "Tutte le categorie",
+  "meta.categoriesDesc": "Sfoglia tutte le categorie disponibili su {site}.",
+  "meta.members": "Tutti i membri",
+  "meta.membersDesc": "Sfoglia i membri della community di {site}."
 }

@@ -8,8 +8,11 @@ import (
 )
 
 type categoryCountTestTopic struct {
-	Id        uint64 `gorm:"primaryKey;column:id"`
-	DeletedAt gorm.DeletedAt
+	Id             uint64 `gorm:"primaryKey;column:id"`
+	MainCategoryId uint64 `gorm:"column:main_category_id"`
+	Status         int8   `gorm:"column:status"`
+	ProcessStatus  int8   `gorm:"column:process_status"`
+	DeletedAt      gorm.DeletedAt
 }
 
 func (categoryCountTestTopic) TableName() string { return "topics" }
@@ -47,9 +50,10 @@ func TestMultiCategoryTopicCountsIgnoresSingleAndDeletedTopics(t *testing.T) {
 	}
 	const base uint64 = 981000
 	rows := []categoryCountTestTopic{
-		{Id: base + 1},
-		{Id: base + 2},
-		{Id: base + 3},
+		{Id: base + 1, MainCategoryId: base + 11, Status: 1},
+		{Id: base + 2, MainCategoryId: base + 11},
+		{Id: base + 3, MainCategoryId: base + 11, Status: 1},
+		{Id: base + 4, MainCategoryId: base + 99, Status: 1},
 	}
 	if err := conn.Create(&rows).Error; err != nil {
 		t.Fatalf("create topics: %v", err)
@@ -63,6 +67,7 @@ func TestMultiCategoryTopicCountsIgnoresSingleAndDeletedTopics(t *testing.T) {
 		{TopicId: base + 2, CategoryId: base + 11, Effective: 1},
 		{TopicId: base + 3, CategoryId: base + 11, Effective: 1},
 		{TopicId: base + 3, CategoryId: base + 13, Effective: 1},
+		{TopicId: base + 4, CategoryId: base + 11, Effective: 1},
 	}
 	if err := conn.Create(&indexes).Error; err != nil {
 		t.Fatalf("create indexes: %v", err)
@@ -73,6 +78,16 @@ func TestMultiCategoryTopicCountsIgnoresSingleAndDeletedTopics(t *testing.T) {
 	}
 	if counts[base+11] != 1 || counts[base+12] != 1 || counts[base+13] != 0 {
 		t.Fatalf("multi-category counts = %v", counts)
+	}
+	publicCounts, err := PublishedTopicCountsForAudience(
+		[]uint64{base + 11, base + 12, base + 13},
+		[]uint64{base + 11, base + 12, base + 13},
+	)
+	if err != nil {
+		t.Fatalf("PublishedTopicCountsForAudience: %v", err)
+	}
+	if publicCounts[base+11] != 1 || publicCounts[base+12] != 1 || publicCounts[base+13] != 0 {
+		t.Fatalf("public category counts = %v", publicCounts)
 	}
 	ids, complete, err := ActiveTopicIDsByCategoryWithDB(conn, base+12, 2)
 	if err != nil || !complete || len(ids) != 1 || ids[0] != base+1 {

@@ -9,6 +9,13 @@
   "likes": "赞",
   "likesReceived": "获赞",
   "topics": "主题",
+  "categoriesTitle": "全部分类",
+  "categoriesSummary": "共 {count} 个可浏览分类。",
+  "categoryTopicCount": "{count} 个主题",
+  "categoriesEmpty": "暂无可浏览分类。",
+  "membersTitle": "所有成员",
+  "memberContribution": "{topics} 个主题，{replies} 条回复",
+  "membersEmpty": "没有找到成员。",
   "posts": "帖子",
   "followers": "关注者",
   "profileStats": "资料统计",
@@ -81,5 +88,9 @@
   "meta.topicDesc": "阅读 {title}，参与 {site} 的社区讨论。",
   "meta.communityDesc": "参与 {site} 的社区讨论。",
   "meta.userDesc": "查看 {username} 在 {site} 的主题、动态和社区关系。",
-  "meta.categoryDesc": "浏览 {category} 分类下的主题。"
+  "meta.categoryDesc": "浏览 {category} 分类下的主题。",
+  "meta.categories": "全部分类",
+  "meta.categoriesDesc": "浏览 {site} 的全部可访问分类。",
+  "meta.members": "所有成员",
+  "meta.membersDesc": "浏览 {site} 的社区成员。"
 }

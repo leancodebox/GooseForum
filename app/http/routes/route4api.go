@@ -65,6 +65,8 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/u/:userId/:section/:subsection", forum.UserProfile)
 	viewRouteApp.GET("/c/:slug/:id", forum.Category)
 	viewRouteApp.GET("/c/:slug/:id/l/:sort", forum.Category)
+	viewRouteApp.GET("/categories", forum.Categories)
+	viewRouteApp.GET("/members", forum.Members)
 	viewRouteApp.GET("/links", forum.Links)
 	viewRouteApp.GET("/sponsors", forum.Sponsors)
 	viewRouteApp.GET("/messages", middleware.CheckLogin, forum.Messages)

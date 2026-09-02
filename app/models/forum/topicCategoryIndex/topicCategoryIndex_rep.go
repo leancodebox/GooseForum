@@ -59,6 +59,31 @@ type MultiCategoryTopicCount struct {
 	TopicCount int64  `gorm:"column:topic_count"`
 }
 
+// PublishedTopicCountsForAudience returns published topic counts for the
+// requested categories, limited to topics whose main category is readable by
+// the current audience.
+func PublishedTopicCountsForAudience(categoryIDs, readableMainCategoryIDs []uint64) (map[uint64]int64, error) {
+	counts := make(map[uint64]int64, len(categoryIDs))
+	if len(categoryIDs) == 0 || len(readableMainCategoryIDs) == 0 {
+		return counts, nil
+	}
+	var rows []MultiCategoryTopicCount
+	err := dbconnect.Connect().Table(tableName+" AS category_idx").
+		Select("category_idx.category_id AS category_id, COUNT(DISTINCT category_idx.topic_id) AS topic_count").
+		Joins("JOIN topics ON topics.id = category_idx.topic_id AND topics.deleted_at IS NULL AND topics.status = ? AND topics.process_status = ?", 1, 0).
+		Where("category_idx.effective = ? AND category_idx.category_id IN ?", 1, categoryIDs).
+		Where("topics.main_category_id IN ?", readableMainCategoryIDs).
+		Group("category_idx.category_id").
+		Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+	for _, row := range rows {
+		counts[row.CategoryID] = row.TopicCount
+	}
+	return counts, nil
+}
+
 func MultiCategoryTopicCounts(categoryIDs []uint64) (map[uint64]int64, error) {
 	return MultiCategoryTopicCountsWithDB(dbconnect.Connect(), categoryIDs)
 }

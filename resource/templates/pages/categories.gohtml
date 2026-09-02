@@ -1,0 +1,25 @@
+{{template "layout/app.gohtml" .}}
+
+{{define "noscript"}}
+{{template "page" .}}
+{{end}}
+
+{{define "page"}}
+<main>
+    <header>
+        <h1>{{ t .Lang "categoriesTitle" }}</h1>
+        <p>{{ t .Lang "categoriesSummary" "count" .Payload.Props.Total }}</p>
+    </header>
+    <ul>
+        {{range .Payload.Props.Categories}}
+        <li>
+            <h2><a href="{{.URL}}">{{.Name}}</a></h2>
+            {{if .Description}}<p>{{.Description}}</p>{{end}}
+            <p>{{ t $.Lang "categoryTopicCount" "count" .TopicCount }}</p>
+        </li>
+        {{else}}
+        <li>{{ t .Lang "categoriesEmpty" }}</li>
+        {{end}}
+    </ul>
+</main>
+{{end}}

@@ -126,6 +126,53 @@ func Page(q PageQuery) struct {
 	}{Page: q.Page, PageSize: q.PageSize, Data: list, Total: total}
 }
 
+type PublicPageQuery struct {
+	PageSize          int
+	BeforeID, AfterID uint64
+}
+
+type PublicPageResult struct {
+	HasPrevious bool
+	HasNext     bool
+	Data        []EntityComplete
+}
+
+// PublicPage returns only the columns needed by the public member directory.
+// Controllers still decide the final public payload shape.
+func PublicPage(q PublicPageQuery) PublicPageResult {
+	q.PageSize = pageutil.BoundPageSize(q.PageSize)
+	listQuery := builder().
+		Select("id", "username", "nickname", "avatar_url", "bio", "prestige", "created_at").
+		Where("deleted_at IS NULL").
+		Where("is_frozen = ?", StatusNormal)
+	ascending := q.AfterID > 0
+	if ascending {
+		listQuery = listQuery.Where("id > ?", q.AfterID).Order(queryopt.Asc(pid))
+	} else {
+		if q.BeforeID > 0 {
+			listQuery = listQuery.Where("id < ?", q.BeforeID)
+		}
+		listQuery = listQuery.Order(queryopt.Desc(pid))
+	}
+
+	var list []EntityComplete
+	listQuery.
+		Limit(q.PageSize + 1).
+		Find(&list)
+
+	hasExtra := len(list) > q.PageSize
+	if hasExtra {
+		list = list[:q.PageSize]
+	}
+	if ascending {
+		for left, right := 0, len(list)-1; left < right; left, right = left+1, right-1 {
+			list[left], list[right] = list[right], list[left]
+		}
+		return PublicPageResult{HasPrevious: hasExtra, HasNext: len(list) > 0, Data: list}
+	}
+	return PublicPageResult{HasPrevious: q.BeforeID > 0 && len(list) > 0, HasNext: hasExtra, Data: list}
+}
+
 func GetByIds(userIds []uint64) (entities []*EntityComplete) {
 	if len(userIds) == 0 {
 		return

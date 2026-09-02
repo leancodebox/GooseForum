@@ -581,6 +581,41 @@ export interface CategoryPageProps {
   }
 }
 
+export interface CategoriesPageProps {
+  categories: CategoryDirectoryPayload[]
+  total: number
+}
+
+export interface CategoryDirectoryPayload {
+  id: number
+  name: string
+  description: string
+  icon: string
+  color: string
+  url: string
+  topicCount: number
+}
+
+export interface MembersPageProps {
+  members: MemberDirectoryPayload[]
+  previousUrl: string
+  pagination: PaginationPayload
+}
+
+export interface MemberDirectoryPayload {
+  id: number
+  username: string
+  nickname: string
+  avatarUrl: string
+  bio: string
+  prestige: number
+  topicCount: number
+  replyCount: number
+  lastActiveAt?: string
+  joinedAt: string
+  url: string
+}
+
 export interface LinksPageProps {
   groups: LinkGroupPayload[]
   totalCount: number

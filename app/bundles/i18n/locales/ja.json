@@ -9,6 +9,13 @@
   "likes": "いいね",
   "likesReceived": "獲得したいいね",
   "topics": "トピック",
+  "categoriesTitle": "すべてのカテゴリー",
+  "categoriesSummary": "閲覧できるカテゴリーは {count} 件です。",
+  "categoryTopicCount": "{count} 件のトピック",
+  "categoriesEmpty": "閲覧できるカテゴリーはありません。",
+  "membersTitle": "すべてのメンバー",
+  "memberContribution": "{topics} 件のトピック、{replies} 件の返信",
+  "membersEmpty": "メンバーが見つかりません。",
   "posts": "投稿",
   "followers": "フォロワー",
   "profileStats": "プロフィール統計",
@@ -81,5 +88,9 @@
   "meta.topicDesc": "「{title}」を読んで、{site} のコミュニティで議論に参加しましょう。",
   "meta.communityDesc": "{site} のコミュニティで議論に参加しましょう。",
   "meta.userDesc": "{site} での {username} のトピック・アクティビティ・コミュニティのつながりを見る。",
-  "meta.categoryDesc": "{category} カテゴリーのトピックを閲覧する。"
+  "meta.categoryDesc": "{category} カテゴリーのトピックを閲覧する。",
+  "meta.categories": "すべてのカテゴリー",
+  "meta.categoriesDesc": "{site} で閲覧できるすべてのカテゴリーを見る。",
+  "meta.members": "すべてのメンバー",
+  "meta.membersDesc": "{site} のコミュニティメンバーを見る。"
 }

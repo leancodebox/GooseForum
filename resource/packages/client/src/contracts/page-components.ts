@@ -1,12 +1,14 @@
 import type {
   AccessGroupsPageProps,
   CategoryPageProps,
+  CategoriesPageProps,
   DraftsPageProps,
   ErrorPageProps,
   HomeProps,
   LinksPageProps,
   LoginPageProps,
   MessagesPageProps,
+  MembersPageProps,
   ModerationPageProps,
   NotificationsPageProps,
   PublishPageProps,
@@ -25,6 +27,8 @@ export const pageComponents = [
   'topic.detail',
   'user.profile',
   'category.index',
+  'categories.index',
+  'members.index',
   'links.index',
   'sponsors.index',
   'notifications.index',
@@ -46,6 +50,8 @@ export interface PagePayloadMap {
   'topic.detail': TopicDetailProps
   'user.profile': UserProfileProps
   'category.index': CategoryPageProps
+  'categories.index': CategoriesPageProps
+  'members.index': MembersPageProps
   'links.index': LinksPageProps
   'sponsors.index': SponsorsPageProps
   'notifications.index': NotificationsPageProps

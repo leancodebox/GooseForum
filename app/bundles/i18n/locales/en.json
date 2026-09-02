@@ -9,6 +9,13 @@
   "likes": "likes",
   "likesReceived": "Likes",
   "topics": "Topics",
+  "categoriesTitle": "All categories",
+  "categoriesSummary": "{count} categories available to browse.",
+  "categoryTopicCount": "{count} topics",
+  "categoriesEmpty": "No categories are available.",
+  "membersTitle": "All members",
+  "memberContribution": "{topics} topics, {replies} replies",
+  "membersEmpty": "No members found.",
   "posts": "Posts",
   "followers": "Followers",
   "profileStats": "Profile stats",
@@ -81,5 +88,9 @@
   "meta.topicDesc": "Read “{title}” and join the discussion on {site}.",
   "meta.communityDesc": "Join the community discussion on {site}.",
   "meta.userDesc": "See {username}’s topics, activity, and community connections on {site}.",
-  "meta.categoryDesc": "Browse topics in the {category} category."
+  "meta.categoryDesc": "Browse topics in the {category} category.",
+  "meta.categories": "All categories",
+  "meta.categoriesDesc": "Browse every category available on {site}.",
+  "meta.members": "All members",
+  "meta.membersDesc": "Browse the community members of {site}."
 }

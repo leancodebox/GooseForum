@@ -1,0 +1,32 @@
+{{template "layout/app.gohtml" .}}
+
+{{define "noscript"}}
+{{template "page" .}}
+{{end}}
+
+{{define "page"}}
+<main>
+    <header>
+        <h1>{{ t .Lang "membersTitle" }}</h1>
+    </header>
+    <ul>
+        {{range .Payload.Props.Members}}
+        <li>
+            <img src="{{.AvatarURL}}" alt="" width="40" height="40" loading="lazy">
+            <h2><a href="{{.URL}}">{{.Nickname}}</a></h2>
+            <p>@{{.Username}}</p>
+            {{if .Bio}}<p>{{.Bio}}</p>{{end}}
+            <p>{{ t $.Lang "memberContribution" "topics" .TopicCount "replies" .ReplyCount }}</p>
+        </li>
+        {{else}}
+        <li>{{ t .Lang "membersEmpty" }}</li>
+        {{end}}
+    </ul>
+    {{if or .Payload.Meta.PrevURL .Payload.Meta.NextURL}}
+    <nav aria-label="Pagination">
+        {{if .Payload.Meta.PrevURL}}<a href="{{.Payload.Meta.PrevURL}}" rel="prev">{{ t .Lang "prevPage" }}</a>{{end}}
+        {{if .Payload.Meta.NextURL}}<a href="{{.Payload.Meta.NextURL}}" rel="next">{{ t .Lang "nextPage" }}</a>{{end}}
+    </nav>
+    {{end}}
+</main>
+{{end}}

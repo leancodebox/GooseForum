@@ -119,6 +119,14 @@ func buildSitemapXML(host string) (string, error) {
 
 	sitemaps = append(sitemaps, []SitemapURL{
 		{
+			Loc:      host + "/categories",
+			Priority: 0.8,
+		},
+		{
+			Loc:      host + "/members",
+			Priority: 0.7,
+		},
+		{
 			Loc:      host + urlconfig.Links(),
 			Priority: 0.8,
 		},

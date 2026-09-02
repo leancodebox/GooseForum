@@ -7,6 +7,7 @@ import {
   Heart,
   Inbox,
   Link,
+  LayoutGrid,
   MessageCircle,
   Languages,
   LogOut,
@@ -21,7 +22,7 @@ import {
   Moon,
   Sun,
   UserRound,
-	UsersRound,
+  UsersRound,
 } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import GlobalFlash from './GlobalFlash.vue'
@@ -89,6 +90,8 @@ const primaryItems = computed<SidebarNavItem[]>(() => {
     sidebarItem('topics', t('shell.nav.topics'), '/'),
     sidebarItem('hot', t('shell.nav.hot'), '/?sort=hot'),
     sidebarItem('popular', t('shell.nav.popular'), '/?sort=popular'),
+    sidebarItem('categories', t('shell.nav.categories'), '/categories'),
+    sidebarItem('members', t('shell.nav.members'), '/members'),
   ]
   if (props.layout.viewer.isAuthenticated) {
     items.push(
@@ -148,6 +151,8 @@ const sidebarIconMap = {
   topics: MessageCircle,
   hot: Flame,
   popular: TrendingUp,
+  categories: LayoutGrid,
+  members: UsersRound,
   messages: Inbox,
   notifications: Bell,
   drafts: FileText,
