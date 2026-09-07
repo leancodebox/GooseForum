@@ -272,6 +272,17 @@ func runVersionedDataMigrations() error {
 		}
 		currentVersion = 20
 	}
+	if currentVersion < 21 {
+		result := datamigration.MigrateLegacyOAuthSettings()
+		slog.Info("app migration legacy OAuth settings done", "migrated", result.Migrated, "skipped", result.Skipped, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			return fmt.Errorf("migrate legacy OAuth settings: %s", result.LastFailed)
+		}
+		if err := syncMigrationVersion(21); err != nil {
+			return err
+		}
+		currentVersion = 21
+	}
 	slog.Info("app migration end", "version", currentVersion)
 	return nil
 }

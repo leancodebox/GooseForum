@@ -31,11 +31,7 @@ import (
 // InitOAuth configures available OAuth providers.
 func InitOAuth() {
 	gothic.Store = sessionstore.GetSession()
-	config, err := migrateLegacyGitHubConfig(loadSettings())
-	if err != nil {
-		slog.Error("OAuth legacy configuration migration failed", "err", err)
-	}
-	if err := ReloadProviders(config); err != nil {
+	if err := ReloadProviders(loadSettings()); err != nil {
 		slog.Error("OAuth provider initialization failed", "err", err)
 		return
 	}

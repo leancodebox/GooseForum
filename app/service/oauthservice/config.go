@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/userOAuth"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
@@ -391,22 +390,6 @@ func validSecureEndpoint(value string) bool {
 
 func loadSettings() pageConfig.OAuthSettingsConfig {
 	return hotdataserve.GetOAuthSettingsConfigCache()
-}
-
-func migrateLegacyGitHubConfig(config pageConfig.OAuthSettingsConfig) (pageConfig.OAuthSettingsConfig, error) {
-	if pageConfig.GetByPageType(pageConfig.OAuthSettings).Id != 0 {
-		return config, nil
-	}
-	clientID := strings.TrimSpace(preferences.GetString("github.client_id", ""))
-	clientSecret := strings.TrimSpace(preferences.GetString("github.client_secret", ""))
-	if clientID == "" || clientSecret == "" {
-		return config, nil
-	}
-	config.GitHub = pageConfig.OAuthProviderConfig{Enabled: true, ClientID: clientID, ClientSecret: clientSecret}
-	if err := persistSettings(config); err != nil {
-		return config, fmt.Errorf("migrate legacy GitHub OAuth settings: %w", err)
-	}
-	return config, nil
 }
 
 func persistSettings(config pageConfig.OAuthSettingsConfig) error {
