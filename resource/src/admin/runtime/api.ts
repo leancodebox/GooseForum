@@ -19,6 +19,7 @@ import type {
   GithubRelease,
   HttpNotifySettings,
   MailSettings,
+  OAuthSettings,
   PageResult,
   PostingSettings,
   SecuritySettings,
@@ -310,6 +311,10 @@ export function getSiteSettings() {
   return getJson<SiteSettings>('/api/admin/site-settings', adminText('k001f'))
 }
 
+export function getOAuthSettings() {
+  return getJson<OAuthSettings>('/api/admin/oauth-settings', 'Failed to load OAuth settings')
+}
+
 export function getSiteChrome() {
   return getJson<SiteChromeConfig>('/api/admin/site-chrome', '加载布局内容失败')
 }
@@ -336,6 +341,10 @@ export function getAnnouncement() {
 
 export function saveSiteSettings(settings: SiteSettings) {
   return postJson<unknown>('/api/admin/save-site-settings', { settings }, adminText('k001k'))
+}
+
+export function saveOAuthSettings(settings: OAuthSettings) {
+  return postJson<OAuthSettings>('/api/admin/save-oauth-settings', { settings }, 'Failed to save OAuth settings')
 }
 
 export function saveSiteChrome(settings: SiteChromeConfig) {

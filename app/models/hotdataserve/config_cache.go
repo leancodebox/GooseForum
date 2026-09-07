@@ -89,6 +89,14 @@ func GetHttpNotifyConfigCache() pageConfig.HttpNotifyConfig {
 	}, configRareCacheTTL)
 }
 
+var oauthSettingsConfigCache = &localcache.Cache[pageConfig.OAuthSettingsConfig]{MaxEntries: cacheconfig.Current().PageConfig}
+
+func GetOAuthSettingsConfigCache() pageConfig.OAuthSettingsConfig {
+	return oauthSettingsConfigCache.GetOrLoad("", func() (pageConfig.OAuthSettingsConfig, error) {
+		return pageConfig.GetConfigByPageType(pageConfig.OAuthSettings, defaultconfig.GetDefaultOAuthSettingsConfig()), nil
+	}, configFastCacheTTL)
+}
+
 func ClearSecuritySettingsConfigCache() {
 	securitySettingsConfigCache.Clear()
 }
@@ -99,6 +107,10 @@ func ClearPostingSettingsConfigCache() {
 
 func ClearHttpNotifyConfigCache() {
 	httpNotifyConfigCache.Clear()
+}
+
+func ClearOAuthSettingsConfigCache() {
+	oauthSettingsConfigCache.Clear()
 }
 
 func ClearSiteSettingsConfigCache() {

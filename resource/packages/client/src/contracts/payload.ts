@@ -46,8 +46,13 @@ export interface ErrorPageProps {
 export interface LoginPageProps {
   initialMode: 'login' | 'register' | 'forgot'
   redirectUrl: string
-  githubUrl: string
-  googleReady: boolean
+  oauthProviders: OAuthProviderPayload[]
+}
+
+export interface OAuthProviderPayload {
+  key: string
+  displayName: string
+  loginUrl: string
 }
 
 export interface ResetPasswordPageProps {

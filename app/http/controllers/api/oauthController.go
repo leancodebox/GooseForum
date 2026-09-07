@@ -9,6 +9,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/forum"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/markbates/goth/gothic"
@@ -16,17 +17,36 @@ import (
 
 // ProviderLogin 开始OAuth登录/绑定流程（根据登录状态自动判断）
 func ProviderLogin(c *gin.Context) {
+	provider := c.Param("provider")
+	if !oauthservice.IsProviderEnabled(provider) {
+		forum.RenderOAuthErrorPage(c, http.StatusNotFound, component.MessageOAuthCallbackFailed)
+		return
+	}
 	q := c.Request.URL.Query()
-	q.Add("provider", c.Param("provider"))
+	q.Set("provider", provider)
 	c.Request.URL.RawQuery = q.Encode()
-	// 开始 OAuth 流程
-	gothic.BeginAuthHandler(c.Writer, c.Request)
+	if err := oauthservice.StartFlow(c.Writer, c.Request, provider, component.LoginUserId(c), c.Query("mode"), c.Query("redirect")); err != nil {
+		forum.RenderOAuthErrorPage(c, http.StatusBadRequest, component.MessageOAuthCallbackFailed)
+		return
+	}
+	authURL, err := gothic.GetAuthURL(c.Writer, c.Request)
+	if err != nil {
+		slog.Error("OAuth start failed", "provider", provider, "error", err)
+		forum.RenderInternalOAuthErrorPage(c, component.MessageOAuthCallbackFailed)
+		return
+	}
+	c.Redirect(http.StatusTemporaryRedirect, authURL)
 }
 
 // ProviderCallback 处理OAuth登录/绑定回调（根据登录状态自动判断）
 func ProviderCallback(c *gin.Context) {
+	provider := c.Param("provider")
+	if !oauthservice.IsProviderEnabled(provider) {
+		forum.RenderOAuthErrorPage(c, http.StatusNotFound, component.MessageOAuthCallbackFailed)
+		return
+	}
 	q := c.Request.URL.Query()
-	q.Add("provider", c.Param("provider"))
+	q.Set("provider", provider)
 	c.Request.URL.RawQuery = q.Encode()
 
 	// 完成 OAuth 流程
@@ -36,12 +56,24 @@ func ProviderCallback(c *gin.Context) {
 		forum.RenderInternalOAuthErrorPage(c, component.MessageOAuthCallbackFailed)
 		return
 	}
+	if gothUser.Provider != provider {
+		slog.Warn("OAuth provider mismatch", "routeProvider", provider, "userProvider", gothUser.Provider)
+		forum.RenderOAuthErrorPage(c, http.StatusBadRequest, component.MessageOAuthCallbackFailed)
+		return
+	}
+	flow, err := oauthservice.ConsumeFlow(c.Writer, c.Request, provider)
+	if err != nil {
+		slog.Warn("OAuth flow validation failed", "provider", provider, "error", err)
+		forum.RenderOAuthErrorPage(c, http.StatusBadRequest, component.MessageOAuthCallbackFailed)
+		return
+	}
 
-	// 检查是否为绑定模式（用户已登录）
-	currentUserInfo := component.GetLoginUser(c)
-	currentUserId := currentUserInfo.UserId
-
-	if currentUserId > 0 {
+	if flow.Mode == "bind" {
+		currentUserId := component.LoginUserId(c)
+		if currentUserId == 0 || currentUserId != flow.UserID {
+			forum.RenderOAuthErrorPage(c, http.StatusUnauthorized, component.MessageAuthRequired)
+			return
+		}
 		if user, ok := userservice.GetUserInfo(currentUserId); !ok || user.IsFrozen == users.StatusFrozen {
 			forum.RenderOAuthErrorPage(c, http.StatusForbidden, component.MessagePermissionUserFrozen)
 			return
@@ -64,15 +96,13 @@ func ProviderCallback(c *gin.Context) {
 			return
 		}
 
-		if user.IsActivated == users.ActivationPending {
-			user.IsActivated = users.ActivationSuccess
-			// 更新用户状态
-			err = userservice.SaveUser(user)
-			if err != nil {
-				slog.Error("Update user activation status failed", "error", err)
-				forum.RenderInternalOAuthErrorPage(c, component.MessageOAuthActivationUpdateFailed)
-				return
-			}
+		if user.IsFrozen == users.StatusFrozen {
+			forum.RenderOAuthErrorPage(c, http.StatusForbidden, component.MessagePermissionUserFrozen)
+			return
+		}
+		if hotdataserve.GetSecuritySettingsConfigCache().EnableEmailVerification && user.IsActivated == users.ActivationPending {
+			forum.RenderOAuthErrorPage(c, http.StatusForbidden, component.MessageAuthEmailUnverified)
+			return
 		}
 
 		// 生成JWT token
@@ -84,7 +114,11 @@ func ProviderCallback(c *gin.Context) {
 		}
 
 		jwtopt.TokenSetting(c, token)
-		c.Redirect(http.StatusFound, "/")
+		redirect := flow.Redirect
+		if redirect == "" {
+			redirect = "/"
+		}
+		c.Redirect(http.StatusFound, redirect)
 	}
 }
 
@@ -109,32 +143,5 @@ func UnbindOAuth(req component.BetterRequest[component.Null]) component.Response
 
 // GetOAuthBindings 获取用户的OAuth绑定状态
 func GetOAuthBindings(req component.BetterRequest[component.Null]) component.Response {
-	// 检查用户是否已登录
-	userID := req.UserId
-
-	// 获取用户的 OAuth 绑定
-	bindings := oauthservice.GetUserOAuthBindings(userID)
-
-	// 构建响应数据
-	result := make(map[string]any)
-	for provider, oauth := range bindings {
-		result[provider] = map[string]any{
-			"bound":     true,
-			"provider":  oauth.Provider,
-			"createdAt": oauth.CreatedAt,
-			"updatedAt": oauth.UpdatedAt,
-		}
-	}
-
-	// 添加未绑定的提供商
-	allProviders := []string{"github", "google"}
-	for _, provider := range allProviders {
-		if _, exists := result[provider]; !exists {
-			result[provider] = map[string]any{
-				"bound": false,
-			}
-		}
-	}
-	return component.SuccessResponse(result)
-
+	return component.SuccessResponse(oauthservice.BindingProviders(req.UserId))
 }

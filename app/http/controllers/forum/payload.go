@@ -33,6 +33,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/chatservice"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
+	"github.com/leancodebox/GooseForum/app/service/oauthservice"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
@@ -112,10 +113,15 @@ type ErrorPageProps struct {
 }
 
 type LoginPageProps struct {
-	InitialMode string `json:"initialMode"`
-	RedirectURL string `json:"redirectUrl"`
-	GitHubURL   string `json:"githubUrl"`
-	GoogleReady bool   `json:"googleReady"`
+	InitialMode    string                 `json:"initialMode"`
+	RedirectURL    string                 `json:"redirectUrl"`
+	OAuthProviders []OAuthProviderPayload `json:"oauthProviders"`
+}
+
+type OAuthProviderPayload struct {
+	Key         string `json:"key"`
+	DisplayName string `json:"displayName"`
+	LoginURL    string `json:"loginUrl"`
 }
 
 type ResetPasswordPageProps struct {
@@ -843,15 +849,19 @@ func buildLoginPageProps(c *gin.Context) LoginPageProps {
 		mode = "register"
 	}
 	redirectURL := c.Query("redirect")
-	githubURL := "/api/auth/github"
-	if redirectURL != "" {
-		githubURL += "?redirect=" + url.QueryEscape(redirectURL)
+	providers := oauthservice.EnabledProviders()
+	providerPayloads := make([]OAuthProviderPayload, 0, len(providers))
+	for _, provider := range providers {
+		loginURL := "/api/auth/" + url.PathEscape(provider.Key) + "?mode=login"
+		if redirectURL != "" {
+			loginURL += "&redirect=" + url.QueryEscape(redirectURL)
+		}
+		providerPayloads = append(providerPayloads, OAuthProviderPayload{
+			Key: provider.Key, DisplayName: provider.DisplayName, LoginURL: loginURL,
+		})
 	}
 	return LoginPageProps{
-		InitialMode: mode,
-		RedirectURL: redirectURL,
-		GitHubURL:   githubURL,
-		GoogleReady: false,
+		InitialMode: mode, RedirectURL: redirectURL, OAuthProviders: providerPayloads,
 	}
 }
 

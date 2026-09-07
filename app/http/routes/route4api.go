@@ -106,7 +106,7 @@ func apiRoute(ginApp *gin.Engine) {
 	baseApi.GET("user-card", UpQueryReq(api.GetUserCard))
 	baseApi.POST("forgot-password", UpButterReq(api.ForgotPassword))
 	baseApi.POST("reset-password", UpButterReq(api.ResetPassword))
-	baseApi.GET("auth/:provider", api.ProviderLogin)
+	baseApi.GET("auth/:provider", middleware.JWTAuth, api.ProviderLogin)
 	baseApi.GET("auth/:provider/callback", middleware.JWTAuth, api.ProviderCallback)
 
 	loginApi := ginApp.Group("api").Use(middleware.JWTAuthCheck)
@@ -212,6 +212,8 @@ func apiRoute(ginApp *gin.Engine) {
 		GET("server-version", UpButterReq(api.ServerVersion)).
 		GET("site-settings", UpButterReq(api.GetSiteSettings)).
 		POST("save-site-settings", UpButterReq(api.SaveSiteSettings)).
+		GET("oauth-settings", UpButterReq(api.GetOAuthSettings)).
+		POST("save-oauth-settings", UpButterReq(api.SaveOAuthSettings)).
 		GET("site-chrome", UpButterReq(api.GetSiteChrome)).
 		POST("save-site-chrome", UpButterReq(api.SaveSiteChrome)).
 		GET("site-theme", UpButterReq(api.GetSiteTheme)).

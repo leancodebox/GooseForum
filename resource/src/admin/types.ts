@@ -231,6 +231,24 @@ export interface SiteSettings {
   externalLinks?: string
 }
 
+export interface OAuthProviderSettings {
+  key: string
+  displayName: string
+  kind: string
+  enabled: boolean
+  clientId: string
+  clientSecret?: string
+  clientSecretConfigured: boolean
+  clearClientSecret?: boolean
+  callbackUrl: string
+  discoveryUrl?: string
+  scopes?: string[]
+}
+
+export interface OAuthSettings {
+  providers: OAuthProviderSettings[]
+}
+
 export interface SiteChromeItem {
   id: string
   enabled: boolean

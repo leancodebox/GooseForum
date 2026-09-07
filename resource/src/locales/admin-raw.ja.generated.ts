@@ -557,5 +557,12 @@ export default {
   "k00fh": "リソースを開く",
   "k00fi": "サイズ",
   "k00fj": "最大 ID",
-  "k00fk": "ユーザーごとの1日あたりの最大トピック数（0は無制限）"
+  "k00fk": "ユーザーごとの1日あたりの最大トピック数（0は無制限）",
+  "k00fl": "OAuth ログイン", "k00fm": "組み込みプロバイダーを設定し、OpenID Connectで認証を拡張します。",
+  "k00fn": "OIDCプロバイダーを追加", "k00fo": "組み込み", "k00fp": "カスタムOIDC", "k00fq": "有効",
+  "k00fr": "Client ID", "k00fs": "Client Secret", "k00ft": "Secret設定済み", "k00fu": "Secret未設定",
+  "k00fv": "保存済みSecretを維持するには空欄にします", "k00fw": "コールバックURL", "k00fx": "OIDC Discovery URL",
+  "k00fy": "Scopes", "k00fz": "プロバイダーを削除", "k00g0": "OAuth設定を保存して反映しました",
+  "k00g1": "プロバイダー名", "k00g2": "プロバイダーKey", "k00g3": "小文字で始め、小文字・数字・ハイフンのみ使用できます",
+  "k00g4": "OAuth設定の読み込みに失敗しました", "k00g5": "保存時に設定済みSecretを削除します", "k00g6": "Secretを削除", "k00g7": "Secretを維持"
 } as const

@@ -42,6 +42,7 @@ const (
 	SecuritySettings = `securitySettings`
 	PostingSettings  = `postingSettings`
 	HttpNotify       = `httpNotify`
+	OAuthSettings    = `oauthSettings`
 	SiteTheme        = `siteTheme`
 	SiteChrome       = `siteChrome`
 	Version          = `version`
@@ -192,6 +193,32 @@ type SecurityAndRegistration struct {
 	EnableSignup            bool     `json:"enableSignup"`
 	EnableEmailVerification bool     `json:"enableEmailVerification"`
 	AllowedDomains          []string `json:"allowedDomains"`
+}
+
+// OAuthSettingsConfig stores credentials for built-in providers and
+// user-defined OpenID Connect providers. Callback URLs are derived from the
+// site URL and are deliberately not persisted.
+type OAuthSettingsConfig struct {
+	GitHub  OAuthProviderConfig  `json:"github"`
+	Google  OAuthProviderConfig  `json:"google"`
+	Discord OAuthProviderConfig  `json:"discord"`
+	Custom  []OIDCProviderConfig `json:"custom"`
+}
+
+type OAuthProviderConfig struct {
+	Enabled      bool   `json:"enabled"`
+	ClientID     string `json:"clientId"`
+	ClientSecret string `json:"clientSecret"`
+}
+
+type OIDCProviderConfig struct {
+	Key          string   `json:"key"`
+	DisplayName  string   `json:"displayName"`
+	Enabled      bool     `json:"enabled"`
+	ClientID     string   `json:"clientId"`
+	ClientSecret string   `json:"clientSecret"`
+	DiscoveryURL string   `json:"discoveryUrl"`
+	Scopes       []string `json:"scopes"`
 }
 
 type PostingContent struct {

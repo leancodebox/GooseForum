@@ -35,6 +35,12 @@ func GetByUserIDAndProvider(userID uint64, provider string) *Entity {
 	return &entity
 }
 
+func ListByUserID(userID uint64) []Entity {
+	var entities []Entity
+	builder().Where("user_id = ?", userID).Order("created_at ASC").Find(&entities)
+	return entities
+}
+
 //func saveAll(entities []*Entity) int64 {
 //	result := builder().Save(entities)
 //	return result.RowsAffected

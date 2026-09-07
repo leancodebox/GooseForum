@@ -118,17 +118,14 @@ maxBackUps = 30                   # 最大保留日志文件数量
 - `maxsize`: 单个日志文件超过指定大小后会自动切割
 - `maxBackUps`: 保留的历史日志文件数量
 
-### [github] OAuth 配置（可选）
+### OAuth 登录配置
 
-```toml
-[github]
-client_id = ""                    # GitHub OAuth App Client ID
-client_secret = ""                # GitHub OAuth App Client Secret
-```
+OAuth 配置保存在数据库中，通过管理后台的“设置 > OAuth”维护。内置支持
+GitHub、Google 和 Discord，也可以添加支持 Discovery 的 OpenID Connect 提供商。
 
-**配置说明：**
-- 需要在 GitHub Settings > Developer settings > OAuth Apps 创建应用
-- Authorization callback URL: `https://yourdomain.com/api/oauth/github/callback`
+管理后台会显示每个提供商应使用的回调地址。只有启用且 Client ID、Client Secret
+配置完整的提供商才会显示在登录和账户绑定页面。旧版本 `[github]` 配置会在首次
+启动时迁入数据库；确认迁移成功后即可从 `config.toml` 删除。
 
 ## 🔄 配置文件热重载
 

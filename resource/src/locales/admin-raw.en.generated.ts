@@ -557,5 +557,12 @@ export default {
   "k00fh": "Open resource",
   "k00fi": "Size",
   "k00fj": "Max ID",
-  "k00fk": "Maximum daily topics per user (0 means unlimited)"
+  "k00fk": "Maximum daily topics per user (0 means unlimited)",
+  "k00fl": "OAuth sign-in", "k00fm": "Configure built-in sign-in providers and extend authentication through OpenID Connect.",
+  "k00fn": "Add OIDC provider", "k00fo": "Built in", "k00fp": "Custom OIDC", "k00fq": "Enabled",
+  "k00fr": "Client ID", "k00fs": "Client Secret", "k00ft": "Secret configured", "k00fu": "Secret not configured",
+  "k00fv": "Leave blank to keep the saved secret", "k00fw": "Callback URL", "k00fx": "OIDC discovery URL",
+  "k00fy": "Scopes", "k00fz": "Remove provider", "k00g0": "OAuth settings saved and activated",
+  "k00g1": "Provider name", "k00g2": "Provider key", "k00g3": "Start with a lowercase letter; use lowercase letters, numbers, and hyphens",
+  "k00g4": "Failed to load OAuth settings", "k00g5": "The configured secret will be cleared when saved", "k00g6": "Clear secret", "k00g7": "Keep secret"
 } as const

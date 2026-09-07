@@ -78,9 +78,4 @@ maxBackUps = 30 # 最大保留文件数量
 slowSQL = true
 slowSQLThreshold = "200ms"
 
-# GitHub OAuth配置
-[github]
-client_id = ""
-client_secret = ""
-
 # end #

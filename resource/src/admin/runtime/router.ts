@@ -62,6 +62,10 @@ export const adminRouter = createRouter({
       path: '/admin/settings/site-chrome',
       component: () => import('@/admin/pages/management/SiteChromeManagementPage.vue'),
     },
+    {
+      path: '/admin/settings/oauth',
+      component: () => import('@/admin/pages/OAuthSettingsPage.vue'),
+    },
     ...Object.entries(settingsPages).map(([path, kind]) => ({
       path,
       component: () => import('@/admin/pages/AdminSettingsPage.vue'),

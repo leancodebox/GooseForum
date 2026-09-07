@@ -557,5 +557,12 @@ export default {
   "k00fh": "打开资源",
   "k00fi": "大小",
   "k00fj": "最大 ID",
-  "k00fk": "每个用户每日最大主题数（0 表示不限制）"
+  "k00fk": "每个用户每日最大主题数（0 表示不限制）",
+  "k00fl": "OAuth 登录", "k00fm": "配置内置登录渠道，并通过 OpenID Connect 扩展其他身份提供商。",
+  "k00fn": "添加 OIDC 提供商", "k00fo": "内置", "k00fp": "自定义 OIDC", "k00fq": "启用",
+  "k00fr": "Client ID", "k00fs": "Client Secret", "k00ft": "已配置 Secret", "k00fu": "尚未配置 Secret",
+  "k00fv": "留空以保留已保存的 Secret", "k00fw": "回调地址", "k00fx": "OIDC Discovery 地址",
+  "k00fy": "Scopes", "k00fz": "移除提供商", "k00g0": "OAuth 配置已保存并生效",
+  "k00g1": "提供商名称", "k00g2": "提供商 Key", "k00g3": "小写字母开头，仅允许小写字母、数字和连字符",
+  "k00g4": "加载 OAuth 配置失败", "k00g5": "保存时将清除已配置的 Secret", "k00g6": "清除 Secret", "k00g7": "保留 Secret"
 } as const

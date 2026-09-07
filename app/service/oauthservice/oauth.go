@@ -2,19 +2,19 @@ package oauthservice
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/randopt"
 	"github.com/leancodebox/GooseForum/app/bundles/sessionstore"
-	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
@@ -22,66 +22,28 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/models/forum/userOAuth"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
-	"github.com/markbates/goth/providers/github"
-	"github.com/markbates/goth/providers/google"
 	"github.com/samber/lo"
-)
-
-const (
-	ProviderGitHub   = "github"
-	ProviderGoogle   = "google"
-	ProviderFacebook = "facebook"
-	ProviderTwitter  = "twitter"
 )
 
 // InitOAuth configures available OAuth providers.
 func InitOAuth() {
 	gothic.Store = sessionstore.GetSession()
-
-	var providers []goth.Provider
-
-	if provider := initGitHubProvider(); provider != nil {
-		providers = append(providers, provider)
+	config, err := migrateLegacyGitHubConfig(loadSettings())
+	if err != nil {
+		slog.Error("OAuth legacy configuration migration failed", "err", err)
 	}
-
-	if provider := initGoogleProvider(); provider != nil {
-		providers = append(providers, provider)
+	if err := ReloadProviders(config); err != nil {
+		slog.Error("OAuth provider initialization failed", "err", err)
+		return
 	}
-
-	if len(providers) > 0 {
-		goth.UseProviders(providers...)
-		slog.Info("OAuth提供商初始化完成", "count", len(providers))
+	if count := len(EnabledProviders()); count > 0 {
+		slog.Info("OAuth providers initialized", "count", count)
 	} else {
-		slog.Warn("未配置任何OAuth提供商")
+		slog.Warn("no OAuth providers enabled")
 	}
-}
-
-// initGitHubProvider returns a GitHub provider when configured.
-func initGitHubProvider() goth.Provider {
-	clientID := preferences.GetString("github.client_id", "")
-	clientSecret := preferences.GetString("github.client_secret", "")
-	callbackURL := hotdataserve.GetSiteSettingsConfigCache().SiteUrl + "/api/auth/github/callback"
-	if clientID == "" || clientSecret == "" {
-		slog.Warn("GitHub OAuth配置缺失，跳过初始化")
-		return nil
-	}
-
-	slog.Info("GitHub OAuth提供商初始化完成")
-	return github.New(clientID, clientSecret, callbackURL)
-}
-
-// initGoogleProvider returns a Google provider when configured.
-func initGoogleProvider() *google.Provider {
-	clientID := preferences.GetString("google.client_id")
-	clientSecret := preferences.GetString("google.client_secret")
-	callbackURL := hotdataserve.GetSiteSettingsConfigCache().SiteUrl + "/api/auth/google/callback"
-	if clientID != "" && clientSecret != "" && callbackURL != "" {
-		// goth.UseProviders(googleProvider)
-		slog.Info("Google OAuth provider configuration found (implementation pending)")
-	}
-	return nil
 }
 
 // OAuthUserInfo is the normalized user data from an OAuth provider.
@@ -100,6 +62,9 @@ type OAuthUserInfo struct {
 // ProcessOAuthCallback logs in an existing OAuth user or creates a new one.
 func ProcessOAuthCallback(gothUser goth.User) (*users.EntityComplete, error) {
 	userInfo := parseOAuthUserInfo(gothUser)
+	if err := validateOAuthUserInfo(userInfo); err != nil {
+		return nil, err
+	}
 
 	existingOAuth := userOAuth.GetByProviderAndUID(userInfo.Provider, userInfo.ID)
 	if existingOAuth != nil {
@@ -107,11 +72,18 @@ func ProcessOAuthCallback(gothUser goth.User) (*users.EntityComplete, error) {
 		if err != nil {
 			return nil, fmt.Errorf("获取用户信息失败: %w", err)
 		}
-		updateOAuthRecord(existingOAuth, gothUser)
 		return &user, nil
+	}
+	if !hotdataserve.GetSecuritySettingsConfigCache().EnableSignup {
+		return nil, errors.New("registration is disabled")
 	}
 
 	newUser, err := createUserFromOAuth(userInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	err = createOAuthRecord(newUser.Id, userInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -120,11 +92,6 @@ func ProcessOAuthCallback(gothUser goth.User) (*users.EntityComplete, error) {
 		UserId:   newUser.Id,
 		Username: newUser.Username,
 	})
-
-	err = createOAuthRecord(newUser.Id, gothUser, userInfo)
-	if err != nil {
-		return nil, err
-	}
 
 	return newUser, nil
 }
@@ -158,13 +125,28 @@ func parseOAuthUserInfo(gothUser goth.User) OAuthUserInfo {
 	return userInfo
 }
 
+func validateOAuthUserInfo(userInfo OAuthUserInfo) error {
+	if strings.TrimSpace(userInfo.Provider) == "" {
+		return errors.New("OAuth provider is missing")
+	}
+	if strings.TrimSpace(userInfo.ID) == "" {
+		return errors.New("OAuth provider user ID is missing")
+	}
+	return nil
+}
+
 // createUserFromOAuth creates a local account from OAuth user data.
 func createUserFromOAuth(userInfo OAuthUserInfo) (*users.EntityComplete, error) {
-	username := userInfo.Login
+	username := oauthUsername(userInfo)
 	originalUsername := username
 	counter := 1
 	for users.ExistUsername(username) {
-		username = fmt.Sprintf("%s_%d", originalUsername, counter)
+		suffix := fmt.Sprintf("_%d", counter)
+		base := originalUsername
+		if len(base)+len(suffix) > 32 {
+			base = base[:32-len(suffix)]
+		}
+		username = base + suffix
 		counter++
 	}
 
@@ -185,7 +167,10 @@ func createUserFromOAuth(userInfo OAuthUserInfo) (*users.EntityComplete, error) 
 		userEntity.AvatarUrl = users.RandAvatarUrl()
 	}
 
-	userEntity.Nickname = username
+	userEntity.Nickname = strings.TrimSpace(userInfo.Name)
+	if userEntity.Nickname == "" {
+		userEntity.Nickname = username
+	}
 	userEntity.Bio = userInfo.Bio
 	userEntity.Website = userInfo.Blog
 	if err := userservice.SaveUser(userEntity); err != nil {
@@ -195,40 +180,39 @@ func createUserFromOAuth(userInfo OAuthUserInfo) (*users.EntityComplete, error) 
 	return userEntity, nil
 }
 
+var invalidUsernameCharacters = regexp.MustCompile(`[^a-zA-Z0-9_-]+`)
+
+func oauthUsername(userInfo OAuthUserInfo) string {
+	base := strings.Trim(invalidUsernameCharacters.ReplaceAllString(strings.TrimSpace(userInfo.Login), "_"), "_-")
+	if base == "" {
+		base = strings.Trim(invalidUsernameCharacters.ReplaceAllString(strings.TrimSpace(userInfo.Name), "_"), "_-")
+	}
+	digest := fmt.Sprintf("%x", sha256.Sum256([]byte(userInfo.Provider+":"+userInfo.ID)))[:8]
+	if base == "" {
+		base = "oauth"
+	}
+	if len(base) > 23 {
+		base = base[:23]
+	}
+	if len(base) < 6 {
+		base += "_" + digest
+	}
+	return base
+}
+
 // createOAuthRecord stores a provider account binding.
-func createOAuthRecord(userID uint64, gothUser goth.User, userInfo OAuthUserInfo) error {
+func createOAuthRecord(userID uint64, userInfo OAuthUserInfo) error {
 	oauthEntity := &userOAuth.Entity{
 		UserId:       userID,
 		Provider:     userInfo.Provider,
 		ProviderUid:  userInfo.ID,
-		AccessToken:  gothUser.AccessToken,
-		RefreshToken: gothUser.RefreshToken,
-		Scopes:       gothUser.AccessTokenSecret,
+		AccessToken:  "",
+		RefreshToken: "",
+		Scopes:       "",
 		RawUserData:  "",
 	}
 
-	if !gothUser.ExpiresAt.IsZero() {
-		oauthEntity.TokenExpiry = gothUser.ExpiresAt
-	} else {
-		oauthEntity.TokenExpiry = time.Now().AddDate(1, 0, 0)
-	}
-
 	return userOAuth.Create(oauthEntity)
-}
-
-// updateOAuthRecord refreshes stored provider token data.
-func updateOAuthRecord(oauthEntity *userOAuth.Entity, gothUser goth.User) {
-	oauthEntity.AccessToken = gothUser.AccessToken
-	oauthEntity.RefreshToken = gothUser.RefreshToken
-	oauthEntity.RawUserData = ""
-
-	if !gothUser.ExpiresAt.IsZero() {
-		oauthEntity.TokenExpiry = gothUser.ExpiresAt
-	}
-
-	if err := userOAuth.Update(oauthEntity); err != nil {
-		slog.Error("failed to update OAuth record", "userId", oauthEntity.UserId, "provider", oauthEntity.Provider, "err", err)
-	}
 }
 
 // GetOAuthByUserID returns a user's OAuth binding for a provider.
@@ -275,13 +259,15 @@ func checkUnbindSafety(userID uint64, providerToUnbind string) error {
 // ProcessOAuthBind binds a provider account to an existing user.
 func ProcessOAuthBind(userID uint64, gothUser goth.User) error {
 	userInfo := parseOAuthUserInfo(gothUser)
+	if err := validateOAuthUserInfo(userInfo); err != nil {
+		return err
+	}
 
 	existingOAuth := userOAuth.GetByProviderAndUID(userInfo.Provider, userInfo.ID)
 	if existingOAuth != nil {
 		if existingOAuth.UserId != userID {
 			return errors.New("该OAuth账户已被其他用户绑定")
 		}
-		updateOAuthRecord(existingOAuth, gothUser)
 		return nil
 	}
 
@@ -290,12 +276,12 @@ func ProcessOAuthBind(userID uint64, gothUser goth.User) error {
 		return errors.New("您已绑定该平台账户")
 	}
 
-	return createOAuthRecord(userID, gothUser, userInfo)
+	return createOAuthRecord(userID, userInfo)
 }
 
 // GetUserOAuthBindings returns active OAuth bindings keyed by provider.
 func GetUserOAuthBindings(userID uint64) map[string]*userOAuth.Entity {
-	providers := []string{ProviderGitHub, ProviderGoogle}
+	providers := enabledProviderKeys()
 	return lo.PickBy(lo.Associate(providers, func(p string) (string, *userOAuth.Entity) {
 		return p, userOAuth.GetByUserIDAndProvider(userID, p)
 	}), func(_ string, v *userOAuth.Entity) bool {

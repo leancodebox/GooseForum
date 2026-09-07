@@ -103,13 +103,14 @@ export interface SaveUserInfoInput {
 }
 
 export interface OAuthBindingPayload {
+  key: string
+  displayName: string
+  enabled: boolean
   bound: boolean
-  provider?: string
-  createdAt?: string
-  updatedAt?: string
+  boundAt?: string
 }
 
-export type OAuthBindingsPayload = Record<string, OAuthBindingPayload>
+export type OAuthBindingsPayload = OAuthBindingPayload[]
 
 export interface CaptchaPayload {
   captchaId: string

@@ -44,6 +44,18 @@ func CreateOrSave(entity *Entity) int64 {
 	return save(entity)
 }
 
+// SaveConfig stores one typed page configuration and reports persistence
+// errors to callers that need transactional configuration reloads.
+func SaveConfig(pageType string, config string) error {
+	entity := GetByPageType(pageType)
+	entity.PageType = pageType
+	entity.Config = config
+	if entity.Id == 0 {
+		return builder().Create(&entity).Error
+	}
+	return builder().Save(&entity).Error
+}
+
 func GetByPageType(pageType string) (entity Entity) {
 	builder().Where(queryopt.Eq(filedPageType, pageType)).First(&entity)
 	return
@@ -59,7 +71,7 @@ func GetConfigByPageType[T any](pageType string, defaultValue T) T {
 	return defaultValue
 }
 
-const AppMigrationVersion uint32 = 19
+const AppMigrationVersion uint32 = 20
 
 func GetMigrationVersion() uint32 {
 	configEntity := GetByPageType(Migration)

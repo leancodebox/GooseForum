@@ -12,6 +12,7 @@ import {
   Mail,
   Megaphone,
   Monitor,
+  KeyRound,
   PanelsTopLeft,
   ShieldCheck,
   PanelLeft,
@@ -113,6 +114,7 @@ const navGroups = computed<NavGroup[]>(() => {
           permission: AdminPermission.SiteManager,
         },
         { title: adminText('k007v'), url: '/admin/settings/mail', icon: Mail, permission: AdminPermission.SiteManager },
+        { title: 'OAuth', url: '/admin/settings/oauth', icon: KeyRound, permission: AdminPermission.SiteManager },
         {
           title: adminText('k0005'),
           url: '/admin/settings/security',

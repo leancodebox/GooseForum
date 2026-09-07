@@ -105,6 +105,10 @@ func GetDefaultHttpNotifyConfig() pageConfig.HttpNotifyConfig {
 	return pageConfig.HttpNotifyConfig{Endpoints: []pageConfig.HttpNotifyEndpoint{}}
 }
 
+func GetDefaultOAuthSettingsConfig() pageConfig.OAuthSettingsConfig {
+	return pageConfig.OAuthSettingsConfig{Custom: []pageConfig.OIDCProviderConfig{}}
+}
+
 func GetDefaultSecuritySettingsConfig() pageConfig.SecurityAndRegistration {
 	config := mustPageConfigDefaults().Security
 	config.AllowedDomains = append([]string(nil), config.AllowedDomains...)

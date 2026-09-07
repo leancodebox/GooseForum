@@ -258,6 +258,20 @@ func runVersionedDataMigrations() error {
 		}
 		currentVersion = 19
 	}
+	if currentVersion < 20 {
+		result := datamigration.EnforceOAuthBindingUniqueness()
+		slog.Info("app migration OAuth binding uniqueness done", "duplicatesRemoved", result.DuplicatesRemoved, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			return fmt.Errorf("enforce OAuth binding uniqueness: %s", result.LastFailed)
+		}
+		if err := datamigration.ClearStoredOAuthTokens(); err != nil {
+			return fmt.Errorf("clear stored OAuth tokens: %w", err)
+		}
+		if err := syncMigrationVersion(20); err != nil {
+			return err
+		}
+		currentVersion = 20
+	}
 	slog.Info("app migration end", "version", currentVersion)
 	return nil
 }

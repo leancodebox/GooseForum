@@ -557,5 +557,12 @@ export default {
   "k00fh": "Apri risorsa",
   "k00fi": "Dimensione",
   "k00fj": "ID massimo",
-  "k00fk": "Numero massimo di temi giornalieri per utente (0 = illimitato)"
+  "k00fk": "Numero massimo di temi giornalieri per utente (0 = illimitato)",
+  "k00fl": "Accesso OAuth", "k00fm": "Configura i provider integrati ed estendi l'autenticazione tramite OpenID Connect.",
+  "k00fn": "Aggiungi provider OIDC", "k00fo": "Integrato", "k00fp": "OIDC personalizzato", "k00fq": "Abilitato",
+  "k00fr": "Client ID", "k00fs": "Client Secret", "k00ft": "Secret configurato", "k00fu": "Secret non configurato",
+  "k00fv": "Lascia vuoto per mantenere il secret salvato", "k00fw": "URL di callback", "k00fx": "URL discovery OIDC",
+  "k00fy": "Scopes", "k00fz": "Rimuovi provider", "k00g0": "Impostazioni OAuth salvate e attivate",
+  "k00g1": "Nome provider", "k00g2": "Chiave provider", "k00g3": "Inizia con una lettera minuscola; usa lettere minuscole, numeri e trattini",
+  "k00g4": "Impossibile caricare le impostazioni OAuth", "k00g5": "Il secret configurato verrà eliminato al salvataggio", "k00g6": "Elimina secret", "k00g7": "Mantieni secret"
 } as const
