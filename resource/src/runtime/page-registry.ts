@@ -20,7 +20,8 @@ export const pageLoaders = {
   'publish.index': () => import('@/site/pages/PublishPage.vue'),
   'search.index': () => import('@/site/pages/SearchPage.vue'),
   'auth.login': () => import('@/site/pages/LoginPage.vue'),
-  'auth.resetPassword': () => import('@/site/pages/ResetPasswordPage.vue'),
+	'auth.resetPassword': () => import('@/site/pages/ResetPasswordPage.vue'),
+	'auth.oidcConsent': () => import('@/site/pages/OIDCConsentPage.vue'),
   'error.index': () => import('@/site/pages/ErrorPage.vue'),
 } as const satisfies Record<PageComponent, () => Promise<{ default: Component }>>
 

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strings"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/redirectopt"
 	"github.com/leancodebox/GooseForum/app/bundles/sessionstore"
 )
 
@@ -71,9 +71,5 @@ func ConsumeFlow(res http.ResponseWriter, req *http.Request, provider string) (F
 }
 
 func safeRedirect(value string) string {
-	value = strings.TrimSpace(value)
-	if !strings.HasPrefix(value, "/") || strings.HasPrefix(value, "//") {
-		return ""
-	}
-	return value
+	return redirectopt.Local(value)
 }

@@ -7,6 +7,8 @@ export interface PagePayload<TProps = unknown, TComponent extends string = strin
   version: string
 }
 
+export interface OIDCConsentPageProps { interaction: string }
+
 export interface PageMeta {
   title: string
   description?: string

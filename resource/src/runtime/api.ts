@@ -12,6 +12,7 @@ import {
   type ModerationReportListResponse,
   type NotificationFilter,
   type NotificationListResponse,
+  type OIDCGrantPayload,
   type OAuthBindingsPayload,
   type PostWindowInput,
   type PostWindowPayload,
@@ -31,6 +32,7 @@ export type {
   JoinableAccessGroup,
   ManagedAccessGroup,
   OAuthBindingsPayload,
+  OIDCGrantPayload,
   PostWindowInput,
   SaveUserInfoInput,
   SubmitTopicInput,
@@ -240,6 +242,14 @@ export function getOAuthBindings(): Promise<OAuthBindingsPayload> {
 export async function unbindOAuth(provider: string): Promise<boolean> {
   await localized(client.api.users.unbindOAuth(provider), t('api.unbindFailed'))
   return true
+}
+
+export function getOIDCGrants(): Promise<OIDCGrantPayload[]> {
+  return localized(client.api.users.oidcGrants(), '加载已授权应用失败')
+}
+
+export function revokeOIDCGrant(clientId: string): Promise<boolean> {
+  return localized(client.api.users.revokeOIDCGrant(clientId), '撤销应用授权失败')
 }
 
 const loginInvalidRequestCode = 'auth.login.invalidRequest'

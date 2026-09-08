@@ -106,7 +106,7 @@ describe('page client', () => {
   })
 
   it('keeps the public page component list unique', () => {
-    expect(pageComponents).toHaveLength(20)
+		expect(pageComponents).toHaveLength(21)
     expect(new Set(pageComponents).size).toBe(pageComponents.length)
   })
 
@@ -193,6 +193,18 @@ describe('API client', () => {
     await client.api.accessGroups.list()
 
     expect(new Headers(fetchMock.mock.calls[0]?.[1]?.headers).get('Accept')).toBe('application/json')
+  })
+
+  it('lists and revokes OIDC grants through the user API', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+
+    await client.api.users.oidcGrants()
+    await client.api.users.revokeOIDCGrant('gf_wiki')
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('https://forum.example/api/oidc/grants')
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://forum.example/api/oidc/grants/revoke')
+    expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(JSON.stringify({ clientId: 'gf_wiki' }))
   })
 
   it('rejects malformed API envelopes', async () => {

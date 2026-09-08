@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import {
+  AppWindow,
   Ban,
   CalendarDays,
   Camera,
@@ -18,6 +19,7 @@ import {
 import {
   changePassword,
   getOAuthBindings,
+  getOIDCGrants,
   resendActivationEmail,
   savePresetAvatar,
   saveUserEmail,
@@ -25,7 +27,9 @@ import {
   saveUserName,
   saveUserProfileCover,
   unbindOAuth,
+  revokeOIDCGrant,
   wearBadge,
+  type OIDCGrantPayload,
   type OAuthBindingsPayload,
 } from '@/runtime/api'
 import { formatDate, formatNumber } from '@/runtime/format'
@@ -46,7 +50,7 @@ const page = defineProps<{
 }>()
 
 const { t, locale } = useI18n()
-const tabKeys = ['profile', 'account', 'privacy', 'binding'] as const
+const tabKeys = ['profile', 'account', 'privacy', 'binding', 'applications'] as const
 type TabKey = (typeof tabKeys)[number]
 
 const activeTab = ref<TabKey>('profile')
@@ -70,6 +74,10 @@ const wornBadgeCode = ref(page.props.user.wornBadgeCode || '')
 const coverUrl = ref(page.props.user.profileCoverUrl || '')
 const coverDraft = ref(page.props.user.profileCoverUrl || '')
 const bindings = ref<OAuthBindingsPayload>([])
+const oidcGrants = ref<OIDCGrantPayload[]>([])
+const loadingOIDCGrants = ref(false)
+const revokingOIDCGrant = ref('')
+const revokeConfirmId = ref('')
 const { push: pushFlash } = useFlashMessages()
 const {
   uploadingAvatar,
@@ -204,6 +212,7 @@ onMounted(() => {
     Object.assign(privacy, JSON.parse(savedPrivacy))
   }
   void loadBindings()
+  void loadOIDCGrants()
 })
 
 function buildExternalInfo() {
@@ -227,7 +236,34 @@ function settingsTabLabel(key: string, fallback?: string) {
   if (key === 'account') return t('settings.tabs.account')
   if (key === 'privacy') return t('settings.tabs.privacy')
   if (key === 'binding') return t('settings.tabs.binding')
+  if (key === 'applications') return '授权应用'
   return fallback || key
+}
+
+async function loadOIDCGrants() {
+  loadingOIDCGrants.value = true
+  try {
+    oidcGrants.value = await getOIDCGrants()
+  } catch (err) {
+    showError(err instanceof Error ? err.message : '加载已授权应用失败')
+  } finally {
+    loadingOIDCGrants.value = false
+  }
+}
+
+async function removeOIDCGrant(clientId: string) {
+  if (revokingOIDCGrant.value) return
+  revokingOIDCGrant.value = clientId
+  try {
+    await revokeOIDCGrant(clientId)
+    oidcGrants.value = oidcGrants.value.filter(grant => grant.clientId !== clientId)
+    revokeConfirmId.value = ''
+    showStatus('应用授权已撤销')
+  } catch (err) {
+    showError(err instanceof Error ? err.message : '撤销应用授权失败')
+  } finally {
+    revokingOIDCGrant.value = ''
+  }
 }
 
 function triggerAvatarFlash() {
@@ -929,6 +965,46 @@ async function toggleBinding(provider: string) {
                   {{ providerActionLabel(provider) }}
                 </button>
               </div>
+            </div>
+          </section>
+
+          <section v-show="activeTab === 'applications'">
+            <SectionHeader :icon="AppWindow" title="已授权应用" description="管理可以使用你的 GooseForum 身份登录的应用。">
+              <template #actions>
+                <button type="button" class="text-xs font-medium text-primary hover:text-primary" @click="loadOIDCGrants">刷新</button>
+              </template>
+            </SectionHeader>
+            <div v-if="loadingOIDCGrants" class="p-8 text-center text-sm text-base-content/55">
+              <Loader2 class="mx-auto mb-2 h-5 w-5 animate-spin" />
+              正在加载授权应用
+            </div>
+            <div v-else-if="!oidcGrants.length" class="p-8 text-center text-sm text-base-content/55">
+              当前没有已授权应用。
+            </div>
+            <div v-else class="divide-y divide-line">
+              <article v-for="grant in oidcGrants" :key="grant.clientId" class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h3 class="font-semibold text-base-content">{{ grant.name }}</h3>
+                    <span v-if="!grant.enabled" class="rounded border border-line px-1.5 py-0.5 text-[11px] text-base-content/55">应用已停用</span>
+                  </div>
+                  <p class="mt-1 truncate font-mono text-xs text-base-content/45">{{ grant.clientId }}</p>
+                  <div class="mt-2 flex flex-wrap gap-1.5">
+                    <span v-for="scope in grant.scopes" :key="scope" class="rounded border border-line bg-base-200/60 px-1.5 py-0.5 font-mono text-[11px] text-base-content/65">{{ scope }}</span>
+                  </div>
+                  <p class="mt-2 text-xs text-base-content/45">授权于 {{ formatDate(grant.grantedAt) }}</p>
+                </div>
+                <div class="flex shrink-0 items-center gap-2">
+                  <template v-if="revokeConfirmId === grant.clientId">
+                    <button type="button" class="gf-button gf-button-sm gf-button-muted" :disabled="Boolean(revokingOIDCGrant)" @click="revokeConfirmId = ''">取消</button>
+                    <button type="button" class="gf-button gf-button-sm border-error/30 bg-error/10 text-error" :disabled="Boolean(revokingOIDCGrant)" @click="removeOIDCGrant(grant.clientId)">
+                      <Loader2 v-if="revokingOIDCGrant === grant.clientId" class="h-4 w-4 animate-spin" />
+                      确认撤销
+                    </button>
+                  </template>
+                  <button v-else type="button" class="gf-button gf-button-sm border-error/30 bg-error/10 text-error" :disabled="Boolean(revokingOIDCGrant)" @click="revokeConfirmId = grant.clientId">撤销授权</button>
+                </div>
+              </article>
             </div>
           </section>
         </div>

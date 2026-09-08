@@ -15,6 +15,7 @@ func RegisterByGin(ginApp *gin.Engine) {
 	ginApp.Use(middleware.AccessLog)
 
 	siteInfoRoute(ginApp)
+	registerDefaultOIDCProvider(ginApp)
 	// 接口
 	apiRoute(ginApp)
 	// 文件

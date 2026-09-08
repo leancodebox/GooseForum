@@ -98,7 +98,7 @@ func Publish(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-	if component.LoginUserId(c) > 0 {
+	if component.LoginUserId(c) > 0 && c.Query("force") != "true" {
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
@@ -123,6 +123,16 @@ func ResetPassword(c *gin.Context) {
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
+	renderAppShell(c, payload)
+}
+
+func OIDCConsent(c *gin.Context) {
+	interaction := c.Query("interaction")
+	if interaction == "" {
+		c.String(http.StatusBadRequest, "invalid authorization interaction")
+		return
+	}
+	payload := PagePayload{Component: PageComponentOIDCConsent, Props: map[string]string{"interaction": interaction}, Meta: buildSimpleMeta(c, "meta.loginRegister"), Layout: buildLayout(c, ""), URL: buildPageURL(c), Version: payloadVersion}
 	renderAppShell(c, payload)
 }
 

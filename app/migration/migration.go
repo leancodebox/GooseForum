@@ -23,6 +23,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/migrationMapping"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderators"
+	"github.com/leancodebox/GooseForum/app/models/forum/oidcProviderStore"
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pointsRecord"
@@ -58,7 +59,28 @@ func migrateSchema() error {
 	var err error
 
 	db := dbconnect.Connect()
-	if err = db.AutoMigrate(
+	if err = db.AutoMigrate(defaultSchemaModels()...); err != nil {
+		slog.Error("dbconnect migration err", "err", err)
+		return fmt.Errorf("migrate default database schema: %w", err)
+	} else {
+		slog.Info("dbconnect migration end")
+	}
+
+	db4file := db4fileconnect.Connect()
+	if err = db4file.AutoMigrate(
+		&filedata.Entity{},
+	); err != nil {
+		slog.Error("db4fileconnect migration err", "err", err)
+		return fmt.Errorf("migrate file database schema: %w", err)
+	} else {
+		slog.Info("db4fileconnect migration end")
+	}
+	return nil
+}
+
+// defaultSchemaModels shares the OIDC schema registry with the store migration.
+func defaultSchemaModels() []any {
+	return append([]any{
 		&accessGroups.Entity{},
 		&accessGroupMembers.Entity{},
 		&categoryGroupPermissions.Entity{},
@@ -92,21 +114,5 @@ func migrateSchema() error {
 		&messages.Entity{},
 		&dailyStats.Entity{},
 		&userActivities.Entity{},
-	); err != nil {
-		slog.Error("dbconnect migration err", "err", err)
-		return fmt.Errorf("migrate default database schema: %w", err)
-	} else {
-		slog.Info("dbconnect migration end")
-	}
-
-	db4file := db4fileconnect.Connect()
-	if err = db4file.AutoMigrate(
-		&filedata.Entity{},
-	); err != nil {
-		slog.Error("db4fileconnect migration err", "err", err)
-		return fmt.Errorf("migrate file database schema: %w", err)
-	} else {
-		slog.Info("db4fileconnect migration end")
-	}
-	return nil
+	}, oidcProviderStore.Models()...)
 }

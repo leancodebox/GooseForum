@@ -25,6 +25,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
+	"github.com/leancodebox/GooseForum/app/service/oidcproviderservice"
 	"github.com/spf13/cast"
 
 	"github.com/gin-gonic/gin"
@@ -163,6 +164,7 @@ func (r *serveRuntime) start() {
 			return
 		}
 		oauthservice.InitOAuth()
+		oidcproviderservice.InitOIDC()
 		captchaOpt.StartCleanup()
 		mailservice.StartEmailProcessor()
 		job.Run()

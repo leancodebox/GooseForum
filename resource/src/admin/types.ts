@@ -249,6 +249,43 @@ export interface OAuthSettings {
   providers: OAuthProviderSettings[]
 }
 
+export type OIDCClientAuthMethod = 'none' | 'client_secret_basic' | 'client_secret_post'
+
+export interface OIDCProviderStatus {
+  enabled: boolean
+  available: boolean
+  issuer?: string
+  error?: string
+}
+
+export interface OIDCClient {
+  clientId: string
+  name: string
+  redirectUris: string[]
+  scopes: string[]
+  grantTypes: string[]
+  tokenEndpointAuthMethod: OIDCClientAuthMethod
+  requirePkce: boolean
+  public: boolean
+  enabled: boolean
+}
+
+export interface OIDCClientInput {
+  name: string
+  redirectUris: string[]
+  scopes: string[]
+  grantTypes: string[]
+  tokenEndpointAuthMethod: OIDCClientAuthMethod
+  requirePkce: boolean
+  public: boolean
+  enabled: boolean
+}
+
+export interface OIDCClientCredentials {
+  client: OIDCClient
+  clientSecret?: string
+}
+
 export interface SiteChromeItem {
   id: string
   enabled: boolean

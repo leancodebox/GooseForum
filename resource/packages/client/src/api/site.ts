@@ -67,6 +67,8 @@ export function createSiteApi(http: GooseHttpClient): GooseSiteApi {
       changePassword: (oldPassword, newPassword) => post(http, route('userChangePassword'), { oldPassword, newPassword }),
       oauthBindings: () => http.request(route('userOauthBindings')),
       unbindOAuth: (provider) => post(http, route('userUnbindOauth').replace(':provider', encodeURIComponent(provider))),
+      oidcGrants: () => http.request(route('userOidcGrants')),
+      revokeOIDCGrant: (clientId) => post(http, route('userRevokeOidcGrant'), { clientId }),
     },
     chat: {
       messages: (input) => post(http, route('chatMessages'), {

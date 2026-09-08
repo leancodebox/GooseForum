@@ -81,6 +81,7 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/admin", middleware.CheckLogin, middleware.CheckAnyPermissionOrNotFound, forum.Manage)
 	viewRouteApp.GET("/admin/*path", middleware.CheckLogin, middleware.CheckAnyPermissionOrNotFound, forum.Manage)
 	viewRouteApp.GET("/login", forum.Login)
+	viewRouteApp.GET("/oauth2/consent", middleware.CheckLogin, forum.OIDCConsent)
 	viewRouteApp.GET("/reset-password", forum.ResetPassword)
 
 	viewRouteApp.GET("/activate", controllers.ActivateAccount)
@@ -121,6 +122,8 @@ func apiRoute(ginApp *gin.Engine) {
 	loginApi.POST("change-password", middleware.CheckWritableAccount, UpButterReq(api.ChangePassword))
 	loginApi.POST("auth/:provider/unbind", middleware.CheckWritableAccount, UpButterReq(api.UnbindOAuth))
 	loginApi.GET("oauth/bindings", UpButterReq(api.GetOAuthBindings))
+	loginApi.GET("oidc/grants", UpButterReq(api.ListMyOIDCGrants))
+	loginApi.POST("oidc/grants/revoke", middleware.CheckWritableAccount, UpJsonReq(api.RevokeMyOIDCGrant))
 
 	forumApi := baseApi.Group("forum")
 	forumApi.GET("get-site-statistics", middleware.JWTAuthCheck, middleware.CheckPermission(permission.Admin), ginUpNP(api.GetSiteStatistics))
@@ -214,6 +217,13 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("save-site-settings", UpButterReq(api.SaveSiteSettings)).
 		GET("oauth-settings", UpButterReq(api.GetOAuthSettings)).
 		POST("save-oauth-settings", UpButterReq(api.SaveOAuthSettings)).
+		GET("oidc-provider", UpButterReq(api.GetOIDCProviderStatus)).
+		POST("oidc-provider", UpJsonReq(api.SaveOIDCProviderSettings)).
+		POST("oidc-provider/rotate-signing-key", UpButterReq(api.RotateOIDCSigningKey)).
+		GET("oidc-clients", UpButterReq(api.ListOIDCClients)).
+		POST("oidc-clients/create", UpJsonReq(api.CreateOIDCClient)).
+		POST("oidc-clients/update", UpJsonReq(api.UpdateOIDCClient)).
+		POST("oidc-clients/rotate-secret", UpJsonReq(api.RotateOIDCClientSecret)).
 		GET("site-chrome", UpButterReq(api.GetSiteChrome)).
 		POST("save-site-chrome", UpButterReq(api.SaveSiteChrome)).
 		GET("site-theme", UpButterReq(api.GetSiteTheme)).

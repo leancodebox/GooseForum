@@ -26,4 +26,12 @@ describe('admin route permissions', () => {
     expect(hasAnyAdminPermission([AdminPermission.TopicsManager, AdminPermission.RoleManager])).toBe(true)
     expect(canVisitAdminPath('/admin/categories')).toBe(true)
   })
+
+  it('limits OIDC Provider management to site managers', () => {
+    configureAdminAccess([AdminPermission.SiteManager])
+    expect(canVisitAdminPath('/admin/settings/oidc-provider')).toBe(true)
+
+    configureAdminAccess([AdminPermission.PageManager])
+    expect(canVisitAdminPath('/admin/settings/oidc-provider')).toBe(false)
+  })
 })

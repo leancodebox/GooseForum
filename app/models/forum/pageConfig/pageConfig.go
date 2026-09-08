@@ -43,6 +43,7 @@ const (
 	PostingSettings  = `postingSettings`
 	HttpNotify       = `httpNotify`
 	OAuthSettings    = `oauthSettings`
+	OIDCProvider     = `oidcProviderSettings`
 	SiteTheme        = `siteTheme`
 	SiteChrome       = `siteChrome`
 	Version          = `version`
@@ -120,6 +121,10 @@ type SiteSettingsConfig struct {
 	SiteUrl         string `json:"siteUrl"`
 	SiteEmail       string `json:"siteEmail"`
 	ExternalLinks   string `json:"externalLinks"`
+}
+
+type OIDCProviderSettingsConfig struct {
+	Enabled bool `json:"enabled"`
 }
 
 type FooterInfo struct {

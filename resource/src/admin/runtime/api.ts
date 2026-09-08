@@ -20,6 +20,10 @@ import type {
   HttpNotifySettings,
   MailSettings,
   OAuthSettings,
+  OIDCClient,
+  OIDCClientCredentials,
+  OIDCClientInput,
+  OIDCProviderStatus,
   PageResult,
   PostingSettings,
   SecuritySettings,
@@ -313,6 +317,34 @@ export function getSiteSettings() {
 
 export function getOAuthSettings() {
   return getJson<OAuthSettings>('/api/admin/oauth-settings', 'Failed to load OAuth settings')
+}
+
+export function getOIDCClients() {
+  return getJson<OIDCClient[]>('/api/admin/oidc-clients', '加载 OIDC 客户端失败')
+}
+
+export function getOIDCProviderStatus() {
+  return getJson<OIDCProviderStatus>('/api/admin/oidc-provider', '加载 OIDC Provider 状态失败')
+}
+
+export function saveOIDCProviderSettings(enabled: boolean) {
+  return postJson<OIDCProviderStatus>('/api/admin/oidc-provider', { enabled }, '保存 OIDC Provider 设置失败')
+}
+
+export function rotateOIDCSigningKey() {
+  return postJson<OIDCProviderStatus>('/api/admin/oidc-provider/rotate-signing-key', {}, '轮换 OIDC 签名密钥失败')
+}
+
+export function createOIDCClient(client: OIDCClientInput) {
+  return postJson<OIDCClientCredentials>('/api/admin/oidc-clients/create', client, '创建 OIDC 客户端失败')
+}
+
+export function updateOIDCClient(client: OIDCClient) {
+  return postJson<OIDCClient>('/api/admin/oidc-clients/update', client, '保存 OIDC 客户端失败')
+}
+
+export function rotateOIDCClientSecret(clientId: string) {
+  return postJson<OIDCClientCredentials>('/api/admin/oidc-clients/rotate-secret', { clientId }, '重置客户端密钥失败')
 }
 
 export function getSiteChrome() {

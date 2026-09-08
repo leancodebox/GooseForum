@@ -24,8 +24,10 @@ var running = false
 func Run() {
 	closer.RegisterPriority(closer.PriorityProducer, Stop)
 	slog.Info("start cron")
+	entryID, err := scheduler.AddFunc("17 * * * *", upCmd(cleanupOIDC))
+	slog.Info("reg OIDC cleanup", "entryID", entryID, "spec", "17 * * * *", "err", err)
 	backupSpec := preferences.Get("db.spec", "0 3 * * *")
-	entryID, err := scheduler.AddFunc(backupSpec, upCmd(func() {
+	entryID, err = scheduler.AddFunc(backupSpec, upCmd(func() {
 		dbconnect.BackupSQLiteHandle()
 		db4fileconnect.BackupSQLiteHandle()
 	}))

@@ -5,6 +5,11 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/glebarez/sqlite"
+	"github.com/leancodebox/GooseForum/app/models/forum/oidcProviderStore"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func TestMigrationUsesCleanTopicEdgeModels(t *testing.T) {
@@ -78,6 +83,36 @@ func TestActiveRuntimeDoesNotImportOldArticleReplyModels(t *testing.T) {
 		})
 		if err != nil {
 			t.Fatalf("scan %s: %v", root, err)
+		}
+	}
+}
+
+func TestStartupSchemaCreatesAllOIDCTables(t *testing.T) {
+	db, err := gorm.Open(sqlite.Open(filepath.Join(t.TempDir(), "startup.sqlite")), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = sqlDB.Close() })
+	// Use the actual startup registry, not Store.Migrate, and verify reruns too.
+	for i := 0; i < 2; i++ {
+		if err := db.AutoMigrate(defaultSchemaModels()...); err != nil {
+			t.Fatal(err)
+		}
+		for _, model := range oidcProviderStore.Models() {
+			if !db.Migrator().HasTable(model) {
+				t.Fatalf("startup omitted OIDC table for %T", model)
+			}
+		}
+		store, err := oidcProviderStore.New(db)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := store.ListSigningKeyHistory(t.Context()); err != nil {
+			t.Fatalf("load signing key history after startup migration: %v", err)
 		}
 	}
 }

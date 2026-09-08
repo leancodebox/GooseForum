@@ -71,6 +71,11 @@ func JWTAuthGetUserId(c *gin.Context) uint64 {
 	if token != newToken {
 		jwt.TokenSetting(c, newToken)
 	}
+	c.Set("authTime", claims.AuthTime)
+	// Old and federated sessions do not prove fresh credential verification.
+	if claims.Reauthenticated {
+		c.Set("authId", claims.AuthID)
+	}
 	return claims.UserId
 }
 

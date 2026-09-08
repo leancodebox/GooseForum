@@ -196,6 +196,8 @@ export interface GooseSiteApi {
     changePassword(oldPassword: string, newPassword: string): Promise<void>
     oauthBindings(): Promise<OAuthBindingsPayload>
     unbindOAuth(provider: string): Promise<void>
+    oidcGrants(): Promise<OIDCGrantPayload[]>
+    revokeOIDCGrant(clientId: string): Promise<boolean>
   }
   chat: {
     messages(input: ChatMessagesInput): Promise<ChatMessagesResponse>
@@ -219,4 +221,12 @@ export interface GooseSiteApi {
     image(file: File): Promise<string>
     avatar(avatar: Blob | Blob[]): Promise<string>
   }
+}
+
+export interface OIDCGrantPayload {
+  clientId: string
+  name: string
+  scopes: string[]
+  grantedAt: string
+  enabled: boolean
 }

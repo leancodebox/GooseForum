@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
+	"github.com/leancodebox/GooseForum/app/bundles/redirectopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
@@ -848,8 +849,11 @@ func buildLoginPageProps(c *gin.Context) LoginPageProps {
 	if c.Query("register") == "true" || c.Query("model") == "register" {
 		mode = "register"
 	}
-	redirectURL := c.Query("redirect")
+	redirectURL := redirectopt.Local(c.Query("redirect"))
 	providers := oauthservice.EnabledProviders()
+	if c.Query("force") == "true" {
+		providers = nil
+	}
 	providerPayloads := make([]OAuthProviderPayload, 0, len(providers))
 	for _, provider := range providers {
 		loginURL := "/api/auth/" + url.PathEscape(provider.Key) + "?mode=login"
@@ -2216,6 +2220,7 @@ func buildSettingsPageProps(user users.EntityComplete) SettingsPageProps {
 			{Key: "account", URL: "/settings?tab=account"},
 			{Key: "privacy", URL: "/settings?tab=privacy"},
 			{Key: "binding", URL: "/settings?tab=binding"},
+			{Key: "applications", URL: "/settings?tab=applications"},
 		},
 	}
 }

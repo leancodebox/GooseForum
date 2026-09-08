@@ -11,6 +11,7 @@ import type {
   MembersPageProps,
   ModerationPageProps,
   NotificationsPageProps,
+	OIDCConsentPageProps,
   PublishPageProps,
   ResetPasswordPageProps,
   SearchPageProps,
@@ -42,6 +43,7 @@ export const pageComponents = [
   'search.index',
   'auth.login',
   'auth.resetPassword',
+	'auth.oidcConsent',
   'error.index',
 ] as const
 
@@ -65,6 +67,7 @@ export interface PagePayloadMap {
   'search.index': SearchPageProps
   'auth.login': LoginPageProps
   'auth.resetPassword': ResetPasswordPageProps
+	'auth.oidcConsent': OIDCConsentPageProps
   'error.index': ErrorPageProps
 }
 

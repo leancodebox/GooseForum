@@ -10,8 +10,11 @@ import (
 
 // CustomClaims stores the GooseForum user ID in an access token.
 type CustomClaims struct {
-	UserId       uint64
-	TokenVersion uint64
+	UserId          uint64
+	TokenVersion    uint64
+	AuthTime        int64  `json:"auth_time"`
+	AuthID          string `json:"auth_id"`
+	Reauthenticated bool   `json:"reauthenticated,omitempty"`
 	jwt.RegisteredClaims
 }
 

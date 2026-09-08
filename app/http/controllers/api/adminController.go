@@ -34,6 +34,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
+	"github.com/leancodebox/GooseForum/app/service/oidcproviderservice"
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
@@ -1194,6 +1195,9 @@ func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) componen
 	response := savePageConfig(pageConfig.SiteSettings, req.Params.Settings, hotdataserve.ClearSiteSettingsConfigCache)
 	if err := oauthservice.ReloadCurrentProviders(); err != nil {
 		return component.FailResponseError(err)
+	}
+	if err := oidcproviderservice.ReloadDefault(); err != nil {
+		slog.Error("reload OIDC provider after site settings update", "err", err)
 	}
 	return response
 }

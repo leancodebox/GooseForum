@@ -22,6 +22,7 @@ const (
 	PageComponentSearch        PageComponent = "search.index"
 	PageComponentLogin         PageComponent = "auth.login"
 	PageComponentResetPassword PageComponent = "auth.resetPassword"
+	PageComponentOIDCConsent   PageComponent = "auth.oidcConsent"
 	PageComponentError         PageComponent = "error.index"
 	PageComponentAdmin         PageComponent = "admin.shell"
 )

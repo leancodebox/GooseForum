@@ -139,3 +139,24 @@ func TestDirectImageUploadRoutesAreRegistered(t *testing.T) {
 		}
 	}
 }
+
+func TestAdminOIDCClientManagementRoutesAreRegistered(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	apiRoute(router)
+
+	registered := map[string]bool{}
+	for _, route := range router.Routes() {
+		registered[route.Method+" "+route.Path] = true
+	}
+	for _, route := range []string{
+		"GET /api/admin/oidc-clients",
+		"POST /api/admin/oidc-clients/create",
+		"POST /api/admin/oidc-clients/update",
+		"POST /api/admin/oidc-clients/rotate-secret",
+	} {
+		if !registered[route] {
+			t.Fatalf("%s was not registered", route)
+		}
+	}
+}

@@ -66,6 +66,10 @@ export const adminRouter = createRouter({
       path: '/admin/settings/oauth',
       component: () => import('@/admin/pages/OAuthSettingsPage.vue'),
     },
+    {
+      path: '/admin/settings/oidc-provider',
+      component: () => import('@/admin/pages/OIDCProviderSettingsPage.vue'),
+    },
     ...Object.entries(settingsPages).map(([path, kind]) => ({
       path,
       component: () => import('@/admin/pages/AdminSettingsPage.vue'),

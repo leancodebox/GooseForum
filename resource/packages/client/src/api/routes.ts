@@ -38,6 +38,8 @@ export const siteApiRoutes = {
   userChangePassword: ['POST', '/api/change-password'],
   userOauthBindings: ['GET', '/api/oauth/bindings'],
   userUnbindOauth: ['POST', '/api/auth/:provider/unbind'],
+  userOidcGrants: ['GET', '/api/oidc/grants'],
+  userRevokeOidcGrant: ['POST', '/api/oidc/grants/revoke'],
   chatMessages: ['POST', '/api/forum/chat/messages'],
   chatSend: ['POST', '/api/forum/chat/send'],
   chatMarkRead: ['POST', '/api/forum/chat/mark-read'],

@@ -70,6 +70,12 @@ func TestCreateNewTokenWithVersion(t *testing.T) {
 	if claims.UserId != userID || claims.TokenVersion != tokenVersion {
 		t.Fatalf("claims = (%d, %d), want (%d, %d)", claims.UserId, claims.TokenVersion, userID, tokenVersion)
 	}
+	if claims.AuthTime == 0 {
+		t.Fatal("auth_time was not recorded")
+	}
+	if claims.AuthID == "" {
+		t.Fatal("auth_id was not recorded")
+	}
 	if newToken == token {
 		t.Fatal("expected refreshed token")
 	}
@@ -80,6 +86,24 @@ func TestCreateNewTokenWithVersion(t *testing.T) {
 	}
 	if refreshedClaims.TokenVersion != tokenVersion {
 		t.Fatalf("refreshed tokenVersion = %d, want %d", refreshedClaims.TokenVersion, tokenVersion)
+	}
+	if refreshedClaims.AuthTime != claims.AuthTime {
+		t.Fatal("JWT refresh changed original auth_time")
+	}
+	if refreshedClaims.AuthID != claims.AuthID {
+		t.Fatal("JWT refresh changed original auth_id")
+	}
+
+	secondToken, err := CreateNewTokenWithVersion(userID, tokenVersion, 15*time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondClaims, _, err := VerifyTokenWithFreshClaims(secondToken)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if secondClaims.AuthID == claims.AuthID {
+		t.Fatal("separate authentication ceremonies reused auth_id")
 	}
 }
 
@@ -150,5 +174,46 @@ func TestVerifyTokenWithFresh(t *testing.T) {
 	}
 	if userId != userID {
 		t.Fatalf("VerifyToken userId = %d, want %d", userId, userID)
+	}
+}
+
+func TestOAuthSessionDoesNotProveReauthenticationAfterRefresh(t *testing.T) {
+	token, err := CreateOAuthTokenWithVersion(7, 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	claims, err := Std().ParseToken(token)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if claims.UserId != 7 || claims.TokenVersion != 3 || claims.AuthTime == 0 || claims.AuthID != "" || claims.Reauthenticated {
+		t.Fatalf("unexpected OAuth session: %+v", claims)
+	}
+	claims.RegisteredClaims = GetBaseRegisteredClaims(15 * time.Second)
+	token, err = Std().CreateToken(*claims)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, renewed, err := VerifyTokenWithFreshClaims(token)
+	if err != nil {
+		t.Fatal(err)
+	}
+	refreshed, err := Std().ParseToken(renewed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if refreshed.Reauthenticated || refreshed.AuthID != "" || refreshed.AuthTime != claims.AuthTime {
+		t.Fatalf("refresh invented credential verification: %+v", refreshed)
+	}
+	passwordToken, err := CreateNewTokenDefaultWithVersion(7, 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	passwordClaims, err := Std().ParseToken(passwordToken)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !passwordClaims.Reauthenticated || passwordClaims.AuthID == "" {
+		t.Fatal("password session has no reauthentication proof")
 	}
 }

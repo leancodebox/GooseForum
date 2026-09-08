@@ -1,12 +1,16 @@
 package jwtopt
 
 import (
+	"crypto/rand"
+	"encoding/base64"
+	"net/http"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/spf13/cast"
 )
 
@@ -35,6 +39,12 @@ func CreateNewTokenDefaultWithVersion(userId, tokenVersion uint64) (string, erro
 	return CreateNewTokenWithVersion(userId, tokenVersion, validTime)
 }
 
+// CreateOAuthTokenWithVersion establishes a local session without asserting that
+// the upstream provider performed fresh credential verification.
+func CreateOAuthTokenWithVersion(userID, tokenVersion uint64) (string, error) {
+	return Std().CreateToken(CustomClaims{UserId: userID, TokenVersion: tokenVersion, AuthTime: time.Now().Unix(), RegisteredClaims: GetBaseRegisteredClaims(validTime)})
+}
+
 // CreateNewToken creates an access token with expireTime.
 func CreateNewToken(userId uint64, expireTime time.Duration) (string, error) {
 	return CreateNewTokenWithVersion(userId, 0, expireTime)
@@ -42,9 +52,18 @@ func CreateNewToken(userId uint64, expireTime time.Duration) (string, error) {
 
 // CreateNewTokenWithVersion creates an access token with expireTime and token version.
 func CreateNewTokenWithVersion(userId, tokenVersion uint64, expireTime time.Duration) (string, error) {
+	authBytes := make([]byte, 32)
+	if _, err := rand.Read(authBytes); err != nil {
+		return "", err
+	}
+	authID := base64.RawURLEncoding.EncodeToString(authBytes)
+	clear(authBytes)
 	cc := CustomClaims{
 		UserId:           userId,
 		TokenVersion:     tokenVersion,
+		AuthTime:         time.Now().Unix(),
+		AuthID:           authID,
+		Reauthenticated:  true,
 		RegisteredClaims: GetBaseRegisteredClaims(expireTime),
 	}
 	return Std().CreateToken(cc)
@@ -96,26 +115,28 @@ func GetGinAccessToken(c *gin.Context) string {
 // TokenSetting writes the refreshed token to headers and cookies.
 func TokenSetting(c *gin.Context, newToken string) {
 	c.Header("New-Token", newToken)
+	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(
 		"access_token",
 		newToken,
 		cast.ToInt(validTime/time.Second),
 		"/",
 		"",
-		false,
+		!setting.IsLocal(),
 		true,
 	)
 }
 
 // TokenClean expires the access_token cookie.
 func TokenClean(c *gin.Context) {
+	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(
 		"access_token",
 		"",
 		-1,
 		"/",
 		"",
-		false,
+		!setting.IsLocal(),
 		true,
 	)
 }
