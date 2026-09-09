@@ -1,12 +1,10 @@
 <div align="center">
   <img src="resource/static/pic/icon_300.webp?t=1788958424" width="140"/>
   <h1>GooseForum</h1>
-  <p>🚀 Modern Go + Vue 3 Forum System</p>
+  <p>A forum for conversations, shared knowledge, and lasting communities.</p>
 
   <p>
     <a href="https://github.com/leancodebox/GooseForum/releases"><img src="https://img.shields.io/github/release/leancodebox/GooseForum.svg" alt="GitHub release"></a>
-    <a href="https://pkg.go.dev/github.com/leancodebox/GooseForum"><img src="https://pkg.go.dev/badge/github.com/leancodebox/GooseForum.svg" alt="pkg.go.dev"></a>
-    <a href="https://goreportcard.com/report/github.com/leancodebox/GooseForum"><img src="https://goreportcard.com/badge/github.com/leancodebox/GooseForum" alt="Go Report Card"></a>
     <a href="https://github.com/avelino/awesome-go"><img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Go"></a>
     <a href="https://golang.org"><img src="https://img.shields.io/badge/Go-1.26+-blue.svg" alt="Go version"></a>
     <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/TailwindCSS-4-blue.svg" alt="TailwindCSS"></a>
@@ -18,6 +16,19 @@
 </div>
 
 ![GooseForum interface preview](https://github.com/leancodebox/assert/blob/main/gooseforum-readme-poster.webp?raw=true)
+
+GooseForum is an open-source forum for discussions, shared knowledge, and ongoing connections. From the first topic to managing content, members, and your community’s look, it gives you the tools to build and run a community on your own server.
+
+[Try the demo](https://gooseforum.online/) · [Download the latest release](https://github.com/leancodebox/GooseForum/releases)
+
+## Features
+
+- **Make room for discussion**: Markdown topics, replies, categories, and drafts keep sharing and conversations organized.
+- **Stay connected**: Notifications, private messages, and user profiles help conversations continue beyond a topic.
+- **Run your community**: A built-in admin console with role and permission management.
+- **Make it your own**: Customize your logo, brand copy, and footer, then preview and publish light and dark themes in the theme workbench.
+- **Join from any screen**: Desktop and mobile layouts, smooth navigation, and accessible pages when JavaScript is unavailable.
+- **Host it yourself**: A single executable, SQLite by default, optional MySQL, and scheduled backups.
 
 ## Quick Start
 
@@ -80,23 +91,9 @@ See [configuration documentation](docs/user/configuration.md) for MySQL, mail, b
 ./GooseForum set-user-password <userId> <password>
 ```
 
-## What Is GooseForum?
-
-GooseForum is a technical community platform built with Go, Gin, GORM, Vue 3, TypeScript, Vite, and TailwindCSS. It ships as a single executable, supports SQLite/MySQL, and provides a payload-driven SPA experience with server-rendered fallback pages for SEO and no-js access.
-
-Live demo: [gooseforum.online](https://gooseforum.online/)
-
-## Features
-
-- Markdown topics, replies, categories, notifications, chat, drafts, and user profiles.
-- Role and permission management with a full admin console.
-- Responsive public UI for desktop and mobile.
-- Theme workbench for light/dark theme preview and publishing.
-- SQLite by default, optional MySQL, scheduled backups.
-- Payload-driven navigation with no-js GoHTML templates.
-- Brand customization for logo, text, footer, and site assets.
-
 ## Development
+
+The backend uses Go, Gin, and GORM; the frontend uses Vue 3, TypeScript, Vite, and TailwindCSS. Server payloads drive navigation, with GoHTML fallback pages for SEO and access without JavaScript.
 
 ```bash
 # Backend with hot reload
@@ -122,7 +119,7 @@ GooseForum/
 │   ├── src/admin/          # Admin console
 │   ├── src/runtime/        # Payload runtime and shared browser helpers
 │   └── templates/          # GoHTML fallback templates
-├── docs/                   # Documentation
+├── docs/                   # Configuration documentation
 ├── main.go
 └── config.toml
 ```
@@ -143,11 +140,7 @@ CMD ["./GooseForum", "serve"]
 
 ## Documentation
 
-- [Documentation Index](docs/README.md)
 - [Configuration](docs/user/configuration.md)
-- [Frontend Architecture](docs/architecture/resource-frontend.md)
-- [UI Specification](docs/frontend/ui-spec.md)
-- [中文 README](README_ZH.md)
 
 ## License
 
