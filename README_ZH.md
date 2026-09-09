@@ -80,7 +80,7 @@ connection = "sqlite"
 path = "./storage/database/sqlite.db"
 ```
 
-MySQL、邮件、备份、安全和站点配置见 [配置文档](docs/user/configuration.md)。
+MySQL、邮件、备份、安全和站点配置见 [配置文档](docs/configuration_ZH.md)。
 
 ### 管理命令
 
@@ -140,7 +140,7 @@ CMD ["./GooseForum", "serve"]
 
 ## 文档
 
-- [配置文档](docs/user/configuration.md)
+- [配置文档](docs/configuration_ZH.md)
 
 ## 许可证
 

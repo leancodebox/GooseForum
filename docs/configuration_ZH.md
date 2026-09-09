@@ -1,6 +1,8 @@
 # GooseForum 配置文档
 
-本文档详细说明了 GooseForum 的所有配置选项。GooseForum 启动时会自动检查执行目录下是否存在 `config.toml` 文件，如果不存在则会自动创建一个默认配置文件。
+[中文](configuration_ZH.md) | [English](configuration.md)
+
+本文档说明 GooseForum 的主要配置选项。GooseForum 启动时会自动检查执行目录下是否存在 `config.toml` 文件，如果不存在则会自动创建一个默认配置文件。
 
 ## 📋 配置文件结构
 
@@ -182,5 +184,5 @@ type = "stdout"
 
 ## 📚 相关文档
 
-- [快速开始](../../README_ZH.md#🚀-快速开始)
-- [英文配置文档](../../README.md#🔧-configuration)
+- [快速开始](../README_ZH.md#快速开始)
+- [英文配置文档](configuration.md)

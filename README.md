@@ -80,7 +80,7 @@ connection = "sqlite"
 path = "./storage/database/sqlite.db"
 ```
 
-See [configuration documentation](docs/user/configuration.md) for MySQL, mail, backup, security, and site settings.
+See [configuration documentation](docs/configuration.md) for MySQL, mail, backup, security, and site settings.
 
 ### Admin Commands
 
@@ -140,7 +140,7 @@ CMD ["./GooseForum", "serve"]
 
 ## Documentation
 
-- [Configuration](docs/user/configuration.md)
+- [Configuration](docs/configuration.md)
 
 ## License
 
