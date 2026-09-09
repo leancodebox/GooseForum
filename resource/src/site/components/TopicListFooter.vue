@@ -43,7 +43,7 @@ function loadNextPage(event: MouseEvent) {
 </script>
 
 <template>
-  <footer class="border-t border-line bg-base-200/50 p-3 text-center">
+  <nav :aria-label="t('topicList.mode.pagination')" class="border-t border-line bg-base-200/50 p-3 text-center">
     <template v-if="mode === 'pagination'">
       <div class="flex flex-wrap items-center justify-center gap-2">
         <a
@@ -76,7 +76,7 @@ function loadNextPage(event: MouseEvent) {
         v-if="pagination.hasNext"
         :href="pagination.nextUrl"
         rel="next"
-        class="gf-button gf-button-sm gf-button-ghost gap-2 disabled:cursor-wait"
+        class="gf-button gf-button-sm gf-button-ghost gap-2 aria-disabled:cursor-wait"
         :aria-disabled="loadingMore"
         @click="loadNextPage"
       >
@@ -86,5 +86,5 @@ function loadNextPage(event: MouseEvent) {
       <p v-else-if="hasTopics" class="text-xs font-medium text-base-content/55">{{ t('topicList.allShown') }}</p>
       <p v-if="loadError" class="mt-2 text-xs text-error">{{ t('topicList.autoLoadFailed') }}</p>
     </template>
-  </footer>
+  </nav>
 </template>

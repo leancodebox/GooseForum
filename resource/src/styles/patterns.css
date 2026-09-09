@@ -17,6 +17,12 @@
     display: none;
   }
 
+  /* Keep post separators inset on wide screens without decorative DOM nodes. */
+  .gf-post-divider {
+    @apply border-t border-line xl:border-t-transparent;
+    @apply xl:before:pointer-events-none xl:before:absolute xl:before:inset-x-5 xl:before:top-0 xl:before:border-t xl:before:border-line xl:before:content-[''];
+  }
+
   .gf-topic-table {
     @apply block w-full;
   }

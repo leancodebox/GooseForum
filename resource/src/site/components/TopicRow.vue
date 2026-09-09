@@ -74,7 +74,11 @@ const { t } = useI18n()
     <td class="hidden justify-center lg:flex">
       <AvatarStack :users="topic.participants" />
     </td>
-    <td class="hidden text-center text-sm font-semibold tabular-nums text-base-content/75 lg:block"><a :href="topic.url" :aria-label="`${topic.title} · ${t('topicList.columns.replies')}: ${topic.replyCount}`">{{ formatNumber(topic.replyCount) }}</a></td>
+    <td class="hidden text-center text-sm font-semibold tabular-nums text-base-content/75 lg:block">
+      <a :href="topic.url" :aria-label="`${topic.title} · ${t('topicList.columns.replies')}: ${topic.replyCount}`">
+        {{ formatNumber(topic.replyCount) }}
+      </a>
+    </td>
     <td class="hidden text-center text-sm tabular-nums text-base-content/55 lg:block">{{ formatNumber(topic.viewCount) }}</td>
     <td class="hidden text-right text-[13px] font-medium tabular-nums text-base-content/55 lg:block">
       <slot name="activity" :topic="topic">

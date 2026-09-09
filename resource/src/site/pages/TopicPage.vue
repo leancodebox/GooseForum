@@ -1408,10 +1408,10 @@ async function removePost(postId: number) {
             <UserAvatar :src="page.props.topic.author.avatarUrl" :alt="page.props.topic.author.username" class="h-5 w-5 rounded-full object-cover" />
             {{ page.props.topic.author.username }}
           </a>
-          <span class="inline-flex items-center gap-1.5">
+          <time :datetime="page.props.topic.createdAt" class="inline-flex items-center gap-1.5">
             <Clock class="h-3.5 w-3.5" />
             {{ formatDateTime(page.props.topic.createdAt) }}
-          </span>
+          </time>
           <a
             v-for="category in page.props.topic.categories"
             :key="category.id"
@@ -1436,290 +1436,282 @@ async function removePost(postId: number) {
         </div>
       </header>
 
-      <section class="gf-card xl:w-[calc(100%+292px)]">
-        <div class="min-w-0 xl:grid xl:grid-cols-[minmax(0,1fr)_256px]">
-          <div class="min-w-0">
-            <span v-if="posts.length" id="posts" class="block scroll-mt-20" aria-hidden="true" />
+      <section class="gf-card min-w-0 xl:grid xl:w-[calc(100%+292px)] xl:grid-cols-[minmax(0,1fr)_256px]">
+        <div class="min-w-0">
+          <span v-if="posts.length" id="posts" class="block scroll-mt-20" aria-hidden="true" />
 
-            <div v-if="postHasBefore" class="relative px-4 py-3 text-center">
-              <button
-                v-if="postHasBefore"
-                type="button"
-                class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-xs font-semibold text-primary transition-colors hover:bg-info/10 hover:text-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-                :disabled="loadingPostWindow"
-                @click="loadPostWindow('before')"
-              >
-                <Loader2 v-if="loadingPostDirection === 'before'" class="h-3.5 w-3.5 animate-spin" />
-                <ChevronsUp v-else class="h-3.5 w-3.5" />
-                {{ t('topic.loadEarlierReplies') }}
-              </button>
-            </div>
-            <article
-              v-for="(post, index) in posts"
-              :id="`post-${post.id}`"
-              :key="post.id"
-              :data-post-no="post.postNo"
-              class="group relative grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 px-3 py-4 transition-[background-color] sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5"
-              :class="{
-                'border-t border-line xl:border-t-transparent': index > 0,
-                'bg-info/10': highlightedPostId === post.id,
-                '[border-top-left-radius:calc(var(--gf-radius-box)-var(--gf-border))] [border-top-right-radius:calc(var(--gf-radius-box)-var(--gf-border))]': index === 0 && !postHasBefore,
-              }"
+          <div v-if="postHasBefore" class="relative px-4 py-3 text-center">
+            <button
+              type="button"
+              class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-xs font-semibold text-primary transition-colors hover:bg-info/10 hover:text-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              :disabled="loadingPostWindow"
+              @click="loadPostWindow('before')"
             >
-              <div v-if="index > 0" class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
-              <a
-                :href="`/u/${post.author.id}`"
-                class="sticky top-19 self-start pt-1"
-                @click="showUserCard(post.author, $event)"
-              >
-                <UserAvatar :src="post.author.avatarUrl" :alt="post.author.username" :badge="post.author.wornBadge" class="h-9 w-9 rounded-full ring-1 ring-line sm:h-10 sm:w-10" img-class="rounded-full" />
-              </a>
-              <div class="min-w-0">
-                <div class="mb-1.5 flex min-w-0 items-start justify-between gap-2">
-                  <div class="min-w-0">
-                    <div class="flex min-w-0 items-center gap-2">
-                      <a :href="`/u/${post.author.id}`" class="min-w-0 truncate font-semibold text-base-content hover:text-primary">{{ post.author.username }}</a>
-                      <span v-if="isFirstPost(post)" class="rounded bg-base-200 px-1.5 py-0.5 text-xs font-semibold text-base-content/55">{{ t('topic.originalPost') }}</span>
-                      <span v-if="post.postNo" class="hidden shrink-0 text-xs font-semibold tabular-nums text-base-content/55 sm:inline">#{{ formatNumber(post.postNo) }}</span>
-                    </div>
-                    <div class="mt-0.5 flex items-center gap-2 text-xs text-base-content/55 sm:hidden">
-                      <span v-if="post.postNo" class="font-semibold tabular-nums text-base-content/55">#{{ formatNumber(post.postNo) }}</span>
-                      <time class="truncate">{{ formatDateTime(post.createdAt) }}</time>
-                    </div>
-                  </div>
-                  <div class="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
-                    <button
-                      v-if="canEditPost(post)"
-                      type="button"
-                      class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      :disabled="savingEditPostId === post.id || deletingPostId === post.id"
-                      :title="t('common.edit')"
-                      @click="startEditPost(post)"
-                    >
-                      <PencilLine class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ t('common.edit') }}</span>
-                    </button>
-                    <button
-                      v-if="canDeleteRenderedPost(post)"
-                      type="button"
-                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      :disabled="deletingPostId === post.id"
-                      :title="deletingPostId === post.id ? t('topic.deleting') : t('topic.delete')"
-                      @click="requestDeletePost(post)"
-                    >
-                      <Trash2 class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ deletingPostId === post.id ? t('topic.deleting') : t('topic.delete') }}</span>
-                    </button>
-                    <button
-                      v-if="page.props.permissions.canPost && !post.isHidden"
-                      type="button"
-                      class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                      :title="t('topic.reply')"
-                      @click="replyTo(post)"
-                    >
-                      <CornerDownLeft class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ t('topic.reply') }}</span>
-                    </button>
-                    <button
-                      v-if="!isFirstPost(post) && !post.isOwnPost && !post.isHidden"
-                      type="button"
-                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-warning/10 hover:text-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2"
-                      :title="t('topic.report')"
-                      @click="requestPostReport(post)"
-                    >
-                      <Flag class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ t('topic.report') }}</span>
-                    </button>
-                    <button
-                      v-if="!isFirstPost(post) && post.canModerate && post.processStatus === 0"
-                      type="button"
-                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:opacity-50"
-                      :disabled="postModerationBusy(post.id)"
-                      :title="t('topic.moderationBan')"
-                      @click="moderatePost(post, 'ban')"
-                    >
-                      <Ban class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ t('topic.moderationBan') }}</span>
-                    </button>
-                    <button
-                      v-else-if="!isFirstPost(post) && post.canModerate && post.processStatus === 1"
-                      type="button"
-                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
-                      :disabled="postModerationBusy(post.id)"
-                      :title="t('topic.moderationUnban')"
-                      @click="moderatePost(post, 'unban')"
-                    >
-                      <RotateCcw class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ t('topic.moderationUnban') }}</span>
-                    </button>
-                    <time class="hidden w-36 shrink-0 text-right text-xs text-base-content/55 sm:-ml-1 sm:block">{{ formatDateTime(post.createdAt) }}</time>
-                  </div>
-                </div>
-                <PostReplyReference v-if="post.replyToPostId" :target="replyTargetFor(post)" />
-                <div v-if="post.isHidden && !post.canModerate" class="rounded border border-line bg-base-200/60 px-3 py-2 text-sm text-base-content/45">
-                  {{ t('topic.hiddenReplyPlaceholder') }}
-                </div>
-                <div v-else v-content-enhancements="post.renderedContent" class="gf-prose gf-prose-post" v-html="post.renderedContent" />
-                <div v-if="post.isHidden && post.canModerate" class="mt-2 inline-flex rounded bg-base-200 px-2 py-1 text-xs font-semibold text-base-content/45">
-                  {{ t('topic.hiddenReplyBadge') }}
-                </div>
-                <div v-if="post.updatedAt && post.updatedAt !== post.createdAt" class="mt-2 text-xs font-medium text-base-content/55">
-                  {{ t('topic.editedAt', { time: formatDateTime(post.updatedAt) }) }}
-                </div>
-                <div v-if="isFirstPost(post)" class="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-3">
-                  <button
-                    type="button"
-                    class="gf-button gf-button-sm px-2.5"
-                    :class="isLiked ? 'bg-error/10 text-error hover:bg-error/10' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
-                    :disabled="actingLike"
-                    @click="toggleLike"
-                  >
-                    <Heart class="h-4 w-4" :fill="isLiked ? 'currentColor' : 'none'" />
-                    {{ likeCount ? formatNumber(likeCount) : t('topic.like') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="gf-button gf-button-sm px-2.5"
-                    :class="isBookmarked ? 'bg-info/10 text-primary hover:bg-info/10' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
-                    :disabled="actingBookmark"
-                    @click="toggleBookmark"
-                  >
-                    <Bookmark class="h-4 w-4" :fill="isBookmarked ? 'currentColor' : 'none'" />
-                    {{ isBookmarked ? t('topic.bookmarked') : t('topic.bookmark') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="gf-button gf-button-sm px-2.5"
-                    :class="isWatched ? 'bg-success/10 text-success hover:bg-success/15' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
-                    :disabled="actingWatch"
-                    @click="toggleWatch"
-                  >
-                    <Bell class="h-4 w-4" :fill="isWatched ? 'currentColor' : 'none'" />
-                    {{ isWatched ? t('topic.watched') : t('topic.watch') }}
-                  </button>
-                  <button
-                    v-if="!page.props.permissions.isOwnTopic"
-                    type="button"
-                    class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-warning/10 hover:text-warning"
-                    @click="requestTopicReport"
-                  >
-                    <Flag class="h-4 w-4" />
-                    {{ t('topic.report') }}
-                  </button>
-                  <button
-                    v-if="page.props.permissions.canModerateTopic && topicProcessStatus === 0"
-                    type="button"
-                    class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
-                    :disabled="actingModeration"
-                    @click="requestTopicModeration('ban')"
-                  >
-                    <Ban class="h-4 w-4" />
-                    {{ t('topic.moderationBan') }}
-                  </button>
-                  <button
-                    v-else-if="page.props.permissions.canModerateTopic && topicProcessStatus === 1"
-                    type="button"
-                    class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
-                    :disabled="actingModeration"
-                    @click="requestTopicModeration('unban')"
-                  >
-                    <RotateCcw class="h-4 w-4" />
-                    {{ t('topic.moderationUnban') }}
-                  </button>
-                  <span v-if="actionMessage" class="text-xs" :class="actionMessageSuccess ? 'text-base-content/75' : 'text-error'">{{ actionMessage }}</span>
-                </div>
-              </div>
-            </article>
-
-            <div v-if="postHasAfter || loadingPostDirection === 'after' || postWindowError || (!postHasAfter && posts.length)" ref="postLoadMoreEl" class="relative border-t border-line px-4 py-3 text-center xl:border-t-transparent">
-              <div class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
-              <button
-                v-if="postHasAfter && postWindowError"
-                type="button"
-                class="gf-button gf-button-sm gf-button-secondary text-xs"
-                :disabled="loadingPostWindow"
-                @click="loadPostWindow('after')"
-              >
-                <Loader2 v-if="loadingPostDirection === 'after'" class="h-3.5 w-3.5 animate-spin" />
-                {{ t('topic.retryLoadReplies') }}
-              </button>
-              <p v-else-if="postWindowError" class="text-xs text-error">{{ postWindowError }}</p>
-              <p v-else-if="postHasAfter && loadingPostDirection === 'after'" class="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-base-content/55">
-                <Loader2 class="h-3.5 w-3.5 animate-spin" />
-                {{ t('topic.loadingMoreReplies') }}
-              </p>
-              <button
-                v-else-if="postHasAfter"
-                type="button"
-                class="gf-button gf-button-sm gf-button-secondary text-xs"
-                :disabled="loadingPostWindow"
-                @click="loadMoreRepliesManually"
-              >
-                {{ t('topic.loadMoreReplies') }}
-              </button>
-              <p v-else-if="!postHasAfter && posts.length" class="text-xs font-medium text-base-content/55">{{ t('topic.allRepliesShown') }}</p>
-            </div>
-            <span class="block h-px scroll-mb-28" aria-hidden="true" />
+              <Loader2 v-if="loadingPostDirection === 'before'" class="h-3.5 w-3.5 animate-spin" />
+              <ChevronsUp v-else class="h-3.5 w-3.5" />
+              {{ t('topic.loadEarlierReplies') }}
+            </button>
           </div>
-
-          <aside class="hidden min-w-0 xl:block">
-            <div
-              class="sticky top-19"
+          <article
+            v-for="(post, index) in posts"
+            :id="`post-${post.id}`"
+            :key="post.id"
+            :data-post-no="post.postNo"
+            class="group relative grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 px-3 py-4 transition-[background-color] sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5"
+            :class="{
+              'gf-post-divider': index > 0,
+              'bg-info/10': highlightedPostId === post.id,
+              '[border-top-left-radius:calc(var(--gf-radius-box)-var(--gf-border))] [border-top-right-radius:calc(var(--gf-radius-box)-var(--gf-border))]': index === 0 && !postHasBefore,
+            }"
+          >
+            <a
+              :href="`/u/${post.author.id}`"
+              class="sticky top-19 self-start pt-1"
+              @click="showUserCard(post.author, $event)"
             >
-              <div class="px-4 py-4">
-                <h2 class="text-sm font-semibold text-base-content/55">{{ t('topic.overview') }}</h2>
-              </div>
-
-              <dl class="space-y-4 border-t border-line px-4 py-5 text-sm">
-                <div class="flex items-center justify-between gap-4">
-                  <dt class="font-semibold text-base-content/55">{{ t('topic.replyCount') }}</dt>
-                  <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.topic.replyCount) }}</dd>
+              <UserAvatar :src="post.author.avatarUrl" :alt="post.author.username" :badge="post.author.wornBadge" class="h-9 w-9 rounded-full ring-1 ring-line sm:h-10 sm:w-10" img-class="rounded-full" />
+            </a>
+            <div class="min-w-0">
+              <header class="mb-1.5 flex min-w-0 items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="flex min-w-0 items-center gap-2">
+                    <a :href="`/u/${post.author.id}`" class="min-w-0 truncate font-semibold text-base-content hover:text-primary">{{ post.author.username }}</a>
+                    <span v-if="isFirstPost(post)" class="rounded bg-base-200 px-1.5 py-0.5 text-xs font-semibold text-base-content/55">{{ t('topic.originalPost') }}</span>
+                    <a v-if="post.postNo" :href="`#post-${post.id}`" class="hidden shrink-0 text-xs font-semibold tabular-nums text-base-content/55 hover:text-primary sm:inline">#{{ formatNumber(post.postNo) }}</a>
+                  </div>
+                  <div class="mt-0.5 flex items-center gap-2 text-xs text-base-content/55 sm:hidden">
+                    <a v-if="post.postNo" :href="`#post-${post.id}`" class="font-semibold tabular-nums text-base-content/55 hover:text-primary">#{{ formatNumber(post.postNo) }}</a>
+                    <time :datetime="post.createdAt" class="truncate">{{ formatDateTime(post.createdAt) }}</time>
+                  </div>
                 </div>
-                <div class="flex items-center justify-between gap-4">
-                  <dt class="font-semibold text-base-content/55">{{ t('topic.viewCount') }}</dt>
-                  <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.topic.viewCount) }}</dd>
-                </div>
-                <div class="flex items-center justify-between gap-4">
-                  <dt class="font-semibold text-base-content/55">{{ t('topic.participants') }}</dt>
-                  <dd class="text-right font-semibold tabular-nums text-base-content">{{ page.props.topic.participants.length }}</dd>
-                </div>
-              </dl>
-
-              <div v-if="page.props.topic.participants.length" class="border-t border-line px-4 py-4">
-                <h3 class="mb-3 text-sm font-semibold text-base-content/55">{{ t('topic.activeParticipants') }}</h3>
-                <div class="flex flex-wrap gap-1.5">
-                  <a
-                    v-for="participant in page.props.topic.participants"
-                    :key="participant.id"
-                    :href="`/u/${participant.id}`"
-                    class="rounded-full"
-                    @click="showUserCard(participant, $event)"
+                <div class="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
+                  <button
+                    v-if="canEditPost(post)"
+                    type="button"
+                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="savingEditPostId === post.id || deletingPostId === post.id"
+                    :title="t('common.edit')"
+                    @click="startEditPost(post)"
                   >
-                    <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover ring-1 ring-line transition hover:ring-primary/40" />
-                  </a>
+                    <PencilLine class="h-3.5 w-3.5" />
+                    <span class="sr-only">{{ t('common.edit') }}</span>
+                  </button>
+                  <button
+                    v-if="canDeleteRenderedPost(post)"
+                    type="button"
+                    class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="deletingPostId === post.id"
+                    :title="deletingPostId === post.id ? t('topic.deleting') : t('topic.delete')"
+                    @click="requestDeletePost(post)"
+                  >
+                    <Trash2 class="h-3.5 w-3.5" />
+                    <span class="sr-only">{{ deletingPostId === post.id ? t('topic.deleting') : t('topic.delete') }}</span>
+                  </button>
+                  <button
+                    v-if="page.props.permissions.canPost && !post.isHidden"
+                    type="button"
+                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    :title="t('topic.reply')"
+                    @click="replyTo(post)"
+                  >
+                    <CornerDownLeft class="h-3.5 w-3.5" />
+                    <span class="sr-only">{{ t('topic.reply') }}</span>
+                  </button>
+                  <button
+                    v-if="!isFirstPost(post) && !post.isOwnPost && !post.isHidden"
+                    type="button"
+                    class="gf-icon-button h-8 w-8 shrink-0 hover:bg-warning/10 hover:text-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2"
+                    :title="t('topic.report')"
+                    @click="requestPostReport(post)"
+                  >
+                    <Flag class="h-3.5 w-3.5" />
+                    <span class="sr-only">{{ t('topic.report') }}</span>
+                  </button>
+                  <button
+                    v-if="!isFirstPost(post) && post.canModerate && post.processStatus === 0"
+                    type="button"
+                    class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:opacity-50"
+                    :disabled="postModerationBusy(post.id)"
+                    :title="t('topic.moderationBan')"
+                    @click="moderatePost(post, 'ban')"
+                  >
+                    <Ban class="h-3.5 w-3.5" />
+                    <span class="sr-only">{{ t('topic.moderationBan') }}</span>
+                  </button>
+                  <button
+                    v-else-if="!isFirstPost(post) && post.canModerate && post.processStatus === 1"
+                    type="button"
+                    class="gf-icon-button h-8 w-8 shrink-0 hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
+                    :disabled="postModerationBusy(post.id)"
+                    :title="t('topic.moderationUnban')"
+                    @click="moderatePost(post, 'unban')"
+                  >
+                    <RotateCcw class="h-3.5 w-3.5" />
+                    <span class="sr-only">{{ t('topic.moderationUnban') }}</span>
+                  </button>
+                  <time :datetime="post.createdAt" class="hidden w-36 shrink-0 text-right text-xs text-base-content/55 sm:-ml-1 sm:block">{{ formatDateTime(post.createdAt) }}</time>
                 </div>
+              </header>
+              <PostReplyReference v-if="post.replyToPostId" :target="replyTargetFor(post)" />
+              <div v-if="post.isHidden && !post.canModerate" class="rounded border border-line bg-base-200/60 px-3 py-2 text-sm text-base-content/45">
+                {{ t('topic.hiddenReplyPlaceholder') }}
               </div>
-
-              <PostPositionRail
-                v-if="page.props.topic.replyCount > 0 && postMaxRange > 0"
-                class="border-t border-line"
-                :current="postRailCurrentNo"
-                :max="postMaxRange"
-                :start-label="postRailStartLabel"
-                :end-label="postRailEndLabel"
-                :current-label="postRailCurrentLabel"
-                :busy="postRailBusy"
-                :progress-current="postRailProgressCurrent"
-                :progress-end="postRailProgressEnd"
-                :progress-start="postRailProgressStart"
-                @earliest="jumpToTopicBodyFromRail"
-                @latest="jumpToLatestPostFromRail"
-                @select="selectPostFromRail"
-              />
+              <div v-else v-content-enhancements="post.renderedContent" class="gf-prose gf-prose-post" v-html="post.renderedContent" />
+              <div v-if="post.isHidden && post.canModerate" class="mt-2 inline-flex rounded bg-base-200 px-2 py-1 text-xs font-semibold text-base-content/45">
+                {{ t('topic.hiddenReplyBadge') }}
+              </div>
+              <div v-if="post.updatedAt && post.updatedAt !== post.createdAt" class="mt-2 text-xs font-medium text-base-content/55">
+                {{ t('topic.editedAt', { time: formatDateTime(post.updatedAt) }) }}
+              </div>
+              <div v-if="isFirstPost(post)" class="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-3">
+                <button
+                  type="button"
+                  class="gf-button gf-button-sm px-2.5"
+                  :class="isLiked ? 'bg-error/10 text-error hover:bg-error/10' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
+                  :disabled="actingLike"
+                  @click="toggleLike"
+                >
+                  <Heart class="h-4 w-4" :fill="isLiked ? 'currentColor' : 'none'" />
+                  {{ likeCount ? formatNumber(likeCount) : t('topic.like') }}
+                </button>
+                <button
+                  type="button"
+                  class="gf-button gf-button-sm px-2.5"
+                  :class="isBookmarked ? 'bg-info/10 text-primary hover:bg-info/10' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
+                  :disabled="actingBookmark"
+                  @click="toggleBookmark"
+                >
+                  <Bookmark class="h-4 w-4" :fill="isBookmarked ? 'currentColor' : 'none'" />
+                  {{ isBookmarked ? t('topic.bookmarked') : t('topic.bookmark') }}
+                </button>
+                <button
+                  type="button"
+                  class="gf-button gf-button-sm px-2.5"
+                  :class="isWatched ? 'bg-success/10 text-success hover:bg-success/15' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
+                  :disabled="actingWatch"
+                  @click="toggleWatch"
+                >
+                  <Bell class="h-4 w-4" :fill="isWatched ? 'currentColor' : 'none'" />
+                  {{ isWatched ? t('topic.watched') : t('topic.watch') }}
+                </button>
+                <button
+                  v-if="!page.props.permissions.isOwnTopic"
+                  type="button"
+                  class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-warning/10 hover:text-warning"
+                  @click="requestTopicReport"
+                >
+                  <Flag class="h-4 w-4" />
+                  {{ t('topic.report') }}
+                </button>
+                <button
+                  v-if="page.props.permissions.canModerateTopic && topicProcessStatus === 0"
+                  type="button"
+                  class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
+                  :disabled="actingModeration"
+                  @click="requestTopicModeration('ban')"
+                >
+                  <Ban class="h-4 w-4" />
+                  {{ t('topic.moderationBan') }}
+                </button>
+                <button
+                  v-else-if="page.props.permissions.canModerateTopic && topicProcessStatus === 1"
+                  type="button"
+                  class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
+                  :disabled="actingModeration"
+                  @click="requestTopicModeration('unban')"
+                >
+                  <RotateCcw class="h-4 w-4" />
+                  {{ t('topic.moderationUnban') }}
+                </button>
+                <span v-if="actionMessage" class="text-xs" :class="actionMessageSuccess ? 'text-base-content/75' : 'text-error'">{{ actionMessage }}</span>
+              </div>
             </div>
-          </aside>
+          </article>
 
+          <div v-if="postHasAfter || loadingPostDirection === 'after' || postWindowError || (!postHasAfter && posts.length)" ref="postLoadMoreEl" class="gf-post-divider relative px-4 py-3 text-center">
+            <button
+              v-if="postHasAfter && postWindowError"
+              type="button"
+              class="gf-button gf-button-sm gf-button-secondary text-xs"
+              :disabled="loadingPostWindow"
+              @click="loadPostWindow('after')"
+            >
+              <Loader2 v-if="loadingPostDirection === 'after'" class="h-3.5 w-3.5 animate-spin" />
+              {{ t('topic.retryLoadReplies') }}
+            </button>
+            <p v-else-if="postWindowError" class="text-xs text-error">{{ postWindowError }}</p>
+            <p v-else-if="postHasAfter && loadingPostDirection === 'after'" class="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-base-content/55">
+              <Loader2 class="h-3.5 w-3.5 animate-spin" />
+              {{ t('topic.loadingMoreReplies') }}
+            </p>
+            <button
+              v-else-if="postHasAfter"
+              type="button"
+              class="gf-button gf-button-sm gf-button-secondary text-xs"
+              :disabled="loadingPostWindow"
+              @click="loadMoreRepliesManually"
+            >
+              {{ t('topic.loadMoreReplies') }}
+            </button>
+            <p v-else-if="!postHasAfter && posts.length" class="text-xs font-medium text-base-content/55">{{ t('topic.allRepliesShown') }}</p>
+          </div>
+          <span class="block h-px scroll-mb-28" aria-hidden="true" />
         </div>
+
+        <aside class="hidden min-w-0 xl:block">
+          <div
+            class="sticky top-19"
+          >
+            <h2 class="px-4 py-4 text-sm font-semibold text-base-content/55">{{ t('topic.overview') }}</h2>
+
+            <dl class="space-y-4 border-t border-line px-4 py-5 text-sm">
+              <div class="flex items-center justify-between gap-4">
+                <dt class="font-semibold text-base-content/55">{{ t('topic.replyCount') }}</dt>
+                <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.topic.replyCount) }}</dd>
+              </div>
+              <div class="flex items-center justify-between gap-4">
+                <dt class="font-semibold text-base-content/55">{{ t('topic.viewCount') }}</dt>
+                <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.topic.viewCount) }}</dd>
+              </div>
+              <div class="flex items-center justify-between gap-4">
+                <dt class="font-semibold text-base-content/55">{{ t('topic.participants') }}</dt>
+                <dd class="text-right font-semibold tabular-nums text-base-content">{{ page.props.topic.participants.length }}</dd>
+              </div>
+            </dl>
+
+            <div v-if="page.props.topic.participants.length" class="border-t border-line px-4 py-4">
+              <h3 class="mb-3 text-sm font-semibold text-base-content/55">{{ t('topic.activeParticipants') }}</h3>
+              <div class="flex flex-wrap gap-1.5">
+                <a
+                  v-for="participant in page.props.topic.participants"
+                  :key="participant.id"
+                  :href="`/u/${participant.id}`"
+                  class="rounded-full"
+                  @click="showUserCard(participant, $event)"
+                >
+                  <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover ring-1 ring-line transition hover:ring-primary/40" />
+                </a>
+              </div>
+            </div>
+
+            <PostPositionRail
+              v-if="page.props.topic.replyCount > 0 && postMaxRange > 0"
+              class="border-t border-line"
+              :current="postRailCurrentNo"
+              :max="postMaxRange"
+              :start-label="postRailStartLabel"
+              :end-label="postRailEndLabel"
+              :current-label="postRailCurrentLabel"
+              :busy="postRailBusy"
+              :progress-current="postRailProgressCurrent"
+              :progress-end="postRailProgressEnd"
+              :progress-start="postRailProgressStart"
+              @earliest="jumpToTopicBodyFromRail"
+              @latest="jumpToLatestPostFromRail"
+              @select="selectPostFromRail"
+            />
+          </div>
+        </aside>
       </section>
 
       <div v-if="page.props.hotTopics.length" class="sm:mt-4 xl:w-[calc(100%+292px)]">

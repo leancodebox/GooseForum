@@ -70,7 +70,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
       {{ t('topic.replyTargetUnavailable') }}
     </div>
     <template v-else>
-      <div class="px-3 pt-2">
+      <blockquote class="m-0 px-3 pt-2">
         <div
           ref="contentEl"
           class="gf-prose gf-prose-post"
@@ -81,7 +81,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
           v-content-enhancements="target.renderedContent"
           v-html="target.renderedContent"
         />
-      </div>
+      </blockquote>
       <button
         v-if="overflowing"
         type="button"
