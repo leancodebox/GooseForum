@@ -6,6 +6,23 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 )
 
+func TestVersionBuiltinAvatar(t *testing.T) {
+	for _, tt := range []struct{ input, want string }{
+		{"/static/pic/1.webp", "/static/pic/1.webp?t=1788958424"},
+		{"/static/pic/12_medium.webp?t=old&size=96#avatar", "/static/pic/12_medium.webp?size=96&t=1788958424#avatar"},
+		{"https://cdn.example.com/static/pic/2.webp", "https://cdn.example.com/static/pic/2.webp?t=1788958424"},
+		{"/static/pic/13.webp", "/static/pic/13.webp?t=1788958424"},
+		{"/static/pic/default-avatar.webp", "/static/pic/default-avatar.webp?t=1788958424"},
+		{"/static/pic/icons/favicon-32.png", "/static/pic/icons/favicon-32.png?t=1788958424"},
+		{"/static/picture/avatar.webp", "/static/picture/avatar.webp"},
+		{"/file/img/avatar.webp?t=123", "/file/img/avatar.webp?t=123"},
+	} {
+		if got := VersionBuiltinAvatar(tt.input); got != tt.want {
+			t.Errorf("VersionBuiltinAvatar(%q) = %q, want %q", tt.input, got, tt.want)
+		}
+	}
+}
+
 func TestDefaultAvatarUsesCDNWhenConfigured(t *testing.T) {
 	old := preferences.GetString("app.cdn_url", "")
 	t.Cleanup(func() {
@@ -13,12 +30,12 @@ func TestDefaultAvatarUsesCDNWhenConfigured(t *testing.T) {
 	})
 
 	preferences.Set("app.cdn_url", "")
-	if got := GetDefaultAvatar(); got != "/static/pic/default-avatar.webp" {
+	if got := GetDefaultAvatar(); got != "/static/pic/default-avatar.webp?t=1788958424" {
 		t.Fatalf("default avatar = %q, want local path", got)
 	}
 
 	preferences.Set("app.cdn_url", "https://cdn.example.com")
-	if got := GetDefaultAvatar(); got != "https://cdn.example.com/static/pic/default-avatar.webp" {
+	if got := GetDefaultAvatar(); got != "https://cdn.example.com/static/pic/default-avatar.webp?t=1788958424" {
 		t.Fatalf("cdn default avatar = %q, want CDN path", got)
 	}
 }
@@ -30,12 +47,12 @@ func TestBannedAvatarUsesCDNWhenConfigured(t *testing.T) {
 	})
 
 	preferences.Set("app.cdn_url", "")
-	if got := GetBannedAvatar(); got != "/static/pic/banned-avatar.png" {
+	if got := GetBannedAvatar(); got != "/static/pic/banned-avatar.png?t=1788958424" {
 		t.Fatalf("banned avatar = %q, want local path", got)
 	}
 
 	preferences.Set("app.cdn_url", "https://cdn.example.com")
-	if got := GetBannedAvatar(); got != "https://cdn.example.com/static/pic/banned-avatar.png" {
+	if got := GetBannedAvatar(); got != "https://cdn.example.com/static/pic/banned-avatar.png?t=1788958424" {
 		t.Fatalf("cdn banned avatar = %q, want CDN path", got)
 	}
 }

@@ -43,7 +43,7 @@ func TestTopicsWithUser2VoMapsListPayload(t *testing.T) {
 	if item.Id != topic.Id || item.Title != topic.Title || item.Description != topic.Excerpt {
 		t.Fatalf("basic fields not mapped: %#v", item)
 	}
-	if item.Username != "author" || item.AvatarUrl != "/static/pic/author.webp" {
+	if item.Username != "author" || item.AvatarUrl != "/static/pic/author.webp?t=1788958424" {
 		t.Fatalf("author fields not mapped: %#v", item)
 	}
 	if len(item.Categories) != 2 || item.Categories[0] != "General" || item.Categories[1] != "" {

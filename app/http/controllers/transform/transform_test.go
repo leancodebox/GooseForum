@@ -62,7 +62,7 @@ func TestUser2UserDetailedVo(t *testing.T) {
 	if got.Id != user.Id {
 		t.Fatalf("Id = %d, want %d", got.Id, user.Id)
 	}
-	if got.AvatarUrl != "/static/pic/default-avatar.webp" {
+	if got.AvatarUrl != "/static/pic/default-avatar.webp?t=1788958424" {
 		t.Fatalf("AvatarUrl = %q, want static avatar path", got.AvatarUrl)
 	}
 	if got.WebsiteName != user.WebsiteName || got.Website != user.Website {
@@ -85,7 +85,7 @@ func TestFrozenUserUsesBannedAvatar(t *testing.T) {
 	}
 
 	got := User2userShow(user)
-	if got.AvatarUrl != "/static/pic/banned-avatar.png" {
+	if got.AvatarUrl != "/static/pic/banned-avatar.png?t=1788958424" {
 		t.Fatalf("AvatarUrl = %q, want banned avatar", got.AvatarUrl)
 	}
 }

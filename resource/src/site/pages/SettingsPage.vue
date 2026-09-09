@@ -164,7 +164,8 @@ const localeOptions = computed(() => supportedLocales.map(item => ({
   value: item,
   label: t(`locale.${item}`),
 })))
-const presetAvatars = Array.from({ length: 12 }, (_, index) => `/static/pic/${index + 1}.webp`)
+// Keep this asset release timestamp in sync with urlconfig.BuiltinAvatarVersion.
+const presetAvatars = Array.from({ length: 12 }, (_, index) => `/static/pic/${index + 1}.webp?t=1788958424`)
 const presetAvatarChanged = computed(() => presetAvatarDraft.value !== avatarUrl.value)
 const avatarPreviewUrl = computed(() => presetAvatarChanged.value ? presetAvatarDraft.value : avatarUrl.value)
 const userBadges = computed(() => page.props.user.badges || [])

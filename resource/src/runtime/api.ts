@@ -201,7 +201,8 @@ export async function saveUserProfileCover(profileCoverUrl: string): Promise<boo
 }
 
 export async function savePresetAvatar(avatarUrl: string): Promise<string> {
-  const result = await localized(client.api.users.savePresetAvatar(avatarUrl), t('api.avatarPresetFailed'))
+  // Cache version belongs to the display URL; the API stores the canonical preset path.
+  const result = await localized(client.api.users.savePresetAvatar(avatarUrl.split('?')[0]!), t('api.avatarPresetFailed'))
   if (!result.avatarUrl) throw new Error(t('api.avatarPresetEmpty'))
   return result.avatarUrl
 }

@@ -5,26 +5,42 @@ import (
 	"fmt"
 	"net/url"
 	"path"
+	"strings"
 
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 )
+
+// BuiltinAvatarVersion is bumped when bundled avatars change. Keep SettingsPage.vue in sync.
+const BuiltinAvatarVersion = "1788958424"
+
+// VersionBuiltinAvatar refreshes bundled avatars without changing stored user URLs.
+func VersionBuiltinAvatar(rawURL string) string {
+	parsed, err := url.Parse(rawURL)
+	if err != nil || !strings.HasPrefix(parsed.Path, "/static/pic/") {
+		return rawURL
+	}
+	query := parsed.Query()
+	query.Set("t", BuiltinAvatarVersion)
+	parsed.RawQuery = query.Encode()
+	return parsed.String()
+}
 
 // GetDefaultAvatar returns the default avatar URL, using the CDN URL when configured.
 func GetDefaultAvatar() string {
 	cdnURL := setting.GetCDNURL()
 	if cdnURL != "" {
-		return cdnURL + `/static/pic/default-avatar.webp`
+		return VersionBuiltinAvatar(cdnURL + `/static/pic/default-avatar.webp`)
 	}
-	return `/static/pic/default-avatar.webp`
+	return VersionBuiltinAvatar(`/static/pic/default-avatar.webp`)
 }
 
 // GetBannedAvatar returns the fixed avatar shown for frozen accounts.
 func GetBannedAvatar() string {
 	cdnURL := setting.GetCDNURL()
 	if cdnURL != "" {
-		return cdnURL + `/static/pic/banned-avatar.png`
+		return VersionBuiltinAvatar(cdnURL + `/static/pic/banned-avatar.png`)
 	}
-	return `/static/pic/banned-avatar.png`
+	return VersionBuiltinAvatar(`/static/pic/banned-avatar.png`)
 }
 
 // FilePath returns the public image route for filename.
