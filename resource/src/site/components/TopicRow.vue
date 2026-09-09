@@ -23,22 +23,22 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <article
+  <tr
     class="group gf-topic-row"
     :class="[
       home ? 'gf-topic-row-home' : '',
       topic.pinWeight > 0 ? 'gf-topic-row-pinned' : '',
     ]"
   >
-    <div class="min-w-0">
+    <td class="min-w-0">
       <div class="flex min-h-6 min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-        <span class="inline-flex min-w-0 max-w-full items-center gap-2">
+        <h2 class="m-0 inline-flex min-w-0 max-w-full items-center gap-2">
           <Pin
             v-if="showPinned && topic.pinWeight > 0"
             class="h-3.5 w-3.5 shrink-0 rotate-45 text-error"
             :aria-label="t('topicList.pinned')"
           />
-          <a :href="topic.url" class="min-w-0 truncate text-[15px] font-medium leading-6 text-base-content group-hover:text-primary sm:text-base">
+          <a :href="topic.url" rel="bookmark" class="min-w-0 truncate text-[15px] font-medium leading-6 text-base-content group-hover:text-primary sm:text-base">
             {{ topic.title }}
           </a>
           <span
@@ -46,7 +46,7 @@ const { t } = useI18n()
             class="h-2 w-2 shrink-0 rounded-full bg-primary"
             aria-hidden="true"
           />
-        </span>
+        </h2>
         <a
           v-for="category in showCategories ? topic.categories : []"
           :key="category.id"
@@ -64,22 +64,22 @@ const { t } = useI18n()
       <p class="mt-1 min-h-5 truncate text-[13px] leading-5 text-base-content/55">{{ topicDescription(topic) }}</p>
       <div class="mt-1.5 flex min-h-6 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/55 lg:hidden">
         <AvatarStack :users="topic.participants" size="sm" />
-        <span>{{ timeAgo(topic.lastUpdateTime) }}</span>
-        <span class="inline-flex items-center gap-1">
+        <a :href="topic.url"><time :datetime="topic.lastUpdateTime">{{ timeAgo(topic.lastUpdateTime) }}</time></a>
+        <a :href="topic.url" :aria-label="`${topic.title} · ${t('topicList.columns.replies')}: ${topic.replyCount}`" class="inline-flex items-center gap-1">
           <MessageSquare class="h-3.5 w-3.5" /> {{ formatNumber(topic.replyCount) }}
-        </span>
+        </a>
         <slot name="mobile-action" :topic="topic" />
       </div>
-    </div>
-    <div class="hidden justify-center lg:flex">
+    </td>
+    <td class="hidden justify-center lg:flex">
       <AvatarStack :users="topic.participants" />
-    </div>
-    <div class="hidden text-center text-sm font-semibold tabular-nums text-base-content/75 lg:block">{{ formatNumber(topic.replyCount) }}</div>
-    <div class="hidden text-center text-sm tabular-nums text-base-content/55 lg:block">{{ formatNumber(topic.viewCount) }}</div>
-    <div class="hidden text-right text-[13px] font-medium tabular-nums text-base-content/55 lg:block">
+    </td>
+    <td class="hidden text-center text-sm font-semibold tabular-nums text-base-content/75 lg:block"><a :href="topic.url" :aria-label="`${topic.title} · ${t('topicList.columns.replies')}: ${topic.replyCount}`">{{ formatNumber(topic.replyCount) }}</a></td>
+    <td class="hidden text-center text-sm tabular-nums text-base-content/55 lg:block">{{ formatNumber(topic.viewCount) }}</td>
+    <td class="hidden text-right text-[13px] font-medium tabular-nums text-base-content/55 lg:block">
       <slot name="activity" :topic="topic">
-        {{ timeAgo(topic.lastUpdateTime) }}
+        <a :href="topic.url"><time :datetime="topic.lastUpdateTime">{{ timeAgo(topic.lastUpdateTime) }}</time></a>
       </slot>
-    </div>
-  </article>
+    </td>
+  </tr>
 </template>

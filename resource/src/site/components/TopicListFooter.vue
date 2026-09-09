@@ -34,6 +34,12 @@ const previousUrl = computed(() => {
   }
   return `${url.pathname}${url.search}${url.hash}`
 })
+// Keep native navigation for new-tab/modifier clicks and enhance ordinary clicks.
+function loadNextPage(event: MouseEvent) {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+  event.preventDefault()
+  if (!props.loadingMore) emit('loadMore')
+}
 </script>
 
 <template>
@@ -66,19 +72,19 @@ const previousUrl = computed(() => {
     </template>
 
     <template v-else>
-      <button
+      <a
         v-if="pagination.hasNext"
-        type="button"
+        :href="pagination.nextUrl"
+        rel="next"
         class="gf-button gf-button-sm gf-button-ghost gap-2 disabled:cursor-wait"
-        :disabled="loadingMore"
-        @click="emit('loadMore')"
+        :aria-disabled="loadingMore"
+        @click="loadNextPage"
       >
         <Loader2 v-if="loadingMore" class="h-4 w-4 animate-spin" />
         {{ loadingMore ? t('common.loadingShort') : t('common.loadMore') }}
-      </button>
+      </a>
       <p v-else-if="hasTopics" class="text-xs font-medium text-base-content/55">{{ t('topicList.allShown') }}</p>
       <p v-if="loadError" class="mt-2 text-xs text-error">{{ t('topicList.autoLoadFailed') }}</p>
-      <a v-if="pagination.hasNext" :href="pagination.nextUrl" rel="next" class="sr-only">{{ t('common.nextPage') }}</a>
     </template>
   </footer>
 </template>

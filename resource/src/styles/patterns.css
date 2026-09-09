@@ -17,6 +17,15 @@
     display: none;
   }
 
+  .gf-topic-table {
+    @apply block w-full;
+  }
+
+  .gf-topic-table > thead,
+  .gf-topic-table > tbody {
+    @apply block;
+  }
+
   .gf-topic-list-header {
     @apply hidden grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] gap-3 border-b border-line/70 bg-base-100/70 px-4 py-1.5 text-[13px] font-normal leading-5 text-base-content/55 lg:grid;
   }
