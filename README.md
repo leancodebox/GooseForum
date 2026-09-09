@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="resource/static/pic/icon_300.webp" width="140"/>
+  <img src="resource/static/pic/icon_300.webp?t=1788958424" width="140"/>
   <h1>GooseForum</h1>
   <p>🚀 Modern Go + Vue 3 Forum System</p>
 
