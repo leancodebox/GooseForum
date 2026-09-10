@@ -343,7 +343,7 @@ onMounted(load)
   <BasicPage :title="adminText('k00d9')" :description="adminText('k00da')">
     <template #primary-action>
       <Button type="button" size="sm" :disabled="saving || loading" @click="persist">
-        <Save class="mr-2 h-4 w-4" />
+        <Save class="size-4" />
         {{ saving ? adminText('k005f') : adminText('k0061') }}
       </Button>
     </template>

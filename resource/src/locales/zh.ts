@@ -1270,6 +1270,7 @@ export default {
     restrictedCategoryCount: '{count} 个受限分类',
     refreshing: '正在刷新',
     noGroups: '暂无访问组',
+    noMatchingGroups: '没有匹配的访问组，请尝试其他关键词。',
     systemGroup: '系统组',
     disabled: '已停用',
     memberCount: '{count} 位成员',

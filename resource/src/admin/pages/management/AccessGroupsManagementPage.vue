@@ -15,6 +15,8 @@ import {
 } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
+import AdminSection from '@/admin/components/AdminSection.vue'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/admin/components/ui/tabs'
 import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
 import { BasicPage } from '@/admin/components/global-layout'
@@ -32,7 +34,7 @@ import {
 import { Input } from '@/admin/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/admin/components/ui/select'
 import { Switch } from '@/admin/components/ui/switch'
-import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/admin/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/admin/components/ui/table'
 import {
   deleteAccessGroup,
   deleteAccessGroupMember,
@@ -110,6 +112,7 @@ async function loadOverview(preferredGroupId = selectedGroupId.value) {
     overview.value = await getAccessControlOverview()
     const available = overview.value.groups.some((group) => group.id === preferredGroupId)
     selectedGroupId.value = available ? preferredGroupId : overview.value.groups[0]?.id || 0
+    if (selectedGroup.value?.systemKey) activePanel.value = 'permissions'
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('accessGroups.loadFailed')
   } finally {
@@ -242,7 +245,7 @@ onMounted(() => void loadOverview())
 <template>
   <BasicPage :title="t('accessGroups.title')" :description="t('accessGroups.description')">
     <template #primary-action>
-      <Button type="button" @click="openCreateGroup">
+      <Button size="sm" type="button" @click="openCreateGroup">
         <Plus class="size-4" />
         {{ t('accessGroups.create') }}
       </Button>
@@ -256,8 +259,8 @@ onMounted(() => void loadOverview())
       <Button variant="outline" size="sm" type="button" @click="loadOverview()">{{ t('common.retry') }}</Button>
     </div>
 
-    <div class="grid items-start border-y xl:grid-cols-[15rem_minmax(0,1fr)]">
-      <aside class="bg-muted/15 px-4 py-4 xl:sticky xl:top-[5.5rem] xl:border-r">
+    <div class="grid items-start gap-4 xl:grid-cols-[15rem_minmax(0,1fr)]">
+      <AdminSection class="xl:sticky xl:top-[5.5rem]" body-class="p-4">
         <header class="border-b pb-3">
           <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-2 text-sm font-semibold">
@@ -273,16 +276,19 @@ onMounted(() => void loadOverview())
           <p class="mt-0.5 text-xs text-muted-foreground">{{ t('accessGroups.systemGroupHint') }}</p>
           <label class="relative mt-3 block">
             <Search class="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input v-model="groupSearch" class="h-9 pl-8 text-sm" :placeholder="t('accessGroups.groups')" />
+            <Input :aria-label="t('accessGroups.groups')" v-model="groupSearch" class="h-9 pl-8 text-sm" :placeholder="t('accessGroups.groups')" />
           </label>
         </header>
-        <div v-if="loading && !overview.groups.length" class="space-y-2 py-3">
-          <div v-for="index in 4" :key="index" class="h-14 animate-pulse rounded-md bg-muted/70" />
+        <div v-if="loading && !overview.groups.length" class="flex h-28 items-center justify-center text-sm text-muted-foreground">
+          {{ t('common.loadingShort') }}
         </div>
-        <div v-else-if="!overview.groups.length" class="py-8 text-center text-sm text-muted-foreground">
+        <div v-else-if="error && !overview.groups.length" class="flex h-28 items-center justify-center text-sm text-muted-foreground">
+          {{ t('common.loadFailed') }}
+        </div>
+        <div v-else-if="!overview.groups.length" class="flex h-28 items-center justify-center text-sm text-muted-foreground">
           {{ t('accessGroups.noGroups') }}
         </div>
-        <nav v-else-if="filteredGroups.length" class="-mx-2 divide-y" aria-label="Access groups">
+        <nav v-else-if="filteredGroups.length" class="-mx-2 divide-y" :aria-label="t('accessGroups.groups')">
           <button
             v-for="group in filteredGroups"
             :key="group.id"
@@ -292,6 +298,7 @@ onMounted(() => void loadOverview())
               selectedGroupId === group.id ? 'bg-primary/10 text-primary' : 'text-foreground',
               group.status !== 1 ? 'opacity-60' : '',
             ]"
+            :aria-current="selectedGroupId === group.id ? 'true' : undefined"
             @click="selectedGroupId = group.id; activePanel = 'permissions'"
           >
             <span
@@ -315,13 +322,13 @@ onMounted(() => void loadOverview())
           </button>
         </nav>
         <div v-else class="py-8 text-center text-sm text-muted-foreground">
-          {{ t('accessGroups.noGroups') }}
+          {{ t('accessGroups.noMatchingGroups') }}
         </div>
-      </aside>
+      </AdminSection>
 
-      <div v-if="selectedGroup" class="min-w-0 divide-y px-4 sm:px-8">
+      <AdminSection v-if="selectedGroup" class="min-w-0" body-class="p-4">
         <section class="pb-4">
-          <div class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="min-w-0">
               <div class="flex flex-wrap items-center gap-2">
                 <h2 class="truncate text-lg font-semibold">{{ selectedGroup.name }}</h2>
@@ -363,189 +370,180 @@ onMounted(() => void loadOverview())
           </div>
         </section>
 
-        <div class="flex min-w-0 items-center gap-1 border-b pt-1" role="tablist" :aria-label="t('accessGroups.title')">
-          <button
-            type="button"
-            role="tab"
-            :aria-selected="activePanel === 'permissions'"
-            class="relative inline-flex items-center gap-2 rounded-t-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
-            :class="activePanel === 'permissions' ? 'bg-muted/70 text-foreground' : ''"
-            @click="activePanel = 'permissions'"
-          >
-            <LockKeyhole class="size-4" />
-            {{ t('accessGroups.categoryPermissions') }}
-          </button>
-          <button
-            v-if="!selectedGroup.systemKey"
-            type="button"
-            role="tab"
-            :aria-selected="activePanel === 'members'"
-            class="relative inline-flex items-center gap-2 rounded-t-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
-            :class="activePanel === 'members' ? 'bg-muted/70 text-foreground' : ''"
-            @click="activePanel = 'members'"
-          >
-            <UsersRound class="size-4" />
-            {{ t('accessGroups.members') }}
-            <span v-if="pendingMemberCount(selectedGroup)" class="size-1.5 rounded-full bg-amber-500" />
-          </button>
-          <p v-if="activePanel === 'permissions'" class="ml-auto hidden truncate px-2 text-xs text-muted-foreground lg:block">
-            {{ t('accessGroups.permissionSummaryHint') }}
-          </p>
-          <Button v-if="activePanel === 'permissions'" variant="outline" size="sm" class="mb-1 ml-2" as-child>
-            <RouterLink to="/admin/categories">
-              <Pencil class="size-3.5" />{{ t('accessGroups.manageCategoryPermissions') }}
-            </RouterLink>
-          </Button>
-        </div>
-
-        <section v-if="activePanel === 'permissions'" class="py-4">
-          <div class="overflow-hidden rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{{ t('accessGroups.category') }}</TableHead>
-                <TableHead>{{ t('accessGroups.visibility') }}</TableHead>
-                <TableHead class="w-52">{{ t('accessGroups.capability') }}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableEmpty v-if="!overview.categories.length" :colspan="3">{{
-                t('accessGroups.noCategories')
-              }}</TableEmpty>
-              <TableRow v-for="category in overview.categories" :key="category.id" class="hover:bg-muted/35">
-                <TableCell>
-                  <div class="flex min-w-44 items-center gap-2.5">
-                    <span
-                      class="size-2.5 shrink-0 rounded-[3px] ring-1 ring-black/10"
-                      :style="{ backgroundColor: category.color || '#64748b' }"
-                    />
-                    <span class="font-medium">{{ category.name }}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge :variant="category.isRestricted ? 'secondary' : 'outline'">
-                    <LockKeyhole v-if="category.isRestricted" class="size-3" />
-                    <Check v-else class="size-3" />
-                    {{ t(category.isRestricted ? 'accessGroups.restricted' : 'accessGroups.public') }}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">{{ levelLabel(grantLevel(selectedGroup, category.id)) }}</Badge>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+        <Tabs v-model="activePanel" class="min-w-0 gap-4">
+          <div class="min-w-0 overflow-x-auto pb-1">
+            <TabsList :aria-label="t('accessGroups.title')">
+              <TabsTrigger value="permissions">
+                <LockKeyhole class="size-4" />
+                {{ t('accessGroups.categoryPermissions') }}
+              </TabsTrigger>
+              <TabsTrigger v-if="!selectedGroup.systemKey" value="members">
+                <UsersRound class="size-4" />
+                {{ t('accessGroups.members') }}
+                <Badge v-if="pendingMemberCount(selectedGroup)" variant="secondary">{{ pendingMemberCount(selectedGroup) }}</Badge>
+              </TabsTrigger>
+            </TabsList>
           </div>
-        </section>
 
-        <section v-if="!selectedGroup.systemKey && activePanel === 'members'" class="pt-4">
-          <header class="mb-3 flex items-center justify-between gap-3 border-b pb-3">
-            <p class="text-sm text-muted-foreground">{{ t('accessGroups.memberHint') }}</p>
-          </header>
-          <form
-            class="grid gap-3 border-b bg-muted/10 p-3 sm:grid-cols-[minmax(12rem,1fr)_10rem_auto] sm:items-end"
-            @submit.prevent="addMember"
-          >
-            <label class="grid gap-1.5 text-xs font-medium text-muted-foreground">
-              {{ t('accessGroups.username') }}
-              <Input
-                v-model="memberUsername"
-                :disabled="memberSaving || selectedGroup.status !== 1"
-                :placeholder="t('accessGroups.usernamePlaceholder')"
-              />
-            </label>
-            <label class="grid gap-1.5 text-xs font-medium text-muted-foreground">
-              {{ t('accessGroups.role') }}
-              <Select
-                :model-value="memberRole"
-                :disabled="memberSaving || selectedGroup.status !== 1"
-                @update:model-value="updateMemberRole"
+          <TabsContent value="permissions" class="min-w-0">
+            <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-xs text-muted-foreground">{{ t('accessGroups.permissionSummaryHint') }}</p>
+              <Button variant="outline" size="sm" class="self-start" as-child>
+                <RouterLink to="/admin/categories">
+                  <Pencil class="size-3.5" />{{ t('accessGroups.manageCategoryPermissions') }}
+                </RouterLink>
+              </Button>
+            </div>
+            <AdminSection>
+              <Table>
+                <TableHeader class="bg-muted/45">
+                  <TableRow>
+                    <TableHead class="h-11 px-4 text-xs text-muted-foreground">{{ t('accessGroups.category') }}</TableHead>
+                    <TableHead class="h-11 px-4 text-xs text-muted-foreground">{{ t('accessGroups.visibility') }}</TableHead>
+                    <TableHead class="h-11 px-4 text-xs text-muted-foreground w-52">{{ t('accessGroups.capability') }}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow v-if="!overview.categories.length">
+                    <TableCell :colspan="3" class="h-28 px-4 text-center text-muted-foreground">{{ t('accessGroups.noCategories') }}</TableCell>
+                  </TableRow>
+                  <TableRow v-for="category in overview.categories" :key="category.id" class="hover:bg-muted/35">
+                    <TableCell class="px-4 py-3">
+                      <div class="flex min-w-44 items-center gap-2.5">
+                        <span
+                          class="size-2.5 shrink-0 rounded-[3px] ring-1 ring-black/10"
+                          :style="{ backgroundColor: category.color || '#64748b' }"
+                        />
+                        <span class="font-medium">{{ category.name }}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell class="px-4 py-3">
+                      <Badge :variant="category.isRestricted ? 'secondary' : 'outline'">
+                        <LockKeyhole v-if="category.isRestricted" class="size-3" />
+                        <Check v-else class="size-3" />
+                        {{ t(category.isRestricted ? 'accessGroups.restricted' : 'accessGroups.public') }}
+                      </Badge>
+                    </TableCell>
+                    <TableCell class="px-4 py-3">
+                      <Badge variant="outline">{{ levelLabel(grantLevel(selectedGroup, category.id)) }}</Badge>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </AdminSection>
+          </TabsContent>
+
+          <TabsContent v-if="!selectedGroup.systemKey" value="members" class="min-w-0">
+            <header class="mb-3">
+              <p class="text-sm text-muted-foreground">{{ t('accessGroups.memberHint') }}</p>
+            </header>
+            <AdminSection>
+              <form
+                class="grid gap-3 border-b bg-muted/20 p-3 2xl:grid-cols-[minmax(0,1fr)_10rem_auto] 2xl:items-end"
+                @submit.prevent="addMember"
               >
-                <SelectTrigger class="w-full"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="member">{{ t('accessGroups.memberRole.member') }}</SelectItem>
-                  <SelectItem value="manager">{{ t('accessGroups.memberRole.manager') }}</SelectItem>
-                </SelectContent>
-              </Select>
-            </label>
-            <Button type="submit" :disabled="memberSaving || selectedGroup.status !== 1 || !memberUsername.trim()">
-              <UserPlus class="size-4" />{{ memberSaving ? t('common.saving') : t('accessGroups.addMember') }}
-            </Button>
-          </form>
-          <div class="overflow-hidden rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{{ t('accessGroups.member') }}</TableHead>
-                <TableHead>{{ t('accessGroups.role') }}</TableHead>
-                <TableHead>{{ t('accessGroups.status') }}</TableHead>
-                <TableHead class="w-44 text-right">{{ t('accessGroups.actions') }}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableEmpty v-if="!selectedMembers.length" :colspan="4">{{ t('accessGroups.noMembers') }}</TableEmpty>
-              <TableRow v-for="member in selectedMembers" :key="member.id" class="hover:bg-muted/35">
-                <TableCell>
-                  <div class="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarImage v-if="member.avatarUrl" :src="member.avatarUrl" :alt="member.username" />
-                      <AvatarFallback class="text-xs font-semibold">{{ memberInitial(member) }}</AvatarFallback>
-                    </Avatar>
-                    <div class="min-w-0">
-                      <div class="truncate font-medium">{{ member.username || `#${member.userId}` }}</div>
-                      <div class="font-mono text-xs text-muted-foreground">ID {{ member.userId }}</div>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell
-                  ><Badge variant="outline">{{ t(`accessGroups.memberRole.${member.memberRole}`) }}</Badge></TableCell
-                >
-                <TableCell>
-                  <Badge :variant="member.status === 2 ? 'secondary' : 'outline'">
-                    <Clock3 v-if="member.status === 2" class="size-3" />
-                    <Check v-else class="size-3" />
-                    {{ t(member.status === 2 ? 'accessGroups.pending' : 'accessGroups.active') }}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div class="flex justify-end gap-2">
-                    <template v-if="member.status === 2">
-                      <AdminActionButton
-                        :disabled="reviewingMemberId !== 0"
-                        @click="reviewApplication(member.id, false)"
-                        >{{ t('accessGroups.reject') }}</AdminActionButton
-                      >
-                      <AdminActionButton
-                        tone="success"
-                        :disabled="reviewingMemberId !== 0"
-                        @click="reviewApplication(member.id, true)"
-                        >{{ t('accessGroups.approve') }}</AdminActionButton
-                      >
-                    </template>
-                    <AdminActionButton
-                      v-else
-                      compact
-                      tone="danger"
-                      :title="t('accessGroups.removeMember')"
-                      @click="deletingMember = { groupId: selectedGroup.id, member }"
+                <label class="grid gap-1.5 text-xs font-medium text-muted-foreground">
+                  {{ t('accessGroups.username') }}
+                  <Input
+                    v-model="memberUsername"
+                    :disabled="memberSaving || selectedGroup.status !== 1"
+                    :placeholder="t('accessGroups.usernamePlaceholder')"
+                  />
+                </label>
+                <label class="grid gap-1.5 text-xs font-medium text-muted-foreground">
+                  {{ t('accessGroups.role') }}
+                  <Select
+                    :model-value="memberRole"
+                    :disabled="memberSaving || selectedGroup.status !== 1"
+                    @update:model-value="updateMemberRole"
+                  >
+                    <SelectTrigger class="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="member">{{ t('accessGroups.memberRole.member') }}</SelectItem>
+                      <SelectItem value="manager">{{ t('accessGroups.memberRole.manager') }}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </label>
+                <Button type="submit" :disabled="memberSaving || selectedGroup.status !== 1 || !memberUsername.trim()">
+                  <UserPlus class="size-4" />{{ memberSaving ? t('common.saving') : t('accessGroups.addMember') }}
+                </Button>
+              </form>
+              <Table>
+                <TableHeader class="bg-muted/45">
+                  <TableRow>
+                    <TableHead class="h-11 px-4 text-xs text-muted-foreground">{{ t('accessGroups.member') }}</TableHead>
+                    <TableHead class="h-11 px-4 text-xs text-muted-foreground">{{ t('accessGroups.role') }}</TableHead>
+                    <TableHead class="h-11 px-4 text-xs text-muted-foreground">{{ t('accessGroups.status') }}</TableHead>
+                    <TableHead class="h-11 px-4 text-xs text-muted-foreground w-44 text-right">{{ t('accessGroups.actions') }}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow v-if="!selectedMembers.length">
+                    <TableCell :colspan="4" class="h-28 px-4 text-center text-muted-foreground">{{ t('accessGroups.noMembers') }}</TableCell>
+                  </TableRow>
+                  <TableRow v-for="member in selectedMembers" :key="member.id" class="hover:bg-muted/35">
+                    <TableCell class="px-4 py-3">
+                      <div class="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarImage v-if="member.avatarUrl" :src="member.avatarUrl" :alt="member.username" />
+                          <AvatarFallback class="text-xs font-semibold">{{ memberInitial(member) }}</AvatarFallback>
+                        </Avatar>
+                        <div class="min-w-0">
+                          <div class="truncate font-medium">{{ member.username || `#${member.userId}` }}</div>
+                          <div class="font-mono text-xs text-muted-foreground">ID {{ member.userId }}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell class="px-4 py-3"
+                      ><Badge variant="outline">{{ t(`accessGroups.memberRole.${member.memberRole}`) }}</Badge></TableCell
                     >
-                      <Trash2 class="size-3.5" />
-                    </AdminActionButton>
-                  </div>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          </div>
-        </section>
-      </div>
+                    <TableCell class="px-4 py-3">
+                      <Badge :variant="member.status === 2 ? 'secondary' : 'outline'">
+                        <Clock3 v-if="member.status === 2" class="size-3" />
+                        <Check v-else class="size-3" />
+                        {{ t(member.status === 2 ? 'accessGroups.pending' : 'accessGroups.active') }}
+                      </Badge>
+                    </TableCell>
+                    <TableCell class="px-4 py-3">
+                      <div class="flex justify-end gap-2">
+                        <template v-if="member.status === 2">
+                          <AdminActionButton
+                            :disabled="reviewingMemberId !== 0"
+                            @click="reviewApplication(member.id, false)"
+                            >{{ t('accessGroups.reject') }}</AdminActionButton
+                          >
+                          <AdminActionButton
+                            tone="success"
+                            :disabled="reviewingMemberId !== 0"
+                            @click="reviewApplication(member.id, true)"
+                            >{{ t('accessGroups.approve') }}</AdminActionButton
+                          >
+                        </template>
+                        <AdminActionButton
+                          v-else
+                          compact
+                          tone="danger"
+                          :title="t('accessGroups.removeMember')"
+                          @click="deletingMember = { groupId: selectedGroup.id, member }"
+                        >
+                          <Trash2 class="size-3.5" />
+                        </AdminActionButton>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </AdminSection>
+          </TabsContent>
+        </Tabs>
+      </AdminSection>
 
-      <div v-else class="grid min-h-64 place-items-center border-t px-8 text-center text-sm text-muted-foreground xl:col-start-2 xl:border-l xl:border-t-0">
-        <div>
-          <UsersRound class="mx-auto mb-3 size-8 opacity-40" />
-          {{ t('accessGroups.selectGroup') }}
-        </div>
-      </div>
+      <AdminSection v-else body-class="flex min-h-28 items-center justify-center p-4 text-center text-sm text-muted-foreground">
+        <p v-if="loading">{{ t('common.loadingShort') }}</p>
+        <p v-else-if="error">{{ t('common.loadFailed') }}</p>
+        <p v-else-if="!overview.groups.length">{{ t('accessGroups.noGroups') }}</p>
+        <p v-else>{{ t('accessGroups.selectGroup') }}</p>
+      </AdminSection>
     </div>
 
     <Dialog :open="groupDialogOpen" @update:open="(open) => !groupSaving && (groupDialogOpen = open)">

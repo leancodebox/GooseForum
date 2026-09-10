@@ -166,7 +166,7 @@ onMounted(() => {
 <template>
   <BasicPage :title="adminText('k0058')" :description="adminText('k0059')">
     <template #primary-action>
-      <Button type="button" @click="openCreate">
+      <Button size="sm" type="button" @click="openCreate">
         <Plus class="size-4" />
         {{ adminText('k005a') }}
       </Button>

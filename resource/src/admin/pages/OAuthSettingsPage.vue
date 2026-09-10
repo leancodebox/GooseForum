@@ -127,11 +127,11 @@ onMounted(load)
   <BasicPage :title="adminText('k00fl')" :description="adminText('k00fm')">
     <template #primary-action>
       <div class="flex items-center gap-2">
-        <Button type="button" variant="outline" @click="addProvider">
+        <Button size="sm" type="button" variant="outline" @click="addProvider">
           <Plus class="size-4" />
           {{ adminText('k00fn') }}
         </Button>
-        <Button type="button" :disabled="saving" @click="save">
+        <Button size="sm" type="button" :disabled="saving" @click="save">
           <Loader2 v-if="saving" class="size-4 animate-spin" />
           <Save v-else class="size-4" />
           {{ adminText('k004f') }}

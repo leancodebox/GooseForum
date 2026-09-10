@@ -282,7 +282,7 @@ onBeforeUnmount(clearSecret)
 <template>
   <BasicPage title="OIDC Provider" :description="adminText('oidcDescription')">
     <template #primary-action>
-      <Button type="button" @click="openCreate">
+      <Button size="sm" type="button" @click="openCreate">
         <Plus class="size-4" />
         {{ adminText('oidcCreate') }}
       </Button>

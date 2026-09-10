@@ -203,7 +203,7 @@ onMounted(() => {
 <template>
   <BasicPage :title="adminText('k004o')" :description="adminText('k004p')">
     <template #primary-action>
-      <Button type="button" :disabled="saving" @click="persist">
+      <Button size="sm" type="button" :disabled="saving" @click="persist">
         <Loader2 v-if="saving" class="size-4 animate-spin" />
         <Save v-else class="size-4" />
         {{ adminText('k004f') }}

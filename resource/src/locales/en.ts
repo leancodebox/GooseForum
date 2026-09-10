@@ -1270,6 +1270,7 @@ export default {
     restrictedCategoryCount: '{count} restricted categories',
     refreshing: 'Refreshing',
     noGroups: 'No access groups',
+    noMatchingGroups: 'No matching access groups. Try another keyword.',
     systemGroup: 'System group',
     disabled: 'Disabled',
     memberCount: '{count} members',

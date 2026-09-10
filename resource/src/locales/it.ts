@@ -1270,6 +1270,7 @@ export default {
     restrictedCategoryCount: '{count} categorie riservate',
     refreshing: 'Aggiornamento in corso',
     noGroups: 'Nessun gruppo di accesso',
+    noMatchingGroups: 'Nessun gruppo corrispondente. Prova un’altra parola chiave.',
     systemGroup: 'Gruppo di sistema',
     disabled: 'Disattivato',
     memberCount: '{count} membri',

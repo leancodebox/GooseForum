@@ -24,7 +24,7 @@ function switchLocale(nextLocale: Locale) {
 
 <template>
   <header class="sticky top-0 z-50 flex h-[4.5rem] shrink-0 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur transition-[width,height] ease-linear supports-[backdrop-filter]:bg-background/85 sm:gap-4">
-    <SidebarTrigger class="-ml-1 shrink-0" />
+    <SidebarTrigger class="-ml-1 size-8 shrink-0" />
     <Separator orientation="vertical" class="h-8 shrink-0" />
 
     <div id="admin-topbar-page-context" class="min-w-0 flex-1" />
@@ -34,13 +34,11 @@ function switchLocale(nextLocale: Locale) {
       class="flex max-w-[48vw] shrink-0 items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     />
 
-    <div class="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+    <div class="ml-auto flex shrink-0 items-center gap-2">
       <div class="relative hidden lg:block">
         <Button
-          variant="outline"
-          size="sm"
+          size="icon-sm"
           type="button"
-          class="text-muted-foreground"
           :aria-label="t('shell.switchLanguage')"
           :title="t('shell.switchLanguage')"
           @click="languageMenuOpen = !languageMenuOpen"
@@ -65,7 +63,7 @@ function switchLocale(nextLocale: Locale) {
           </Button>
         </div>
       </div>
-      <Button as-child class="hidden xl:inline-flex">
+      <Button as-child size="sm" class="hidden xl:inline-flex">
         <a href="/">
           <ArrowLeft class="size-4" />
           {{ adminText('k007y') }}
@@ -75,7 +73,7 @@ function switchLocale(nextLocale: Locale) {
         v-if="layout.viewer.isAuthenticated"
         :src="layout.viewer.avatarUrl"
         :alt="layout.viewer.username"
-        class="hidden size-9 rounded-full object-cover sm:block"
+        class="hidden size-8 rounded-full object-cover sm:block"
       />
     </div>
   </header>

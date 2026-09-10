@@ -158,8 +158,8 @@ onMounted(() => {
     :title="adminText('k004c')"
     :description="adminText('k004d')"
   >
-    <div class="mb-3 flex justify-end">
-      <div class="inline-flex max-w-full items-center gap-2 rounded-md border bg-muted/35 px-2.5 py-1 text-xs text-muted-foreground">
+    <template #primary-action>
+      <div class="inline-flex h-8 max-w-[48vw] items-center gap-1.5 rounded-md border bg-muted/35 px-2.5 text-sm text-muted-foreground">
         <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
         <span class="shrink-0">{{ adminText('k002q') }}</span>
         <span class="truncate font-semibold text-foreground">{{ serverVersionLoading ? adminText('k004e') : serverVersion?.version || 'dev' }}</span>
@@ -173,7 +173,7 @@ onMounted(() => {
           #{{ shortCommit(serverVersion?.commit) }}
         </span>
       </div>
-    </div>
+    </template>
 
       <AdminSection class="mb-4">
         <div class="grid sm:grid-cols-2 xl:grid-cols-4">

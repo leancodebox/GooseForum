@@ -1270,6 +1270,7 @@ export default {
     restrictedCategoryCount: '制限付きカテゴリ {count} 件',
     refreshing: '更新中',
     noGroups: 'アクセスグループはありません',
+    noMatchingGroups: '一致するアクセスグループがありません。別のキーワードをお試しください。',
     systemGroup: 'システムグループ',
     disabled: '無効',
     memberCount: 'メンバー {count} 人',

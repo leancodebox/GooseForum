@@ -404,7 +404,7 @@ onMounted(() => {
 <template>
   <BasicPage :title="adminText('k005l')" :description="adminText('k0045')">
     <template v-if="canManageCategories" #primary-action>
-      <Button type="button" @click="openCreate">
+      <Button size="sm" type="button" @click="openCreate">
         <Plus class="size-4" />
         {{ adminText('k005m') }}
       </Button>
