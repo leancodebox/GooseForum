@@ -15,6 +15,7 @@ import {
   UserRound,
   UserPlus,
 } from '@lucide/vue'
+import { TooltipContent, TooltipPortal, TooltipProvider, TooltipRoot, TooltipTrigger } from 'reka-ui'
 import { followUser } from '@/runtime/api'
 import { formatDate, formatDateTime, formatNumber, timeAgo } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
@@ -307,39 +308,48 @@ function safeProfileUrl(value?: string) {
               <span v-if="page.props.user.lastActiveTime">{{ t('user.lastActive', { time: timeAgo(page.props.user.lastActiveTime) }) }}</span>
             </div>
 
-            <div v-if="websiteUrl || socialProfileLinks.length" class="flex flex-wrap items-center gap-0.5 sm:justify-end">
-              <a
-                v-if="websiteUrl"
-                :href="websiteUrl"
-                target="_blank"
-                rel="noopener noreferrer ugc"
-                class="group relative inline-flex h-8 w-8 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-200 hover:text-primary"
-                :title="page.props.user.websiteName || page.props.user.website"
-                :aria-label="page.props.user.websiteName || page.props.user.website"
-              >
-                <Bird class="h-5 w-5" />
-                <span class="gf-tooltip pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 max-w-40 -translate-x-1/2 truncate opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                  {{ page.props.user.websiteName || page.props.user.website }}
-                </span>
-              </a>
-              <a
-                v-for="item in socialProfileLinks"
-                :key="item.key"
-                :href="item.href"
-                target="_blank"
-                rel="noopener noreferrer ugc"
-                class="group relative inline-flex h-8 w-8 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-200 hover:text-primary"
-                :title="item.label"
-                :aria-label="item.label"
-              >
-                <svg class="h-4 w-4 fill-current" role="img" viewBox="0 0 24 24" aria-hidden="true">
-                  <path :d="item.icon.path" />
-                </svg>
-                <span class="gf-tooltip pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 max-w-40 -translate-x-1/2 truncate opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                  {{ item.label }}
-                </span>
-              </a>
-            </div>
+            <TooltipProvider :delay-duration="150">
+              <div v-if="websiteUrl || socialProfileLinks.length" class="flex flex-wrap items-center gap-0.5 sm:justify-end">
+                <TooltipRoot v-if="websiteUrl">
+                  <TooltipTrigger as-child>
+                    <a
+                      :href="websiteUrl"
+                      target="_blank"
+                      rel="noopener noreferrer ugc"
+                      class="inline-flex h-8 w-8 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-200 hover:text-primary"
+                      :aria-label="page.props.user.websiteName || page.props.user.website"
+                    >
+                      <Bird class="h-5 w-5" />
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent side="top" :side-offset="8" :collision-padding="16" class="gf-tooltip z-[90] max-w-[min(20rem,calc(100vw-2rem))] whitespace-normal break-words [overflow-wrap:anywhere]">
+                      {{ page.props.user.websiteName || page.props.user.website }}
+                    </TooltipContent>
+                  </TooltipPortal>
+                </TooltipRoot>
+                <TooltipRoot v-for="item in socialProfileLinks" :key="item.key">
+                  <TooltipTrigger as-child>
+                    <a
+                      :href="item.href"
+                      target="_blank"
+                      rel="noopener noreferrer ugc"
+                      class="inline-flex h-8 w-8 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-200 hover:text-primary"
+                      :aria-label="item.label"
+                    >
+                      <svg class="h-4 w-4 fill-current" role="img" viewBox="0 0 24 24" aria-hidden="true">
+                        <path :d="item.icon.path" />
+                      </svg>
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent side="top" :side-offset="8" :collision-padding="16" class="gf-tooltip z-[90] max-w-[min(20rem,calc(100vw-2rem))] whitespace-normal break-words [overflow-wrap:anywhere]">
+                      {{ item.label }}
+                    </TooltipContent>
+                  </TooltipPortal>
+                </TooltipRoot>
+              </div>
+            </TooltipProvider>
           </div>
 
         </div>
