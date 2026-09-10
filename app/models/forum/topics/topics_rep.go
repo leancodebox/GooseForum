@@ -10,31 +10,46 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
 	"gorm.io/gorm"
 )
 
 func SaveOrCreateById(entity *Entity) int64 {
+	var result *gorm.DB
 	if entity.Id == 0 {
-		return builder().Create(entity).RowsAffected
+		result = builder().Create(entity)
+	} else {
+		result = builder().Save(entity)
 	}
-
-	return builder().Save(entity).RowsAffected
+	if result.Error == nil {
+		topicrank.Notify(entity.Id)
+	}
+	return result.RowsAffected
 }
-
 func Create(entity *Entity) error {
-	return builder().Create(entity).Error
+	if err := builder().Create(entity).Error; err != nil {
+		return err
+	}
+	topicrank.Notify(entity.Id)
+	return nil
 }
-
-func Delete(entity *Entity) int64 {
-	return builder().Delete(entity).RowsAffected
-}
-
+func Delete(entity *Entity) int64 { return builder().Delete(entity).RowsAffected }
 func Save(entity *Entity) error {
-	return builder().Save(entity).Error
+	if err := SaveWithDB(builder(), entity); err != nil {
+		return err
+	}
+	topicrank.Notify(entity.Id)
+	return nil
 }
 
+// SaveWithDB leaves event publication to the caller after its transaction commits.
+func SaveWithDB(db *gorm.DB, entity *Entity) error { return db.Save(entity).Error }
 func SaveNoUpdate(entity *Entity) error {
-	return builder().Omit("updated_at").Save(entity).Error
+	if err := builder().Omit("updated_at").Save(entity).Error; err != nil {
+		return err
+	}
+	topicrank.Notify(entity.Id)
+	return nil
 }
 
 func Get(id uint64) (entity Entity) {
@@ -299,8 +314,8 @@ func sortTopicPageEntities(list []Entity, sortKey string) {
 		left, right := list[i], list[j]
 		switch sortKey {
 		case "hot":
-			if left.ReplyCount != right.ReplyCount {
-				return left.ReplyCount > right.ReplyCount
+			if left.RankScore != right.RankScore {
+				return left.RankScore > right.RankScore
 			}
 		case "popular":
 			if left.ViewCount != right.ViewCount {
@@ -393,7 +408,7 @@ func PageForModeration(q ModerationPageQuery) struct {
 }
 
 func UpdateProcessStatus(id uint64, processStatus int8) error {
-	return builder().Where(queryopt.Eq("id", id)).UpdateColumn("process_status", processStatus).Error
+	return builder().Where(queryopt.Eq("id", id)).Updates(map[string]any{"process_status": processStatus, "next_rank_at": time.Now()}).Error
 }
 
 func UpdatePinWeight(id uint64, pinWeight int) error {
@@ -479,7 +494,7 @@ func ReservePostSequenceWithDB(db *gorm.DB, topicId uint64) (uint64, error) {
 func applyPageSort(b *gorm.DB, sort string) *gorm.DB {
 	switch sort {
 	case "hot":
-		return b.Order(queryopt.Desc("topics.reply_count")).Order(queryopt.Desc("topics.id"))
+		return b.Order(queryopt.Desc("topics.rank_score")).Order(queryopt.Desc("topics.id"))
 	case "popular":
 		return b.Order(queryopt.Desc("topics.view_count")).Order(queryopt.Desc("topics.id"))
 	case "new":

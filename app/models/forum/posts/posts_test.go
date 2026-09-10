@@ -1,6 +1,7 @@
 package posts
 
 import (
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"testing"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 
 func TestPostRepositoryWindows(t *testing.T) {
 	conn := dbconnect.Connect()
-	if err := conn.AutoMigrate(&Entity{}); err != nil {
+	if err := conn.AutoMigrate(&Entity{}, &topics.Entity{}); err != nil {
 		t.Fatalf("migrate posts: %v", err)
 	}
 	conn.Where("1 = 1").Delete(&Entity{})

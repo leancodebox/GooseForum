@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
 	"gorm.io/gorm"
 )
 
@@ -20,15 +21,23 @@ func SaveNoUpdate(entity *Entity) error {
 }
 
 func Create(entity *Entity) error {
-	return CreateWithDB(builder(), entity)
+	if err := CreateWithDB(builder(), entity); err != nil {
+		return err
+	}
+	topicrank.Notify(entity.TopicId)
+	return nil
 }
 
-func CreateWithDB(db *gorm.DB, entity *Entity) error {
-	return db.Create(entity).Error
-}
+// CreateWithDB leaves event publication to the transaction owner.
+func CreateWithDB(db *gorm.DB, entity *Entity) error { return db.Create(entity).Error }
 
 func Save(entity *Entity) error {
-	return builder().Save(entity).Error
+	db := builder()
+	if err := db.Save(entity).Error; err != nil {
+		return err
+	}
+	topicrank.Notify(entity.TopicId)
+	return nil
 }
 
 func Get(id uint64) (entity Entity) {
@@ -62,11 +71,24 @@ func GetMapByIds(ids []uint64) map[uint64]*Entity {
 }
 
 func UpdateProcessStatus(id uint64, processStatus int8) error {
-	return builder().Where(queryopt.Eq("id", id)).Update("process_status", processStatus).Error
+	db := builder()
+	var entity Entity
+	if err := db.First(&entity, id).Error; err != nil {
+		return err
+	}
+	if err := builder().Where("id = ?", id).Update("process_status", processStatus).Error; err != nil {
+		return err
+	}
+	topicrank.Notify(entity.TopicId)
+	return nil
 }
 
 func DeleteEntity(entity *Entity) int64 {
-	return builder().Delete(entity).RowsAffected
+	result := builder().Delete(entity)
+	if result.Error == nil && result.RowsAffected > 0 {
+		topicrank.Notify(entity.TopicId)
+	}
+	return result.RowsAffected
 }
 
 func GetFirstPageByTopicId(topicId uint64) (entities []*Entity) {

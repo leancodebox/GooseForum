@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
 	"gorm.io/gorm/clause"
 )
 
@@ -27,7 +28,11 @@ func GetByTopicId(userId, topicId any) (entity Entity) {
 }
 
 func SetLiked(userId, topicId uint64, liked bool) bool {
-	return setAt(userId, topicId, "liked_at", timeForState(liked))
+	changed := setAt(userId, topicId, "liked_at", timeForState(liked))
+	if changed {
+		topicrank.Notify(topicId)
+	}
+	return changed
 }
 
 func SetBookmarked(userId, topicId uint64, bookmarked bool) bool {

@@ -49,7 +49,7 @@ func TestTopicAndPostSchemaMigrates(t *testing.T) {
 	for _, index := range []string{
 		"idx_topics_main_category",
 		"idx_topics_list_default",
-		"idx_topics_list_hot",
+		"idx_topics_list_rank",
 		"idx_topics_list_popular",
 		"idx_topics_list_new",
 	} {

@@ -7,6 +7,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserStat"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/samber/lo"
 	"gorm.io/gorm"
@@ -21,7 +22,7 @@ func CreateTopicPost(entity *posts.Entity, topicEntity topics.Entity) error {
 	lock.Lock()
 	defer lock.Unlock()
 
-	return dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
+	err := dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
 		postNo, err := topics.ReservePostSequenceWithDB(tx, entity.TopicId)
 		if err != nil {
 			return err
@@ -40,6 +41,10 @@ func CreateTopicPost(entity *posts.Entity, topicEntity topics.Entity) error {
 		posters := buildPosters(topicEntity.UserId, activeUserIDs)
 		return topics.IncrementPostFastWithDB(tx, topicEntity.Id, posters, entity.Id, entity.CreatedAt)
 	})
+	if err == nil {
+		topicrank.Notify(entity.TopicId)
+	}
+	return err
 }
 
 func SyncTopicPostStats(topicEntity topics.Entity, postEntity posts.Entity, isDelete bool) {

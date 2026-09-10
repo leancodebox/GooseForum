@@ -2,6 +2,8 @@ package migration
 
 import (
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
+	"github.com/leancodebox/GooseForum/app/service/topicrankservice"
 	"log/slog"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
@@ -282,6 +284,15 @@ func runVersionedDataMigrations() error {
 			return err
 		}
 		currentVersion = 21
+	}
+	if currentVersion < 22 {
+		if err := topicrankservice.Backfill(dbconnect.Connect()); err != nil {
+			return fmt.Errorf("backfill topic ranks: %w", err)
+		}
+		if err := syncMigrationVersion(22); err != nil {
+			return err
+		}
+		currentVersion = 22
 	}
 	slog.Info("app migration end", "version", currentVersion)
 	return nil

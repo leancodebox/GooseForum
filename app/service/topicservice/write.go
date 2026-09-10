@@ -8,6 +8,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"gorm.io/gorm"
@@ -70,14 +71,14 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 			input.Topic.LastPostId = input.FirstPost.Id
 			now := time.Now()
 			input.Topic.LastPostedAt = &now
-			if err := tx.Save(input.Topic).Error; err != nil {
+			if err := topics.SaveWithDB(tx, input.Topic); err != nil {
 				return err
 			}
 		} else {
 			if input.Topic.Id == 0 || input.FirstPost.Id == 0 || input.FirstPost.TopicId != input.Topic.Id {
 				return errors.New("existing topic and first post are inconsistent")
 			}
-			if err := tx.Save(input.Topic).Error; err != nil {
+			if err := topics.SaveWithDB(tx, input.Topic); err != nil {
 				return err
 			}
 			if err := tx.Save(input.FirstPost).Error; err != nil {
@@ -88,6 +89,7 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 	}); err != nil {
 		return err
 	}
+	topicrank.Notify(input.Topic.Id)
 	return adjustCategoryTopicCounts(conn, oldPublished, oldCategoryIDs, isCountedTopic(input.Topic), categoryIDs)
 }
 
@@ -146,9 +148,14 @@ func UpdateTopicStatusWithDB(conn *gorm.DB, topic *topics.Entity, nextStatus int
 		return nil
 	}
 	wasCounted := isCountedTopic(topic)
-	result := conn.Model(&topics.Entity{}).
+	result := conn.Table("topics").
 		Where("id = ? AND status = ?", topic.Id, previousStatus).
-		Update("status", nextStatus)
+		Updates(map[string]any{
+			"status":       nextStatus,
+			"updated_at":   time.Now(),
+			"next_rank_at": time.Now(),
+			"published_at": gorm.Expr("CASE WHEN published_at IS NULL AND ? = 1 THEN ? ELSE published_at END", nextStatus, time.Now()),
+		})
 	if result.Error != nil {
 		return result.Error
 	}
@@ -172,9 +179,12 @@ func UpdateTopicProcessStatusWithDB(conn *gorm.DB, topic *topics.Entity, nextSta
 		return nil
 	}
 	wasCounted := isCountedTopic(topic)
-	result := conn.Model(&topics.Entity{}).
+	result := conn.Table("topics").
 		Where("id = ? AND process_status = ?", topic.Id, previousStatus).
-		UpdateColumn("process_status", nextStatus)
+		UpdateColumns(map[string]any{
+			"process_status": nextStatus,
+			"next_rank_at":   time.Now(),
+		})
 	if result.Error != nil {
 		return result.Error
 	}

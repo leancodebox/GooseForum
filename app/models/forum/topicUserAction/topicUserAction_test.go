@@ -1,6 +1,7 @@
 package topicUserAction
 
 import (
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"reflect"
 	"testing"
 	"time"
@@ -10,7 +11,7 @@ import (
 
 func TestTopicUserActionRepositoryParity(t *testing.T) {
 	conn := dbconnect.Connect()
-	if err := conn.AutoMigrate(&Entity{}); err != nil {
+	if err := conn.AutoMigrate(&Entity{}, &topics.Entity{}); err != nil {
 		t.Fatalf("migrate topic user action: %v", err)
 	}
 	conn.Where("1 = 1").Delete(&Entity{})
