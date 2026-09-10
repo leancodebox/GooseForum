@@ -10,8 +10,7 @@
     <ol class="gf-crawler-topic-items">
     {{range .Topics}}
     <li class="gf-crawler-topic-row">
-        <div class="gf-crawler-topic-main">
-            <article>
+        <article class="gf-crawler-topic-main">
             <h2 class="gf-crawler-topic-title"><a href="{{.URL}}" rel="bookmark">{{.Title}}</a></h2>
             {{if or .Author.Username .Categories}}
             <p class="gf-crawler-topic-meta">
@@ -20,8 +19,7 @@
             </p>
             {{end}}
             {{if .Description}}<p class="gf-crawler-topic-excerpt">{{.Description}}</p>{{end}}
-            </article>
-        </div>
+        </article>
         <div class="gf-crawler-topic-number"><span class="gf-crawler-visually-hidden">{{ t $.Lang "replies" }}: </span>{{.ReplyCount}}</div>
         <div class="gf-crawler-topic-number"><span class="gf-crawler-visually-hidden">{{ t $.Lang "views" }}: </span>{{.ViewCount}}</div>
         <div class="gf-crawler-topic-activity"><span class="gf-crawler-visually-hidden">{{ t $.Lang "activity" }}: </span>{{if .LastUpdateTime}}<time>{{.LastUpdateTime}}</time>{{else if .ActivityText}}<time>{{.ActivityText}}</time>{{end}}</div>

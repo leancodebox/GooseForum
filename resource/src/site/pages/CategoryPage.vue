@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Plus, UsersRound } from '@lucide/vue'
-import { fetchPage } from '@/runtime/router'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
 import TopicListFooter from '@/site/components/TopicListFooter.vue'
 import TopicListModeSwitch from '@/site/components/TopicListModeSwitch.vue'
 import TopicList from '@/site/components/TopicList.vue'
-import { useTopicListMode } from '@/site/composables/useTopicListMode'
-import type { CategoryPageProps, LayoutPayload, PagePayload, TopicPayload } from '@gooseforum/client'
+import { useTopicList } from '@/site/composables/useTopicList'
+import type { CategoryPageProps, LayoutPayload } from '@gooseforum/client'
 
 const page = defineProps<{
   layout: LayoutPayload
@@ -17,69 +15,7 @@ const page = defineProps<{
   pageUrl: string
 }>()
 const { t } = useI18n()
-const { mode: listMode, setMode: setListMode } = useTopicListMode()
-
-const topics = ref<TopicPayload[]>([])
-const pagination = ref<CategoryPageProps['pagination']>(page.props.pagination)
-const loadingMore = ref(false)
-const loadError = ref('')
-const loadMoreSentinel = ref<HTMLElement | null>(null)
-let observer: IntersectionObserver | undefined
-
-const hasTopics = computed(() => topics.value.length > 0)
-const isWaterfallMode = computed(() => listMode.value === 'waterfall')
-
-watch(
-  () => page.pageUrl,
-  () => {
-    topics.value = [...page.props.topics]
-    pagination.value = page.props.pagination
-    loadError.value = ''
-    void nextTick(observeSentinel)
-  },
-  { immediate: true },
-)
-
-watch(
-  () => page.props.topics,
-  (incoming) => {
-    const unseenByID = new Map(incoming.map((topic) => [topic.id, topic.unseen]))
-    topics.value = topics.value.map((topic) =>
-      unseenByID.has(topic.id) ? { ...topic, unseen: unseenByID.get(topic.id) } : topic,
-    )
-  },
-)
-
-watch(listMode, (mode) => {
-  if (mode === 'pagination') {
-    observer?.disconnect()
-    topics.value = [...page.props.topics]
-    pagination.value = page.props.pagination
-    return
-  }
-  void nextTick(observeSentinel)
-})
-
-async function loadMore() {
-  if (!isWaterfallMode.value || loadingMore.value || !pagination.value.hasNext || !pagination.value.nextUrl) return
-
-  loadingMore.value = true
-  loadError.value = ''
-  try {
-    const payload = (await fetchPage(new URL(pagination.value.nextUrl, window.location.origin))) as PagePayload<CategoryPageProps>
-    topics.value = mergeTopics(topics.value, payload.props.topics)
-    pagination.value = payload.props.pagination
-  } catch (error) {
-    loadError.value = error instanceof Error ? error.message : t('common.loadFailed')
-  } finally {
-    loadingMore.value = false
-  }
-}
-
-function mergeTopics(current: TopicPayload[], incoming: TopicPayload[]) {
-  const seen = new Set(current.map((topic) => topic.id))
-  return [...current, ...incoming.filter((topic) => !seen.has(topic.id))]
-}
+const { topics, pagination, hasTopics, listMode, setListMode, loadingMore, loadError, loadMoreSentinel, loadMore } = useTopicList(page)
 
 function sortTabLabel(key: string, fallback?: string) {
   if (key === 'latest') return t('topicList.tabs.latestReplies')
@@ -88,30 +24,6 @@ function sortTabLabel(key: string, fallback?: string) {
   if (key === 'popular') return t('topicList.tabs.popular')
   return fallback || key
 }
-
-function observeSentinel() {
-  observer?.disconnect()
-  if (!isWaterfallMode.value || !loadMoreSentinel.value || !('IntersectionObserver' in window)) return
-  observer = new IntersectionObserver(
-    (entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) void loadMore()
-    },
-    { rootMargin: '480px 0px' },
-  )
-  observer.observe(loadMoreSentinel.value)
-}
-
-onMounted(observeSentinel)
-onActivated(() => {
-  void nextTick(observeSentinel)
-})
-onDeactivated(() => {
-  observer?.disconnect()
-})
-
-onBeforeUnmount(() => {
-  observer?.disconnect()
-})
 
 </script>
 
@@ -127,17 +39,18 @@ onBeforeUnmount(() => {
       <section class="gf-card overflow-hidden">
         <div class="gf-home-topic-toolbar">
           <div class="gf-home-topic-tools">
-            <div class="gf-home-topic-tabs">
+            <nav class="gf-home-topic-tabs" :aria-label="t('topicList.columns.topic')">
               <a
                 v-for="tab in page.props.tabs"
                 :key="tab.key"
                 :href="tab.url"
+                :aria-current="tab.active ? 'page' : undefined"
                 class="gf-tab"
                 :class="tab.active ? 'gf-tab-active' : 'gf-tab-idle'"
               >
                 {{ sortTabLabel(tab.key, tab.label) }}
               </a>
-            </div>
+            </nav>
             <TopicListModeSwitch :model-value="listMode" @update:model-value="setListMode" />
           </div>
           <a href="/publish" class="gf-button gf-button-md gf-button-primary shrink-0 whitespace-nowrap px-3 sm:h-8">

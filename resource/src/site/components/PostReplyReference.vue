@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { ChevronDown, ChevronUp } from '@lucide/vue'
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { vContentEnhancements } from '@/runtime/content-enhancements'
+import { postURL } from '@/runtime/post-url'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import type { ReplyTargetPayload } from '@gooseforum/client'
 
 const props = defineProps<{
+  topicId: number
   target?: ReplyTargetPayload
 }>()
 
 const { t } = useI18n()
+const sourceURL = computed(() => props.target && !props.target.unavailable && props.target.postNo
+  ? postURL(props.topicId, props.target.postNo, props.target.id)
+  : undefined)
 const expanded = ref(false)
 const overflowing = ref(false)
 const contentEl = ref<HTMLElement | null>(null)
@@ -63,14 +68,14 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
         class="h-6 w-6 rounded-full object-cover ring-1 ring-line"
       />
       <span v-if="target?.author.username" class="min-w-0 truncate font-medium text-base-content/75">@{{ target.author.username }}</span>
-      <span v-if="target?.postNo" class="shrink-0 text-xs text-base-content/45">#{{ target.postNo }}</span>
+      <a v-if="sourceURL" :href="sourceURL" class="shrink-0 text-xs text-base-content/45">#{{ target?.postNo }}</a>
     </div>
 
     <div v-if="!target || target.unavailable" class="px-3 pt-2 text-sm text-base-content/45">
       {{ t('topic.replyTargetUnavailable') }}
     </div>
     <template v-else>
-      <blockquote class="m-0 px-3 pt-2">
+      <blockquote :cite="sourceURL" class="m-0 px-3 pt-2">
         <div
           ref="contentEl"
           class="gf-prose gf-prose-post"

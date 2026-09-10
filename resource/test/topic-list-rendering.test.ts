@@ -24,8 +24,8 @@ describe('topic discovery markup', () => {
   it('renders complete table rows with heading and real detail/category links', async () => {
     const html = await render(h(TopicList, { topics: [topic] }))
     expect(html).toMatch(/<table[^>]*>[\s\S]*<thead>[\s\S]*<th scope="col"/)
-    expect(html).toMatch(/<tbody[^>]*>[\s\S]*<tr[^>]*>[\s\S]*<td/)
-    expect(html.match(/<td[ >]/g)).toHaveLength(5)
+    expect(html).toMatch(/<tbody[^>]*>[\s\S]*<tr[^>]*>[\s\S]*<th scope="row"/)
+    expect(html.match(/<td[ >]/g)).toHaveLength(4)
     expect(html).toMatch(/<h2[^>]*>[\s\S]*<a href="\/p\/post\/529" rel="bookmark"/)
     expect(html).toContain('href="/c/Coding/4"')
     expect(html).toContain('<time datetime="2026-09-09T12:00:00Z">')

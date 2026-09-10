@@ -30,7 +30,7 @@ const { t } = useI18n()
       topic.pinWeight > 0 ? 'gf-topic-row-pinned' : '',
     ]"
   >
-    <td class="min-w-0">
+    <th scope="row" class="min-w-0 text-left font-normal">
       <div class="flex min-h-6 min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
         <h2 class="m-0 inline-flex min-w-0 max-w-full items-center gap-2">
           <Pin
@@ -51,6 +51,7 @@ const { t } = useI18n()
           v-for="category in showCategories ? topic.categories : []"
           :key="category.id"
           :href="category.url"
+          rel="tag"
           class="gf-topic-chip"
           :style="{ '--gf-topic-chip-color': category.color || 'var(--gf-color-primary)' }"
         >
@@ -70,7 +71,7 @@ const { t } = useI18n()
         </a>
         <slot name="mobile-action" :topic="topic" />
       </div>
-    </td>
+    </th>
     <td class="hidden justify-center lg:flex">
       <AvatarStack :users="topic.participants" />
     </td>

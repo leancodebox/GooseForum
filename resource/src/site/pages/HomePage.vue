@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Bell, Mail, Plus, UsersRound } from '@lucide/vue'
-import { fetchPage } from '@/runtime/router'
 import EmptyState from '@/site/components/EmptyState.vue'
 import TopicListFooter from '@/site/components/TopicListFooter.vue'
 import TopicListModeSwitch from '@/site/components/TopicListModeSwitch.vue'
 import TopicList from '@/site/components/TopicList.vue'
-import { useTopicListMode } from '@/site/composables/useTopicListMode'
-import type { HomeProps, LayoutPayload, PagePayload, TopicPayload } from '@gooseforum/client'
+import { useTopicList } from '@/site/composables/useTopicList'
+import type { HomeProps, LayoutPayload } from '@gooseforum/client'
 
 const page = defineProps<{
   layout: LayoutPayload
@@ -16,78 +15,17 @@ const page = defineProps<{
   pageUrl: string
 }>()
 const { t } = useI18n()
-const { mode: listMode, setMode: setListMode } = useTopicListMode()
+const { topics, pagination, hasTopics, listMode, setListMode, loadingMore, loadError, loadMoreSentinel, loadMore } = useTopicList(page)
+
 const announcementReadStorageKey = 'goose:announcement:last-read-published-at'
 const announcementReminderWindow = 7 * 24 * 60 * 60 * 1000
-
-const topics = ref<TopicPayload[]>([])
-const pagination = ref<HomeProps['pagination']>(page.props.pagination)
-const loadingMore = ref(false)
-const loadError = ref('')
-const loadMoreSentinel = ref<HTMLElement | null>(null)
 const announcementUnread = ref(shouldRemindAnnouncement())
-let observer: IntersectionObserver | undefined
-
-const hasTopics = computed(() => topics.value.length > 0)
 const showPinnedLabels = computed(() => page.props.sort === '' || page.props.sort === 'latest')
-const isWaterfallMode = computed(() => listMode.value === 'waterfall')
-
-watch(
-  () => page.pageUrl,
-  () => {
-    topics.value = [...page.props.topics]
-    pagination.value = page.props.pagination
-    loadError.value = ''
-    void nextTick(observeSentinel)
-  },
-  { immediate: true },
-)
-
-watch(
-  () => page.props.topics,
-  (incoming) => {
-    const unseenByID = new Map(incoming.map((topic) => [topic.id, topic.unseen]))
-    topics.value = topics.value.map((topic) =>
-      unseenByID.has(topic.id) ? { ...topic, unseen: unseenByID.get(topic.id) } : topic,
-    )
-  },
-)
 
 watch(
   () => [page.props.announcement.enabled, page.props.announcement.publishedAt] as const,
   () => refreshAnnouncementReminder(),
 )
-
-watch(listMode, (mode) => {
-  if (mode === 'pagination') {
-    observer?.disconnect()
-    topics.value = [...page.props.topics]
-    pagination.value = page.props.pagination
-    return
-  }
-  void nextTick(observeSentinel)
-})
-
-async function loadMore() {
-  if (!isWaterfallMode.value || loadingMore.value || !pagination.value.hasNext || !pagination.value.nextUrl) return
-
-  loadingMore.value = true
-  loadError.value = ''
-  try {
-    const payload = (await fetchPage(new URL(pagination.value.nextUrl, window.location.origin))) as PagePayload<HomeProps>
-    topics.value = mergeTopics(topics.value, payload.props.topics)
-    pagination.value = payload.props.pagination
-  } catch (error) {
-    loadError.value = error instanceof Error ? error.message : t('common.loadFailed')
-  } finally {
-    loadingMore.value = false
-  }
-}
-
-function mergeTopics(current: TopicPayload[], incoming: TopicPayload[]) {
-  const seen = new Set(current.map((topic) => topic.id))
-  return [...current, ...incoming.filter((topic) => !seen.has(topic.id))]
-}
 
 function sortTabLabel(key: string, fallback?: string) {
   if (key === 'latest') return t('topicList.tabs.latest')
@@ -134,33 +72,8 @@ function syncAnnouncementRead(event: StorageEvent) {
   if (event.key === announcementReadStorageKey) refreshAnnouncementReminder()
 }
 
-function observeSentinel() {
-  observer?.disconnect()
-  if (!isWaterfallMode.value || !loadMoreSentinel.value || !('IntersectionObserver' in window)) return
-  observer = new IntersectionObserver(
-    (entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) void loadMore()
-    },
-    { rootMargin: '480px 0px' },
-  )
-  observer.observe(loadMoreSentinel.value)
-}
-
-onMounted(() => {
-  observeSentinel()
-  window.addEventListener('storage', syncAnnouncementRead)
-})
-onActivated(() => {
-  void nextTick(observeSentinel)
-})
-onDeactivated(() => {
-  observer?.disconnect()
-})
-
-onBeforeUnmount(() => {
-  observer?.disconnect()
-  window.removeEventListener('storage', syncAnnouncementRead)
-})
+onMounted(() => window.addEventListener('storage', syncAnnouncementRead))
+onBeforeUnmount(() => window.removeEventListener('storage', syncAnnouncementRead))
 
 </script>
 
@@ -210,17 +123,18 @@ onBeforeUnmount(() => {
       <section class="gf-card overflow-hidden">
         <div class="gf-home-topic-toolbar">
           <div class="gf-home-topic-tools">
-            <div class="gf-home-topic-tabs">
+            <nav class="gf-home-topic-tabs" :aria-label="t('topicList.columns.topic')">
               <a
                 v-for="tab in page.props.tabs"
                 :key="tab.key"
                 :href="tab.url"
+                :aria-current="tab.active ? 'page' : undefined"
                 class="gf-tab"
                 :class="tab.active ? 'gf-tab-active' : 'gf-tab-idle'"
               >
                 {{ sortTabLabel(tab.key, tab.label) }}
               </a>
-            </div>
+            </nav>
             <TopicListModeSwitch :model-value="listMode" @update:model-value="setListMode" />
           </div>
           <a href="/publish" class="gf-button gf-button-md gf-button-primary shrink-0 whitespace-nowrap px-3 sm:h-8">
