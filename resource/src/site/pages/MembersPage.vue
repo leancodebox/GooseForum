@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CalendarDays, ChevronRight, FileText, MessageCircle, Sparkles, UsersRound } from '@lucide/vue'
+import { CalendarDays, ChevronLeft, ChevronRight, UsersRound } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
@@ -19,12 +19,12 @@ const { t } = useI18n()
   <div class="pb-12">
     <PageHeader :title="t('membersPage.title')" :description="t('membersPage.subtitle')" compact />
 
-    <section v-if="props.members.length" class="grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
+    <section v-if="props.members.length" class="grid gap-0 sm:gap-3 md:grid-cols-2 xl:grid-cols-3">
       <a
         v-for="member in props.members"
         :key="member.id"
         :href="member.url"
-        class="group gf-card flex min-w-0 flex-col overflow-hidden transition hover:-translate-y-px hover:border-primary/30 hover:shadow-[0_5px_16px_rgb(0_0_0/calc(var(--gf-depth)*0.06))]"
+        class="group directory-card gf-card flex min-w-0 flex-col overflow-hidden transition-colors hover:border-primary/25 hover:bg-base-200"
       >
         <div class="flex min-w-0 items-center gap-2.5 px-3.5 pt-3.5">
           <span class="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-base-200 ring-1 ring-line/70 transition group-hover:ring-primary/30">
@@ -35,7 +35,7 @@ const { t } = useI18n()
               <h2 class="truncate text-sm font-bold text-base-content transition group-hover:text-primary">{{ member.nickname }}</h2>
               <span class="truncate text-[11px] text-base-content/45">@{{ member.username }}</span>
             </div>
-            <span class="mt-0.5 inline-flex items-center gap-1 text-[10px] text-base-content/45">
+            <span class="mt-0.5 inline-flex items-center gap-1 text-[11px] text-base-content/55">
               <CalendarDays class="h-3 w-3" aria-hidden="true" />{{ t('membersPage.joinedAt', { date: member.joinedAt }) }}
             </span>
           </div>
@@ -47,17 +47,17 @@ const { t } = useI18n()
         </p>
 
         <div class="mt-auto grid grid-cols-3 divide-x divide-line/60 border-t border-line/60 bg-base-200/35 py-2">
-          <span class="flex min-w-0 items-center justify-center gap-1 text-[10px] text-base-content/50" :title="t('membersPage.prestige')">
-            <Sparkles class="h-3 w-3 shrink-0 text-warning" aria-hidden="true" />
-            <strong class="truncate font-semibold text-base-content/75">{{ formatNumber(member.prestige) }}</strong>
+          <span class="flex min-w-0 flex-col items-center justify-center gap-1 px-1 text-xs text-base-content/55">
+            <strong class="max-w-full truncate text-sm font-semibold text-base-content/75">{{ formatNumber(member.prestige) }}</strong>
+            <span class="text-center text-[11px]">{{ t('membersPage.prestige') }}</span>
           </span>
-          <span class="flex min-w-0 items-center justify-center gap-1 text-[10px] text-base-content/50" :title="t('membersPage.topics')">
-            <FileText class="h-3 w-3 shrink-0" aria-hidden="true" />
-            <strong class="truncate font-semibold text-base-content/75">{{ formatNumber(member.topicCount) }}</strong>
+          <span class="flex min-w-0 flex-col items-center justify-center gap-1 px-1 text-xs text-base-content/55">
+            <strong class="max-w-full truncate text-sm font-semibold text-base-content/75">{{ formatNumber(member.topicCount) }}</strong>
+            <span class="text-center text-[11px]">{{ t('membersPage.topics') }}</span>
           </span>
-          <span class="flex min-w-0 items-center justify-center gap-1 text-[10px] text-base-content/50" :title="t('membersPage.replies')">
-            <MessageCircle class="h-3 w-3 shrink-0" aria-hidden="true" />
-            <strong class="truncate font-semibold text-base-content/75">{{ formatNumber(member.replyCount) }}</strong>
+          <span class="flex min-w-0 flex-col items-center justify-center gap-1 px-1 text-xs text-base-content/55">
+            <strong class="max-w-full truncate text-sm font-semibold text-base-content/75">{{ formatNumber(member.replyCount) }}</strong>
+            <span class="text-center text-[11px]">{{ t('membersPage.replies') }}</span>
           </span>
         </div>
       </a>
@@ -81,15 +81,29 @@ const { t } = useI18n()
         :href="props.previousUrl"
         rel="prev"
         class="gf-button gf-button-sm gf-button-secondary"
-      >{{ t('common.previousPage') }}</a>
-      <span v-else />
+      >
+        <ChevronLeft class="h-4 w-4" />
+        {{ t('common.previousPage') }}
+      </a>
+      <span v-else aria-hidden="true" />
       <a
         v-if="props.pagination.hasNext"
         :href="props.pagination.nextUrl"
         rel="next"
         class="gf-button gf-button-sm gf-button-secondary"
-      >{{ t('common.nextPage') }}</a>
-      <span v-else />
+      >
+        {{ t('common.nextPage') }}
+        <ChevronRight class="h-4 w-4" />
+      </a>
+      <span v-else aria-hidden="true" />
     </nav>
   </div>
 </template>
+
+<style scoped>
+@media (max-width: 639.98px) {
+  .directory-card {
+    border-bottom-color: var(--gf-color-line);
+  }
+}
+</style>

@@ -26,12 +26,12 @@ function isImageIcon(icon: string) {
       </template>
     </PageHeader>
 
-    <section v-if="props.categories.length" class="grid gap-3 sm:grid-cols-2">
+    <section v-if="props.categories.length" class="grid gap-0 sm:grid-cols-2 sm:gap-3">
       <a
         v-for="category in props.categories"
         :key="category.id"
         :href="category.url"
-        class="group gf-card flex min-w-0 items-stretch p-3.5 transition hover:border-primary/25 hover:bg-base-200"
+        class="group directory-card gf-card flex min-w-0 items-stretch p-3.5 transition hover:border-primary/25 hover:bg-base-200"
       >
         <span
           class="mr-3 w-1 shrink-0 rounded-full"
@@ -71,3 +71,11 @@ function isImageIcon(icon: string) {
     />
   </div>
 </template>
+
+<style scoped>
+@media (max-width: 639.98px) {
+  .directory-card {
+    border-bottom-color: var(--gf-color-line);
+  }
+}
+</style>
