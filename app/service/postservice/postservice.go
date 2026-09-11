@@ -9,6 +9,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserStat"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
+	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"github.com/samber/lo"
 	"gorm.io/gorm"
 )
@@ -18,6 +19,7 @@ const topicSequenceLockShards = 256
 var topicSequenceLocks [topicSequenceLockShards]sync.Mutex
 
 func CreateTopicPost(entity *posts.Entity, topicEntity topics.Entity) error {
+	contentmoderationservice.PreparePost(entity)
 	lock := &topicSequenceLocks[entity.TopicId%topicSequenceLockShards]
 	lock.Lock()
 	defer lock.Unlock()
@@ -43,6 +45,7 @@ func CreateTopicPost(entity *posts.Entity, topicEntity topics.Entity) error {
 	})
 	if err == nil {
 		topicrank.Notify(entity.TopicId)
+		go contentmoderationservice.ReviewPost(entity.Id, entity.ModerationVersion)
 	}
 	return err
 }

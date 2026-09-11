@@ -622,4 +622,5 @@ export default {
   "oidcCopied": "已复制",
   "oidcCopySecret": "复制密钥",
   "oidcStored": "我已妥善保存",
+  "sensitiveTitle": "敏感词审核", "sensitiveDescription": "控制内容发布后的敏感词检测与可见性策略。", "sensitiveEnable": "启用敏感词审核", "sensitiveEnableDesc": "对新发布的主题、首帖和回复执行敏感词检测。", "sensitiveMode": "审核模式", "sensitiveAfterReview": "审核通过后可见", "sensitiveVisibleThenReview": "先可见，审核失败后隐藏", "sensitiveDictionary": "敏感词词库", "sensitiveWordPlaceholder": "输入敏感词", "sensitiveReplacementPlaceholder": "替换文本", "sensitiveSave": "保存", "sensitiveReject": "拒绝", "sensitiveReplace": "替换", "sensitiveRecord": "仅记录", "sensitiveEdit": "编辑", "sensitiveDelete": "删除",
 } as const

@@ -622,4 +622,5 @@ export default {
   "oidcCopied": "Copiato",
   "oidcCopySecret": "Copia segreto",
   "oidcStored": "L’ho salvato in modo sicuro",
+  "sensitiveTitle": "Moderazione parole sensibili", "sensitiveDescription": "Gestisci i controlli dopo la pubblicazione.", "sensitiveEnable": "Abilita moderazione", "sensitiveEnableDesc": "Controlla nuovi argomenti, primi post e risposte.", "sensitiveMode": "Modalità moderazione", "sensitiveAfterReview": "Visibile dopo la revisione", "sensitiveVisibleThenReview": "Visibile prima, nascondi se rifiutato", "sensitiveDictionary": "Dizionario parole sensibili", "sensitiveWordPlaceholder": "Inserisci una parola", "sensitiveReplacementPlaceholder": "Testo sostitutivo", "sensitiveSave": "Salva", "sensitiveReject": "Rifiuta", "sensitiveReplace": "Sostituisci", "sensitiveRecord": "Solo registra", "sensitiveEdit": "Modifica", "sensitiveDelete": "Elimina",
 } as const

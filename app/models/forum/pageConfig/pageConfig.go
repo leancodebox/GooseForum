@@ -34,20 +34,21 @@ func (itself *Entity) TableName() string {
 }
 
 const (
-	FriendShipLinks  = `friendShipLinks`
-	SponsorsPage     = `sponsors`
-	SiteSettings     = `siteSettings`
-	EmailSettings    = `emailSetting`
-	Announcement     = `announcement`
-	SecuritySettings = `securitySettings`
-	PostingSettings  = `postingSettings`
-	HttpNotify       = `httpNotify`
-	OAuthSettings    = `oauthSettings`
-	OIDCProvider     = `oidcProviderSettings`
-	SiteTheme        = `siteTheme`
-	SiteChrome       = `siteChrome`
-	Version          = `version`
-	Migration        = `migration`
+	FriendShipLinks       = `friendShipLinks`
+	SponsorsPage          = `sponsors`
+	SiteSettings          = `siteSettings`
+	EmailSettings         = `emailSetting`
+	Announcement          = `announcement`
+	SecuritySettings      = `securitySettings`
+	PostingSettings       = `postingSettings`
+	HttpNotify            = `httpNotify`
+	OAuthSettings         = `oauthSettings`
+	OIDCProvider          = `oidcProviderSettings`
+	SiteTheme             = `siteTheme`
+	SiteChrome            = `siteChrome`
+	Version               = `version`
+	Migration             = `migration`
+	SensitiveWordSettings = `sensitiveWordSettings`
 )
 
 type LinkItem struct {
@@ -199,6 +200,17 @@ type SecurityAndRegistration struct {
 	EnableEmailVerification bool     `json:"enableEmailVerification"`
 	AllowedDomains          []string `json:"allowedDomains"`
 }
+
+// SensitiveWordConfig controls automatic content moderation.
+type SensitiveWordConfig struct {
+	Enabled bool   `json:"enabled"`
+	Mode    string `json:"mode"`
+}
+
+const (
+	ModerationAfterReview       = "after_review"
+	ModerationVisibleThenReview = "visible_then_review"
+)
 
 // OAuthSettingsConfig stores credentials for built-in providers and
 // user-defined OpenID Connect providers. Callback URLs are derived from the

@@ -22,6 +22,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/sensitiveWord"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/userBadges"
@@ -31,6 +32,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/accessadminservice"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
+	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
@@ -38,6 +40,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
+	"github.com/leancodebox/GooseForum/app/service/sensitivewordservice"
 	"github.com/leancodebox/GooseForum/app/service/themeservice"
 	"github.com/leancodebox/GooseForum/app/service/topicservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
@@ -1331,6 +1334,59 @@ type SaveSecuritySettingsReq struct {
 // SaveSecuritySettings 保存安全与注册设置
 func SaveSecuritySettings(req component.BetterRequest[SaveSecuritySettingsReq]) component.Response {
 	return savePageConfig(pageConfig.SecuritySettings, req.Params.Settings, hotdataserve.ClearSecuritySettingsConfigCache)
+}
+
+type SaveSensitiveWordSettingsReq struct {
+	Settings pageConfig.SensitiveWordConfig `json:"settings" validate:"required"`
+}
+
+func GetSensitiveWordSettings(req component.BetterRequest[component.Null]) component.Response {
+	config := pageConfig.GetConfigByPageType(pageConfig.SensitiveWordSettings, defaultconfig.GetDefaultSensitiveWordConfig())
+	return successDataMap("settings", config)
+}
+
+func SaveSensitiveWordSettings(req component.BetterRequest[SaveSensitiveWordSettingsReq]) component.Response {
+	config := req.Params.Settings
+	if err := contentmoderationservice.ValidateMode(config.Mode); err != nil {
+		config.Mode = pageConfig.ModerationAfterReview
+	}
+	return savePageConfig(pageConfig.SensitiveWordSettings, config, func() {})
+}
+
+func SensitiveWordList(req component.BetterRequest[component.Null]) component.Response {
+	return successDataMap("words", sensitiveWord.List(false))
+}
+
+type SensitiveWordSaveReq struct {
+	Word sensitiveWord.Entity `json:"word" validate:"required"`
+}
+
+func SaveSensitiveWord(req component.BetterRequest[SensitiveWordSaveReq]) component.Response {
+	word := req.Params.Word
+	word.Word = strings.TrimSpace(word.Word)
+	if word.Word == "" {
+		return component.FailResponseCode("word_required", nil)
+	}
+	if word.Action == "" {
+		word.Action = sensitiveWord.ActionReject
+	}
+	if err := sensitiveWord.Save(&word); err != nil {
+		return component.FailResponseCode("word_save_failed", nil)
+	}
+	sensitivewordservice.Refresh()
+	return successDataMap("word", word)
+}
+
+type SensitiveWordDeleteReq struct {
+	Id uint64 `json:"id" validate:"required"`
+}
+
+func DeleteSensitiveWord(req component.BetterRequest[SensitiveWordDeleteReq]) component.Response {
+	if err := sensitiveWord.Delete(req.Params.Id); err != nil {
+		return component.FailResponseCode("word_delete_failed", nil)
+	}
+	sensitivewordservice.Refresh()
+	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
 
 // GetPostingSettings 获取发布内容设置

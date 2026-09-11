@@ -31,6 +31,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/reports"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/sensitiveWord"
 	"github.com/leancodebox/GooseForum/app/models/forum/taskQueue"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
@@ -95,6 +96,7 @@ func defaultSchemaModels() []any {
 		&pageConfig.Entity{},
 		&pointsRecord.Entity{},
 		&reports.Entity{},
+		&sensitiveWord.Entity{},
 		&topics.Entity{},
 		&topicrank.Entity{},
 		&posts.Entity{},

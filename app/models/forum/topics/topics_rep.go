@@ -87,6 +87,16 @@ func Get(id uint64) (entity Entity) {
 	return
 }
 
+func GetForModeration(id, version uint64) (Entity, error) {
+	var entity Entity
+	err := builder().Select("id", "title", "first_post_id", "moderation_version").Where("id = ? AND moderation_version = ?", id, version).First(&entity).Error
+	return entity, err
+}
+
+func UpdateModeration(id, version uint64, values map[string]any) error {
+	return builder().Where("id = ? AND moderation_version = ?", id, version).Updates(values).Error
+}
+
 func GetSimple(id any) (entity Entity) {
 	builder().Where(queryopt.Eq("id", id)).First(&entity)
 	return

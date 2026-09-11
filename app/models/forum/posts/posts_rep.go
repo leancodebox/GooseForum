@@ -45,6 +45,20 @@ func Get(id uint64) (entity Entity) {
 	return
 }
 
+func GetForModeration(id, version uint64) (Entity, error) {
+	var entity Entity
+	err := builder().Select("id", "content", "topic_id", "post_no", "moderation_version").Where("id = ? AND moderation_version = ?", id, version).First(&entity).Error
+	return entity, err
+}
+
+func UpdateModeration(id, version uint64, values map[string]any) error {
+	return builder().Where("id = ? AND moderation_version = ?", id, version).Updates(values).Error
+}
+
+func UpdateModerationByID(id uint64, values map[string]any) error {
+	return builder().Where("id = ?", id).Updates(values).Error
+}
+
 func GetMaxId() uint64 {
 	var entity Entity
 	builder().Order(queryopt.Desc("id")).Limit(1).First(&entity)

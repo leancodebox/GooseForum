@@ -622,4 +622,5 @@ export default {
   "oidcCopied": "Copied",
   "oidcCopySecret": "Copy secret",
   "oidcStored": "I have saved it securely",
+  "sensitiveTitle": "Sensitive word moderation", "sensitiveDescription": "Control sensitive word checks and visibility after publishing.", "sensitiveEnable": "Enable sensitive word moderation", "sensitiveEnableDesc": "Check new topics, first posts, and replies for sensitive words.", "sensitiveMode": "Moderation mode", "sensitiveAfterReview": "Visible after review", "sensitiveVisibleThenReview": "Visible first, hide when rejected", "sensitiveDictionary": "Sensitive word dictionary", "sensitiveWordPlaceholder": "Enter a sensitive word", "sensitiveReplacementPlaceholder": "Replacement text", "sensitiveSave": "Save", "sensitiveReject": "Reject", "sensitiveReplace": "Replace", "sensitiveRecord": "Record only", "sensitiveEdit": "Edit", "sensitiveDelete": "Delete",
 } as const

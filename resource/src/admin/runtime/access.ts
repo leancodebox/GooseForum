@@ -28,6 +28,7 @@ const adminPathPermissions: Record<string, AdminPathPermission> = {
   '/admin/settings/security': AdminPermission.SiteManager,
   '/admin/settings/posting': AdminPermission.SiteManager,
   '/admin/settings/http-notify': AdminPermission.SiteManager,
+  '/admin/settings/sensitive-words': AdminPermission.SiteManager,
   '/admin/settings/site-chrome': AdminPermission.SiteManager,
   '/admin/settings/announcement': AdminPermission.PageManager,
   '/admin/unknown': AdminPermission.PageManager,
@@ -54,6 +55,7 @@ const adminEntryPaths = [
   '/admin/settings/site-chrome',
   '/admin/settings/announcement',
   '/admin/settings/http-notify',
+  '/admin/settings/sensitive-words',
   '/admin/unknown',
 ]
 

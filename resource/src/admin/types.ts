@@ -333,6 +333,12 @@ export interface SecuritySettings {
   allowedDomains: string[]
 }
 
+export interface SensitiveWordSettings {
+  enabled: boolean
+  mode: 'after_review' | 'visible_then_review'
+}
+export interface SensitiveWord { id: number; word: string; action: 'reject' | 'replace' | 'record'; replacement: string; enabled: boolean }
+
 export interface PostingSettings {
   textControl: {
     minPostLength: number

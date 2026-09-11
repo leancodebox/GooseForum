@@ -21,6 +21,7 @@ import {
   UserCog,
   UsersRound,
   Webhook,
+  ShieldAlert,
 } from '@lucide/vue'
 import { computed } from 'vue'
 import { Avatar, AvatarFallback, AvatarImage } from '@/admin/components/ui/avatar'
@@ -146,6 +147,7 @@ const navGroups = computed<NavGroup[]>(() => {
           icon: Webhook,
           permission: AdminPermission.SiteManager,
         },
+        { title: adminText('sensitiveTitle'), url: '/admin/settings/sensitive-words', icon: ShieldAlert, permission: AdminPermission.SiteManager },
       ],
     },
   ]

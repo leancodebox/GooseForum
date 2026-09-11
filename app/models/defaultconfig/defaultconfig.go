@@ -115,6 +115,10 @@ func GetDefaultSecuritySettingsConfig() pageConfig.SecurityAndRegistration {
 	return config
 }
 
+func GetDefaultSensitiveWordConfig() pageConfig.SensitiveWordConfig {
+	return pageConfig.SensitiveWordConfig{Enabled: false, Mode: pageConfig.ModerationAfterReview}
+}
+
 func GetDefaultSiteSettingsConfig() pageConfig.SiteSettingsConfig {
 	return mustPageConfigDefaults().Site
 }

@@ -27,6 +27,8 @@ import type {
   PageResult,
   PostingSettings,
   SecuritySettings,
+  SensitiveWordSettings,
+  SensitiveWord,
   ServerVersion,
   SiteChromeConfig,
   SiteSettings,
@@ -359,6 +361,10 @@ export function getSecuritySettings() {
   return getJson<SecuritySettings>('/api/admin/security-settings', adminText('k001h'))
 }
 
+export function getSensitiveWordSettings() {
+  return getJson<SensitiveWordSettings>('/api/admin/sensitive-word-settings', '加载敏感词审核设置失败')
+}
+
 export function getPostingSettings() {
   return getJson<PostingSettings>('/api/admin/posting-settings', adminText('k001i'))
 }
@@ -394,6 +400,13 @@ export function testMailConnection(settings: MailSettings, testEmail: string) {
 export function saveSecuritySettings(settings: SecuritySettings) {
   return postJson<unknown>('/api/admin/save-security-settings', { settings }, adminText('k001m'))
 }
+
+export function saveSensitiveWordSettings(settings: SensitiveWordSettings) {
+  return postJson<unknown>('/api/admin/save-sensitive-word-settings', { settings }, '保存敏感词审核设置失败')
+}
+export function getSensitiveWords() { return getJson<SensitiveWord[]>('/api/admin/sensitive-words', '加载敏感词失败') }
+export function saveSensitiveWord(word: SensitiveWord) { return postJson<{ word: SensitiveWord }>('/api/admin/sensitive-word-save', { word }, '保存敏感词失败') }
+export function deleteSensitiveWord(id: number) { return postJson<unknown>('/api/admin/sensitive-word-delete', { id }, '删除敏感词失败') }
 
 export function savePostingSettings(settings: PostingSettings) {
   return postJson<unknown>('/api/admin/save-posting-settings', { settings }, adminText('k001n'))

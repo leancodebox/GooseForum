@@ -11,6 +11,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
+	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -55,6 +56,10 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 			return err
 		}
 		input.Topic.CategoryIds = append([]uint64(nil), categoryIDs...)
+		if input.Create {
+			contentmoderationservice.PrepareTopic(input.Topic)
+			contentmoderationservice.PreparePost(input.FirstPost)
+		}
 		input.Topic.MainCategoryId = categoryIDs[0]
 		if input.Create {
 			input.Topic.PostCount = 1
@@ -90,6 +95,9 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 		return err
 	}
 	topicrank.Notify(input.Topic.Id)
+	if input.Create {
+		go contentmoderationservice.ReviewTopic(input.Topic.Id, input.Topic.ModerationVersion)
+	}
 	return adjustCategoryTopicCounts(conn, oldPublished, oldCategoryIDs, isCountedTopic(input.Topic), categoryIDs)
 }
 

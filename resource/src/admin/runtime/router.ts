@@ -9,6 +9,7 @@ const settingsPages = {
   '/admin/settings/posting': 'posting',
   '/admin/settings/announcement': 'announcement',
   '/admin/settings/http-notify': 'http-notify',
+  '/admin/settings/sensitive-words': 'sensitive-words',
 } as const
 
 export const adminRouter = createRouter({

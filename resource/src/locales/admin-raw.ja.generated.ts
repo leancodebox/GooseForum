@@ -622,4 +622,5 @@ export default {
   "oidcCopied": "コピーしました",
   "oidcCopySecret": "シークレットをコピー",
   "oidcStored": "安全に保存しました",
+  "sensitiveTitle": "センシティブワード審査", "sensitiveDescription": "公開後の検査と表示方法を管理します。", "sensitiveEnable": "審査を有効化", "sensitiveEnableDesc": "新しいトピック、初回投稿、返信を検査します。", "sensitiveMode": "審査モード", "sensitiveAfterReview": "審査後に表示", "sensitiveVisibleThenReview": "先に表示し、拒否時に非表示", "sensitiveDictionary": "センシティブワード辞書", "sensitiveWordPlaceholder": "単語を入力", "sensitiveReplacementPlaceholder": "置換テキスト", "sensitiveSave": "保存", "sensitiveReject": "拒否", "sensitiveReplace": "置換", "sensitiveRecord": "記録のみ", "sensitiveEdit": "編集", "sensitiveDelete": "削除",
 } as const
