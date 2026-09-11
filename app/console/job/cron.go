@@ -13,7 +13,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
-	"github.com/leancodebox/GooseForum/app/service/topicrankservice"
 	"github.com/robfig/cron/v3"
 )
 
@@ -56,14 +55,6 @@ func Run() {
 		}
 	}))
 	slog.Info("reg pending upload cleanup", "entryID", entryID, "err", err)
-	entryID, err = scheduler.AddJob("@every 30s", cron.NewChain(cron.SkipIfStillRunning(cron.DefaultLogger)).Then(cron.FuncJob(upCmd(func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-		defer cancel()
-		if err := topicrankservice.ProcessDue(ctx, dbconnect.Connect(), time.Now(), 200); err != nil {
-			slog.Error("update topic ranks", "err", err)
-		}
-	}))))
-	slog.Info("reg topic ranking", "entryID", entryID, "err", err)
 	running = true
 	scheduler.Start()
 }

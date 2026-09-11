@@ -11,9 +11,8 @@ const tableName = "topics"
 type Entity struct {
 	Id uint64 `gorm:"primaryKey;column:id;autoIncrement;not null;index:idx_topics_list_default,priority:5,sort:desc;index:idx_topics_list_rank,priority:4,sort:desc;index:idx_topics_list_popular,priority:4,sort:desc;index:idx_topics_list_new,priority:4,sort:desc;index:idx_topics_admin_list,priority:3,sort:desc;index:idx_topics_admin_user_list,priority:4,sort:desc;" json:"id"`
 	// Ranking fields are read-only to ordinary model saves: stale topic snapshots
-	// must never overwrite worker results or durable invalidations.
+	// must never overwrite worker results or the first publication timestamp.
 	RankScore   int64      `gorm:"column:rank_score;type:bigint;not null;default:0;->;index:idx_topics_list_rank,priority:3,sort:desc" json:"-"`
-	NextRankAt  *time.Time `gorm:"column:next_rank_at;index:idx_topics_rank_due;->" json:"-"`
 	PublishedAt *time.Time `gorm:"column:published_at;->" json:"-"`
 
 	Title       string   `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"`

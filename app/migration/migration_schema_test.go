@@ -8,6 +8,8 @@ import (
 
 	"github.com/glebarez/sqlite"
 	"github.com/leancodebox/GooseForum/app/models/forum/oidcProviderStore"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -101,6 +103,12 @@ func TestStartupSchemaCreatesAllOIDCTables(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		if err := db.AutoMigrate(defaultSchemaModels()...); err != nil {
 			t.Fatal(err)
+		}
+		if !db.Migrator().HasTable(&topicrank.Entity{}) {
+			t.Fatal("startup omitted ranking schedule table")
+		}
+		if db.Migrator().HasColumn(&topics.Entity{}, "next_rank_at") {
+			t.Fatal("fresh startup recreated the old schedule column")
 		}
 		for _, model := range oidcProviderStore.Models() {
 			if !db.Migrator().HasTable(model) {

@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/migration"
 	"github.com/leancodebox/GooseForum/app/service/topicrankservice"
 	"github.com/spf13/cobra"
@@ -18,7 +17,7 @@ func init() {
 			if err := migration.M(); err != nil {
 				return err
 			}
-			count, err := topicrankservice.Rebuild(cmd.Context(), dbconnect.Connect(), func(n int64) { cmd.Printf("Recalculated %d topics\n", n) })
+			count, err := topicrankservice.Rebuild(cmd.Context(), func(n int64) { cmd.Printf("Recalculated %d topics\n", n) })
 			if err != nil {
 				return fmt.Errorf("rebuild topic ranks after %d topics: %w", count, err)
 			}

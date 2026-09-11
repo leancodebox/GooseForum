@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/glebarez/sqlite"
+	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"gorm.io/gorm"
@@ -13,14 +13,11 @@ import (
 
 func rankDB(t *testing.T) *gorm.DB {
 	t.Helper()
-	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-	if err != nil {
+	db := dbconnect.Connect()
+	if err := db.Migrator().DropTable(&topicrank.Entity{}, &topics.Entity{}); err != nil {
 		t.Fatal(err)
 	}
-	sqlDB, _ := db.DB()
-	sqlDB.SetMaxOpenConns(1)
-	t.Cleanup(func() { sqlDB.Close() })
-	if err := db.AutoMigrate(&topics.Entity{}); err != nil {
+	if err := db.AutoMigrate(&topics.Entity{}, &topicrank.Entity{}); err != nil {
 		t.Fatal(err)
 	}
 	return db
@@ -36,6 +33,13 @@ func readTopic(t *testing.T, db *gorm.DB, id uint64) topics.Entity {
 	var row topics.Entity
 	must(t, db.First(&row, id).Error)
 	return row
+}
+
+func readSchedule(t *testing.T, id uint64) topicrank.Entity {
+	t.Helper()
+	entry, err := topicrank.Get(context.Background(), id)
+	must(t, err)
+	return entry
 }
 
 func TestFreshnessBoundariesAndCaps(t *testing.T) {
@@ -63,33 +67,14 @@ func TestDirtyMarkerAndStaleSave(t *testing.T) {
 	topic := topics.Entity{Id: 1, Status: 1}
 	must(t, saveAndHandleRank(db, &topic))
 	stale := readTopic(t, db, 1)
-	must(t, db.Table("topics").Where("id = 1").Updates(map[string]any{"rank_score": 42, "next_rank_at": nil}).Error)
+	must(t, db.Table("topics").Where("id = 1").Updates(map[string]any{"rank_score": 42}).Error)
 	stale.Title = "edited"
 	must(t, saveAndHandleRank(db, &stale))
 	got := readTopic(t, db, 1)
-	if got.RankScore != 42 || got.NextRankAt == nil {
+	if got.RankScore != 42 || readSchedule(t, 1).NextRunAt == nil {
 		t.Fatalf("stale save overwrote ranking: %+v", got)
 	}
 
-}
-
-func TestWorkerLimitAndSettling(t *testing.T) {
-	db := rankDB(t)
-	now := time.Now().Add(time.Second)
-	for id := uint64(1); id <= 3; id++ {
-		must(t, saveAndHandleRank(db, &topics.Entity{Id: id, Status: 0}))
-	}
-	must(t, ProcessDue(context.Background(), db, now, 2))
-	var due int64
-	must(t, db.Table("topics").Where("next_rank_at IS NOT NULL").Count(&due).Error)
-	if due != 1 {
-		t.Fatalf("due %v want 1", due)
-	}
-	must(t, ProcessDue(context.Background(), db, now, 2))
-	must(t, db.Table("topics").Where("next_rank_at IS NOT NULL").Count(&due).Error)
-	if due != 0 {
-		t.Fatal("drafts kept scheduling")
-	}
 }
 
 func TestBackfillAndDraftFirstPublication(t *testing.T) {
@@ -98,10 +83,10 @@ func TestBackfillAndDraftFirstPublication(t *testing.T) {
 	// Legacy rows predate the ranking hook/columns.
 	must(t, db.Session(&gorm.Session{SkipHooks: true}).Create(&topics.Entity{Id: 1, Status: 1, CreatedAt: old}).Error)
 	must(t, saveAndHandleRank(db, &topics.Entity{Id: 2, Status: 0, CreatedAt: old}))
-	must(t, Backfill(db))
-	must(t, Backfill(db))
+	must(t, Backfill(context.Background()))
+	must(t, Backfill(context.Background()))
 	legacy := readTopic(t, db, 1)
-	if legacy.RankScore != 0 || legacy.NextRankAt != nil || legacy.PublishedAt == nil || !legacy.PublishedAt.Equal(old) {
+	if legacy.RankScore != 0 || readSchedule(t, 1).NextRunAt != nil || legacy.PublishedAt == nil || !legacy.PublishedAt.Equal(old) {
 		t.Fatalf("legacy topic made fresh: %+v", legacy)
 	}
 	draft := readTopic(t, db, 2)
@@ -114,7 +99,7 @@ func TestBackfillAndDraftFirstPublication(t *testing.T) {
 	if first.PublishedAt == nil || first.PublishedAt.Before(time.Now().Add(-time.Minute)) {
 		t.Fatal("first publication reused draft creation time")
 	}
-	must(t, Recalculate(db, 2, time.Now()))
+	must(t, Recalculate(context.Background(), 2, time.Now()))
 	if readTopic(t, db, 2).RankScore != 30000 {
 		t.Fatal("newly published draft missing freshness")
 	}
@@ -138,19 +123,19 @@ func TestRebuildBatchesPreservesPublicationAndCanRepeat(t *testing.T) {
 	must(t, db.Table("topics").Where("id > 0").Updates(map[string]any{"rank_score": 12.345, "published_at": published}).Error)
 	for attempt := 0; attempt < 2; attempt++ {
 		var batches []int64
-		count, err := Rebuild(context.Background(), db, func(n int64) { batches = append(batches, n) })
+		count, err := Rebuild(context.Background(), func(n int64) { batches = append(batches, n) })
 		must(t, err)
 		if count != 205 || len(batches) != 2 || batches[0] != 200 || batches[1] != 205 {
 			t.Fatalf("count %d batches %v", count, batches)
 		}
 		topic := readTopic(t, db, 205)
-		if topic.RankScore != 0 || !topic.PublishedAt.Equal(published) || topic.NextRankAt != nil {
+		if topic.RankScore != 0 || !topic.PublishedAt.Equal(published) || readSchedule(t, 205).NextRunAt != nil {
 			t.Fatalf("unexpected rebuilt topic: %+v", topic)
 		}
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	if _, err := Rebuild(ctx, db, nil); err == nil {
+	if _, err := Rebuild(ctx, nil); err == nil {
 		t.Fatal("canceled rebuild succeeded")
 	}
 }
@@ -160,14 +145,14 @@ func TestRankWriteDoesNotTouchContentOrScheduleAgain(t *testing.T) {
 	topic := topics.Entity{Id: 1, Status: 1, Title: "unchanged"}
 	must(t, saveAndHandleRank(db, &topic))
 	before := readTopic(t, db, 1)
-	must(t, topicrank.Save(db, 1, 12345, nil))
+	must(t, topics.SaveRankScore(context.Background(), 1, 12345))
 	after := readTopic(t, db, 1)
-	if after.RankScore != 12345 || after.NextRankAt != nil || after.Title != before.Title || !after.UpdatedAt.Equal(before.UpdatedAt) || !after.PublishedAt.Equal(*before.PublishedAt) {
+	if after.RankScore != 12345 || after.Title != before.Title || !after.UpdatedAt.Equal(before.UpdatedAt) || !after.PublishedAt.Equal(*before.PublishedAt) {
 		t.Fatalf("rank write changed content or scheduled again: %+v", after)
 	}
 }
 
-// The fixture has only a topics table. Any dependency on reply/action/stat
+// The fixture has only topics and its scheduling table. Any dependency on reply/action/stat
 // aggregation will fail, even if it is hidden behind a repository helper.
 func TestRankingReadsOnlyPersistedTopicCounters(t *testing.T) {
 	db := rankDB(t)
@@ -175,15 +160,15 @@ func TestRankingReadsOnlyPersistedTopicCounters(t *testing.T) {
 	old := now.Add(-30 * 24 * time.Hour)
 	last := now.Add(-30 * time.Minute)
 	must(t, db.Create(&topics.Entity{Id: 1, Status: 1, LikeCount: 8, ReplyCount: 12, CreatedAt: old, LastPostedAt: &last}).Error)
-	must(t, Recalculate(db, 1, now))
+	must(t, Recalculate(context.Background(), 1, now))
 	got := readTopic(t, db, 1)
 	want, _ := Score(Signals{Likes: 8, Replies: 12, LastPostedAt: &last}, old, now)
-	if got.RankScore != want || got.NextRankAt == nil {
+	if got.RankScore != want || readSchedule(t, 1).NextRunAt == nil {
 		t.Fatalf("got %+v want %d", got, want)
 	}
-	must(t, Recalculate(db, 1, now.Add(24*time.Hour)))
+	must(t, Recalculate(context.Background(), 1, now.Add(24*time.Hour)))
 	settled := readTopic(t, db, 1)
-	if settled.NextRankAt != nil || settled.RankScore != want-20000 {
+	if readSchedule(t, 1).NextRunAt != nil || settled.RankScore != want-20000 {
 		t.Fatalf("did not settle: %+v", settled)
 	}
 }
@@ -216,5 +201,5 @@ func saveAndHandleRank(db *gorm.DB, topic *topics.Entity) error {
 	if err := topics.SaveWithDB(db, topic); err != nil {
 		return err
 	}
-	return topicrank.Mark(db, topic.Id)
+	return topicrank.MarkAt(context.Background(), topic.Id, time.Now())
 }

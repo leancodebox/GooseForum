@@ -5,16 +5,33 @@ import (
 	"errors"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
-	"gorm.io/gorm"
 )
 
-// Recalculate reads one topic and writes its score without a transaction.
-// Concurrent changes are eventually reflected by another event or a rebuild.
-func Recalculate(db *gorm.DB, id uint64, now time.Time) error {
+// Recalculate is the explicit rebuild entry point. Normal worker processing
+// already has the task version and goes straight to recalculateScheduled.
+func Recalculate(ctx context.Context, id uint64, now time.Time) error {
+	entry, err := topicrank.Get(ctx, id)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		if err := topicrank.MarkAt(ctx, id, now); err != nil {
+			return err
+		}
+		entry, err = topicrank.Get(ctx, id)
+	}
+	if err != nil {
+		return err
+	}
+	return recalculateScheduled(ctx, topicrank.ScheduledTopic{ID: id, Version: entry.Version}, now)
+}
 
-	topic, err := topics.GetForRankingWithDB(db, id)
+func recalculateScheduled(ctx context.Context, entry topicrank.ScheduledTopic, now time.Time) error {
+	topic, err := topics.GetForRanking(ctx, entry.ID)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return topicrank.SetNext(ctx, entry, nil)
+	}
 	if err != nil {
 		return err
 	}
@@ -26,44 +43,23 @@ func Recalculate(db *gorm.DB, id uint64, now time.Time) error {
 			published = *topic.PublishedAt
 		}
 		score, next = Score(Signals{Likes: topic.LikeCount, Replies: topic.ReplyCount, LastPostedAt: topic.LastPostedAt}, published, now)
-
 	}
-	return topicrank.Save(db, id, score, next)
-}
-
-// ProcessDue is bounded both by row count and by the caller's context. Failed
-// rows stay due for retry; an error does not starve the rest of the batch.
-func ProcessDue(ctx context.Context, db *gorm.DB, now time.Time, limit int) error {
-	if limit <= 0 {
-		return nil
-	}
-	db = db.WithContext(ctx)
-	ids, err := topicrank.DueIDs(db, now, limit)
-	if err != nil {
+	if err := topics.SaveRankScore(ctx, entry.ID, score); err != nil {
 		return err
 	}
-	var errs []error
-	for _, id := range ids {
-		if err := ctx.Err(); err != nil {
-			return errors.Join(append(errs, err)...)
-		}
-		if err := Recalculate(db, id, now); err != nil {
-			errs = append(errs, err)
-		}
-	}
-	return errors.Join(errs...)
+	return topicrank.SetNext(ctx, entry, next)
 }
 
 // Backfill is a one-time versioned migration, never a periodic table scan.
-func Backfill(db *gorm.DB) error {
-	upper, err := topicrank.MaxID(db)
+func Backfill(ctx context.Context) error {
+	upper, err := topics.MaxRankingID(ctx)
 	if err != nil {
 		return err
 	}
 	var cursor uint64
 	now := time.Now()
 	for {
-		ids, err := topicrank.IDsAfter(db, cursor, upper, 200)
+		ids, err := topics.RankingIDsAfter(ctx, cursor, upper, 200)
 		if err != nil {
 			return err
 		}
@@ -71,16 +67,16 @@ func Backfill(db *gorm.DB) error {
 			return nil
 		}
 		for _, id := range ids {
-			row, err := topics.GetForRankingWithDB(db, id)
+			row, err := topics.GetForRanking(ctx, id)
 			if err != nil {
 				return err
 			}
 			if row.Status == 1 {
-				if err := topicrank.SetPublishedAt(db, id, row.CreatedAt); err != nil {
+				if err := topics.SetPublishedAt(ctx, id, row.CreatedAt); err != nil {
 					return err
 				}
 			}
-			if err := Recalculate(db, id, now); err != nil {
+			if err := Recalculate(ctx, id, now); err != nil {
 				return err
 			}
 			cursor = id
@@ -90,9 +86,8 @@ func Backfill(db *gorm.DB) error {
 
 // Rebuild explicitly visits a bounded snapshot of all topic IDs, including
 // dormant topics. It preserves first publication timestamps and supports reruns.
-func Rebuild(ctx context.Context, db *gorm.DB, progress func(int64)) (int64, error) {
-	db = db.WithContext(ctx).Session(&gorm.Session{SkipDefaultTransaction: true})
-	upper, err := topicrank.MaxID(db)
+func Rebuild(ctx context.Context, progress func(int64)) (int64, error) {
+	upper, err := topics.MaxRankingID(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -100,7 +95,7 @@ func Rebuild(ctx context.Context, db *gorm.DB, progress func(int64)) (int64, err
 	var count int64
 	now := time.Now()
 	for {
-		ids, err := topicrank.IDsAfter(db, cursor, upper, 200)
+		ids, err := topics.RankingIDsAfter(ctx, cursor, upper, 200)
 		if err != nil {
 			return count, err
 		}
@@ -108,7 +103,7 @@ func Rebuild(ctx context.Context, db *gorm.DB, progress func(int64)) (int64, err
 			return count, nil
 		}
 		for _, id := range ids {
-			if err := Recalculate(db, id, now); err != nil {
+			if err := Recalculate(ctx, id, now); err != nil {
 				return count, err
 			}
 			cursor = id

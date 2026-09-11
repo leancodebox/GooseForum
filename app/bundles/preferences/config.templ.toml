@@ -48,6 +48,12 @@ maxIdleConnections = 3
 maxOpenConnections = 5
 maxLifeSeconds = 300
 
+[ranking]
+# 多实例共用数据库时，只在一个实例上启用排序 Worker。
+worker_enabled = true
+# 平滑处理上限；每条之间等待，不积攒额度集中执行。修改后重启生效。
+max_per_second = 20
+
 [storage]
 driver = "database" # database | s3
 

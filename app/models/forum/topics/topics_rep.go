@@ -1,6 +1,7 @@
 package topics
 
 import (
+	"context"
 	"slices"
 	"sort"
 	"time"
@@ -22,6 +23,13 @@ func SaveOrCreateById(entity *Entity) int64 {
 		result = builder().Save(entity)
 	}
 	if result.Error == nil {
+		if entity.Status == 1 && entity.PublishedAt == nil {
+			now := time.Now()
+			if err := SetPublishedAt(context.Background(), entity.Id, now); err != nil {
+				return 0
+			}
+			entity.PublishedAt = &now
+		}
 		topicrank.Notify(entity.Id)
 	}
 	return result.RowsAffected
@@ -29,6 +37,13 @@ func SaveOrCreateById(entity *Entity) int64 {
 func Create(entity *Entity) error {
 	if err := builder().Create(entity).Error; err != nil {
 		return err
+	}
+	if entity.Status == 1 && entity.PublishedAt == nil {
+		now := time.Now()
+		if err := SetPublishedAt(context.Background(), entity.Id, now); err != nil {
+			return err
+		}
+		entity.PublishedAt = &now
 	}
 	topicrank.Notify(entity.Id)
 	return nil
@@ -43,9 +58,24 @@ func Save(entity *Entity) error {
 }
 
 // SaveWithDB leaves event publication to the caller after its transaction commits.
-func SaveWithDB(db *gorm.DB, entity *Entity) error { return db.Save(entity).Error }
+func SaveWithDB(db *gorm.DB, entity *Entity) error {
+	if err := db.Save(entity).Error; err != nil {
+		return err
+	}
+	if entity.Status == 1 && entity.PublishedAt == nil {
+		now := time.Now()
+		result := db.Table(tableName).Where(queryopt.Eq("id", entity.Id)).Where(queryopt.IsNull("published_at")).UpdateColumn("published_at", now)
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected > 0 {
+			entity.PublishedAt = &now
+		}
+	}
+	return nil
+}
 func SaveNoUpdate(entity *Entity) error {
-	if err := builder().Omit("updated_at").Save(entity).Error; err != nil {
+	if err := SaveWithDB(builder().Omit("updated_at"), entity); err != nil {
 		return err
 	}
 	topicrank.Notify(entity.Id)
@@ -408,7 +438,11 @@ func PageForModeration(q ModerationPageQuery) struct {
 }
 
 func UpdateProcessStatus(id uint64, processStatus int8) error {
-	return builder().Where(queryopt.Eq("id", id)).Updates(map[string]any{"process_status": processStatus, "next_rank_at": time.Now()}).Error
+	result := builder().Where(queryopt.Eq("id", id)).Update("process_status", processStatus)
+	if result.Error == nil && result.RowsAffected > 0 {
+		topicrank.Notify(id)
+	}
+	return result.Error
 }
 
 func UpdatePinWeight(id uint64, pinWeight int) error {
@@ -418,11 +452,19 @@ func UpdatePinWeight(id uint64, pinWeight int) error {
 }
 
 func IncrementLike(entity Entity) int64 {
-	return builder().Exec("UPDATE topics SET like_count = like_count + 1 WHERE id = ?", entity.Id).RowsAffected
+	result := builder().Exec("UPDATE topics SET like_count = like_count + 1 WHERE id = ?", entity.Id)
+	if result.Error == nil && result.RowsAffected > 0 {
+		topicrank.Notify(entity.Id)
+	}
+	return result.RowsAffected
 }
 
 func DecrementLike(entity Entity) int64 {
-	return builder().Exec("UPDATE topics SET like_count = like_count - 1 WHERE id = ?", entity.Id).RowsAffected
+	result := builder().Exec("UPDATE topics SET like_count = like_count - 1 WHERE id = ?", entity.Id)
+	if result.Error == nil && result.RowsAffected > 0 {
+		topicrank.Notify(entity.Id)
+	}
+	return result.RowsAffected
 }
 
 func IncrementViews(counts map[uint64]uint64) error {

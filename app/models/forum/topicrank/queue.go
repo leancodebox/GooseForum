@@ -6,23 +6,13 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
-
-	"gorm.io/gorm"
 )
 
-func Mark(tx *gorm.DB, topicID uint64) error {
-	return MarkAt(tx, topicID, time.Now())
-}
+// Wakeups only nudges the local worker. The database remains the schedule;
+// repeated notifications collapse into one buffered wakeup.
+var wakeups = make(chan struct{}, 1)
 
-func MarkAt(tx *gorm.DB, topicID uint64, now time.Time) error {
-	if topicID == 0 {
-		return nil
-	}
-	return query(tx).Where("id = ?", topicID).UpdateColumns(map[string]any{
-		"next_rank_at": now,
-		"published_at": gorm.Expr("CASE WHEN published_at IS NULL AND status = 1 THEN ? ELSE published_at END", now),
-	}).Error
-}
+func Wakeups() <-chan struct{} { return wakeups }
 
 // TopicRankRequested carries values only, never a request context or transaction handle.
 type TopicRankRequested struct {

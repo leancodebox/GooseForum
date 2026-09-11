@@ -12,14 +12,14 @@ import (
 
 func TestTopicRankEventRegistrationAndHandling(t *testing.T) {
 	db := dbconnect.Connect()
-	if err := db.AutoMigrate(&topics.Entity{}); err != nil {
+	if err := db.AutoMigrate(&topics.Entity{}, &topicrank.Entity{}); err != nil {
 		t.Fatal(err)
 	}
 	topic := topics.Entity{Status: 1, Title: "ranking event test"}
 	if err := db.Create(&topic).Error; err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { db.Unscoped().Delete(&topic) })
+	t.Cleanup(func() { db.Unscoped().Delete(&topic); db.Delete(&topicrank.Entity{}, "topic_id = ?", topic.Id) })
 	occurred := time.Now().Add(-time.Minute).Truncate(time.Millisecond)
 	event := &topicrank.TopicRankRequested{TopicID: topic.Id, OccurredAt: occurred}
 	found := false
@@ -39,7 +39,15 @@ func TestTopicRankEventRegistrationAndHandling(t *testing.T) {
 	if err := db.First(&got, topic.Id).Error; err != nil {
 		t.Fatal(err)
 	}
-	if got.NextRankAt == nil || !got.NextRankAt.Equal(occurred) || got.PublishedAt == nil || !got.PublishedAt.Equal(occurred) {
-		t.Fatalf("event timestamp not preserved: %+v", got)
+	scheduled, err := topicrank.Get(context.Background(), topic.Id)
+	if err != nil {
+		t.Fatal(err)
 	}
+	if scheduled.NextRunAt == nil || !scheduled.NextRunAt.Equal(occurred) || scheduled.Version != 1 {
+		t.Fatalf("event schedule not preserved: %+v", scheduled)
+	}
+	if got.PublishedAt != nil || !got.UpdatedAt.Equal(topic.UpdatedAt) {
+		t.Fatal("scheduling changed topic content")
+	}
+
 }

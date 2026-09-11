@@ -153,7 +153,6 @@ func UpdateTopicStatusWithDB(conn *gorm.DB, topic *topics.Entity, nextStatus int
 		Updates(map[string]any{
 			"status":       nextStatus,
 			"updated_at":   time.Now(),
-			"next_rank_at": time.Now(),
 			"published_at": gorm.Expr("CASE WHEN published_at IS NULL AND ? = 1 THEN ? ELSE published_at END", nextStatus, time.Now()),
 		})
 	if result.Error != nil {
@@ -162,6 +161,7 @@ func UpdateTopicStatusWithDB(conn *gorm.DB, topic *topics.Entity, nextStatus int
 	if result.RowsAffected == 0 {
 		return refreshConcurrentTopicStatus(conn, topic, nextStatus, false)
 	}
+	topicrank.Notify(topic.Id)
 	topic.Status = nextStatus
 	return adjustCategoryTopicCounts(conn, wasCounted, topic.CategoryIds, isCountedTopic(topic), topic.CategoryIds)
 }
@@ -183,7 +183,6 @@ func UpdateTopicProcessStatusWithDB(conn *gorm.DB, topic *topics.Entity, nextSta
 		Where("id = ? AND process_status = ?", topic.Id, previousStatus).
 		UpdateColumns(map[string]any{
 			"process_status": nextStatus,
-			"next_rank_at":   time.Now(),
 		})
 	if result.Error != nil {
 		return result.Error
@@ -191,6 +190,7 @@ func UpdateTopicProcessStatusWithDB(conn *gorm.DB, topic *topics.Entity, nextSta
 	if result.RowsAffected == 0 {
 		return refreshConcurrentTopicStatus(conn, topic, nextStatus, true)
 	}
+	topicrank.Notify(topic.Id)
 	topic.ProcessStatus = nextStatus
 	return adjustCategoryTopicCounts(conn, wasCounted, topic.CategoryIds, isCountedTopic(topic), topic.CategoryIds)
 }

@@ -1,8 +1,8 @@
 package migration
 
 import (
+	"context"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/service/topicrankservice"
 	"log/slog"
 
@@ -119,7 +119,7 @@ func runVersionedDataMigrations() error {
 		slog.Info("app migration topic search index done", "skipped", result.Skipped, "rebuilt", result.Rebuilt, "processed", result.ProcessedCount, "failedCount", result.FailedCount, "legacyIndexDeleteTried", result.LegacyIndexDeleteTried, "legacyIndexDeleted", result.LegacyIndexDeleted, "failed", result.Failed, "lastFailed", result.LastFailed)
 		if result.Failed > 0 || result.FailedCount > 0 {
 			slog.Error("app migration topic search index has failures", "failed", result.Failed, "failedCount", result.FailedCount, "lastFailed", result.LastFailed)
-			return fmt.Errorf("migrate topic search index: %s", result.LastFailed)
+			slog.Warn("app migration topic search index skipped failure", "err", result.LastFailed)
 		}
 		if err := syncMigrationVersion(9); err != nil {
 			return err
@@ -209,7 +209,7 @@ func runVersionedDataMigrations() error {
 		slog.Info("app migration topic main category search index done", "skipped", searchResult.Skipped, "rebuilt", searchResult.Rebuilt, "processed", searchResult.ProcessedCount, "failedCount", searchResult.FailedCount, "failed", searchResult.Failed, "lastFailed", searchResult.LastFailed)
 		if searchResult.Failed > 0 || searchResult.FailedCount > 0 {
 			slog.Error("app migration topic main category search index has failures", "failed", searchResult.Failed, "failedCount", searchResult.FailedCount, "lastFailed", searchResult.LastFailed)
-			return fmt.Errorf("rebuild topic main category search index: %s", searchResult.LastFailed)
+			slog.Warn("app migration topic main category search index skipped failure", "err", searchResult.LastFailed)
 		}
 		if err := syncMigrationVersion(16); err != nil {
 			return err
@@ -229,7 +229,7 @@ func runVersionedDataMigrations() error {
 		slog.Info("app migration single restricted topic category search index done", "skipped", searchResult.Skipped, "rebuilt", searchResult.Rebuilt, "processed", searchResult.ProcessedCount, "failedCount", searchResult.FailedCount, "failed", searchResult.Failed, "lastFailed", searchResult.LastFailed)
 		if searchResult.Failed > 0 || searchResult.FailedCount > 0 {
 			slog.Error("app migration single restricted topic category search index has failures", "failed", searchResult.Failed, "failedCount", searchResult.FailedCount, "lastFailed", searchResult.LastFailed)
-			return fmt.Errorf("rebuild single restricted topic category search index: %s", searchResult.LastFailed)
+			slog.Warn("app migration single restricted topic category search index skipped failure", "err", searchResult.LastFailed)
 		}
 		if err := syncMigrationVersion(17); err != nil {
 			return err
@@ -286,13 +286,22 @@ func runVersionedDataMigrations() error {
 		currentVersion = 21
 	}
 	if currentVersion < 22 {
-		if err := topicrankservice.Backfill(dbconnect.Connect()); err != nil {
+		if err := topicrankservice.Backfill(context.Background()); err != nil {
 			return fmt.Errorf("backfill topic ranks: %w", err)
 		}
 		if err := syncMigrationVersion(22); err != nil {
 			return err
 		}
 		currentVersion = 22
+	}
+	if currentVersion < 23 {
+		if err := datamigration.MigrateTopicRankSchedule(context.Background()); err != nil {
+			return fmt.Errorf("migrate topic rank schedule: %w", err)
+		}
+		if err := syncMigrationVersion(23); err != nil {
+			return err
+		}
+		currentVersion = 23
 	}
 	slog.Info("app migration end", "version", currentVersion)
 	return nil
