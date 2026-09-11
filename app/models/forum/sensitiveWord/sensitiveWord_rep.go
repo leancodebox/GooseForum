@@ -25,7 +25,7 @@ func Get(id uint64) (Entity, error) {
 	return e, err
 }
 
-func Save(e *Entity) error { return builder().Save(e).Error }
+func Save(e *Entity) error { return dbconnect.Connect().Save(e).Error }
 
 func Delete(id uint64) error {
 	result := builder().Delete(&Entity{}, id)
