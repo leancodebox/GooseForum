@@ -411,7 +411,7 @@ async function loadUserCard() {
         >
           <a
             href="/search"
-            class="hidden h-9 w-9 items-center justify-center rounded-full text-icon-muted transition-colors duration-150 hover:bg-base-300 hover:text-base-content sm:inline-flex"
+            class="inline-flex h-9 w-9 items-center justify-center rounded-full text-icon-muted transition-colors duration-150 hover:bg-base-300 hover:text-base-content"
             :aria-label="t('shell.search')"
             :title="t('shell.search')"
           >
