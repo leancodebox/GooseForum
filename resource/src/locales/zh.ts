@@ -483,6 +483,7 @@ export default {
     noContactableUsers: '暂无可联系用户。',
   },
   publish: {
+    moderationRejected: "内容已保存，但未通过敏感词审核，暂不公开。请修改后重新发布，或联系管理员复核。",
     createTitle: '发布主题',
     editTitle: '编辑主题',
     subtitle: '写清楚标题，选择合适分类，让讨论更容易被找到。',
@@ -1176,6 +1177,7 @@ export default {
     },
     messages: {
       userUpdated: '更新用户 {userId}：{changedFields}',
+      contentReviewed: "审核 {type} #{subjectId}，操作 {action}，版本 {version}：{reason}",
       topicStatusChanged: '主题「{title}」状态调整为{status}',
       topicPinWeightChanged: '主题「{title}」置顶权重 {oldPinWeight} -> {pinWeight}',
       topicCategoriesChanged: '主题「{title}」分类 {oldCategoryIds} -> {categoryIds}',

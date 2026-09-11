@@ -483,6 +483,7 @@ export default {
     noContactableUsers: 'Nessun utente contattabile.',
   },
   publish: {
+    moderationRejected: "Il contenuto è stato salvato ma non ha superato la moderazione e non è pubblico. Modificalo e riprova oppure contatta un amministratore.",
     createTitle: 'Pubblica argomento',
     editTitle: 'Modifica argomento',
     subtitle: 'Scrivi un titolo chiaro e scegli categorie adatte per rendere la discussione più facile da trovare.',
@@ -1176,6 +1177,7 @@ export default {
     },
     messages: {
       userUpdated: 'Utente {userId} aggiornato: {changedFields}',
+      contentReviewed: "Moderazione {type} #{subjectId}: {action}, versione {version}: {reason}",
       topicStatusChanged: 'Stato del topic "{title}" cambiato in {status}',
       topicPinWeightChanged: 'Peso di fissaggio del topic "{title}" {oldPinWeight} -> {pinWeight}',
       topicCategoriesChanged: 'Categorie del topic "{title}" {oldCategoryIds} -> {categoryIds}',

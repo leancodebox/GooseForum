@@ -128,6 +128,11 @@ export interface AdminPermissionOption {
 }
 
 export interface AdminTopic {
+  moderationStatus: string
+  moderationReason: string
+  moderationVersion: number
+  moderatedAt?: string
+
   id: number
   title: string
   description?: string | null
@@ -412,4 +417,18 @@ export interface GithubRelease {
   html_url: string
   prerelease: boolean
   draft: boolean
+}
+
+export interface ReviewPost {
+ id: number
+ topicId: number
+ topicTitle: string
+ userId: number
+ postNo: number
+ content: string
+ moderationStatus: string
+ moderationReason: string
+ moderationVersion: number
+ processStatus: number
+ updatedAt: string
 }

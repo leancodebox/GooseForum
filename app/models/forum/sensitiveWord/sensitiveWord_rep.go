@@ -34,3 +34,9 @@ func Delete(id uint64) error {
 	}
 	return result.Error
 }
+
+func LoadEnabled() ([]Entity, error) {
+	var list []Entity
+	err := builder().Where("enabled = ?", true).Order("id asc").Find(&list).Error
+	return list, err
+}

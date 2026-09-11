@@ -29,6 +29,8 @@ import {
   TableRow,
 } from '@/admin/components/ui/table'
 import {
+  reviewContent,
+  getReviewPosts,
   editTopic,
   updateTopicCategories,
   updateTopicPin,
@@ -38,13 +40,20 @@ import {
   getCategoryList,
 } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
-import type { AdminTopic, AdminCategory, AdminPayload, TopicSource, ManageHomeProps } from '@/admin/types'
+import type { ReviewPost, AdminTopic, AdminCategory, AdminPayload, TopicSource, ManageHomeProps } from '@/admin/types'
 
 defineProps<{
   payload: AdminPayload<ManageHomeProps>
 }>()
 
 const { t } = useI18n()
+const kind = ref<'topic' | 'post'>('topic')
+const moderationStatus = ref('')
+const categoryId = ref('')
+const replyRows = ref<ReviewPost[]>([])
+const reviewReason = ref('')
+const reviewReply = ref<ReviewPost | null>(null)
+let requestVersion = 0
 const loading = ref(false)
 const saving = ref(false)
 const sourceLoading = ref(false)
@@ -92,8 +101,9 @@ const categoryDialogOptions = computed<CategoryOption[]>(() => {
     })),
   ]
 })
-const rangeStart = computed(() => (rows.value.length === 0 ? 0 : (page.value - 1) * pageSize.value + 1))
-const rangeEnd = computed(() => rows.value.length === 0 ? 0 : rangeStart.value + rows.value.length - 1)
+const visibleRowCount = computed(() => kind.value === 'topic' ? rows.value.length : replyRows.value.length)
+const rangeStart = computed(() => (visibleRowCount.value === 0 ? 0 : (page.value - 1) * pageSize.value + 1))
+const rangeEnd = computed(() => visibleRowCount.value === 0 ? 0 : rangeStart.value + visibleRowCount.value - 1)
 const currentMainCategoryName = computed(() => categoryName(categoryDialogRow.value?.categoryId?.[0]))
 const nextMainCategoryName = computed(() => categoryName(pendingCategoryIds.value?.[0]))
 
@@ -136,27 +146,40 @@ function postTime(value?: string) {
   return value.slice(11, 16)
 }
 
-function topicStatusInfo(status: number) {
-  return status === 1
+function reviewLabel(status: string) {
+  return adminText(`reviewStatus_${status || 'none'}`)
+}
+function topicStatusInfo(post: AdminTopic) {
+  if (post.topicStatus !== 1 && ['rejected', 'pending', 'denied'].includes(post.moderationStatus)) return { label: reviewLabel(post.moderationStatus), className: 'bg-destructive/10 text-destructive' }
+  return post.topicStatus === 1
     ? { label: adminText('k003q'), className: 'bg-slate-950 text-white' }
     : { label: adminText('k003r'), className: 'bg-slate-100 text-slate-600' }
 }
 
 async function loadPosts() {
+  const currentRequest = ++requestVersion
   loading.value = true
   error.value = ''
   try {
+    if (kind.value === 'post') {
+      const result = await getReviewPosts({ page: page.value, pageSize: pageSize.value, moderationStatus: moderationStatus.value || undefined, search: appliedSearch.value || undefined })
+      if (currentRequest !== requestVersion) return
+      replyRows.value = result.list || []
+      hasNext.value = Boolean(result.hasNext)
+      return
+    }
     const [postPage, categoryList] = await Promise.all([
-      getTopicsList({ page: page.value, pageSize: pageSize.value, search: appliedSearch.value || undefined }),
+      getTopicsList({ page: page.value, pageSize: pageSize.value, search: appliedSearch.value || undefined, moderationStatus: moderationStatus.value || undefined, categoryId: Number(categoryId.value) || undefined }),
       categories.value.length ? Promise.resolve(categories.value) : getCategoryList(),
     ])
+    if (currentRequest !== requestVersion) return
     rows.value = postPage.list || []
     hasNext.value = Boolean(postPage.hasNext)
     categories.value = categoryList || []
   } catch (err) {
-    error.value = err instanceof Error ? err.message : adminText('k003s')
+    if (currentRequest === requestVersion) error.value = err instanceof Error ? err.message : adminText('k003s')
   } finally {
-    loading.value = false
+    if (currentRequest === requestVersion) loading.value = false
   }
 }
 
@@ -255,9 +278,11 @@ async function savePinWeight() {
 async function openSource(post: AdminTopic) {
   sourceDialogRow.value = post
   source.value = null
+  reviewReason.value = ''
   sourceLoading.value = true
   try {
-    source.value = await getTopicSource(post.id)
+    const result = await getTopicSource(post.id)
+    if (sourceDialogRow.value?.id === post.id) source.value = result
   } catch (err) {
     adminToast.error(err, adminText('k003y'))
   } finally {
@@ -309,6 +334,20 @@ async function confirmDeleteTopic() {
   }
 }
 
+async function decide(action: 'approve' | 'reject' | 'recheck') {
+  const item = kind.value === 'topic' ? source.value : reviewReply.value
+  if (!item || !reviewReason.value.trim()) return
+  saving.value = true
+  try {
+    await reviewContent(kind.value, { id: item.id, version: item.moderationVersion, action, reason: reviewReason.value.trim() })
+    sourceDialogRow.value = null
+    reviewReply.value = null
+    await loadPosts()
+    adminToast.success(adminText('reviewSaved'))
+  } catch (err) { adminToast.error(err, adminText('reviewFailed')) }
+  finally { saving.value = false }
+}
+
 onMounted(() => {
   void loadPosts()
 })
@@ -316,6 +355,19 @@ onMounted(() => {
 
 <template>
   <BasicPage :title="adminText('k005u')" :description="adminText('k005v')">
+      <div class="mb-4 flex flex-wrap items-center gap-2">
+        <select v-model="kind" class="h-9 rounded-md border bg-background px-3 text-sm" @change="page = 1; loadPosts()">
+          <option value="topic">{{ adminText('reviewTopics') }}</option><option value="post">{{ adminText('reviewReplies') }}</option>
+        </select>
+        <select v-model="moderationStatus" class="h-9 rounded-md border bg-background px-3 text-sm" @change="page = 1; loadPosts()">
+          <option value="">{{ adminText('reviewAll') }}</option>
+          <option v-for="status in ['rejected', 'pending', 'denied', 'approved', 'none']" :key="status" :value="status">{{ reviewLabel(status) }}</option>
+        </select>
+        <select v-if="kind === 'topic'" v-model="categoryId" class="h-9 rounded-md border bg-background px-3 text-sm" @change="page = 1; loadPosts()">
+          <option value="">{{ adminText('reviewAllCategories') }}</option>
+          <option v-for="category in categories" :key="category.id" :value="String(category.id)">{{ category.category }}</option>
+        </select>
+      </div>
       <AdminSection>
         <template #header>
         <AdminToolbar class="-mx-3 -my-2 border-b-0">
@@ -350,7 +402,20 @@ onMounted(() => {
         </AdminToolbar>
         </template>
 
-        <div class="md:hidden">
+        <div v-if="kind === 'post'" class="divide-y">
+          <p v-if="error" class="p-4 text-destructive">{{ error }}</p>
+          <p v-else-if="!replyRows.length" class="p-4 text-muted-foreground">{{ loading ? adminText('k0046') : adminText('k00aw') }}</p>
+          <article v-for="reply in replyRows" :key="reply.id" class="space-y-2 p-4">
+            <div class="flex items-center justify-between gap-3">
+              <span class="font-medium">{{ reply.topicTitle }} · #{{ reply.postNo }} · UID {{ reply.userId }}</span>
+              <Badge>{{ reviewLabel(reply.moderationStatus) }}</Badge>
+            </div>
+            <p class="line-clamp-3 whitespace-pre-wrap break-words text-sm">{{ reply.content }}</p>
+            <p class="break-words text-sm text-muted-foreground">{{ reply.moderationReason }}</p>
+            <Button variant="outline" @click="reviewReply = reply; reviewReason = ''">{{ adminText('reviewOpen') }}</Button>
+          </article>
+        </div>
+        <div v-if="kind === 'topic'" class="md:hidden">
           <div v-if="loading && rows.length === 0" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k0046') }}</div>
           <div v-else-if="error" class="px-3 py-10 text-center text-sm text-destructive">{{ error }}</div>
           <div v-else-if="rows.length === 0" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k00aw') }}</div>
@@ -362,6 +427,7 @@ onMounted(() => {
                     <a :href="`/p/post/${post.id}`" target="_blank" rel="noreferrer" class="min-w-0 truncate text-[15px] font-semibold leading-5 text-foreground hover:text-primary hover:underline">
                       {{ post.title }}
                     </a>
+                    <Badge v-if="post.moderationStatus && post.moderationStatus !== 'none'" variant="outline" class="shrink-0" :title="post.moderationReason">{{ reviewLabel(post.moderationStatus) }}</Badge>
                     <Badge v-if="post.processStatus === 1" variant="destructive" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k0069') }}</Badge>
                     <Badge v-if="post.pinWeight > 0" variant="secondary" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k00ax') }} {{ post.pinWeight }}</Badge>
                   </div>
@@ -369,8 +435,8 @@ onMounted(() => {
                     {{ post.description || adminText('k005w') }}
                   </p>
                 </div>
-                <span class="inline-flex h-6 shrink-0 items-center rounded-md px-2 text-xs font-semibold" :class="topicStatusInfo(post.topicStatus).className">
-                  {{ topicStatusInfo(post.topicStatus).label }}
+                <span class="inline-flex h-6 shrink-0 items-center rounded-md px-2 text-xs font-semibold" :class="topicStatusInfo(post).className">
+                  {{ topicStatusInfo(post).label }}
                 </span>
               </div>
 
@@ -397,7 +463,7 @@ onMounted(() => {
                   </div>
                 </div>
                 <div class="flex shrink-0 items-center gap-0.5">
-                  <AdminActionButton compact :title="adminText('k006c')" @click="openSource(post)">
+                  <AdminActionButton compact :title="adminText('reviewOpen')" @click="openSource(post)">
                     <FileText class="size-4" />
                   </AdminActionButton>
                   <AdminActionButton compact :title="adminText('k006d')" @click="openCategoryDialog(post)">
@@ -419,7 +485,7 @@ onMounted(() => {
           </div>
         </div>
 
-          <Table class="hidden table-fixed md:table">
+          <Table v-if="kind === 'topic'" class="hidden table-fixed md:table">
             <TableHeader class="bg-muted/30">
               <TableRow>
                 <TableHead class="px-3">{{ adminText('k00az') }}</TableHead>
@@ -446,7 +512,8 @@ onMounted(() => {
                         <a :href="`/p/post/${post.id}`" target="_blank" rel="noreferrer" class="min-w-0 truncate text-[15px] font-semibold leading-5 text-foreground hover:text-primary hover:underline">
                           {{ post.title }}
                         </a>
-                        <Badge v-if="post.processStatus === 1" variant="destructive" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k0069') }}</Badge>
+                        <Badge v-if="post.moderationStatus && post.moderationStatus !== 'none'" variant="outline" class="shrink-0" :title="post.moderationReason">{{ reviewLabel(post.moderationStatus) }}</Badge>
+                    <Badge v-if="post.processStatus === 1" variant="destructive" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k0069') }}</Badge>
                         <Badge v-if="post.pinWeight > 0" variant="secondary" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k00ax') }} {{ post.pinWeight }}</Badge>
                       </div>
                       <p class="truncate text-[12px] leading-4 text-muted-foreground">
@@ -476,8 +543,8 @@ onMounted(() => {
                   </TableCell>
                   <TableCell class="py-2 text-center align-middle">
                     <div class="inline-flex min-w-[52px] flex-col items-center gap-0.5">
-                      <span class="inline-flex h-6 items-center rounded-md px-2 text-xs font-semibold" :class="topicStatusInfo(post.topicStatus).className">
-                        {{ topicStatusInfo(post.topicStatus).label }}
+                      <span class="inline-flex h-6 items-center rounded-md px-2 text-xs font-semibold" :class="topicStatusInfo(post).className">
+                        {{ topicStatusInfo(post).label }}
                       </span>
                       <span class="text-[11px]" :class="post.processStatus === 1 ? 'text-destructive' : 'text-muted-foreground'">
                         {{ post.processStatus === 1 ? adminText('k005x') : adminText('k005y') }}
@@ -486,7 +553,7 @@ onMounted(() => {
                   </TableCell>
                   <TableCell class="pr-3">
                     <div class="flex justify-end gap-0.5">
-                      <AdminActionButton compact :title="adminText('k006c')" @click="openSource(post)">
+                      <AdminActionButton compact :title="adminText('reviewOpen')" @click="openSource(post)">
                         <FileText class="size-4" />
                       </AdminActionButton>
                       <AdminActionButton compact :title="adminText('k006d')" @click="openCategoryDialog(post)">
@@ -584,16 +651,42 @@ onMounted(() => {
       <Dialog :open="sourceDialogRow !== null" @update:open="(open) => !open && (sourceDialogRow = null)">
         <DialogContent class="sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>{{ adminText('k00b7') }}</DialogTitle>
+            <DialogTitle>{{ adminText('reviewOpen') }}</DialogTitle>
             <DialogDescription>{{ sourceDialogRow?.title }}</DialogDescription>
           </DialogHeader>
           <div class="max-h-[58vh] overflow-auto rounded-lg border bg-muted/20 p-4">
             <pre v-if="sourceLoading" class="text-sm text-muted-foreground">{{ adminText('k0046') }}</pre>
             <pre v-else class="whitespace-pre-wrap break-words text-sm leading-6">{{ source?.content || adminText('k0062') }}</pre>
           </div>
+          <div v-if="source && !sourceLoading" class="space-y-3">
+            <p class="break-words text-sm">{{ reviewLabel(source.moderationStatus) }} · {{ source.moderatedAt || '—' }}</p>
+            <p class="break-words text-sm text-muted-foreground">{{ source.moderationReason }}</p>
+            <template v-if="source.topicStatus === 1 || ['rejected', 'pending', 'denied'].includes(source.moderationStatus)">
+              <Input v-model="reviewReason" :maxlength="300" :placeholder="adminText('reviewReason')" />
+              <div class="flex flex-wrap gap-2">
+                <Button :disabled="saving || !reviewReason.trim()" @click="decide('approve')">{{ adminText('reviewApprove') }}</Button>
+                <Button variant="destructive" :disabled="saving || !reviewReason.trim()" @click="decide('reject')">{{ adminText('reviewReject') }}</Button>
+                <Button variant="outline" :disabled="saving || !reviewReason.trim()" @click="decide('recheck')">{{ adminText('reviewRecheck') }}</Button>
+              </div>
+            </template>
+          </div>
           <DialogFooter>
             <Button variant="outline" type="button" @click="sourceDialogRow = null">{{ adminText('k00b8') }}</Button>
             <Button type="button" :disabled="!source?.content" @click="copySource">{{ adminText('k00b9') }}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog :open="reviewReply !== null" @update:open="(open) => !open && (reviewReply = null)">
+        <DialogContent class="sm:max-w-3xl">
+          <DialogHeader><DialogTitle>{{ adminText('reviewReplies') }}</DialogTitle><DialogDescription>{{ reviewReply?.topicTitle }} · #{{ reviewReply?.postNo }}</DialogDescription></DialogHeader>
+          <pre class="max-h-[45vh] overflow-auto whitespace-pre-wrap break-words rounded-md border p-4 text-sm">{{ reviewReply?.content }}</pre>
+          <p class="break-words text-sm text-muted-foreground">{{ reviewReply?.moderationReason }}</p>
+          <Input v-model="reviewReason" :maxlength="300" :placeholder="adminText('reviewReason')" />
+          <DialogFooter>
+            <Button :disabled="saving || !reviewReason.trim()" @click="decide('approve')">{{ adminText('reviewApprove') }}</Button>
+            <Button variant="destructive" :disabled="saving || !reviewReason.trim()" @click="decide('reject')">{{ adminText('reviewReject') }}</Button>
+            <Button variant="outline" :disabled="saving || !reviewReason.trim()" @click="decide('recheck')">{{ adminText('reviewRecheck') }}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

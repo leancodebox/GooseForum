@@ -87,16 +87,6 @@ func Get(id uint64) (entity Entity) {
 	return
 }
 
-func GetForModeration(id, version uint64) (Entity, error) {
-	var entity Entity
-	err := builder().Select("id", "title", "first_post_id", "moderation_version").Where("id = ? AND moderation_version = ?", id, version).First(&entity).Error
-	return entity, err
-}
-
-func UpdateModeration(id, version uint64, values map[string]any) error {
-	return builder().Where("id = ? AND moderation_version = ?", id, version).Updates(values).Error
-}
-
 func GetSimple(id any) (entity Entity) {
 	builder().Where(queryopt.Eq("id", id)).First(&entity)
 	return
@@ -236,9 +226,11 @@ type PageQuery struct {
 }
 
 type AdminPageQuery struct {
-	Page, PageSize int
-	Search         string
-	UserId         uint64
+	ModerationStatus string
+	CategoryId       uint64
+	Page, PageSize   int
+	Search           string
+	UserId           uint64
 }
 
 type ModerationPageQuery struct {
@@ -394,7 +386,18 @@ func PageForAdmin(q AdminPageQuery) struct {
 	if q.UserId != 0 {
 		b.Where(queryopt.Eq("user_id", q.UserId))
 	}
-	b.Limit(queryLimit).Offset(q.PageSize * q.Page).Order(queryopt.Desc("pin_weight")).Order(queryopt.Desc("updated_at")).Order(queryopt.Desc("id")).Find(&list)
+	if q.ModerationStatus != "" {
+		b = b.Where("moderation_status = ?", q.ModerationStatus)
+	}
+	if q.CategoryId != 0 {
+		b = b.Where("id IN (SELECT topic_id FROM topic_category_index WHERE category_id = ? AND effective = 1)", q.CategoryId)
+	}
+	if q.ModerationStatus == "pending" || q.ModerationStatus == "rejected" {
+		b = b.Order("updated_at ASC").Order("id ASC")
+	} else {
+		b = b.Order("pin_weight DESC").Order("updated_at DESC").Order("id DESC")
+	}
+	b.Limit(queryLimit).Offset(q.PageSize * q.Page).Find(&list)
 	hasNext := len(list) > q.PageSize
 	if hasNext {
 		list = list[:q.PageSize]

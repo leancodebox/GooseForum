@@ -19,6 +19,7 @@ export interface CreatePostInput {
 }
 
 export interface CreatePostResult {
+  moderationStatus?: string
   id: number
   postNo?: number
   renderedContent: string
@@ -30,6 +31,8 @@ export interface UpdatePostInput {
 }
 
 export interface UpdatePostResult {
+  moderationStatus?: string
+  processStatus?: number
   id: number
   postNo?: number
   content: string
@@ -168,6 +171,7 @@ export interface GooseSiteApi {
     watch(topicId: number, action: ToggleAction): Promise<boolean>
     setStatus(topicId: number, topicStatus: 0 | 1): Promise<boolean>
     write(input: SubmitTopicInput): Promise<number>
+    writeReviewed(input: SubmitTopicInput): Promise<{ id: number, moderationStatus: string }>
   }
   moderation: {
     setTopicStatus(topicId: number, action: 'ban' | 'unban'): Promise<boolean>

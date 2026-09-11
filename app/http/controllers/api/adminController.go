@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/buildinfo"
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/randopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -395,13 +396,20 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 }
 
 type TopicsListReq struct {
-	Page     int    `form:"page"`
-	PageSize int    `form:"pageSize"`
-	Search   string `form:"search"`
-	UserId   uint64 `form:"userId"`
+	Page             int    `form:"page"`
+	PageSize         int    `form:"pageSize"`
+	Search           string `form:"search"`
+	UserId           uint64 `form:"userId"`
+	ModerationStatus string `json:"moderationStatus"`
+	CategoryId       uint64 `json:"categoryId"`
 }
 
 type TopicAdminBaseVo struct {
+	ModerationStatus  string     `json:"moderationStatus"`
+	ModerationReason  string     `json:"moderationReason"`
+	ModerationVersion uint64     `json:"moderationVersion"`
+	ModeratedAt       *time.Time `json:"moderatedAt"`
+
 	Id            uint64   `json:"id"`
 	Title         string   `json:"title"`
 	Description   string   `json:"description"`
@@ -434,7 +442,7 @@ type TopicSourceVo struct {
 
 func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
 	param := req.Params
-	pageData := topics.PageForAdmin(topics.AdminPageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, Search: param.Search, UserId: param.UserId})
+	pageData := topics.PageForAdmin(topics.AdminPageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, Search: param.Search, UserId: param.UserId, ModerationStatus: param.ModerationStatus, CategoryId: param.CategoryId})
 	userIds := lo.Map(pageData.Data, func(t topics.Entity, _ int) uint64 {
 		return t.UserId
 	})
@@ -448,6 +456,7 @@ func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
 				userAvatarUrl = user.GetWebAvatarUrl()
 			}
 			return TopicInfoAdminVo{
+				ModerationStatus: t.ModerationStatus, ModerationReason: t.ModerationReason, ModerationVersion: t.ModerationVersion, ModeratedAt: t.ModeratedAt,
 				Id:            t.Id,
 				Title:         t.Title,
 				Description:   t.Excerpt,
@@ -482,6 +491,7 @@ func TopicSource(req component.BetterRequest[TopicSourceReq]) component.Response
 	}
 
 	return component.SuccessResponse(TopicSourceVo{
+		ModerationStatus: topic.ModerationStatus, ModerationReason: topic.ModerationReason, ModerationVersion: topic.ModerationVersion, ModeratedAt: topic.ModeratedAt,
 		Id:            topic.Id,
 		Title:         topic.Title,
 		Description:   topic.Excerpt,
@@ -1350,7 +1360,11 @@ func SaveSensitiveWordSettings(req component.BetterRequest[SaveSensitiveWordSett
 	if err := contentmoderationservice.ValidateMode(config.Mode); err != nil {
 		config.Mode = pageConfig.ModerationAfterReview
 	}
-	return savePageConfig(pageConfig.SensitiveWordSettings, config, func() {})
+	if err := pageConfig.SaveConfig(pageConfig.SensitiveWordSettings, jsonopt.Encode(config)); err != nil {
+		return component.FailResponseError(err)
+	}
+	sensitivewordservice.ClearConfigCache()
+	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
 
 func SensitiveWordList(req component.BetterRequest[component.Null]) component.Response {
@@ -1370,10 +1384,15 @@ func SaveSensitiveWord(req component.BetterRequest[SensitiveWordSaveReq]) compon
 	if word.Action == "" {
 		word.Action = sensitiveWord.ActionReject
 	}
+	if len([]rune(word.Word)) > 128 || len([]rune(word.Replacement)) > 128 || (word.Action != sensitiveWord.ActionReject && word.Action != sensitiveWord.ActionReplace && word.Action != sensitiveWord.ActionRecord) {
+		return component.FailResponseCode("invalid_sensitive_word", nil)
+	}
 	if err := sensitiveWord.Save(&word); err != nil {
 		return component.FailResponseCode("word_save_failed", nil)
 	}
-	sensitivewordservice.Refresh()
+	if err := sensitivewordservice.Refresh(); err != nil {
+		return component.FailResponseError(err)
+	}
 	return successDataMap("word", word)
 }
 
@@ -1385,7 +1404,9 @@ func DeleteSensitiveWord(req component.BetterRequest[SensitiveWordDeleteReq]) co
 	if err := sensitiveWord.Delete(req.Params.Id); err != nil {
 		return component.FailResponseCode("word_delete_failed", nil)
 	}
-	sensitivewordservice.Refresh()
+	if err := sensitivewordservice.Refresh(); err != nil {
+		return component.FailResponseError(err)
+	}
 	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
 

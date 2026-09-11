@@ -18,6 +18,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
+	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
@@ -31,11 +32,12 @@ func GetSiteStatistics() component.Response {
 }
 
 type WriteTopicReq struct {
-	TopicId     uint64   `json:"topicId"`
-	Content     string   `json:"content" validate:"required"`
-	Title       string   `json:"title" validate:"required"`
-	CategoryId  []uint64 `json:"categoryId" validate:"min=1,max=3"`
-	TopicStatus int8     `json:"topicStatus" validate:"oneof=0 1"`
+	ReturnReview bool     `json:"returnReview"`
+	TopicId      uint64   `json:"topicId"`
+	Content      string   `json:"content" validate:"required"`
+	Title        string   `json:"title" validate:"required"`
+	CategoryId   []uint64 `json:"categoryId" validate:"min=1,max=3"`
+	TopicStatus  int8     `json:"topicStatus" validate:"oneof=0 1"`
 }
 
 // WriteTopic creates or updates a topic and its first post.
@@ -106,7 +108,9 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 
 	var topic topics.Entity
 	var firstPost posts.Entity
+	firstPublication := true
 	wasPublished := false
+	var expectedVersion uint64
 	if req.Params.TopicId != 0 {
 		topic = topics.Get(req.Params.TopicId)
 		if topic.Id == 0 {
@@ -115,7 +119,9 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		if topic.UserId != req.UserId {
 			return component.FailResponseCode(component.MessageTopicOwnerMismatch, nil)
 		}
-		wasPublished = topic.Status == 1
+		firstPublication = topic.PublishedAt == nil
+		expectedVersion = topic.ModerationVersion
+		wasPublished = topic.Status == 1 && topic.ProcessStatus == 0
 		firstPost = posts.Get(topic.FirstPostId)
 		if firstPost.Id == 0 {
 			firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
@@ -151,8 +157,9 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		firstPost.Content = req.Params.Content
 		firstPost.RenderedHTML = ""
 		firstPost.RenderedVersion = markdown2html.GetPostVersion()
+		contentmoderationservice.ReviewTopic(&topic, &firstPost)
 		if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{
-			Topic: &topic, FirstPost: &firstPost, CategoryIDs: categoryIDs,
+			Topic: &topic, FirstPost: &firstPost, CategoryIDs: categoryIDs, ExpectedVersion: &expectedVersion,
 		}); err != nil {
 			if errors.Is(err, accesscontrol.ErrRestrictedCategorySingle) {
 				return component.FailResponseCode(component.MessageTopicRestrictedSingle, nil)
@@ -161,12 +168,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		}
 		fileusageservice.ReplaceTopic(topic.Id, req.UserId, firstPost.Content)
 		hotdataserve.ClearTopicCategoryCache()
-		if wasPublished {
-			eventbus.Publish(context.Background(), &eventhandlers.TopicUpdatedEvent{Topic: &topic, FirstPost: &firstPost})
-		} else if topic.Status == 1 {
-			userStatistics.WriteTopic(req.UserId)
-			eventbus.Publish(context.Background(), &eventhandlers.TopicPublishedEvent{Topic: &topic, FirstPost: &firstPost})
-		}
+		publishTopicReviewResult(&topic, &firstPost, firstPublication)
 	} else {
 		topic.Posters = []topics.Poster{{UserID: req.UserId}}
 		firstPost = posts.Entity{
@@ -175,6 +177,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 			RenderedHTML:    "",
 			RenderedVersion: markdown2html.GetPostVersion(),
 		}
+		contentmoderationservice.ReviewTopic(&topic, &firstPost)
 		if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{
 			Topic: &topic, FirstPost: &firstPost, CategoryIDs: categoryIDs, Create: true,
 		}); err != nil {
@@ -184,17 +187,15 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
 		fileusageservice.ReplaceTopic(topic.Id, req.UserId, firstPost.Content)
-		if topic.Status == 1 {
-			userStatistics.WriteTopic(req.UserId)
-		}
 		userservice.InvalidateUserPublicProfileCache(req.UserId)
 		hotdataserve.ClearTopicCategoryCache()
-		if topic.Status == 1 {
-			eventbus.Publish(context.Background(), &eventhandlers.TopicPublishedEvent{Topic: &topic, FirstPost: &firstPost})
-		}
+		publishTopicReviewResult(&topic, &firstPost, true)
 		if err := topicunseenservice.MarkVisited(req.UserId, topic.Id, firstPost.Id, time.Now()); err != nil {
 			slog.Warn("mark created topic visited failed", "userId", req.UserId, "topicId", topic.Id, "error", err)
 		}
+	}
+	if req.Params.ReturnReview {
+		return component.SuccessResponse(map[string]any{"id": topic.Id, "moderationStatus": topic.ModerationStatus})
 	}
 	return component.SuccessResponse(topic.Id)
 }
@@ -223,15 +224,21 @@ func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Re
 	if topic.Status == nextStatus {
 		return component.SuccessResponse(true)
 	}
-	if err := topicservice.UpdateTopicStatus(&topic, nextStatus); err != nil {
+	firstPost := posts.Get(topic.FirstPostId)
+	if firstPost.Id == 0 {
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
+	}
+	firstPublication := topic.PublishedAt == nil
+	expectedVersion := topic.ModerationVersion
+	topic.Status = nextStatus
+	contentmoderationservice.ReviewTopic(&topic, &firstPost)
+	if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{Topic: &topic, FirstPost: &firstPost, CategoryIDs: topic.CategoryIds, ExpectedVersion: &expectedVersion}); err != nil {
 		return component.FailResponseCode(component.MessageTopicSaveFailed, nil)
 	}
-	firstPost := posts.Get(topic.FirstPostId)
 	hotdataserve.ClearTopicCategoryCache()
-	if topic.Status == 1 {
-		eventbus.Publish(context.Background(), &eventhandlers.TopicPublishedEvent{Topic: &topic, FirstPost: &firstPost})
-	} else {
-		eventbus.Publish(context.Background(), &eventhandlers.TopicUpdatedEvent{Topic: &topic, FirstPost: &firstPost})
+	publishTopicReviewResult(&topic, &firstPost, firstPublication)
+	if topic.ModerationStatus == "rejected" {
+		return component.FailResponseError(errors.New("内容未通过敏感词审核，暂不公开"))
 	}
 	return component.SuccessResponse(true)
 }
@@ -323,32 +330,14 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 		slog.Warn("mark created post visited failed", "userId", req.UserId, "topicId", topicEntity.Id, "postId", postEntity.Id, "error", err)
 	}
 	fileusageservice.ReplacePost(postEntity.Id, req.UserId, postEntity.Content)
-	userStatistics.WriteComment(req.UserId)
-	userservice.InvalidateUserPublicProfileCache(req.UserId)
-	hotdataserve.ClearTopicListCache()
-
-	// 获取父 post 作者 ID
-	var parentPostAuthorID uint64
-	if req.Params.ReplyToPostId > 0 {
-		parentPostAuthorID = parentPost.UserId
+	if postEntity.ProcessStatus == 0 {
+		publishVisiblePost(topicEntity, *postEntity)
 	}
-
-	// 发布统一的评论创建事件
-	eventbus.Publish(context.Background(), &eventhandlers.CommentCreatedEvent{
-		TopicId:             topicEntity.Id,
-		PostId:              postEntity.Id,
-		PostNo:              postEntity.PostNo,
-		UserId:              req.UserId,
-		Content:             req.Params.Content,
-		TopicAuthorId:       topicEntity.UserId,
-		ReplyToPostId:       req.Params.ReplyToPostId,
-		ReplyToPostAuthorId: parentPostAuthorID,
-	})
-
 	return component.SuccessResponse(map[string]any{
-		"id":              postEntity.Id,
-		"postNo":          postEntity.PostNo,
-		"renderedContent": postEntity.RenderedHTML,
+		"moderationStatus": postEntity.ModerationStatus,
+		"id":               postEntity.Id,
+		"postNo":           postEntity.PostNo,
+		"renderedContent":  postEntity.RenderedHTML,
 	})
 }
 
@@ -393,11 +382,15 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 
 	}
 
+	expectedVersion := postEntity.ModerationVersion
+	wasPublished := postEntity.WasPublished()
+	wasVisible := postEntity.ProcessStatus == 0
 	postEntity.Content = content
 	postEntity.RenderedHTML = markdown2html.PostMarkdownToHTML(content)
 	postEntity.RenderedVersion = markdown2html.GetPostVersion()
 
-	if err := posts.Save(&postEntity); err != nil {
+	contentmoderationservice.ReviewPost(&postEntity)
+	if err := posts.SaveReviewed(&postEntity, expectedVersion); err != nil {
 		return component.FailResponseCode(
 			component.MessagePostUpdateFailed,
 
@@ -405,13 +398,22 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 
 	}
 	fileusageservice.ReplacePost(postEntity.Id, req.UserId, postEntity.Content)
+	if wasVisible != (postEntity.ProcessStatus == 0) {
+		postservice.SyncTopicPostStats(topics.Get(postEntity.TopicId), postEntity, postEntity.ProcessStatus != 0)
+		hotdataserve.ClearTopicListCache()
+		if postEntity.ProcessStatus == 0 && !wasPublished {
+			publishVisiblePost(topics.Get(postEntity.TopicId), postEntity)
+		}
+	}
 
 	return component.SuccessResponse(map[string]any{
-		"id":              postEntity.Id,
-		"postNo":          postEntity.PostNo,
-		"content":         postEntity.Content,
-		"renderedContent": postEntity.RenderedHTML,
-		"updatedAt":       postEntity.UpdatedAt.Format(time.DateTime),
+		"id":               postEntity.Id,
+		"postNo":           postEntity.PostNo,
+		"content":          postEntity.Content,
+		"renderedContent":  postEntity.RenderedHTML,
+		"updatedAt":        postEntity.UpdatedAt.Format(time.DateTime),
+		"moderationStatus": postEntity.ModerationStatus,
+		"processStatus":    postEntity.ProcessStatus,
 	})
 }
 
@@ -428,7 +430,7 @@ func DeletePost(req component.BetterRequest[DeletePostReq]) component.Response {
 	}
 	posts.DeleteEntity(&postEntity)
 	topicEntity := topics.GetSimple(postEntity.TopicId)
-	if topicEntity.Id > 0 {
+	if topicEntity.Id > 0 && postEntity.ProcessStatus == 0 {
 		postservice.SyncTopicPostStats(topicEntity, postEntity, true)
 		hotdataserve.ClearTopicListCache()
 	}

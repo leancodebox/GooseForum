@@ -162,8 +162,8 @@ export async function followUser(userId: number, isFollowing: boolean): Promise<
   return (await localized(client.api.users.follow(userId, isFollowing), t('api.followFailed'))) ?? true
 }
 
-export async function submitTopic(topic: SubmitTopicInput): Promise<number> {
-  return (await localized(client.api.topics.write(topic), t('api.topicSaveFailed'))) ?? topic.topicId
+export async function submitTopic(topic: SubmitTopicInput): Promise<{ id: number, moderationStatus: string }> {
+  return localized(client.api.topics.writeReviewed(topic), t('api.topicSaveFailed'))
 }
 
 export function uploadImage(file: File): Promise<string> {

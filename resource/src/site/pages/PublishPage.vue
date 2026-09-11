@@ -485,18 +485,22 @@ async function submitPublishedTopic() {
   error.value = ''
   message.value = ''
   try {
-    const id = await submitTopic({
+    const result = await submitTopic({
       topicId: currentTopicId.value,
       title: title.value.trim(),
       content: content.value.trim(),
       categoryId: categoryIds.value,
       topicStatus: 1,
     })
-    currentTopicId.value = id
+    currentTopicId.value = result.id
     syncSavedSnapshot()
     forceNextNavigation()
+    if (result.moderationStatus === 'rejected') {
+      error.value = t('publish.moderationRejected')
+      return
+    }
     message.value = page.props.isEditing ? t('publish.topicUpdated') : t('publish.topicPublished')
-    window.location.href = `/p/post/${id}`
+    window.location.href = `/p/post/${result.id}`
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('publish.saveFailed')
   } finally {
@@ -514,14 +518,14 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
   error.value = ''
   message.value = ''
   try {
-    const id = await submitTopic({
+    const result = await submitTopic({
       topicId: currentTopicId.value,
       title: title.value.trim(),
       content: content.value.trim(),
       categoryId: categoryIds.value,
       topicStatus: 0,
     })
-    currentTopicId.value = id
+    currentTopicId.value = result.id
     syncSavedSnapshot()
     forceNextNavigation()
     if (redirect) window.location.href = nextUrl || '/drafts'

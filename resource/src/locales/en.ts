@@ -483,6 +483,7 @@ export default {
     noContactableUsers: 'No contactable users.',
   },
   publish: {
+    moderationRejected: "Your content was saved but did not pass moderation and is not public. Edit and resubmit it, or contact an administrator.",
     createTitle: 'Publish topic',
     editTitle: 'Edit topic',
     subtitle: 'Write a clear title and choose suitable categories so the discussion is easier to find.',
@@ -1176,6 +1177,7 @@ export default {
     },
     messages: {
       userUpdated: 'Updated user {userId}: {changedFields}',
+      contentReviewed: "Reviewed {type} #{subjectId}: {action}, version {version}: {reason}",
       topicStatusChanged: 'Topic "{title}" status changed to {status}',
       topicPinWeightChanged: 'Topic "{title}" pin weight {oldPinWeight} -> {pinWeight}',
       topicCategoriesChanged: 'Topic "{title}" categories {oldCategoryIds} -> {categoryIds}',

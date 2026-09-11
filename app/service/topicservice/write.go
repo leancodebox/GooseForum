@@ -11,16 +11,16 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
-	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type FirstPostWrite struct {
-	Topic       *topics.Entity
-	FirstPost   *posts.Entity
-	CategoryIDs []uint64
-	Create      bool
+	Topic           *topics.Entity
+	FirstPost       *posts.Entity
+	CategoryIDs     []uint64
+	Create          bool
+	ExpectedVersion *uint64
 }
 
 func SaveTopicAndFirstPost(input FirstPostWrite) error {
@@ -41,10 +41,14 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 		if !input.Create {
 			var stored topics.Entity
 			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
-				Select("id", "status", "process_status").
+				Select("id", "status", "process_status", "moderation_version").
 				First(&stored, input.Topic.Id).Error; err != nil {
 				return err
 			}
+			if input.ExpectedVersion != nil && stored.ModerationVersion != *input.ExpectedVersion {
+				return errors.New("content changed; reload before reviewing")
+			}
+			input.Topic.ProcessStatus = stored.ProcessStatus
 			oldPublished = isCountedTopic(&stored)
 			var err error
 			oldCategoryIDs, err = topicCategoryIndex.ActiveCategoryIDsByTopicWithDB(tx, input.Topic.Id)
@@ -56,10 +60,6 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 			return err
 		}
 		input.Topic.CategoryIds = append([]uint64(nil), categoryIDs...)
-		if input.Create {
-			contentmoderationservice.PrepareTopic(input.Topic)
-			contentmoderationservice.PreparePost(input.FirstPost)
-		}
 		input.Topic.MainCategoryId = categoryIDs[0]
 		if input.Create {
 			input.Topic.PostCount = 1
@@ -95,9 +95,6 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 		return err
 	}
 	topicrank.Notify(input.Topic.Id)
-	if input.Create {
-		go contentmoderationservice.ReviewTopic(input.Topic.Id, input.Topic.ModerationVersion)
-	}
 	return adjustCategoryTopicCounts(conn, oldPublished, oldCategoryIDs, isCountedTopic(input.Topic), categoryIDs)
 }
 
@@ -133,7 +130,8 @@ func SaveTopicCategoriesWithDB(conn *gorm.DB, topic *topics.Entity, categoryIDs 
 		}
 		topic.CategoryIds = append([]uint64(nil), categoryIDs...)
 		topic.MainCategoryId = categoryIDs[0]
-		if err := tx.Omit("updated_at").Save(topic).Error; err != nil {
+		topic.Status, topic.ProcessStatus = stored.Status, stored.ProcessStatus
+		if err := tx.Model(&topics.Entity{}).Where("id = ?", topic.Id).Omit("updated_at").Select("category_id", "main_category_id").Updates(topic).Error; err != nil {
 			return err
 		}
 		return topicCategoryIndex.ReplaceTopicCategoriesWithDB(tx, topic.Id, categoryIDs)

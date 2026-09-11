@@ -40,6 +40,7 @@ const targetTypeCodeMap: Record<number, string> = {
 }
 
 const optInfoMessageKeyMap: Record<string, string> = {
+  'admin.opt.content.reviewed': 'adminOptLog.messages.contentReviewed',
   'admin.opt.user.updated': 'adminOptLog.messages.userUpdated',
   'admin.opt.topic.statusChanged': 'adminOptLog.messages.topicStatusChanged',
   'admin.opt.topic.pinWeightChanged': 'adminOptLog.messages.topicPinWeightChanged',

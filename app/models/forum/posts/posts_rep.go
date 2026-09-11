@@ -17,7 +17,8 @@ func SaveOrCreateById(entity *Entity) int64 {
 }
 
 func SaveNoUpdate(entity *Entity) error {
-	return builder().Omit("updated_at").Save(entity).Error
+	return builder().Where("id = ? AND moderation_version = ?", entity.Id, entity.ModerationVersion).
+		UpdateColumns(map[string]any{"rendered_html": entity.RenderedHTML, "rendered_version": entity.RenderedVersion}).Error
 }
 
 func Create(entity *Entity) error {
@@ -45,18 +46,18 @@ func Get(id uint64) (entity Entity) {
 	return
 }
 
-func GetForModeration(id, version uint64) (Entity, error) {
-	var entity Entity
-	err := builder().Select("id", "content", "topic_id", "post_no", "moderation_version").Where("id = ? AND moderation_version = ?", id, version).First(&entity).Error
-	return entity, err
-}
-
-func UpdateModeration(id, version uint64, values map[string]any) error {
-	return builder().Where("id = ? AND moderation_version = ?", id, version).Updates(values).Error
-}
-
-func UpdateModerationByID(id uint64, values map[string]any) error {
-	return builder().Where("id = ?", id).Updates(values).Error
+// SaveReviewed compares the version before changing content or an admin decision.
+func SaveReviewed(entity *Entity, version uint64) error {
+	result := builder().Where("id = ? AND moderation_version = ?", entity.Id, version).
+		Select("content", "rendered_html", "rendered_version", "process_status", "moderation_status", "moderation_reason", "moderation_version", "moderated_at", "updated_at", "published_at").Updates(entity)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("content changed; reload before reviewing")
+	}
+	topicrank.Notify(entity.TopicId)
+	return nil
 }
 
 func GetMaxId() uint64 {
@@ -180,7 +181,7 @@ func GetByTopicPostNoAtOrBefore(topicId uint64, postNo uint64) (entity Entity, o
 }
 
 func GetLastByTopicID(topicID uint64) (entity Entity, ok bool) {
-	err := builder().
+	err := builder().Where("process_status = 0").
 		Where(queryopt.Eq("topic_id", topicID)).
 		Order(queryopt.Desc("post_no")).
 		Order(queryopt.Desc("id")).

@@ -1151,6 +1151,7 @@ async function savePostEdit() {
         content: updated.content,
         renderedContent: updated.renderedContent,
         updatedAt: updated.updatedAt,
+        processStatus: updated.processStatus ?? posts.value[index]!.processStatus,
       }
     }
     editingPostId.value = 0
@@ -1159,7 +1160,10 @@ async function savePostEdit() {
     postDraftBeforeEdit.value = ''
     targetPostBeforeEdit.value = 0
     composerOpen.value = false
-    pushFlash(t('topic.replyUpdated'), 'success')
+    if (updated.moderationStatus === 'rejected') {
+      errorMessage.value = t('publish.moderationRejected')
+      await refreshCurrentPage()
+    } else pushFlash(t('topic.replyUpdated'), 'success')
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : t('api.replyUpdateFailed')
   } finally {
@@ -1191,6 +1195,10 @@ async function submitPost() {
     postContent.value = ''
     targetPostId.value = 0
     composerOpen.value = false
+    if (typeof createdPost === 'object' && createdPost?.moderationStatus === 'rejected') {
+      errorMessage.value = t('publish.moderationRejected')
+      return
+    }
     pushFlash(t('topic.replyPosted'), 'success')
     const createdPostId = typeof createdPost === 'object' && createdPost !== null ? createdPost.id : createdPost
     try {

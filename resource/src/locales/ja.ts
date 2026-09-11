@@ -483,6 +483,7 @@ export default {
     noContactableUsers: '連絡できるユーザーはいません。',
   },
   publish: {
+    moderationRejected: "内容は保存されましたが、審査に通らなかったため公開されません。編集して再投稿するか、管理者に確認を依頼してください。",
     createTitle: 'トピックを投稿',
     editTitle: 'トピックを編集',
     subtitle: 'わかりやすいタイトルと適切なカテゴリで、議論を見つけやすくします。',
@@ -1176,6 +1177,7 @@ export default {
     },
     messages: {
       userUpdated: 'Updated user {userId}: {changedFields}',
+      contentReviewed: "{type} #{subjectId} の審査：{action}、バージョン {version}：{reason}",
       topicStatusChanged: 'Topic "{title}" status changed to {status}',
       topicPinWeightChanged: 'Topic "{title}" pin weight {oldPinWeight} -> {pinWeight}',
       topicCategoriesChanged: 'Topic "{title}" categories {oldCategoryIds} -> {categoryIds}',

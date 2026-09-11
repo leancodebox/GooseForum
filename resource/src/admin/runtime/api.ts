@@ -4,6 +4,7 @@ import type {
   AccessControlOverview,
   ApiEnvelope,
   AdminTopic,
+  ReviewPost,
   AdminBadge,
   AdminCategory,
   AdminCategoryModerator,
@@ -253,7 +254,7 @@ export function deleteCategoryModerator(id: number) {
   return postJson<unknown>('/api/admin/category-moderator-delete', { id }, adminText('k00er'))
 }
 
-export function getTopicsList(params: { page?: number, pageSize?: number, search?: string }) {
+export function getTopicsList(params: { page?: number, pageSize?: number, search?: string, moderationStatus?: string, categoryId?: number, userId?: number }) {
   return postJson<PageResult<AdminTopic>>('/api/admin/topics/list', params, adminText('k0012'))
 }
 
@@ -361,8 +362,10 @@ export function getSecuritySettings() {
   return getJson<SecuritySettings>('/api/admin/security-settings', adminText('k001h'))
 }
 
-export function getSensitiveWordSettings() {
-  return getJson<SensitiveWordSettings>('/api/admin/sensitive-word-settings', '加载敏感词审核设置失败')
+export async function getSensitiveWordSettings() {
+  const result = await getJson<{ settings: SensitiveWordSettings }>('/api/admin/sensitive-word-settings', '加载敏感词审核设置失败')
+  if (!result?.settings || typeof result.settings.enabled !== 'boolean') throw new Error('敏感词设置响应格式错误')
+  return result.settings
 }
 
 export function getPostingSettings() {
@@ -404,7 +407,11 @@ export function saveSecuritySettings(settings: SecuritySettings) {
 export function saveSensitiveWordSettings(settings: SensitiveWordSettings) {
   return postJson<unknown>('/api/admin/save-sensitive-word-settings', { settings }, '保存敏感词审核设置失败')
 }
-export function getSensitiveWords() { return getJson<SensitiveWord[]>('/api/admin/sensitive-words', '加载敏感词失败') }
+export async function getSensitiveWords() {
+  const result = await getJson<{ words: SensitiveWord[] | null }>('/api/admin/sensitive-words', '加载敏感词失败')
+  if (!result || !('words' in result) || (result.words !== null && !Array.isArray(result.words))) throw new Error('敏感词列表响应格式错误')
+  return result.words ?? []
+}
 export function saveSensitiveWord(word: SensitiveWord) { return postJson<{ word: SensitiveWord }>('/api/admin/sensitive-word-save', { word }, '保存敏感词失败') }
 export function deleteSensitiveWord(id: number) { return postJson<unknown>('/api/admin/sensitive-word-delete', { id }, '删除敏感词失败') }
 
@@ -418,4 +425,11 @@ export function saveHttpNotifySettings(settings: HttpNotifySettings) {
 
 export function saveAnnouncement(settings: AnnouncementConfig) {
   return postJson<unknown>('/api/admin/save-announcement', { settings }, adminText('k001o'))
+}
+
+export function reviewContent(kind: 'topic' | 'post', data: { id: number, version: number, action: 'approve' | 'reject' | 'recheck', reason: string }) {
+ return postJson<boolean>(`/api/admin/${kind === 'topic' ? 'topics' : 'posts'}/review`, data, adminText('reviewFailed'))
+}
+export function getReviewPosts(params: { page: number, pageSize: number, moderationStatus?: string, search?: string }) {
+ return postJson<PageResult<ReviewPost>>('/api/admin/posts/review-list', params, adminText('reviewFailed'))
 }

@@ -19,7 +19,7 @@ const topicSequenceLockShards = 256
 var topicSequenceLocks [topicSequenceLockShards]sync.Mutex
 
 func CreateTopicPost(entity *posts.Entity, topicEntity topics.Entity) error {
-	contentmoderationservice.PreparePost(entity)
+	contentmoderationservice.ReviewPost(entity)
 	lock := &topicSequenceLocks[entity.TopicId%topicSequenceLockShards]
 	lock.Lock()
 	defer lock.Unlock()
@@ -33,6 +33,9 @@ func CreateTopicPost(entity *posts.Entity, topicEntity topics.Entity) error {
 		if err := posts.CreateWithDB(tx, entity); err != nil {
 			return err
 		}
+		if entity.ProcessStatus != 0 {
+			return nil
+		}
 		if err := topicUserStat.IncrementUserPostWithDB(tx, topicEntity.Id, entity.UserId); err != nil {
 			return err
 		}
@@ -45,7 +48,6 @@ func CreateTopicPost(entity *posts.Entity, topicEntity topics.Entity) error {
 	})
 	if err == nil {
 		topicrank.Notify(entity.TopicId)
-		go contentmoderationservice.ReviewPost(entity.Id, entity.ModerationVersion)
 	}
 	return err
 }

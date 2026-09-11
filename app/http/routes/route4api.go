@@ -175,6 +175,9 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("topics/list", UpButterReq(api.TopicsList)).
 		POST("topics/source", UpButterReq(api.TopicSource)).
 		POST("topics/edit", UpButterReq(api.EditTopic)).
+		POST("topics/review", UpButterReq(api.ReviewAdminTopic)).
+		POST("posts/review-list", UpButterReq(api.ReviewPostsList)).
+		POST("posts/review", UpButterReq(api.ReviewAdminPost)).
 		POST("topics/delete", UpButterReq(api.DeleteTopic)).
 		POST("topics/pin-edit", UpButterReq(api.EditTopicPin)).
 		POST("topics/categories-edit", UpButterReq(api.EditTopicCategories)).

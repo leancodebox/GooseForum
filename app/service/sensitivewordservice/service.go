@@ -8,70 +8,79 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/sensitiveWord"
 )
 
-type Match struct {
-	Word        string
-	Action      string
-	Replacement string
-}
-
 type Result struct {
 	Passed       bool
+	Content      string
 	MatchedWords []string
 	Reason       string
 }
 
-var (
-	mu    sync.RWMutex
-	words []sensitiveWord.Entity
-)
+// Published dictionaries are immutable; readers share the slice without copying it.
+var dictionary struct {
+	sync.Mutex
+	loaded bool
+	words  []sensitiveWord.Entity
+}
 
-func Refresh() {
-	list := sensitiveWord.List(true)
-	sort.Slice(list, func(i, j int) bool { return len(list[i].Word) > len(list[j].Word) })
-	mu.Lock()
-	words = list
-	mu.Unlock()
+func Refresh() error {
+	dictionary.Lock()
+	defer dictionary.Unlock()
+	list, err := loadWords()
+	dictionary.loaded = err == nil
+	if err != nil {
+		return err
+	}
+	dictionary.words = list
+	return nil
+}
+
+func loadWords() ([]sensitiveWord.Entity, error) {
+	list, err := sensitiveWord.LoadEnabled()
+	if err != nil {
+		return nil, err
+	}
+	sort.SliceStable(list, func(i, j int) bool { return len(list[i].Word) > len(list[j].Word) })
+	return list, nil
 }
 
 func Check(content string) Result {
-	mu.RLock()
-	list := append([]sensitiveWord.Entity(nil), words...)
-	mu.RUnlock()
-	if len(list) == 0 {
-		Refresh()
-		mu.RLock()
-		list = append([]sensitiveWord.Entity(nil), words...)
-		mu.RUnlock()
+	dictionary.Lock()
+	if !dictionary.loaded {
+		list, err := loadWords()
+		if err != nil {
+			dictionary.Unlock()
+			return Result{Passed: false, Content: content, Reason: "sensitive word dictionary unavailable"}
+		}
+		dictionary.words = list
+		dictionary.loaded = true
 	}
-	result := Result{Passed: true}
-	seen := make(map[string]struct{})
+	list := dictionary.words
+	dictionary.Unlock()
+	return check(content, list)
+}
+
+func check(content string, list []sensitiveWord.Entity) Result {
+	result := Result{Passed: true, Content: content}
+	replacements := make([]string, 0)
 	for _, word := range list {
 		if word.Word == "" || !strings.Contains(content, word.Word) {
 			continue
 		}
-		if _, ok := seen[word.Word]; ok {
-			continue
-		}
-		seen[word.Word] = struct{}{}
 		result.MatchedWords = append(result.MatchedWords, word.Word)
-		if word.Action == sensitiveWord.ActionReject || word.Action == "" {
+		switch word.Action {
+		case sensitiveWord.ActionReplace:
+			replacements = append(replacements, word.Word, word.Replacement)
+		case sensitiveWord.ActionRecord:
+		default:
 			result.Passed = false
 		}
+	}
+	// One pass prevents replacement text from being processed by another rule.
+	if len(replacements) > 0 {
+		result.Content = strings.NewReplacer(replacements...).Replace(content)
 	}
 	if len(result.MatchedWords) > 0 {
 		result.Reason = "matched sensitive words: " + strings.Join(result.MatchedWords, ", ")
 	}
 	return result
-}
-
-func Replace(content string) string {
-	mu.RLock()
-	list := append([]sensitiveWord.Entity(nil), words...)
-	mu.RUnlock()
-	for _, word := range list {
-		if word.Action == sensitiveWord.ActionReplace && word.Word != "" {
-			content = strings.ReplaceAll(content, word.Word, word.Replacement)
-		}
-	}
-	return content
 }

@@ -39,6 +39,7 @@ export function createSiteApi(http: GooseHttpClient): GooseSiteApi {
       watch: (topicId, action) => post(http, route('topicsWatch'), { topicId, action }),
       setStatus: (topicId, topicStatus) => post(http, route('topicsStatus'), { topicId, topicStatus }),
       write: (input) => post(http, route('topicsWrite'), input),
+      writeReviewed: (input) => post(http, route('topicsWrite'), { ...input, returnReview: true }),
     },
     moderation: {
       setTopicStatus: (topicId, action) => post(http, route('moderationTopicStatus'), { topicId, action }),
