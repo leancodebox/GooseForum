@@ -483,6 +483,7 @@ export default {
     noContactableUsers: 'No contactable users.',
   },
   publish: {
+    moderationPending: "Your content was saved and will be public after approval.",
     moderationRejected: "Your content was saved but did not pass moderation and is not public. Edit and resubmit it, or contact an administrator.",
     createTitle: 'Publish topic',
     editTitle: 'Edit topic',

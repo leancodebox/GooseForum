@@ -53,13 +53,13 @@ func ReviewAdminTopic(req component.BetterRequest[ReviewContentReq]) component.R
 			return component.FailResponseError(fmt.Errorf("请先启用敏感词检测"))
 		}
 		topic.Status = 1
-		contentmoderationservice.ReviewTopic(&topic, &post)
+		contentmoderationservice.PrepareTopic(&topic, &post)
 	} else {
 		topic.ModerationVersion++
 		post.ModerationVersion++
 		topic.ModerationStatus, topic.Status = "approved", 1
 		if req.Params.Action == "reject" {
-			topic.ModerationStatus, topic.Status = "denied", 0
+			topic.ModerationStatus, topic.Status = "rejected", 0
 		}
 		topic.ModerationReason, topic.ModeratedAt = req.Params.Reason, &now
 		post.ModerationStatus, post.ModerationReason, post.ModeratedAt = topic.ModerationStatus, req.Params.Reason, &now
@@ -68,13 +68,14 @@ func ReviewAdminTopic(req component.BetterRequest[ReviewContentReq]) component.R
 			post.ProcessStatus = 0
 		}
 	}
-	if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{Topic: &topic, FirstPost: &post, CategoryIDs: topic.CategoryIds, ExpectedVersion: &req.Params.Version}); err != nil {
+	if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{Topic: &topic, FirstPost: &post, CategoryIDs: topic.CategoryIds, ExpectedVersion: &req.Params.Version, ReviewOnly: true}); err != nil {
 		return component.FailResponseError(err)
 	}
 	hotdataserve.ClearTopicCategoryCache()
 	fileusageservice.ReplaceTopic(topic.Id, topic.UserId, post.Content)
 	publishTopicReviewResult(&topic, &post, firstPublication)
 	logContentReview(req, "topic", topic.Id)
+	enqueueContentReview(true, topic.Id, topic.ModerationVersion, topic.ModerationStatus)
 	return component.SuccessResponse(true)
 }
 
@@ -105,7 +106,9 @@ func ReviewPostsList(req component.BetterRequest[ReviewPostsReq]) component.Resp
 	q := dbconnect.Connect().Model(&posts.Entity{}).
 		Select("posts.id, posts.topic_id, topics.title AS topic_title, posts.user_id, posts.post_no, posts.content, posts.moderation_status, posts.moderation_reason, posts.moderation_version, posts.process_status, posts.updated_at").
 		Joins("JOIN topics ON topics.id = posts.topic_id AND topics.deleted_at IS NULL").Where("posts.post_no > 1")
-	if req.Params.ModerationStatus != "" {
+	if req.Params.ModerationStatus == "rejected" {
+		q = q.Where("posts.moderation_status IN ?", []string{"rejected", "denied"})
+	} else if req.Params.ModerationStatus != "" {
 		q = q.Where("posts.moderation_status = ?", req.Params.ModerationStatus)
 	}
 	if req.Params.Search != "" {
@@ -139,12 +142,12 @@ func ReviewAdminPost(req component.BetterRequest[ReviewContentReq]) component.Re
 		if !sensitivewordservice.Enabled() {
 			return component.FailResponseError(fmt.Errorf("请先启用敏感词检测"))
 		}
-		contentmoderationservice.ReviewPost(&post)
+		contentmoderationservice.PreparePost(&post)
 	} else {
 		post.ModerationVersion++
 		post.ModerationStatus, post.ProcessStatus = "approved", 0
 		if req.Params.Action == "reject" {
-			post.ModerationStatus, post.ProcessStatus = "denied", 1
+			post.ModerationStatus, post.ProcessStatus = "rejected", 1
 		}
 		now := time.Now()
 		post.ModerationReason, post.ModeratedAt = req.Params.Reason, &now
@@ -165,6 +168,7 @@ func ReviewAdminPost(req component.BetterRequest[ReviewContentReq]) component.Re
 		publishVisiblePost(topic, post)
 	}
 	logContentReview(req, "post", topic.Id)
+	enqueueContentReview(false, post.Id, post.ModerationVersion, post.ModerationStatus)
 	return component.SuccessResponse(true)
 }
 

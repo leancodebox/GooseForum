@@ -19,7 +19,7 @@ const topicSequenceLockShards = 256
 var topicSequenceLocks [topicSequenceLockShards]sync.Mutex
 
 func CreateTopicPost(entity *posts.Entity, topicEntity topics.Entity) error {
-	contentmoderationservice.ReviewPost(entity)
+	contentmoderationservice.PreparePost(entity)
 	lock := &topicSequenceLocks[entity.TopicId%topicSequenceLockShards]
 	lock.Lock()
 	defer lock.Unlock()

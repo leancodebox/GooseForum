@@ -30,7 +30,14 @@ func handleTopicPublished(ctx context.Context, event *TopicPublishedEvent) error
 		return nil
 	}
 	if event.Topic != nil {
-		_, err := searchservice.BuildSingleTopicSearchDocument(event.Topic, event.FirstPost)
+		// Publication and review events may arrive after a newer edit. Index the
+		// current state, not the snapshot that originally queued the event.
+		topic := topics.Get(event.Topic.Id)
+		if topic.Id == 0 {
+			return nil
+		}
+		post := posts.Get(topic.FirstPostId)
+		_, err := searchservice.BuildSingleTopicSearchDocument(&topic, &post)
 		return err
 	}
 	return nil
@@ -48,7 +55,14 @@ func handleTopicUpdated(ctx context.Context, event *TopicUpdatedEvent) error {
 		return nil
 	}
 	if event.Topic != nil {
-		_, err := searchservice.BuildSingleTopicSearchDocument(event.Topic, event.FirstPost)
+		// Publication and review events may arrive after a newer edit. Index the
+		// current state, not the snapshot that originally queued the event.
+		topic := topics.Get(event.Topic.Id)
+		if topic.Id == 0 {
+			return nil
+		}
+		post := posts.Get(topic.FirstPostId)
+		_, err := searchservice.BuildSingleTopicSearchDocument(&topic, &post)
 		return err
 	}
 	return nil

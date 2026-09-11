@@ -641,4 +641,12 @@ export default {
   "reviewSyncDescription": "Publishing and editing run checks before content becomes public. Rejected content is saved for manual review in content management. Drafts stay private.",
   "reviewStatus_denied": "Rifiutato manualmente",
   "reviewEmptyWords": "Nessuna parola corrispondente. Aggiungi una regola con il modulo qui sopra.",
+  "sensitiveAsyncHint": "Pubblicazione e modifica avviano la revisione in background. Bozze escluse.",
+  "sensitiveSearch": "Cerca parole o sostituzioni",
+  "sensitiveWordLabel": "Parola",
+  "sensitiveActionLabel": "Azione",
+  "sensitiveReplacementLabel": "Sostituzione",
+  "sensitiveEnabledLabel": "Attivo",
+  "sensitiveAdd": "Aggiungi",
+  "sensitiveEmptyReplacement": "(sostituzione vuota)",
 } as const

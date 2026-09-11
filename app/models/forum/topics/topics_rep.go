@@ -386,7 +386,9 @@ func PageForAdmin(q AdminPageQuery) struct {
 	if q.UserId != 0 {
 		b.Where(queryopt.Eq("user_id", q.UserId))
 	}
-	if q.ModerationStatus != "" {
+	if q.ModerationStatus == "rejected" {
+		b = b.Where("moderation_status IN ?", []string{"rejected", "denied"})
+	} else if q.ModerationStatus != "" {
 		b = b.Where("moderation_status = ?", q.ModerationStatus)
 	}
 	if q.CategoryId != 0 {

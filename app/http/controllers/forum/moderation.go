@@ -250,7 +250,7 @@ func UpdateModerationPostStatus(req component.BetterRequest[ModerationPostStatus
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 	nextStatus := moderationTargetStatus(req.Params.Action)
-	if post.ProcessStatus == nextStatus {
+	if post.ProcessStatus == nextStatus && post.ModerationStatus != "pending" {
 		return component.SuccessResponse(true)
 	}
 	if err := posts.UpdateProcessStatus(post.Id, nextStatus); err != nil {

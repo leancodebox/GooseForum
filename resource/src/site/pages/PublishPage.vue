@@ -499,6 +499,10 @@ async function submitPublishedTopic() {
       error.value = t('publish.moderationRejected')
       return
     }
+    if (result.moderationStatus === 'pending' && result.topicStatus === 0) {
+      message.value = t('publish.moderationPending')
+      return
+    }
     message.value = page.props.isEditing ? t('publish.topicUpdated') : t('publish.topicPublished')
     window.location.href = `/p/post/${result.id}`
   } catch (err) {

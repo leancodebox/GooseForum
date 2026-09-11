@@ -21,6 +21,7 @@ type FirstPostWrite struct {
 	CategoryIDs     []uint64
 	Create          bool
 	ExpectedVersion *uint64
+	ReviewOnly      bool
 }
 
 func SaveTopicAndFirstPost(input FirstPostWrite) error {
@@ -41,15 +42,33 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 		if !input.Create {
 			var stored topics.Entity
 			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
-				Select("id", "status", "process_status", "moderation_version").
 				First(&stored, input.Topic.Id).Error; err != nil {
 				return err
 			}
 			if input.ExpectedVersion != nil && stored.ModerationVersion != *input.ExpectedVersion {
 				return errors.New("content changed; reload before reviewing")
 			}
-			input.Topic.ProcessStatus = stored.ProcessStatus
 			oldPublished = isCountedTopic(&stored)
+			if input.ReviewOnly {
+				var currentPost posts.Entity
+				if err := tx.Select("id", "process_status", "moderation_status", "moderation_version").First(&currentPost, input.FirstPost.Id).Error; err != nil {
+					return err
+				}
+				// A moderator can block the first post separately from the topic.
+				if currentPost.ProcessStatus == 1 && currentPost.ModerationStatus != "pending" && currentPost.ModerationStatus != "rejected" && currentPost.ModerationStatus != "denied" {
+					input.FirstPost.ProcessStatus = 1
+				}
+				input.FirstPost.ModerationVersion = currentPost.ModerationVersion + 1
+				// Keep counters, categories, pinning and manual blocks changed while the
+				// worker was matching text. Only reviewed content and its state may change.
+				reviewed := *input.Topic
+				stored.Title, stored.Excerpt, stored.FirstImageURL = reviewed.Title, reviewed.Excerpt, reviewed.FirstImageURL
+				stored.Status, stored.ModerationStatus = reviewed.Status, reviewed.ModerationStatus
+				stored.ModerationReason, stored.ModeratedAt, stored.ModerationVersion = reviewed.ModerationReason, reviewed.ModeratedAt, reviewed.ModerationVersion
+				*input.Topic = stored
+				categoryIDs = stored.CategoryIds
+			}
+			input.Topic.ProcessStatus = stored.ProcessStatus
 			var err error
 			oldCategoryIDs, err = topicCategoryIndex.ActiveCategoryIDsByTopicWithDB(tx, input.Topic.Id)
 			if err != nil {
@@ -89,6 +108,9 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 			if err := tx.Save(input.FirstPost).Error; err != nil {
 				return err
 			}
+		}
+		if input.ReviewOnly {
+			return nil
 		}
 		return topicCategoryIndex.ReplaceTopicCategoriesWithDB(tx, input.Topic.Id, categoryIDs)
 	}); err != nil {

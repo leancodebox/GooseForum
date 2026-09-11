@@ -157,7 +157,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		firstPost.Content = req.Params.Content
 		firstPost.RenderedHTML = ""
 		firstPost.RenderedVersion = markdown2html.GetPostVersion()
-		contentmoderationservice.ReviewTopic(&topic, &firstPost)
+		contentmoderationservice.PrepareTopic(&topic, &firstPost)
 		if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{
 			Topic: &topic, FirstPost: &firstPost, CategoryIDs: categoryIDs, ExpectedVersion: &expectedVersion,
 		}); err != nil {
@@ -177,7 +177,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 			RenderedHTML:    "",
 			RenderedVersion: markdown2html.GetPostVersion(),
 		}
-		contentmoderationservice.ReviewTopic(&topic, &firstPost)
+		contentmoderationservice.PrepareTopic(&topic, &firstPost)
 		if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{
 			Topic: &topic, FirstPost: &firstPost, CategoryIDs: categoryIDs, Create: true,
 		}); err != nil {
@@ -194,8 +194,9 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 			slog.Warn("mark created topic visited failed", "userId", req.UserId, "topicId", topic.Id, "error", err)
 		}
 	}
+	enqueueContentReview(true, topic.Id, topic.ModerationVersion, topic.ModerationStatus)
 	if req.Params.ReturnReview {
-		return component.SuccessResponse(map[string]any{"id": topic.Id, "moderationStatus": topic.ModerationStatus})
+		return component.SuccessResponse(map[string]any{"id": topic.Id, "moderationStatus": topic.ModerationStatus, "topicStatus": topic.Status})
 	}
 	return component.SuccessResponse(topic.Id)
 }
@@ -221,7 +222,7 @@ func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Re
 		}
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
-	if topic.Status == nextStatus {
+	if topic.Status == nextStatus && !(nextStatus == 0 && topic.ModerationStatus == "pending") {
 		return component.SuccessResponse(true)
 	}
 	firstPost := posts.Get(topic.FirstPostId)
@@ -231,15 +232,13 @@ func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Re
 	firstPublication := topic.PublishedAt == nil
 	expectedVersion := topic.ModerationVersion
 	topic.Status = nextStatus
-	contentmoderationservice.ReviewTopic(&topic, &firstPost)
+	contentmoderationservice.PrepareTopic(&topic, &firstPost)
 	if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{Topic: &topic, FirstPost: &firstPost, CategoryIDs: topic.CategoryIds, ExpectedVersion: &expectedVersion}); err != nil {
 		return component.FailResponseCode(component.MessageTopicSaveFailed, nil)
 	}
 	hotdataserve.ClearTopicCategoryCache()
 	publishTopicReviewResult(&topic, &firstPost, firstPublication)
-	if topic.ModerationStatus == "rejected" {
-		return component.FailResponseError(errors.New("内容未通过敏感词审核，暂不公开"))
-	}
+	enqueueContentReview(true, topic.Id, topic.ModerationVersion, topic.ModerationStatus)
 	return component.SuccessResponse(true)
 }
 
@@ -333,7 +332,9 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 	if postEntity.ProcessStatus == 0 {
 		publishVisiblePost(topicEntity, *postEntity)
 	}
+	enqueueContentReview(false, postEntity.Id, postEntity.ModerationVersion, postEntity.ModerationStatus)
 	return component.SuccessResponse(map[string]any{
+		"processStatus":    postEntity.ProcessStatus,
 		"moderationStatus": postEntity.ModerationStatus,
 		"id":               postEntity.Id,
 		"postNo":           postEntity.PostNo,
@@ -389,7 +390,7 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 	postEntity.RenderedHTML = markdown2html.PostMarkdownToHTML(content)
 	postEntity.RenderedVersion = markdown2html.GetPostVersion()
 
-	contentmoderationservice.ReviewPost(&postEntity)
+	contentmoderationservice.PreparePost(&postEntity)
 	if err := posts.SaveReviewed(&postEntity, expectedVersion); err != nil {
 		return component.FailResponseCode(
 			component.MessagePostUpdateFailed,
@@ -406,6 +407,7 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 		}
 	}
 
+	enqueueContentReview(false, postEntity.Id, postEntity.ModerationVersion, postEntity.ModerationStatus)
 	return component.SuccessResponse(map[string]any{
 		"id":               postEntity.Id,
 		"postNo":           postEntity.PostNo,

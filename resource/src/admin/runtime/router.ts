@@ -9,7 +9,6 @@ const settingsPages = {
   '/admin/settings/posting': 'posting',
   '/admin/settings/announcement': 'announcement',
   '/admin/settings/http-notify': 'http-notify',
-  '/admin/settings/sensitive-words': 'sensitive-words',
 } as const
 
 export const adminRouter = createRouter({
@@ -71,6 +70,7 @@ export const adminRouter = createRouter({
       path: '/admin/settings/oidc-provider',
       component: () => import('@/admin/pages/OIDCProviderSettingsPage.vue'),
     },
+    { path: '/admin/settings/sensitive-words', component: () => import('@/admin/pages/SensitiveWordsSettingsPage.vue') },
     ...Object.entries(settingsPages).map(([path, kind]) => ({
       path,
       component: () => import('@/admin/pages/AdminSettingsPage.vue'),

@@ -641,4 +641,12 @@ export default {
   "reviewSyncDescription": "Publishing and editing run checks before content becomes public. Rejected content is saved for manual review in content management. Drafts stay private.",
   "reviewStatus_denied": "手動で拒否",
   "reviewEmptyWords": "該当する単語はありません。上のフォームから追加できます。",
+  "sensitiveAsyncHint": "投稿・編集後に自動審査します。下書きは対象外です。",
+  "sensitiveSearch": "単語または置換内容を検索",
+  "sensitiveWordLabel": "対象語",
+  "sensitiveActionLabel": "処理",
+  "sensitiveReplacementLabel": "置換内容",
+  "sensitiveEnabledLabel": "有効",
+  "sensitiveAdd": "追加",
+  "sensitiveEmptyReplacement": "（空文字に置換）",
 } as const

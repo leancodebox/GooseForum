@@ -7,7 +7,7 @@ import httpNotifyGuideJa from '@/admin/docs/http-notify-guide.ja.md?raw'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import MarkdownIt from 'markdown-it'
-import { Code, FileText, Globe, Loader2, MailCheck, Plus, Save, Send, Shield, Trash2, Upload, Webhook, Pencil } from '@lucide/vue'
+import { Code, FileText, Globe, Loader2, MailCheck, Plus, Save, Send, Shield, Trash2, Upload, Webhook } from '@lucide/vue'
 import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Button } from '@/admin/components/ui/button'
@@ -36,11 +36,6 @@ import {
   saveMailSettings,
   savePostingSettings,
   saveSecuritySettings,
-  getSensitiveWordSettings,
-  getSensitiveWords,
-  saveSensitiveWordSettings,
-  saveSensitiveWord,
-  deleteSensitiveWord,
   saveSiteSettings,
   testMailConnection,
   uploadAdminImage,
@@ -56,12 +51,10 @@ import type {
   ManageHomeProps,
   PostingSettings,
   SecuritySettings,
-  SensitiveWordSettings,
-  SensitiveWord,
   SiteSettings,
 } from '@/admin/types'
 
-type Kind = 'site-info' | 'mail' | 'security' | 'posting' | 'http-notify' | 'announcement' | 'sensitive-words'
+type Kind = 'site-info' | 'mail' | 'security' | 'posting' | 'http-notify' | 'announcement'
 
 const props = defineProps<{
   payload: AdminPayload<ManageHomeProps>
@@ -149,16 +142,6 @@ const announcementForm = reactive<AnnouncementConfig>({
   enabled: false,
   content: '',
 })
-const sensitiveWordForm = reactive<SensitiveWordSettings>({ enabled: false, mode: 'after_review' })
-const sensitiveWords = ref<SensitiveWord[]>([])
-const wordSaving = ref(false)
-const wordSearch = ref('')
-const wordPage = ref(1)
-const filteredWords = computed(() => sensitiveWords.value.filter(item => item.word.includes(wordSearch.value.trim())))
-const visibleWords = computed(() => filteredWords.value.slice((wordPage.value - 1) * 50, wordPage.value * 50))
-watch(wordSearch, () => { wordPage.value = 1 })
-const wordForm = reactive<SensitiveWord>({ id: 0, word: '', action: 'reject', replacement: '', enabled: true })
-
 const pageMeta = computed(() => {
   locale.value
   const meta: Record<Kind, { title: string, description: string }> = {
@@ -168,7 +151,6 @@ const pageMeta = computed(() => {
     posting: { title: adminText('k0007'), description: adminText('k0008') },
     'http-notify': { title: adminText('k00cj'), description: adminText('k00cp') },
     announcement: { title: adminText('k0009'), description: adminText('k000a') },
-    'sensitive-words': { title: adminText('sensitiveTitle'), description: adminText('sensitiveDescription') },
   }
   return meta[props.kind]
 })
@@ -351,11 +333,6 @@ async function load() {
     else if (props.kind === 'security') Object.assign(securityForm, normalizeSecurity(await getSecuritySettings()))
     else if (props.kind === 'posting') Object.assign(postingForm, normalizePosting(await getPostingSettings()))
     else if (props.kind === 'http-notify') Object.assign(httpNotifyForm, normalizeHttpNotify(await getHttpNotifySettings()))
-    else if (props.kind === 'sensitive-words') {
-      const [settings, words] = await Promise.all([getSensitiveWordSettings(), getSensitiveWords()])
-      Object.assign(sensitiveWordForm, settings)
-      sensitiveWords.value = words
-    }
     else Object.assign(announcementForm, normalizeAnnouncement(await getAnnouncement()))
   } catch (err) {
     error.value = err instanceof Error ? err.message : adminText('k000d')
@@ -375,7 +352,6 @@ async function save() {
     else if (props.kind === 'security') await saveSecuritySettings(normalizeSecurity(securityForm))
     else if (props.kind === 'posting') await savePostingSettings(normalizePosting(postingForm))
     else if (props.kind === 'http-notify') await saveHttpNotifySettings(httpNotifySettings!)
-    else if (props.kind === 'sensitive-words') await saveSensitiveWordSettings(sensitiveWordForm)
     else await saveAnnouncement(normalizeAnnouncement(announcementForm))
     adminToast.success(adminText('k000e'))
   } catch (err) {
@@ -383,44 +359,6 @@ async function save() {
   } finally {
     saving.value = false
   }
-}
-
-async function persistWord(word: SensitiveWord) {
-  const result = await saveSensitiveWord({ ...word })
-  const index = sensitiveWords.value.findIndex(item => item.id === result.word.id)
-  if (index >= 0) sensitiveWords.value[index] = result.word
-  else sensitiveWords.value.push(result.word)
-}
-
-async function saveWord() {
-  if (wordSaving.value || !wordForm.word.trim()) return
-  wordSaving.value = true
-  try {
-    await persistWord(wordForm)
-    Object.assign(wordForm, { id: 0, word: '', action: 'reject', replacement: '', enabled: true })
-    adminToast.success(adminText('reviewSaved'))
-  } catch (err) { adminToast.error(err, adminText('reviewFailed')) }
-  finally { wordSaving.value = false }
-}
-
-async function toggleWord(item: SensitiveWord, enabled: boolean) {
-  if (wordSaving.value) return
-  wordSaving.value = true
-  try { await persistWord({ ...item, enabled }) }
-  catch (err) { adminToast.error(err, adminText('reviewFailed')) }
-  finally { wordSaving.value = false }
-}
-
-async function removeWord(id: number) {
-  if (wordSaving.value) return
-  wordSaving.value = true
-  try {
-    await deleteSensitiveWord(id)
-    sensitiveWords.value = sensitiveWords.value.filter(item => item.id !== id)
-    wordPage.value = Math.min(wordPage.value, Math.max(1, Math.ceil(filteredWords.value.length / 50)))
-    if (wordForm.id === id) Object.assign(wordForm, { id: 0, word: '', action: 'reject', replacement: '', enabled: true })
-  } catch (err) { adminToast.error(err, adminText('reviewFailed')) }
-  finally { wordSaving.value = false }
 }
 
 async function sendTestMail() {
@@ -759,34 +697,6 @@ onMounted(load)
           </TabsContent>
         </Tabs>
       </div>
-
-      <form v-else-if="kind === 'sensitive-words'" class="max-w-2xl space-y-8" @submit.prevent="save">
-        <div class="flex items-center justify-between rounded-lg border bg-muted/20 p-4">
-          <div><div class="text-base font-medium">{{ adminText('sensitiveEnable') }}</div><p class="text-sm text-muted-foreground">{{ adminText('sensitiveEnableDesc') }}</p></div>
-          <Switch v-model="sensitiveWordForm.enabled" />
-        </div>
-        <p class="text-sm text-muted-foreground">{{ adminText('reviewSyncDescription') }}</p>
-        <section class="space-y-4 border-t pt-6">
-          <div class="text-base font-medium">{{ adminText('sensitiveDictionary') }}</div>
-          <div class="grid gap-3 rounded-lg border bg-muted/20 p-4 md:grid-cols-[1fr_150px_1fr_auto]">
-            <Input v-model="wordForm.word" :maxlength="128" :placeholder="adminText('sensitiveWordPlaceholder')" />
-            <select v-model="wordForm.action" class="h-9 rounded-md border bg-background px-3 text-sm"><option value="reject">{{ adminText('sensitiveReject') }}</option><option value="replace">{{ adminText('sensitiveReplace') }}</option><option value="record">{{ adminText('sensitiveRecord') }}</option></select>
-            <Input v-model="wordForm.replacement" :maxlength="128" :disabled="wordForm.action !== 'replace'" :placeholder="adminText('sensitiveReplacementPlaceholder')" />
-            <Button type="button" :disabled="wordSaving || !wordForm.word.trim()" @click="saveWord"><Save class="size-4" />{{ adminText('sensitiveSave') }}</Button>
-          </div>
-          <div class="flex items-center gap-2">
-            <Input v-model="wordSearch" :placeholder="adminText('sensitiveWordPlaceholder')" />
-            <Button type="button" variant="outline" :disabled="wordPage <= 1" @click="wordPage--">{{ adminText('k00au') }}</Button>
-            <span class="text-sm">{{ wordPage }}</span>
-            <Button type="button" variant="outline" :disabled="wordPage * 50 >= filteredWords.length" @click="wordPage++">{{ adminText('k00av') }}</Button>
-          </div>
-          <p v-if="filteredWords.length === 0" class="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">{{ adminText('reviewEmptyWords') }}</p>
-          <div v-for="item in visibleWords" :key="item.id" class="flex items-center justify-between rounded-lg border p-3">
-            <div><span class="font-medium">{{ item.word }}</span><span class="ml-3 text-xs text-muted-foreground">{{ item.action }}</span></div>
-            <div class="flex items-center gap-2"><Switch :model-value="item.enabled" :disabled="wordSaving" @update:model-value="enabled => toggleWord(item, enabled)" /><Button type="button" variant="ghost" size="icon" :title="adminText('sensitiveEdit')" @click="Object.assign(wordForm, item)"><Pencil class="size-4" /></Button><Button type="button" variant="ghost" size="icon" :title="adminText('sensitiveDelete')" :disabled="wordSaving" @click="removeWord(item.id)"><Trash2 class="size-4" /></Button></div>
-          </div>
-        </section>
-      </form>
 
       <form v-else class="max-w-3xl space-y-6" @submit.prevent="save">
         <div class="flex items-center justify-between">

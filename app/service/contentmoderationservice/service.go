@@ -11,8 +11,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/sensitivewordservice"
 )
 
-// ReviewTopic only changes the supplied write snapshot. Call before opening a
-// transaction, and persist the result through the normal topic write path.
+// ReviewTopic evaluates a worker snapshot. Persist it only if the queued
+// content version is still current.
 func ReviewTopic(topic *topics.Entity, post *posts.Entity) {
 	previouslyRejected := post.ModerationStatus == "rejected" || post.ModerationStatus == "pending" || post.ModerationStatus == "denied"
 	topic.ModerationVersion++
@@ -83,8 +83,7 @@ func boundedReason(reason string) string {
 	return reason
 }
 
-// Retained for clients using the original settings payload. Detection is now
-// synchronous in both modes, before any public side effects.
+// ValidateMode restricts the visibility policy while asynchronous review runs.
 func ValidateMode(mode string) error {
 	if mode != "after_review" && mode != "visible_then_review" {
 		return fmt.Errorf("invalid moderation mode %q", mode)

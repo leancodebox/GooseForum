@@ -91,7 +91,7 @@ func UpdateProcessStatus(id uint64, processStatus int8) error {
 	if err := db.First(&entity, id).Error; err != nil {
 		return err
 	}
-	if err := builder().Where("id = ?", id).Update("process_status", processStatus).Error; err != nil {
+	if err := builder().Where("id = ?", id).Updates(map[string]any{"process_status": processStatus, "moderation_version": gorm.Expr("moderation_version + 1"), "moderation_status": "none"}).Error; err != nil {
 		return err
 	}
 	topicrank.Notify(entity.TopicId)

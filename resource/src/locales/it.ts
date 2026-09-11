@@ -483,6 +483,7 @@ export default {
     noContactableUsers: 'Nessun utente contattabile.',
   },
   publish: {
+    moderationPending: "Contenuto salvato. Sarà pubblico dopo l’approvazione.",
     moderationRejected: "Il contenuto è stato salvato ma non ha superato la moderazione e non è pubblico. Modificalo e riprova oppure contatta un amministratore.",
     createTitle: 'Pubblica argomento',
     editTitle: 'Modifica argomento',

@@ -12,6 +12,7 @@ import { BasicPage } from '@/admin/components/global-layout'
 import { Button } from '@/admin/components/ui/button'
 import { Badge } from '@/admin/components/ui/badge'
 import { Input } from '@/admin/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/admin/components/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -48,8 +49,8 @@ defineProps<{
 
 const { t } = useI18n()
 const kind = ref<'topic' | 'post'>('topic')
-const moderationStatus = ref('')
-const categoryId = ref('')
+const moderationStatus = ref('all')
+const categoryId = ref('all')
 const replyRows = ref<ReviewPost[]>([])
 const reviewReason = ref('')
 const reviewReply = ref<ReviewPost | null>(null)
@@ -147,7 +148,7 @@ function postTime(value?: string) {
 }
 
 function reviewLabel(status: string) {
-  return adminText(`reviewStatus_${status || 'none'}`)
+  return adminText(`reviewStatus_${status === 'denied' ? 'rejected' : status || 'none'}`)
 }
 function topicStatusInfo(post: AdminTopic) {
   if (post.topicStatus !== 1 && ['rejected', 'pending', 'denied'].includes(post.moderationStatus)) return { label: reviewLabel(post.moderationStatus), className: 'bg-destructive/10 text-destructive' }
@@ -162,14 +163,14 @@ async function loadPosts() {
   error.value = ''
   try {
     if (kind.value === 'post') {
-      const result = await getReviewPosts({ page: page.value, pageSize: pageSize.value, moderationStatus: moderationStatus.value || undefined, search: appliedSearch.value || undefined })
+      const result = await getReviewPosts({ page: page.value, pageSize: pageSize.value, moderationStatus: moderationStatus.value === 'all' ? undefined : moderationStatus.value, search: appliedSearch.value || undefined })
       if (currentRequest !== requestVersion) return
       replyRows.value = result.list || []
       hasNext.value = Boolean(result.hasNext)
       return
     }
     const [postPage, categoryList] = await Promise.all([
-      getTopicsList({ page: page.value, pageSize: pageSize.value, search: appliedSearch.value || undefined, moderationStatus: moderationStatus.value || undefined, categoryId: Number(categoryId.value) || undefined }),
+      getTopicsList({ page: page.value, pageSize: pageSize.value, search: appliedSearch.value || undefined, moderationStatus: moderationStatus.value === 'all' ? undefined : moderationStatus.value, categoryId: Number(categoryId.value) || undefined }),
       categories.value.length ? Promise.resolve(categories.value) : getCategoryList(),
     ])
     if (currentRequest !== requestVersion) return
@@ -194,8 +195,8 @@ function changePage(nextPage: number) {
   void loadPosts()
 }
 
-function changePageSize(event: Event) {
-  pageSize.value = Number((event.target as HTMLSelectElement).value)
+function changePageSize(value: unknown) {
+  pageSize.value = Number(value)
   page.value = 1
   void loadPosts()
 }
@@ -356,17 +357,23 @@ onMounted(() => {
 <template>
   <BasicPage :title="adminText('k005u')" :description="adminText('k005v')">
       <div class="mb-4 flex flex-wrap items-center gap-2">
-        <select v-model="kind" class="h-9 rounded-md border bg-background px-3 text-sm" @change="page = 1; loadPosts()">
-          <option value="topic">{{ adminText('reviewTopics') }}</option><option value="post">{{ adminText('reviewReplies') }}</option>
-        </select>
-        <select v-model="moderationStatus" class="h-9 rounded-md border bg-background px-3 text-sm" @change="page = 1; loadPosts()">
-          <option value="">{{ adminText('reviewAll') }}</option>
-          <option v-for="status in ['rejected', 'pending', 'denied', 'approved', 'none']" :key="status" :value="status">{{ reviewLabel(status) }}</option>
-        </select>
-        <select v-if="kind === 'topic'" v-model="categoryId" class="h-9 rounded-md border bg-background px-3 text-sm" @change="page = 1; loadPosts()">
-          <option value="">{{ adminText('reviewAllCategories') }}</option>
-          <option v-for="category in categories" :key="category.id" :value="String(category.id)">{{ category.category }}</option>
-        </select>
+        <Select v-model="kind" @update:model-value="page = 1; loadPosts()">
+          <SelectTrigger class="h-9 w-auto min-w-32" :aria-label="adminText('reviewTopics')"><SelectValue /></SelectTrigger>
+          <SelectContent>
+          <SelectItem value="topic">{{ adminText('reviewTopics') }}</SelectItem><SelectItem value="post">{{ adminText('reviewReplies') }}</SelectItem>
+        </SelectContent></Select>
+        <Select v-model="moderationStatus" @update:model-value="page = 1; loadPosts()">
+          <SelectTrigger class="h-9 w-auto min-w-32" :aria-label="adminText('reviewAll')"><SelectValue /></SelectTrigger>
+          <SelectContent>
+          <SelectItem value="all">{{ adminText('reviewAll') }}</SelectItem>
+          <SelectItem v-for="status in ['pending', 'approved', 'rejected', 'none']" :key="status" :value="status">{{ reviewLabel(status) }}</SelectItem>
+        </SelectContent></Select>
+        <Select v-if="kind === 'topic'" v-model="categoryId" @update:model-value="page = 1; loadPosts()">
+          <SelectTrigger class="h-9 w-auto min-w-32" :aria-label="adminText('reviewAllCategories')"><SelectValue /></SelectTrigger>
+          <SelectContent>
+          <SelectItem value="all">{{ adminText('reviewAllCategories') }}</SelectItem>
+          <SelectItem v-for="category in categories" :key="category.id" :value="String(category.id)">{{ category.category }}</SelectItem>
+        </SelectContent></Select>
       </div>
       <AdminSection>
         <template #header>
@@ -389,11 +396,13 @@ onMounted(() => {
             <span class="whitespace-nowrap">{{ rangeStart }}-{{ rangeEnd }}</span>
             <div class="h-4 w-px bg-border" />
             <div class="flex flex-wrap items-center gap-2">
-              <select class="h-9 rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" :value="pageSize" @change="changePageSize">
-                <option :value="10">{{ adminText('k002x') }}</option>
-                <option :value="20">{{ adminText('k002y') }}</option>
-                <option :value="50">{{ adminText('k0030') }}</option>
-              </select>
+              <Select :model-value="String(pageSize)" @update:model-value="changePageSize">
+                <SelectTrigger class="h-9 w-auto"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                <SelectItem value="10">{{ adminText('k002x') }}</SelectItem>
+                <SelectItem value="20">{{ adminText('k002y') }}</SelectItem>
+                <SelectItem value="50">{{ adminText('k0030') }}</SelectItem>
+              </SelectContent></Select>
               <Button variant="outline" size="sm" type="button" :disabled="page <= 1 || loading" @click="changePage(page - 1)">{{ adminText('k00au') }}</Button>
               <span class="whitespace-nowrap">{{ adminText('k0056') }} {{ page }} {{ adminText('k0057') }}</span>
               <Button variant="outline" size="sm" type="button" :disabled="!hasNext || loading" @click="changePage(page + 1)">{{ adminText('k00av') }}</Button>

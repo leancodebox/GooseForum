@@ -29,6 +29,7 @@ func enableReviewTest(t *testing.T) {
 	sensitivewordservice.ClearConfigCache()
 	sensitivewordservice.Refresh()
 	t.Cleanup(func() {
+		contentReviewsIdle.Wait()
 		pageConfig.SaveConfig(pageConfig.SensitiveWordSettings, `{"enabled":false}`)
 		sensitiveWord.Delete(word.Id)
 		sensitivewordservice.ClearConfigCache()
@@ -80,13 +81,16 @@ func TestRejectedReplyDoesNotIncrementPublicStats(t *testing.T) {
 	if post.ProcessStatus != 1 || got.ReplyCount != topic.ReplyCount || got.LastPostId != topic.LastPostId {
 		t.Fatal("rejected reply updated public counters")
 	}
+	if err := runContentReview(contentReviewJob{id: post.Id, version: post.ModerationVersion}); err != nil {
+		t.Fatal(err)
+	}
 	rows := ReviewPostsList(component.BetterRequest[ReviewPostsReq]{Params: ReviewPostsReq{ModerationStatus: "rejected", PageSize: 50}}).Data.Result.(component.Page[ReviewPostVo])
 	if len(rows.List) == 0 {
 		t.Fatal("rejected reply missing from queue")
 	}
 }
 
-func TestPublishingAndEditingRunReviewBeforeSave(t *testing.T) {
+func TestPublishingAndEditingEnqueueReview(t *testing.T) {
 	db := setupTopicWriteTestDB(t)
 	createTopicWriteUser(t, db, 943001, "review-writer")
 	if err := db.Create(&category.Entity{Id: 943002, Name: "Review", Slug: "review-test"}).Error; err != nil {
@@ -106,6 +110,7 @@ func TestPublishingAndEditingRunReviewBeforeSave(t *testing.T) {
 		t.Fatal("draft published")
 	}
 	UpdateTopicStatus(component.BetterRequest[TopicStatusReq]{UserId: 943001, Params: TopicStatusReq{TopicId: id, TopicStatus: 1}})
+	contentReviewsIdle.Wait()
 	if topic := topics.Get(id); topic.Status != 0 || topic.ModerationStatus != "rejected" {
 		t.Fatal("draft publication bypassed review")
 	}
@@ -113,11 +118,13 @@ func TestPublishingAndEditingRunReviewBeforeSave(t *testing.T) {
 	req.Params.TopicStatus = 1
 	req.Params.Content = "Normal content with enough words"
 	WriteTopic(req)
+	contentReviewsIdle.Wait()
 	if topics.Get(id).Status != 1 {
 		t.Fatal("corrected topic not published")
 	}
 	req.Params.Content = "blocked-review-test content"
 	WriteTopic(req)
+	contentReviewsIdle.Wait()
 	if topic := topics.Get(id); topic.Status != 0 || topic.ModerationStatus != "rejected" {
 		t.Fatal("editing bypassed review")
 	}

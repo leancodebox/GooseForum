@@ -1163,6 +1163,9 @@ async function savePostEdit() {
     if (updated.moderationStatus === 'rejected') {
       errorMessage.value = t('publish.moderationRejected')
       await refreshCurrentPage()
+    } else if (updated.moderationStatus === 'pending' && updated.processStatus === 1) {
+      pushFlash(t('publish.moderationPending'), 'success')
+      await refreshCurrentPage()
     } else pushFlash(t('topic.replyUpdated'), 'success')
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : t('api.replyUpdateFailed')
@@ -1197,6 +1200,10 @@ async function submitPost() {
     composerOpen.value = false
     if (typeof createdPost === 'object' && createdPost?.moderationStatus === 'rejected') {
       errorMessage.value = t('publish.moderationRejected')
+      return
+    }
+    if (typeof createdPost === 'object' && createdPost?.moderationStatus === 'pending' && createdPost.processStatus === 1) {
+      successMessage.value = t('publish.moderationPending')
       return
     }
     pushFlash(t('topic.replyPosted'), 'success')

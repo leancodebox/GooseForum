@@ -483,6 +483,7 @@ export default {
     noContactableUsers: '暂无可联系用户。',
   },
   publish: {
+    moderationPending: "内容已保存，审核通过后公开。",
     moderationRejected: "内容已保存，但未通过敏感词审核，暂不公开。请修改后重新发布，或联系管理员复核。",
     createTitle: '发布主题',
     editTitle: '编辑主题',

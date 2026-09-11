@@ -483,6 +483,7 @@ export default {
     noContactableUsers: '連絡できるユーザーはいません。',
   },
   publish: {
+    moderationPending: "内容を保存しました。審査通過後に公開されます。",
     moderationRejected: "内容は保存されましたが、審査に通らなかったため公開されません。編集して再投稿するか、管理者に確認を依頼してください。",
     createTitle: 'トピックを投稿',
     editTitle: 'トピックを編集',
