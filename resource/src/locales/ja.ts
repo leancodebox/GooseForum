@@ -385,6 +385,7 @@ export default {
     deleteReplyDescription: '削除すると、この返信はトピックから削除され、返信数も更新されます。',
     deleteTopicTitle: 'このトピックを削除しますか？',
     deleteTopicDescription: '一般ユーザーには表示されなくなりますが、管理者は管理画面で記録を確認できます。',
+    pendingReviewBadge: '審査中・このページでは自分だけに表示されています',
     confirmDelete: '削除を確定',
     moderationBan: '封禁',
     moderationBanTitle: 'この投稿を封禁しますか？',

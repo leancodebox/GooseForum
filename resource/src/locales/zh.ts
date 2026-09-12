@@ -385,6 +385,7 @@ export default {
     deleteReplyDescription: '删除后这条回复会从主题中移除，相关回复数也会同步更新。',
     deleteTopicTitle: '删除这个主题？',
     deleteTopicDescription: '删除后主题将不再对普通用户显示，但管理员仍可在后台查看记录。',
+    pendingReviewBadge: '审核中，仅当前页面对你可见',
     confirmDelete: '确认删除',
     moderationBan: '封禁',
     moderationBanTitle: '封禁这篇帖子？',

@@ -385,6 +385,7 @@ export default {
     deleteReplyDescription: 'After deletion, this reply will be removed from the topic and reply counts will update.',
     deleteTopicTitle: 'Delete this topic?',
     deleteTopicDescription: 'The topic will no longer be visible to regular users, but administrators can still see its record.',
+    pendingReviewBadge: 'Pending review · visible to you on this page',
     confirmDelete: 'Confirm delete',
     moderationBan: 'Block',
     moderationBanTitle: 'Block this post?',

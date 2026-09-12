@@ -57,6 +57,7 @@ const reportNote = ref('')
 const reportSubmitting = ref(false)
 const reportError = ref('')
 const moderatingPostIds = ref<number[]>([])
+const locallyPendingPostIds = ref<Set<number>>(new Set())
 const posts = ref<PostPayload[]>([...initialPosts])
 const postPageStarts = ref<number[]>(initialPosts[0]?.postNo ? [initialPosts[0].postNo] : [])
 const replyTargets = ref<ReplyTargetPayload[]>([...(initialPostStream.replyTargets || [])])
@@ -542,6 +543,7 @@ function measurePostViewportProgress() {
 
 function resetPostsFromProps() {
   posts.value = [...initialPosts]
+  locallyPendingPostIds.value = new Set()
   postPageStarts.value = initialPosts[0]?.postNo ? [initialPosts[0].postNo] : []
   replyTargets.value = [...(initialPostStream.replyTargets || [])]
   postHasBefore.value = initialPostStream.hasBefore
@@ -995,6 +997,51 @@ async function revealCreatedPost(postId: number, postNo = 0) {
   scheduleActivePostFromScroll()
 }
 
+async function revealPendingPost(createdPost: { id: number; postNo?: number; renderedContent: string; processStatus?: number }, content: string, replyTarget?: PostPayload) {
+  const postNo = createdPost.postNo || postMaxRange.value + 1
+  const viewer = page.layout.viewer
+  const pendingPost: PostPayload = {
+    id: createdPost.id,
+    topicId: page.props.topic.id,
+    postNo,
+    content,
+    renderedContent: createdPost.renderedContent,
+    processStatus: createdPost.processStatus ?? 1,
+    isHidden: false,
+    canModerate: false,
+    author: {
+      id: viewer.id,
+      username: viewer.username,
+      avatarUrl: viewer.avatarUrl,
+    },
+    createdAt: new Date().toISOString(),
+    replyToPostId: replyTarget?.id,
+    replyToUserId: replyTarget?.author.id,
+    replyToUsername: replyTarget?.author.username,
+    isOwnPost: true,
+  }
+  posts.value = [...posts.value.filter((post) => post.id !== pendingPost.id), pendingPost]
+  if (replyTarget && !replyTargetMap.value.has(replyTarget.id)) {
+    replyTargets.value = [...replyTargets.value, {
+      id: replyTarget.id,
+      postNo: replyTarget.postNo,
+      author: replyTarget.author,
+      renderedContent: replyTarget.renderedContent,
+    }]
+  }
+  locallyPendingPostIds.value = new Set([...locallyPendingPostIds.value, pendingPost.id])
+  postMaxNo.value = Math.max(postMaxNo.value, postNo)
+  postHasAfter.value = false
+  postAfterPostNo.value = postNo
+  disablePostAutoLoadAfter()
+  activePostNo.value = postNo
+  syncProgressForPostNo(postNo)
+  highlightPost(pendingPost.id)
+  const element = await findPostElementAfterLayout(pendingPost.id)
+  if (element && !isElementMostlyVisible(element)) scrollPostIntoComfortView(element)
+  collectPostElements()
+}
+
 async function toggleLike() {
   if (actingLike.value) return
 
@@ -1184,7 +1231,8 @@ async function submitPost() {
     return
   }
 
-  const postId = targetPost.value?.id || 0
+  const replyTarget = targetPost.value
+  const postId = replyTarget?.id || 0
   const content = postContent.value.trim()
   if (submitting.value) return
 
@@ -1207,7 +1255,8 @@ async function submitPost() {
       return
     }
     if (typeof createdPost === 'object' && createdPost?.moderationStatus === 'pending' && createdPost.processStatus === 1) {
-      successMessage.value = t('publish.moderationPending')
+      pushFlash(t('publish.moderationPending'), 'success')
+      await revealPendingPost(createdPost, content, replyTarget)
       return
     }
     pushFlash(t('topic.replyPosted'), 'success')
@@ -1399,7 +1448,7 @@ async function removePost(postId: number) {
       window.location.href = '/'
       return
     }
-    replyCount.value = Math.max(0, replyCount.value - 1)
+    if (removedPost?.processStatus === 0) replyCount.value = Math.max(0, replyCount.value - 1)
     posts.value = posts.value.filter((post) => post.id !== postId)
     if (targetPostId.value === postId) {
       targetPostId.value = 0
@@ -1583,6 +1632,9 @@ async function removePost(postId: number) {
               <div v-else v-content-enhancements="post.renderedContent" class="gf-prose gf-prose-post" v-html="post.renderedContent" />
               <div v-if="post.isHidden && post.canModerate" class="mt-2 inline-flex rounded bg-base-200 px-2 py-1 text-xs font-semibold text-base-content/45">
                 {{ t('topic.hiddenReplyBadge') }}
+              </div>
+              <div v-if="locallyPendingPostIds.has(post.id)" class="mt-2 inline-flex rounded bg-warning/10 px-2 py-1 text-xs font-semibold text-warning">
+                {{ t('topic.pendingReviewBadge') }}
               </div>
               <div v-if="post.updatedAt && post.updatedAt !== post.createdAt" class="mt-2 text-xs font-medium text-base-content/55">
                 {{ t('topic.editedAt', { time: formatDateTime(post.updatedAt) }) }}
