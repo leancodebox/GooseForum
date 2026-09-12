@@ -1,31 +1,23 @@
 package api
 
 import (
-	"context"
 	"errors"
 	"log/slog"
 	"strings"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
-	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
-	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
-	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
-	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
-	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
-	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
-	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
+	"github.com/leancodebox/GooseForum/app/service/postwriteservice"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
+	"github.com/leancodebox/GooseForum/app/service/topicactionservice"
 	"github.com/leancodebox/GooseForum/app/service/topicservice"
-	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
-	"github.com/leancodebox/GooseForum/app/service/userservice"
+	"github.com/leancodebox/GooseForum/app/service/topicwriteservice"
+	"github.com/leancodebox/GooseForum/app/service/userfollowservice"
 )
 
 func GetSiteStatistics() component.Response {
@@ -57,149 +49,70 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	}
 	isNew := req.Params.TopicId == 0
 
-	if len(req.Params.Title) < postingConfig.TextControl.MinTitleLength {
-		minLength := postingConfig.TextControl.MinTitleLength
-		return component.FailResponseCode(
-			component.MessageTopicTitleTooShort,
-
-			component.MessageParams{"minLength": minLength})
-
+	if response, invalid := validateTextLength(req.Params.Title, postingConfig.TextControl.MinTitleLength, postingConfig.TextControl.MaxTitleLength, component.MessageTopicTitleTooShort, component.MessageTopicTitleTooLong); invalid {
+		return response
 	}
-
-	if len(req.Params.Title) > postingConfig.TextControl.MaxTitleLength {
-		maxLength := postingConfig.TextControl.MaxTitleLength
-		return component.FailResponseCode(
-			component.MessageTopicTitleTooLong,
-
-			component.MessageParams{"maxLength": maxLength})
-
-	}
-
-	if len(req.Params.Content) < postingConfig.TextControl.MinPostLength {
-		minLength := postingConfig.TextControl.MinPostLength
-		return component.FailResponseCode(
-			component.MessageTopicContentTooShort,
-
-			component.MessageParams{"minLength": minLength})
-
-	}
-
-	if len(req.Params.Content) > postingConfig.TextControl.MaxPostLength {
-		maxLength := postingConfig.TextControl.MaxPostLength
-		return component.FailResponseCode(
-			component.MessageTopicContentTooLong,
-
-			component.MessageParams{"maxLength": maxLength})
-
+	if response, invalid := validateTextLength(req.Params.Content, postingConfig.TextControl.MinPostLength, postingConfig.TextControl.MaxPostLength, component.MessageTopicContentTooShort, component.MessageTopicContentTooLong); invalid {
+		return response
 	}
 
 	// 检查新用户冷却时间
-	if isNew && postingConfig.TextControl.NewUserPostCooldownMinutes > 0 {
-		cooldownTime := userEntity.CreatedAt.Add(time.Duration(postingConfig.TextControl.NewUserPostCooldownMinutes) * time.Minute)
-		if time.Now().Before(cooldownTime) {
-			minutes := postingConfig.TextControl.NewUserPostCooldownMinutes
-			availableAt := cooldownTime.Format("2006-01-02 15:04:05")
-			return component.FailResponseCode(
-				component.MessageTopicPostCooldown,
-
-				component.MessageParams{"minutes": minutes, "availableAt": availableAt})
-
+	if isNew {
+		if response, coolingDown := newUserCooldownResponse(userEntity.CreatedAt, postingConfig.TextControl.NewUserPostCooldownMinutes, component.MessageTopicPostCooldown); coolingDown {
+			return response
 		}
 	}
 
-	var topic topics.Entity
-	var firstPost posts.Entity
-	firstPublication := true
-	wasPublished := false
-	var expectedVersion uint64
-	if req.Params.TopicId != 0 {
-		topic = topics.Get(req.Params.TopicId)
-		if topic.Id == 0 {
+	result, err := topicwriteservice.Write(topicwriteservice.WriteInput{
+		UserID: req.UserId, TopicID: req.Params.TopicId, Title: req.Params.Title,
+		Content: req.Params.Content, CategoryIDs: req.Params.CategoryId, Status: req.Params.TopicStatus,
+		DailyLimit: postingConfig.TextControl.MaxDailyTopicsPerUser,
+	})
+	if err != nil {
+		if errors.Is(err, topicwriteservice.ErrTopicNotFound) {
 			return component.FailResponseCode(component.MessageTopicNotFound, nil)
 		}
-		if topic.UserId != req.UserId {
+		if errors.Is(err, topicwriteservice.ErrOwnerMismatch) {
 			return component.FailResponseCode(component.MessageTopicOwnerMismatch, nil)
 		}
-		firstPublication = topic.PublishedAt == nil
-		expectedVersion = topic.ModerationVersion
-		wasPublished = topic.Status == 1 && topic.ProcessStatus == 0
-		firstPost = posts.Get(topic.FirstPostId)
-		if firstPost.Id == 0 {
-			firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
-		}
-	} else {
-		if postingConfig.TextControl.MaxDailyTopicsPerUser > 0 && topics.CantWriteNew(req.UserId, int64(postingConfig.TextControl.MaxDailyTopicsPerUser)) {
+		if errors.Is(err, topicwriteservice.ErrDailyLimit) {
 			return component.FailResponseCode(component.MessageTopicDailyLimit, nil)
 		}
-		topic.UserId = req.UserId
-	}
-	categoryIDs, err := authorizeTopicCategoryWrite(
-		req.UserId,
-		&topic,
-		req.Params.CategoryId,
-		isNew,
-		!wasPublished && req.Params.TopicStatus == 1,
-	)
-	if err != nil {
 		if errors.Is(err, accesscontrol.ErrRestrictedCategorySingle) {
 			return component.FailResponseCode(component.MessageTopicRestrictedSingle, nil)
 		}
-		return component.FailResponseCode(component.MessagePermissionDenied, nil)
+		if errors.Is(err, topicwriteservice.ErrPermissionDenied) {
+			return component.FailResponseCode(component.MessagePermissionDenied, nil)
+		}
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
-	topic.CategoryIds = categoryIDs
-	topic.Status = req.Params.TopicStatus
-	topic.Title = req.Params.Title
-	topic.Excerpt = markdown2html.ExtractDescription(req.Params.Content, 200)
-	topic.FirstImageURL = markdown2html.ExtractFirstImageURL(req.Params.Content)
-	if !isNew {
-		if firstPost.Id == 0 {
-			return component.FailResponseCode(component.MessageTopicNotFound, nil)
-		}
-		firstPost.Content = req.Params.Content
-		firstPost.RenderedHTML = ""
-		firstPost.RenderedVersion = markdown2html.GetPostVersion()
-		contentmoderationservice.PrepareTopic(&topic, &firstPost)
-		if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{
-			Topic: &topic, FirstPost: &firstPost, CategoryIDs: categoryIDs, ExpectedVersion: &expectedVersion,
-		}); err != nil {
-			if errors.Is(err, accesscontrol.ErrRestrictedCategorySingle) {
-				return component.FailResponseCode(component.MessageTopicRestrictedSingle, nil)
-			}
-			return component.FailResponseCode(component.MessageOperationFailed, nil)
-		}
-		fileusageservice.ReplaceTopic(topic.Id, req.UserId, firstPost.Content)
-		hotdataserve.ClearTopicCategoryCache()
-		publishTopicReviewResult(&topic, &firstPost, firstPublication)
-	} else {
-		topic.Posters = []topics.Poster{{UserID: req.UserId}}
-		firstPost = posts.Entity{
-			UserId:          req.UserId,
-			Content:         req.Params.Content,
-			RenderedHTML:    "",
-			RenderedVersion: markdown2html.GetPostVersion(),
-		}
-		contentmoderationservice.PrepareTopic(&topic, &firstPost)
-		if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{
-			Topic: &topic, FirstPost: &firstPost, CategoryIDs: categoryIDs, Create: true,
-		}); err != nil {
-			if errors.Is(err, accesscontrol.ErrRestrictedCategorySingle) {
-				return component.FailResponseCode(component.MessageTopicRestrictedSingle, nil)
-			}
-			return component.FailResponseCode(component.MessageOperationFailed, nil)
-		}
-		fileusageservice.ReplaceTopic(topic.Id, req.UserId, firstPost.Content)
-		userservice.InvalidateUserPublicProfileCache(req.UserId)
-		hotdataserve.ClearTopicCategoryCache()
-		publishTopicReviewResult(&topic, &firstPost, true)
-		if err := topicunseenservice.MarkVisited(req.UserId, topic.Id, firstPost.Id, time.Now()); err != nil {
-			slog.Warn("mark created topic visited failed", "userId", req.UserId, "topicId", topic.Id, "error", err)
-		}
-	}
-	enqueueContentReview(true, topic.Id, topic.ModerationVersion, topic.ModerationStatus)
 	if req.Params.ReturnReview {
-		return component.SuccessResponse(map[string]any{"id": topic.Id, "moderationStatus": topic.ModerationStatus, "topicStatus": topic.Status})
+		return component.SuccessResponse(map[string]any{"id": result.ID, "moderationStatus": result.ModerationStatus, "topicStatus": result.TopicStatus})
 	}
-	return component.SuccessResponse(topic.Id)
+	return component.SuccessResponse(result.ID)
+}
+
+func validateTextLength(value string, minLength, maxLength int, tooShort, tooLong component.MessageCode) (component.Response, bool) {
+	if len(value) < minLength {
+		return component.FailResponseCode(tooShort, component.MessageParams{"minLength": minLength}), true
+	}
+	if len(value) > maxLength {
+		return component.FailResponseCode(tooLong, component.MessageParams{"maxLength": maxLength}), true
+	}
+	return component.Response{}, false
+}
+
+func newUserCooldownResponse(createdAt time.Time, minutes int, code component.MessageCode) (component.Response, bool) {
+	if minutes <= 0 {
+		return component.Response{}, false
+	}
+	availableAt := createdAt.Add(time.Duration(minutes) * time.Minute)
+	if !time.Now().Before(availableAt) {
+		return component.Response{}, false
+	}
+	return component.FailResponseCode(code, component.MessageParams{
+		"minutes": minutes, "availableAt": availableAt.Format("2006-01-02 15:04:05"),
+	}), true
 }
 
 type TopicStatusReq struct {
@@ -208,38 +121,21 @@ type TopicStatusReq struct {
 }
 
 func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Response {
-	topic := topics.Get(req.Params.TopicId)
-	if topic.Id == 0 {
-		return component.FailResponseCode(component.MessageTopicNotFound, nil)
-	}
-	if topic.UserId != req.UserId {
-		return component.FailResponseCode(component.MessageTopicOperationDenied, nil)
-	}
-	nextStatus := req.Params.TopicStatus
-	publishing := topic.Status != 1 && nextStatus == 1
-	if _, err := authorizeTopicCategoryWrite(req.UserId, &topic, topic.CategoryIds, false, publishing); err != nil {
+	if err := topicwriteservice.UpdateStatus(req.UserId, req.Params.TopicId, req.Params.TopicStatus); err != nil {
+		if errors.Is(err, topicwriteservice.ErrTopicNotFound) {
+			return component.FailResponseCode(component.MessageTopicNotFound, nil)
+		}
+		if errors.Is(err, topicwriteservice.ErrOwnerMismatch) {
+			return component.FailResponseCode(component.MessageTopicOperationDenied, nil)
+		}
 		if errors.Is(err, accesscontrol.ErrRestrictedCategorySingle) {
 			return component.FailResponseCode(component.MessageTopicRestrictedSingle, nil)
 		}
-		return component.FailResponseCode(component.MessagePermissionDenied, nil)
-	}
-	if topic.Status == nextStatus && !(nextStatus == 0 && topic.ModerationStatus == "pending") {
-		return component.SuccessResponse(true)
-	}
-	firstPost := posts.Get(topic.FirstPostId)
-	if firstPost.Id == 0 {
-		return component.FailResponseCode(component.MessageTopicNotFound, nil)
-	}
-	firstPublication := topic.PublishedAt == nil
-	expectedVersion := topic.ModerationVersion
-	topic.Status = nextStatus
-	contentmoderationservice.PrepareTopic(&topic, &firstPost)
-	if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{Topic: &topic, FirstPost: &firstPost, CategoryIDs: topic.CategoryIds, ExpectedVersion: &expectedVersion}); err != nil {
+		if errors.Is(err, topicwriteservice.ErrPermissionDenied) {
+			return component.FailResponseCode(component.MessagePermissionDenied, nil)
+		}
 		return component.FailResponseCode(component.MessageTopicSaveFailed, nil)
 	}
-	hotdataserve.ClearTopicCategoryCache()
-	publishTopicReviewResult(&topic, &firstPost, firstPublication)
-	enqueueContentReview(true, topic.Id, topic.ModerationVersion, topic.ModerationStatus)
 	return component.SuccessResponse(true)
 }
 
@@ -264,76 +160,31 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 	}
 
 	content := strings.TrimSpace(req.Params.Content)
-	if len(content) < postingConfig.TextControl.MinPostLength {
-		minLength := postingConfig.TextControl.MinPostLength
-		return component.FailResponseCode(
-			component.MessageCommentContentTooShort,
-
-			component.MessageParams{"minLength": minLength})
-
-	}
-
-	if len(content) > postingConfig.TextControl.MaxPostLength {
-		maxLength := postingConfig.TextControl.MaxPostLength
-		return component.FailResponseCode(
-			component.MessageCommentContentTooLong,
-
-			component.MessageParams{"maxLength": maxLength})
-
+	if response, invalid := validateTextLength(content, postingConfig.TextControl.MinPostLength, postingConfig.TextControl.MaxPostLength, component.MessageCommentContentTooShort, component.MessageCommentContentTooLong); invalid {
+		return response
 	}
 
 	// 评论也受发帖冷却限制
-	if postingConfig.TextControl.NewUserPostCooldownMinutes > 0 {
-		cooldownTime := userEntity.CreatedAt.Add(time.Duration(postingConfig.TextControl.NewUserPostCooldownMinutes) * time.Minute)
-		if time.Now().Before(cooldownTime) {
-			minutes := postingConfig.TextControl.NewUserPostCooldownMinutes
-			availableAt := cooldownTime.Format("2006-01-02 15:04:05")
-			return component.FailResponseCode(
-				component.MessageCommentPostCooldown,
+	if response, coolingDown := newUserCooldownResponse(userEntity.CreatedAt, postingConfig.TextControl.NewUserPostCooldownMinutes, component.MessageCommentPostCooldown); coolingDown {
+		return response
+	}
 
-				component.MessageParams{"minutes": minutes, "availableAt": availableAt})
-
+	postEntity, err := postwriteservice.Create(postwriteservice.CreateInput{
+		UserID: req.UserId, TopicID: req.Params.TopicId, Content: content, ReplyToPostID: req.Params.ReplyToPostId,
+	})
+	if err != nil {
+		if errors.Is(err, postwriteservice.ErrTopicUnavailable) {
+			return component.FailResponseCode(component.MessageTopicNotFound, nil)
 		}
-	}
-
-	topicEntity := topics.GetSimple(req.Params.TopicId)
-	if err := authorizePublishedTopic(req.UserId, topicEntity, accesscontrol.CapabilityReply); err != nil {
-		return component.FailResponseCode(component.MessageTopicNotFound, nil)
-	}
-
-	var parentPost posts.Entity
-	if req.Params.ReplyToPostId > 0 {
-		parentPost = posts.Get(req.Params.ReplyToPostId)
-		if parentPost.Id == 0 || parentPost.TopicId != req.Params.TopicId {
+		if errors.Is(err, postwriteservice.ErrParentPostMissing) {
 			return component.FailResponseCode(component.MessageCommentParentPostMissing, nil)
 		}
-	}
-
-	postEntity := &posts.Entity{
-		TopicId:         req.Params.TopicId,
-		Content:         content,
-		RenderedHTML:    markdown2html.PostMarkdownToHTML(content),
-		RenderedVersion: markdown2html.GetPostVersion(),
-		UserId:          req.UserId,
-		ReplyToPostId:   req.Params.ReplyToPostId,
-	}
-
-	err = postservice.CreateTopicPost(postEntity, topicEntity)
-	if err != nil {
 		return component.FailResponseCode(
 			component.MessageCommentCreateFailed,
 
 			component.MessageParams{"error": err.Error()})
 
 	}
-	if err := topicunseenservice.MarkVisited(req.UserId, topicEntity.Id, postEntity.Id, time.Now()); err != nil {
-		slog.Warn("mark created post visited failed", "userId", req.UserId, "topicId", topicEntity.Id, "postId", postEntity.Id, "error", err)
-	}
-	fileusageservice.ReplacePost(postEntity.Id, req.UserId, postEntity.Content)
-	if postEntity.ProcessStatus == 0 {
-		publishVisiblePost(topicEntity, *postEntity)
-	}
-	enqueueContentReview(false, postEntity.Id, postEntity.ModerationVersion, postEntity.ModerationStatus)
 	return component.SuccessResponse(map[string]any{
 		"processStatus":    postEntity.ProcessStatus,
 		"moderationStatus": postEntity.ModerationStatus,
@@ -354,61 +205,25 @@ type UpdatePostReq struct {
 
 func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
-	postEntity := posts.Get(req.Params.PostId)
-	if postEntity.Id == 0 || postEntity.PostNo <= 1 {
-		return component.FailResponseCode(component.MessagePostNotFound, nil)
-	}
-	if err := authorizePublishedTopic(req.UserId, topics.GetSimple(postEntity.TopicId), accesscontrol.CapabilityRead); err != nil {
-		return component.FailResponseCode(component.MessagePostNotFound, nil)
-	}
-	if postEntity.UserId != req.UserId {
-		return component.FailResponseCode(component.MessageTopicOperationDenied, nil)
-	}
-
 	content := strings.TrimSpace(req.Params.Content)
-	if len(content) < postingConfig.TextControl.MinPostLength {
-		minLength := postingConfig.TextControl.MinPostLength
-		return component.FailResponseCode(
-			component.MessageCommentContentTooShort,
-
-			component.MessageParams{"minLength": minLength})
-
+	if response, invalid := validateTextLength(content, postingConfig.TextControl.MinPostLength, postingConfig.TextControl.MaxPostLength, component.MessageCommentContentTooShort, component.MessageCommentContentTooLong); invalid {
+		return response
 	}
 
-	if len(content) > postingConfig.TextControl.MaxPostLength {
-		maxLength := postingConfig.TextControl.MaxPostLength
-		return component.FailResponseCode(
-			component.MessageCommentContentTooLong,
-
-			component.MessageParams{"maxLength": maxLength})
-
-	}
-
-	expectedVersion := postEntity.ModerationVersion
-	wasPublished := postEntity.WasPublished()
-	wasVisible := postEntity.ProcessStatus == 0
-	postEntity.Content = content
-	postEntity.RenderedHTML = markdown2html.PostMarkdownToHTML(content)
-	postEntity.RenderedVersion = markdown2html.GetPostVersion()
-
-	contentmoderationservice.PreparePost(&postEntity)
-	if err := posts.SaveReviewed(&postEntity, expectedVersion); err != nil {
+	postEntity, err := postwriteservice.Update(postwriteservice.UpdateInput{UserID: req.UserId, PostID: req.Params.PostId, Content: content})
+	if err != nil {
+		if errors.Is(err, postwriteservice.ErrPostNotFound) || errors.Is(err, postwriteservice.ErrTopicUnavailable) {
+			return component.FailResponseCode(component.MessagePostNotFound, nil)
+		}
+		if errors.Is(err, postwriteservice.ErrOwnerMismatch) {
+			return component.FailResponseCode(component.MessageTopicOperationDenied, nil)
+		}
 		return component.FailResponseCode(
 			component.MessagePostUpdateFailed,
 
 			component.MessageParams{"error": err.Error()})
 
 	}
-	fileusageservice.ReplacePost(postEntity.Id, req.UserId, postEntity.Content)
-	if wasVisible != (postEntity.ProcessStatus == 0) {
-		postservice.SyncTopicPostStats(topics.Get(postEntity.TopicId), postEntity, postEntity.ProcessStatus != 0)
-		hotdataserve.ClearTopicListCache()
-		if postEntity.ProcessStatus == 0 && !wasPublished {
-			publishVisiblePost(topics.Get(postEntity.TopicId), postEntity)
-		}
-	}
-
-	enqueueContentReview(false, postEntity.Id, postEntity.ModerationVersion, postEntity.ModerationStatus)
 	return component.SuccessResponse(map[string]any{
 		"id":               postEntity.Id,
 		"postNo":           postEntity.PostNo,
@@ -443,13 +258,13 @@ func DeletePost(req component.BetterRequest[DeletePostReq]) component.Response {
 		if err := topicservice.DeleteTopic(&topicEntity); err != nil {
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
-		hotdataserve.ClearTopicCategoryCache()
+		hotdataserve.ClearTopicWriteCaches(true)
 		return component.SuccessResponse(true)
 	}
 	posts.DeleteEntity(&postEntity)
 	if topicEntity.Id > 0 && postEntity.ProcessStatus == 0 {
 		postservice.SyncTopicPostStats(topicEntity, postEntity, true)
-		hotdataserve.ClearTopicListCache()
+		hotdataserve.ClearTopicWriteCaches(false)
 	}
 	return component.SuccessResponse(true)
 }
@@ -460,42 +275,8 @@ type LikeTopicReq struct {
 }
 
 func LikeTopic(req component.BetterRequest[LikeTopicReq]) component.Response {
-	topicEntity := topics.Get(req.Params.TopicId)
-	if err := authorizePublishedTopic(req.UserId, topicEntity, accesscontrol.CapabilityRead); err != nil {
+	if err := topicactionservice.SetLiked(req.UserId, req.Params.TopicId, req.Params.Action == 1); err != nil {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
-	}
-	state := topicUserAction.GetByTopicId(req.UserId, topicEntity.Id)
-	targetLiked := req.Params.Action == 1
-	if state.Id == 0 && !targetLiked {
-		return component.SuccessResponse(true)
-	}
-	if state.Id != 0 && (state.LikedAt != nil) == targetLiked {
-		return component.SuccessResponse(true)
-	}
-	if topicUserAction.SetLiked(req.UserId, topicEntity.Id, targetLiked) {
-		if req.Params.Action == 1 {
-			topics.IncrementLike(topicEntity)
-			userStatistics.LikeTopic(topicEntity.UserId)
-			userStatistics.GivenLike(req.UserId)
-			userservice.InvalidateUserPublicProfileCache(topicEntity.UserId)
-			userservice.InvalidateUserPublicProfileCache(req.UserId)
-			hotdataserve.ClearTopicListCache()
-
-			// 发送点赞事件
-			eventbus.Publish(context.Background(), &eventhandlers.TopicLikedEvent{
-				UserId:  topicEntity.UserId,
-				TopicId: topicEntity.Id,
-				Title:   topicEntity.Title,
-				LikerId: req.UserId,
-			})
-		} else {
-			topics.DecrementLike(topicEntity)
-			userStatistics.CancelLikeTopic(topicEntity.UserId)
-			userStatistics.CancelGivenLike(req.UserId)
-			userservice.InvalidateUserPublicProfileCache(topicEntity.UserId)
-			userservice.InvalidateUserPublicProfileCache(req.UserId)
-			hotdataserve.ClearTopicListCache()
-		}
 	}
 	return component.SuccessResponse(true)
 }
@@ -506,33 +287,10 @@ type BookmarkTopicReq struct {
 }
 
 func BookmarkTopic(req component.BetterRequest[BookmarkTopicReq]) component.Response {
-	topicEntity := topics.Get(req.Params.TopicId)
-	if err := authorizePublishedTopic(req.UserId, topicEntity, accesscontrol.CapabilityRead); err != nil {
+	if err := topicactionservice.SetBookmarked(req.UserId, req.Params.TopicId, req.Params.Action == 1); err != nil {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
-
-	state := topicUserAction.GetByTopicId(req.UserId, topicEntity.Id)
-	targetBookmarked := req.Params.Action == 1
-	if state.Id == 0 && !targetBookmarked {
-		return component.SuccessResponse(true)
-	}
-	if state.Id != 0 && (state.BookmarkedAt != nil) == targetBookmarked {
-		return component.SuccessResponse(true)
-	}
-
-	if topicUserAction.SetBookmarked(req.UserId, topicEntity.Id, targetBookmarked) {
-		updateBookmarkStats(req.UserId, targetBookmarked)
-		userservice.InvalidateUserPublicProfileCache(req.UserId)
-	}
 	return component.SuccessResponse(true)
-}
-
-func updateBookmarkStats(userID uint64, bookmarked bool) {
-	if bookmarked {
-		userStatistics.Collection(userID)
-		return
-	}
-	userStatistics.CancelCollection(userID)
 }
 
 type WatchTopicReq struct {
@@ -541,21 +299,9 @@ type WatchTopicReq struct {
 }
 
 func WatchTopic(req component.BetterRequest[WatchTopicReq]) component.Response {
-	topicEntity := topics.Get(req.Params.TopicId)
-	if err := authorizePublishedTopic(req.UserId, topicEntity, accesscontrol.CapabilityRead); err != nil {
+	if err := topicactionservice.SetWatched(req.UserId, req.Params.TopicId, req.Params.Action == 1); err != nil {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
-
-	state := topicUserAction.GetByTopicId(req.UserId, topicEntity.Id)
-	targetWatched := req.Params.Action == 1
-	if state.Id == 0 && !targetWatched {
-		return component.SuccessResponse(true)
-	}
-	if state.Id != 0 && (state.WatchedAt != nil) == targetWatched {
-		return component.SuccessResponse(true)
-	}
-
-	topicUserAction.SetWatched(req.UserId, topicEntity.Id, targetWatched)
 	return component.SuccessResponse(true)
 }
 
@@ -565,46 +311,8 @@ type FollowUserReq struct {
 }
 
 func FollowUser(req component.BetterRequest[FollowUserReq]) component.Response {
-	userEntity, _ := users.Get(req.Params.Id)
-	if userEntity.Id == 0 {
+	if err := userfollowservice.SetFollowed(req.UserId, req.Params.Id, req.Params.Action == 1); err != nil {
 		return component.FailResponseCode(component.MessageUserNotFound, nil)
-	}
-	userFollowEntity := userFollow.GetByUserId(req.UserId, req.Params.Id)
-	if userFollowEntity.Id == 0 {
-		userFollowEntity.UserId = req.UserId
-		userFollowEntity.FollowUserId = req.Params.Id
-	}
-	var targetStatus int
-	if req.Params.Action == 1 {
-		targetStatus = 1
-	} else {
-		targetStatus = 0
-	}
-
-	if userFollowEntity.Status == targetStatus {
-		return component.SuccessResponse(true)
-	}
-	userFollowEntity.Status = targetStatus
-	if userFollow.SaveOrCreateById(&userFollowEntity) > 0 {
-		if req.Params.Action == 1 {
-			userStatistics.Following(req.UserId)
-			userStatistics.Follower(req.Params.Id)
-			userservice.InvalidateUserPublicProfileCache(req.UserId)
-			userservice.InvalidateUserPublicProfileCache(req.Params.Id)
-
-			// 发送关注通知
-			followerUser, _ := req.GetUser()
-			eventbus.Publish(context.Background(), &eventhandlers.UserFollowedEvent{
-				UserId:       req.Params.Id,
-				FollowerId:   req.UserId,
-				FollowerName: followerUser.Username,
-			})
-		} else {
-			userStatistics.CancelFollowing(req.UserId)
-			userStatistics.CancelFollower(req.Params.Id)
-			userservice.InvalidateUserPublicProfileCache(req.UserId)
-			userservice.InvalidateUserPublicProfileCache(req.Params.Id)
-		}
 	}
 	return component.SuccessResponse(true)
 }

@@ -37,9 +37,20 @@ var md = goldmark.New(
 
 // MarkdownToHTML renders Markdown to HTML with the shared server parser.
 func MarkdownToHTML(markdown string) string {
-	var buf bytes.Buffer
+	source, doc := parseMarkdown(markdown)
+	return renderMarkdown(source, doc)
+}
+
+func parseMarkdown(markdown string) ([]byte, ast.Node) {
+	source := []byte(markdown)
 	ctx := parser.NewContext(parser.WithIDs(headingid.NewIDs()))
-	if err := md.Convert([]byte(markdown), &buf, parser.WithContext(ctx)); err != nil {
+	doc := md.Parser().Parse(text.NewReader(source), parser.WithContext(ctx))
+	return source, doc
+}
+
+func renderMarkdown(source []byte, doc ast.Node) string {
+	var buf bytes.Buffer
+	if err := md.Renderer().Render(&buf, source, doc); err != nil {
 		slog.Error("转化失败", "err", err)
 	}
 	return buf.String()
@@ -48,6 +59,41 @@ func MarkdownToHTML(markdown string) string {
 // PostMarkdownToHTML renders public user content and applies UGC link/image policies.
 func PostMarkdownToHTML(markdown string) string {
 	return normalizePostHTML(MarkdownToHTML(markdown))
+}
+
+// ContentAnalysis contains values derived from one Markdown parse.
+type ContentAnalysis struct {
+	RenderedHTML  string
+	Description   string
+	ImageURLs     []string
+	FirstImageURL string
+}
+
+// AnalyzeContent extracts topic metadata without rendering HTML.
+func AnalyzeContent(content string, maxDescriptionLength int) ContentAnalysis {
+	source, doc := parseMarkdown(content)
+	return analyzeDocument(source, doc, maxDescriptionLength, false)
+}
+
+// AnalyzePostContent renders a post and extracts its file references from the same AST.
+func AnalyzePostContent(content string) ContentAnalysis {
+	source, doc := parseMarkdown(content)
+	return analyzeDocument(source, doc, 0, true)
+}
+
+func analyzeDocument(source []byte, doc ast.Node, maxDescriptionLength int, render bool) ContentAnalysis {
+	imageURLs := extractImageURLs(doc)
+	result := ContentAnalysis{ImageURLs: imageURLs}
+	if len(imageURLs) > 0 {
+		result.FirstImageURL = imageURLs[0]
+	}
+	if maxDescriptionLength > 0 {
+		result.Description = extractDescriptionFromDocument(source, doc, maxDescriptionLength)
+	}
+	if render {
+		result.RenderedHTML = normalizePostHTML(renderMarkdown(source, doc))
+	}
+	return result
 }
 
 func normalizePostHTML(raw string) string {
@@ -143,9 +189,11 @@ func ExtractFirstImageURL(content string) string {
 }
 
 func ExtractImageURLs(content string) []string {
-	reader := text.NewReader([]byte(content))
-	doc := GetParser().Parser().Parse(reader)
+	_, doc := parseMarkdown(content)
+	return extractImageURLs(doc)
+}
 
+func extractImageURLs(doc ast.Node) []string {
 	imageURLs := make([]string, 0)
 	_ = ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
@@ -183,16 +231,17 @@ func ExtractDescription(content string, maxLength int) string {
 	if maxLength <= 0 {
 		maxLength = 200
 	}
+	source, doc := parseMarkdown(content)
+	return extractDescriptionFromDocument(source, doc, maxLength)
+}
 
-	reader := text.NewReader([]byte(content))
-	doc := GetParser().Parser().Parse(reader)
-
+func extractDescriptionFromDocument(source []byte, doc ast.Node, maxLength int) string {
 	var textParts []string
 	err := ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			switch node := n.(type) {
 			case *ast.Heading, *ast.Paragraph, *ast.ListItem:
-				textContent := extractDescriptionBlockText(node, reader.Source())
+				textContent := extractDescriptionBlockText(node, source)
 				if textContent != "" && utf8.RuneCountInString(textContent) > 3 {
 					textParts = append(textParts, textContent)
 				}
@@ -207,7 +256,7 @@ func ExtractDescription(content string, maxLength int) string {
 	})
 
 	if err != nil {
-		return fallbackExtractDescription(content, maxLength)
+		return fallbackExtractDescription(string(source), maxLength)
 	}
 
 	description := strings.Join(textParts, " ")

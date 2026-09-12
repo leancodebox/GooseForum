@@ -87,6 +87,29 @@ func TestCategoryCacheReadsCleanCategories(t *testing.T) {
 	}
 }
 
+func TestTopicWriteCacheInvalidationKeepsCategorySnapshotWhenCountsDoNotChange(t *testing.T) {
+	categoryCache.Clear()
+	topicSimpleVoCache.Clear()
+	categoryCache.Set("categorySnapshot", categorySnapshot{}, time.Minute)
+	topicSimpleVoCache.Set("topic-page", TopicSimpleVoPage{}, time.Minute)
+
+	ClearTopicWriteCaches(false)
+
+	categoryLoads := 0
+	categoryCache.GetOrLoad("categorySnapshot", func() (categorySnapshot, error) {
+		categoryLoads++
+		return categorySnapshot{}, nil
+	}, time.Minute)
+	topicLoads := 0
+	topicSimpleVoCache.GetOrLoad("topic-page", func() (TopicSimpleVoPage, error) {
+		topicLoads++
+		return TopicSimpleVoPage{}, nil
+	}, time.Minute)
+	if categoryLoads != 0 || topicLoads != 1 {
+		t.Fatalf("loads after topic-only invalidation: category=%d topic=%d", categoryLoads, topicLoads)
+	}
+}
+
 func TestSiteStatsReadsTopicPostMaxIds(t *testing.T) {
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(&topics.Entity{}, &posts.Entity{}, &users.EntityComplete{}, &dailyStats.Entity{}, &pageConfig.Entity{}); err != nil {

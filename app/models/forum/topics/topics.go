@@ -21,7 +21,7 @@ type Entity struct {
 	// may read the topic. Remaining categories are public auxiliary tags; a
 	// restricted category must be the topic's only category.
 	MainCategoryId    uint64         `gorm:"column:main_category_id;not null;default:0;index:idx_topics_main_category;" json:"mainCategoryId"`
-	UserId            uint64         `gorm:"column:user_id;not null;default:0;index:idx_topics_user_status,priority:1;index:idx_topics_admin_user_list,priority:1;" json:"userId"`
+	UserId            uint64         `gorm:"column:user_id;not null;default:0;index:idx_topics_user_status,priority:1;index:idx_topics_admin_user_list,priority:1;index:idx_topics_user_created,priority:1;" json:"userId"`
 	Status            int8           `gorm:"column:status;not null;default:0;index:idx_topics_user_status,priority:2;index:idx_topics_list_default,priority:1;index:idx_topics_list_rank,priority:1;index:idx_topics_list_popular,priority:1;index:idx_topics_list_new,priority:1;" json:"status"`
 	ProcessStatus     int8           `gorm:"column:process_status;not null;default:0;index:idx_topics_user_status,priority:3;index:idx_topics_list_default,priority:2;index:idx_topics_list_rank,priority:2;index:idx_topics_list_popular,priority:2;index:idx_topics_list_new,priority:2;" json:"processStatus"`
 	ModerationStatus  string         `gorm:"column:moderation_status;type:varchar(16);not null;default:'none';index:idx_topics_review,priority:1" json:"moderationStatus"`
@@ -40,13 +40,23 @@ type Entity struct {
 	Excerpt           string         `gorm:"column:excerpt;type:varchar(255);not null;default:'';" json:"excerpt"`
 	FirstImageURL     string         `gorm:"column:first_image_url;type:varchar(512);not null;default:'';" json:"firstImageUrl"`
 	Posters           []Poster       `gorm:"column:posters;type:text;serializer:json" json:"posters"`
-	CreatedAt         time.Time      `gorm:"column:created_at;autoCreateTime;<-:create;index:idx_topics_list_new,priority:3,sort:desc;" json:"createdAt"`
+	CreatedAt         time.Time      `gorm:"column:created_at;autoCreateTime;<-:create;index:idx_topics_list_new,priority:3,sort:desc;index:idx_topics_user_created,priority:2,sort:desc;" json:"createdAt"`
 	UpdatedAt         time.Time      `gorm:"column:updated_at;autoUpdateTime;index:idx_topics_list_default,priority:4,sort:desc;index:idx_topics_admin_list,priority:2,sort:desc;index:idx_topics_admin_user_list,priority:3,sort:desc;;index:idx_topics_review,priority:2" json:"updatedAt"`
 	DeletedAt         gorm.DeletedAt `json:"-"`
 }
 
 type Poster struct {
 	UserID uint64 `json:"user_id"`
+}
+
+// InteractionTarget is the read model used by topic interaction commands.
+type InteractionTarget struct {
+	Id             uint64
+	Title          string
+	UserId         uint64
+	Status         int8
+	ProcessStatus  int8
+	MainCategoryId uint64
 }
 
 func (itself *Entity) TableName() string {

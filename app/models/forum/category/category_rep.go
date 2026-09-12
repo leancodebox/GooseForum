@@ -26,6 +26,17 @@ func Count() int64 {
 	return count
 }
 
+func AllExist(ids []uint64) bool {
+	if len(ids) == 0 {
+		return false
+	}
+	var count int64
+	if err := builder().Where("id IN ?", ids).Count(&count).Error; err != nil {
+		return false
+	}
+	return count == int64(len(ids))
+}
+
 func All() (entities []*Entity) {
 	builder().Order(queryopt.Asc("sort")).Order(queryopt.Asc("id")).Find(&entities)
 	return

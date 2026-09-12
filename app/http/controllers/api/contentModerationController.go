@@ -45,6 +45,7 @@ func ReviewAdminTopic(req component.BetterRequest[ReviewContentReq]) component.R
 	}
 	legacyHidden := post.ModerationStatus == "rejected" || post.ModerationStatus == "pending"
 	firstPublication := topic.PublishedAt == nil
+	wasCounted := topic.Status == 1 && topic.ProcessStatus == 0
 	now := time.Now()
 	if req.Params.Action == "recheck" {
 		if !sensitivewordservice.Enabled() {
@@ -69,9 +70,9 @@ func ReviewAdminTopic(req component.BetterRequest[ReviewContentReq]) component.R
 	if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{Topic: &topic, FirstPost: &post, CategoryIDs: topic.CategoryIds, ExpectedVersion: &req.Params.Version, ReviewOnly: true}); err != nil {
 		return component.FailResponseError(err)
 	}
-	hotdataserve.ClearTopicCategoryCache()
+	hotdataserve.ClearTopicWriteCaches(wasCounted != (topic.Status == 1 && topic.ProcessStatus == 0))
 	fileusageservice.ReplaceTopic(topic.Id, topic.UserId, post.Content)
-	publishTopicReviewResult(&topic, &post, firstPublication)
+	eventhandlers.PublishTopicReviewResult(&topic, &post, firstPublication)
 	logContentReview(req, "topic", topic.Id)
 	enqueueContentReview(true, topic.Id, topic.ModerationVersion, topic.ModerationStatus)
 	return component.SuccessResponse(true)
@@ -163,7 +164,7 @@ func ReviewAdminPost(req component.BetterRequest[ReviewContentReq]) component.Re
 	hotdataserve.ClearTopicListCache()
 	fileusageservice.ReplacePost(post.Id, post.UserId, post.Content)
 	if !wasPublished && post.ProcessStatus == 0 {
-		publishVisiblePost(topic, post)
+		eventhandlers.PublishVisiblePost(topic, post)
 	}
 	logContentReview(req, "post", topic.Id)
 	enqueueContentReview(false, post.Id, post.ModerationVersion, post.ModerationStatus)
@@ -183,12 +184,4 @@ func enqueueContentReview(topic bool, id, version uint64, status string) {
 	eventbus.Publish(context.Background(), &eventhandlers.ContentReviewRequestedEvent{
 		Topic: topic, ID: id, Version: version,
 	})
-}
-
-func publishTopicReviewResult(topic *topics.Entity, post *posts.Entity, firstPublication bool) {
-	eventhandlers.PublishTopicReviewResult(topic, post, firstPublication)
-}
-
-func publishVisiblePost(topic topics.Entity, post posts.Entity) {
-	eventhandlers.PublishVisiblePost(topic, post)
 }

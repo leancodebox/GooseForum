@@ -1,6 +1,7 @@
 package topics
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -10,6 +11,25 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"gorm.io/gorm"
 )
+
+func TestInteractionTargetInfersSelectedColumnsFromReadModel(t *testing.T) {
+	conn, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("open sqlite: %v", err)
+	}
+	query := conn.ToSQL(func(tx *gorm.DB) *gorm.DB {
+		var target InteractionTarget
+		return tx.Table(tableName).Model(&Entity{}).Where("id = ?", 1).First(&target)
+	})
+	if strings.Contains(query, "SELECT *") {
+		t.Fatalf("interaction query did not infer columns from read model: %s", query)
+	}
+	for _, column := range []string{"id", "title", "user_id", "status", "process_status", "main_category_id"} {
+		if !strings.Contains(query, column) {
+			t.Fatalf("interaction query missing %s: %s", column, query)
+		}
+	}
+}
 
 func TestTopicAndPostSchemaMigrates(t *testing.T) {
 	conn, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
@@ -48,6 +68,7 @@ func TestTopicAndPostSchemaMigrates(t *testing.T) {
 	}
 	for _, index := range []string{
 		"idx_topics_main_category",
+		"idx_topics_user_created",
 		"idx_topics_list_default",
 		"idx_topics_list_rank",
 		"idx_topics_list_popular",
@@ -165,10 +186,10 @@ func TestTopicRepositoryParity(t *testing.T) {
 		t.Fatalf("Get(10).PinWeight=%d, want 99", got.PinWeight)
 	}
 
-	if IncrementLike(Entity{Id: 10}) != 1 {
+	if IncrementLike(10) != 1 {
 		t.Fatal("IncrementLike() rows != 1")
 	}
-	if DecrementLike(Entity{Id: 10}) != 1 {
+	if DecrementLike(10) != 1 {
 		t.Fatal("DecrementLike() rows != 1")
 	}
 	if got := Get(10); got.LikeCount != 0 {

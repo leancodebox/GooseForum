@@ -16,6 +16,11 @@ func Get(id any) (entity EntityComplete, err error) {
 	return
 }
 
+func GetIdentity(id any) (identity Identity, err error) {
+	err = builder().Model(&EntityComplete{}).Where(pid, id).First(&identity).Error
+	return
+}
+
 func Verify(usernameOrEmail string, password string) (*EntityComplete, error) {
 	var user EntityComplete
 	var err error

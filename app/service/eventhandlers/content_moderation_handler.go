@@ -43,6 +43,7 @@ func reviewTopicContent(event *ContentReviewRequestedEvent) error {
 		return nil
 	}
 	firstPublication := topic.PublishedAt == nil
+	wasCounted := topic.Status == 1 && topic.ProcessStatus == 0
 	// Pending is assigned only after an explicit publication request.
 	topic.Status = 1
 	contentmoderationservice.ReviewTopic(&topic, &post)
@@ -53,7 +54,7 @@ func reviewTopicContent(event *ContentReviewRequestedEvent) error {
 		return err
 	}
 	fileusageservice.ReplaceTopic(topic.Id, topic.UserId, post.Content)
-	hotdataserve.ClearTopicCategoryCache()
+	hotdataserve.ClearTopicWriteCaches(wasCounted != (topic.Status == 1 && topic.ProcessStatus == 0))
 	PublishTopicReviewResult(&topic, &post, firstPublication)
 	return nil
 }
@@ -97,7 +98,7 @@ func PublishTopicReviewResult(topic *topics.Entity, post *posts.Entity, firstPub
 
 // PublishVisiblePost dispatches the domain event produced when a reply first
 // becomes publicly visible.
-func PublishVisiblePost(topic topics.Entity, post posts.Entity) {
+func PublishVisiblePost(topic topics.Entity, post posts.Entity, knownParentUserID ...uint64) {
 	if topic.Status != 1 || topic.ProcessStatus != 0 || post.ProcessStatus != 0 {
 		return
 	}
@@ -105,7 +106,9 @@ func PublishVisiblePost(topic topics.Entity, post posts.Entity) {
 	userservice.InvalidateUserPublicProfileCache(post.UserId)
 	hotdataserve.ClearTopicListCache()
 	var parentUserID uint64
-	if post.ReplyToPostId != 0 {
+	if len(knownParentUserID) > 0 {
+		parentUserID = knownParentUserID[0]
+	} else if post.ReplyToPostId != 0 {
 		parentUserID = posts.Get(post.ReplyToPostId).UserId
 	}
 	eventbus.Publish(context.Background(), &CommentCreatedEvent{

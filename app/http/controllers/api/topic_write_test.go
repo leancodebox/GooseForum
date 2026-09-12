@@ -21,6 +21,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/userActivities"
 	"github.com/leancodebox/GooseForum/app/models/forum/userBadges"
+	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -235,6 +236,32 @@ func TestTopicActionsUseTopicUserAction(t *testing.T) {
 	topic := topics.Get(4001)
 	if topic.LikeCount != 1 {
 		t.Fatalf("like count = %d, want 1", topic.LikeCount)
+	}
+}
+
+func TestFollowUserUpdatesRelationshipAndStatistics(t *testing.T) {
+	conn := setupTopicWriteTestDB(t)
+	createTopicWriteUser(t, conn, 4201, "follower")
+	createTopicWriteUser(t, conn, 4202, "followed")
+	if err := conn.AutoMigrate(&userFollow.Entity{}); err != nil {
+		t.Fatalf("migrate user follow: %v", err)
+	}
+
+	res := FollowUser(component.BetterRequest[FollowUserReq]{
+		UserId: 4201, Params: FollowUserReq{Id: 4202, Action: 1},
+	})
+	if res.Data.Code != component.SUCCESS {
+		t.Fatalf("follow response = %#v", res.Data)
+	}
+	relation := userFollow.GetByUserId(uint64(4201), uint64(4202))
+	if relation.Id == 0 || relation.Status != 1 {
+		t.Fatalf("follow relationship = %#v", relation)
+	}
+	if got := userStatistics.Get(4201).FollowingCount; got != 1 {
+		t.Fatalf("following count = %d, want 1", got)
+	}
+	if got := userStatistics.Get(4202).FollowerCount; got != 1 {
+		t.Fatalf("follower count = %d, want 1", got)
 	}
 }
 

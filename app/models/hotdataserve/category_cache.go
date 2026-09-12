@@ -53,6 +53,15 @@ func ClearCategoryCache() {
 	ClearTopicListCache()
 }
 
+// ClearTopicWriteCaches always invalidates topic lists and only reloads the
+// category snapshot when a write can have changed category topic counts.
+func ClearTopicWriteCaches(categoryCountsChanged bool) {
+	ClearTopicListCache()
+	if categoryCountsChanged {
+		categoryCache.Clear()
+	}
+}
+
 func ClearTopicCategoryCache() {
 	ClearCategoryCache()
 }

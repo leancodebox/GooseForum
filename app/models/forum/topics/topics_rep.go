@@ -97,6 +97,12 @@ func GetSimple(id any) (entity Entity) {
 	return
 }
 
+// GetInteractionTarget loads only the fields needed by like, bookmark and watch actions.
+func GetInteractionTarget(id any) (target InteractionTarget) {
+	builder().Model(&Entity{}).Where(queryopt.Eq("id", id)).First(&target)
+	return
+}
+
 func GetMaxId() uint64 {
 	var entity Entity
 	builder().Order(queryopt.Desc("id")).Limit(1).First(&entity)
@@ -471,18 +477,18 @@ func UpdatePinWeight(id uint64, pinWeight int) error {
 	}).Error
 }
 
-func IncrementLike(entity Entity) int64 {
-	result := builder().Exec("UPDATE topics SET like_count = like_count + 1 WHERE id = ?", entity.Id)
+func IncrementLike(topicID uint64) int64 {
+	result := builder().Exec("UPDATE topics SET like_count = like_count + 1 WHERE id = ?", topicID)
 	if result.Error == nil && result.RowsAffected > 0 {
-		topicrank.Notify(entity.Id)
+		topicrank.Notify(topicID)
 	}
 	return result.RowsAffected
 }
 
-func DecrementLike(entity Entity) int64 {
-	result := builder().Exec("UPDATE topics SET like_count = like_count - 1 WHERE id = ?", entity.Id)
+func DecrementLike(topicID uint64) int64 {
+	result := builder().Exec("UPDATE topics SET like_count = like_count - 1 WHERE id = ?", topicID)
 	if result.Error == nil && result.RowsAffected > 0 {
-		topicrank.Notify(entity.Id)
+		topicrank.Notify(topicID)
 	}
 	return result.RowsAffected
 }

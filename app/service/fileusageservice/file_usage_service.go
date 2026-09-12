@@ -16,11 +16,19 @@ type Usage struct {
 }
 
 func ReplaceTopic(topicID uint64, userID uint64, content string) {
-	replace(fileUsage.TargetTopic, topicID, []string{fileUsage.UsageInlineImage}, userID, namesToUsages(markdown2html.ExtractImageURLs(content), fileUsage.UsageInlineImage))
+	ReplaceTopicImages(topicID, userID, markdown2html.ExtractImageURLs(content))
 }
 
 func ReplacePost(postID uint64, userID uint64, content string) {
-	replace(fileUsage.TargetPost, postID, []string{fileUsage.UsageInlineImage}, userID, namesToUsages(markdown2html.ExtractImageURLs(content), fileUsage.UsageInlineImage))
+	ReplacePostImages(postID, userID, markdown2html.ExtractImageURLs(content))
+}
+
+func ReplaceTopicImages(topicID uint64, userID uint64, imageURLs []string) {
+	replace(fileUsage.TargetTopic, topicID, []string{fileUsage.UsageInlineImage}, userID, namesToUsages(imageURLs, fileUsage.UsageInlineImage))
+}
+
+func ReplacePostImages(postID uint64, userID uint64, imageURLs []string) {
+	replace(fileUsage.TargetPost, postID, []string{fileUsage.UsageInlineImage}, userID, namesToUsages(imageURLs, fileUsage.UsageInlineImage))
 }
 
 func ReplaceAvatar(userId uint64, fileNames []string) {

@@ -112,6 +112,26 @@ func TestExtractFirstImageURL(t *testing.T) {
 	}
 }
 
+func TestAnalyzeContentReturnsDescriptionAndImages(t *testing.T) {
+	got := AnalyzeContent("Useful topic description.\n\n![first](/file/img/first.webp)\n\n![second](https://example.com/second.webp)", 200)
+	if got.Description != "Useful topic description." {
+		t.Fatalf("description = %q", got.Description)
+	}
+	if got.FirstImageURL != "/file/img/first.webp" || len(got.ImageURLs) != 2 {
+		t.Fatalf("images = %#v, first = %q", got.ImageURLs, got.FirstImageURL)
+	}
+}
+
+func TestAnalyzePostContentRendersAndReturnsImages(t *testing.T) {
+	got := AnalyzePostContent("[external](https://example.com) ![image](/file/img/a.webp)")
+	if !strings.Contains(got.RenderedHTML, `rel="nofollow ugc noopener noreferrer"`) {
+		t.Fatalf("rendered HTML was not normalized: %s", got.RenderedHTML)
+	}
+	if len(got.ImageURLs) != 1 || got.ImageURLs[0] != "/file/img/a.webp" {
+		t.Fatalf("images = %#v", got.ImageURLs)
+	}
+}
+
 func TestExtractFirstImageURLSkipsNonPublicDestinations(t *testing.T) {
 	tests := []string{
 		"",
