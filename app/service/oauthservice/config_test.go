@@ -170,7 +170,7 @@ func TestMergedSecret(t *testing.T) {
 }
 
 func TestOAuthUsername(t *testing.T) {
-	validUsername := regexp.MustCompile(`^[a-zA-Z0-9_-]{6,32}$`)
+	validUsername := regexp.MustCompile(`^[a-zA-Z0-9_-]{4,32}$`)
 	tests := []struct {
 		name string
 		user OAuthUserInfo

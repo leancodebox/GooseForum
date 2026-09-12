@@ -7,7 +7,7 @@ export { default as ChartTooltipContent } from "./ChartTooltipContent.vue"
 export { componentToString } from "./utils"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
-export const THEMES = { light: "", dark: ".dark" } as const
+export const THEMES = { light: "", dark: '[data-theme="gf-dark"]' } as const
 
 export type ChartConfig = {
   [k in string]: {

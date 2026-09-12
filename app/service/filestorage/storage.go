@@ -25,7 +25,7 @@ type Metadata struct {
 }
 
 func (metadata Metadata) GetAccessPath() string {
-	return urlconfig.FilePath(metadata.Name)
+	return urlconfig.StoredFilePath(metadata.StorageDriver, metadata.Name)
 }
 
 type PutRequest struct {

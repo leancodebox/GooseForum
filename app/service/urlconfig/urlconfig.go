@@ -7,6 +7,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 )
 
@@ -46,6 +47,18 @@ func GetBannedAvatar() string {
 // FilePath returns the public image route for filename.
 func FilePath(filename string) string {
 	return path.Join("/file/img", filename)
+}
+
+// StoredFilePath returns the public URL for a stored file. S3 installations can
+// expose objects through their own CDN/custom domain while database-backed and
+// legacy files continue to use GooseForum's guarded file route.
+func StoredFilePath(storageDriver, filename string) string {
+	if strings.EqualFold(strings.TrimSpace(storageDriver), "s3") {
+		if publicURL := strings.TrimRight(strings.TrimSpace(preferences.GetString("storage.s3.publicUrl")), "/"); publicURL != "" {
+			return publicURL + "/" + strings.TrimLeft(filename, "/")
+		}
+	}
+	return FilePath(filename)
 }
 
 // Public page route constants.

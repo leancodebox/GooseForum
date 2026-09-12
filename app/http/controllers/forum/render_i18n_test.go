@@ -24,6 +24,32 @@ func TestServerTemplatesParse(t *testing.T) {
 	}
 }
 
+func TestAdminLayoutRendersSharedTheme(t *testing.T) {
+	reg, err := newRegistry(resource.GetTemplateFS())
+	if err != nil {
+		t.Fatalf("newRegistry: %v", err)
+	}
+
+	payload := PagePayload{
+		Layout: LayoutPayload{
+			Site:  SitePayload{Name: "GooseForum"},
+			Theme: ThemePayload{Current: "gf-dark", ThemeColor: "#101010"},
+		},
+		Meta: PageMeta{Title: "Admin"},
+	}
+	var buf bytes.Buffer
+	if err := reg.render(&buf, "admin.gohtml", templateData{Payload: payload, Lang: "en"}); err != nil {
+		t.Fatalf("render admin template: %v", err)
+	}
+	out := buf.String()
+	if !strings.Contains(out, `data-goose-admin data-theme="gf-dark"`) {
+		t.Fatalf("admin layout missing shared theme: %s", out)
+	}
+	if !strings.Contains(out, `name="theme-color" content="#101010"`) {
+		t.Fatalf("admin layout missing shared theme color: %s", out)
+	}
+}
+
 // TestTopicListPartialLocalized renders the topic list partial through the
 // dict("Topics", ..., "Lang", ...) contract and checks it localizes to English
 // with no residual Chinese.

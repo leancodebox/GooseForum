@@ -12,6 +12,7 @@
 - `[server]` - 服务器配置
 - `[jwtopt]` - JWT 认证配置
 - `[db]` - 数据库配置
+- `[storage]` - 文件存储配置
 - `[log]` - 日志配置
 
 ## 🔧 详细配置说明
@@ -100,6 +101,29 @@ maxIdleConnections = 10
 maxOpenConnections = 20
 maxLifeSeconds = 3600
 ```
+
+### [storage] 文件存储配置
+
+`driver` 可设为 `database` 或 `s3`。使用 S3 时，`endpoint` 用于服务端读写和签名，
+`publicUrl` 用于生成页面中的文件访问地址，通常填写绑定到 Bucket 的自定义域名或 CDN：
+
+```toml
+[storage]
+driver = "s3"
+
+[storage.s3]
+endpoint = "https://s3.example.com"
+publicUrl = "https://files.example.com"
+bucket = "gooseforum"
+accessKey = "your-access-key"
+secretKey = "your-secret-key"
+region = ""
+secure = true
+pathStyle = false
+```
+
+`publicUrl` 可留空；留空时仍通过 GooseForum 的 `/file/img/` 路由访问。它也可以包含路径前缀，
+例如 `https://cdn.example.com/forum-files`。已有数据库存储文件不受 S3 自定义域名影响。
 
 ### [log] 日志配置
 

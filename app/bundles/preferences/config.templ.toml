@@ -59,6 +59,8 @@ driver = "database" # database | s3
 
 [storage.s3]
 endpoint = ""
+# 对象的公开访问地址，可填写绑定到 Bucket 的自定义域名或 CDN，并可包含路径前缀
+publicUrl = ""
 bucket = ""
 accessKey = ""
 secretKey = ""

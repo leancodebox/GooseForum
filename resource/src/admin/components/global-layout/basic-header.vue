@@ -7,7 +7,7 @@ defineProps<LayoutHeaderProps>()
 <template>
   <Teleport defer to="#admin-topbar-page-context">
     <div class="min-w-0">
-      <h1 class="truncate text-base font-semibold sm:text-lg">
+      <h1 class="truncate text-base font-semibold text-foreground sm:text-lg">
         {{ title }}
       </h1>
       <p v-if="description" class="mt-0.5 hidden truncate text-xs text-muted-foreground lg:block">

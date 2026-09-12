@@ -22,6 +22,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
+	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"github.com/leancodebox/GooseForum/app/service/topicservice"
 	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
@@ -421,17 +422,31 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 
 func DeletePost(req component.BetterRequest[DeletePostReq]) component.Response {
 	postEntity := posts.Get(req.Params.PostId)
-	if postEntity.Id == 0 || postEntity.PostNo <= 1 {
+	if postEntity.Id == 0 {
 		return component.FailResponseCode(component.MessagePostNotFound, nil)
 	}
-	if err := authorizePublishedTopic(req.UserId, topics.GetSimple(postEntity.TopicId), accesscontrol.CapabilityRead); err != nil {
+	topicEntity := topics.Get(postEntity.TopicId)
+	if err := authorizePublishedTopic(req.UserId, topicEntity, accesscontrol.CapabilityRead); err != nil {
 		return component.FailResponseCode(component.MessagePostNotFound, nil)
 	}
 	if postEntity.UserId != req.UserId {
 		return component.FailResponseCode(component.MessageTopicOperationDenied, nil)
 	}
+	if postEntity.PostNo <= 1 {
+		if topicEntity.UserId != req.UserId || topicEntity.FirstPostId != postEntity.Id {
+			return component.FailResponseCode(component.MessageTopicOperationDenied, nil)
+		}
+		topicEntity.ProcessStatus = 1
+		if _, err := searchservice.BuildSingleTopicSearchDocument(&topicEntity, &postEntity); err != nil {
+			slog.Error("failed to remove self-deleted topic from search", "topicId", topicEntity.Id, "err", err)
+		}
+		if err := topicservice.DeleteTopic(&topicEntity); err != nil {
+			return component.FailResponseCode(component.MessageOperationFailed, nil)
+		}
+		hotdataserve.ClearTopicCategoryCache()
+		return component.SuccessResponse(true)
+	}
 	posts.DeleteEntity(&postEntity)
-	topicEntity := topics.GetSimple(postEntity.TopicId)
 	if topicEntity.Id > 0 && postEntity.ProcessStatus == 0 {
 		postservice.SyncTopicPostStats(topicEntity, postEntity, true)
 		hotdataserve.ClearTopicListCache()

@@ -118,7 +118,7 @@ const navGroups = computed<NavGroup[]>(() => {
         { title: adminText('k007v'), url: '/admin/settings/mail', icon: Mail, permission: AdminPermission.SiteManager },
         { title: 'OAuth', url: '/admin/settings/oauth', icon: KeyRound, permission: AdminPermission.SiteManager },
         {
-          title: 'OIDC Provider',
+          title: adminText('oidcTitle'),
           url: '/admin/settings/oidc-provider',
           icon: LogIn,
           permission: AdminPermission.SiteManager,

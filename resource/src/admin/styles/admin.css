@@ -1,12 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where([data-theme="gf-dark"], [data-theme="gf-dark"] *));
 @source "../**/*.{ts,vue}";
 @source "../../types/**/*.{ts,vue}";
 @source "../../../templates/layout/admin.gohtml";
 @source "../../../templates/pages/admin.gohtml";
 
 :root {
+  color-scheme: light;
   --radius: 0.625rem;
   --background: oklch(0.985 0.003 247.858);
   --foreground: oklch(0.129 0.042 264.695);
@@ -39,6 +40,41 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+}
+
+:root[data-theme="gf-dark"] {
+    color-scheme: dark;
+    --background: oklch(0.145 0.018 264);
+    --foreground: oklch(0.95 0.008 255);
+    --card: oklch(0.19 0.02 264);
+    --card-foreground: oklch(0.95 0.008 255);
+    --popover: oklch(0.19 0.02 264);
+    --popover-foreground: oklch(0.95 0.008 255);
+    --primary: oklch(0.78 0.1 245);
+    --primary-foreground: oklch(0.16 0.025 264);
+    --secondary: oklch(0.25 0.025 264);
+    --secondary-foreground: oklch(0.94 0.008 255);
+    --muted: oklch(0.24 0.02 264);
+    --muted-foreground: oklch(0.7 0.025 257);
+    --accent: oklch(0.27 0.025 264);
+    --accent-foreground: oklch(0.96 0.006 255);
+    --destructive: oklch(0.7 0.19 25);
+    --border: oklch(0.32 0.025 264);
+    --input: oklch(0.32 0.025 264);
+    --ring: oklch(0.63 0.08 250);
+    --chart-1: oklch(0.7 0.18 41);
+    --chart-2: oklch(0.68 0.13 185);
+    --chart-3: oklch(0.67 0.12 228);
+    --chart-4: oklch(0.76 0.16 84);
+    --chart-5: oklch(0.73 0.17 55);
+    --sidebar: oklch(0.17 0.02 264);
+    --sidebar-foreground: oklch(0.94 0.008 255);
+    --sidebar-primary: oklch(0.78 0.1 245);
+    --sidebar-primary-foreground: oklch(0.16 0.025 264);
+    --sidebar-accent: oklch(0.25 0.025 264);
+    --sidebar-accent-foreground: oklch(0.96 0.006 255);
+    --sidebar-border: oklch(0.31 0.025 264);
+    --sidebar-ring: oklch(0.63 0.08 250);
 }
 
 @theme inline {

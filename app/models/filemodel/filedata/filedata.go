@@ -46,7 +46,7 @@ func (itself *Entity) TableName() string {
 }
 
 func (itself *Entity) GetAccessPath() string {
-	return accessPath(itself.Name)
+	return urlconfig.StoredFilePath(itself.StorageDriver, itself.Name)
 }
 
 func accessPath(name string) string {

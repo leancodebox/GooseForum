@@ -419,6 +419,7 @@ type TopicAdminBaseVo struct {
 	ProcessStatus int8     `json:"processStatus"`
 	CreatedAt     string   `json:"createdAt"`
 	UpdatedAt     string   `json:"updatedAt"`
+	Deleted       bool     `json:"deleted"`
 }
 
 type TopicInfoAdminVo struct {
@@ -466,6 +467,7 @@ func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
 				ProcessStatus: t.ProcessStatus,
 				CreatedAt:     t.CreatedAt.Format(time.DateTime),
 				UpdatedAt:     t.UpdatedAt.Format(time.DateTime),
+				Deleted:       t.DeletedAt.Valid,
 				Username:      username,
 				UserAvatarUrl: userAvatarUrl,
 				ViewCount:     t.ViewCount,
@@ -481,7 +483,7 @@ func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
 }
 
 func TopicSource(req component.BetterRequest[TopicSourceReq]) component.Response {
-	topic := topics.Get(req.Params.TopicId)
+	topic := topics.GetForAdmin(req.Params.TopicId)
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
@@ -501,6 +503,7 @@ func TopicSource(req component.BetterRequest[TopicSourceReq]) component.Response
 		ProcessStatus: topic.ProcessStatus,
 		CreatedAt:     topic.CreatedAt.Format(time.DateTime),
 		UpdatedAt:     topic.UpdatedAt.Format(time.DateTime),
+		Deleted:       topic.DeletedAt.Valid,
 		Content:       firstPost.Content,
 	})
 }

@@ -52,6 +52,16 @@ func TestImageUploadPolicyValidatesFileMetadata(t *testing.T) {
 	}
 }
 
+func TestAdminImageUploadPolicyDoesNotUsePostingExtensionList(t *testing.T) {
+	policy, failure := resolveAdminImageUploadPolicy(1)
+	if failure != nil {
+		t.Fatalf("admin upload policy failed: %#v", failure)
+	}
+	if _, rejected := policy.Validate("brand.bmp", 512, "image/bmp"); rejected != nil {
+		t.Fatalf("admin brand image rejected: %#v", rejected)
+	}
+}
+
 func TestValidateUploadedImageChecksDecodedFormat(t *testing.T) {
 	imageData := encodeTestPNG(t)
 	if err := validateUploadedImage(bytes.NewReader(imageData), "image/png"); err != nil {

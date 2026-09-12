@@ -89,7 +89,7 @@ function toneClass(badge: AdminBadge) {
     amber: 'bg-amber-100 text-amber-700 ring-amber-200',
     orange: 'bg-orange-100 text-orange-700 ring-orange-200',
     yellow: 'bg-yellow-100 text-yellow-700 ring-yellow-200',
-    slate: 'bg-slate-100 text-slate-700 ring-slate-200',
+    slate: 'bg-muted text-muted-foreground ring-border',
   }
   return classes[color]
 }

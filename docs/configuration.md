@@ -12,6 +12,7 @@ The configuration uses TOML and contains these main sections:
 - `[server]`: Server settings
 - `[jwtopt]`: JWT authentication
 - `[db]`: Database settings
+- `[storage]`: File storage settings
 - `[log]`: Logging
 
 ## Configuration Options
@@ -98,6 +99,31 @@ maxIdleConnections = 10
 maxOpenConnections = 20
 maxLifeSeconds = 3600
 ```
+
+### [storage] File storage
+
+Set `driver` to `database` or `s3`. With S3, `endpoint` is used for server-side
+I/O and upload signing, while `publicUrl` is the custom bucket domain or CDN used
+in public file URLs:
+
+```toml
+[storage]
+driver = "s3"
+
+[storage.s3]
+endpoint = "https://s3.example.com"
+publicUrl = "https://files.example.com"
+bucket = "gooseforum"
+accessKey = "your-access-key"
+secretKey = "your-secret-key"
+region = ""
+secure = true
+pathStyle = false
+```
+
+Leave `publicUrl` empty to keep serving files through GooseForum's `/file/img/`
+route. A path prefix such as `https://cdn.example.com/forum-files` is supported.
+Existing database-backed files are unaffected by the S3 custom domain.
 
 ### [log] Logging
 

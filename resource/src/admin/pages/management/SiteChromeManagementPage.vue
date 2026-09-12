@@ -614,7 +614,7 @@ onMounted(load)
               <Input v-model="brandForm.brandImage" placeholder="Brand Image URL" />
               <Button variant="outline" type="button" class="relative shrink-0 overflow-hidden">
                 <Upload class="mr-2 h-4 w-4" />{{ adminText('k0084') }}
-                <input type="file" accept="image/*" class="absolute inset-0 cursor-pointer opacity-0" @change="uploadBrandImage" />
+                <input type="file" accept=".jpg,.jpeg,.png,.gif,.webp,.bmp" class="absolute inset-0 cursor-pointer opacity-0" @change="uploadBrandImage" />
               </Button>
             </div>
           </label>

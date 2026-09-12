@@ -148,8 +148,11 @@ func TestTopicRepositoryParity(t *testing.T) {
 		t.Fatalf("UpdatePinWeight() err=%v", err)
 	}
 	adminPage := PageForAdmin(AdminPageQuery{Page: 1, PageSize: 10, UserId: 1})
-	if len(adminPage.Data) != 3 || adminPage.Data[0].Id != 10 || adminPage.Data[1].Id != 40 || adminPage.Data[2].Id != 30 {
-		t.Fatalf("PageForAdmin() ids = %#v, want pinned topic 10 before topics 40, 30", adminPage.Data)
+	if len(adminPage.Data) != 4 || adminPage.Data[0].Id != 10 || adminPage.Data[1].Id != 50 || adminPage.Data[2].Id != 40 || adminPage.Data[3].Id != 30 || !adminPage.Data[1].DeletedAt.Valid {
+		t.Fatalf("PageForAdmin() ids = %#v, want pinned topic 10 before deleted topic 50 and topics 40, 30", adminPage.Data)
+	}
+	if got := GetForAdmin(50); got.Id != 50 || !got.DeletedAt.Valid {
+		t.Fatalf("GetForAdmin(50) = %#v, want soft-deleted topic", got)
 	}
 
 	if err := UpdateProcessStatus(10, 1); err != nil {

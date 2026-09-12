@@ -85,7 +85,7 @@ function sectionBadgeClass(level: SponsorLevel) {
   const tone = levelMeta[level].tone
   if (tone === 'diamond') return 'bg-blue-50 text-blue-700'
   if (tone === 'gold') return 'bg-amber-50 text-amber-700'
-  if (tone === 'silver') return 'bg-gray-100 text-gray-600'
+  if (tone === 'silver') return 'bg-muted text-muted-foreground'
   return 'bg-rose-50 text-rose-700'
 }
 

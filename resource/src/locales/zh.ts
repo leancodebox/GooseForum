@@ -383,6 +383,8 @@ export default {
     replyCountValue: '{count} 回复',
     deleteReplyTitle: '删除这条回复？',
     deleteReplyDescription: '删除后这条回复会从主题中移除，相关回复数也会同步更新。',
+    deleteTopicTitle: '删除这个主题？',
+    deleteTopicDescription: '删除后主题将不再对普通用户显示，但管理员仍可在后台查看记录。',
     confirmDelete: '确认删除',
     moderationBan: '封禁',
     moderationBanTitle: '封禁这篇帖子？',
@@ -822,7 +824,7 @@ export default {
         notAllowed: '该邮箱域名不在允许的注册白名单中',
       },
       username: {
-        invalid: '用户名仅允许字母、数字、下划线、连字符，长度6-32',
+        invalid: '用户名仅允许字母、数字、下划线、连字符，长度4-32',
         exists: '用户名已存在',
       },
       email: {

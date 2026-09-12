@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { adminText } from '@/admin/runtime/i18n-text'
-import { ref } from 'vue'
-import { ArrowLeft, Languages } from '@lucide/vue'
+import { computed, ref } from 'vue'
+import { ArrowLeft, Languages, Moon, Sun } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/admin/components/ui/button'
 import { Separator } from '@/admin/components/ui/separator'
 import { SidebarTrigger } from '@/admin/components/ui/sidebar'
 import { setLocale, supportedLocales, type Locale } from '@/runtime/i18n'
+import { useSiteTheme } from '@/runtime/site-theme'
 import type { LayoutPayload } from '@gooseforum/client'
 
 defineProps<{
@@ -15,6 +16,8 @@ defineProps<{
 
 const { t, locale } = useI18n()
 const languageMenuOpen = ref(false)
+const { isDark, toggleTheme } = useSiteTheme()
+const themeButtonText = computed(() => isDark.value ? adminText('themeSwitchLight') : adminText('themeSwitchDark'))
 
 function switchLocale(nextLocale: Locale) {
   setLocale(nextLocale)
@@ -23,7 +26,7 @@ function switchLocale(nextLocale: Locale) {
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 flex h-[4.5rem] shrink-0 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur transition-[width,height] ease-linear supports-[backdrop-filter]:bg-background/85 sm:gap-4">
+  <header class="sticky top-0 z-50 flex h-[4.5rem] shrink-0 items-center gap-3 border-b bg-background/95 px-4 text-foreground backdrop-blur transition-[width,height] ease-linear supports-[backdrop-filter]:bg-background/85 sm:gap-4">
     <SidebarTrigger class="-ml-1 size-8 shrink-0" />
     <Separator orientation="vertical" class="h-8 shrink-0" />
 
@@ -35,6 +38,17 @@ function switchLocale(nextLocale: Locale) {
     />
 
     <div class="ml-auto flex shrink-0 items-center gap-2">
+      <Button
+        size="icon-sm"
+        variant="ghost"
+        type="button"
+        :aria-label="themeButtonText"
+        :title="themeButtonText"
+        @click="toggleTheme"
+      >
+        <Sun v-if="isDark" class="size-4" />
+        <Moon v-else class="size-4" />
+      </Button>
       <div class="relative hidden lg:block">
         <Button
           size="icon-sm"

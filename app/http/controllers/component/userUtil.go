@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_-]{6,32}$`)
+	usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_-]{4,32}$`)
 )
 
 type PermissionAction string

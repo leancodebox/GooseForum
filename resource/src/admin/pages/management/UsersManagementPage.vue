@@ -108,7 +108,7 @@ function badgeToneClass(badge: AdminBadge | UserBadge) {
     amber: 'bg-amber-100 text-amber-700 ring-amber-200',
     orange: 'bg-orange-100 text-orange-700 ring-orange-200',
     yellow: 'bg-yellow-100 text-yellow-700 ring-yellow-200',
-    slate: 'bg-slate-100 text-slate-700 ring-slate-200',
+    slate: 'bg-muted text-muted-foreground ring-border',
   }
   if (badge.color && classes[badge.color]) return classes[badge.color]
   if (badge.level === 'gold') return classes.amber

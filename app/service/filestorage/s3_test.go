@@ -327,6 +327,8 @@ func TestNewS3StoreRejectsInvalidConfiguration(t *testing.T) {
 	tests := []S3Config{
 		{},
 		{Endpoint: "localhost:9000"},
+		{Endpoint: "localhost:9000", PublicURL: "files.example.com", Bucket: "forum", AccessKey: "access", SecretKey: "secret"},
+		{Endpoint: "localhost:9000", PublicURL: "https://files.example.com/path?token=bad", Bucket: "forum", AccessKey: "access", SecretKey: "secret"},
 		{Endpoint: "localhost:9000", Bucket: "INVALID_BUCKET", AccessKey: "access", SecretKey: "secret"},
 		{Endpoint: "localhost:9000", Bucket: "forum"},
 	}

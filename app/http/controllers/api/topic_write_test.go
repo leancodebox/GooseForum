@@ -175,6 +175,40 @@ func TestCreatePostWritesPostAndTopicStats(t *testing.T) {
 	}
 }
 
+func TestDeletePostLetsOwnerSoftDeleteTopicFromFirstPost(t *testing.T) {
+	conn := setupTopicWriteTestDB(t)
+	createTopicWriteUser(t, conn, 1151, "topic_owner")
+	if err := conn.Create(&category.Entity{Id: 3152, Name: "Delete", Slug: "delete"}).Error; err != nil {
+		t.Fatalf("create category: %v", err)
+	}
+	ensureTopicWriteAccess(t, conn)
+	now := time.Now().Add(-time.Hour)
+	topic := topics.Entity{Id: 3151, Title: "Owned topic", CategoryIds: []uint64{3152}, MainCategoryId: 3152, UserId: 1151, Status: 1, PostCount: 1, PostSeq: 1, FirstPostId: 3161, CreatedAt: now, UpdatedAt: now}
+	if err := conn.Create(&topic).Error; err != nil {
+		t.Fatalf("create topic: %v", err)
+	}
+	if err := conn.Create(&posts.Entity{Id: 3161, TopicId: topic.Id, PostNo: 1, UserId: 1151, Content: "first", CreatedAt: now, UpdatedAt: now}).Error; err != nil {
+		t.Fatalf("create first post: %v", err)
+	}
+	if err := conn.Create(&topicCategoryIndex.Entity{TopicId: topic.Id, CategoryId: 3152, Effective: 1}).Error; err != nil {
+		t.Fatalf("create topic category index: %v", err)
+	}
+
+	res := DeletePost(component.BetterRequest[DeletePostReq]{UserId: 1151, Params: DeletePostReq{PostId: 3161}})
+	if res.Data.Code != 0 {
+		t.Fatalf("delete response = %#v", res.Data)
+	}
+	if got := topics.Get(topic.Id); got.Id != 0 {
+		t.Fatalf("public topic still exists: %#v", got)
+	}
+	if got := topics.GetForAdmin(topic.Id); got.Id != topic.Id || !got.DeletedAt.Valid {
+		t.Fatalf("admin topic record = %#v", got)
+	}
+	if indexes := topicCategoryIndex.GetByTopicId(topic.Id); len(indexes) != 0 {
+		t.Fatalf("active category indexes = %#v", indexes)
+	}
+}
+
 func TestTopicActionsUseTopicUserAction(t *testing.T) {
 	conn := setupTopicWriteTestDB(t)
 	createTopicWriteUser(t, conn, 1201, "author")

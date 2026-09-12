@@ -34,6 +34,7 @@ const initialPosts = initialPostStream.posts
 const postContent = ref('')
 const targetPostId = ref(0)
 const likeCount = ref(page.props.topic.likeCount)
+const replyCount = ref(page.props.topic.replyCount)
 const isLiked = ref(page.props.topic.isLiked)
 const isBookmarked = ref(page.props.topic.isBookmarked)
 const isWatched = ref(page.props.topic.isWatched)
@@ -555,6 +556,7 @@ function resetPostsFromProps() {
   activePostNo.value = firstPostNo(initialPosts) || 1
   syncProgressForPostNo(activePostNo.value)
   postWindowError.value = ''
+  replyCount.value = page.props.topic.replyCount
   editingPostId.value = 0
 }
 
@@ -960,26 +962,28 @@ async function findPostElementAfterLayout(postId: number) {
   return document.getElementById(`post-${postId}`)
 }
 
-async function revealCreatedPost(postId: number) {
-  if (!postId) return
+async function revealCreatedPost(postId: number, postNo = 0) {
+  if (!postId && !postNo) return
 
   navigationPhase.value = 'loading'
   const payload = await getPostWindow({
     topicId: page.props.topic.id,
-    anchorPostId: postId,
+    anchorPostId: postNo ? undefined : postId,
+    anchorPostNo: postNo || undefined,
     limit: 20,
   })
   applyPostWindowPayload(payload, 'replace')
-  const createdPost = payload.posts.find((post) => post.id === postId)
+  const createdPost = payload.posts.find((post) => post.id === postId || (postNo > 0 && post.postNo === postNo))
   if (createdPost?.postNo) {
     navigationTargetPostNo.value = createdPost.postNo
     activePostNo.value = createdPost.postNo
     syncProgressForPostNo(createdPost.postNo)
   }
-  highlightPost(postId)
-  const element = await findPostElementAfterLayout(postId)
+  const createdPostId = createdPost?.id || postId
+  highlightPost(createdPostId)
+  const element = await findPostElementAfterLayout(createdPostId)
   if (element && !isElementMostlyVisible(element)) {
-    navigationTargetPostId.value = postId
+    navigationTargetPostId.value = createdPostId
     scrollPostIntoComfortView(element)
     resumePostRailSyncWhenSettled()
     return
@@ -1088,7 +1092,7 @@ function canEditPost(post: PostPayload) {
 }
 
 function canDeleteRenderedPost(post: PostPayload) {
-  return post.isOwnPost && !post.isHidden && !isFirstPost(post)
+  return post.isOwnPost && !post.isHidden
 }
 
 function startEditPost(post: PostPayload) {
@@ -1208,9 +1212,12 @@ async function submitPost() {
     }
     pushFlash(t('topic.replyPosted'), 'success')
     const createdPostId = typeof createdPost === 'object' && createdPost !== null ? createdPost.id : createdPost
+    const createdPostNo = typeof createdPost === 'object' && createdPost !== null ? createdPost.postNo : 0
+    const createdPostIsVisible = typeof createdPost !== 'object' || createdPost === null || createdPost.processStatus === 0
+    if (createdPostIsVisible) replyCount.value += 1
     try {
       if (typeof createdPostId === 'number') {
-        await revealCreatedPost(createdPostId)
+        await revealCreatedPost(createdPostId, createdPostNo)
       } else {
         await refreshCurrentPage()
       }
@@ -1388,6 +1395,11 @@ async function removePost(postId: number) {
   try {
     const removedPost = posts.value.find((post) => post.id === postId)
     await deletePost(postId)
+    if (removedPost && isFirstPost(removedPost)) {
+      window.location.href = '/'
+      return
+    }
+    replyCount.value = Math.max(0, replyCount.value - 1)
     posts.value = posts.value.filter((post) => post.id !== postId)
     if (targetPostId.value === postId) {
       targetPostId.value = 0
@@ -1447,7 +1459,7 @@ async function removePost(postId: number) {
           </a>
           <span class="inline-flex items-center gap-1.5">
             <MessageSquare class="h-3.5 w-3.5" />
-            {{ formatNumber(page.props.topic.replyCount) }}
+            {{ formatNumber(replyCount) }}
           </span>
           <span class="inline-flex items-center gap-1.5">
             <Eye class="h-3.5 w-3.5" />
@@ -1681,7 +1693,7 @@ async function removePost(postId: number) {
             <dl class="space-y-4 border-t border-line px-4 py-5 text-sm">
               <div class="flex items-center justify-between gap-4">
                 <dt class="font-semibold text-base-content/55">{{ t('topic.replyCount') }}</dt>
-                <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.topic.replyCount) }}</dd>
+                <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(replyCount) }}</dd>
               </div>
               <div class="flex items-center justify-between gap-4">
                 <dt class="font-semibold text-base-content/55">{{ t('topic.viewCount') }}</dt>
@@ -1709,7 +1721,7 @@ async function removePost(postId: number) {
             </div>
 
             <PostPositionRail
-              v-if="page.props.topic.replyCount > 0 && postMaxRange > 0"
+              v-if="replyCount > 0 && postMaxRange > 0"
               class="border-t border-line"
               :current="postRailCurrentNo"
               :max="postMaxRange"
@@ -1794,8 +1806,8 @@ async function removePost(postId: number) {
                 <AlertTriangle class="h-5 w-5" />
               </div>
               <div class="min-w-0 flex-1">
-                <h2 id="delete-post-title" class="text-base font-bold text-base-content">{{ t('topic.deleteReplyTitle') }}</h2>
-                <p class="mt-1 text-sm leading-6 text-base-content/55">{{ t('topic.deleteReplyDescription') }}</p>
+                <h2 id="delete-post-title" class="text-base font-bold text-base-content">{{ isFirstPost(pendingDeletePost) ? t('topic.deleteTopicTitle') : t('topic.deleteReplyTitle') }}</h2>
+                <p class="mt-1 text-sm leading-6 text-base-content/55">{{ isFirstPost(pendingDeletePost) ? t('topic.deleteTopicDescription') : t('topic.deleteReplyDescription') }}</p>
               </div>
               <button
                 type="button"

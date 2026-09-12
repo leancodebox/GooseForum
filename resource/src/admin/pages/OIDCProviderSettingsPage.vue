@@ -280,7 +280,7 @@ onBeforeUnmount(clearSecret)
 </script>
 
 <template>
-  <BasicPage title="OIDC Provider" :description="adminText('oidcDescription')">
+  <BasicPage :title="adminText('oidcTitle')" :description="adminText('oidcDescription')">
     <template #primary-action>
       <Button size="sm" type="button" @click="openCreate">
         <Plus class="size-4" />
@@ -350,7 +350,7 @@ onBeforeUnmount(clearSecret)
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2">
               <h3 class="truncate text-sm font-semibold">{{ client.name }}</h3>
-              <Badge variant="secondary">{{ client.public ? 'Public' : 'Confidential' }}</Badge>
+              <Badge variant="secondary">{{ client.public ? adminText('oidcPublic') : adminText('oidcConfidential') }}</Badge>
               <Badge :variant="client.enabled ? 'default' : 'outline'">{{ client.enabled ? adminText('oidcEnabled') : adminText('oidcDisabled') }}</Badge>
             </div>
             <p class="mt-1 truncate font-mono text-xs text-muted-foreground">{{ client.clientId }}</p>
@@ -397,11 +397,11 @@ onBeforeUnmount(clearSecret)
             <legend class="text-sm font-medium">{{ adminText('oidcClientType') }}</legend>
             <div class="grid gap-2 sm:grid-cols-2">
               <button type="button" class="rounded-md border p-3 text-left text-sm transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50" :class="!form.public ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'" :disabled="editing" :aria-pressed="!form.public" @click="setPublic(false)">
-                <span class="font-medium">Confidential</span>
+                <span class="font-medium">{{ adminText('oidcConfidential') }}</span>
                 <span class="mt-1 block text-xs text-muted-foreground">{{ adminText('oidcConfidentialHint') }}</span>
               </button>
               <button type="button" class="rounded-md border p-3 text-left text-sm transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50" :class="form.public ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'" :disabled="editing" :aria-pressed="form.public" @click="setPublic(true)">
-                <span class="font-medium">Public</span>
+                <span class="font-medium">{{ adminText('oidcPublic') }}</span>
                 <span class="mt-1 block text-xs text-muted-foreground">{{ adminText('oidcPublicHint') }}</span>
               </button>
             </div>
@@ -485,11 +485,11 @@ onBeforeUnmount(clearSecret)
         </DialogHeader>
         <div class="grid gap-3">
           <div>
-            <p class="mb-1 text-xs font-medium text-muted-foreground">Client ID</p>
+            <p class="mb-1 text-xs font-medium text-muted-foreground">{{ adminText('oidcClientId') }}</p>
             <code class="block overflow-x-auto rounded-md border bg-muted/40 p-3 text-xs">{{ secretClientId }}</code>
           </div>
           <div>
-            <p class="mb-1 text-xs font-medium text-muted-foreground">Client Secret</p>
+            <p class="mb-1 text-xs font-medium text-muted-foreground">{{ adminText('oidcClientSecret') }}</p>
             <div class="flex min-w-0 gap-2">
               <Input :model-value="revealedSecret" readonly class="min-w-0 font-mono text-xs" />
               <Button type="button" size="icon" variant="outline" :title="copied ? adminText('oidcCopied') : adminText('oidcCopySecret')" @click="copySecret">

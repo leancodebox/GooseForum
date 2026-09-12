@@ -113,6 +113,7 @@ function resolveInitialTheme(): SiteTheme {
 
 function applyTheme(theme: SiteTheme) {
   document.documentElement.dataset.theme = theme
+  document.documentElement.style.colorScheme = theme === 'gf-dark' ? 'dark' : 'light'
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColors[theme])
 }
 

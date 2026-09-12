@@ -383,6 +383,8 @@ export default {
     replyCountValue: '{count} replies',
     deleteReplyTitle: 'Delete this reply?',
     deleteReplyDescription: 'After deletion, this reply will be removed from the topic and reply counts will update.',
+    deleteTopicTitle: 'Delete this topic?',
+    deleteTopicDescription: 'The topic will no longer be visible to regular users, but administrators can still see its record.',
     confirmDelete: 'Confirm delete',
     moderationBan: 'Block',
     moderationBanTitle: 'Block this post?',
@@ -822,7 +824,7 @@ export default {
         notAllowed: 'This email domain is not allowed for registration',
       },
       username: {
-        invalid: 'Username may only contain letters, numbers, underscores, and hyphens, 6-32 characters',
+        invalid: 'Username may only contain letters, numbers, underscores, and hyphens, 4-32 characters',
         exists: 'Username already exists',
       },
       email: {

@@ -383,6 +383,8 @@ export default {
     replyCountValue: '{count} 件の返信',
     deleteReplyTitle: 'この返信を削除しますか？',
     deleteReplyDescription: '削除すると、この返信はトピックから削除され、返信数も更新されます。',
+    deleteTopicTitle: 'このトピックを削除しますか？',
+    deleteTopicDescription: '一般ユーザーには表示されなくなりますが、管理者は管理画面で記録を確認できます。',
     confirmDelete: '削除を確定',
     moderationBan: '封禁',
     moderationBanTitle: 'この投稿を封禁しますか？',
@@ -822,7 +824,7 @@ export default {
         notAllowed: 'このメールドメインは登録できません',
       },
       username: {
-        invalid: 'ユーザー名は英数字、アンダースコア、ハイフンのみで、6-32文字にしてください',
+        invalid: 'ユーザー名は英数字、アンダースコア、ハイフンのみで、4-32文字にしてください',
         exists: 'ユーザー名はすでに使われています',
       },
       email: {

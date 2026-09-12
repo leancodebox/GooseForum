@@ -71,7 +71,13 @@ func SaveAdminImgByGinContext(c *gin.Context) {
 
 func saveImgByGinContext(c *gin.Context, adminUpload bool) {
 	userId := c.GetUint64(`userId`)
-	policy, failure := resolveImageUploadPolicy(userId)
+	var policy *imageUploadPolicy
+	var failure *imageUploadFailure
+	if adminUpload {
+		policy, failure = resolveAdminImageUploadPolicy(userId)
+	} else {
+		policy, failure = resolveImageUploadPolicy(userId)
+	}
 	if failure != nil {
 		c.JSON(failure.Status, failure.Data)
 		return

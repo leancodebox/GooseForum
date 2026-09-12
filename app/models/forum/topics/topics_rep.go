@@ -87,6 +87,11 @@ func Get(id uint64) (entity Entity) {
 	return
 }
 
+func GetForAdmin(id uint64) (entity Entity) {
+	builder().Unscoped().First(&entity, id)
+	return
+}
+
 func GetSimple(id any) (entity Entity) {
 	builder().Where(queryopt.Eq("id", id)).First(&entity)
 	return
@@ -379,7 +384,7 @@ func PageForAdmin(q AdminPageQuery) struct {
 	q.Page = max(q.Page-1, 0)
 	q.PageSize = pageutil.BoundPageSize(q.PageSize)
 	queryLimit := q.PageSize + 1
-	b := builder()
+	b := builder().Unscoped()
 	if q.Search != "" {
 		b.Where(queryopt.Like("title", q.Search))
 	}

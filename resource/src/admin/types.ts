@@ -142,6 +142,7 @@ export interface AdminTopic {
   userAvatarUrl?: string | null
   topicStatus: number
   processStatus: number
+  deleted: boolean
   viewCount: number
   replyCount: number
   likeCount: number

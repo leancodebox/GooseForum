@@ -151,10 +151,11 @@ function reviewLabel(status: string) {
   return adminText(`reviewStatus_${status === 'denied' ? 'rejected' : status || 'none'}`)
 }
 function topicStatusInfo(post: AdminTopic) {
+  if (post.deleted) return { label: adminText('topicDeleted'), className: 'bg-muted text-muted-foreground' }
   if (post.topicStatus !== 1 && ['rejected', 'pending', 'denied'].includes(post.moderationStatus)) return { label: reviewLabel(post.moderationStatus), className: 'bg-destructive/10 text-destructive' }
   return post.topicStatus === 1
-    ? { label: adminText('k003q'), className: 'bg-slate-950 text-white' }
-    : { label: adminText('k003r'), className: 'bg-slate-100 text-slate-600' }
+    ? { label: adminText('k003q'), className: 'bg-primary text-primary-foreground' }
+    : { label: adminText('k003r'), className: 'bg-muted text-muted-foreground' }
 }
 
 async function loadPosts() {
@@ -438,6 +439,7 @@ onMounted(() => {
                     </a>
                     <Badge v-if="post.moderationStatus && post.moderationStatus !== 'none'" variant="outline" class="shrink-0" :title="post.moderationReason">{{ reviewLabel(post.moderationStatus) }}</Badge>
                     <Badge v-if="post.processStatus === 1" variant="destructive" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k0069') }}</Badge>
+                    <Badge v-if="post.deleted" variant="outline" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('topicDeleted') }}</Badge>
                     <Badge v-if="post.pinWeight > 0" variant="secondary" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k00ax') }} {{ post.pinWeight }}</Badge>
                   </div>
                   <p class="line-clamp-2 break-words text-[12px] leading-5 text-muted-foreground">
@@ -468,24 +470,24 @@ onMounted(() => {
                     <a :href="`/u/${post.userId}`" target="_blank" rel="noreferrer" class="block truncate text-[13px] font-semibold hover:text-primary hover:underline">
                       {{ post.username }}
                     </a>
-                    <div class="truncate text-xs text-muted-foreground">{{ postDate(post.createdAt) }} {{ postTime(post.createdAt) }} · {{ post.processStatus === 1 ? adminText('k005x') : adminText('k005y') }}</div>
+                    <div class="truncate text-xs text-muted-foreground">{{ postDate(post.createdAt) }} {{ postTime(post.createdAt) }} · {{ post.deleted ? adminText('topicDeleted') : post.processStatus === 1 ? adminText('k005x') : adminText('k005y') }}</div>
                   </div>
                 </div>
                 <div class="flex shrink-0 items-center gap-0.5">
                   <AdminActionButton compact :title="adminText('reviewOpen')" @click="openSource(post)">
                     <FileText class="size-4" />
                   </AdminActionButton>
-                  <AdminActionButton compact :title="adminText('k006d')" @click="openCategoryDialog(post)">
+                  <AdminActionButton v-if="!post.deleted" compact :title="adminText('k006d')" @click="openCategoryDialog(post)">
                     <Tags class="size-4" />
                   </AdminActionButton>
-                  <AdminActionButton compact :tone="post.pinWeight > 0 ? 'primary' : 'default'" :title="adminText('k006e')" @click="openPinDialog(post)">
+                  <AdminActionButton v-if="!post.deleted" compact :tone="post.pinWeight > 0 ? 'primary' : 'default'" :title="adminText('k006e')" @click="openPinDialog(post)">
                     <Pin class="size-4" />
                   </AdminActionButton>
-                  <AdminActionButton compact :tone="post.processStatus === 1 ? 'success' : 'danger'" :title="post.processStatus === 1 ? adminText('k005z') : adminText('k0060')" @click="actionRow = post">
+                  <AdminActionButton v-if="!post.deleted" compact :tone="post.processStatus === 1 ? 'success' : 'danger'" :title="post.processStatus === 1 ? adminText('k005z') : adminText('k0060')" @click="actionRow = post">
                     <Undo2 v-if="post.processStatus === 1" class="size-4" />
                     <Ban v-else class="size-4" />
                   </AdminActionButton>
-                  <AdminActionButton compact tone="danger" :title="adminText('k005i')" @click="deleteRow = post">
+                  <AdminActionButton v-if="!post.deleted" compact tone="danger" :title="adminText('k005i')" @click="deleteRow = post">
                     <Trash2 class="size-4" />
                   </AdminActionButton>
                 </div>
@@ -556,7 +558,7 @@ onMounted(() => {
                         {{ topicStatusInfo(post).label }}
                       </span>
                       <span class="text-[11px]" :class="post.processStatus === 1 ? 'text-destructive' : 'text-muted-foreground'">
-                        {{ post.processStatus === 1 ? adminText('k005x') : adminText('k005y') }}
+                        {{ post.deleted ? adminText('topicDeleted') : post.processStatus === 1 ? adminText('k005x') : adminText('k005y') }}
                       </span>
                     </div>
                   </TableCell>
@@ -565,17 +567,17 @@ onMounted(() => {
                       <AdminActionButton compact :title="adminText('reviewOpen')" @click="openSource(post)">
                         <FileText class="size-4" />
                       </AdminActionButton>
-                      <AdminActionButton compact :title="adminText('k006d')" @click="openCategoryDialog(post)">
+                      <AdminActionButton v-if="!post.deleted" compact :title="adminText('k006d')" @click="openCategoryDialog(post)">
                         <Tags class="size-4" />
                       </AdminActionButton>
-                      <AdminActionButton compact :tone="post.pinWeight > 0 ? 'primary' : 'default'" :title="adminText('k006e')" @click="openPinDialog(post)">
+                      <AdminActionButton v-if="!post.deleted" compact :tone="post.pinWeight > 0 ? 'primary' : 'default'" :title="adminText('k006e')" @click="openPinDialog(post)">
                         <Pin class="size-4" />
                       </AdminActionButton>
-                      <AdminActionButton compact :tone="post.processStatus === 1 ? 'success' : 'danger'" :title="post.processStatus === 1 ? adminText('k005z') : adminText('k0060')" @click="actionRow = post">
+                      <AdminActionButton v-if="!post.deleted" compact :tone="post.processStatus === 1 ? 'success' : 'danger'" :title="post.processStatus === 1 ? adminText('k005z') : adminText('k0060')" @click="actionRow = post">
                         <Undo2 v-if="post.processStatus === 1" class="size-4" />
                         <Ban v-else class="size-4" />
                       </AdminActionButton>
-                      <AdminActionButton compact tone="danger" :title="adminText('k005i')" @click="deleteRow = post">
+                      <AdminActionButton v-if="!post.deleted" compact tone="danger" :title="adminText('k005i')" @click="deleteRow = post">
                         <Trash2 class="size-4" />
                       </AdminActionButton>
                     </div>

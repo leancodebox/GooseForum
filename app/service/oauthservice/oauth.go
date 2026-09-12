@@ -190,7 +190,7 @@ func oauthUsername(userInfo OAuthUserInfo) string {
 	if len(base) > 23 {
 		base = base[:23]
 	}
-	if len(base) < 6 {
+	if len(base) < 4 {
 		base += "_" + digest
 	}
 	return base

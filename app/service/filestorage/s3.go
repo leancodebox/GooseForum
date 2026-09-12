@@ -24,6 +24,7 @@ const (
 
 type S3Config struct {
 	Endpoint     string
+	PublicURL    string
 	Bucket       string
 	AccessKey    string
 	SecretKey    string
@@ -56,6 +57,9 @@ func NewS3Store(config S3Config) (*S3Store, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := validateS3PublicURL(config.PublicURL); err != nil {
+		return nil, err
+	}
 	bucket := strings.TrimSpace(config.Bucket)
 	if bucket == "" {
 		return nil, errors.New("s3 bucket is required")
@@ -80,6 +84,21 @@ func NewS3Store(config S3Config) (*S3Store, error) {
 		return nil, fmt.Errorf("create s3 client: %w", err)
 	}
 	return newS3Store(&minioS3Client{client: client, bucket: bucket}), nil
+}
+
+func validateS3PublicURL(raw string) error {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil
+	}
+	parsed, err := url.Parse(raw)
+	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
+		return errors.New("s3 public URL must be a complete http or https URL")
+	}
+	if parsed.RawQuery != "" || parsed.Fragment != "" {
+		return errors.New("s3 public URL must not contain a query or fragment")
+	}
+	return nil
 }
 
 func newS3Store(client s3Client) *S3Store {

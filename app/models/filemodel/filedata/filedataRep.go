@@ -9,17 +9,19 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 )
 
 type FileResource struct {
-	Id        uint64    `json:"id"`
-	Name      string    `json:"name"`
-	Type      string    `json:"type"`
-	Size      int64     `json:"size"`
-	UserId    uint64    `json:"userId"`
-	CreatedAt time.Time `json:"createdAt"`
-	URL       string    `json:"url"`
-	Data      []byte    `json:"-"`
+	Id            uint64    `json:"id"`
+	Name          string    `json:"name"`
+	Type          string    `json:"type"`
+	Size          int64     `json:"size"`
+	StorageDriver string    `json:"storageDriver"`
+	UserId        uint64    `json:"userId"`
+	CreatedAt     time.Time `json:"createdAt"`
+	URL           string    `json:"url"`
+	Data          []byte    `json:"-"`
 }
 
 type FileResourcePageResult struct {
@@ -195,7 +197,7 @@ func FileResourcePage(page, pageSize int) FileResourcePageResult {
 	var list []FileResource
 	builder().
 		Where("storage_status = ?", StorageStatusReady).
-		Select("id, name, assert_type AS type, CASE WHEN file_size > 0 THEN file_size ELSE LENGTH(content) END AS size, user_id, created_at").
+		Select("id, name, assert_type AS type, CASE WHEN file_size > 0 THEN file_size ELSE LENGTH(content) END AS size, storage_driver, user_id, created_at").
 		Order("id DESC").
 		Offset((page - 1) * pageSize).
 		Limit(pageSize).
@@ -207,7 +209,7 @@ func FileResourcePage(page, pageSize int) FileResourcePageResult {
 }
 
 func (itself FileResource) GetAccessPath() string {
-	return accessPath(itself.Name)
+	return urlconfig.StoredFilePath(itself.StorageDriver, itself.Name)
 }
 
 // CountDailyUploads returns the number of files uploaded by a user today.

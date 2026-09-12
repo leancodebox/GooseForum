@@ -15,6 +15,7 @@ func ConfigureFromPreferences() error {
 	case S3Driver:
 		store, err := NewS3Store(S3Config{
 			Endpoint:     preferences.GetString("storage.s3.endpoint"),
+			PublicURL:    preferences.GetString("storage.s3.publicUrl"),
 			Bucket:       preferences.GetString("storage.s3.bucket"),
 			AccessKey:    preferences.GetString("storage.s3.accessKey"),
 			SecretKey:    preferences.GetString("storage.s3.secretKey"),

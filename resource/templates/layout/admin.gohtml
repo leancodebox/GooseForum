@@ -1,15 +1,17 @@
 {{define "layout/admin.gohtml"}}
 <!DOCTYPE html>
-<html lang="{{.Lang}}" data-goose-admin>
+<html lang="{{.Lang}}" data-goose-admin data-theme="{{.Payload.Layout.Theme.Current}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="{{.Payload.Layout.Theme.ThemeColor}}" data-goose-theme-color>
     <title>{{.Payload.Meta.Title}}</title>
     {{if .Payload.Meta.Robots}}<meta name="robots" content="{{.Payload.Meta.Robots}}">{{end}}
     {{if .Payload.Layout.Site.Favicon}}<link rel="icon" href="{{ResourceAsset .Payload.Layout.Site.Favicon}}">{{end}}
     {{ResourceEntry `src/admin/main.ts`}}
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased">
+<body class="antialiased">
     <script id="goose-payload" type="application/json">{{json .Payload}}</script>
     <div id="goose-admin-app"></div>
     <noscript>

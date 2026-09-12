@@ -43,10 +43,11 @@ function responseMessage(data: ApiEnvelope<unknown>, fallback: string) {
 }
 
 async function readApiResponse<T>(response: Response, fallback: string): Promise<T> {
+  const data = await response.json().catch(() => null) as ApiEnvelope<T> | null
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`)
+    throw new Error(data ? responseMessage(data, fallback) : `HTTP ${response.status}`)
   }
-  const data = (await response.json()) as ApiEnvelope<T>
+  if (!data) throw new Error(fallback)
   if (data.code !== undefined && data.code !== 0) {
     throw new Error(responseMessage(data, fallback))
   }

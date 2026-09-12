@@ -25,8 +25,22 @@ type imageUploadFailure struct {
 }
 
 func resolveImageUploadPolicy(userId uint64) (*imageUploadPolicy, *imageUploadFailure) {
+	return resolveImageUploadPolicyFor(userId, false)
+}
+
+func resolveAdminImageUploadPolicy(userId uint64) (*imageUploadPolicy, *imageUploadFailure) {
+	return resolveImageUploadPolicyFor(userId, true)
+}
+
+func resolveImageUploadPolicyFor(userId uint64, adminUpload bool) (*imageUploadPolicy, *imageUploadFailure) {
 	if userId == 0 {
 		return nil, uploadFailure(http.StatusUnauthorized, component.MessageAuthRequired, nil)
+	}
+	if adminUpload {
+		return &imageUploadPolicy{
+			MaxSize:     int64(filestorage.MaxFileSize),
+			AllowedExts: []string{".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"},
+		}, nil
 	}
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
 	userEntity, _ := users.Get(userId)

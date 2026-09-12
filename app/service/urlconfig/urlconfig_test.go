@@ -66,6 +66,19 @@ func TestFilePath(t *testing.T) {
 	}
 }
 
+func TestStoredFilePathUsesS3PublicURLOnlyForS3Objects(t *testing.T) {
+	old := preferences.GetString("storage.s3.publicUrl")
+	preferences.Set("storage.s3.publicUrl", "https://files.example.com/forum/")
+	t.Cleanup(func() { preferences.Set("storage.s3.publicUrl", old) })
+
+	if got := StoredFilePath("s3", "2026/09/image.webp"); got != "https://files.example.com/forum/2026/09/image.webp" {
+		t.Fatalf("S3 file path = %q", got)
+	}
+	if got := StoredFilePath("database", "2026/09/image.webp"); got != "/file/img/2026/09/image.webp" {
+		t.Fatalf("database file path = %q", got)
+	}
+}
+
 func TestCategoryEscapesSlug(t *testing.T) {
 	if got := Category("吐槽/脑洞", 8); got != "/c/%E5%90%90%E6%A7%BD%2F%E8%84%91%E6%B4%9E/8" {
 		t.Fatalf("Category = %q", got)
