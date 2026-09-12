@@ -845,10 +845,7 @@ func buildTrackedTopicPayloads(userID uint64, topics []*vo.TopicsSimpleVo) []Top
 }
 
 func buildLoginPageProps(c *gin.Context) LoginPageProps {
-	mode := "login"
-	if c.Query("register") == "true" || c.Query("model") == "register" {
-		mode = "register"
-	}
+	mode := loginInitialMode(c)
 	redirectURL := redirectopt.Local(c.Query("redirect"))
 	providers := oauthservice.EnabledProviders()
 	if c.Query("force") == "true" {
@@ -867,6 +864,17 @@ func buildLoginPageProps(c *gin.Context) LoginPageProps {
 	return LoginPageProps{
 		InitialMode: mode, RedirectURL: redirectURL, OAuthProviders: providerPayloads,
 	}
+}
+
+func loginInitialMode(c *gin.Context) string {
+	mode := c.Query("mode")
+	if mode == "forgot" || c.Query("forgot") == "true" || c.Query("model") == "forgot" {
+		return "forgot"
+	}
+	if mode == "register" || c.Query("register") == "true" || c.Query("model") == "register" {
+		return "register"
+	}
+	return "login"
 }
 
 func buildHomeTabs(sort string) []TabPayload {

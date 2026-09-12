@@ -654,6 +654,9 @@ export default {
       currentPassword: '当前密码',
       passwordHint: '至少 6 个字符。',
       changePassword: '修改密码',
+      forgotPasswordTitle: '忘记了当前密码？',
+      forgotPasswordDescription: '可以通过注册邮箱验证身份。我们会发送一封带有安全重置链接的邮件。',
+      resetByEmail: '通过邮箱重置密码',
     },
     privacy: {
       title: '隐私偏好',

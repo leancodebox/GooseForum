@@ -98,7 +98,7 @@ func Publish(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-	if component.LoginUserId(c) > 0 && c.Query("force") != "true" {
+	if component.LoginUserId(c) > 0 && c.Query("force") != "true" && loginInitialMode(c) != "forgot" {
 		c.Redirect(http.StatusFound, "/")
 		return
 	}

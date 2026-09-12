@@ -863,21 +863,30 @@ async function toggleBinding(provider: string) {
             <form class="max-w-xl space-y-4 p-4" @submit.prevent="submitPassword">
               <label class="block">
                 <span class="text-sm font-medium text-base-content/75">{{ t('settings.account.currentPassword') }}</span>
-                <input v-model="passwordForm.oldPassword" required type="password" class="gf-input mt-1" />
+                <input v-model="passwordForm.oldPassword" required type="password" autocomplete="current-password" class="gf-input mt-1" />
               </label>
               <label class="block">
                 <span class="text-sm font-medium text-base-content/75">{{ t('auth.newPassword') }}</span>
-                <input v-model="passwordForm.newPassword" required type="password" class="gf-input mt-1" />
+                <input v-model="passwordForm.newPassword" required type="password" autocomplete="new-password" class="gf-input mt-1" />
                 <span class="mt-1 block text-xs text-base-content/55">{{ t('settings.account.passwordHint') }}</span>
               </label>
               <label class="block">
                 <span class="text-sm font-medium text-base-content/75">{{ t('auth.confirmPassword') }}</span>
-                <input v-model="passwordForm.confirmPassword" required type="password" class="gf-input mt-1" />
+                <input v-model="passwordForm.confirmPassword" required type="password" autocomplete="new-password" class="gf-input mt-1" />
               </label>
               <button type="submit" class="gf-button gf-button-lg gf-button-primary disabled:cursor-wait" :disabled="savingPassword">
                 <Loader2 v-if="savingPassword" class="h-4 w-4 animate-spin" />
                 {{ t('settings.account.changePassword') }}
               </button>
+
+              <div class="border-t border-line pt-4">
+                <p class="text-sm font-semibold text-base-content">{{ t('settings.account.forgotPasswordTitle') }}</p>
+                <p class="mt-1 text-sm leading-6 text-base-content/55">{{ t('settings.account.forgotPasswordDescription') }}</p>
+                <a href="/login?mode=forgot" class="gf-button gf-button-lg gf-button-ghost mt-3">
+                  <Mail class="h-4 w-4" />
+                  {{ t('settings.account.resetByEmail') }}
+                </a>
+              </div>
             </form>
           </section>
 

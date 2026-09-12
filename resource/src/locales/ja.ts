@@ -654,6 +654,9 @@ export default {
       currentPassword: '現在のパスワード',
       passwordHint: '6文字以上。',
       changePassword: 'パスワードを変更',
+      forgotPasswordTitle: '現在のパスワードを忘れましたか？',
+      forgotPasswordDescription: '登録メールアドレスで本人確認できます。安全なパスワード再設定リンクをメールで送信します。',
+      resetByEmail: 'メールでパスワードを再設定',
     },
     privacy: {
       title: 'プライバシー設定',

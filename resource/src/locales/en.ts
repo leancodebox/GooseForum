@@ -654,6 +654,9 @@ export default {
       currentPassword: 'Current password',
       passwordHint: 'At least 6 characters.',
       changePassword: 'Change password',
+      forgotPasswordTitle: 'Forgot your current password?',
+      forgotPasswordDescription: 'Verify your identity with your registered email. We will send you a secure password reset link.',
+      resetByEmail: 'Reset password by email',
     },
     privacy: {
       title: 'Privacy preferences',
