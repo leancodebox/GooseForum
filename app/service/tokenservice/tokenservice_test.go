@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
@@ -63,7 +64,7 @@ func TestGenerateActivationTokenByUser(t *testing.T) {
 func TestPasswordResetTokenLifecycle(t *testing.T) {
 	withAppSigningKey(t, "password-reset-test-key")
 
-	token, err := GeneratePasswordResetToken(34, "reset@example.com")
+	token, err := GeneratePasswordResetToken(34, "reset@example.com", 7)
 	if err != nil {
 		t.Fatalf("GeneratePasswordResetToken failed: %v", err)
 	}
@@ -78,8 +79,31 @@ func TestPasswordResetTokenLifecycle(t *testing.T) {
 	if claims.Email != "reset@example.com" {
 		t.Fatalf("Email = %q, want reset@example.com", claims.Email)
 	}
+	if claims.TokenVersion == nil || *claims.TokenVersion != 7 {
+		t.Fatalf("TokenVersion = %v, want 7", claims.TokenVersion)
+	}
 	if claims.ExpiresAt == nil || time.Until(claims.ExpiresAt.Time) <= 29*time.Minute {
 		t.Fatalf("password reset token expiry should be close to 30m, got %v", claims.ExpiresAt)
+	}
+}
+
+func TestPasswordResetTokenRejectsMissingTokenVersion(t *testing.T) {
+	withAppSigningKey(t, "password-reset-version-test-key")
+
+	legacyToken := jwt.NewWithClaims(jwt.SigningMethodHS256, PasswordResetClaims{
+		UserId: 34,
+		Email:  "reset@example.com",
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)),
+		},
+	})
+	tokenString, err := legacyToken.SignedString(signingKey())
+	if err != nil {
+		t.Fatalf("sign legacy password reset token: %v", err)
+	}
+
+	if _, err = ParsePasswordResetToken(tokenString); err == nil {
+		t.Fatal("expected password reset token without token version to be rejected")
 	}
 }
 

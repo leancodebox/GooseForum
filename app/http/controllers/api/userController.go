@@ -524,7 +524,7 @@ func ForgotPassword(req component.BetterRequest[ForgotPasswordReq]) component.Re
 		return component.SuccessResponseCode("操作成功：如果该邮箱已注册，您将收到密码重置邮件", component.MessageAuthResetMailQueued, nil)
 	}
 
-	token, err := tokenservice.GeneratePasswordResetToken(userEntity.Id, userEntity.Email)
+	token, err := tokenservice.GeneratePasswordResetToken(userEntity.Id, userEntity.Email, userEntity.TokenVersion)
 	if err != nil {
 		return component.FailResponseCode(component.MessageAuthResetTokenCreateFailed, nil)
 	}
@@ -562,7 +562,7 @@ func ResetPassword(req component.BetterRequest[ResetPasswordReq]) component.Resp
 		return component.FailResponseCode(component.MessageUserNotFound, nil)
 	}
 
-	if userEntity.Email != claims.Email {
+	if userEntity.Email != claims.Email || claims.TokenVersion == nil || userEntity.TokenVersion != *claims.TokenVersion {
 		return component.FailResponseCode(component.MessageAuthResetTokenInvalid, nil)
 	}
 

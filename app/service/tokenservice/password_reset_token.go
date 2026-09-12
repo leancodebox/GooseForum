@@ -8,18 +8,20 @@ import (
 
 // PasswordResetClaims is the JWT payload used for password reset links.
 type PasswordResetClaims struct {
-	UserId uint64 `json:"userId"`
-	Email  string `json:"email"`
+	UserId       uint64  `json:"userId"`
+	Email        string  `json:"email"`
+	TokenVersion *uint64 `json:"tokenVersion"`
 	jwt.RegisteredClaims
 }
 
 // GeneratePasswordResetToken creates a signed password reset token.
-func GeneratePasswordResetToken(userId uint64, email string) (string, error) {
+func GeneratePasswordResetToken(userId uint64, email string, tokenVersion uint64) (string, error) {
 	claims := PasswordResetClaims{
-		UserId:    userId,
-		Email:     email,
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)),
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		UserId:       userId,
+		Email:        email,
+		TokenVersion: &tokenVersion,
+		ExpiresAt:    jwt.NewNumericDate(time.Now().Add(30 * time.Minute)),
+		IssuedAt:     jwt.NewNumericDate(time.Now()),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -37,6 +39,9 @@ func ParsePasswordResetToken(tokenString string) (*PasswordResetClaims, error) {
 	}
 
 	if claims, ok := token.Claims.(*PasswordResetClaims); ok && token.Valid {
+		if claims.TokenVersion == nil {
+			return nil, jwt.ErrTokenInvalidClaims
+		}
 		return claims, nil
 	}
 
