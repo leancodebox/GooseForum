@@ -75,7 +75,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
       {{ t('topic.replyTargetUnavailable') }}
     </div>
     <template v-else>
-      <blockquote :cite="sourceURL" class="m-0 px-3 pt-2">
+      <blockquote :cite="sourceURL" class="reply-reference-quote m-0 px-3 pt-2">
         <div
           ref="contentEl"
           class="gf-prose gf-prose-post"
@@ -103,6 +103,15 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 </template>
 
 <style scoped>
+.reply-reference-quote {
+  quotes: none;
+}
+
+.reply-reference-quote :deep(p:first-of-type::before),
+.reply-reference-quote :deep(p:last-of-type::after) {
+  content: none !important;
+}
+
 .reply-reference-content--collapsed {
   max-height: 4lh;
   overflow: hidden;
