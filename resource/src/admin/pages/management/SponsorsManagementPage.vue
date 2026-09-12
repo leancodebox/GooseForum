@@ -203,19 +203,16 @@ onMounted(() => {
 <template>
   <BasicPage :title="adminText('k004o')" :description="adminText('k004p')">
     <template #primary-action>
+      <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadSponsors">
+        <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
+        {{ adminText('k004q') }}
+      </Button>
       <Button size="sm" type="button" :disabled="saving" @click="persist">
         <Loader2 v-if="saving" class="size-4 animate-spin" />
         <Save v-else class="size-4" />
         {{ adminText('k004f') }}
       </Button>
     </template>
-
-      <div class="mb-3 flex justify-end">
-        <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadSponsors">
-          <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
-          {{ adminText('k004q') }}
-        </Button>
-      </div>
 
       <div v-if="loading && !loaded" class="flex h-64 items-center justify-center rounded-lg border">
         <Loader2 class="size-8 animate-spin text-primary" />

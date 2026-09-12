@@ -22,11 +22,18 @@ if (!hasParentLayout) {
 
 <template>
   <slot v-if="hasParentLayout" />
-  <SidebarProvider v-else>
-    <AppSidebar :layout="layout" />
-    <SidebarInset class="min-w-0 max-w-full peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)] peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]">
+  <SidebarProvider
+    v-else
+    class="admin-shell"
+    :style="{
+      '--sidebar-width': '18rem',
+      '--header-height': '3rem',
+    }"
+  >
+    <AppSidebar :layout="layout" variant="inset" />
+    <SidebarInset class="min-w-0 max-w-full overflow-hidden border-sidebar-border/70 md:rounded-2xl md:border">
       <AdminTopbar :layout="layout" />
-      <div class="min-w-0 grow p-4">
+      <div class="@container/main flex min-w-0 grow flex-col overflow-x-hidden">
         <slot />
       </div>
     </SidebarInset>

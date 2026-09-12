@@ -40,16 +40,22 @@ import {
 import { RouterLink, useRoute } from 'vue-router'
 import type { LayoutPayload } from '@gooseforum/client'
 import type { LucideIcon } from '@lucide/vue'
+import type { SidebarProps } from '@/admin/components/ui/sidebar'
 import { useI18n } from 'vue-i18n'
 import { AdminPermission, hasAnyAdminPermission } from '@/admin/runtime/access'
 
-defineProps<{
+const props = withDefaults(defineProps<{
   layout: LayoutPayload
-}>()
+  variant?: SidebarProps['variant']
+}>(), {
+  variant: 'sidebar',
+})
 
 const route = useRoute()
 const { locale, t } = useI18n()
 const currentPath = computed(() => route.path.replace(/\/+$/, '') || '/admin')
+const siteLogo = computed(() => props.layout.site.logo || props.layout.site.brandImage || props.layout.site.favicon)
+const viewerInitials = computed(() => (props.layout.viewer.username || 'A').slice(0, 2).toUpperCase())
 
 interface NavItem {
   title: string
@@ -164,24 +170,28 @@ function isActive(item: NavItem) {
 </script>
 
 <template>
-  <Sidebar collapsible="icon" class="z-50">
-    <SidebarHeader>
+  <Sidebar :variant="variant" collapsible="offcanvas" class="z-50">
+    <SidebarHeader class="px-2 pt-2">
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton
             as-child
             size="lg"
-            class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            class="h-10 px-2 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
             <a href="/" target="_blank" rel="noopener noreferrer" :title="adminText('k007s')">
-              <div
-                class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
-              >
-                <GalleryVerticalEnd class="size-4" />
+              <div class="flex aspect-square size-8 items-center justify-center overflow-hidden rounded-full border border-sidebar-border bg-background text-foreground shadow-xs">
+                <img
+                  v-if="siteLogo"
+                  :src="siteLogo"
+                  :alt="layout.site.name || 'GooseForum'"
+                  class="size-full rounded-full object-cover"
+                />
+                <GalleryVerticalEnd v-else class="size-4.5" />
               </div>
               <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-semibold">{{ layout.site.name || 'GooseForum' }}</span>
-                <span class="truncate text-xs">Admin</span>
+                <span class="truncate text-base font-semibold tracking-tight">{{ layout.site.name || 'GooseForum' }}</span>
+                <span class="truncate text-[11px] text-muted-foreground">Admin Console</span>
               </div>
             </a>
           </SidebarMenuButton>
@@ -189,12 +199,17 @@ function isActive(item: NavItem) {
       </SidebarMenu>
     </SidebarHeader>
 
-    <SidebarContent class="gap-0">
-      <SidebarGroup v-for="group in navGroups" :key="group.title" class="py-1">
-        <SidebarGroupLabel class="h-7">{{ group.title }}</SidebarGroupLabel>
-        <SidebarMenu>
+    <SidebarContent class="gap-2 px-1 py-1">
+      <SidebarGroup v-for="(group, groupIndex) in navGroups" :key="group.title" class="py-0">
+        <SidebarGroupLabel v-if="groupIndex > 0" class="h-8 px-2 text-xs font-medium">{{ group.title }}</SidebarGroupLabel>
+        <SidebarMenu class="gap-1">
           <SidebarMenuItem v-for="item in group.items" :key="item.title">
-            <SidebarMenuButton as-child :is-active="isActive(item)" :tooltip="item.title">
+            <SidebarMenuButton
+              as-child
+              :is-active="isActive(item)"
+              :tooltip="item.title"
+              class="h-8 rounded-lg px-2 text-[13px] font-medium data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:shadow-xs"
+            >
               <a v-if="item.external" :href="item.url" target="_blank" rel="noopener noreferrer">
                 <component :is="item.icon" />
                 <span>{{ item.title }}</span>
@@ -210,16 +225,16 @@ function isActive(item: NavItem) {
       </SidebarGroup>
     </SidebarContent>
 
-    <SidebarFooter>
+    <SidebarFooter class="px-2 pb-2">
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg">
-            <Avatar class="size-8 rounded-lg">
-              <AvatarImage :src="layout.viewer.avatarUrl" :alt="layout.viewer.username || 'admin'" />
-              <AvatarFallback class="rounded-lg">CN</AvatarFallback>
+          <SidebarMenuButton size="lg" class="h-11 rounded-xl border border-transparent px-2 hover:border-sidebar-border hover:bg-sidebar-accent">
+            <Avatar class="size-8 rounded-full">
+              <AvatarImage class="object-cover" :src="layout.viewer.avatarUrl" :alt="layout.viewer.username || 'admin'" />
+              <AvatarFallback class="rounded-full">{{ viewerInitials }}</AvatarFallback>
             </Avatar>
             <div class="grid flex-1 text-left text-sm leading-tight">
-              <span class="truncate font-semibold">{{ layout.viewer.username || 'shadcn' }}</span>
+              <span class="truncate font-semibold">{{ layout.viewer.username || 'Admin' }}</span>
               <span class="truncate text-xs">{{ layout.viewer.email || adminText('k007x') }}</span>
             </div>
           </SidebarMenuButton>

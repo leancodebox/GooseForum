@@ -33,7 +33,7 @@ func TestAdminLayoutRendersSharedTheme(t *testing.T) {
 	payload := PagePayload{
 		Layout: LayoutPayload{
 			Site:  SitePayload{Name: "GooseForum"},
-			Theme: ThemePayload{Current: "gf-dark", ThemeColor: "#101010"},
+			Theme: ThemePayload{Current: "gf-dark", Href: "/site-theme.css?v=test", ThemeColor: "#101010"},
 		},
 		Meta: PageMeta{Title: "Admin"},
 	}
@@ -47,6 +47,9 @@ func TestAdminLayoutRendersSharedTheme(t *testing.T) {
 	}
 	if !strings.Contains(out, `name="theme-color" content="#101010"`) {
 		t.Fatalf("admin layout missing shared theme color: %s", out)
+	}
+	if !strings.Contains(out, `id="goose-site-theme-link" rel="stylesheet" href="/site-theme.css?v=test"`) {
+		t.Fatalf("admin layout missing shared theme stylesheet: %s", out)
 	}
 }
 

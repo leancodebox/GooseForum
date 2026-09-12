@@ -260,7 +260,7 @@ onMounted(() => void loadOverview())
     </div>
 
     <div class="grid items-start gap-4 xl:grid-cols-[15rem_minmax(0,1fr)]">
-      <AdminSection class="xl:sticky xl:top-[5.5rem]" body-class="p-4">
+      <AdminSection body-class="p-4">
         <header class="border-b pb-3">
           <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-2 text-sm font-semibold">

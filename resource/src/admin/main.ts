@@ -7,9 +7,12 @@ import { readAdminPayload } from '@/admin/runtime/payload'
 import { adminRouter } from '@/admin/runtime/router'
 import { i18n } from '@/runtime/i18n'
 import { configureAdminAccess } from '@/admin/runtime/access'
+import { applySiteThemePayload, applyStoredTheme } from '@/runtime/site-theme'
 
 const payload = readAdminPayload()
 configureAdminAccess(payload.layout.viewer.adminPermissions)
+applySiteThemePayload(payload.layout.theme)
+applyStoredTheme()
 
 document.documentElement.lang = document.documentElement.lang || 'zh-CN'
 

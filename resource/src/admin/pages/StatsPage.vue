@@ -3,6 +3,14 @@
 import { FileText, Link as LinkIcon, MessageSquare, Users } from '@lucide/vue'
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import AdminSection from '@/admin/components/AdminSection.vue'
+import { Badge } from '@/admin/components/ui/badge'
+import {
+  Card,
+  CardAction,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/admin/components/ui/card'
 import { BasicPage } from '@/admin/components/global-layout'
 import {
   getGithubReleases,
@@ -175,29 +183,30 @@ onMounted(() => {
       </div>
     </template>
 
-      <AdminSection class="mb-4">
-        <div class="grid sm:grid-cols-2 xl:grid-cols-4">
-        <div
-          v-for="(item, index) in summaryItems"
+      <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 @5xl/main:grid-cols-4">
+        <Card
+          v-for="item in summaryItems"
           :key="item.label"
-          class="flex min-h-20 items-center justify-between border-b px-4 py-3 text-card-foreground sm:[&:nth-child(2n+1)]:border-r xl:border-b-0 xl:border-r xl:last:border-r-0"
-          :class="index >= 2 ? 'sm:border-b-0' : ''"
+          class="@container/card min-h-32 gap-3 bg-gradient-to-t from-primary/5 to-card py-4 shadow-xs"
         >
-          <div class="min-w-0">
-            <div class="mb-2 flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground">
-              <component :is="item.icon" class="h-4 w-4" />
-              <span>{{ item.label }}</span>
-            </div>
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-2xl font-bold leading-none tracking-tight">{{ formatNumber(item.value) }}</span>
-              <span v-if="item.delta" class="text-xs font-medium text-muted-foreground">{{ item.delta }}</span>
-            </div>
-          </div>
-        </div>
-        </div>
-      </AdminSection>
+          <CardHeader class="gap-2.5 px-4">
+            <CardDescription class="flex items-center gap-2 font-medium">
+              <component :is="item.icon" class="size-4" />
+              {{ item.label }}
+            </CardDescription>
+            <CardTitle class="text-3xl font-semibold tabular-nums tracking-tight">
+              {{ formatNumber(item.value) }}
+            </CardTitle>
+            <CardAction>
+              <Badge v-if="item.delta" variant="outline" class="bg-background/70 tabular-nums">
+                {{ item.delta }}
+              </Badge>
+            </CardAction>
+          </CardHeader>
+        </Card>
+      </div>
 
-      <div class="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div class="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div class="min-w-0 min-h-110">
           <TrafficOverview :data="traffic" :loading="trafficLoading">
             <template #headerAction>

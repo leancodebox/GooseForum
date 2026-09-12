@@ -10,6 +10,7 @@
     {{if .Payload.Meta.Robots}}<meta name="robots" content="{{.Payload.Meta.Robots}}">{{end}}
     {{if .Payload.Layout.Site.Favicon}}<link rel="icon" href="{{ResourceAsset .Payload.Layout.Site.Favicon}}">{{end}}
     {{ResourceEntry `src/admin/main.ts`}}
+    {{if .Payload.Layout.Theme.Href}}<link id="goose-site-theme-link" rel="stylesheet" href="{{.Payload.Layout.Theme.Href}}">{{end}}
 </head>
 <body class="antialiased">
     <script id="goose-payload" type="application/json">{{json .Payload}}</script>

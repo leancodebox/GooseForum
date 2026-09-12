@@ -26,9 +26,9 @@ function switchLocale(nextLocale: Locale) {
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 flex h-[4.5rem] shrink-0 items-center gap-3 border-b bg-background/95 px-4 text-foreground backdrop-blur transition-[width,height] ease-linear supports-[backdrop-filter]:bg-background/85 sm:gap-4">
+  <header class="sticky top-0 z-40 flex h-(--header-height) shrink-0 items-center gap-1 border-b bg-background/92 px-3 text-foreground backdrop-blur transition-[width,height] ease-linear supports-[backdrop-filter]:bg-background/80 lg:gap-2 lg:px-4">
     <SidebarTrigger class="-ml-1 size-8 shrink-0" />
-    <Separator orientation="vertical" class="h-8 shrink-0" />
+    <Separator orientation="vertical" class="mx-2 h-4 shrink-0" />
 
     <div id="admin-topbar-page-context" class="min-w-0 flex-1" />
 
@@ -37,7 +37,7 @@ function switchLocale(nextLocale: Locale) {
       class="flex max-w-[48vw] shrink-0 items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     />
 
-    <div class="ml-auto flex shrink-0 items-center gap-2">
+    <div class="ml-auto flex shrink-0 items-center gap-1">
       <Button
         size="icon-sm"
         variant="ghost"
@@ -52,6 +52,7 @@ function switchLocale(nextLocale: Locale) {
       <div class="relative hidden lg:block">
         <Button
           size="icon-sm"
+          variant="ghost"
           type="button"
           :aria-label="t('shell.switchLanguage')"
           :title="t('shell.switchLanguage')"
@@ -77,18 +78,12 @@ function switchLocale(nextLocale: Locale) {
           </Button>
         </div>
       </div>
-      <Button as-child size="sm" class="hidden xl:inline-flex">
+      <Button as-child size="sm" variant="ghost" class="hidden xl:inline-flex">
         <a href="/">
           <ArrowLeft class="size-4" />
           {{ adminText('k007y') }}
         </a>
       </Button>
-      <img
-        v-if="layout.viewer.isAuthenticated"
-        :src="layout.viewer.avatarUrl"
-        :alt="layout.viewer.username"
-        class="hidden size-8 rounded-full object-cover sm:block"
-      />
     </div>
   </header>
 </template>

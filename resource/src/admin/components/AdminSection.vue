@@ -9,8 +9,8 @@ const props = defineProps<{
 </script>
 
 <template>
-  <section :class="cn('overflow-hidden rounded-lg border bg-card text-card-foreground', props.class)">
-    <div v-if="$slots.header" class="border-b bg-muted/20 px-3 py-2">
+  <section :class="cn('overflow-hidden rounded-xl border bg-card text-card-foreground shadow-xs', props.class)">
+    <div v-if="$slots.header" class="border-b px-4 py-3">
       <slot name="header" />
     </div>
     <div :class="cn(props.bodyClass)">
