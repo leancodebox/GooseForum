@@ -1,6 +1,10 @@
 package api
 
 import (
+	"context"
+	"fmt"
+	"testing"
+
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
@@ -8,10 +12,33 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/sensitiveWord"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
+	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/sensitivewordservice"
-	"testing"
 )
+
+type contentReviewJob struct {
+	topic       bool
+	id, version uint64
+}
+
+func runContentReview(job contentReviewJob) error {
+	event := &eventhandlers.ContentReviewRequestedEvent{Topic: job.topic, ID: job.id, Version: job.version}
+	for _, handler := range eventhandlers.Handlers() {
+		if _, ok := handler.NewEvent().(*eventhandlers.ContentReviewRequestedEvent); ok {
+			return handler.Handle(context.Background(), event)
+		}
+	}
+	return fmt.Errorf("content review event handler is not registered")
+}
+
+func runPendingTopicReview(t *testing.T, id uint64) {
+	t.Helper()
+	topic := topics.Get(id)
+	if err := runContentReview(contentReviewJob{topic: true, id: id, version: topic.ModerationVersion}); err != nil {
+		t.Fatal(err)
+	}
+}
 
 func enableReviewTest(t *testing.T) {
 	t.Helper()
@@ -29,7 +56,6 @@ func enableReviewTest(t *testing.T) {
 	sensitivewordservice.ClearConfigCache()
 	sensitivewordservice.Refresh()
 	t.Cleanup(func() {
-		contentReviewsIdle.Wait()
 		pageConfig.SaveConfig(pageConfig.SensitiveWordSettings, `{"enabled":false}`)
 		sensitiveWord.Delete(word.Id)
 		sensitivewordservice.ClearConfigCache()
@@ -110,7 +136,7 @@ func TestPublishingAndEditingEnqueueReview(t *testing.T) {
 		t.Fatal("draft published")
 	}
 	UpdateTopicStatus(component.BetterRequest[TopicStatusReq]{UserId: 943001, Params: TopicStatusReq{TopicId: id, TopicStatus: 1}})
-	contentReviewsIdle.Wait()
+	runPendingTopicReview(t, id)
 	if topic := topics.Get(id); topic.Status != 0 || topic.ModerationStatus != "rejected" {
 		t.Fatal("draft publication bypassed review")
 	}
@@ -118,13 +144,13 @@ func TestPublishingAndEditingEnqueueReview(t *testing.T) {
 	req.Params.TopicStatus = 1
 	req.Params.Content = "Normal content with enough words"
 	WriteTopic(req)
-	contentReviewsIdle.Wait()
+	runPendingTopicReview(t, id)
 	if topics.Get(id).Status != 1 {
 		t.Fatal("corrected topic not published")
 	}
 	req.Params.Content = "blocked-review-test content"
 	WriteTopic(req)
-	contentReviewsIdle.Wait()
+	runPendingTopicReview(t, id)
 	if topic := topics.Get(id); topic.Status != 0 || topic.ModerationStatus != "rejected" {
 		t.Fatal("editing bypassed review")
 	}

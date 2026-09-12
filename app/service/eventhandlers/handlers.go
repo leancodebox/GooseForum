@@ -7,6 +7,7 @@ import (
 // Handlers 返回所有事件处理器
 func Handlers() []cqrs.EventHandler {
 	return []cqrs.EventHandler{
+		cqrs.NewEventHandler("ContentReviewRequestedHandler", handleContentReviewRequested),
 		cqrs.NewEventHandler("TopicRankRequestedHandler", handleTopicRankRequested),
 		cqrs.NewEventHandler("CommentCreatedHandler", handleCommentCreated),
 		cqrs.NewEventHandler("UserFollowedHandler", handleUserFollowed),

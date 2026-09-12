@@ -10,7 +10,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
-	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
@@ -19,7 +18,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/sensitivewordservice"
 	"github.com/leancodebox/GooseForum/app/service/topicservice"
-	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
 
 type ReviewContentReq struct {
@@ -178,29 +176,19 @@ func logContentReview(req component.BetterRequest[ReviewContentReq], kind string
 	})
 }
 
-func publishTopicReviewResult(topic *topics.Entity, post *posts.Entity, firstPublication bool) {
-	userservice.InvalidateUserPublicProfileCache(topic.UserId)
-	if firstPublication && topic.Status == 1 && topic.ProcessStatus == 0 {
-		userStatistics.WriteTopic(topic.UserId)
-		eventbus.Publish(context.Background(), &eventhandlers.TopicPublishedEvent{Topic: topic, FirstPost: post})
-	} else {
-		eventbus.Publish(context.Background(), &eventhandlers.TopicUpdatedEvent{Topic: topic, FirstPost: post})
+func enqueueContentReview(topic bool, id, version uint64, status string) {
+	if status != "pending" {
+		return
 	}
+	eventbus.Publish(context.Background(), &eventhandlers.ContentReviewRequestedEvent{
+		Topic: topic, ID: id, Version: version,
+	})
+}
+
+func publishTopicReviewResult(topic *topics.Entity, post *posts.Entity, firstPublication bool) {
+	eventhandlers.PublishTopicReviewResult(topic, post, firstPublication)
 }
 
 func publishVisiblePost(topic topics.Entity, post posts.Entity) {
-	if topic.Status != 1 || topic.ProcessStatus != 0 || post.ProcessStatus != 0 {
-		return
-	}
-	userStatistics.WriteComment(post.UserId)
-	userservice.InvalidateUserPublicProfileCache(post.UserId)
-	hotdataserve.ClearTopicListCache()
-	var parentUserID uint64
-	if post.ReplyToPostId != 0 {
-		parentUserID = posts.Get(post.ReplyToPostId).UserId
-	}
-	eventbus.Publish(context.Background(), &eventhandlers.CommentCreatedEvent{
-		TopicId: topic.Id, PostId: post.Id, PostNo: post.PostNo, UserId: post.UserId,
-		Content: post.Content, TopicAuthorId: topic.UserId, ReplyToPostId: post.ReplyToPostId, ReplyToPostAuthorId: parentUserID,
-	})
+	eventhandlers.PublishVisiblePost(topic, post)
 }
