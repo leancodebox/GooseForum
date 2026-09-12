@@ -2,7 +2,6 @@ package eventhandlers
 
 import (
 	"context"
-	"strconv"
 	"strings"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
@@ -63,7 +62,7 @@ func handleHttpNotifyCommentCreated(ctx context.Context, event *CommentCreatedEv
 		User:                commenter,
 		ReplyToPostID:       event.ReplyToPostId,
 		ReplyToPostAuthorID: event.ReplyToPostAuthorId,
-		URL:                 postURL(event.TopicId, event.PostId),
+		URL:                 postURL(event.TopicId, postNo),
 	}
 	payload := notifyEventData{
 		BaseURI:        baseURI(),
@@ -100,6 +99,10 @@ func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEven
 	if topic.Id > 0 && !topicPubliclyReadable(topic) {
 		return nil
 	}
+	var targetPost posts.Entity
+	if event.TargetType == "reply" || event.TargetType == "post" {
+		targetPost = posts.Get(event.TargetId)
+	}
 	payload := notifyEventData{
 		BaseURI:       baseURI(),
 		ReportID:      new(event.ReportId),
@@ -109,17 +112,16 @@ func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEven
 		Reason:        new(event.Reason),
 		Topic:         new(topicNotifyPayloadFromSmall(topic)),
 		Reporter:      new(userNotifyPayload(event.ReporterId)),
-		ModerationURL: moderationTargetURL(event),
+		ModerationURL: moderationTargetURL(event, targetPost.PostNo),
 	}
 	if event.TargetType == "reply" || event.TargetType == "post" {
-		post := posts.Get(event.TargetId)
-		commenter := userNotifyPayload(post.UserId)
+		commenter := userNotifyPayload(targetPost.UserId)
 		payload.Post = &notifyPost{
-			ID:     post.Id,
-			PostNo: post.PostNo,
-			UserID: post.UserId,
+			ID:     targetPost.Id,
+			PostNo: targetPost.PostNo,
+			UserID: targetPost.UserId,
 			User:   commenter,
-			URL:    postURL(post.TopicId, post.Id),
+			URL:    postURL(targetPost.TopicId, targetPost.PostNo),
 		}
 	}
 	httpnotifyservice.Notify(httpnotifyservice.EventReportCreated, payload)
@@ -281,28 +283,21 @@ func userNotifyPayload(userID uint64) notifyUser {
 	}
 }
 
-func postURL(topicID uint64, postID uint64) string {
+func postURL(topicID uint64, postNo uint64) string {
 	if topicID == 0 {
 		return ""
 	}
-	if postID == 0 {
-		return urlconfig.PostDetail(topicID)
-	}
-	return urlconfig.PostDetail(topicID) + "#post-" + uintToString(postID)
+	return urlconfig.PostDetailAt(topicID, postNo)
 }
 
-func moderationTargetURL(event *ReportCreatedEvent) string {
+func moderationTargetURL(event *ReportCreatedEvent, postNo uint64) string {
 	if event.TopicId == 0 {
 		return ""
 	}
 	if (event.TargetType == "reply" || event.TargetType == "post") && event.TargetId > 0 {
-		return postURL(event.TopicId, event.TargetId)
+		return postURL(event.TopicId, postNo)
 	}
 	return urlconfig.PostDetail(event.TopicId)
-}
-
-func uintToString(value uint64) string {
-	return strconv.FormatUint(value, 10)
 }
 
 func baseURI() string {

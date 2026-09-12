@@ -157,7 +157,7 @@ func TestTopicTemplateRendersPostStreamNoscript(t *testing.T) {
 			t.Fatalf("topic noscript missing crawler detail class %s: %s", want, out)
 		}
 	}
-	if !strings.Contains(out, `href="#post-100">#1</a>`) || !strings.Contains(out, `href="#post-101">#2</a>`) {
+	if !strings.Contains(out, `href="/p/post/10">#1</a>`) || !strings.Contains(out, `href="/p/post/10/2">#2</a>`) {
 		t.Fatalf("topic noscript should render first post and replies as posts with post numbers: %s", out)
 	}
 	if !strings.Contains(out, "gf-crawler-post-body img") || !strings.Contains(out, "max-height: 560px") {

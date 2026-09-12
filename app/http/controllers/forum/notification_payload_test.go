@@ -17,12 +17,12 @@ func TestBuildNotificationPayloadUsesPostNumberURL(t *testing.T) {
 	}
 }
 
-func TestBuildNotificationPayloadFallsBackToPostAnchor(t *testing.T) {
+func TestBuildNotificationPayloadFallsBackToTopicURL(t *testing.T) {
 	notification := &eventNotification.Entity{
 		Payload: eventNotification.NotificationPayload{TopicId: 42, PostId: 99},
 	}
 	item := BuildNotificationPayload(notification)
-	if item.Topic == nil || item.Topic.URL != "/p/post/42#post-99" {
-		t.Fatalf("notification topic = %#v, want legacy post anchor URL", item.Topic)
+	if item.Topic == nil || item.Topic.URL != "/p/post/42" {
+		t.Fatalf("notification topic = %#v, want topic URL", item.Topic)
 	}
 }

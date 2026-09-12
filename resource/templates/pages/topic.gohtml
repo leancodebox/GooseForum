@@ -32,7 +32,7 @@
             <li id="post-{{.ID}}" class="gf-crawler-post">
                 <article>
                     <p class="gf-crawler-post-meta">
-                        <a href="#post-{{.ID}}">#{{.PostNo}}</a>
+                        <a href="/p/post/{{$.Payload.Props.Topic.ID}}{{if gt .PostNo 1}}/{{.PostNo}}{{end}}">#{{.PostNo}}</a>
                         <a href="/u/{{.Author.ID}}">{{.Author.Username}}</a>
                         <time>{{.CreatedAt}}</time>
                     </p>

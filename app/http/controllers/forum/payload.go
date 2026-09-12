@@ -1452,7 +1452,7 @@ func buildTopicJSONLDComments(posts []PostPayload, canonical string) []vo.Commen
 			Text:          text,
 			Author:        vo.Person{Type: "Person", Name: post.Author.Username},
 			DatePublished: publishedTime,
-			URL:           canonical + "#post-" + strconv.FormatUint(post.ID, 10),
+			URL:           fmt.Sprintf("%s/%d", strings.TrimRight(canonical, "/"), post.PostNo),
 		})
 		if len(comments) >= topicJSONLDCommentLimit {
 			break
@@ -1793,7 +1793,7 @@ func userActivityURL(activity *userActivities.Entity, replyByID map[uint64]*post
 		if post == nil || post.TopicId == 0 {
 			return ""
 		}
-		return urlconfig.PostDetail(post.TopicId) + "#post-" + strconv.FormatUint(post.Id, 10)
+		return urlconfig.PostDetailAt(post.TopicId, post.PostNo)
 	}
 
 	switch activity.SubjectType {
@@ -2164,12 +2164,7 @@ func BuildNotificationPayload(notification *eventNotification.Entity) Notificati
 		item.Actor.Username = payload.Extra.FollowerName
 	}
 	if payload.TopicId > 0 {
-		topicURL := urlconfig.PostDetail(payload.TopicId)
-		if payload.PostNo > 0 {
-			topicURL = fmt.Sprintf("%s/%d", topicURL, payload.PostNo)
-		} else if payload.PostId > 0 {
-			topicURL = fmt.Sprintf("%s#post-%d", topicURL, payload.PostId)
-		}
+		topicURL := urlconfig.PostDetailAt(payload.TopicId, payload.PostNo)
 		item.Topic = &NotificationTopicPayload{
 			ID:    payload.TopicId,
 			Title: payload.TopicTitle,

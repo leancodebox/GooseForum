@@ -144,6 +144,14 @@ func PostDetail(id any) string {
 	return fmt.Sprintf("%s/%v", PathPost, id)
 }
 
+// PostDetailAt returns the topic detail path positioned at a post number.
+func PostDetailAt(id any, postNo uint64) string {
+	if postNo <= 1 {
+		return PostDetail(id)
+	}
+	return fmt.Sprintf("%s/%v", PostDetail(id), postNo)
+}
+
 // Category returns the public category path for slug and id.
 func Category(slug string, id any) string {
 	return fmt.Sprintf("/c/%s/%v", url.PathEscape(slug), id)

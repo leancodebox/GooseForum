@@ -1559,7 +1559,7 @@ async function removePost(postId: number) {
               <UserAvatar :src="post.author.avatarUrl" :alt="post.author.username" :badge="post.author.wornBadge" class="h-9 w-9 rounded-full ring-1 ring-line sm:h-10 sm:w-10" img-class="rounded-full" />
             </a>
             <div class="min-w-0">
-              <PostHeader :post="post" :first="isFirstPost(post)" :permalink="postURL(page.props.topic.id, post.postNo, post.id)">
+              <PostHeader :post="post" :first="isFirstPost(post)" :permalink="postURL(page.props.topic.id, post.postNo)">
                 <button
                   v-if="canEditPost(post)"
                   type="button"

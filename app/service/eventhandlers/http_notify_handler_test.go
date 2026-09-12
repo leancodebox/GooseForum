@@ -5,7 +5,7 @@ import (
 )
 
 func TestPostURL(t *testing.T) {
-	if got := postURL(123, 456); got != "/p/post/123#post-456" {
+	if got := postURL(123, 456); got != "/p/post/123/456" {
 		t.Fatalf("postURL() = %q", got)
 	}
 	if got := postURL(123, 0); got != "/p/post/123" {

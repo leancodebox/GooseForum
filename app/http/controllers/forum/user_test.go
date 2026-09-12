@@ -58,11 +58,11 @@ func TestUserActivityURLForCommentUsesPostTopic(t *testing.T) {
 		SubjectId:   456,
 	}
 	postByID := map[uint64]*posts.Entity{
-		456: {Id: 456, TopicId: 123},
+		456: {Id: 456, TopicId: 123, PostNo: 7},
 	}
 
-	if got := userActivityURL(activity, postByID); got != "/p/post/123#post-456" {
-		t.Fatalf("userActivityURL() = %q, want %q", got, "/p/post/123#post-456")
+	if got := userActivityURL(activity, postByID); got != "/p/post/123/7" {
+		t.Fatalf("userActivityURL() = %q, want %q", got, "/p/post/123/7")
 	}
 }
 

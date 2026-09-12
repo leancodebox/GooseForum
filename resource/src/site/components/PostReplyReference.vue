@@ -14,7 +14,7 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const sourceURL = computed(() => props.target && !props.target.unavailable && props.target.postNo
-  ? postURL(props.topicId, props.target.postNo, props.target.id)
+  ? postURL(props.topicId, props.target.postNo)
   : undefined)
 const expanded = ref(false)
 const overflowing = ref(false)

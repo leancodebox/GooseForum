@@ -115,7 +115,7 @@ func TestTopicMetaJSONLDIncludesVisiblePostStreamComments(t *testing.T) {
 	if len(jsonLD.Comment) != 1 {
 		t.Fatalf("comments len = %d, want 1", len(jsonLD.Comment))
 	}
-	if jsonLD.Comment[0].Text != "reply body" || jsonLD.Comment[0].Author.Name != "replyer" || jsonLD.Comment[0].URL != "http://localhost/p/post/440#post-101" {
+	if jsonLD.Comment[0].Text != "reply body" || jsonLD.Comment[0].Author.Name != "replyer" || jsonLD.Comment[0].URL != "http://localhost/p/post/440/2" {
 		t.Fatalf("comment json-ld = %#v", jsonLD.Comment[0])
 	}
 }
