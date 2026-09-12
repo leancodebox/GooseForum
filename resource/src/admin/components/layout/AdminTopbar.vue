@@ -49,7 +49,7 @@ function switchLocale(nextLocale: Locale) {
         <Sun v-if="isDark" class="size-4" />
         <Moon v-else class="size-4" />
       </Button>
-      <div class="relative hidden lg:block">
+      <div class="relative">
         <Button
           size="icon-sm"
           variant="ghost"

@@ -3,8 +3,7 @@ import { adminText } from '@/admin/runtime/i18n-text'
 
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Ban, Eye, FileText, Heart, MessageSquare, Pin, RefreshCw, Search, Tags, Trash2, Undo2 } from '@lucide/vue'
-import AdminActionButton from '@/admin/components/AdminActionButton.vue'
+import { Ban, Eye, FileText, Heart, MessageSquare, MoreHorizontal, Pin, RefreshCw, Search, Tags, Trash2, Undo2 } from '@lucide/vue'
 import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
 import AdminSection from '@/admin/components/AdminSection.vue'
 import AdminToolbar from '@/admin/components/AdminToolbar.vue'
@@ -12,6 +11,13 @@ import { BasicPage } from '@/admin/components/global-layout'
 import { Button } from '@/admin/components/ui/button'
 import { Badge } from '@/admin/components/ui/badge'
 import { Input } from '@/admin/components/ui/input'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/admin/components/ui/dropdown-menu'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/admin/components/ui/select'
 import {
   Dialog,
@@ -430,9 +436,9 @@ onMounted(() => {
           <div v-else-if="error" class="px-3 py-10 text-center text-sm text-destructive">{{ error }}</div>
           <div v-else-if="rows.length === 0" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k00aw') }}</div>
           <div v-else class="divide-y">
-            <article v-for="post in rows" :key="post.id" class="space-y-2 px-3 py-3">
+            <article v-for="post in rows" :key="post.id" class="space-y-2 px-3 py-2.5">
               <div class="flex min-w-0 items-start justify-between gap-3">
-                <div class="min-w-0 flex-1 space-y-1">
+                <div class="min-w-0 flex-1">
                   <div class="flex min-w-0 items-center gap-1.5">
                     <a :href="`/p/post/${post.id}`" target="_blank" rel="noreferrer" class="min-w-0 truncate text-[15px] font-semibold leading-5 text-foreground hover:text-primary hover:underline">
                       {{ post.title }}
@@ -442,9 +448,6 @@ onMounted(() => {
                     <Badge v-if="post.deleted" variant="outline" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('topicDeleted') }}</Badge>
                     <Badge v-if="post.pinWeight > 0" variant="secondary" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k00ax') }} {{ post.pinWeight }}</Badge>
                   </div>
-                  <p class="line-clamp-2 break-words text-[12px] leading-5 text-muted-foreground">
-                    {{ post.description || adminText('k005w') }}
-                  </p>
                 </div>
                 <span class="inline-flex h-6 shrink-0 items-center rounded-md px-2 text-xs font-semibold" :class="topicStatusInfo(post).className">
                   {{ topicStatusInfo(post).label }}
@@ -462,47 +465,49 @@ onMounted(() => {
                 <span class="inline-flex items-center gap-1"><Heart class="size-3.5" />{{ post.likeCount }}</span>
               </div>
 
-              <div class="flex items-center justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-2">
                 <div class="flex min-w-0 items-center gap-2">
-                  <img v-if="post.userAvatarUrl" :src="post.userAvatarUrl" class="size-7 shrink-0 rounded-full object-cover ring-1 ring-border" alt="" />
-                  <span v-else class="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">{{ avatarText(post) }}</span>
-                  <div class="min-w-0">
-                    <a :href="`/u/${post.userId}`" target="_blank" rel="noreferrer" class="block truncate text-[13px] font-semibold hover:text-primary hover:underline">
-                      {{ post.username }}
-                    </a>
-                    <div class="truncate text-xs text-muted-foreground">{{ postDate(post.createdAt) }} {{ postTime(post.createdAt) }} · {{ post.deleted ? adminText('topicDeleted') : post.processStatus === 1 ? adminText('k005x') : adminText('k005y') }}</div>
-                  </div>
+                  <img v-if="post.userAvatarUrl" :src="post.userAvatarUrl" class="size-6 shrink-0 rounded-full object-cover ring-1 ring-border" alt="" />
+                  <span v-else class="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-medium">{{ avatarText(post) }}</span>
+                  <a :href="`/u/${post.userId}`" target="_blank" rel="noreferrer" class="max-w-24 truncate text-xs font-normal hover:text-primary hover:underline">
+                    {{ post.username }}
+                  </a>
                 </div>
-                <div class="flex shrink-0 items-center gap-0.5">
-                  <AdminActionButton compact :title="adminText('reviewOpen')" @click="openSource(post)">
+                <span class="truncate text-xs text-muted-foreground">{{ postDate(post.createdAt) }} {{ postTime(post.createdAt) }}</span>
+                <div class="ml-auto flex shrink-0 items-center">
+                  <Button variant="ghost" size="icon-sm" type="button" :title="adminText('reviewOpen')" @click="openSource(post)">
                     <FileText class="size-4" />
-                  </AdminActionButton>
-                  <AdminActionButton v-if="!post.deleted" compact :title="adminText('k006d')" @click="openCategoryDialog(post)">
-                    <Tags class="size-4" />
-                  </AdminActionButton>
-                  <AdminActionButton v-if="!post.deleted" compact :tone="post.pinWeight > 0 ? 'primary' : 'default'" :title="adminText('k006e')" @click="openPinDialog(post)">
-                    <Pin class="size-4" />
-                  </AdminActionButton>
-                  <AdminActionButton v-if="!post.deleted" compact :tone="post.processStatus === 1 ? 'success' : 'danger'" :title="post.processStatus === 1 ? adminText('k005z') : adminText('k0060')" @click="actionRow = post">
-                    <Undo2 v-if="post.processStatus === 1" class="size-4" />
-                    <Ban v-else class="size-4" />
-                  </AdminActionButton>
-                  <AdminActionButton v-if="!post.deleted" compact tone="danger" :title="adminText('k005i')" @click="deleteRow = post">
-                    <Trash2 class="size-4" />
-                  </AdminActionButton>
+                  </Button>
+                  <DropdownMenu v-if="!post.deleted">
+                    <DropdownMenuTrigger as-child>
+                      <Button variant="ghost" size="icon-sm" type="button" :title="adminText('k007m')">
+                        <MoreHorizontal class="size-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem @select="openCategoryDialog(post)"><Tags />{{ adminText('k006d') }}</DropdownMenuItem>
+                      <DropdownMenuItem @select="openPinDialog(post)"><Pin />{{ adminText('k006e') }}</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem :variant="post.processStatus === 1 ? 'default' : 'destructive'" @select="actionRow = post">
+                        <Undo2 v-if="post.processStatus === 1" /><Ban v-else />
+                        {{ post.processStatus === 1 ? adminText('k005z') : adminText('k0060') }}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem variant="destructive" @select="deleteRow = post"><Trash2 />{{ adminText('k005i') }}</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </article>
           </div>
         </div>
 
-          <Table v-if="kind === 'topic'" class="hidden table-fixed md:table">
+          <Table v-if="kind === 'topic'" class="hidden min-w-[980px] table-fixed md:table">
             <TableHeader class="bg-muted/30">
               <TableRow>
                 <TableHead class="px-3">{{ adminText('k00az') }}</TableHead>
                 <TableHead class="w-[180px]">{{ adminText('k00b0') }}</TableHead>
                 <TableHead class="w-[96px] text-center">{{ adminText('k007j') }}</TableHead>
-                <TableHead class="w-[176px] text-right pr-3">{{ adminText('k007m') }}</TableHead>
+                <TableHead class="w-[76px] pr-3 text-right">{{ adminText('k007m') }}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -517,69 +522,63 @@ onMounted(() => {
               </TableRow>
               <template v-else>
                 <TableRow v-for="post in rows" :key="post.id" class="group hover:bg-muted/20">
-                  <TableCell class="max-w-0 whitespace-normal px-3 py-2">
-                    <div class="min-w-0 space-y-1">
-                      <div class="flex min-w-0 items-center gap-1.5">
-                        <a :href="`/p/post/${post.id}`" target="_blank" rel="noreferrer" class="min-w-0 truncate text-[15px] font-semibold leading-5 text-foreground hover:text-primary hover:underline">
-                          {{ post.title }}
-                        </a>
-                        <Badge v-if="post.moderationStatus && post.moderationStatus !== 'none'" variant="outline" class="shrink-0" :title="post.moderationReason">{{ reviewLabel(post.moderationStatus) }}</Badge>
-                    <Badge v-if="post.processStatus === 1" variant="destructive" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k0069') }}</Badge>
-                        <Badge v-if="post.pinWeight > 0" variant="secondary" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k00ax') }} {{ post.pinWeight }}</Badge>
-                      </div>
-                      <p class="truncate text-[12px] leading-4 text-muted-foreground">
-                        {{ post.description || adminText('k005w') }}
-                      </p>
-                      <div class="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[12px] leading-4 text-muted-foreground">
-                        <span class="whitespace-nowrap">{{ postDate(post.createdAt) }} {{ postTime(post.createdAt) }}</span>
-                        <span v-for="category in postCategories(post)" :key="category.id" class="inline-flex h-5 max-w-32 items-center gap-1 rounded-full bg-muted px-1.5 font-medium" :class="category.missing ? 'text-destructive' : ''">
-                          <span class="size-1.5 shrink-0 rounded-full" :style="{ backgroundColor: category.color || '#64748b' }" />
-                          <span class="truncate">{{ category.category }}</span>
-                        </span>
-                        <span v-if="postCategories(post).length === 0" class="inline-flex h-5 items-center rounded-full bg-muted px-1.5">{{ adminText('k00ay') }}</span>
-                        <span class="inline-flex items-center gap-1" :title="adminText('k006f')"><Eye class="size-3.5" />{{ post.viewCount }}</span>
-                        <span class="inline-flex items-center gap-1" :title="adminText('k006g')"><MessageSquare class="size-3.5" />{{ post.replyCount }}</span>
-                        <span class="inline-flex items-center gap-1" :title="adminText('k006h')"><Heart class="size-3.5" />{{ post.likeCount }}</span>
-                      </div>
+                  <TableCell class="max-w-0 px-3 py-2">
+                    <div class="flex min-w-0 items-center gap-1.5 overflow-hidden">
+                      <a :href="`/p/post/${post.id}`" target="_blank" rel="noreferrer" class="min-w-0 truncate text-[15px] font-semibold leading-5 text-foreground hover:text-primary hover:underline">
+                        {{ post.title }}
+                      </a>
+                      <Badge v-if="post.moderationStatus && post.moderationStatus !== 'none'" variant="outline" class="shrink-0" :title="post.moderationReason">{{ reviewLabel(post.moderationStatus) }}</Badge>
+                      <Badge v-if="post.processStatus === 1" variant="destructive" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k0069') }}</Badge>
+                      <Badge v-if="post.pinWeight > 0" variant="secondary" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k00ax') }} {{ post.pinWeight }}</Badge>
+                      <span v-for="category in postCategories(post)" :key="category.id" class="inline-flex h-5 max-w-32 shrink-0 items-center gap-1 rounded-full bg-muted px-1.5 font-medium" :class="category.missing ? 'text-destructive' : ''">
+                        <span class="size-1.5 shrink-0 rounded-full" :style="{ backgroundColor: category.color || '#64748b' }" />
+                        <span class="truncate">{{ category.category }}</span>
+                      </span>
+                      <span v-if="postCategories(post).length === 0" class="inline-flex h-5 shrink-0 items-center rounded-full bg-muted px-1.5">{{ adminText('k00ay') }}</span>
+                      <span class="ml-auto inline-flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+                        <span class="whitespace-nowrap">{{ postDate(post.createdAt) }}</span>
+                        <span class="inline-flex items-center gap-0.5" :title="adminText('k006f')"><Eye class="size-3.5" />{{ post.viewCount }}</span>
+                        <span class="inline-flex items-center gap-0.5" :title="adminText('k006g')"><MessageSquare class="size-3.5" />{{ post.replyCount }}</span>
+                        <span class="inline-flex items-center gap-0.5" :title="adminText('k006h')"><Heart class="size-3.5" />{{ post.likeCount }}</span>
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell class="max-w-0 py-2 align-middle">
                     <div class="flex min-w-0 items-center gap-2">
                       <img v-if="post.userAvatarUrl" :src="post.userAvatarUrl" class="size-7 shrink-0 rounded-full object-cover ring-1 ring-border" alt="" />
                       <span v-else class="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">{{ avatarText(post) }}</span>
-                      <a :href="`/u/${post.userId}`" target="_blank" rel="noreferrer" class="min-w-0 truncate text-[13px] font-semibold hover:text-primary hover:underline">
+                      <a :href="`/u/${post.userId}`" target="_blank" rel="noreferrer" class="min-w-0 truncate text-[13px] font-normal hover:text-primary hover:underline">
                         {{ post.username }}
                       </a>
                     </div>
                   </TableCell>
                   <TableCell class="py-2 text-center align-middle">
-                    <div class="inline-flex min-w-[52px] flex-col items-center gap-0.5">
+                    <div class="inline-flex min-w-[52px] items-center justify-center">
                       <span class="inline-flex h-6 items-center rounded-md px-2 text-xs font-semibold" :class="topicStatusInfo(post).className">
                         {{ topicStatusInfo(post).label }}
-                      </span>
-                      <span class="text-[11px]" :class="post.processStatus === 1 ? 'text-destructive' : 'text-muted-foreground'">
-                        {{ post.deleted ? adminText('topicDeleted') : post.processStatus === 1 ? adminText('k005x') : adminText('k005y') }}
                       </span>
                     </div>
                   </TableCell>
                   <TableCell class="pr-3">
-                    <div class="flex justify-end gap-0.5">
-                      <AdminActionButton compact :title="adminText('reviewOpen')" @click="openSource(post)">
+                    <div class="flex justify-end">
+                      <Button variant="ghost" size="icon-sm" type="button" :title="adminText('reviewOpen')" @click="openSource(post)">
                         <FileText class="size-4" />
-                      </AdminActionButton>
-                      <AdminActionButton v-if="!post.deleted" compact :title="adminText('k006d')" @click="openCategoryDialog(post)">
-                        <Tags class="size-4" />
-                      </AdminActionButton>
-                      <AdminActionButton v-if="!post.deleted" compact :tone="post.pinWeight > 0 ? 'primary' : 'default'" :title="adminText('k006e')" @click="openPinDialog(post)">
-                        <Pin class="size-4" />
-                      </AdminActionButton>
-                      <AdminActionButton v-if="!post.deleted" compact :tone="post.processStatus === 1 ? 'success' : 'danger'" :title="post.processStatus === 1 ? adminText('k005z') : adminText('k0060')" @click="actionRow = post">
-                        <Undo2 v-if="post.processStatus === 1" class="size-4" />
-                        <Ban v-else class="size-4" />
-                      </AdminActionButton>
-                      <AdminActionButton v-if="!post.deleted" compact tone="danger" :title="adminText('k005i')" @click="deleteRow = post">
-                        <Trash2 class="size-4" />
-                      </AdminActionButton>
+                      </Button>
+                      <DropdownMenu v-if="!post.deleted">
+                        <DropdownMenuTrigger as-child>
+                          <Button variant="ghost" size="icon-sm" type="button" :title="adminText('k007m')"><MoreHorizontal class="size-4" /></Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem @select="openCategoryDialog(post)"><Tags />{{ adminText('k006d') }}</DropdownMenuItem>
+                          <DropdownMenuItem @select="openPinDialog(post)"><Pin />{{ adminText('k006e') }}</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem :variant="post.processStatus === 1 ? 'default' : 'destructive'" @select="actionRow = post">
+                            <Undo2 v-if="post.processStatus === 1" /><Ban v-else />
+                            {{ post.processStatus === 1 ? adminText('k005z') : adminText('k0060') }}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem variant="destructive" @select="deleteRow = post"><Trash2 />{{ adminText('k005i') }}</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </TableCell>
                 </TableRow>
