@@ -11,7 +11,7 @@
 
 ## 项目概览
 
-GooseForum 是一个现代化论坛平台，后端使用 Go，前端和管理后台统一由 `resource/` 下的 Vue 3 应用提供。后端框架采用 Gin，数据库 ORM 使用 GORM，支持 SQLite 与 MySQL。
+GooseForum 是一个现代化论坛平台，后端使用 Go，前端和管理后台统一由 `resource/` 下的 Vue 3 应用提供。后端框架采用 Gin，数据库 ORM 使用 GORM，支持 SQLite、MySQL 与 PostgreSQL。
 
 ## 开发命令
 
@@ -92,5 +92,5 @@ cd resource && npx vitest run
 
 全部配置在 `config.toml` 中，关键项：
 - `server.port`：HTTP 端口（默认：5234）
-- `db.default.connection`：sqlite 或 mysql
+- `db.default.connection`：sqlite、mysql 或 postgres
 - `app.debug`：是否启用调试模式；不配置时 `local` 默认开启，其他环境默认关闭

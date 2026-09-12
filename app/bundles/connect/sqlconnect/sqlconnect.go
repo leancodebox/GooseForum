@@ -14,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -46,7 +47,7 @@ func TestConfig() Config {
 }
 
 func (itself *Connect) IsSqlite() bool {
-	return itself.Config.Connection == "sqlite"
+	return strings.EqualFold(strings.TrimSpace(itself.Config.Connection), "sqlite")
 }
 
 func GetConnectByPreferences(preferences preferences.ExclusivePreferences) Connect {
@@ -65,13 +66,16 @@ func GetConnectByPreferences(preferences preferences.ExclusivePreferences) Conne
 func GetConnect(config Config) Connect {
 	var dbIns *gorm.DB
 	var err error
-	switch config.Connection {
+	switch strings.ToLower(strings.TrimSpace(config.Connection)) {
 	case "sqlite":
 		slog.Info("use sqlite")
 		dbIns, err = connectSqlLiteDB(config.DbPath)
 	case "mysql":
 		slog.Info("use mysql")
 		dbIns, err = connectMysqlDB(config.DbUrl)
+	case "postgres", "postgresql":
+		slog.Info("use postgresql")
+		dbIns, err = connectPostgresDB(config.DbUrl)
 	default:
 		slog.Info("use sqlite because unselect db")
 		dbIns, err = connectSqlLiteDB(config.DbPath)
@@ -113,6 +117,16 @@ func connectMysqlDB(dbUrl string) (*gorm.DB, error) {
 		Logger: logging.NewGormLoggerWithDefault(),
 	})
 	return db, err
+}
+
+func connectPostgresDB(dbUrl string) (*gorm.DB, error) {
+	return gorm.Open(postgresDialector(dbUrl), &gorm.Config{
+		Logger: logging.NewGormLoggerWithDefault(),
+	})
+}
+
+func postgresDialector(dbUrl string) gorm.Dialector {
+	return postgres.Open(dbUrl)
 }
 
 func connectSqlLiteDB(dbPath string) (*gorm.DB, error) {

@@ -28,7 +28,7 @@ GooseForum 是一个开源论坛，为社区提供讨论、分享与持续交流
 - **掌握社区运营**：内置管理后台，支持角色和权限管理。
 - **打造自己的社区风格**：自定义 Logo、品牌文案和页脚，通过主题工作台预览并发布浅色、深色主题。
 - **随时参与交流**：适配桌面与移动端，支持流畅的站内导航，并保留无 JavaScript 时可访问的页面。
-- **自主部署与维护**：单个可执行文件，默认 SQLite，可选 MySQL，支持定时备份。
+- **自主部署与维护**：单个可执行文件，默认 SQLite，可选 MySQL 或 PostgreSQL，支持 SQLite 定时备份。
 
 ## 快速开始
 
@@ -80,7 +80,7 @@ connection = "sqlite"
 path = "./storage/database/sqlite.db"
 ```
 
-MySQL、邮件、备份、安全和站点配置见 [配置文档](docs/configuration_ZH.md)。
+MySQL/PostgreSQL、邮件、备份、安全和站点配置见 [配置文档](docs/configuration_ZH.md)。
 
 ### 管理命令
 

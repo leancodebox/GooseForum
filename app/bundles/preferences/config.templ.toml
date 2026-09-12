@@ -31,7 +31,7 @@ keep = 7
 spec = "0 3 * * *"
 
 [db.default]
-connection = "sqlite"# in mysql sqlite
+connection = "sqlite" # sqlite | mysql | postgres
 url = "db_user:db_pass@tcp(db_host:3306)/db_name?charset=utf8mb4&parseTime=True&loc=Local"
 path = "./storage/database/sqlite.db"# :memory:|./storage/database/sqlite.db
 
@@ -40,7 +40,7 @@ maxOpenConnections = 5
 maxLifeSeconds = 300
 
 [db.file]
-connection = "sqlite"# in mysql sqlite
+connection = "sqlite" # sqlite | mysql | postgres
 url = "root:root_password@tcp(127.0.0.1:3306)/goose_forum?charset=utf8mb4&parseTime=True&loc=Local"
 path = "./storage/database/file.db"# :memory:|./storage/database/sqlite.db
 

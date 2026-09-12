@@ -24,12 +24,12 @@ type Entity struct {
 	Id uint64 `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`
 	// 联合唯一索引 idx_article_user 用于 Upsert (On Conflict) 定位
 	// 联合索引 idx_active_query 用于高性能获取前 5 名活跃用户
-	ArticleId uint64 `gorm:"column:article_id;type:bigint unsigned;not null;uniqueIndex:idx_article_user,priority:1;index:idx_active_query,priority:1" json:"articleId"`
-	UserId    uint64 `gorm:"column:user_id;type:bigint unsigned;not null;uniqueIndex:idx_article_user,priority:2" json:"userId"`
+	ArticleId uint64 `gorm:"column:article_id;not null;uniqueIndex:idx_article_user,priority:1;index:idx_active_query,priority:1" json:"articleId"`
+	UserId    uint64 `gorm:"column:user_id;not null;uniqueIndex:idx_article_user,priority:2" json:"userId"`
 
 	// 计数器和时间，用于排序
-	ReplyCount  uint32    `gorm:"column:reply_count;type:int unsigned;not null;default:0;index:idx_active_query,priority:2" json:"replyCount"`
-	LastReplyAt time.Time `gorm:"column:last_reply_at;type:datetime;not null;default:CURRENT_TIMESTAMP;index:idx_active_query,priority:3" json:"lastReplyAt"`
+	ReplyCount  uint32    `gorm:"column:reply_count;not null;default:0;index:idx_active_query,priority:2" json:"replyCount"`
+	LastReplyAt time.Time `gorm:"column:last_reply_at;not null;default:CURRENT_TIMESTAMP;index:idx_active_query,priority:3" json:"lastReplyAt"`
 
 	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`

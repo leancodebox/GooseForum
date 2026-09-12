@@ -37,14 +37,14 @@ const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
 	Id              uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;index:idx_reply_article_id,priority:2;" json:"id"`                                                                                            //
-	ArticleId       uint64    `gorm:"column:article_id;type:bigint unsigned;not null;default:0;index:idx_reply_article_created;index:idx_reply_article_id,priority:1;index:idx_reply_article_no,priority:1;" json:"articleId"` //
-	ReplyNo         uint64    `gorm:"column:reply_no;type:bigint unsigned;not null;default:0;index:idx_reply_article_no,priority:2;" json:"replyNo"`                                                                           // 文章内稳定回复序号
-	UserId          uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;index;" json:"userId"`                                                                                                             //
-	TargetId        uint64    `gorm:"column:target_id;type:bigint unsigned;not null;default:0;" json:"targetId"`                                                                                                               // 目标id
+	ArticleId       uint64    `gorm:"column:article_id;not null;default:0;index:idx_reply_article_created;index:idx_reply_article_id,priority:1;index:idx_reply_article_no,priority:1;" json:"articleId"` //
+	ReplyNo         uint64    `gorm:"column:reply_no;not null;default:0;index:idx_reply_article_no,priority:2;" json:"replyNo"`                                                                           // 文章内稳定回复序号
+	UserId          uint64    `gorm:"column:user_id;not null;default:0;index;" json:"userId"`                                                                                                             //
+	TargetId        uint64    `gorm:"column:target_id;not null;default:0;" json:"targetId"`                                                                                                               // 目标id
 	Content         string    `gorm:"column:content;type:text;" json:"content"`                                                                                                                                                //
 	RenderedHTML    string    `gorm:"column:rendered_html;type:text;" json:"renderedHTML"`                                                                                                                                     // md 渲染后数据
-	RenderedVersion uint32    `gorm:"column:rendered_version;type:bigint unsigned;not null;default:0;" json:"renderedVersion"`                                                                                                 // md 的渲染器版本
-	ProcessStatus   int8      `gorm:"column:process_status;type:tinyint;not null;default:0;index:idx_reply_article_process,priority:2;" json:"processStatus"`                                                                  // 管理状态：0 正常 1 封禁
+	RenderedVersion uint32    `gorm:"column:rendered_version;not null;default:0;" json:"renderedVersion"`                                                                                                 // md 的渲染器版本
+	ProcessStatus   int8      `gorm:"column:process_status;not null;default:0;index:idx_reply_article_process,priority:2;" json:"processStatus"`                                                                  // 管理状态：0 正常 1 封禁
 	ReplyId         uint64    `gorm:"column:reply_id;type:bigint;not null;default:0;" json:"replyId"`                                                                                                                          //
 	CreatedAt       time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;index:idx_reply_article_created;" json:"createdAt"`                                                                                      //
 	UpdatedAt       time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`

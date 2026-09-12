@@ -23,7 +23,7 @@ const fieldCreatedAt = "created_at"
 
 type Entity struct {
 	Id           uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                   //
-	UserId       uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`    //
+	UserId       uint64    `gorm:"column:user_id;not null;default:0;" json:"userId"`    //
 	Action       string    `gorm:"column:action;type:varchar(64);not null;default:'';index;" json:"action"`  //
 	PointsChange int64     `gorm:"column:points_change;type:bigint;not null;default:0;" json:"pointsChange"` //
 	CreatedAt    time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`       //

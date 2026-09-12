@@ -26,8 +26,8 @@ const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
 	Id           uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;index:idx_following_list,priority:4,sort:desc;index:idx_follower_list,priority:4,sort:desc" json:"id"`                    //
-	UserId       uint64    `gorm:"column:user_id;type:bigint unsigned;not null;uniqueIndex:uniq_user_follow,priority:1;index:idx_following_list,priority:1" json:"userId"`                              // 主体
-	FollowUserId uint64    `gorm:"column:follow_user_id;type:bigint unsigned;not null;uniqueIndex:uniq_user_follow,priority:2;index:idx_follow;index:idx_follower_list,priority:1" json:"followUserId"` // 被关注者
+	UserId       uint64    `gorm:"column:user_id;not null;uniqueIndex:uniq_user_follow,priority:1;index:idx_following_list,priority:1" json:"userId"`                              // 主体
+	FollowUserId uint64    `gorm:"column:follow_user_id;not null;uniqueIndex:uniq_user_follow,priority:2;index:idx_follow;index:idx_follower_list,priority:1" json:"followUserId"` // 被关注者
 	Status       int       `gorm:"column:status;type:int;not null;default:1;index:idx_following_list,priority:2;index:idx_follower_list,priority:2" json:"status"`                                      // 1 关注 0 取消关注
 	CreatedAt    time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;index:idx_following_list,priority:3;index:idx_follower_list,priority:3" json:"createdAt"`                            //
 	UpdatedAt    time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`

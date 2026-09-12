@@ -31,8 +31,8 @@ const fieldDeletedAt = "deleted_at"
 
 type Entity struct {
 	Id           uint64         `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                            //
-	RoleId       uint64         `gorm:"column:role_id;type:bigint unsigned;not null;default:0;" json:"roleId"`             //
-	PermissionId uint64         `gorm:"column:permission_id;type:bigint unsigned;not null;default:0;" json:"permissionId"` //
+	RoleId       uint64         `gorm:"column:role_id;not null;default:0;" json:"roleId"`             //
+	PermissionId uint64         `gorm:"column:permission_id;not null;default:0;" json:"permissionId"` //
 	Effective    int            `gorm:"column:effective;type:int;not null;default:0;" json:"effective"`                    //
 	CreatedAt    time.Time      `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`                //
 	UpdatedAt    time.Time      `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`

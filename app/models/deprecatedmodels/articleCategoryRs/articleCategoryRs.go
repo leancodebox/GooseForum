@@ -26,8 +26,8 @@ const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
 	Id                uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                                                                   //
-	ArticleId         uint64    `gorm:"column:article_id;type:bigint unsigned;not null;index:idx_article_id;index:idx_article_category_effective,priority:3" json:"articleId"`    //
-	ArticleCategoryId uint64    `gorm:"column:article_category_id;type:bigint unsigned;not null;index;index:idx_article_category_effective,priority:2;" json:"articleCategoryId"` //
+	ArticleId         uint64    `gorm:"column:article_id;not null;index:idx_article_id;index:idx_article_category_effective,priority:3" json:"articleId"`    //
+	ArticleCategoryId uint64    `gorm:"column:article_category_id;not null;index;index:idx_article_category_effective,priority:2;" json:"articleCategoryId"` //
 	Effective         int       `gorm:"column:effective;type:int;not null;default:0;index:idx_article_category_effective,priority:1;" json:"effective"`                           //
 	CreatedAt         time.Time `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`                                                                             //
 	UpdatedAt         time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`

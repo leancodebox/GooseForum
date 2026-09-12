@@ -83,7 +83,7 @@ func (TokenEntity) TableName() string { return tokenTable }
 type SigningKeyEntity struct {
 	ID                  uint8  `gorm:"primaryKey;column:id;not null"`
 	KID                 string `gorm:"column:kid;type:varchar(64);not null;uniqueIndex"`
-	EncryptedPrivateKey []byte `gorm:"column:encrypted_private_key;type:blob;not null"`
+	EncryptedPrivateKey []byte `gorm:"column:encrypted_private_key;not null"`
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 }
@@ -92,7 +92,7 @@ func (SigningKeyEntity) TableName() string { return signingKeyTable }
 
 type SigningKeyHistoryEntity struct {
 	KID       string    `gorm:"primaryKey;column:kid;type:varchar(64);not null"`
-	PublicKey []byte    `gorm:"column:public_key;type:blob;not null"`
+	PublicKey []byte    `gorm:"column:public_key;not null"`
 	RetireAt  time.Time `gorm:"column:retire_at;not null;index:idx_oidc_signing_key_history_retire"`
 	CreatedAt time.Time
 }
@@ -104,7 +104,7 @@ func (SigningKeyHistoryEntity) TableName() string { return signingKeyHistoryTabl
 // never persisted. RequestJSON is the server-validated authorization request.
 type InteractionEntity struct {
 	Hash           string     `gorm:"primaryKey;column:interaction_hash;type:varchar(64);not null"`
-	RequestJSON    []byte     `gorm:"column:request_json;type:blob;not null"`
+	RequestJSON    []byte     `gorm:"column:request_json;not null"`
 	Purpose        string     `gorm:"column:purpose;type:varchar(16);not null;default:consent;index:idx_oidc_interactions_purpose"`
 	UserID         string     `gorm:"column:user_id;type:varchar(255);not null;index:idx_oidc_interactions_user"`
 	AuthTime       time.Time  `gorm:"column:auth_time;not null"`

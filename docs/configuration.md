@@ -73,7 +73,7 @@ spec = "0 3 * * *"                       # Backup schedule (cron expression)
 
 ```toml
 [db.default]
-connection = "sqlite"                # Database type: sqlite, mysql
+connection = "sqlite"                # Database type: sqlite, mysql, postgres
 path = "./storage/database/sqlite.db" # SQLite database path
 url = "user:pass@tcp(host:3306)/db?charset=utf8mb4&parseTime=True&loc=Local" # MySQL DSN
 maxIdleConnections = 3               # Maximum idle connections
@@ -99,6 +99,20 @@ maxIdleConnections = 10
 maxOpenConnections = 20
 maxLifeSeconds = 3600
 ```
+
+PostgreSQL example:
+
+```toml
+[db.default]
+connection = "postgres"
+url = "host=localhost port=5432 user=gooseforum password=secret dbname=gooseforum sslmode=disable TimeZone=Asia/Shanghai"
+maxIdleConnections = 10
+maxOpenConnections = 20
+maxLifeSeconds = 3600
+```
+
+`postgresql` is also accepted as the connection name. The `url` setting may use
+either PostgreSQL keyword/value format (shown above) or a `postgres://` URL.
 
 ### [storage] File storage
 

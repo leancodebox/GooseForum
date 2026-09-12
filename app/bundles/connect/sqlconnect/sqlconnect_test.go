@@ -18,3 +18,10 @@ func TestTestConfigUsesSingleConnectionInMemorySQLite(t *testing.T) {
 		t.Fatalf("MaxIdleConnections = %d, want 1", cfg.MaxIdleConnections)
 	}
 }
+
+func TestPostgresDialector(t *testing.T) {
+	dialector := postgresDialector("host=localhost user=gooseforum dbname=gooseforum sslmode=disable")
+	if dialector.Name() != "postgres" {
+		t.Fatalf("dialector name = %q, want postgres", dialector.Name())
+	}
+}

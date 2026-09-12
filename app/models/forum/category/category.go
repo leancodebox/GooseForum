@@ -18,7 +18,7 @@ type Entity struct {
 	Color      string    `gorm:"column:color;type:varchar(255);not null;default:'';" json:"color"`
 	Slug       string    `gorm:"column:slug;type:varchar(255);not null;default:'';" json:"slug"`
 	Sort       int       `gorm:"column:sort;type:int;not null;default:0;index:idx_category_sort,priority:1;" json:"sort"`
-	TopicCount uint64    `gorm:"column:topic_count;type:bigint unsigned;not null;default:0;" json:"topicCount"`
+	TopicCount uint64    `gorm:"column:topic_count;not null;default:0;" json:"topicCount"`
 	CreatedAt  time.Time `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`
 	UpdatedAt  time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }

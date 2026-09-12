@@ -82,7 +82,7 @@ type Extra struct {
 type Entity struct {
 	Id        uint64              `gorm:"primaryKey;column:id;autoIncrement;not null;index:idx_user_id_desc,priority:2;index:idx_user_read_id,priority:3" json:"id"`
 	UserId    uint64              `gorm:"column:user_id;type:bigint;index:idx_user_id_event_type_read;index:idx_user_read;index:idx_user_id_desc,priority:1;index:idx_user_read_id,priority:1" json:"userId"` // 接收通知的用户ID
-	TopicId   uint64              `gorm:"column:topic_id;type:bigint unsigned;not null;default:0;index:idx_notification_topic;" json:"topicId"`
+	TopicId   uint64              `gorm:"column:topic_id;not null;default:0;index:idx_notification_topic;" json:"topicId"`
 	Payload   NotificationPayload `gorm:"column:payload;type:json;serializer:json" json:"payload"`                                                                                         // 通知内容(JSON)
 	EventType string              `gorm:"column:event_type;type:varchar(16);index:idx_user_id_event_type_read;" json:"eventType"`                                                          // 通知类型
 	IsRead    bool                `gorm:"column:is_read;type:boolean;default:false;index:idx_user_id_event_type_read;index:idx_user_read;index:idx_user_read_id,priority:2" json:"isRead"` // 是否已读

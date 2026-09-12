@@ -28,7 +28,7 @@ GooseForum is an open-source forum for discussions, shared knowledge, and ongoin
 - **Run your community**: A built-in admin console with role and permission management.
 - **Make it your own**: Customize your logo, brand copy, and footer, then preview and publish light and dark themes in the theme workbench.
 - **Join from any screen**: Desktop and mobile layouts, smooth navigation, and accessible pages when JavaScript is unavailable.
-- **Host it yourself**: A single executable, SQLite by default, optional MySQL, and scheduled backups.
+- **Host it yourself**: A single executable, SQLite by default, optional MySQL or PostgreSQL, and scheduled SQLite backups.
 
 ## Quick Start
 
@@ -80,7 +80,7 @@ connection = "sqlite"
 path = "./storage/database/sqlite.db"
 ```
 
-See [configuration documentation](docs/configuration.md) for MySQL, mail, backup, security, and site settings.
+See [configuration documentation](docs/configuration.md) for MySQL/PostgreSQL, mail, backup, security, and site settings.
 
 ### Admin Commands
 

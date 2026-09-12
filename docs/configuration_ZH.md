@@ -77,7 +77,7 @@ spec = "0 3 * * *"                         # 备份时间（Cron 表达式）
 
 ```toml
 [db.default]
-connection = "sqlite"                          # 数据库类型: sqlite, mysql
+connection = "sqlite"                          # 数据库类型: sqlite, mysql, postgres
 path = "./storage/database/sqlite.db"           # SQLite 路径
 url = "user:pass@tcp(host:3306)/db?charset=utf8mb4&parseTime=True&loc=Local"  # MySQL 连接字符串
 maxIdleConnections = 3                        # 最大空闲连接数
@@ -101,6 +101,19 @@ maxIdleConnections = 10
 maxOpenConnections = 20
 maxLifeSeconds = 3600
 ```
+
+**PostgreSQL 配置示例：**
+```toml
+[db.default]
+connection = "postgres"
+url = "host=localhost port=5432 user=gooseforum password=secret dbname=gooseforum sslmode=disable TimeZone=Asia/Shanghai"
+maxIdleConnections = 10
+maxOpenConnections = 20
+maxLifeSeconds = 3600
+```
+
+连接名称也可写成 `postgresql`。`url` 支持上面的 PostgreSQL 键值格式，也支持
+`postgres://` URL。
 
 ### [storage] 文件存储配置
 
