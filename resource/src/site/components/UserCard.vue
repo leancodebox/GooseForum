@@ -129,6 +129,7 @@ onBeforeUnmount(() => {
       :collision-padding="12"
       :aria-label="displayName"
       class="w-[min(20rem,calc(100vw-1.5rem))] p-3"
+      @focusoutside.prevent
     >
       <div class="flex items-start gap-3">
         <a :href="profileUrl" class="shrink-0 rounded-full ring-2 ring-base-100">
