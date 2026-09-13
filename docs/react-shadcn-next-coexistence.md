@@ -2,7 +2,7 @@
 
 ## 状态
 
-- 决策状态：已确定方向，尚未开始实现。
+- 决策状态：方向已确定，隔离的 React workspace 与开发入口已经初始化。
 - 下一步：将当前 Vue 客户端迁移为 React，并采用 React 官方 shadcn/ui 生态。
 - 长期并存能力：Next 作为可选渲染方式接入，不取代 Go SSR，也不是 React 迁移的下一阶段或完成条件。
 - 历史基线：`docs/shadcn-vue-site-migration.md` 记录了当前 shadcn-vue/Reka UI 基础层的迁移结果；该实现继续作为迁移前的行为与视觉基线。
@@ -31,7 +31,7 @@ resource/
 │   ├── client/             现有框架无关 payload、API 与浏览器协议
 │   └── react/              React 业务组件、hooks、shadcn/ui 与宿主适配接口
 ├── apps/
-│   ├── react/              带 index.html 的 Vite 开发入口和 Go payload 适配
+│   ├── react/              C 端与后台双入口的 Vite 开发应用和 Go payload 适配
 │   └── next/               可选 Next App Router 适配与服务端入口
 ├── templates/              长期保留的 Go HTML/SEO/no-js 模板
 └── static/                 Go 模式使用的浏览器端构建产物
@@ -78,9 +78,10 @@ Go 客户端适配   Next 适配
 ### 阶段一：React 基础设施
 
 - 建立 React workspace、TypeScript 和构建入口。
-- 保留独立 `index.html` 作为开发壳；未检测到 Go 注入 payload 时，通过 Vite 代理读取真实 Go 页面 payload。
+- 使用同一 Vite 应用的两个 HTML 入口：根 `index.html` 对应 C 端，`admin/index.html` 对应管理后台；两套源码分别位于 `src/site/` 和 `src/admin/`。
+- 未检测到 Go 注入 payload 时，通过 Vite 代理读取真实 Go 页面 payload。
 - React 开发构建产物保留在新 app 自己的 `dist/`，不进入现有 `resource/static/` 或 Go `embed.FS`。
-- 初始化官方 shadcn/ui，映射现有主题 token。
+- 初始化官方 shadcn/ui，映射现有主题 token；管理后台 shell 以官方 `dashboard-01` block 为起点，C 端按 GooseForum 的信息架构自行设计。
 - 建立 Go payload、导航、i18n、主题和 flash message 的 React 适配。
 - 保持现有 Go 模板与 `X-Goose-Page` 协议。
 - 为核心交互增加浏览器级回归测试。

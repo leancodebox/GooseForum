@@ -22,6 +22,12 @@ export default defineConfig(({ mode }) => {
       manifest: true,
       outDir: 'dist',
       emptyOutDir: true,
+      rollupOptions: {
+        input: {
+          site: fileURLToPath(new URL('./index.html', import.meta.url)),
+          admin: fileURLToPath(new URL('./admin/index.html', import.meta.url)),
+        },
+      },
     },
     server: {
       port: 3011,
