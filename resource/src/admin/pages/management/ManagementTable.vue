@@ -3,7 +3,8 @@ import { adminText } from '@/admin/runtime/i18n-text'
 
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import AdminSection from '@/admin/components/AdminSection.vue'
-import { Button } from '@/admin/components/ui/button'
+import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 withDefaults(defineProps<{
   loading?: boolean
@@ -72,16 +73,15 @@ const emit = defineEmits<{
     >
       <div>{{ adminText('k0054') }} {{ total }} {{ adminText('k0055') }}</div>
       <div class="flex items-center gap-2">
-        <select
-          class="h-9 rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          :value="pageSize"
-          @change="emit('update:pageSize', Number(($event.target as HTMLSelectElement).value))"
-        >
-          <option :value="10">{{ adminText('k002x') }}</option>
-          <option :value="20">{{ adminText('k002y') }}</option>
-          <option :value="30">{{ adminText('k002z') }}</option>
-          <option :value="50">{{ adminText('k0030') }}</option>
-        </select>
+        <Select :model-value="String(pageSize)" @update:model-value="emit('update:pageSize', Number($event))">
+          <SelectTrigger class="w-20"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">{{ adminText('k002x') }}</SelectItem>
+            <SelectItem value="20">{{ adminText('k002y') }}</SelectItem>
+            <SelectItem value="30">{{ adminText('k002z') }}</SelectItem>
+            <SelectItem value="50">{{ adminText('k0030') }}</SelectItem>
+          </SelectContent>
+        </Select>
         <Button
           variant="outline"
           size="icon"

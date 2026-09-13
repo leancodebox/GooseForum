@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { ArrowLeft, Home } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
+import { Button } from '@/components/ui/button'
 import { resolveApiMessage } from '@/runtime/api-message'
 import EmptyState from '@/site/components/EmptyState.vue'
 import type { ErrorPageProps, LayoutPayload } from '@gooseforum/client'
@@ -31,18 +32,21 @@ function goBack() {
     <main class="min-w-0 pb-8">
       <section class="gf-card overflow-hidden">
         <EmptyState :title="`${page.props.code} · ${localizedTitle}`" :description="localizedMessage">
-          <button
+          <Button
             type="button"
-            class="gf-button gf-button-md gf-button-secondary"
+            variant="surface"
+            class="px-3"
             @click="goBack"
           >
             <ArrowLeft class="h-4 w-4" />
             {{ t('common.back') }}
-          </button>
-          <a href="/" class="gf-button gf-button-md gf-button-primary">
-            <Home class="h-4 w-4" />
-            {{ t('common.home') }}
-          </a>
+          </Button>
+          <Button as-child variant="brand" class="px-3">
+            <a href="/">
+              <Home class="h-4 w-4" />
+              {{ t('common.home') }}
+            </a>
+          </Button>
         </EmptyState>
       </section>
     </main>

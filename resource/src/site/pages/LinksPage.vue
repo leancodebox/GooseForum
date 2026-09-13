@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { ExternalLink, Link, Send, ShieldCheck } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
 import type { LayoutPayload, LinksPageProps } from '@gooseforum/client'
@@ -16,7 +18,7 @@ const { t } = useI18n()
     <div class="pb-12">
       <PageHeader :title="t('linksPage.title')" :description="t('linksPage.subtitle')" compact>
         <template #badge>
-          <span class="gf-badge gf-badge-muted">{{ props.totalCount }}</span>
+          <Badge variant="muted">{{ props.totalCount }}</Badge>
         </template>
       </PageHeader>
 
@@ -33,7 +35,7 @@ const { t } = useI18n()
                 </span>
                 <span class="truncate">{{ group.name }}</span>
               </h2>
-              <span class="gf-badge gf-badge-muted text-[11px]">{{ group.links.length }}</span>
+              <Badge variant="muted" class="text-[11px]">{{ group.links.length }}</Badge>
             </div>
 
             <div class="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
@@ -75,10 +77,12 @@ const { t } = useI18n()
           <div class="rounded-[var(--gf-radius-box)] border border-line/70 bg-base-200/45 p-4 sm:bg-base-100">
             <h2 class="text-sm font-semibold text-base-content">{{ t('linksPage.applyTitle') }}</h2>
             <p class="mt-2 text-sm leading-6 text-base-content/55">{{ t('linksPage.applyDescription') }}</p>
-            <a href="/publish" class="gf-button gf-button-md gf-button-primary mt-4">
-              <Send class="h-4 w-4" />
-              {{ t('linksPage.applyAction') }}
-            </a>
+            <Button as-child variant="brand" class="mt-4">
+              <a href="/publish">
+                <Send class="h-4 w-4" />
+                {{ t('linksPage.applyAction') }}
+              </a>
+            </Button>
           </div>
 
           <div class="rounded-[var(--gf-radius-box)] border border-line/70 bg-base-200/45 p-4 sm:bg-base-100">

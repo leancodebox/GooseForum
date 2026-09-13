@@ -6,8 +6,8 @@ import { adminText } from '@/admin/runtime/i18n-text'
 import { useI18n } from 'vue-i18n'
 import AdminSection from '@/admin/components/AdminSection.vue'
 import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
-import { Badge } from '@/admin/components/ui/badge'
-import { Button } from '@/admin/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -15,18 +15,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/admin/components/ui/dialog'
-import { Input } from '@/admin/components/ui/input'
-import { Label } from '@/admin/components/ui/label'
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/admin/components/ui/select'
-import { Switch } from '@/admin/components/ui/switch'
-import { Textarea } from '@/admin/components/ui/textarea'
+} from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
 import { createOIDCClient, getOIDCClients, getOIDCProviderStatus, rotateOIDCClientSecret, rotateOIDCSigningKey, saveOIDCProviderSettings, updateOIDCClient } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import type { OIDCClient, OIDCClientAuthMethod, OIDCClientInput, OIDCProviderStatus } from '@/admin/types'
@@ -396,14 +396,14 @@ onBeforeUnmount(clearSecret)
           <fieldset class="grid gap-3">
             <legend class="text-sm font-medium">{{ adminText('oidcClientType') }}</legend>
             <div class="grid gap-2 sm:grid-cols-2">
-              <button type="button" class="rounded-md border p-3 text-left text-sm transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50" :class="!form.public ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'" :disabled="editing" :aria-pressed="!form.public" @click="setPublic(false)">
+              <Button type="button" variant="ghost" class="h-auto flex-col items-start justify-start whitespace-normal rounded-md border p-3 text-left text-sm font-normal shadow-none" :class="!form.public ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'" :disabled="editing" :aria-pressed="!form.public" @click="setPublic(false)">
                 <span class="font-medium">{{ adminText('oidcConfidential') }}</span>
                 <span class="mt-1 block text-xs text-muted-foreground">{{ adminText('oidcConfidentialHint') }}</span>
-              </button>
-              <button type="button" class="rounded-md border p-3 text-left text-sm transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50" :class="form.public ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'" :disabled="editing" :aria-pressed="form.public" @click="setPublic(true)">
+              </Button>
+              <Button type="button" variant="ghost" class="h-auto flex-col items-start justify-start whitespace-normal rounded-md border p-3 text-left text-sm font-normal shadow-none" :class="form.public ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'" :disabled="editing" :aria-pressed="form.public" @click="setPublic(true)">
                 <span class="font-medium">{{ adminText('oidcPublic') }}</span>
                 <span class="mt-1 block text-xs text-muted-foreground">{{ adminText('oidcPublicHint') }}</span>
-              </button>
+              </Button>
             </div>
           </fieldset>
 

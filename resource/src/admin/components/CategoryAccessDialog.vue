@@ -2,8 +2,8 @@
 import { computed, ref, watch } from 'vue'
 import { AlertTriangle, Check, LockKeyhole, RefreshCw, ShieldCheck, UsersRound } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
-import { Badge } from '@/admin/components/ui/badge'
-import { Button } from '@/admin/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -11,9 +11,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/admin/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/admin/components/ui/select'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/admin/components/ui/table'
+} from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { getAccessControlOverview, saveCategoryAccess } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import type { AccessControlOverview, AccessGroup, AdminCategory } from '@/admin/types'

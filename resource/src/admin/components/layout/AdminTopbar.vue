@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { adminText } from '@/admin/runtime/i18n-text'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { ArrowLeft, Languages, Moon, Sun } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
-import { Button } from '@/admin/components/ui/button'
-import { Separator } from '@/admin/components/ui/separator'
-import { SidebarTrigger } from '@/admin/components/ui/sidebar'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Separator } from '@/components/ui/separator'
+import { SidebarTrigger } from '@/components/ui/sidebar'
 import { setLocale, supportedLocales, type Locale } from '@/runtime/i18n'
 import { useSiteTheme } from '@/runtime/site-theme'
 import type { LayoutPayload } from '@gooseforum/client'
@@ -15,13 +16,11 @@ defineProps<{
 }>()
 
 const { t, locale } = useI18n()
-const languageMenuOpen = ref(false)
 const { isDark, toggleTheme } = useSiteTheme()
 const themeButtonText = computed(() => isDark.value ? adminText('themeSwitchLight') : adminText('themeSwitchDark'))
 
 function switchLocale(nextLocale: Locale) {
   setLocale(nextLocale)
-  languageMenuOpen.value = false
 }
 </script>
 
@@ -49,35 +48,29 @@ function switchLocale(nextLocale: Locale) {
         <Sun v-if="isDark" class="size-4" />
         <Moon v-else class="size-4" />
       </Button>
-      <div class="relative">
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          type="button"
-          :aria-label="t('shell.switchLanguage')"
-          :title="t('shell.switchLanguage')"
-          @click="languageMenuOpen = !languageMenuOpen"
-        >
-          <Languages class="size-4" />
-        </Button>
-        <div
-          v-if="languageMenuOpen"
-          class="absolute right-0 z-50 mt-2 w-36 overflow-hidden rounded-md border bg-popover py-1 text-popover-foreground shadow-lg"
-        >
+      <DropdownMenu :modal="false">
+        <DropdownMenuTrigger as-child>
           <Button
+            size="icon-sm"
+            variant="ghost"
+            type="button"
+            :aria-label="t('shell.switchLanguage')"
+            :title="t('shell.switchLanguage')"
+          >
+            <Languages class="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" class="w-36">
+          <DropdownMenuItem
             v-for="item in supportedLocales"
             :key="item"
-            variant="ghost"
-            size="sm"
-            type="button"
-            class="w-full justify-start rounded-none"
-            :class="locale === item ? 'font-semibold text-primary hover:text-primary' : 'text-popover-foreground'"
-            @click="switchLocale(item)"
+            :class="locale === item ? 'font-semibold text-primary focus:text-primary' : ''"
+            @select="switchLocale(item)"
           >
             {{ t(`locale.${item}`) }}
-          </Button>
-        </div>
-      </div>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <Button as-child size="sm" variant="ghost" class="hidden xl:inline-flex">
         <a href="/">
           <ArrowLeft class="size-4" />

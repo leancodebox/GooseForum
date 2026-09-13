@@ -16,6 +16,8 @@ import {
   UserPlus,
 } from '@lucide/vue'
 import { TooltipContent, TooltipPortal, TooltipProvider, TooltipRoot, TooltipTrigger } from 'reka-ui'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { followUser } from '@/runtime/api'
 import { formatDate, formatDateTime, formatNumber, timeAgo } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
@@ -259,10 +261,10 @@ function safeProfileUrl(value?: string) {
               <div class="min-w-0 pt-3">
                 <div class="flex min-w-0 flex-wrap items-center gap-2">
                   <h1 class="truncate text-2xl font-bold leading-tight text-base-content">{{ displayName }}</h1>
-                  <span v-if="page.props.user.isAdmin" class="gf-badge gf-badge-warning rounded text-[11px]">Admin</span>
-                  <span v-if="page.props.user.isOnline" class="gf-badge gf-badge-success rounded text-[11px]">
+                  <Badge v-if="page.props.user.isAdmin" variant="warning" class="rounded text-[11px]">Admin</Badge>
+                  <Badge v-if="page.props.user.isOnline" variant="success" class="rounded text-[11px]">
                     <Radio class="h-3 w-3" /> {{ t('user.online') }}
-                  </span>
+                  </Badge>
                 </div>
                 <p class="mt-1 text-sm font-medium text-base-content/55">@{{ page.props.user.username }}</p>
                 <p class="mt-2 max-w-3xl text-sm leading-relaxed text-base-content/75">{{ bioText }}</p>
@@ -270,33 +272,29 @@ function safeProfileUrl(value?: string) {
             </div>
 
             <div class="flex shrink-0 flex-wrap items-center gap-2">
-              <a
-                v-if="page.props.isOwnProfile"
-                :href="page.props.settingsUrl"
-                class="gf-button gf-button-md gf-button-secondary"
-              >
-                <Settings class="h-4 w-4" />
-                {{ t('user.editProfile') }}
-              </a>
-              <a
-                v-else-if="page.props.canMessage"
-                :href="page.props.messageUrl"
-                class="gf-button gf-button-md gf-button-secondary"
-              >
-                <MessageSquare class="h-4 w-4" />
-                {{ t('shell.nav.messages') }}
-              </a>
-              <button
+              <Button v-if="page.props.isOwnProfile" as-child variant="surface">
+                <a :href="page.props.settingsUrl">
+                  <Settings class="h-4 w-4" />
+                  {{ t('user.editProfile') }}
+                </a>
+              </Button>
+              <Button v-else-if="page.props.canMessage" as-child variant="surface">
+                <a :href="page.props.messageUrl">
+                  <MessageSquare class="h-4 w-4" />
+                  {{ t('shell.nav.messages') }}
+                </a>
+              </Button>
+              <Button
                 v-if="page.props.canFollow"
                 type="button"
-                class="gf-button gf-button-md"
-                :class="isFollowing ? 'bg-base-300 text-base-content hover:bg-base-300' : 'bg-primary text-primary-content hover:bg-primary'"
+                :variant="isFollowing ? 'muted' : 'brand'"
+                :class="isFollowing ? 'bg-base-300 text-base-content hover:bg-base-300' : undefined"
                 :disabled="followLoading"
                 @click="toggleFollow"
               >
                 <UserPlus class="h-4 w-4" />
                 {{ followLoading ? t('common.loading') : isFollowing ? t('user.following') : t('user.follow') }}
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -390,14 +388,15 @@ function safeProfileUrl(value?: string) {
                   <div class="min-w-0">
                     <div class="flex min-w-0 flex-wrap items-center gap-2">
                       <span class="truncate text-[15px] font-semibold text-base-content">{{ topic.title }}</span>
-                      <span
+                      <Badge
                         v-for="category in topicCategories(topic)"
                         :key="category.id"
-                        class="gf-badge gf-badge-muted h-5 gap-1 text-[11px] font-normal"
+                        variant="muted"
+                        class="h-5 gap-1 text-[11px] font-normal"
                       >
                         <span class="h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: category.color }" />
                         {{ category.name }}
-                      </span>
+                      </Badge>
                     </div>
                     <p class="mt-1 truncate text-sm text-base-content/55">{{ topicDescription(topic) }}</p>
                   </div>

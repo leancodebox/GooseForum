@@ -1,6 +1,7 @@
 packages:
   - "."
   - "packages/*"
+ignoreWorkspaceRootCheck: true
 allowBuilds:
   maplibre-gl@2.4.0: false
   vue-demi@0.14.10: true

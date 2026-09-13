@@ -2,6 +2,9 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Award, Bell, Check, CheckCheck, Info, MessageCircle, UserPlus } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { fetchNotifications, markAllNotificationsRead, markNotificationRead } from '@/runtime/api'
 import { formatDateTime } from '@/runtime/format'
 import { useUnreadStatus } from '@/runtime/unread-status'
@@ -318,46 +321,50 @@ function markItemReadAndNavigate(item: NotificationPayload) {
   <main class="min-w-0 pb-8">
     <PageHeader :title="t('notifications.title')" :description="t('notifications.summary', { total: loadedCount })" compact>
       <template #badge>
-        <span v-if="unreadCount" class="gf-badge gf-badge-info h-5 tabular-nums">
+        <Badge v-if="unreadCount" variant="info" class="h-5 tabular-nums">
           {{ t('notifications.unread', { count: unreadCount }) }}
-        </span>
+        </Badge>
       </template>
       <template #meta>
         <p v-if="actionError" class="mt-1 text-xs text-error">{{ actionError }}</p>
       </template>
       <template #actions>
-        <button
+        <Button
           type="button"
-          class="gf-button gf-button-sm gf-button-secondary w-fit text-xs disabled:opacity-45"
+          variant="surface"
+          size="sm"
+          class="w-fit text-xs disabled:opacity-45"
           :disabled="!hasUnread || markingAllRead"
           @click="markAllRead"
         >
           <CheckCheck class="h-4 w-4" />
           {{ markingAllRead ? t('common.loading') : t('notifications.markAllRead') }}
-        </button>
+        </Button>
       </template>
     </PageHeader>
 
     <section class="gf-card overflow-hidden">
-      <div class="flex items-center gap-1 border-b border-line bg-base-200/60 p-2">
-        <button
-          type="button"
-          class="gf-tab"
-          :class="activeFilter === 'all' ? 'bg-base-100 text-base-content shadow-sm ring-1 ring-line' : 'text-base-content/55 hover:bg-base-100/70 hover:text-base-content'"
-          @click="setActiveFilter('all')"
-        >
-          {{ t('notifications.tabs.all') }}
-        </button>
-        <button
-          type="button"
-          class="gf-tab gap-1.5"
-          :class="activeFilter === 'unread' ? 'bg-base-100 text-base-content shadow-sm ring-1 ring-line' : 'text-base-content/55 hover:bg-base-100/70 hover:text-base-content'"
-          @click="setActiveFilter('unread')"
-        >
-          {{ t('notifications.tabs.unread') }}
-          <span v-if="unreadCount" class="gf-badge gf-badge-info px-1.5 text-[11px] font-bold tabular-nums">{{ unreadCount }}</span>
-        </button>
-      </div>
+      <Tabs
+        :model-value="activeFilter"
+        class="gap-0"
+        @update:model-value="setActiveFilter($event as NotificationFilter)"
+      >
+        <TabsList class="h-auto w-full justify-start gap-1 rounded-none border-b border-line bg-base-200/60 p-2">
+          <TabsTrigger
+            value="all"
+            class="h-8 flex-none gap-1.5 rounded-[var(--gf-radius-field)] border border-transparent px-3 text-sm font-semibold text-base-content/55 shadow-none transition hover:bg-base-100/70 hover:text-base-content data-[state=active]:bg-base-100 data-[state=active]:text-base-content data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-line data-[state=active]:hover:bg-base-100"
+          >
+            {{ t('notifications.tabs.all') }}
+          </TabsTrigger>
+          <TabsTrigger
+            value="unread"
+            class="h-8 flex-none gap-1.5 rounded-[var(--gf-radius-field)] border border-transparent px-3 text-sm font-semibold text-base-content/55 shadow-none transition hover:bg-base-100/70 hover:text-base-content data-[state=active]:bg-base-100 data-[state=active]:text-base-content data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-line data-[state=active]:hover:bg-base-100"
+          >
+            {{ t('notifications.tabs.unread') }}
+            <Badge v-if="unreadCount" variant="info" class="px-1.5 text-[11px] font-bold tabular-nums">{{ unreadCount }}</Badge>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       <div class="hidden grid-cols-[34px_minmax(0,1fr)_116px] gap-3 border-b border-line bg-base-200/60 px-3 py-2 text-[11px] font-bold uppercase text-base-content/75 md:grid">
         <div />
@@ -416,16 +423,18 @@ function markItemReadAndNavigate(item: NotificationPayload) {
             <time class="mt-1 block text-xs text-base-content/55 md:hidden">{{ formatDateTime(item.createdAt) }}</time>
           </div>
           <time class="hidden text-right text-xs font-medium tabular-nums text-base-content/55 md:block">{{ formatDateTime(item.createdAt) }}</time>
-          <button
+          <Button
             v-if="!item.isRead"
             type="button"
-            class="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-md text-icon-muted transition-colors hover:bg-base-100 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:static"
+            variant="muted"
+            size="icon-sm"
+            class="absolute right-2 top-2 size-7 text-icon-muted hover:bg-base-100 hover:text-primary md:static"
             :title="t('notifications.markRead')"
             :aria-label="t('notifications.markRead')"
             @click.stop="markItemRead(item)"
           >
             <Check class="h-4 w-4" />
-          </button>
+          </Button>
         </article>
       </div>
 
@@ -434,15 +443,16 @@ function markItemReadAndNavigate(item: NotificationPayload) {
       <EmptyState v-else :icon="Bell" :title="emptyTitle" :description="emptyDescription" />
 
       <div ref="loadMoreEl" class="border-t border-line px-4 py-3 text-center text-xs font-semibold text-base-content/55">
-        <button
+        <Button
           v-if="activeList.hasNext"
           type="button"
-          class="gf-button gf-button-sm gf-button-ghost"
+          variant="brand-ghost"
+          size="sm"
           :disabled="activeList.loading"
           @click="loadNotifications(activeFilter)"
         >
           {{ activeList.loading ? t('notifications.loadingMore') : t('notifications.loadMore') }}
-        </button>
+        </Button>
         <span v-else-if="notifications.length">{{ t('notifications.noMore') }}</span>
       </div>
     </section>

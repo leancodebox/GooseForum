@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { Plus, UsersRound } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
 import TopicListFooter from '@/site/components/TopicListFooter.vue'
@@ -40,23 +41,26 @@ function sortTabLabel(key: string, fallback?: string) {
         <div class="gf-home-topic-toolbar">
           <div class="gf-home-topic-tools">
             <nav class="gf-home-topic-tabs" :aria-label="t('topicList.columns.topic')">
-              <a
+              <Button
                 v-for="tab in page.props.tabs"
                 :key="tab.key"
-                :href="tab.url"
-                :aria-current="tab.active ? 'page' : undefined"
-                class="gf-tab"
-                :class="tab.active ? 'gf-tab-active' : 'gf-tab-idle'"
+                as-child
+                :variant="tab.active ? 'neutral' : 'muted'"
+                size="sm"
               >
-                {{ sortTabLabel(tab.key, tab.label) }}
-              </a>
+                <a :href="tab.url" :aria-current="tab.active ? 'page' : undefined">
+                  {{ sortTabLabel(tab.key, tab.label) }}
+                </a>
+              </Button>
             </nav>
             <TopicListModeSwitch :model-value="listMode" @update:model-value="setListMode" />
           </div>
-          <a href="/publish" class="gf-button gf-button-md gf-button-primary shrink-0 whitespace-nowrap px-3 sm:h-8">
-            <Plus class="h-4 w-4" />
-            {{ t('topicList.newTopic') }}
-          </a>
+          <Button as-child variant="brand" class="shrink-0 whitespace-nowrap px-3 sm:h-8">
+            <a href="/publish">
+              <Plus class="h-4 w-4" />
+              {{ t('topicList.newTopic') }}
+            </a>
+          </Button>
         </div>
 
         <TopicList :topics="topics" :show-categories="false" :show-hot="false">

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { CalendarDays, ChevronLeft, ChevronRight, UsersRound } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
+import { Button } from '@/components/ui/button'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
@@ -76,25 +77,19 @@ const { t } = useI18n()
       class="mt-4 flex items-center justify-between gap-3 border-t border-line/70 pt-4"
       :aria-label="t('membersPage.pagination')"
     >
-      <a
-        v-if="props.previousUrl"
-        :href="props.previousUrl"
-        rel="prev"
-        class="gf-button gf-button-sm gf-button-secondary"
-      >
-        <ChevronLeft class="h-4 w-4" />
-        {{ t('common.previousPage') }}
-      </a>
+      <Button v-if="props.previousUrl" as-child variant="surface" size="sm">
+        <a :href="props.previousUrl" rel="prev">
+          <ChevronLeft class="h-4 w-4" />
+          {{ t('common.previousPage') }}
+        </a>
+      </Button>
       <span v-else aria-hidden="true" />
-      <a
-        v-if="props.pagination.hasNext"
-        :href="props.pagination.nextUrl"
-        rel="next"
-        class="gf-button gf-button-sm gf-button-secondary"
-      >
-        {{ t('common.nextPage') }}
-        <ChevronRight class="h-4 w-4" />
-      </a>
+      <Button v-if="props.pagination.hasNext" as-child variant="surface" size="sm">
+        <a :href="props.pagination.nextUrl" rel="next">
+          {{ t('common.nextPage') }}
+          <ChevronRight class="h-4 w-4" />
+        </a>
+      </Button>
       <span v-else aria-hidden="true" />
     </nav>
   </div>

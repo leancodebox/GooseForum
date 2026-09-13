@@ -2,6 +2,8 @@
 import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Check, LoaderCircle, LockKeyhole } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { resetPassword } from '@/runtime/api'
 import type { LayoutPayload, ResetPasswordPageProps } from '@gooseforum/client'
 
@@ -77,21 +79,23 @@ async function submit() {
               <span class="sr-only">{{ t('auth.newPassword') }}</span>
               <span class="relative block">
                 <LockKeyhole class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/55" />
-                <input v-model="form.password" type="password" class="gf-input pl-10" :placeholder="t('auth.newPassword')" autocomplete="new-password" />
+                <Input v-model="form.password" type="password" class="h-10 rounded-[var(--gf-radius-field)] border-line bg-base-100 pl-10 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20" :placeholder="t('auth.newPassword')" autocomplete="new-password" />
               </span>
             </label>
             <label class="block">
               <span class="sr-only">{{ t('auth.confirmPassword') }}</span>
               <span class="relative block">
                 <LockKeyhole class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/55" />
-                <input v-model="form.confirmPassword" type="password" class="gf-input pl-10" :placeholder="t('auth.confirmPassword')" autocomplete="new-password" />
+                <Input v-model="form.confirmPassword" type="password" class="h-10 rounded-[var(--gf-radius-field)] border-line bg-base-100 pl-10 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20" :placeholder="t('auth.confirmPassword')" autocomplete="new-password" />
               </span>
             </label>
-            <button type="submit" class="gf-button gf-button-xl gf-button-primary w-full" :disabled="!canSubmit">
+            <Button type="submit" variant="brand" size="xl" class="w-full" :disabled="!canSubmit">
               <LoaderCircle v-if="loading" class="h-4 w-4 animate-spin" />
               {{ t('auth.saveNewPassword') }}
-            </button>
-            <a href="/login" class="gf-button gf-button-lg gf-button-ghost w-full">{{ t('auth.backToLogin') }}</a>
+            </Button>
+            <Button as-child variant="brand-ghost" size="lg" class="w-full px-4">
+              <a href="/login">{{ t('auth.backToLogin') }}</a>
+            </Button>
           </form>
         </div>
 

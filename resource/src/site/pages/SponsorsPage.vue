@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { ExternalLink, HeartHandshake, Mail, ShieldCheck } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
 import type { LayoutPayload, SponsorPayload, SponsorSectionPayload, SponsorsPageProps } from '@gooseforum/client'
@@ -52,7 +54,7 @@ function showMessage(sponsor: SponsorPayload) {
     <div class="pb-12">
       <PageHeader :title="props.content.title" :description="props.content.description">
         <template #badge>
-          <span class="gf-badge gf-badge-muted">{{ props.totalCount }}</span>
+          <Badge variant="muted">{{ props.totalCount }}</Badge>
         </template>
       </PageHeader>
 
@@ -63,7 +65,7 @@ function showMessage(sponsor: SponsorPayload) {
               <h2 class="flex min-w-0 items-center gap-2 text-base font-bold text-base-content">
                 <span class="rounded px-1.5 py-0.5 text-[11px] font-semibold" :class="sectionBadgeClass(section)">{{ section.label }}</span>
               </h2>
-              <span class="gf-badge gf-badge-muted text-[11px]">{{ section.sponsors.length }}</span>
+              <Badge variant="muted" class="text-[11px]">{{ section.sponsors.length }}</Badge>
             </div>
 
             <div class="grid gap-3" :class="sectionGrid(section)">
@@ -103,10 +105,12 @@ function showMessage(sponsor: SponsorPayload) {
           <div class="rounded-[var(--gf-radius-box)] border border-line/70 bg-base-200/45 p-4 sm:bg-base-100">
             <h2 class="text-sm font-semibold text-base-content">{{ props.contact.title }}</h2>
             <p class="mt-2 text-sm leading-6 text-base-content/55">{{ props.contact.description }}</p>
-            <a :href="props.contact.buttonLink" class="gf-button gf-button-md gf-button-primary mt-4">
-              <Mail class="h-4 w-4" />
-              {{ props.contact.buttonText }}
-            </a>
+            <Button as-child variant="brand" class="mt-4">
+              <a :href="props.contact.buttonLink">
+                <Mail class="h-4 w-4" />
+                {{ props.contact.buttonText }}
+              </a>
+            </Button>
           </div>
 
           <div v-if="props.rules.length" class="rounded-[var(--gf-radius-box)] border border-line/70 bg-base-200/45 p-4 sm:bg-base-100">

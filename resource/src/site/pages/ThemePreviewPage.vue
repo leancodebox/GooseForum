@@ -20,6 +20,13 @@ import {
   Sparkles,
   Sun,
 } from '@lucide/vue'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
 import { useFlashMessages } from '@/runtime/flash-message'
 import { publishSiteTheme, saveSiteTheme } from '@/runtime/site-theme-api'
 import { applySiteThemeCss, applySiteThemePayload, setTheme, type SiteTheme } from '@/runtime/site-theme'
@@ -506,45 +513,44 @@ function hexToRgb(value: string) {
             <div class="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold">
               <span class="rounded-full bg-base-200 px-2 py-1 text-base-content/65">v{{ prepublish.version || 1 }}</span>
               <span class="rounded-full px-2 py-1" :class="prepublish.enabled ? 'bg-success/10 text-success' : 'bg-base-200 text-base-content/55'">{{ prepublish.enabled ? 'Enabled' : 'Disabled' }}</span>
-              <span v-if="dirty" class="gf-badge gf-badge-warning py-1">Unsaved</span>
-              <span v-if="!canManageSiteTheme" class="gf-badge gf-badge-error py-1">Read only</span>
+              <Badge v-if="dirty" variant="warning" class="py-1">Unsaved</Badge>
+              <Badge v-if="!canManageSiteTheme" variant="error" class="py-1">Read only</Badge>
             </div>
           </div>
           <div class="flex shrink-0 items-center gap-1.5">
-            <button type="button" class="gf-button gf-button-sm gf-button-secondary text-xs" @click="resetAllThemesToDefault">
+            <Button type="button" variant="surface" size="sm" class="text-xs" @click="resetAllThemesToDefault">
               {{ t('themePreview.resetDefault') }}
-            </button>
-            <button type="button" class="gf-icon-button h-8 w-8 bg-base-200" :title="t('themePreview.restoreToSavedTitle')" @click="resetPrepublish">
+            </Button>
+            <Button type="button" variant="muted" size="icon-sm" class="bg-base-200" :title="t('themePreview.restoreToSavedTitle')" :aria-label="t('themePreview.restoreToSavedTitle')" @click="resetPrepublish">
               <RotateCcw class="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </div>
 
         <div class="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
-          <div class="gf-segmented grid-cols-2">
-            <button
-              type="button"
-              class="gf-segmented-item"
-              :class="selectedTheme === 'gf-light' ? 'gf-segmented-item-active' : 'gf-segmented-item-idle'"
-              @click="selectTheme('gf-light')"
-            >
-              <Sun class="h-4 w-4" /> Light
-            </button>
-            <button
-              type="button"
-              class="gf-segmented-item"
-              :class="selectedTheme === 'gf-dark' ? 'gf-segmented-item-active' : 'gf-segmented-item-idle'"
-              @click="selectTheme('gf-dark')"
-            >
-              <Moon class="h-4 w-4" /> Dark
-            </button>
-          </div>
+          <Tabs
+            class="w-full"
+            :model-value="selectedTheme"
+            @update:model-value="selectTheme($event as SiteTheme)"
+          >
+            <TabsList class="grid h-auto w-full grid-cols-2 gap-0 rounded-[var(--gf-radius-field)] border border-line bg-base-200 p-0.5">
+              <TabsTrigger
+                value="gf-light"
+                class="h-8 rounded-[calc(var(--gf-radius-field)-2px)] px-2 text-sm font-semibold text-base-content/55 hover:text-base-content data-[state=active]:bg-base-100 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-line"
+              >
+                <Sun class="h-4 w-4" /> Light
+              </TabsTrigger>
+              <TabsTrigger
+                value="gf-dark"
+                class="h-8 rounded-[calc(var(--gf-radius-field)-2px)] px-2 text-sm font-semibold text-base-content/55 hover:text-base-content data-[state=active]:bg-base-100 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-line"
+              >
+                <Moon class="h-4 w-4" /> Dark
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
           <label class="inline-flex cursor-pointer items-center gap-2 rounded-md bg-base-200 px-2 text-sm font-semibold text-base-content/75">
             <span>{{ t('themePreview.enableLabel') }}</span>
-            <span class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition" :class="prepublish.enabled ? 'bg-primary' : 'bg-base-300'">
-              <input v-model="prepublish.enabled" type="checkbox" class="peer sr-only" />
-              <span class="absolute left-0.5 h-4 w-4 rounded-full bg-primary-content transition" :class="prepublish.enabled ? 'translate-x-4' : 'translate-x-0 bg-base-100'" />
-            </span>
+            <Switch v-model="prepublish.enabled" class="data-[state=unchecked]:bg-base-300" />
           </label>
         </div>
       </div>
@@ -557,11 +563,12 @@ function hexToRgb(value: string) {
             <span class="h-px flex-1 bg-line" />
           </div>
           <div class="grid grid-cols-3 gap-1.5">
-            <button
+            <Button
               v-for="preset in themePresets"
               :key="preset.key"
               type="button"
-              class="min-w-0 rounded-md border border-line bg-base-100 px-2 py-1.5 text-left transition hover:border-primary/30 hover:bg-base-200 disabled:cursor-not-allowed disabled:opacity-55"
+              variant="surface"
+              class="block w-full min-w-0 rounded-md border border-line bg-base-100 px-2 py-1.5 text-left transition hover:border-primary/30 hover:bg-base-200 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-55"
               :disabled="!canManageSiteTheme"
               :title="presetDescription(preset)"
               @click="applyPreset(preset)"
@@ -577,7 +584,7 @@ function hexToRgb(value: string) {
                   />
                 </span>
               </div>
-            </button>
+            </Button>
           </div>
         </section>
 
@@ -586,9 +593,9 @@ function hexToRgb(value: string) {
             <PaintBucket class="h-4 w-4 text-icon-muted" />
             <h2 class="text-sm font-semibold text-base-content">Change Colors</h2>
             <span class="h-px flex-1 bg-line" />
-            <button type="button" class="gf-button gf-button-sm gf-button-secondary h-7 text-xs" @click="resetSelectedThemeToDefault">
+            <Button type="button" variant="surface" size="sm" class="h-7 text-xs" @click="resetSelectedThemeToDefault">
               {{ t('themePreview.resetDefault') }}
-            </button>
+            </Button>
           </div>
 
           <div v-for="group in colorGroups" :key="group.key" class="border-b border-line pb-3 last:border-b-0">
@@ -653,11 +660,12 @@ function hexToRgb(value: string) {
                 <span class="font-mono text-xs text-base-content/55">{{ tokenValue(key) }}</span>
               </div>
               <div class="grid grid-cols-5 gap-1.5">
-                <button
+                <Button
                   v-for="[, value] in radiusOptions"
                   :key="`${key}-${value}`"
                   type="button"
-                  class="grid h-10 place-items-center rounded-md border transition"
+                  variant="surface"
+                  class="grid h-10 place-items-center rounded-md border p-0 transition"
                   :class="isRadiusSelected(key, value) ? 'border-primary bg-info/10' : 'border-line bg-base-200 hover:bg-base-300'"
                   :aria-label="`${label} ${value}px`"
                   @click="setToken(key, fromRange(key, value))"
@@ -667,7 +675,7 @@ function hexToRgb(value: string) {
                     :class="isRadiusSelected(key, value) ? 'opacity-100' : 'opacity-35'"
                     :style="radiusPreviewStyle(value, isRadiusSelected(key, value))"
                   />
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -682,7 +690,11 @@ function hexToRgb(value: string) {
           <div class="grid gap-2">
             <label class="flex items-center justify-between rounded-md bg-base-200 px-2.5 py-1.5 text-sm font-medium text-base-content/75">
               <span>Depth Effect</span>
-              <input type="checkbox" class="h-4 w-4 accent-primary" :checked="tokenValue('depth') === '1'" @change="setToken('depth', ($event.target as HTMLInputElement).checked ? '1' : '0')" />
+              <Checkbox
+                :model-value="tokenValue('depth') === '1'"
+                class="border-line shadow-none focus-visible:ring-primary"
+                @update:model-value="setToken('depth', Boolean($event) ? '1' : '0')"
+              />
             </label>
           </div>
         </section>
@@ -699,38 +711,46 @@ function hexToRgb(value: string) {
           </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <div class="gf-segmented grid-cols-3">
-            <button
-              v-for="[mode, label, Icon] in previewModes"
-              :key="mode"
-              type="button"
-              class="gf-segmented-item text-xs sm:text-sm"
-              :class="previewMode === mode ? 'gf-segmented-item-active' : 'gf-segmented-item-idle'"
-              @click="previewMode = mode"
-            >
-              <component :is="Icon" class="h-4 w-4" /> {{ label }}
-            </button>
-          </div>
-          <button
+          <Tabs
+            class="w-auto"
+            :model-value="previewMode"
+            @update:model-value="previewMode = $event as PreviewMode"
+          >
+            <TabsList class="grid h-auto grid-cols-3 gap-0 rounded-[var(--gf-radius-field)] border border-line bg-base-200 p-0.5">
+              <TabsTrigger
+                v-for="[mode, label, Icon] in previewModes"
+                :key="mode"
+                :value="mode"
+                class="h-8 rounded-[calc(var(--gf-radius-field)-2px)] px-2 text-xs font-semibold text-base-content/55 hover:text-base-content sm:text-sm data-[state=active]:bg-base-100 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-line"
+              >
+                <component :is="Icon" class="h-4 w-4" /> {{ label }}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Button
             type="button"
-            class="gf-button gf-button-sm gf-button-secondary w-32 whitespace-nowrap disabled:bg-base-100 disabled:text-base-content/75 disabled:opacity-100"
+            variant="surface"
+            size="sm"
+            class="w-32 whitespace-nowrap disabled:bg-base-100 disabled:text-base-content/75 disabled:opacity-100"
             :class="saving ? 'cursor-wait bg-base-200 ring-2 ring-primary/20' : ''"
             :aria-busy="saving"
             :disabled="!canManageSiteTheme || saving || publishing"
             @click="save"
           >
             <Save class="h-4 w-4" :class="saving ? 'animate-pulse text-primary' : ''" /> {{ t('themePreview.saveDraft') }}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            class="gf-button gf-button-sm gf-button-primary w-28 whitespace-nowrap disabled:bg-primary disabled:text-primary-content disabled:opacity-100"
+            variant="brand"
+            size="sm"
+            class="w-28 whitespace-nowrap disabled:bg-primary disabled:text-primary-content disabled:opacity-100"
             :class="publishing ? 'cursor-wait brightness-95 ring-2 ring-primary/25' : ''"
             :aria-busy="publishing"
             :disabled="!canManageSiteTheme || saving || publishing"
             @click="publish"
           >
             <Rocket class="h-4 w-4" :class="publishing ? 'animate-pulse' : ''" /> {{ t('themePreview.publishSite') }}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -744,13 +764,13 @@ function hexToRgb(value: string) {
             <section class="gf-card overflow-hidden">
               <header class="flex flex-col gap-2 border-b border-line bg-base-100 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex min-w-0 items-center gap-2 overflow-x-auto">
-                  <button class="gf-tab gf-tab-active">{{ t('themePreview.tabLatest') }}</button>
-                  <button class="gf-tab gf-tab-idle">{{ t('themePreview.tabHot') }}</button>
-                  <button class="gf-tab gf-tab-idle">{{ t('themePreview.tabFeatured') }}</button>
+                  <span class="inline-flex h-8 shrink-0 items-center rounded-[var(--gf-radius-field)] bg-neutral px-3 text-sm font-semibold text-neutral-content">{{ t('themePreview.tabLatest') }}</span>
+                  <span class="inline-flex h-8 shrink-0 items-center rounded-[var(--gf-radius-field)] px-3 text-sm font-semibold text-base-content/55">{{ t('themePreview.tabHot') }}</span>
+                  <span class="inline-flex h-8 shrink-0 items-center rounded-[var(--gf-radius-field)] px-3 text-sm font-semibold text-base-content/55">{{ t('themePreview.tabFeatured') }}</span>
                 </div>
-                <button class="gf-button gf-button-sm gf-button-primary">
+                <Button variant="brand" size="sm">
                   <Rocket class="h-4 w-4" /> {{ t('themePreview.samplePublish') }}
-                </button>
+                </Button>
               </header>
               <div class="hidden grid-cols-[minmax(0,1fr)_88px_56px_56px_64px] gap-2 border-b border-line bg-base-200/60 px-3 py-2 text-[11px] font-bold uppercase text-base-content/75 xl:grid">
                 <div>Topic</div>
@@ -791,8 +811,8 @@ function hexToRgb(value: string) {
 
             <article class="gf-card p-3">
               <div class="flex flex-wrap items-center gap-2">
-                <span class="gf-badge gf-badge-info">Preview</span>
-                <span class="gf-badge gf-badge-muted">Theme</span>
+                <Badge variant="info">Preview</Badge>
+                <Badge variant="muted">Theme</Badge>
               </div>
               <h3 class="mt-3 text-xl font-semibold leading-tight text-base-content">{{ t('themePreview.sampleTopicTitle') }}</h3>
               <div class="gf-prose gf-prose-post mt-2 text-sm">
@@ -843,17 +863,23 @@ function hexToRgb(value: string) {
                   <span class="rounded-selector bg-accent px-2 py-1 text-xs font-bold text-accent-content">NEW</span>
                 </div>
                 <div class="mt-4 flex flex-wrap gap-2">
-                  <button class="gf-button gf-button-sm gf-button-primary">Primary</button>
-                  <button class="gf-button gf-button-sm gf-button-secondary">Secondary</button>
+                  <Button variant="brand" size="sm">Primary</Button>
+                  <Button variant="surface" size="sm">Secondary</Button>
                 </div>
               </div>
 
               <div class="rounded-box border border-line bg-base-100 p-4">
                 <h3 class="font-semibold text-base-content">Form states</h3>
                 <label class="mt-3 block text-xs font-medium text-base-content/55">Input</label>
-                <input class="gf-input mt-1 bg-base-200" value="GooseForum" />
+                <Input
+                  class="mt-1 h-10 rounded-[var(--gf-radius-field)] border-line bg-base-200 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 dark:bg-base-200"
+                  default-value="GooseForum"
+                />
                 <label class="mt-3 block text-xs font-medium text-base-content/55">Textarea</label>
-                <textarea class="gf-textarea mt-1 min-h-20 resize-none bg-base-200" :value="t('themePreview.sampleTextarea')"></textarea>
+                <Textarea
+                  class="mt-1 min-h-20 resize-none rounded-[var(--gf-radius-field)] border-line bg-base-200 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 dark:bg-base-200"
+                  :default-value="t('themePreview.sampleTextarea')"
+                />
                 <div class="mt-3 flex items-center justify-between rounded-selector bg-base-200 px-3 py-2">
                   <span class="text-sm font-medium text-base-content/75">Selector</span>
                   <span class="h-5 w-9 rounded-full bg-primary p-0.5"><span class="block h-4 w-4 translate-x-4 rounded-full bg-primary-content" /></span>
@@ -880,8 +906,8 @@ function hexToRgb(value: string) {
               </div>
               <div v-for="item in ['Users', 'Posts', 'Badges']" :key="item" class="grid grid-cols-[1fr_72px_80px] items-center border-b border-line px-3 py-2 text-sm last:border-b-0">
                 <div class="font-medium text-base-content">{{ item }}</div>
-                <div><span class="gf-badge gf-badge-success">OK</span></div>
-                <div class="text-right"><button class="rounded-md px-2 py-1 text-xs font-semibold text-primary hover:bg-info/10">Edit</button></div>
+                <div><Badge variant="success">OK</Badge></div>
+                <div class="text-right"><span class="inline-flex rounded-md px-2 py-1 text-xs font-semibold text-primary">Edit</span></div>
               </div>
             </div>
             <div class="mt-4 rounded-md border border-line bg-base-200 p-3">
@@ -899,9 +925,9 @@ function hexToRgb(value: string) {
               <Code2 class="h-4 w-4 text-icon-muted" />
               <h3 class="text-sm font-semibold text-base-content">Generated CSS</h3>
             </div>
-            <button type="button" class="gf-button gf-button-sm gf-button-secondary" @click="copyThemeCss">
+            <Button type="button" variant="surface" size="sm" @click="copyThemeCss">
               <Clipboard class="h-4 w-4" /> {{ copying ? 'Copied' : 'Copy' }}
-            </button>
+            </Button>
           </header>
           <pre class="max-h-[calc(100vh-14rem)] overflow-auto p-4 text-xs leading-6 text-base-content"><code>{{ activeThemeCss || '/* custom theme disabled */' }}</code></pre>
         </div>

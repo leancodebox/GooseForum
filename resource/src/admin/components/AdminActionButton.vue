@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { ButtonVariants } from '@/admin/components/ui/button'
-import { Button } from '@/admin/components/ui/button'
+import type { ButtonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 
 const props = withDefaults(defineProps<{
   compact?: boolean

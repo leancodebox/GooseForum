@@ -3,11 +3,11 @@ import { computed, onMounted, ref } from 'vue'
 import { KeyRound, Loader2, Plus, Save, Trash2, X } from '@lucide/vue'
 import { siDiscord, siGithub, siGoogle, type SimpleIcon } from 'simple-icons'
 import { BasicPage } from '@/admin/components/global-layout'
-import { Badge } from '@/admin/components/ui/badge'
-import { Button } from '@/admin/components/ui/button'
-import { Input } from '@/admin/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/admin/components/ui/tabs'
-import { Switch } from '@/admin/components/ui/switch'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Switch } from '@/components/ui/switch'
 import { adminText } from '@/admin/runtime/i18n-text'
 import { getOAuthSettings, saveOAuthSettings } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
@@ -254,15 +254,17 @@ onMounted(load)
             <div class="flex min-h-7 flex-wrap gap-1.5 md:col-start-2">
               <Badge v-for="scope in activeProvider.scopes" :key="scope" variant="secondary" class="gap-1 px-2 py-1 font-mono text-xs font-normal">
                 {{ scope }}
-                <button
+                <Button
                   v-if="scope !== 'openid'"
                   type="button"
-                  class="rounded-sm text-muted-foreground hover:text-foreground"
+                  variant="ghost"
+                  size="icon-sm"
+                  class="size-4 rounded-sm p-0 text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground"
                   :title="adminText('k005i')"
                   @click="removeScope(activeProvider, scope)"
                 >
                   <X class="size-3" />
-                </button>
+                </Button>
               </Badge>
             </div>
           </div>

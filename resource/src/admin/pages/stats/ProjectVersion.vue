@@ -2,7 +2,7 @@
 import { adminText } from '@/admin/runtime/i18n-text'
 import { AlertCircle, ChevronRight, Code2, ExternalLink, Loader2, Tag } from '@lucide/vue'
 import AdminSection from '@/admin/components/AdminSection.vue'
-import { Button } from '@/admin/components/ui/button'
+import { Button } from '@/components/ui/button'
 import type { GithubRelease } from '@/admin/types'
 
 defineProps<{

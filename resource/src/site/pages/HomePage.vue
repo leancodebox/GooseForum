@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Bell, Mail, Plus, UsersRound } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
 import EmptyState from '@/site/components/EmptyState.vue'
 import TopicListFooter from '@/site/components/TopicListFooter.vue'
 import TopicListModeSwitch from '@/site/components/TopicListModeSwitch.vue'
@@ -103,16 +104,17 @@ onBeforeUnmount(() => window.removeEventListener('storage', syncAnnouncementRead
         :aria-label="t('topicList.announcement')"
       >
         <div class="flex items-start gap-2 sm:gap-2.5">
-          <button
+          <Button
             v-if="announcementUnread"
             type="button"
-            class="-mx-1 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-primary transition hover:bg-primary/10 focus-visible:bg-primary/10 focus-visible:outline-none"
+            variant="muted"
+            class="-mx-1 h-6 w-6 shrink-0 rounded p-0 font-normal text-primary shadow-none transition hover:bg-primary/10 hover:text-primary focus-visible:bg-primary/10 focus-visible:outline-none"
             :title="t('topicList.markAnnouncementRead')"
             :aria-label="t('topicList.markAnnouncementRead')"
             @click="markAnnouncementRead"
           >
             <Bell class="announcement-unread-bell h-4 w-4" />
-          </button>
+          </Button>
           <Bell v-else class="mt-1 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
           <div class="min-w-0 flex-1">
             <div class="gf-prose gf-prose-announcement" v-html="page.props.announcement.html" />
@@ -124,23 +126,26 @@ onBeforeUnmount(() => window.removeEventListener('storage', syncAnnouncementRead
         <div class="gf-home-topic-toolbar">
           <div class="gf-home-topic-tools">
             <nav class="gf-home-topic-tabs" :aria-label="t('topicList.columns.topic')">
-              <a
+              <Button
                 v-for="tab in page.props.tabs"
                 :key="tab.key"
-                :href="tab.url"
-                :aria-current="tab.active ? 'page' : undefined"
-                class="gf-tab"
-                :class="tab.active ? 'gf-tab-active' : 'gf-tab-idle'"
+                as-child
+                :variant="tab.active ? 'neutral' : 'muted'"
+                size="sm"
               >
-                {{ sortTabLabel(tab.key, tab.label) }}
-              </a>
+                <a :href="tab.url" :aria-current="tab.active ? 'page' : undefined">
+                  {{ sortTabLabel(tab.key, tab.label) }}
+                </a>
+              </Button>
             </nav>
             <TopicListModeSwitch :model-value="listMode" @update:model-value="setListMode" />
           </div>
-          <a href="/publish" class="gf-button gf-button-md gf-button-primary shrink-0 whitespace-nowrap px-3 sm:h-8">
-            <Plus class="h-4 w-4" />
-            {{ t('topicList.newTopic') }}
-          </a>
+          <Button as-child variant="brand" class="shrink-0 whitespace-nowrap px-3 sm:h-8">
+            <a href="/publish">
+              <Plus class="h-4 w-4" />
+              {{ t('topicList.newTopic') }}
+            </a>
+          </Button>
         </div>
 
         <TopicList :topics="topics" home :show-pinned="showPinnedLabels">

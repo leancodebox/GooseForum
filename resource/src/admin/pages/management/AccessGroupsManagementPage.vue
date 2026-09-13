@@ -16,13 +16,13 @@ import {
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import AdminSection from '@/admin/components/AdminSection.vue'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/admin/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import { Avatar, AvatarFallback, AvatarImage } from '@/admin/components/ui/avatar'
-import { Badge } from '@/admin/components/ui/badge'
-import { Button } from '@/admin/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -30,11 +30,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/admin/components/ui/dialog'
-import { Input } from '@/admin/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/admin/components/ui/select'
-import { Switch } from '@/admin/components/ui/switch'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/admin/components/ui/table'
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {
   deleteAccessGroup,
   deleteAccessGroupMember,
@@ -289,11 +289,12 @@ onMounted(() => void loadOverview())
           {{ t('accessGroups.noGroups') }}
         </div>
         <nav v-else-if="filteredGroups.length" class="-mx-2 divide-y" :aria-label="t('accessGroups.groups')">
-          <button
+          <Button
             v-for="group in filteredGroups"
             :key="group.id"
             type="button"
-            class="group flex w-full items-center gap-3 px-2 py-2.5 text-left outline-none transition-colors hover:bg-muted/70 focus-visible:ring-2 focus-visible:ring-ring"
+            variant="ghost"
+            class="group h-auto w-full justify-start gap-3 rounded-none px-2 py-2.5 text-left font-normal shadow-none hover:bg-muted/70"
             :class="[
               selectedGroupId === group.id ? 'bg-primary/10 text-primary' : 'text-foreground',
               group.status !== 1 ? 'opacity-60' : '',
@@ -319,7 +320,7 @@ onMounted(() => void loadOverview())
               </span>
             </span>
             <Badge variant="outline" class="min-w-7 px-1.5">{{ activeMemberCount(group) }}</Badge>
-          </button>
+          </Button>
         </nav>
         <div v-else class="py-8 text-center text-sm text-muted-foreground">
           {{ t('accessGroups.noMatchingGroups') }}

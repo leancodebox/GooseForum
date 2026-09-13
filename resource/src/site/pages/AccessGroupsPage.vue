@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { CheckCircle2, Clock3, Lock, UsersRound } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
+import { Button } from '@/components/ui/button'
 import PageHeader from '@/site/components/PageHeader.vue'
 import {
   applyToAccessGroup,
@@ -111,9 +112,9 @@ onMounted(() => void load())
           <span v-else-if="group.status === 2" class="inline-flex items-center gap-1.5 text-sm font-medium text-warning"
             ><Clock3 class="h-4 w-4" />{{ t('accessGroups.pending') }}</span
           >
-          <button v-else class="gf-button gf-button-primary" :disabled="applyingId !== 0" @click="apply(group)">
+          <Button v-else type="button" variant="brand" :disabled="applyingId !== 0" @click="apply(group)">
             {{ applyingId === group.id ? t('common.saving') : t('accessGroups.apply') }}
-          </button>
+          </Button>
         </article>
       </div>
     </section>
@@ -140,19 +141,22 @@ onMounted(() => void load())
           >
             <span class="font-medium">{{ application.username || `#${application.userId}` }}</span>
             <div class="flex gap-2">
-              <button
-                class="gf-button gf-button-muted"
+              <Button
+                type="button"
+                variant="muted"
                 :disabled="reviewingMemberId !== 0"
                 @click="review(group.id, application.id, false)"
               >
-                {{ t('accessGroups.reject') }}</button
-              ><button
-                class="gf-button gf-button-primary"
+                {{ t('accessGroups.reject') }}
+              </Button>
+              <Button
+                type="button"
+                variant="brand"
                 :disabled="reviewingMemberId !== 0"
                 @click="review(group.id, application.id, true)"
               >
                 {{ t('accessGroups.approve') }}
-              </button>
+              </Button>
             </div>
           </div>
         </article>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, X } from '@lucide/vue'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { useI18n } from 'vue-i18n'
 
 interface MarkdownPreviewImage {
@@ -15,8 +17,6 @@ const actualSize = ref(false)
 const viewerOpen = computed(() => images.value.length > 0)
 const currentImage = computed(() => images.value[currentIndex.value])
 const hasMultipleImages = computed(() => images.value.length > 1)
-let lastBodyOverflow = ''
-let bodyScrollLocked = false
 
 function open(nextImages: MarkdownPreviewImage[], index: number) {
   const normalizedImages = nextImages.filter((image) => image.src)
@@ -25,10 +25,6 @@ function open(nextImages: MarkdownPreviewImage[], index: number) {
   images.value = normalizedImages
   currentIndex.value = Math.max(0, Math.min(index, normalizedImages.length - 1))
   actualSize.value = false
-  lockBodyScroll()
-  void nextTick(() => {
-    window.addEventListener('keydown', handleKeydown)
-  })
 }
 
 function close() {
@@ -36,8 +32,6 @@ function close() {
   images.value = []
   currentIndex.value = 0
   actualSize.value = false
-  window.removeEventListener('keydown', handleKeydown)
-  unlockBodyScroll()
 }
 
 function showPrevious() {
@@ -57,11 +51,6 @@ function toggleActualSize() {
 }
 
 function handleKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    event.preventDefault()
-    close()
-    return
-  }
   if (event.key === 'ArrowLeft') {
     event.preventDefault()
     showPrevious()
@@ -78,26 +67,9 @@ function handleKeydown(event: KeyboardEvent) {
   }
 }
 
-function lockBodyScroll() {
-  if (typeof document === 'undefined') return
-  if (document.body.style.overflow === 'hidden') return
-  lastBodyOverflow = document.body.style.overflow
-  document.body.style.overflow = 'hidden'
-  bodyScrollLocked = true
+function onOpenChange(open: boolean) {
+  if (!open) close()
 }
-
-function unlockBodyScroll() {
-  if (typeof document === 'undefined') return
-  if (!bodyScrollLocked) return
-  document.body.style.overflow = lastBodyOverflow
-  lastBodyOverflow = ''
-  bodyScrollLocked = false
-}
-
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', handleKeydown)
-  unlockBodyScroll()
-})
 
 defineExpose({
   open,
@@ -106,16 +78,16 @@ defineExpose({
 </script>
 
 <template>
-  <Teleport to="body">
-    <Transition name="gf-modal">
-      <div
-        v-if="viewerOpen && currentImage"
-        class="gf-markdown-image-viewer fixed inset-0 z-[120] flex items-center justify-center px-3 py-4 backdrop-blur-sm sm:px-6"
-        role="dialog"
-        aria-modal="true"
-        :aria-label="currentImage.alt || t('common.preview')"
-        @click.self="close"
-      >
+  <Dialog :open="viewerOpen" @update:open="onOpenChange">
+    <DialogContent
+      class="h-dvh max-h-none w-full max-w-none border-0 bg-transparent p-0 shadow-none"
+      :show-close-button="false"
+      @keydown="handleKeydown"
+    >
+      <DialogTitle v-if="currentImage" class="sr-only">{{ currentImage.alt || t('common.preview') }}</DialogTitle>
+      <DialogDescription class="sr-only">{{ t('common.preview') }}</DialogDescription>
+
+      <div v-if="currentImage" class="relative h-full w-full">
         <div
           v-if="hasMultipleImages"
           class="gf-markdown-image-viewer-count absolute left-3 top-3 z-10 rounded-full px-3 py-2 text-xs font-semibold tabular-nums sm:left-5 sm:top-5"
@@ -124,8 +96,8 @@ defineExpose({
         </div>
 
         <div class="absolute right-3 top-3 z-10 flex items-center gap-2 sm:right-5 sm:top-5">
-          <button
-            type="button"
+          <Button
+            variant="muted"
             class="gf-markdown-image-viewer-button inline-flex h-10 w-10 items-center justify-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             :aria-label="actualSize ? t('common.preview') : t('image.originalSize')"
             :title="actualSize ? t('common.preview') : t('image.originalSize')"
@@ -134,10 +106,10 @@ defineExpose({
             <Minimize2 v-if="actualSize" class="h-4 w-4" />
             <Maximize2 v-else class="h-4 w-4" />
             <span class="sr-only">{{ actualSize ? t('common.preview') : t('image.originalSize') }}</span>
-          </button>
+          </Button>
 
-          <button
-            type="button"
+          <Button
+            variant="muted"
             class="gf-markdown-image-viewer-button inline-flex h-10 w-10 items-center justify-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             :aria-label="t('common.close')"
             :title="t('common.close')"
@@ -145,12 +117,12 @@ defineExpose({
           >
             <X class="h-4 w-4" />
             <span class="sr-only">{{ t('common.close') }}</span>
-          </button>
+          </Button>
         </div>
 
-        <button
+        <Button
           v-if="hasMultipleImages"
-          type="button"
+          variant="muted"
           class="gf-markdown-image-viewer-button absolute left-3 top-1/2 z-10 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:left-5"
           :aria-label="t('common.previousPage')"
           :title="t('common.previousPage')"
@@ -158,7 +130,7 @@ defineExpose({
         >
           <ChevronLeft class="h-5 w-5" />
           <span class="sr-only">{{ t('common.previousPage') }}</span>
-        </button>
+        </Button>
 
         <div class="gf-markdown-image-viewer-stage grid h-full w-full place-items-center overflow-hidden p-0">
           <img
@@ -172,9 +144,9 @@ defineExpose({
           >
         </div>
 
-        <button
+        <Button
           v-if="hasMultipleImages"
-          type="button"
+          variant="muted"
           class="gf-markdown-image-viewer-button absolute right-3 top-1/2 z-10 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:right-5"
           :aria-label="t('common.nextPage')"
           :title="t('common.nextPage')"
@@ -182,26 +154,13 @@ defineExpose({
         >
           <ChevronRight class="h-5 w-5" />
           <span class="sr-only">{{ t('common.nextPage') }}</span>
-        </button>
+        </Button>
       </div>
-    </Transition>
-  </Teleport>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <style scoped>
-.gf-markdown-image-viewer {
-  --gf-image-viewer-backdrop: color-mix(in oklch, var(--gf-color-base-content) 62%, transparent);
-  --gf-image-viewer-backdrop-glow: color-mix(in oklch, var(--gf-color-base-100) 16%, transparent);
-  background:
-    radial-gradient(circle at top, var(--gf-image-viewer-backdrop-glow), transparent 42%),
-    var(--gf-image-viewer-backdrop);
-}
-
-:global([data-theme="gf-dark"]) .gf-markdown-image-viewer {
-  --gf-image-viewer-backdrop: color-mix(in oklch, var(--gf-color-base-200) 82%, transparent);
-  --gf-image-viewer-backdrop-glow: color-mix(in oklch, var(--gf-color-base-content) 8%, transparent);
-}
-
 .gf-markdown-image-viewer-button {
   border: var(--gf-border) solid color-mix(in oklch, var(--gf-color-line) 76%, transparent);
   background: color-mix(in oklch, var(--gf-color-base-100) 86%, transparent);

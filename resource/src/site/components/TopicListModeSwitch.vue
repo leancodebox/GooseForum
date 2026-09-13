@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { Grid3X3, List } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
+import { Button } from '@/components/ui/button'
 import { useFlashMessages } from '@/runtime/flash-message'
 import type { TopicListMode } from '@/site/composables/useTopicListMode'
 
@@ -27,16 +28,17 @@ function switchMode() {
 </script>
 
 <template>
-  <div class="gf-list-mode-switch">
-    <button
+  <div class="inline-flex h-8 shrink-0 items-center border-l border-line/70 pl-2">
+    <Button
       type="button"
-      class="gf-list-mode-button"
+      variant="muted"
+      size="icon-sm"
       :aria-label="t('topicList.mode.switchTo', { mode: label })"
       :title="t('topicList.mode.switchTo', { mode: label })"
       @click="switchMode"
     >
       <component :is="ModeIcon" class="h-4 w-4" aria-hidden="true" />
       <span class="sr-only">{{ label }}</span>
-    </button>
+    </Button>
   </div>
 </template>

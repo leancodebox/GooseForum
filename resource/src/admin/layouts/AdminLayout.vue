@@ -5,7 +5,7 @@ import AdminTopbar from '@/admin/components/layout/AdminTopbar.vue'
 import {
   SidebarInset,
   SidebarProvider,
-} from '@/admin/components/ui/sidebar'
+} from '@/components/ui/sidebar'
 import type { LayoutPayload } from '@gooseforum/client'
 
 defineProps<{

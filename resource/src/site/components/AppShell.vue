@@ -25,6 +25,15 @@ import {
   UsersRound,
 } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
 import GlobalFlash from './GlobalFlash.vue'
 import { setLocale, supportedLocales, type Locale } from '@/runtime/i18n'
 import { useSiteTheme } from '@/runtime/site-theme'
@@ -183,6 +192,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateHeaderElevated)
   window.removeEventListener('goose:user-card-show', ensureUserCardForEvent)
+  window.clearTimeout(closeTimers.lang)
+  window.clearTimeout(closeTimers.user)
 })
 
 watch(
@@ -251,6 +262,13 @@ function updateHeaderElevated() {
 function setHoverMenu(menu: 'lang' | 'user', open: boolean) {
   window.clearTimeout(closeTimers[menu])
   closeTimers[menu] = undefined
+  if (open) {
+    const otherMenu = menu === 'lang' ? 'user' : 'lang'
+    window.clearTimeout(closeTimers[otherMenu])
+    closeTimers[otherMenu] = undefined
+    if (otherMenu === 'lang') langMenuOpen.value = false
+    else userMenuOpen.value = false
+  }
   if (menu === 'lang') langMenuOpen.value = open
   else userMenuOpen.value = open
 }
@@ -305,18 +323,20 @@ async function loadUserCard() {
     >
       <div class="mx-auto grid h-16 w-full max-w-[1600px] grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:gap-4 sm:px-5 md:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-8 lg:px-8">
         <div class="flex min-w-0 items-center gap-2 sm:gap-4 lg:gap-8">
-          <button
+          <Button
             type="button"
+            variant="muted"
             class="inline-flex h-9 w-9 items-center justify-center rounded-md text-icon-muted hover:bg-base-300 hover:text-base-content lg:hidden"
             :aria-label="t('shell.openMenu')"
             @click="openDrawer"
           >
-            <Menu class="h-5 w-5" />
-          </button>
-          <button
+            <Menu class="size-5" />
+          </Button>
+          <Button
             v-if="hasHeaderTitle"
             type="button"
-            class="flex min-w-0 flex-1 flex-col items-start justify-center gap-0.5 self-stretch text-left transition md:hidden"
+            variant="muted"
+            class="flex min-w-0 flex-1 flex-col items-start justify-center gap-0.5 self-stretch text-left transition shadow-none md:hidden"
             @click="scrollToTop"
           >
             <span class="block max-w-full truncate text-lg font-semibold leading-6 text-base-content hover:text-primary">
@@ -338,7 +358,7 @@ async function loadUserCard() {
                 <span class="max-w-20 truncate">{{ tag.name }}</span>
               </span>
             </span>
-          </button>
+          </Button>
           <a
             href="/"
             class="min-w-0 items-center gap-2"
@@ -377,10 +397,11 @@ async function loadUserCard() {
         </div>
 
         <div class="hidden min-w-0 md:block">
-          <button
+          <Button
             v-if="hasHeaderTitle"
             type="button"
-            class="flex h-16 max-w-full flex-col items-start justify-center gap-0.5 text-left transition"
+            variant="muted"
+            class="flex h-16 max-w-full flex-col items-start justify-center gap-0.5 text-left transition shadow-none"
             @click="scrollToTop"
           >
             <span class="block max-w-full truncate text-xl font-semibold leading-6 text-base-content hover:text-primary">
@@ -402,7 +423,7 @@ async function loadUserCard() {
                 <span class="max-w-28 truncate">{{ tag.name }}</span>
               </span>
             </span>
-          </button>
+          </Button>
         </div>
 
         <div
@@ -418,132 +439,149 @@ async function loadUserCard() {
             <Search class="h-5 w-5" />
           </a>
 
-          <button
+          <Button
             type="button"
-            class="inline-flex h-9 w-9 items-center justify-center rounded-full text-icon-muted transition-colors duration-150 hover:bg-base-300 hover:text-base-content"
+            variant="muted"
+            class="h-9 w-9 rounded-full p-0 font-normal text-icon-muted shadow-none transition-colors duration-150 hover:bg-base-300 hover:text-base-content"
             :aria-label="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
             :title="isDark ? 'Light' : 'Dark'"
             @click="toggleTheme"
           >
-            <Sun v-if="isDark" class="h-5 w-5" />
-            <Moon v-else class="h-5 w-5" />
-          </button>
+            <Sun v-if="isDark" class="size-5" />
+            <Moon v-else class="size-5" />
+          </Button>
 
-          <div
-            class="relative"
-            @mouseenter="setHoverMenu('lang', true)"
-            @mouseleave="closeHoverMenuSoon('lang')"
-            @focusin="setHoverMenu('lang', true)"
-            @focusout="closeHoverMenuSoon('lang')"
-          >
-            <button
-              type="button"
-              class="inline-flex h-9 w-9 items-center justify-center rounded-full text-icon-muted transition-colors duration-150 hover:bg-base-300 hover:text-base-content"
-              :aria-label="t('shell.switchLanguage')"
-              :title="t('shell.switchLanguage')"
-              :aria-expanded="langMenuOpen"
-              @click="langMenuOpen = !langMenuOpen"
-            >
-              <Languages class="h-5 w-5" />
-            </button>
-            <Transition name="gf-menu">
-              <div
-                v-if="langMenuOpen"
-                class="absolute right-0 top-full z-[70] w-36 pt-2"
+          <DropdownMenu v-model:open="langMenuOpen" :modal="false">
+            <div class="relative" @mouseenter="setHoverMenu('lang', true)" @mouseleave="closeHoverMenuSoon('lang')">
+              <DropdownMenuTrigger as-child>
+                <Button
+                  type="button"
+                  variant="muted"
+                  class="h-9 w-9 rounded-full p-0 font-normal text-icon-muted shadow-none transition-colors duration-150 hover:bg-base-300 hover:text-base-content"
+                  :aria-label="t('shell.switchLanguage')"
+                  :title="t('shell.switchLanguage')"
+                >
+                  <Languages class="size-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                :side-offset="8"
+                class="z-[70] w-36 rounded-[var(--gf-radius-box)] border-line bg-base-100 p-1 text-base-content shadow-[0_18px_40px_-24px_rgb(15_23_42_/_calc(var(--gf-depth)*0.45))]"
+                @close-auto-focus.prevent
+                @mouseenter="setHoverMenu('lang', true)"
+                @mouseleave="closeHoverMenuSoon('lang')"
               >
-                <div class="gf-menu-surface overflow-hidden py-1">
-                  <button
-                    v-for="item in supportedLocales"
-                    :key="item"
-                    class="block w-full px-3 py-1.5 text-left text-sm transition-colors duration-150 hover:bg-base-200"
-                    :class="locale === item ? 'font-semibold text-primary' : 'text-base-content/75'"
-                    type="button"
-                    @click="setLang(item)"
-                  >
-                    {{ t(`locale.${item}`) }}
-                  </button>
-                </div>
-              </div>
-            </Transition>
-          </div>
+                <DropdownMenuItem
+                  v-for="item in supportedLocales"
+                  :key="item"
+                  class="px-3 py-1.5 text-base-content/75 focus:bg-base-200 focus:text-base-content"
+                  :class="locale === item ? 'font-semibold text-primary' : ''"
+                  @select="setLang(item)"
+                >
+                  {{ t(`locale.${item}`) }}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </div>
+          </DropdownMenu>
 
           <template v-if="layout.viewer.isAuthenticated">
-            <div
-              class="relative"
-              @mouseenter="setHoverMenu('user', true)"
-              @mouseleave="closeHoverMenuSoon('user')"
-              @focusin="setHoverMenu('user', true)"
-              @focusout="closeHoverMenuSoon('user')"
-            >
-              <button
-                type="button"
-                class="relative ml-1 flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-150 hover:bg-base-300"
-                :aria-label="t('shell.userMenu')"
-                :aria-expanded="userMenuOpen"
-              >
-                <UserAvatar :src="layout.viewer.avatarUrl" :alt="layout.viewer.username" class="h-9 w-9 rounded-full object-cover ring-1 ring-line/80" />
-                <span
-                  v-show="hasUnreadMessage || hasUnreadNotification"
-                  class="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-error ring-2 ring-base-100"
-                />
-              </button>
-              <Transition name="gf-menu">
-                <div
-                  v-if="userMenuOpen"
-                  class="absolute right-0 top-full z-[70] w-56 pt-2"
+            <DropdownMenu v-model:open="userMenuOpen" :modal="false">
+              <div class="relative" @mouseenter="setHoverMenu('user', true)" @mouseleave="closeHoverMenuSoon('user')">
+                <DropdownMenuTrigger as-child>
+                  <Button
+                    type="button"
+                    variant="muted"
+                    class="relative ml-1 grid h-10 w-10 place-items-center rounded-full p-0 font-normal shadow-none transition-colors duration-150 hover:bg-base-300"
+                    :aria-label="t('shell.userMenu')"
+                  >
+                    <UserAvatar :src="layout.viewer.avatarUrl" :alt="layout.viewer.username" class="h-9 w-9 rounded-full object-cover ring-1 ring-line/80" />
+                    <span
+                      v-show="hasUnreadMessage || hasUnreadNotification"
+                      class="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-error ring-2 ring-base-100"
+                    />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  :side-offset="8"
+                  class="z-[70] w-56 rounded-[var(--gf-radius-box)] border-line bg-base-100 p-0 text-base-content shadow-[0_18px_40px_-24px_rgb(15_23_42_/_calc(var(--gf-depth)*0.45))]"
+                  @close-auto-focus.prevent
+                  @mouseenter="setHoverMenu('user', true)"
+                  @mouseleave="closeHoverMenuSoon('user')"
                 >
-                  <div class="gf-menu-surface overflow-hidden">
-                    <div class="border-b border-line/70 px-3 py-2.5">
-                      <div class="truncate text-sm font-semibold text-base-content">{{ layout.viewer.username }}</div>
-                    </div>
-                    <div class="py-1">
-                      <a :href="`/u/${layout.viewer.id}`" class="gf-menu-item">
+                  <DropdownMenuLabel class="border-b border-line/70 px-3 py-2.5 font-normal">
+                    <div class="truncate text-sm font-semibold text-base-content">{{ layout.viewer.username }}</div>
+                  </DropdownMenuLabel>
+                  <div class="py-1">
+                    <DropdownMenuItem as-child class="h-9 rounded-none px-3 text-base-content/75 focus:bg-base-200 focus:text-base-content">
+                      <a :href="`/u/${layout.viewer.id}`">
                         <UserRound class="h-4 w-4 text-icon-muted" /> {{ t('shell.profile') }}
                       </a>
-                      <a href="/messages" class="gf-menu-item">
+                    </DropdownMenuItem>
+                    <DropdownMenuItem as-child class="h-9 rounded-none px-3 text-base-content/75 focus:bg-base-200 focus:text-base-content">
+                      <a href="/messages">
                         <Inbox class="h-4 w-4 text-icon-muted" />
                         <span class="min-w-0 flex-1">{{ t('shell.nav.messages') }}</span>
                         <span v-show="hasUnreadMessage" class="h-2 w-2 rounded-full bg-error" />
                       </a>
-                      <a href="/notifications" class="gf-menu-item" :title="notificationTitle">
+                    </DropdownMenuItem>
+                    <DropdownMenuItem as-child class="h-9 rounded-none px-3 text-base-content/75 focus:bg-base-200 focus:text-base-content">
+                      <a href="/notifications" :title="notificationTitle">
                         <Bell class="h-4 w-4 text-icon-muted" />
                         <span class="min-w-0 flex-1">{{ t('shell.nav.notifications') }}</span>
                         <span v-show="hasUnreadNotification" class="h-2 w-2 rounded-full bg-error" />
                       </a>
-                      <a href="/drafts" class="gf-menu-item">
+                    </DropdownMenuItem>
+                    <DropdownMenuItem as-child class="h-9 rounded-none px-3 text-base-content/75 focus:bg-base-200 focus:text-base-content">
+                      <a href="/drafts">
                         <FileText class="h-4 w-4 text-icon-muted" /> {{ t('shell.nav.drafts') }}
                       </a>
-                    </div>
-                    <div class="border-t border-line/70 py-1">
-                      <a href="/publish" class="gf-menu-item-primary">
+                    </DropdownMenuItem>
+                  </div>
+                  <DropdownMenuSeparator class="m-0 bg-line/70" />
+                  <div class="py-1">
+                    <DropdownMenuItem as-child class="h-9 rounded-none px-3 font-semibold text-primary focus:bg-info/10 focus:text-primary">
+                      <a href="/publish">
                         <PenSquare class="h-4 w-4" /> {{ t('shell.publish') }}
                       </a>
-                      <a href="/settings" class="gf-menu-item">
+                    </DropdownMenuItem>
+                    <DropdownMenuItem as-child class="h-9 rounded-none px-3 text-base-content/75 focus:bg-base-200 focus:text-base-content">
+                      <a href="/settings">
                         <Settings class="h-4 w-4 text-icon-muted" /> {{ t('shell.settings') }}
                       </a>
-					  <a href="/access-groups" class="gf-menu-item">
-						<UsersRound class="h-4 w-4 text-icon-muted" /> {{ t('accessGroups.groups') }}
-					  </a>
-                      <a v-if="layout.viewer.canAccessAdmin" href="/theme-preview" class="gf-menu-item">
+                    </DropdownMenuItem>
+                    <DropdownMenuItem as-child class="h-9 rounded-none px-3 text-base-content/75 focus:bg-base-200 focus:text-base-content">
+                      <a href="/access-groups">
+                        <UsersRound class="h-4 w-4 text-icon-muted" /> {{ t('accessGroups.groups') }}
+                      </a>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem v-if="layout.viewer.canAccessAdmin" as-child class="h-9 rounded-none px-3 text-base-content/75 focus:bg-base-200 focus:text-base-content">
+                      <a href="/theme-preview">
                         <Palette class="h-4 w-4 text-icon-muted" /> {{ t('shell.themePreview') }}
                       </a>
-                      <a v-if="layout.viewer.canAccessAdmin" href="/admin" class="gf-menu-item-warning">
+                    </DropdownMenuItem>
+                    <DropdownMenuItem v-if="layout.viewer.canAccessAdmin" as-child class="h-9 rounded-none px-3 text-warning focus:bg-warning/10 focus:text-warning">
+                      <a href="/admin">
                         <Shield class="h-4 w-4" /> {{ t('shell.admin') }}
                       </a>
-                    </div>
-                    <div class="border-t border-line/70 py-1">
-                      <button class="gf-menu-item-danger" type="button" @click="logout">
-                        <LogOut class="h-4 w-4" /> {{ t('shell.logout') }}
-                      </button>
-                    </div>
+                    </DropdownMenuItem>
                   </div>
-                </div>
-              </Transition>
-            </div>
+                  <DropdownMenuSeparator class="m-0 bg-line/70" />
+                  <div class="py-1">
+                    <DropdownMenuItem variant="destructive" class="h-9 rounded-none px-3 text-error focus:bg-error/10 focus:text-error" @select="logout">
+                      <LogOut class="h-4 w-4" /> {{ t('shell.logout') }}
+                    </DropdownMenuItem>
+                  </div>
+                </DropdownMenuContent>
+              </div>
+            </DropdownMenu>
           </template>
           <template v-else>
             <a href="/login" class="rounded-md px-3 py-2 text-sm font-medium text-base-content/75 hover:bg-base-300">{{ t('shell.login') }}</a>
-            <a href="/login?register=true" class="gf-button gf-button-md gf-button-neutral hidden sm:inline-flex">{{ t('shell.register') }}</a>
+            <Button as-child variant="neutral" class="hidden sm:inline-flex">
+              <a href="/login?register=true">{{ t('shell.register') }}</a>
+            </Button>
           </template>
         </div>
       </div>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { FileText, PenSquare, ShieldAlert } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { formatDateTime } from '@/runtime/format'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
@@ -22,15 +24,17 @@ function isBlocked(draft: DraftPayload) {
   <main class="min-w-0 pb-8">
     <PageHeader :title="t('drafts.title')" :description="t('drafts.summary')" compact>
       <template #badge>
-        <span class="gf-badge gf-badge-muted h-5 tabular-nums text-base-content/75">
+        <Badge variant="muted" class="h-5 tabular-nums text-base-content/75">
           {{ t('drafts.total', { count: props.total }) }}
-        </span>
+        </Badge>
       </template>
       <template #actions>
-        <a href="/publish" class="gf-button gf-button-sm gf-button-secondary w-fit text-xs">
-          <PenSquare class="h-4 w-4" />
-          {{ t('drafts.newDraft') }}
-        </a>
+        <Button as-child variant="surface" size="sm" class="w-fit text-xs">
+          <a href="/publish">
+            <PenSquare class="h-4 w-4" />
+            {{ t('drafts.newDraft') }}
+          </a>
+        </Button>
       </template>
     </PageHeader>
 
@@ -60,13 +64,14 @@ function isBlocked(draft: DraftPayload) {
                 <span class="h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: category.color }" />
                 {{ category.name }}
               </span>
-              <span
+              <Badge
                 v-if="isBlocked(draft)"
-                class="gf-badge gf-badge-error shrink-0 text-[11px]"
+                variant="error"
+                class="shrink-0 text-[11px]"
               >
                 <ShieldAlert class="h-3.5 w-3.5" />
                 {{ t('drafts.blocked') }}
-              </span>
+              </Badge>
             </div>
             <p class="mt-1.5 line-clamp-1 text-sm leading-6 text-base-content/55">
               {{ draft.description || t('drafts.emptyDescription') }}
@@ -79,21 +84,20 @@ function isBlocked(draft: DraftPayload) {
           </div>
           <time class="text-xs font-medium text-base-content/55 md:text-right">{{ formatDateTime(draft.updatedAt) }}</time>
           <div class="flex flex-wrap items-center gap-2 md:flex-nowrap md:justify-end">
-            <a
-              :href="draft.editUrl"
-              class="gf-button gf-button-sm gf-button-primary shrink-0 text-xs"
-            >
-              <FileText class="h-4 w-4" />
-              {{ t('drafts.edit') }}
-            </a>
+            <Button as-child variant="brand" size="sm" class="shrink-0 text-xs">
+              <a :href="draft.editUrl">
+                <FileText class="h-4 w-4" />
+                {{ t('drafts.edit') }}
+              </a>
+            </Button>
           </div>
         </article>
       </div>
 
       <EmptyState v-else :icon="FileText" :title="t('drafts.emptyTitle')" :description="t('drafts.emptyHint')">
-        <a href="/publish" class="gf-button gf-button-md gf-button-primary px-4">
-          {{ t('drafts.newDraft') }}
-        </a>
+        <Button as-child variant="brand" class="px-4">
+          <a href="/publish">{{ t('drafts.newDraft') }}</a>
+        </Button>
       </EmptyState>
     </section>
   </main>

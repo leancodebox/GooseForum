@@ -9,11 +9,11 @@ import { BasicPage } from '@/admin/components/global-layout'
 import AdminSection from '@/admin/components/AdminSection.vue'
 import AdminToolbar from '@/admin/components/AdminToolbar.vue'
 import AdminActionButton from '@/admin/components/AdminActionButton.vue'
-import { Button } from '@/admin/components/ui/button'
-import { Input } from '@/admin/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/admin/components/ui/select'
-import { Switch } from '@/admin/components/ui/switch'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/admin/components/ui/table'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 defineProps<{ payload: AdminPayload<ManageHomeProps> }>()
 

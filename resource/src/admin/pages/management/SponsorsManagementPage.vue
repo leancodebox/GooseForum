@@ -6,9 +6,9 @@ import Draggable from 'vuedraggable'
 import { GripVertical, Loader2, PenLine, Plus, RefreshCw, Save, Trash2, Upload } from '@lucide/vue'
 import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import { Button } from '@/admin/components/ui/button'
-import { Input } from '@/admin/components/ui/input'
-import { Textarea } from '@/admin/components/ui/textarea'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/admin/components/ui/dialog'
+} from '@/components/ui/dialog'
 import { getSponsors, saveSponsors, uploadAdminImage } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import type { AdminPayload, ManageHomeProps, SponsorItem, SponsorsConfig } from '@/admin/types'
@@ -279,14 +279,15 @@ onMounted(() => {
                 </article>
               </template>
               <template #footer>
-                <button
+                <Button
                   v-if="config.sponsors[level].length === 0"
                   type="button"
-                  class="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  variant="ghost"
+                  class="h-auto p-0 text-sm font-normal text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground"
                   @click="openSponsor(level, null)"
                 >
                   {{ adminText('k009s') }}
-                </button>
+                </Button>
               </template>
             </Draggable>
           </section>

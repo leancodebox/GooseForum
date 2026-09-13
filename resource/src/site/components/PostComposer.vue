@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { Bold, Check, Code, Code2, Image, Italic, Link, List, ListOrdered, Loader2, Maximize2, MessageSquareQuote, Minimize2, Minus, Send, Strikethrough, X } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
 import { uploadImage } from '@/runtime/api'
 import { processImageFile, validateImageFile } from '@/runtime/image'
 import { markdownFromClipboard } from '@/runtime/rich-paste'
@@ -251,19 +252,25 @@ function handleEditorKeydown(event: KeyboardEvent) {
       <div class="relative mx-auto flex w-full max-w-[58rem] justify-center">
         <Transition name="floating-reply" mode="out-in">
           <div v-if="minimized" key="minimized" class="gf-composer-minimized pointer-events-auto flex w-[min(32rem,calc(100vw-1.5rem))] items-center gap-3 px-3 py-2">
-            <button type="button" class="flex min-w-0 flex-1 items-center gap-3 text-left" :aria-label="t('topic.restoreComposer')" @click="restoreComposer">
+            <Button
+              type="button"
+              variant="muted"
+              class="h-auto min-w-0 flex-1 items-center justify-start gap-3 rounded-md p-0 text-left font-normal shadow-none"
+              :aria-label="t('topic.restoreComposer')"
+              @click="restoreComposer"
+            >
               <UserAvatar :src="viewer.avatarUrl" :alt="viewer.username" class="h-8 w-8 shrink-0 rounded-full object-cover ring-1 ring-line" />
               <span class="min-w-0">
                 <span class="block truncate text-sm font-semibold text-base-content">{{ composerTitle }}</span>
                 <span class="block truncate text-xs text-base-content/55">{{ topicTitle }}</span>
               </span>
-            </button>
-            <button type="button" class="gf-icon-button h-8 w-8 shrink-0" :title="t('topic.restoreComposer')" @click="restoreComposer">
+            </Button>
+            <Button type="button" variant="muted" size="icon-sm" :title="t('topic.restoreComposer')" :aria-label="t('topic.restoreComposer')" @click="restoreComposer">
               <Maximize2 class="h-4 w-4" />
-            </button>
-            <button type="button" class="gf-icon-button h-8 w-8 shrink-0" :title="t('common.close')" @click="closeComposer">
+            </Button>
+            <Button type="button" variant="muted" size="icon-sm" :title="t('common.close')" :aria-label="t('common.close')" @click="closeComposer">
               <X class="h-4 w-4" />
-            </button>
+            </Button>
           </div>
 
           <section
@@ -280,24 +287,24 @@ function handleEditorKeydown(event: KeyboardEvent) {
                 <div class="truncate text-xs text-base-content/55">{{ topicTitle }}</div>
               </div>
               <div class="flex shrink-0 items-center gap-0.5">
-                <button type="button" class="gf-icon-button h-8 w-8" :title="t('topic.minimizeComposer')" :disabled="composerBusy" @click="minimizeComposer">
+                <Button type="button" variant="muted" size="icon-sm" :title="t('topic.minimizeComposer')" :aria-label="t('topic.minimizeComposer')" :disabled="composerBusy" @click="minimizeComposer">
                   <Minus class="h-4 w-4" />
-                </button>
-                <button type="button" class="gf-icon-button h-8 w-8" :title="expanded ? t('topic.restoreComposer') : t('topic.expandComposer')" @click="toggleExpanded">
+                </Button>
+                <Button type="button" variant="muted" size="icon-sm" :title="expanded ? t('topic.restoreComposer') : t('topic.expandComposer')" :aria-label="expanded ? t('topic.restoreComposer') : t('topic.expandComposer')" @click="toggleExpanded">
                   <Minimize2 v-if="expanded" class="h-4 w-4" />
                   <Maximize2 v-else class="h-4 w-4" />
-                </button>
-                <button type="button" class="gf-icon-button h-8 w-8" :title="t('common.close')" :disabled="composerBusy" @click="closeComposer">
+                </Button>
+                <Button type="button" variant="muted" size="icon-sm" :title="t('common.close')" :aria-label="t('common.close')" :disabled="composerBusy" @click="closeComposer">
                   <X class="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             </header>
 
             <div v-if="target && !editing" class="flex min-w-0 shrink-0 items-center gap-2 border-b border-primary/15 bg-info/10 px-3 py-2 text-xs font-medium text-base-content/75">
               <span class="min-w-0 flex-1 truncate">{{ t('topic.replyToPost', { user: `@${target.author.username}`, no: target.postNo || target.id }) }}</span>
-              <button type="button" class="gf-icon-button h-6 w-6 shrink-0 hover:bg-base-100" :aria-label="t('common.cancel')" @click="emit('clearTarget')">
+              <Button type="button" variant="muted" size="icon-sm" class="size-6 hover:bg-base-100" :aria-label="t('common.cancel')" @click="emit('clearTarget')">
                 <X class="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
 
             <div class="relative min-h-0 flex-1">
@@ -324,29 +331,29 @@ function handleEditorKeydown(event: KeyboardEvent) {
             </div>
 
             <footer class="flex shrink-0 items-center gap-1 border-t border-line bg-base-100 px-2 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:px-3 sm:pb-2">
-              <button type="button" class="gf-button gf-button-md gf-button-primary mr-1 shrink-0 px-3" :disabled="composerBusy" @click="submit">
+              <Button type="button" variant="brand" class="mr-1 shrink-0 px-3" :disabled="composerBusy" @click="submit">
                 <Loader2 v-if="composerBusy" class="h-4 w-4 animate-spin" />
                 <Check v-else-if="editing" class="h-4 w-4" />
                 <Send v-else class="h-4 w-4" />
                 <span class="hidden sm:inline">{{ submitText }}</span>
-              </button>
+              </Button>
 
               <div class="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <label class="gf-composer-tool shrink-0 cursor-pointer" :class="{ 'cursor-wait opacity-60': uploadingImage }" :title="t('publish.uploadImageTitle')">
+                <Button as="label" variant="muted" size="icon" class="shrink-0 cursor-pointer" :class="{ 'cursor-wait opacity-60': uploadingImage }" :title="t('publish.uploadImageTitle')" :aria-label="t('publish.uploadImageTitle')">
                   <Loader2 v-if="uploadingImage" class="h-4 w-4 animate-spin" />
                   <Image v-else class="h-4 w-4" />
                   <input type="file" accept="image/*" multiple class="hidden" :disabled="uploadingImage" @change="handleImageInput" />
-                </label>
+                </Button>
                 <span class="mx-1 h-5 w-px shrink-0 bg-line" />
-                <button type="button" class="gf-composer-tool" :title="t('publish.toolbar.bold')" @mousedown.prevent @click="applyToolbarAction('bold')"><Bold class="h-4 w-4" /></button>
-                <button type="button" class="gf-composer-tool" :title="t('publish.toolbar.italic')" @mousedown.prevent @click="applyToolbarAction('italic')"><Italic class="h-4 w-4" /></button>
-                <button type="button" class="gf-composer-tool" :title="t('publish.toolbar.strike')" @mousedown.prevent @click="applyToolbarAction('strike')"><Strikethrough class="h-4 w-4" /></button>
-                <button type="button" class="gf-composer-tool" :title="t('publish.toolbar.inlineCode')" @mousedown.prevent @click="applyToolbarAction('inlineCode')"><Code class="h-4 w-4" /></button>
-                <button type="button" class="gf-composer-tool" :title="t('publish.toolbar.link')" @mousedown.prevent @click="applyToolbarAction('link')"><Link class="h-4 w-4" /></button>
-                <button type="button" class="gf-composer-tool" :title="t('publish.toolbar.quote')" @mousedown.prevent @click="applyToolbarAction('quote')"><MessageSquareQuote class="h-4 w-4" /></button>
-                <button type="button" class="gf-composer-tool" :title="t('publish.toolbar.code')" @mousedown.prevent @click="applyToolbarAction('code')"><Code2 class="h-4 w-4" /></button>
-                <button type="button" class="gf-composer-tool" :title="t('publish.toolbar.bulletList')" @mousedown.prevent @click="applyToolbarAction('bulletList')"><List class="h-4 w-4" /></button>
-                <button type="button" class="gf-composer-tool" :title="t('publish.toolbar.orderedList')" @mousedown.prevent @click="applyToolbarAction('orderedList')"><ListOrdered class="h-4 w-4" /></button>
+                <Button type="button" variant="muted" size="icon" :title="t('publish.toolbar.bold')" :aria-label="t('publish.toolbar.bold')" @mousedown.prevent @click="applyToolbarAction('bold')"><Bold class="h-4 w-4" /></Button>
+                <Button type="button" variant="muted" size="icon" :title="t('publish.toolbar.italic')" :aria-label="t('publish.toolbar.italic')" @mousedown.prevent @click="applyToolbarAction('italic')"><Italic class="h-4 w-4" /></Button>
+                <Button type="button" variant="muted" size="icon" :title="t('publish.toolbar.strike')" :aria-label="t('publish.toolbar.strike')" @mousedown.prevent @click="applyToolbarAction('strike')"><Strikethrough class="h-4 w-4" /></Button>
+                <Button type="button" variant="muted" size="icon" :title="t('publish.toolbar.inlineCode')" :aria-label="t('publish.toolbar.inlineCode')" @mousedown.prevent @click="applyToolbarAction('inlineCode')"><Code class="h-4 w-4" /></Button>
+                <Button type="button" variant="muted" size="icon" :title="t('publish.toolbar.link')" :aria-label="t('publish.toolbar.link')" @mousedown.prevent @click="applyToolbarAction('link')"><Link class="h-4 w-4" /></Button>
+                <Button type="button" variant="muted" size="icon" :title="t('publish.toolbar.quote')" :aria-label="t('publish.toolbar.quote')" @mousedown.prevent @click="applyToolbarAction('quote')"><MessageSquareQuote class="h-4 w-4" /></Button>
+                <Button type="button" variant="muted" size="icon" :title="t('publish.toolbar.code')" :aria-label="t('publish.toolbar.code')" @mousedown.prevent @click="applyToolbarAction('code')"><Code2 class="h-4 w-4" /></Button>
+                <Button type="button" variant="muted" size="icon" :title="t('publish.toolbar.bulletList')" :aria-label="t('publish.toolbar.bulletList')" @mousedown.prevent @click="applyToolbarAction('bulletList')"><List class="h-4 w-4" /></Button>
+                <Button type="button" variant="muted" size="icon" :title="t('publish.toolbar.orderedList')" :aria-label="t('publish.toolbar.orderedList')" @mousedown.prevent @click="applyToolbarAction('orderedList')"><ListOrdered class="h-4 w-4" /></Button>
               </div>
             </footer>
           </section>

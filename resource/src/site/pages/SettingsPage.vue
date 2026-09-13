@@ -16,6 +16,13 @@ import {
   Sparkles,
   UserRound,
 } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Textarea } from '@/components/ui/textarea'
 import {
   changePassword,
   getOAuthBindings,
@@ -97,6 +104,10 @@ const {
   onStatus: showStatus,
   onError: showError,
 })
+
+function handleCropModalOpen(open: boolean) {
+  if (!open) closeCropModal()
+}
 
 const socialKeys = ['github', 'twitter', 'linkedIn', 'weibo', 'bilibili', 'zhihu'] as const
 
@@ -340,9 +351,9 @@ async function saveProfile() {
   }
 }
 
-function toggleCoverEditor() {
-  coverDraft.value = coverUrl.value
-  editingCover.value = !editingCover.value
+function handleCoverEditorOpen(open: boolean) {
+  if (open) coverDraft.value = coverUrl.value
+  editingCover.value = open
 }
 
 function cancelCoverEditor() {
@@ -490,34 +501,36 @@ async function toggleBinding(provider: string) {
         <div class="px-4 pb-4 sm:px-5">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div class="flex min-w-0 gap-4">
-              <button
+              <Button
                 type="button"
-                class="group relative -mt-9 h-24 w-24 shrink-0 rounded-full border-2 border-base-100 bg-base-100 shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-primary/20 sm:-mt-10 sm:h-28 sm:w-28"
+                variant="surface"
+                class="group relative -mt-9 h-24 w-24 shrink-0 rounded-full border-2 border-base-100 bg-base-100 p-0 shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:opacity-100 sm:-mt-10 sm:h-28 sm:w-28"
                 :disabled="uploadingAvatar"
                 :aria-label="t('settings.avatar.upload')"
                 @click="chooseCustomAvatar"
               >
                 <UserAvatar :src="avatarPreviewUrl" :alt="usernameForm.username" :badge="wornBadgePreview" size="large" class="h-full w-full rounded-full" img-class="rounded-full transition group-hover:brightness-90" />
                 <span class="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full text-neutral-content">
-                  <Loader2 v-if="uploadingAvatar" class="h-8 w-8 animate-spin opacity-100" />
-                  <Camera v-else class="h-8 w-8 opacity-0 drop-shadow transition group-hover:opacity-100" />
+                  <Loader2 v-if="uploadingAvatar" class="size-8 animate-spin opacity-100" />
+                  <Camera v-else class="size-8 opacity-0 drop-shadow transition group-hover:opacity-100" />
                 </span>
                 <input ref="avatarInput" type="file" class="hidden" accept="image/*" @change="handleAvatarChange" />
-              </button>
+              </Button>
 
               <div class="min-w-0 pt-3">
                 <div class="flex min-w-0 flex-wrap items-center gap-2">
                   <h2 class="truncate text-2xl font-bold leading-tight text-base-content">{{ displayName }}</h2>
-                  <span class="gf-badge gf-badge-info rounded text-[11px]">{{ t('settings.editing') }}</span>
-                  <button
+                  <Badge variant="info" class="rounded text-[11px]">{{ t('settings.editing') }}</Badge>
+                  <Button
                     type="button"
-                    class="inline-flex h-7 w-7 items-center justify-center rounded outline-none transition hover:bg-base-300 focus-visible:ring-4 focus-visible:ring-primary/20"
+                    variant="ghost"
+                    class="h-7 w-7 rounded p-0 outline-none transition hover:bg-base-300 focus-visible:ring-4 focus-visible:ring-primary/20"
                     :aria-label="t('settings.easterEgg.aria')"
                     :title="t('settings.easterEgg.title')"
                     @click="triggerAvatarFlash"
                   >
                     <Sparkles class="h-4 w-4 text-primary" />
-                  </button>
+                  </Button>
                 </div>
                 <p class="mt-1 text-sm font-medium text-base-content/55">@{{ usernameForm.username }}</p>
                 <p class="mt-2 max-w-3xl text-sm leading-relaxed text-base-content/75">{{ profileBioText }}</p>
@@ -526,58 +539,61 @@ async function toggleBinding(provider: string) {
 
             <div class="flex shrink-0 flex-col items-start gap-2 sm:items-end">
               <div class="flex flex-wrap items-center gap-2">
-                <div v-if="layout.viewer.canAccessAdmin" class="relative">
-                  <button
-                    type="button"
-                    class="gf-button gf-button-md gf-button-secondary"
-                    :aria-expanded="editingCover"
-                    @click="toggleCoverEditor"
+                <Popover v-if="layout.viewer.canAccessAdmin" :open="editingCover" @update:open="handleCoverEditorOpen">
+                  <PopoverTrigger as-child>
+                    <Button type="button" variant="surface" class="px-3">
+                      <Image class="h-4 w-4" />
+                      {{ t('user.editCover') }}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="end"
+                    :side-offset="8"
+                    class="w-80 max-w-[calc(100vw-2rem)] rounded-[var(--gf-radius-box)] border-line bg-base-100 p-3 text-base-content shadow-lg"
                   >
-                    <Image class="h-4 w-4" />
-                    {{ t('user.editCover') }}
-                  </button>
-                  <form
-                    v-if="editingCover"
-                    class="gf-menu-surface absolute left-0 top-11 z-20 w-80 max-w-[calc(100vw-2rem)] p-3 sm:left-auto sm:right-0"
-                    @submit.prevent="saveCover"
-                  >
+                    <form @submit.prevent="saveCover">
                     <label class="block">
                       <span class="text-xs font-semibold text-base-content/55">{{ t('user.coverUrl') }}</span>
-                      <input
+                      <Input
                         v-model="coverDraft"
                         type="url"
-                        class="gf-input mt-1 h-9"
+                        class="mt-1 h-9 rounded-[var(--gf-radius-field)] border-line bg-base-100 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 dark:bg-base-100"
                         :placeholder="t('user.coverUrl')"
                       />
                     </label>
                     <div class="mt-3 flex justify-end gap-2">
-                      <button
+                      <Button
                         type="button"
-                        class="gf-button gf-button-sm gf-button-secondary"
+                        variant="surface"
+                        size="sm"
                         :disabled="savingCover"
                         @click="cancelCoverEditor"
                       >
                         {{ t('common.cancel') }}
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="submit"
-                        class="gf-button gf-button-sm gf-button-primary min-w-16 disabled:cursor-wait"
+                        variant="brand"
+                        size="sm"
+                        class="min-w-16 disabled:cursor-wait"
                         :disabled="savingCover"
                       >
                         <Loader2 v-if="savingCover" class="h-4 w-4 animate-spin" />
                         <span v-else>{{ t('common.save') }}</span>
-                      </button>
+                      </Button>
                     </div>
-                  </form>
-                </div>
-                <button
+                    </form>
+                  </PopoverContent>
+                </Popover>
+                <Button
                   type="button"
-                  class="gf-button gf-button-md gf-button-secondary"
+                  variant="surface"
+                  class="px-3"
                   @click="chooseCustomAvatar"
                 >
                   <Camera class="h-4 w-4" />
                   {{ t('settings.avatar.change') }}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -604,34 +620,39 @@ async function toggleBinding(provider: string) {
                 <p class="mt-0.5 text-xs text-base-content/50">{{ t('settings.avatar.presetsDescription') }}</p>
               </div>
               <div class="flex items-center gap-1.5">
-                <button
+                <Button
                   v-if="presetAvatarChanged"
                   type="button"
-                  class="gf-button gf-button-sm gf-button-primary h-8 text-sm"
+                  variant="brand"
+                  size="sm"
+                  class="text-sm"
                   :disabled="Boolean(savingPresetAvatar) || uploadingAvatar"
                   @click="applyPresetAvatar"
                 >
                   <Loader2 v-if="savingPresetAvatar" class="h-3.5 w-3.5 animate-spin" />
                   <Check v-else class="h-3.5 w-3.5" />
                   {{ t('settings.avatar.applyPreset') }}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  class="gf-button gf-button-sm gf-button-secondary h-8 text-sm"
+                  variant="surface"
+                  size="sm"
+                  class="text-sm"
                   :disabled="uploadingAvatar"
                   @click="chooseCustomAvatar"
                 >
                   <Camera class="h-3.5 w-3.5" />
                   {{ t('settings.avatar.uploadCustom') }}
-                </button>
+                </Button>
               </div>
             </div>
             <div class="flex gap-1.5 overflow-x-auto pb-1">
-              <button
+              <Button
                 v-for="url in presetAvatars"
                 :key="url"
                 type="button"
-                class="relative h-11 w-11 shrink-0 rounded-md border bg-base-100 p-0.5 transition hover:border-primary/50 hover:bg-base-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:cursor-wait disabled:opacity-70"
+                variant="surface"
+                class="relative h-11 w-11 shrink-0 rounded-md border bg-base-100 p-0.5 transition hover:border-primary/50 hover:bg-base-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:pointer-events-auto disabled:cursor-wait disabled:opacity-70"
                 :class="presetAvatarDraft === url ? 'border-primary ring-2 ring-primary/15' : 'border-line'"
                 :disabled="Boolean(savingPresetAvatar) || uploadingAvatar"
                 :aria-label="t('settings.avatar.selectPreset')"
@@ -644,7 +665,7 @@ async function toggleBinding(provider: string) {
                 <span v-else-if="savingPresetAvatar === url" class="absolute inset-0 flex items-center justify-center rounded-md bg-base-100/70">
                   <Loader2 class="h-3.5 w-3.5 animate-spin text-primary" />
                 </span>
-              </button>
+              </Button>
             </div>
           </section>
 
@@ -654,20 +675,23 @@ async function toggleBinding(provider: string) {
                 <h3 class="text-sm font-semibold text-base-content/75">{{ t('settings.avatar.wornBadgeTitle') }}</h3>
                 <p class="mt-0.5 text-xs text-base-content/50">{{ t('settings.avatar.wornBadgeDescription') }}</p>
               </div>
-              <button
+              <Button
                 type="button"
-                class="gf-button gf-button-sm gf-button-primary h-8 text-sm"
+                variant="brand"
+                size="sm"
+                class="text-sm"
                 :disabled="savingWornBadge"
                 @click="applyWornBadge"
               >
                 <Loader2 v-if="savingWornBadge" class="h-3.5 w-3.5 animate-spin" />
                 <Check v-else class="h-3.5 w-3.5" />
                 {{ savingWornBadge ? t('settings.savingShort') : t('settings.avatar.applyWornBadge') }}
-              </button>
+              </Button>
             </div>
             <div class="flex gap-2 overflow-x-auto pb-1">
-              <button
+              <Button
                 type="button"
+                variant="surface"
                 class="relative flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-1 rounded-md bg-base-100 px-1 py-1.5 text-xs font-semibold transition hover:bg-base-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20"
                 :disabled="savingWornBadge"
                 @click="selectWornBadge('')"
@@ -679,12 +703,13 @@ async function toggleBinding(provider: string) {
                 <span v-if="wornBadgeCode === ''" class="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-content ring-2 ring-base-100">
                   <Check class="h-3 w-3" />
                 </span>
-              </button>
-              <button
+              </Button>
+              <Button
                 v-for="badge in userBadges"
                 :key="badge.code"
                 type="button"
-                class="relative flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-1 rounded-md bg-base-100 px-1 py-1.5 transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:cursor-wait"
+                variant="surface"
+                class="relative flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-1 rounded-md bg-base-100 px-1 py-1.5 transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:pointer-events-auto disabled:cursor-wait disabled:opacity-100"
                 :class="[
                   badge.isWearable ? 'hover:bg-base-200' : 'cursor-not-allowed opacity-45 grayscale',
                 ]"
@@ -704,7 +729,7 @@ async function toggleBinding(provider: string) {
                 <span v-if="wornBadgeCode === badge.code" class="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-content ring-2 ring-base-100">
                   <Check class="h-3 w-3" />
                 </span>
-              </button>
+              </Button>
             </div>
           </section>
         </div>
@@ -718,16 +743,17 @@ async function toggleBinding(provider: string) {
       </p>
 
         <nav class="flex overflow-x-auto border-t border-line bg-base-200/35 px-3">
-            <button
+            <Button
               v-for="tab in props.tabs"
               :key="tab.key"
               type="button"
-              class="inline-flex h-11 shrink-0 items-center border-b-2 px-4 text-sm font-semibold"
+              variant="ghost"
+              class="h-11 shrink-0 rounded-none border-b-2 px-4 text-sm font-semibold hover:bg-transparent"
               :class="activeTab === tab.key ? 'border-primary text-primary' : 'border-transparent text-base-content/55 hover:text-base-content'"
               @click="setActiveTab(tab.key as TabKey)"
             >
               {{ settingsTabLabel(tab.key, tab.label) }}
-            </button>
+            </Button>
           </nav>
 
         <div class="space-y-3">
@@ -741,21 +767,23 @@ async function toggleBinding(provider: string) {
                     <div class="flex h-10 min-w-0 flex-1 items-center rounded-md border border-line bg-base-200/70 px-3 text-sm font-medium text-base-content">
                       <span class="truncate">{{ usernameForm.username }}</span>
                     </div>
-                    <button
+                    <Button
                       type="button"
-                      class="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md border border-primary/20 bg-info/10 px-3 text-sm font-semibold text-primary hover:border-primary/20 hover:bg-info/10"
+                      variant="brand-ghost"
+                      size="lg"
+                      class="h-10 shrink-0 border border-primary/20 bg-info/10 px-3 hover:border-primary/20 hover:bg-info/10"
                       @click="editingUsername = true"
                     >
                       <Pencil class="h-4 w-4" />
                       {{ t('common.edit') }}
-                    </button>
+                    </Button>
                   </div>
                   <div v-else class="mt-1 flex min-w-0 gap-2">
-                    <input v-model="usernameForm.username" class="gf-input min-w-0 flex-1 border-primary/40 ring-4 ring-primary/20" />
-                    <button type="button" class="gf-button gf-button-lg gf-button-primary shrink-0" :disabled="savingUsername" @click="saveUsername">
+                    <Input v-model="usernameForm.username" class="h-10 min-w-0 flex-1 rounded-[var(--gf-radius-field)] border-primary/40 bg-base-100 shadow-none ring-4 ring-primary/20 dark:bg-base-100" />
+                    <Button type="button" variant="brand" size="lg" class="shrink-0 px-4" :disabled="savingUsername" @click="saveUsername">
                       {{ savingUsername ? t('settings.savingShort') : t('common.save') }}
-                    </button>
-                    <button type="button" class="gf-button gf-button-lg gf-button-muted shrink-0 px-2.5 font-medium" @click="cancelUsernameEdit">{{ t('common.cancel') }}</button>
+                    </Button>
+                    <Button type="button" variant="muted" size="lg" class="shrink-0 px-2.5" @click="cancelUsernameEdit">{{ t('common.cancel') }}</Button>
                   </div>
                 </label>
                 <div class="block min-w-0">
@@ -764,42 +792,46 @@ async function toggleBinding(provider: string) {
                     <div class="flex h-10 min-w-0 flex-1 items-center rounded-md border border-line bg-base-200/70 px-3 text-sm font-medium text-base-content">
                       <span class="truncate">{{ emailForm.email }}</span>
                     </div>
-                    <button
+                    <Button
                       type="button"
-                      class="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md border border-primary/20 bg-info/10 px-3 text-sm font-semibold text-primary hover:border-primary/20 hover:bg-info/10"
+                      variant="brand-ghost"
+                      size="lg"
+                      class="h-10 shrink-0 border border-primary/20 bg-info/10 px-3 hover:border-primary/20 hover:bg-info/10"
                       @click="editingEmail = true"
                     >
                       <Pencil class="h-4 w-4" />
                       {{ t('common.edit') }}
-                    </button>
+                    </Button>
                   </div>
                   <div v-else class="mt-1 flex min-w-0 gap-2">
-                    <input v-model="emailForm.email" type="email" class="gf-input min-w-0 flex-1 border-primary/40 ring-4 ring-primary/20" />
-                    <button type="button" class="gf-button gf-button-lg gf-button-primary shrink-0" :disabled="savingEmail" @click="saveEmail">
+                    <Input v-model="emailForm.email" type="email" class="h-10 min-w-0 flex-1 rounded-[var(--gf-radius-field)] border-primary/40 bg-base-100 shadow-none ring-4 ring-primary/20 dark:bg-base-100" />
+                    <Button type="button" variant="brand" size="lg" class="shrink-0 px-4" :disabled="savingEmail" @click="saveEmail">
                       {{ savingEmail ? t('settings.savingShort') : t('common.save') }}
-                    </button>
-                    <button type="button" class="gf-button gf-button-lg gf-button-muted shrink-0 px-2.5 font-medium" @click="cancelEmailEdit">{{ t('common.cancel') }}</button>
+                    </Button>
+                    <Button type="button" variant="muted" size="lg" class="shrink-0 px-2.5" @click="cancelEmailEdit">{{ t('common.cancel') }}</Button>
                   </div>
                   <div v-if="layout.viewer.requiresEmailVerification" class="mt-2 flex flex-col gap-2 border-l-2 border-warning bg-warning/10 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
                     <span class="min-w-0 text-sm text-warning">
                       <span class="font-semibold">{{ t('settings.emailVerification.title') }}</span>
                       <span class="ml-1 text-warning">{{ t('settings.emailVerification.description') }}</span>
                     </span>
-                    <button
+                    <Button
                       type="button"
-                      class="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-md border border-warning/30 bg-base-100 px-3 text-sm font-semibold text-warning hover:bg-warning/15 disabled:cursor-wait disabled:opacity-70"
+                      variant="surface"
+                      size="sm"
+                      class="shrink-0 border-warning/30 text-warning hover:bg-warning/15 disabled:cursor-wait disabled:opacity-70"
                       :disabled="sendingActivationEmail"
                       @click="sendActivationEmail"
                     >
                       <Loader2 v-if="sendingActivationEmail" class="h-4 w-4 animate-spin" />
                       <Mail v-else class="h-4 w-4" />
                       {{ sendingActivationEmail ? t('settings.emailVerification.sending') : t('settings.emailVerification.action') }}
-                    </button>
+                    </Button>
                   </div>
                 </div>
                 <label class="block min-w-0">
                   <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.displayName') }}</span>
-                  <input v-model="profileForm.nickname" class="gf-input mt-1" />
+                  <Input v-model="profileForm.nickname" class="mt-1 h-10 rounded-[var(--gf-radius-field)] border-line bg-base-100 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 dark:bg-base-100" />
                 </label>
                 <label class="block min-w-0">
                   <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.language') }}</span>
@@ -807,21 +839,21 @@ async function toggleBinding(provider: string) {
                 </label>
                 <label class="block">
                   <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.websiteName') }}</span>
-                  <input v-model="profileForm.websiteName" class="gf-input mt-1" />
+                  <Input v-model="profileForm.websiteName" class="mt-1 h-10 rounded-[var(--gf-radius-field)] border-line bg-base-100 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 dark:bg-base-100" />
                 </label>
                 <label class="block">
                   <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.website') }}</span>
-                  <input v-model="profileForm.website" class="gf-input mt-1" placeholder="https://example.com" />
+                  <Input v-model="profileForm.website" class="mt-1 h-10 rounded-[var(--gf-radius-field)] border-line bg-base-100 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 dark:bg-base-100" placeholder="https://example.com" />
                 </label>
               </div>
 
               <label class="block">
                 <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.bio') }}</span>
-                <textarea v-model="profileForm.bio" class="gf-textarea mt-1 min-h-24 py-2" />
+                <Textarea v-model="profileForm.bio" class="mt-1 min-h-24 resize-y rounded-[var(--gf-radius-field)] border-line bg-base-100 px-3 py-2 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 dark:bg-base-100" />
               </label>
               <label class="block">
                 <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.signature') }}</span>
-                <textarea v-model="profileForm.signature" class="gf-textarea mt-1 min-h-20 py-2" />
+                <Textarea v-model="profileForm.signature" class="mt-1 min-h-20 resize-y rounded-[var(--gf-radius-field)] border-line bg-base-100 px-3 py-2 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 dark:bg-base-100" />
               </label>
 
               <div class="border-t border-line pt-5">
@@ -839,21 +871,23 @@ async function toggleBinding(provider: string) {
                       </span>
                       {{ item.label }}
                     </span>
-                    <input v-model="profileForm.externalInformation[item.key].link" class="gf-input mt-1" />
+                    <Input v-model="profileForm.externalInformation[item.key].link" class="mt-1 h-10 rounded-[var(--gf-radius-field)] border-line bg-base-100 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 dark:bg-base-100" />
                   </label>
                 </div>
               </div>
 
               <div class="border-t border-line pt-5">
-                <button
+                <Button
                   type="button"
-                  class="gf-button gf-button-lg gf-button-primary min-w-28 disabled:cursor-wait"
+                  variant="brand"
+                  size="lg"
+                  class="min-w-28 px-4 disabled:cursor-wait"
                   :disabled="savingProfile"
                   @click="saveProfile"
                 >
                   <Loader2 v-if="savingProfile" class="h-4 w-4 animate-spin" />
                   <span>{{ savingProfile ? t('settings.savingShort') : t('settings.profile.save') }}</span>
-                </button>
+                </Button>
               </div>
             </div>
           </section>
@@ -863,29 +897,31 @@ async function toggleBinding(provider: string) {
             <form class="max-w-xl space-y-4 p-4" @submit.prevent="submitPassword">
               <label class="block">
                 <span class="text-sm font-medium text-base-content/75">{{ t('settings.account.currentPassword') }}</span>
-                <input v-model="passwordForm.oldPassword" required type="password" autocomplete="current-password" class="gf-input mt-1" />
+                <Input v-model="passwordForm.oldPassword" required type="password" autocomplete="current-password" class="mt-1 h-10 rounded-[var(--gf-radius-field)] border-line bg-base-100 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 dark:bg-base-100" />
               </label>
               <label class="block">
                 <span class="text-sm font-medium text-base-content/75">{{ t('auth.newPassword') }}</span>
-                <input v-model="passwordForm.newPassword" required type="password" autocomplete="new-password" class="gf-input mt-1" />
+                <Input v-model="passwordForm.newPassword" required type="password" autocomplete="new-password" class="mt-1 h-10 rounded-[var(--gf-radius-field)] border-line bg-base-100 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 dark:bg-base-100" />
                 <span class="mt-1 block text-xs text-base-content/55">{{ t('settings.account.passwordHint') }}</span>
               </label>
               <label class="block">
                 <span class="text-sm font-medium text-base-content/75">{{ t('auth.confirmPassword') }}</span>
-                <input v-model="passwordForm.confirmPassword" required type="password" autocomplete="new-password" class="gf-input mt-1" />
+                <Input v-model="passwordForm.confirmPassword" required type="password" autocomplete="new-password" class="mt-1 h-10 rounded-[var(--gf-radius-field)] border-line bg-base-100 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 dark:bg-base-100" />
               </label>
-              <button type="submit" class="gf-button gf-button-lg gf-button-primary disabled:cursor-wait" :disabled="savingPassword">
+              <Button type="submit" variant="brand" size="lg" class="px-4 disabled:cursor-wait" :disabled="savingPassword">
                 <Loader2 v-if="savingPassword" class="h-4 w-4 animate-spin" />
                 {{ t('settings.account.changePassword') }}
-              </button>
+              </Button>
 
               <div class="border-t border-line pt-4">
                 <p class="text-sm font-semibold text-base-content">{{ t('settings.account.forgotPasswordTitle') }}</p>
                 <p class="mt-1 text-sm leading-6 text-base-content/55">{{ t('settings.account.forgotPasswordDescription') }}</p>
-                <a href="/login?mode=forgot" class="gf-button gf-button-lg gf-button-ghost mt-3">
-                  <Mail class="h-4 w-4" />
-                  {{ t('settings.account.resetByEmail') }}
-                </a>
+                <Button as-child variant="brand-ghost" size="lg" class="mt-3 px-4">
+                  <a href="/login?mode=forgot">
+                    <Mail class="h-4 w-4" />
+                    {{ t('settings.account.resetByEmail') }}
+                  </a>
+                </Button>
               </div>
             </form>
           </section>
@@ -898,21 +934,21 @@ async function toggleBinding(provider: string) {
                   <span class="block text-sm font-semibold text-base-content">{{ t('settings.privacy.showTopics') }}</span>
                   <span class="text-sm text-base-content/55">{{ t('settings.privacy.showTopicsDescription') }}</span>
                 </span>
-                <input v-model="privacy.showTopics" type="checkbox" class="h-5 w-5 rounded border-line text-primary" @change="savePrivacy" />
+                <Checkbox v-model="privacy.showTopics" class="size-5 border-line shadow-none focus-visible:ring-primary" @update:model-value="savePrivacy" />
               </label>
               <label class="flex items-center justify-between gap-4 py-4">
                 <span>
                   <span class="block text-sm font-semibold text-base-content">{{ t('settings.privacy.showFollowing') }}</span>
                   <span class="text-sm text-base-content/55">{{ t('settings.privacy.showFollowingDescription') }}</span>
                 </span>
-                <input v-model="privacy.showFollowing" type="checkbox" class="h-5 w-5 rounded border-line text-primary" @change="savePrivacy" />
+                <Checkbox v-model="privacy.showFollowing" class="size-5 border-line shadow-none focus-visible:ring-primary" @update:model-value="savePrivacy" />
               </label>
               <label class="flex items-center justify-between gap-4 py-4">
                 <span>
                   <span class="block text-sm font-semibold text-base-content">{{ t('settings.privacy.emailNotifications') }}</span>
                   <span class="text-sm text-base-content/55">{{ t('settings.privacy.emailNotificationsDescription') }}</span>
                 </span>
-                <input v-model="privacy.emailNotifications" type="checkbox" class="h-5 w-5 rounded border-line text-primary" @change="savePrivacy" />
+                <Checkbox v-model="privacy.emailNotifications" class="size-5 border-line shadow-none focus-visible:ring-primary" @update:model-value="savePrivacy" />
               </label>
             </div>
           </section>
@@ -920,7 +956,9 @@ async function toggleBinding(provider: string) {
           <section v-show="activeTab === 'binding'">
             <SectionHeader :icon="Mail" :title="t('settings.binding.title')">
               <template #actions>
-                <button type="button" class="text-xs font-medium text-primary hover:text-primary" @click="loadBindings">{{ t('settings.binding.refresh') }}</button>
+                <Button type="button" variant="brand-ghost" size="sm" class="h-auto px-0 py-0 text-xs hover:bg-transparent" @click="loadBindings">
+                  {{ t('settings.binding.refresh') }}
+                </Button>
               </template>
             </SectionHeader>
             <div v-if="loadingBindings" class="p-4 py-8 text-center text-sm text-base-content/55">
@@ -957,9 +995,10 @@ async function toggleBinding(provider: string) {
                     </p>
                   </div>
                 </div>
-                <button
+                <Button
                   type="button"
-                  class="inline-flex h-9 min-w-24 items-center justify-center gap-2 rounded-md border px-3 text-sm font-semibold disabled:cursor-not-allowed"
+                  :variant="isBound(provider.key) ? 'surface' : 'neutral'"
+                  class="min-w-24"
                   :class="[
                     !provider.enabled && !provider.bound
                       ? 'border-line bg-base-300 text-base-content/55'
@@ -973,7 +1012,7 @@ async function toggleBinding(provider: string) {
                   <Loader2 v-if="bindingAction === provider.key" class="h-4 w-4 animate-spin" />
                   <Check v-else-if="isBound(provider.key)" class="h-4 w-4" />
                   {{ providerActionLabel(provider) }}
-                </button>
+                </Button>
               </div>
             </div>
           </section>
@@ -981,7 +1020,7 @@ async function toggleBinding(provider: string) {
           <section v-show="activeTab === 'applications'">
             <SectionHeader :icon="AppWindow" title="已授权应用" description="管理可以使用你的 GooseForum 身份登录的应用。">
               <template #actions>
-                <button type="button" class="text-xs font-medium text-primary hover:text-primary" @click="loadOIDCGrants">刷新</button>
+                <Button type="button" variant="brand-ghost" size="sm" class="h-auto px-0 py-0 text-xs hover:bg-transparent" @click="loadOIDCGrants">刷新</Button>
               </template>
             </SectionHeader>
             <div v-if="loadingOIDCGrants" class="p-8 text-center text-sm text-base-content/55">
@@ -1006,13 +1045,13 @@ async function toggleBinding(provider: string) {
                 </div>
                 <div class="flex shrink-0 items-center gap-2">
                   <template v-if="revokeConfirmId === grant.clientId">
-                    <button type="button" class="gf-button gf-button-sm gf-button-muted" :disabled="Boolean(revokingOIDCGrant)" @click="revokeConfirmId = ''">取消</button>
-                    <button type="button" class="gf-button gf-button-sm border-error/30 bg-error/10 text-error" :disabled="Boolean(revokingOIDCGrant)" @click="removeOIDCGrant(grant.clientId)">
+                    <Button type="button" variant="muted" size="sm" :disabled="Boolean(revokingOIDCGrant)" @click="revokeConfirmId = ''">取消</Button>
+                    <Button type="button" variant="surface" size="sm" class="border-error/30 bg-error/10 text-error hover:bg-error/10 hover:text-error" :disabled="Boolean(revokingOIDCGrant)" @click="removeOIDCGrant(grant.clientId)">
                       <Loader2 v-if="revokingOIDCGrant === grant.clientId" class="h-4 w-4 animate-spin" />
                       确认撤销
-                    </button>
+                    </Button>
                   </template>
-                  <button v-else type="button" class="gf-button gf-button-sm border-error/30 bg-error/10 text-error" :disabled="Boolean(revokingOIDCGrant)" @click="revokeConfirmId = grant.clientId">撤销授权</button>
+                  <Button v-else type="button" variant="surface" size="sm" class="border-error/30 bg-error/10 text-error hover:bg-error/10 hover:text-error" :disabled="Boolean(revokingOIDCGrant)" @click="revokeConfirmId = grant.clientId">撤销授权</Button>
                 </div>
               </article>
             </div>
@@ -1020,18 +1059,17 @@ async function toggleBinding(provider: string) {
         </div>
       </section>
 
-      <div v-if="cropModalOpen" class="fixed inset-0 z-[100] overflow-y-auto bg-neutral/50 px-3 py-4 backdrop-blur-sm sm:px-4" role="dialog" aria-modal="true">
-        <div class="mx-auto flex min-h-full max-w-[760px] items-center justify-center">
-          <div class="gf-menu-surface flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-hidden">
-            <div class="flex items-center justify-between border-b border-line px-5 py-3">
+      <Dialog :open="cropModalOpen" @update:open="handleCropModalOpen">
+        <DialogContent :show-close-button="false" class="flex max-h-[calc(100vh-2rem)] flex-col gap-0 overflow-hidden rounded-[var(--gf-radius-box)] border-line bg-base-100 p-0 sm:max-w-[760px]">
+            <DialogHeader class="flex-row items-center justify-between gap-3 border-b border-line px-5 py-3 text-left">
               <div>
-                <h2 class="text-base font-semibold text-base-content">{{ t('settings.avatar.cropTitle') }}</h2>
-                <p class="mt-0.5 text-sm text-base-content/55">{{ t('settings.avatar.cropDescription') }}</p>
+                <DialogTitle class="text-base text-base-content">{{ t('settings.avatar.cropTitle') }}</DialogTitle>
+                <DialogDescription class="mt-0.5 text-base-content/55">{{ t('settings.avatar.cropDescription') }}</DialogDescription>
               </div>
-              <button type="button" class="rounded-md px-2 py-1 text-sm font-medium text-base-content/55 hover:bg-base-300 hover:text-base-content" @click="closeCropModal">
+              <Button type="button" variant="muted" size="sm" class="h-auto px-2 py-1 text-sm" @click="closeCropModal">
                 {{ t('common.close') }}
-              </button>
-            </div>
+              </Button>
+            </DialogHeader>
 
             <div class="grid gap-4 overflow-y-auto p-4 md:grid-cols-[minmax(280px,420px)_180px] md:items-start md:justify-center">
               <div class="avatar-crop-workspace aspect-square w-full max-w-[420px] justify-self-center overflow-hidden rounded-lg border border-line bg-base-200">
@@ -1055,22 +1093,23 @@ async function toggleBinding(provider: string) {
               {{ cropError }}
             </div>
 
-            <div class="flex items-center justify-end gap-2 border-t border-line bg-base-200 px-5 py-3">
-              <button type="button" class="gf-button gf-button-lg gf-button-muted font-medium" @click="closeCropModal">
+            <DialogFooter class="flex-row items-center justify-end border-t border-line bg-base-200 px-5 py-3">
+              <Button type="button" variant="muted" size="lg" class="px-4" @click="closeCropModal">
                 {{ t('common.cancel') }}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                class="gf-button gf-button-lg gf-button-primary min-w-28 disabled:cursor-wait"
+                variant="brand"
+                size="lg"
+                class="min-w-28 px-4 disabled:cursor-wait"
                 :disabled="uploadingAvatar"
                 @click="uploadCroppedAvatar"
               >
                 <Loader2 v-if="uploadingAvatar" class="h-4 w-4 animate-spin" />
                 {{ uploadingAvatar ? t('settings.avatar.uploading') : t('settings.avatar.confirmUpload') }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+              </Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
 </template>

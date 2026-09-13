@@ -3,7 +3,7 @@
 import { VisArea, VisAxis, VisLine, VisXYContainer } from '@unovis/vue'
 import { computed } from 'vue'
 import AdminSection from '@/admin/components/AdminSection.vue'
-import type { ChartConfig } from '@/admin/components/ui/chart'
+import type { ChartConfig } from '@/components/ui/chart'
 import {
   ChartContainer,
   ChartCrosshair,
@@ -11,7 +11,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   componentToString,
-} from '@/admin/components/ui/chart'
+} from '@/components/ui/chart'
 import type { DailyTraffic } from '@/admin/types'
 
 const props = defineProps<{

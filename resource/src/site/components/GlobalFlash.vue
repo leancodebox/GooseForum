@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { CircleCheck, CircleX, Info, TriangleAlert, X } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
 import { dismiss, useFlashMessages, type FlashMessageType } from '@/runtime/flash-message'
 
 const { messages } = useFlashMessages()
@@ -87,14 +88,15 @@ function labelFor(type: FlashMessageType) {
           <div class="mb-1 text-[11px] font-bold text-base-content/55">{{ labelFor(item.type) }}</div>
           <p class="leading-5 text-base-content">{{ item.message }}</p>
         </div>
-        <button
+        <Button
           type="button"
-          class="-mr-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-300 hover:text-base-content"
+          variant="muted"
+          class="-mr-1 h-7 w-7 shrink-0 rounded-md p-0 font-normal text-icon-muted shadow-none transition hover:bg-base-300 hover:text-base-content"
           :aria-label="t('flash.close')"
           @click="dismiss(item.id)"
         >
           <X class="h-3.5 w-3.5" />
-        </button>
+        </Button>
       </div>
     </TransitionGroup>
   </div>

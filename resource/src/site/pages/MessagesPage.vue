@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { ArrowLeft, MessageSquare, MessageSquarePlus, MoreVertical, Search, Send, Smile, X } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { getChatMessages, markChatRead, sendChatMessage, type ChatMessagePayload } from '@/runtime/api'
 import { formatChatTime } from '@/runtime/format'
 import { useUnreadStatus } from '@/runtime/unread-status'
@@ -38,6 +42,10 @@ const messageInput = ref<HTMLTextAreaElement | null>(null)
 const unreadStatus = useUnreadStatus()
 const messagePageLimit = 30
 const emojis = ['😀', '😂', '😍', '😊', '😭', '👍', '🙏', '🔥', '✨', '🎉', '🤔', '👀', '❤️', '🙌', '👏', '✅']
+
+function handleNewChatOpen(open: boolean) {
+  showNewChat.value = open
+}
 
 const filteredConversations = computed(() => {
   const keyword = search.value.trim().toLowerCase()
@@ -242,29 +250,32 @@ async function startChat(user: UserConnectionPayload) {
         >
           <div class="flex h-14 shrink-0 items-center justify-between border-b border-line bg-base-100 px-4 md:h-15">
             <h1 class="text-base font-bold text-base-content md:text-lg">{{ t('messages.title') }}</h1>
-            <button
+            <Button
               type="button"
-              class="gf-icon-button h-8 w-8 hover:bg-base-300 hover:text-base-content"
+              variant="muted"
+              size="icon-sm"
               :title="t('messages.newMessage')"
+              :aria-label="t('messages.newMessage')"
               @click="showNewChat = true"
             >
               <MessageSquarePlus class="h-4 w-4" />
-            </button>
+            </Button>
           </div>
 
           <div class="border-b border-line p-3 md:bg-transparent">
-            <label class="flex h-9 items-center gap-2 border border-line bg-base-200 px-3 text-sm text-base-content/55 [border-radius:var(--gf-radius-field)] md:bg-base-100">
-              <Search class="h-4 w-4" />
-              <input v-model="search" class="min-w-0 flex-1 bg-transparent outline-none" :placeholder="t('messages.searchConversations')" />
-            </label>
+            <InputGroup class="border-line bg-base-200 shadow-none [border-radius:var(--gf-radius-field)] has-[[data-slot=input-group-control]:focus-visible]:border-primary has-[[data-slot=input-group-control]:focus-visible]:ring-4 has-[[data-slot=input-group-control]:focus-visible]:ring-primary/20 dark:bg-base-200 md:bg-base-100 md:dark:bg-base-100">
+              <InputGroupAddon><Search class="h-4 w-4" /></InputGroupAddon>
+              <InputGroupInput v-model="search" :placeholder="t('messages.searchConversations')" />
+            </InputGroup>
           </div>
 
           <div v-if="filteredConversations.length" class="min-h-0 flex-1 overflow-y-auto">
-            <button
+            <Button
               v-for="conversation in filteredConversations"
               :key="conversation.peerId"
               type="button"
-              class="flex w-full gap-3 border-b border-line px-4 py-3 text-left transition hover:bg-base-200 md:hover:bg-base-100"
+              variant="muted"
+              class="flex w-full justify-start gap-3 rounded-none border-b border-line px-4 py-3 font-normal text-base-content shadow-none transition hover:bg-base-200 md:hover:bg-base-100"
               :class="active?.peerId === conversation.peerId ? 'bg-info/10 shadow-[inset_3px_0_0_var(--gf-color-primary)] md:bg-base-100' : ''"
               @click="selectConversation(conversation)"
             >
@@ -287,16 +298,16 @@ async function startChat(user: UserConnectionPayload) {
                   </p>
                 </div>
               </div>
-            </button>
+            </Button>
           </div>
 
           <div v-else class="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center">
             <MessageSquare class="h-10 w-10 text-base-content/35" />
             <h2 class="mt-3 text-base font-semibold text-base-content">{{ t('messages.emptyConversationsTitle') }}</h2>
             <p class="mt-1 text-sm text-base-content/55">{{ t('messages.emptyConversationsDescription') }}</p>
-            <button type="button" class="gf-button gf-button-md gf-button-primary mt-4" @click="showNewChat = true">
+            <Button type="button" variant="brand" class="mt-4" @click="showNewChat = true">
               {{ t('messages.newMessage') }}
-            </button>
+            </Button>
           </div>
         </aside>
 
@@ -304,18 +315,18 @@ async function startChat(user: UserConnectionPayload) {
           <div v-if="active" class="flex min-h-0 w-full flex-col">
             <header class="flex h-14 shrink-0 items-center justify-between border-b border-line px-3 md:h-15 md:px-4">
               <div class="flex min-w-0 items-center gap-3">
-                <button type="button" class="gf-icon-button -ml-2 h-8 w-8 hover:bg-base-300 hover:text-base-content md:hidden" @click="active = null">
+                <Button type="button" variant="muted" size="icon-sm" class="-ml-2 md:hidden" :aria-label="t('common.back')" @click="active = null">
                   <ArrowLeft class="h-5 w-5" />
-                </button>
+                </Button>
                 <UserAvatar :src="active.peerAvatar" :alt="active.peerUsername" class="h-9 w-9 rounded-full object-cover ring-1 ring-line" />
                 <div class="min-w-0">
                   <a :href="active.peerUrl" class="truncate text-sm font-bold text-base-content hover:text-primary">{{ active.peerUsername }}</a>
                   <p class="text-xs text-base-content/55">{{ t('messages.conversation') }}</p>
                 </div>
               </div>
-              <button type="button" class="gf-icon-button h-8 w-8 hover:bg-base-300 hover:text-base-content">
+              <Button type="button" variant="muted" size="icon-sm" aria-label="More">
                 <MoreVertical class="h-4 w-4" />
-              </button>
+              </Button>
             </header>
 
             <div ref="messagesEl" class="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3 md:space-y-4 md:px-4 md:py-4" @scroll.passive="handleMessagesScroll">
@@ -367,37 +378,51 @@ async function startChat(user: UserConnectionPayload) {
                   <div class="mt-1 flex items-center justify-between gap-3 border-t border-line/70 px-1 pt-2">
                     <div class="flex min-w-0 items-center gap-2">
                       <div class="relative">
-                        <button
-                          type="button"
-                          class="gf-icon-button h-8 w-8 hover:bg-base-100 hover:text-primary"
-                          :title="t('messages.emoji')"
-                          @click="showEmoji = !showEmoji"
-                        >
-                          <Smile class="h-5 w-5" />
-                        </button>
-                        <div v-if="showEmoji" class="gf-menu-surface absolute bottom-full left-0 z-20 mb-3 grid w-48 grid-cols-4 gap-1 p-2">
-                          <button
-                            v-for="emoji in emojis"
-                            :key="emoji"
-                            type="button"
-                            class="p-1.5 text-xl hover:bg-base-200 [border-radius:var(--gf-radius-field)]"
-                            @click="appendEmoji(emoji)"
+                        <Popover v-model:open="showEmoji">
+                          <PopoverTrigger as-child>
+                            <Button
+                              type="button"
+                              variant="muted"
+                              size="icon-sm"
+                              class="hover:bg-base-100 hover:text-primary"
+                              :title="t('messages.emoji')"
+                              :aria-label="t('messages.emoji')"
+                            >
+                              <Smile class="h-5 w-5" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            side="top"
+                            align="start"
+                            :side-offset="8"
+                            class="grid w-48 grid-cols-4 gap-1 border-line bg-base-100 p-2 shadow-lg [border-radius:var(--gf-radius-box)]"
                           >
-                            {{ emoji }}
-                          </button>
-                        </div>
+                            <Button
+                              v-for="emoji in emojis"
+                              :key="emoji"
+                              type="button"
+                              variant="muted"
+                              class="p-1.5 text-xl font-normal hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary shadow-none [border-radius:var(--gf-radius-field)]"
+                              @click="appendEmoji(emoji)"
+                            >
+                              {{ emoji }}
+                            </Button>
+                          </PopoverContent>
+                        </Popover>
                       </div>
                       <span class="hidden truncate text-[11px] font-medium text-base-content/55 sm:inline">{{ t('messages.enterHint') }}</span>
                     </div>
-                    <button
+                    <Button
                       type="button"
-                      class="gf-button gf-button-sm gf-button-primary shrink-0 disabled:bg-base-300 disabled:text-base-content/55"
+                      variant="brand"
+                      size="sm"
+                      class="shrink-0 disabled:bg-base-300 disabled:text-base-content/55"
                       :disabled="!newMessage.trim() || sending"
                       @click="submitMessage"
                     >
                       <Send class="h-4 w-4" />
                       <span>{{ t('messages.send') }}</span>
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -408,33 +433,35 @@ async function startChat(user: UserConnectionPayload) {
             <MessageSquare class="h-12 w-12 text-base-content/35" />
             <h2 class="mt-3 text-lg font-semibold text-base-content">{{ t('messages.selectConversation') }}</h2>
             <p class="mt-1 text-sm text-base-content/55">{{ t('messages.selectConversationDescription') }}</p>
-            <button type="button" class="gf-button gf-button-md gf-button-primary mt-4" @click="showNewChat = true">
+            <Button type="button" variant="brand" class="mt-4" @click="showNewChat = true">
               {{ t('messages.startChat') }}
-            </button>
+            </Button>
           </div>
         </section>
       </section>
 
-      <div v-if="showNewChat" class="fixed inset-0 z-[80] flex items-center justify-center bg-neutral/20 px-4 backdrop-blur-sm" @click.self="showNewChat = false">
-        <div class="gf-menu-surface flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden">
-          <div class="flex h-13 items-center justify-between border-b border-line px-4">
-            <h2 class="text-sm font-semibold text-base-content">{{ t('messages.newMessage') }}</h2>
-            <button type="button" class="gf-icon-button p-1.5 hover:bg-base-300 hover:text-base-content" @click="showNewChat = false">
+      <Dialog :open="showNewChat" @update:open="handleNewChatOpen">
+        <DialogContent :show-close-button="false" class="flex max-h-[80vh] flex-col gap-0 overflow-hidden rounded-[var(--gf-radius-box)] border-line bg-base-100 p-0 sm:max-w-md">
+          <DialogHeader class="flex h-13 flex-row items-center justify-between border-b border-line px-4 text-left">
+            <DialogTitle class="text-sm text-base-content">{{ t('messages.newMessage') }}</DialogTitle>
+            <Button type="button" variant="muted" size="icon-sm" :aria-label="t('common.close')" @click="showNewChat = false">
               <X class="h-4 w-4" />
-            </button>
-          </div>
+            </Button>
+          </DialogHeader>
+          <DialogDescription class="sr-only">{{ t('messages.searchUsers') }}</DialogDescription>
           <div class="border-b border-line p-3">
-            <label class="flex h-9 items-center gap-2 border border-line bg-base-200 px-3 text-sm text-base-content/55 [border-radius:var(--gf-radius-field)]">
-              <Search class="h-4 w-4" />
-              <input v-model="userSearch" class="min-w-0 flex-1 bg-transparent outline-none" :placeholder="t('messages.searchUsers')" />
-            </label>
+            <InputGroup class="border-line bg-base-200 shadow-none [border-radius:var(--gf-radius-field)] has-[[data-slot=input-group-control]:focus-visible]:border-primary has-[[data-slot=input-group-control]:focus-visible]:ring-4 has-[[data-slot=input-group-control]:focus-visible]:ring-primary/20 dark:bg-base-200">
+              <InputGroupAddon><Search class="h-4 w-4" /></InputGroupAddon>
+              <InputGroupInput v-model="userSearch" :placeholder="t('messages.searchUsers')" />
+            </InputGroup>
           </div>
           <div class="min-h-0 overflow-y-auto p-2">
-            <button
+            <Button
               v-for="user in filteredUsers"
               :key="user.id"
               type="button"
-              class="flex w-full items-center gap-3 p-3 text-left hover:bg-base-200 [border-radius:var(--gf-radius-field)]"
+              variant="muted"
+              class="flex w-full items-center justify-start gap-3 p-3 text-left font-normal text-base-content shadow-none hover:bg-base-200 [border-radius:var(--gf-radius-field)]"
               @click="startChat(user)"
             >
               <UserAvatar :src="user.avatarUrl" :alt="user.username" class="h-10 w-10 rounded-full object-cover ring-1 ring-line" />
@@ -442,10 +469,10 @@ async function startChat(user: UserConnectionPayload) {
                 <div class="truncate text-sm font-semibold text-base-content">{{ user.nickname || user.username }}</div>
                 <div class="truncate text-xs text-base-content/55">@{{ user.username }}</div>
               </div>
-            </button>
+            </Button>
             <p v-if="!filteredUsers.length" class="px-4 py-8 text-center text-sm text-base-content/55">{{ t('messages.noContactableUsers') }}</p>
           </div>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
     </main>
 </template>

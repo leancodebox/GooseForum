@@ -6,10 +6,10 @@ import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalize
 import { useMediaQuery } from '@vueuse/core'
 import { Calendar } from '@lucide/vue'
 import { computed, ref, shallowRef, watch } from 'vue'
-import { Button } from '@/admin/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/admin/components/ui/popover'
-import { RangeCalendar } from '@/admin/components/ui/range-calendar'
-import { cn } from '@/admin/utils/cn'
+import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { RangeCalendar } from '@/components/ui/range-calendar'
+import { cn } from '@/lib/utils'
 
 const props = defineProps<{
   startDate: string

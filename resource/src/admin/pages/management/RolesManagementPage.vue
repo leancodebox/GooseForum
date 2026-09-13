@@ -7,7 +7,10 @@ import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
 import AdminToolbar from '@/admin/components/AdminToolbar.vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import { Button } from '@/admin/components/ui/button'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -15,7 +18,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/admin/components/ui/dialog'
+} from '@/components/ui/dialog'
 import { deleteRole, getPermissionList, getRoleList, saveRole } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import type { AdminPayload, AdminRole, ManageHomeProps } from '@/admin/types'
@@ -35,7 +38,7 @@ const page = ref(1)
 const pageSize = ref(10)
 const search = ref('')
 const appliedSearch = ref('')
-const effectiveFilter = ref('')
+const effectiveFilter = ref('all')
 const dialogMode = ref<'add' | 'edit' | null>(null)
 const editingRole = ref<AdminRole | null>(null)
 const deletingRole = ref<AdminRole | null>(null)
@@ -45,7 +48,7 @@ const filteredRows = computed(() => {
   const keyword = appliedSearch.value.toLowerCase()
   return rows.value.filter((role) => {
     const matchesName = !keyword || role.roleName.toLowerCase().includes(keyword)
-    const matchesEffective = effectiveFilter.value === '' || String(role.effective) === effectiveFilter.value
+    const matchesEffective = effectiveFilter.value === 'all' || String(role.effective) === effectiveFilter.value
     return matchesName && matchesEffective
   })
 })
@@ -178,16 +181,19 @@ onMounted(() => {
             <form class="flex min-w-64 flex-1 gap-2 sm:flex-none" @submit.prevent="applySearch">
               <div class="relative flex-1">
                 <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <input v-model="search" class="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" :placeholder="adminText('k007q')" />
+                <Input v-model="search" class="h-10 pl-9" :placeholder="adminText('k007q')" />
               </div>
               <Button type="submit" class="h-10">{{ adminText('k00al') }}</Button>
             </form>
             <div class="flex items-center gap-2">
-              <select v-model="effectiveFilter" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" @change="page = 1">
-                <option value="">{{ adminText('k00am') }}</option>
-                <option value="1">{{ adminText('k007n') }}</option>
-                <option value="0">{{ adminText('k007o') }}</option>
-              </select>
+              <Select v-model="effectiveFilter" @update:model-value="page = 1">
+                <SelectTrigger class="h-10 w-32"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{{ adminText('k00am') }}</SelectItem>
+                  <SelectItem value="1">{{ adminText('k007n') }}</SelectItem>
+                  <SelectItem value="0">{{ adminText('k007o') }}</SelectItem>
+                </SelectContent>
+              </Select>
               <Button variant="outline" type="button" class="h-10" :disabled="loading" @click="loadRoles">
                 <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
                 {{ adminText('k004q') }}
@@ -238,17 +244,15 @@ onMounted(() => {
           <div class="space-y-5">
             <label class="grid gap-2 text-sm font-medium">
               {{ adminText('k007i') }}
-              <input v-model="form.roleName" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" :placeholder="adminText('k007r')" />
+              <Input v-model="form.roleName" class="h-10" :placeholder="adminText('k007r')" />
             </label>
             <div class="grid gap-2">
               <div class="text-sm font-medium">{{ adminText('k00ap') }}</div>
               <div class="grid max-h-56 grid-cols-2 gap-3 overflow-y-auto rounded-md border p-4">
                 <label v-for="permission in permissionOptions" :key="permission.id" class="flex items-center gap-2 text-sm">
-                  <input
-                    class="size-4 rounded border"
-                    type="checkbox"
-                    :checked="form.permissions.includes(permission.id)"
-                    @change="togglePermission(permission.id, ($event.target as HTMLInputElement).checked)"
+                  <Checkbox
+                    :model-value="form.permissions.includes(permission.id)"
+                    @update:model-value="togglePermission(permission.id, Boolean($event))"
                   />
                   {{ permission.name }}
                 </label>

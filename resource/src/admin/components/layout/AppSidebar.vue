@@ -24,7 +24,7 @@ import {
   ShieldAlert,
 } from '@lucide/vue'
 import { computed } from 'vue'
-import { Avatar, AvatarFallback, AvatarImage } from '@/admin/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Sidebar,
   SidebarContent,
@@ -36,11 +36,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from '@/admin/components/ui/sidebar'
+} from '@/components/ui/sidebar'
 import { RouterLink, useRoute } from 'vue-router'
 import type { LayoutPayload } from '@gooseforum/client'
 import type { LucideIcon } from '@lucide/vue'
-import type { SidebarProps } from '@/admin/components/ui/sidebar'
+import type { SidebarProps } from '@/components/ui/sidebar'
 import { useI18n } from 'vue-i18n'
 import { AdminPermission, hasAnyAdminPermission } from '@/admin/runtime/access'
 

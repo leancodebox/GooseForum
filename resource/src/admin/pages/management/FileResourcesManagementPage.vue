@@ -5,9 +5,10 @@ import { computed, onMounted, ref } from 'vue'
 import { ChevronLeft, ChevronRight, Copy, File, RefreshCw } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import AdminSection from '@/admin/components/AdminSection.vue'
-import { Badge } from '@/admin/components/ui/badge'
-import { Button } from '@/admin/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/admin/components/ui/dialog'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { adminToast } from '@/admin/runtime/toast'
 import { getFileResourceList } from '@/admin/runtime/api'
 import type { AdminFileResource, AdminPayload, ManageHomeProps } from '@/admin/types'
@@ -131,9 +132,10 @@ onMounted(loadResources)
           :key="item.id"
           class="group overflow-hidden rounded-lg border bg-background transition hover:border-primary/35 hover:shadow-sm"
         >
-          <button
+          <Button
             type="button"
-            class="block aspect-[4/3] w-full overflow-hidden bg-muted text-left"
+            variant="ghost"
+            class="aspect-[4/3] h-auto w-full overflow-hidden rounded-none bg-muted p-0 text-left font-normal shadow-none hover:bg-muted"
             :title="item.name"
             @click="openPreview(item)"
           >
@@ -142,7 +144,7 @@ onMounted(loadResources)
               <File class="size-8" />
               <span class="max-w-full truncate px-4 text-xs font-medium">{{ item.type || 'file' }}</span>
             </div>
-          </button>
+          </Button>
           <div class="space-y-2 p-3">
             <div class="min-w-0">
               <div class="truncate text-sm font-medium text-foreground" :title="item.name">{{ item.name }}</div>
@@ -173,16 +175,15 @@ onMounted(loadResources)
       <div class="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/10 px-4 py-3 text-sm text-muted-foreground">
         <div>{{ adminText('k00fj') }} {{ maxId }}</div>
         <div class="flex items-center gap-2">
-          <select
-            class="h-9 rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            :value="pageSize"
-            @change="updatePageSize(Number(($event.target as HTMLSelectElement).value))"
-          >
-            <option :value="10">{{ adminText('k002x') }}</option>
-            <option :value="20">{{ adminText('k002y') }}</option>
-            <option :value="30">{{ adminText('k002z') }}</option>
-            <option :value="50">{{ adminText('k0030') }}</option>
-          </select>
+          <Select :model-value="String(pageSize)" @update:model-value="updatePageSize(Number($event))">
+            <SelectTrigger class="w-20"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">{{ adminText('k002x') }}</SelectItem>
+              <SelectItem value="20">{{ adminText('k002y') }}</SelectItem>
+              <SelectItem value="30">{{ adminText('k002z') }}</SelectItem>
+              <SelectItem value="50">{{ adminText('k0030') }}</SelectItem>
+            </SelectContent>
+          </Select>
           <Button
             variant="outline"
             size="icon"

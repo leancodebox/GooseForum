@@ -2,6 +2,7 @@
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Button } from '@/components/ui/button'
 import { vContentEnhancements } from '@/runtime/content-enhancements'
 import { postURL } from '@/runtime/post-url'
 import UserAvatar from '@/site/components/UserAvatar.vue'
@@ -87,9 +88,9 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
           v-html="target.renderedContent"
         />
       </blockquote>
-      <button
+      <Button
         v-if="overflowing"
-        type="button"
+        variant="ghost"
         class="mx-2.5 mt-1 inline-flex h-7 items-center gap-1 rounded px-1.5 text-xs font-medium text-primary transition hover:bg-info/10"
         :aria-expanded="expanded"
         @click="toggleExpanded"
@@ -97,7 +98,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
         <ChevronUp v-if="expanded" class="h-3.5 w-3.5" />
         <ChevronDown v-else class="h-3.5 w-3.5" />
         {{ expanded ? t('topic.collapseReply') : t('topic.expandReply') }}
-      </button>
+      </Button>
     </template>
   </aside>
 </template>

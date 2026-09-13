@@ -21,9 +21,11 @@ import {
   Upload,
 } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import { Button } from '@/admin/components/ui/button'
-import { Input } from '@/admin/components/ui/input'
-import { Switch } from '@/admin/components/ui/switch'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import {
   Dialog,
   DialogContent,
@@ -31,7 +33,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/admin/components/ui/dialog'
+} from '@/components/ui/dialog'
 import { getSiteChrome, saveSiteChrome, uploadAdminImage } from '@/admin/runtime/api'
 import { adminText } from '@/admin/runtime/i18n-text'
 import { adminToast } from '@/admin/runtime/toast'
@@ -354,9 +356,10 @@ onMounted(load)
     <section v-else class="min-h-[760px] overflow-hidden rounded-xl border bg-base-200 text-base-content shadow-sm">
       <header class="border-b border-transparent bg-base-100/0 shadow-none backdrop-blur-none">
         <div class="mx-auto grid h-16 w-full max-w-[1600px] grid-cols-[auto_minmax(0,1fr)] items-center gap-8 px-5">
-          <button
+          <Button
             type="button"
-            class="group relative -ml-1 flex min-w-0 shrink-0 items-center gap-2 rounded-md border border-dashed border-transparent px-2 py-1 text-left transition hover:border-primary/25 hover:bg-primary/5"
+            variant="ghost"
+            class="group relative -ml-1 h-auto min-w-0 shrink-0 justify-start gap-2 rounded-md border border-dashed border-transparent px-2 py-1 text-left font-normal shadow-none hover:border-primary/25 hover:bg-primary/5"
             @click="openBrandDialog"
           >
             <img v-if="brandType === 'image' && brandImage" :src="brandImage" :alt="brandText" class="h-8 w-auto max-w-40 shrink-0 object-contain sm:h-9" />
@@ -367,7 +370,7 @@ onMounted(load)
             <span class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-sm text-icon-muted opacity-0 transition hover:bg-primary/10 hover:text-primary group-hover:opacity-100">
               <Pencil class="h-3.5 w-3.5" />
             </span>
-          </button>
+          </Button>
 
           <nav class="flex min-w-0 items-center gap-1" aria-label="Header navigation preview">
             <Draggable
@@ -383,16 +386,16 @@ onMounted(load)
                 >
                   <span class="min-w-0 truncate">{{ displayChromeLabel(element) }}</span>
                   <span class="pointer-events-none absolute left-1/2 top-full z-10 flex -translate-x-1/2 shrink-0 items-center gap-0.5 rounded-md bg-base-100/80 px-0.5 py-0.5 opacity-0 backdrop-blur transition-opacity duration-150 before:absolute before:inset-x-0 before:-top-2 before:h-2 group-hover:pointer-events-auto group-hover:opacity-100">
-                    <button v-if="isSystemHeaderItem(element)" type="button" class="relative inline-flex h-5 w-5 items-center justify-center rounded-sm text-icon-muted transition hover:scale-110 hover:bg-primary/10 hover:text-primary" :title="adminText('k00dc')" @click.stop="toggleHeaderItemVisibility(index)">
+                    <Button v-if="isSystemHeaderItem(element)" type="button" variant="ghost" size="icon-sm" class="relative size-5 rounded-sm p-0 text-icon-muted shadow-none transition hover:scale-110 hover:bg-primary/10 hover:text-primary" :title="adminText('k00dc')" @click.stop="toggleHeaderItemVisibility(index)">
                       <EyeOff v-if="element.enabled" class="h-3.5 w-3.5" />
                       <Eye v-else class="h-3.5 w-3.5" />
-                    </button>
-                    <button v-if="!isSystemHeaderItem(element)" type="button" class="relative inline-flex h-5 w-5 items-center justify-center rounded-sm text-icon-muted transition hover:scale-110 hover:bg-primary/10 hover:text-primary" @click.stop="openItem('header', index)">
+                    </Button>
+                    <Button v-if="!isSystemHeaderItem(element)" type="button" variant="ghost" size="icon-sm" class="relative size-5 rounded-sm p-0 text-icon-muted shadow-none transition hover:scale-110 hover:bg-primary/10 hover:text-primary" @click.stop="openItem('header', index)">
                       <Pencil class="h-3.5 w-3.5" />
-                    </button>
-                    <button v-if="!isSystemHeaderItem(element)" type="button" class="relative inline-flex h-5 w-5 items-center justify-center rounded-sm text-icon-muted transition hover:scale-110 hover:bg-destructive/10 hover:text-destructive" @click.stop="removeItem('header', index)">
+                    </Button>
+                    <Button v-if="!isSystemHeaderItem(element)" type="button" variant="ghost" size="icon-sm" class="relative size-5 rounded-sm p-0 text-icon-muted shadow-none transition hover:scale-110 hover:bg-destructive/10 hover:text-destructive" @click.stop="removeItem('header', index)">
                       <Trash2 class="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                   </span>
                 </div>
               </template>
@@ -427,12 +430,12 @@ onMounted(load)
                     <LinkIcon class="h-4 w-4 shrink-0 opacity-80" />
                     <span class="min-w-0 flex-1 truncate">{{ element.label || adminText('k00dd') }}</span>
                     <span class="absolute right-1 top-1/2 flex -translate-y-1/2 items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                      <button type="button" class="inline-flex h-5 w-5 items-center justify-center rounded-sm bg-base-100/80 text-icon-muted backdrop-blur transition hover:scale-110 hover:bg-primary/10 hover:text-primary" @click.stop="openItem('mainMenu', index)">
+                      <Button type="button" variant="ghost" size="icon-sm" class="size-5 rounded-sm bg-base-100/80 p-0 text-icon-muted shadow-none backdrop-blur transition hover:scale-110 hover:bg-primary/10 hover:text-primary" @click.stop="openItem('mainMenu', index)">
                         <Pencil class="h-4 w-4" />
-                      </button>
-                      <button type="button" class="inline-flex h-5 w-5 items-center justify-center rounded-sm bg-base-100/80 text-icon-muted backdrop-blur transition hover:scale-110 hover:bg-destructive/10 hover:text-destructive" @click.stop="removeItem('mainMenu', index)">
+                      </Button>
+                      <Button type="button" variant="ghost" size="icon-sm" class="size-5 rounded-sm bg-base-100/80 p-0 text-icon-muted shadow-none backdrop-blur transition hover:scale-110 hover:bg-destructive/10 hover:text-destructive" @click.stop="removeItem('mainMenu', index)">
                         <Trash2 class="h-4 w-4" />
-                      </button>
+                      </Button>
                     </span>
                   </div>
                 </template>
@@ -462,12 +465,12 @@ onMounted(load)
                       <LinkIcon class="h-4 w-4 shrink-0 opacity-80" />
                       <span class="min-w-0 flex-1 truncate">{{ element.label || adminText('k00dd') }}</span>
                       <span class="absolute right-1 top-1/2 flex -translate-y-1/2 items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                        <button type="button" class="inline-flex h-5 w-5 items-center justify-center rounded-sm bg-base-100/80 text-icon-muted backdrop-blur transition hover:scale-110 hover:bg-primary/10 hover:text-primary" @click.stop="openItem('resources', index)">
+                        <Button type="button" variant="ghost" size="icon-sm" class="size-5 rounded-sm bg-base-100/80 p-0 text-icon-muted shadow-none backdrop-blur transition hover:scale-110 hover:bg-primary/10 hover:text-primary" @click.stop="openItem('resources', index)">
                           <Pencil class="h-4 w-4" />
-                        </button>
-                        <button type="button" class="inline-flex h-5 w-5 items-center justify-center rounded-sm bg-base-100/80 text-icon-muted backdrop-blur transition hover:scale-110 hover:bg-destructive/10 hover:text-destructive" @click.stop="removeItem('resources', index)">
+                        </Button>
+                        <Button type="button" variant="ghost" size="icon-sm" class="size-5 rounded-sm bg-base-100/80 p-0 text-icon-muted shadow-none backdrop-blur transition hover:scale-110 hover:bg-destructive/10 hover:text-destructive" @click.stop="removeItem('resources', index)">
                           <Trash2 class="h-4 w-4" />
-                        </button>
+                        </Button>
                       </span>
                     </div>
                   </template>
@@ -488,12 +491,12 @@ onMounted(load)
               <div class="mb-1 flex h-5 items-center px-2">
                 <div class="min-w-0 flex-1 truncate text-[10px] font-bold uppercase tracking-wide text-base-content/55">{{ group.title }}</div>
                 <div class="flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                  <button type="button" class="inline-flex h-5 w-5 items-center justify-center rounded-sm text-icon-muted transition hover:scale-110 hover:bg-primary/10 hover:text-primary" @click="openGroup(groupIndex)">
+                  <Button type="button" variant="ghost" size="icon-sm" class="size-5 rounded-sm p-0 text-icon-muted shadow-none transition hover:scale-110 hover:bg-primary/10 hover:text-primary" @click="openGroup(groupIndex)">
                     <Pencil class="h-3.5 w-3.5" />
-                  </button>
-                  <button type="button" class="inline-flex h-5 w-5 items-center justify-center rounded-sm text-icon-muted transition hover:scale-110 hover:bg-destructive/10 hover:text-destructive" @click="removeGroup(groupIndex)">
+                  </Button>
+                  <Button type="button" variant="ghost" size="icon-sm" class="size-5 rounded-sm p-0 text-icon-muted shadow-none transition hover:scale-110 hover:bg-destructive/10 hover:text-destructive" @click="removeGroup(groupIndex)">
                     <Trash2 class="h-3.5 w-3.5" />
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -503,12 +506,12 @@ onMounted(load)
                     <LinkIcon class="h-4 w-4 shrink-0 opacity-80" />
                     <span class="min-w-0 flex-1 truncate">{{ element.label || adminText('k00dd') }}</span>
                     <span class="absolute right-1 top-1/2 flex -translate-y-1/2 items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover/item:opacity-100">
-                      <button type="button" class="inline-flex h-5 w-5 items-center justify-center rounded-sm bg-base-100/80 text-icon-muted backdrop-blur transition hover:scale-110 hover:bg-primary/10 hover:text-primary" @click.stop="openSidebarGroupItem(groupIndex, index)">
+                      <Button type="button" variant="ghost" size="icon-sm" class="size-5 rounded-sm bg-base-100/80 p-0 text-icon-muted shadow-none backdrop-blur transition hover:scale-110 hover:bg-primary/10 hover:text-primary" @click.stop="openSidebarGroupItem(groupIndex, index)">
                         <Pencil class="h-4 w-4" />
-                      </button>
-                      <button type="button" class="inline-flex h-5 w-5 items-center justify-center rounded-sm bg-base-100/80 text-icon-muted backdrop-blur transition hover:scale-110 hover:bg-destructive/10 hover:text-destructive" @click.stop="removeSidebarGroupItem(groupIndex, index)">
+                      </Button>
+                      <Button type="button" variant="ghost" size="icon-sm" class="size-5 rounded-sm bg-base-100/80 p-0 text-icon-muted shadow-none backdrop-blur transition hover:scale-110 hover:bg-destructive/10 hover:text-destructive" @click.stop="removeSidebarGroupItem(groupIndex, index)">
                         <Trash2 class="h-4 w-4" />
-                      </button>
+                      </Button>
                     </span>
                   </div>
                 </template>
@@ -583,20 +586,20 @@ onMounted(load)
         </DialogHeader>
 
         <form class="grid gap-4" @submit.prevent="saveBrandDialog">
-          <div class="flex flex-wrap gap-4 text-sm">
+          <RadioGroup v-model="brandForm.brandType" class="flex flex-wrap gap-4 text-sm">
             <label class="flex items-center gap-2">
-              <input v-model="brandForm.brandType" type="radio" value="default" />
+              <RadioGroupItem value="default" />
               {{ adminText('k0086') }}
             </label>
             <label class="flex items-center gap-2">
-              <input v-model="brandForm.brandType" type="radio" value="text" />
+              <RadioGroupItem value="text" />
               {{ adminText('k0087') }}
             </label>
             <label class="flex items-center gap-2">
-              <input v-model="brandForm.brandType" type="radio" value="image" />
+              <RadioGroupItem value="image" />
               {{ adminText('k0088') }}
             </label>
-          </div>
+          </RadioGroup>
 
           <label v-if="brandForm.brandType === 'default'" class="grid gap-1.5 text-sm">
             <span class="font-medium">{{ adminText('k0086') }}</span>
@@ -637,10 +640,13 @@ onMounted(load)
         <form class="grid gap-4" @submit.prevent="saveItem">
           <label class="grid gap-1.5 text-sm">
             <span class="font-medium">{{ adminText('k00dr') }}</span>
-            <select v-model="form.type" class="h-9 rounded-md border bg-background px-3 text-sm">
-              <option value="link">{{ adminText('k00ds') }}</option>
-              <option value="text">{{ adminText('k00dt') }}</option>
-            </select>
+            <Select v-model="form.type">
+              <SelectTrigger class="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="link">{{ adminText('k00ds') }}</SelectItem>
+                <SelectItem value="text">{{ adminText('k00dt') }}</SelectItem>
+              </SelectContent>
+            </Select>
           </label>
           <label class="grid gap-1.5 text-sm">
             <span class="font-medium">{{ adminText('k00dv') }}</span>
@@ -700,16 +706,16 @@ onMounted(load)
               <template #item="{ element, index }">
                 <span class="group inline-flex min-h-6 items-center gap-0.5 rounded-md transition-colors hover:bg-base-300/80">
                   <span class="footer-manage-drag cursor-grab rounded px-1 text-base-content/35 opacity-0 transition group-hover:opacity-100 active:cursor-grabbing">⋮⋮</span>
-                  <button type="button" class="max-w-40 truncate rounded px-1 text-left transition hover:text-base-content" @click="openFooterLink(index)">
+                  <Button type="button" variant="ghost" class="h-auto max-w-40 truncate rounded px-1 py-0 text-left text-xs font-normal text-base-content/75 shadow-none hover:bg-transparent hover:text-base-content" @click="openFooterLink(index)">
                     {{ element.name || adminText('k00dd') }}
-                  </button>
+                  </Button>
                   <span class="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button type="button" class="inline-flex h-5 w-5 items-center justify-center rounded-sm text-icon-muted transition hover:scale-110 hover:bg-primary/10 hover:text-primary" @click.stop="openFooterLink(index)">
+                    <Button type="button" variant="ghost" size="icon-sm" class="size-5 rounded-sm p-0 text-icon-muted shadow-none transition hover:scale-110 hover:bg-primary/10 hover:text-primary" @click.stop="openFooterLink(index)">
                       <Pencil class="h-3.5 w-3.5" />
-                    </button>
-                    <button type="button" class="inline-flex h-5 w-5 items-center justify-center rounded-sm text-icon-muted transition hover:scale-110 hover:bg-destructive/10 hover:text-destructive" @click.stop="removeFooterLink(index)">
+                    </Button>
+                    <Button type="button" variant="ghost" size="icon-sm" class="size-5 rounded-sm p-0 text-icon-muted shadow-none transition hover:scale-110 hover:bg-destructive/10 hover:text-destructive" @click.stop="removeFooterLink(index)">
                       <Trash2 class="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                   </span>
                 </span>
               </template>
@@ -730,16 +736,16 @@ onMounted(load)
               <template #item="{ element, index }">
                 <span class="group inline-flex min-h-6 items-center gap-0.5 rounded-md transition-colors hover:bg-base-300/80">
                   <span class="footer-manage-drag cursor-grab rounded px-1 text-base-content/35 opacity-0 transition group-hover:opacity-100 active:cursor-grabbing">⋮⋮</span>
-                  <button type="button" class="max-w-72 truncate rounded px-1 text-left transition hover:text-base-content" @click="openFooterPrimary(index)">
+                  <Button type="button" variant="ghost" class="h-auto max-w-72 truncate rounded px-1 py-0 text-left text-xs font-normal text-base-content/75 shadow-none hover:bg-transparent hover:text-base-content" @click="openFooterPrimary(index)">
                     {{ element.content || adminText('k00dd') }}
-                  </button>
+                  </Button>
                   <span class="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button type="button" class="inline-flex h-5 w-5 items-center justify-center rounded-sm text-icon-muted transition hover:scale-110 hover:bg-primary/10 hover:text-primary" @click.stop="openFooterPrimary(index)">
+                    <Button type="button" variant="ghost" size="icon-sm" class="size-5 rounded-sm p-0 text-icon-muted shadow-none transition hover:scale-110 hover:bg-primary/10 hover:text-primary" @click.stop="openFooterPrimary(index)">
                       <Pencil class="h-3.5 w-3.5" />
-                    </button>
-                    <button type="button" class="inline-flex h-5 w-5 items-center justify-center rounded-sm text-icon-muted transition hover:scale-110 hover:bg-destructive/10 hover:text-destructive" @click.stop="removeFooterPrimary(index)">
+                    </Button>
+                    <Button type="button" variant="ghost" size="icon-sm" class="size-5 rounded-sm p-0 text-icon-muted shadow-none transition hover:scale-110 hover:bg-destructive/10 hover:text-destructive" @click.stop="removeFooterPrimary(index)">
                       <Trash2 class="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                   </span>
                 </span>
               </template>

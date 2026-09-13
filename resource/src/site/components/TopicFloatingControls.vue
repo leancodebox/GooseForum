@@ -4,6 +4,7 @@ import type { Component } from 'vue'
 import { Loader2, MessageSquare, X } from '@lucide/vue'
 import { formatNumber } from '@/runtime/format'
 import PostPositionRail from '@/site/components/PostPositionRail.vue'
+import { Button } from '@/components/ui/button'
 import { useI18n } from 'vue-i18n'
 
 type TopicAction = {
@@ -72,14 +73,14 @@ function closeMobileRail() {
           >
             <div class="mb-1 flex items-center justify-between gap-3 px-1">
               <div class="text-xs font-semibold text-base-content/55">{{ t('topic.replyPosition') }}</div>
-              <button
-                type="button"
+              <Button
+                variant="ghost"
                 class="inline-flex h-7 w-7 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-300 hover:text-base-content"
                 :aria-label="t('common.close')"
                 @click="closeMobileRail"
               >
                 <X class="h-4 w-4" />
-              </button>
+              </Button>
             </div>
             <PostPositionRail
               :current="currentNo"
@@ -98,19 +99,20 @@ function closeMobileRail() {
           </div>
           <div v-else-if="!open" class="pointer-events-auto flex max-w-full flex-col items-center gap-2">
             <div class="gf-floating-surface flex w-fit max-w-full items-center gap-1 rounded-full p-1">
-              <button
+              <Button
                 v-if="hasRail"
-                type="button"
+                variant="ghost"
                 class="inline-flex h-9 items-center rounded-full px-2.5 text-sm font-black tabular-nums text-primary transition hover:bg-info/10 hover:text-primary xl:hidden"
                 :aria-expanded="mobileRailOpen"
                 :aria-label="t('topic.replyPosition')"
                 @click="toggleMobileRail"
               >
                 {{ `${currentNo} / ${formatNumber(maxNo)}` }}
-              </button>
+              </Button>
               <template v-if="authenticated">
-                <button
+                <Button
                   v-for="action in actions"
+                  variant="ghost"
                   :key="action.key"
                   type="button"
                   class="inline-flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
@@ -121,10 +123,11 @@ function closeMobileRail() {
                 >
                   <Loader2 v-if="action.acting" class="h-4 w-4 animate-spin" />
                   <component :is="action.icon" v-else class="h-4 w-4" :fill="action.active && action.fill !== false ? 'currentColor' : 'none'" />
-                </button>
+                </Button>
               </template>
-              <button
+              <Button
                 v-if="authenticated && canPost"
+                variant="ghost"
                 type="button"
                 class="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-base-content/75 transition hover:bg-info/10 hover:text-primary"
                 :title="t('topic.joinDiscussion')"
@@ -132,7 +135,7 @@ function closeMobileRail() {
               >
                 <MessageSquare class="h-4 w-4" />
                 <span>{{ t('topic.joinDiscussion') }}</span>
-              </button>
+              </Button>
             </div>
           </div>
         </Transition>

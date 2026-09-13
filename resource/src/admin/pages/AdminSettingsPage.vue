@@ -10,12 +10,13 @@ import MarkdownIt from 'markdown-it'
 import { Code, FileText, Globe, Loader2, MailCheck, Plus, Save, Send, Shield, Trash2, Upload, Webhook } from '@lucide/vue'
 import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import { Button } from '@/admin/components/ui/button'
-import { Badge } from '@/admin/components/ui/badge'
-import { Input } from '@/admin/components/ui/input'
-import { Textarea } from '@/admin/components/ui/textarea'
-import { Switch } from '@/admin/components/ui/switch'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/admin/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Dialog,
   DialogContent,
@@ -23,7 +24,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/admin/components/ui/dialog'
+} from '@/components/ui/dialog'
 import {
   getAnnouncement,
   getHttpNotifySettings,
@@ -435,10 +436,6 @@ function toggleEndpointEvent(endpoint: HttpNotifyEndpoint, eventName: string, ch
   }
 }
 
-function onEndpointEventChange(endpoint: HttpNotifyEndpoint, eventName: string, event: Event) {
-  toggleEndpointEvent(endpoint, eventName, (event.target as HTMLInputElement).checked)
-}
-
 function addAnnouncementExample() {
   if (!announcementForm.content) {
     announcementForm.content = adminText('k000k')
@@ -677,11 +674,10 @@ onMounted(load)
                     <div class="text-sm font-medium">{{ adminText('k00cy') }}</div>
                     <div class="flex flex-wrap gap-2">
                       <label v-for="item in httpNotifyEvents" :key="item.value" class="inline-flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-sm">
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           :disabled="!httpNotifyForm.enabled"
-                          :checked="endpoint.events.includes(item.value)"
-                          @change="onEndpointEventChange(endpoint, item.value, $event)"
+                          :model-value="endpoint.events.includes(item.value)"
+                          @update:model-value="toggleEndpointEvent(endpoint, item.value, Boolean($event))"
                         />
                         {{ item.label }}
                       </label>

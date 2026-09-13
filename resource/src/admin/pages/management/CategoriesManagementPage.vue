@@ -10,9 +10,11 @@ import AdminSection from '@/admin/components/AdminSection.vue'
 import AdminToolbar from '@/admin/components/AdminToolbar.vue'
 import CategoryAccessDialog from '@/admin/components/CategoryAccessDialog.vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import { Button } from '@/admin/components/ui/button'
-import { Badge } from '@/admin/components/ui/badge'
-import { Input } from '@/admin/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Command, CommandItem, CommandList } from '@/components/ui/command'
+import { Input } from '@/components/ui/input'
+import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
 import {
   Dialog,
   DialogContent,
@@ -20,7 +22,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/admin/components/ui/dialog'
+} from '@/components/ui/dialog'
 import {
   Table,
   TableBody,
@@ -28,7 +30,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/admin/components/ui/table'
+} from '@/components/ui/table'
 import { AdminPermission, hasAdminPermission } from '@/admin/runtime/access'
 import {
   addCategoryModerator,
@@ -84,6 +86,7 @@ const moderatorSaving = ref(false)
 const moderatorUserInput = ref('')
 const moderatorSearching = ref(false)
 const moderatorCandidates = ref<AdminUser[]>([])
+const moderatorCandidatesOpen = ref(false)
 const selectedModeratorUser = ref<AdminUser | null>(null)
 let moderatorSearchTimer: ReturnType<typeof setTimeout> | undefined
 const globalModerators = ref<AdminCategoryModerator[]>([])
@@ -91,6 +94,7 @@ const globalModeratorInput = ref('')
 const globalModeratorSaving = ref(false)
 const globalModeratorSearching = ref(false)
 const globalModeratorCandidates = ref<AdminUser[]>([])
+const globalModeratorCandidatesOpen = ref(false)
 const selectedGlobalModeratorUser = ref<AdminUser | null>(null)
 let globalModeratorSearchTimer: ReturnType<typeof setTimeout> | undefined
 const form = reactive<AdminCategory>({
@@ -223,6 +227,7 @@ function openModerators(row: AdminCategory) {
   moderatorUserInput.value = ''
   selectedModeratorUser.value = null
   moderatorCandidates.value = []
+  moderatorCandidatesOpen.value = false
 }
 
 function moderatorInitial(name: string) {
@@ -288,6 +293,7 @@ function selectModeratorCandidate(user: AdminUser) {
   selectedModeratorUser.value = user
   moderatorUserInput.value = user.username || String(user.userId)
   moderatorCandidates.value = []
+  moderatorCandidatesOpen.value = false
 }
 
 function selectGlobalModeratorCandidate(user: AdminUser) {
@@ -295,6 +301,7 @@ function selectGlobalModeratorCandidate(user: AdminUser) {
   selectedGlobalModeratorUser.value = user
   globalModeratorInput.value = user.username || String(user.userId)
   globalModeratorCandidates.value = []
+  globalModeratorCandidatesOpen.value = false
 }
 
 async function addGlobalModeratorUser() {
@@ -314,6 +321,7 @@ async function addGlobalModeratorUser() {
     globalModeratorInput.value = ''
     selectedGlobalModeratorUser.value = null
     globalModeratorCandidates.value = []
+    globalModeratorCandidatesOpen.value = false
     adminToast.success(adminText('k00ek'))
   } catch (err) {
     adminToast.error(err, adminText('k00el'))
@@ -343,6 +351,7 @@ async function addModerator() {
     moderatorUserInput.value = ''
     selectedModeratorUser.value = null
     moderatorCandidates.value = []
+    moderatorCandidatesOpen.value = false
     adminToast.success(adminText('k00em'))
   } catch (err) {
     adminToast.error(err, adminText('k00en'))
@@ -353,6 +362,7 @@ async function addModerator() {
 
 watch(moderatorUserInput, (value) => {
   if (!moderatorRow.value) return
+  moderatorCandidatesOpen.value = Boolean(value.trim())
   if (moderatorSearchTimer) clearTimeout(moderatorSearchTimer)
   moderatorSearchTimer = setTimeout(() => {
     void searchModeratorUsers(value)
@@ -360,6 +370,7 @@ watch(moderatorUserInput, (value) => {
 })
 
 watch(globalModeratorInput, (value) => {
+  globalModeratorCandidatesOpen.value = Boolean(value.trim())
   if (globalModeratorSearchTimer) clearTimeout(globalModeratorSearchTimer)
   globalModeratorSearchTimer = setTimeout(() => {
     void searchGlobalModeratorUsers(value)
@@ -447,42 +458,55 @@ onMounted(() => {
                   <img v-if="moderator.avatarUrl" :src="moderator.avatarUrl" class="size-4 rounded-full object-cover" alt="" />
                   <span v-else class="grid size-4 place-items-center rounded-full bg-muted text-[9px] font-semibold">{{ moderatorInitial(moderator.username) }}</span>
                   <span class="truncate">{{ moderator.username || `#${moderator.userId}` }}</span>
-                  <button
-                    class="-mr-1 grid size-5 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    class="-mr-1 size-5 rounded p-0 text-muted-foreground shadow-none hover:bg-muted hover:text-foreground"
                     :disabled="globalModeratorSaving"
                     @click="removeGlobalModerator(moderator.id)"
                   >
                     <X class="size-3" />
-                  </button>
+                  </Button>
                 </span>
               </div>
               <form class="flex gap-1.5" @submit.prevent="addGlobalModeratorUser">
-                <div class="relative min-w-0 flex-1">
-                  <Input v-model="globalModeratorInput" class="h-8" :placeholder="adminText('k00eu')" autocomplete="off" />
-                  <div
-                    v-if="globalModeratorInput.trim() && (globalModeratorCandidates.length || globalModeratorSearching)"
-                    class="absolute left-0 right-0 top-[calc(100%+4px)] z-50 overflow-hidden rounded-md border bg-popover shadow-md"
-                  >
-                    <div v-if="globalModeratorSearching" class="px-3 py-2 text-sm text-muted-foreground">{{ adminText('k00ev') }}</div>
-                    <button
-                      v-for="user in globalModeratorCandidates"
-                      v-else
-                      :key="user.userId"
-                      class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
-                      :class="isAlreadyGlobalModerator(user.userId) ? 'cursor-default opacity-55' : 'hover:bg-muted'"
-                      type="button"
-                      :disabled="isAlreadyGlobalModerator(user.userId)"
-                      @click="selectGlobalModeratorCandidate(user)"
-                    >
-                      <img v-if="user.avatarUrl" :src="user.avatarUrl" class="size-7 rounded-full object-cover ring-1 ring-border" alt="" />
-                      <span v-else class="flex size-7 items-center justify-center rounded-full bg-muted text-xs font-semibold">{{ moderatorInitial(user.username) }}</span>
-                      <span class="min-w-0 flex-1 truncate">{{ user.username }}</span>
-                      <span v-if="isAlreadyGlobalModerator(user.userId)" class="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">{{ adminText('k00ew') }}</span>
-                      <span class="shrink-0 font-mono text-xs text-muted-foreground">#{{ user.userId }}</span>
-                    </button>
-                  </div>
-                </div>
+                <Popover
+                  :open="globalModeratorCandidatesOpen && Boolean(globalModeratorInput.trim()) && (globalModeratorCandidates.length > 0 || globalModeratorSearching)"
+                  @update:open="globalModeratorCandidatesOpen = $event"
+                >
+                  <PopoverAnchor as-child>
+                    <Input
+                      v-model="globalModeratorInput"
+                      class="h-8 min-w-0 flex-1"
+                      :placeholder="adminText('k00eu')"
+                      autocomplete="off"
+                      @focus="globalModeratorCandidatesOpen = Boolean(globalModeratorInput.trim())"
+                    />
+                  </PopoverAnchor>
+                  <PopoverContent align="start" :side-offset="4" class="z-[70] w-[var(--reka-popover-trigger-width)] p-0" @open-auto-focus.prevent>
+                    <Command>
+                      <CommandList>
+                        <div v-if="globalModeratorSearching" class="px-3 py-2 text-sm text-muted-foreground">{{ adminText('k00ev') }}</div>
+                        <CommandItem
+                          v-for="user in globalModeratorCandidates"
+                          v-else
+                          :key="user.userId"
+                          :value="String(user.userId)"
+                          class="gap-2 rounded-none px-3 py-2"
+                          :disabled="isAlreadyGlobalModerator(user.userId)"
+                          @select="selectGlobalModeratorCandidate(user)"
+                        >
+                          <img v-if="user.avatarUrl" :src="user.avatarUrl" class="size-7 rounded-full object-cover ring-1 ring-border" alt="" />
+                          <span v-else class="flex size-7 items-center justify-center rounded-full bg-muted text-xs font-semibold">{{ moderatorInitial(user.username) }}</span>
+                          <span class="min-w-0 flex-1 truncate">{{ user.username }}</span>
+                          <span v-if="isAlreadyGlobalModerator(user.userId)" class="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">{{ adminText('k00ew') }}</span>
+                          <span class="shrink-0 font-mono text-xs text-muted-foreground">#{{ user.userId }}</span>
+                        </CommandItem>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 <Button type="submit" variant="outline" size="sm" :disabled="globalModeratorSaving">
                   <UserPlus class="size-3.5" />
                   {{ adminText('k0094') }}
@@ -536,9 +560,11 @@ onMounted(() => {
                 <TableCell v-if="canManageCategories" class="text-muted-foreground">{{ item.slug || '-' }}</TableCell>
                 <TableCell v-if="canManageCategories" class="max-w-lg truncate text-muted-foreground">{{ item.desc || '-' }}</TableCell>
                 <TableCell v-if="canManageCategories">
-                  <button
-                    class="inline-flex max-w-full items-center gap-1.5 rounded-md border bg-background px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
+                    class="h-auto max-w-full gap-1.5 bg-background px-2 py-1 text-xs font-normal text-muted-foreground shadow-none hover:border-primary/40 hover:text-primary"
                     @click="openModerators(item)"
                   >
                     <ShieldCheck class="size-3.5" />
@@ -556,7 +582,7 @@ onMounted(() => {
                       <span class="truncate">{{ adminText('k00ey', { count: item.moderators.length }) }}</span>
                     </span>
                     <span v-else>{{ adminText('k00ez') }}</span>
-                  </button>
+                  </Button>
                 </TableCell>
                 <TableCell v-if="canManageCategories">{{ item.sort ?? 0 }}</TableCell>
                 <TableCell>
@@ -615,10 +641,12 @@ onMounted(() => {
             <div class="grid gap-2 text-sm font-medium">
               {{ adminText('k00ad') }}
               <div class="flex flex-wrap items-center gap-2">
-                <button
+                <Button
                   v-for="color in presetColors"
                   :key="color"
-                  class="size-7 rounded-full border transition-transform hover:scale-110"
+                  variant="ghost"
+                  size="icon-sm"
+                  class="size-7 rounded-full border p-0 shadow-none transition-transform hover:scale-110 hover:bg-transparent"
                   :class="form.color === color ? 'ring-2 ring-primary ring-offset-2' : ''"
                   :style="{ backgroundColor: color }"
                   type="button"
@@ -662,31 +690,42 @@ onMounted(() => {
           </DialogHeader>
           <div class="space-y-4">
             <form class="flex gap-2" @submit.prevent="addModerator">
-              <div class="relative min-w-0 flex-1">
-                <Input v-model="moderatorUserInput" :placeholder="adminText('k00f1')" autocomplete="off" />
-                <div
-                  v-if="moderatorUserInput.trim() && (moderatorCandidates.length || moderatorSearching)"
-                  class="absolute left-0 right-0 top-[calc(100%+4px)] z-50 overflow-hidden rounded-md border bg-popover shadow-md"
-                >
-                  <div v-if="moderatorSearching" class="px-3 py-2 text-sm text-muted-foreground">{{ adminText('k00ev') }}</div>
-                  <button
-                    v-for="user in moderatorCandidates"
-                    v-else
-                    :key="user.userId"
-                    class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
-                    :class="isAlreadyModerator(user.userId) ? 'cursor-default opacity-55' : 'hover:bg-muted'"
-                    type="button"
-                    :disabled="isAlreadyModerator(user.userId)"
-                    @click="selectModeratorCandidate(user)"
-                  >
-                    <img v-if="user.avatarUrl" :src="user.avatarUrl" class="size-7 rounded-full object-cover ring-1 ring-border" alt="" />
-                    <span v-else class="flex size-7 items-center justify-center rounded-full bg-muted text-xs font-semibold">{{ moderatorInitial(user.username) }}</span>
-                    <span class="min-w-0 flex-1 truncate">{{ user.username }}</span>
-                    <span v-if="isAlreadyModerator(user.userId)" class="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">{{ adminText('k00ew') }}</span>
-                    <span class="shrink-0 font-mono text-xs text-muted-foreground">#{{ user.userId }}</span>
-                  </button>
-                </div>
-              </div>
+              <Popover
+                :open="moderatorCandidatesOpen && Boolean(moderatorUserInput.trim()) && (moderatorCandidates.length > 0 || moderatorSearching)"
+                @update:open="moderatorCandidatesOpen = $event"
+              >
+                <PopoverAnchor as-child>
+                  <Input
+                    v-model="moderatorUserInput"
+                    class="min-w-0 flex-1"
+                    :placeholder="adminText('k00f1')"
+                    autocomplete="off"
+                    @focus="moderatorCandidatesOpen = Boolean(moderatorUserInput.trim())"
+                  />
+                </PopoverAnchor>
+                <PopoverContent align="start" :side-offset="4" class="z-[70] w-[var(--reka-popover-trigger-width)] p-0" @open-auto-focus.prevent>
+                  <Command>
+                    <CommandList>
+                      <div v-if="moderatorSearching" class="px-3 py-2 text-sm text-muted-foreground">{{ adminText('k00ev') }}</div>
+                      <CommandItem
+                        v-for="user in moderatorCandidates"
+                        v-else
+                        :key="user.userId"
+                        :value="String(user.userId)"
+                        class="gap-2 rounded-none px-3 py-2"
+                        :disabled="isAlreadyModerator(user.userId)"
+                        @select="selectModeratorCandidate(user)"
+                      >
+                        <img v-if="user.avatarUrl" :src="user.avatarUrl" class="size-7 rounded-full object-cover ring-1 ring-border" alt="" />
+                        <span v-else class="flex size-7 items-center justify-center rounded-full bg-muted text-xs font-semibold">{{ moderatorInitial(user.username) }}</span>
+                        <span class="min-w-0 flex-1 truncate">{{ user.username }}</span>
+                        <span v-if="isAlreadyModerator(user.userId)" class="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">{{ adminText('k00ew') }}</span>
+                        <span class="shrink-0 font-mono text-xs text-muted-foreground">#{{ user.userId }}</span>
+                      </CommandItem>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <Button type="submit" :disabled="moderatorSaving">
                 <UserPlus class="size-4" />
                 {{ adminText('k0094') }}

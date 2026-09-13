@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { adminText } from '@/admin/runtime/i18n-text'
 import { AlertTriangle } from '@lucide/vue'
-import { Button } from '@/admin/components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/admin/components/ui/dialog'
+} from '@/components/ui/dialog'
 
 withDefaults(defineProps<{
   cancelText?: string

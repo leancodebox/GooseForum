@@ -9,6 +9,10 @@ import {
   Radio,
   UserPlus,
 } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Popover, PopoverContent } from '@/components/ui/popover'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { getUserCard } from '@/runtime/api'
 import { formatDate, formatNumber, timeAgo } from '@/runtime/format'
 import type { UserCardShowDetail } from '@/runtime/user-card-events'
@@ -23,12 +27,9 @@ const loading = ref(false)
 const error = ref('')
 const fallbackUser = ref<UserCardShowDetail['user'] | null>(null)
 const card = ref<UserCardPayload | null>(null)
-const position = ref({ left: 0, top: 0 })
-const cardEl = ref<HTMLElement | null>(null)
-const activeBadgeCode = ref('')
+const anchorTarget = ref<HTMLElement | undefined>(undefined)
 const cache = new Map<number, UserCardPayload>()
 let requestToken = 0
-let preferredSide: 'top' | 'bottom' | null = null
 
 const displayName = computed(() => card.value?.nickname || fallbackUser.value?.username || card.value?.username || '')
 const username = computed(() => card.value?.username || fallbackUser.value?.username || '')
@@ -69,34 +70,7 @@ function formatLinkLabel(url: string) {
 
 function hideNow() {
   visible.value = false
-  activeBadgeCode.value = ''
-  preferredSide = null
-}
-
-function placeCard(target: HTMLElement) {
-  const rect = target.getBoundingClientRect()
-  const cardWidth = Math.min(320, window.innerWidth - 24)
-  const measuredHeight = cardEl.value?.offsetHeight || 0
-  const cardHeight = Math.max(measuredHeight, 220)
-  const gap = 10
-  const viewportPadding = 12
-  const viewportWidth = window.innerWidth
-
-  let left = rect.left
-  left = Math.max(viewportPadding, Math.min(left, viewportWidth - cardWidth - viewportPadding))
-  const belowTop = rect.bottom + gap
-  const aboveTop = rect.top - cardHeight - gap
-  if (!preferredSide) {
-    const belowSpace = window.innerHeight - rect.bottom - gap - viewportPadding
-    const aboveSpace = rect.top - gap - viewportPadding
-    preferredSide = belowSpace >= cardHeight || belowSpace >= aboveSpace ? 'bottom' : 'top'
-  }
-  const top = preferredSide === 'top' ? aboveTop : belowTop
-
-  position.value = {
-    left,
-    top: Math.max(viewportPadding, Math.min(top, window.innerHeight - cardHeight - viewportPadding)),
-  }
+  anchorTarget.value = undefined
 }
 
 async function show(event: Event) {
@@ -104,9 +78,9 @@ async function show(event: Event) {
   if (!detail?.user?.id || !detail.target) return
 
   fallbackUser.value = detail.user
+  anchorTarget.value = detail.target
   visible.value = true
   error.value = ''
-  requestAnimationFrame(() => placeCard(detail.target))
 
   const cached = cache.get(detail.user.id)
   if (cached) {
@@ -123,7 +97,6 @@ async function show(event: Event) {
     if (token !== requestToken) return
     cache.set(detail.user.id, result)
     card.value = result
-    requestAnimationFrame(() => placeCard(detail.target))
   } catch {
     if (token !== requestToken) return
     error.value = t('userCard.unavailable')
@@ -132,47 +105,31 @@ async function show(event: Event) {
   }
 }
 
-function onDocumentPointerDown(event: PointerEvent) {
-  if (!visible.value) return
-  const target = event.target
-  if (target instanceof Node && cardEl.value?.contains(target)) return
-  hideNow()
-}
-
-function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') hideNow()
+function onOpenChange(open: boolean) {
+  if (!open) hideNow()
 }
 
 onMounted(() => {
   window.addEventListener('goose:user-card-show', show)
-  document.addEventListener('pointerdown', onDocumentPointerDown)
-  window.addEventListener('keydown', onKeydown)
-  window.addEventListener('scroll', hideNow, { passive: true })
-  window.addEventListener('resize', hideNow)
   window.addEventListener('goose:page', hideNow)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('goose:user-card-show', show)
-  document.removeEventListener('pointerdown', onDocumentPointerDown)
-  window.removeEventListener('keydown', onKeydown)
-  window.removeEventListener('scroll', hideNow)
-  window.removeEventListener('resize', hideNow)
   window.removeEventListener('goose:page', hideNow)
 })
 
 </script>
 
 <template>
-  <Teleport to="body">
-    <Transition name="user-card-pop">
-      <div
-        v-if="visible"
-        ref="cardEl"
-        class="gf-menu-surface fixed z-[90] w-[min(20rem,calc(100vw-1.5rem))] p-3 text-base-content"
-        :style="{ left: `${position.left}px`, top: `${position.top}px` }"
-        @click.stop
-      >
+  <Popover :open="visible" @update:open="onOpenChange">
+    <PopoverContent
+      :reference="anchorTarget"
+      :side-offset="10"
+      :collision-padding="12"
+      :aria-label="displayName"
+      class="w-[min(20rem,calc(100vw-1.5rem))] p-3"
+    >
       <div class="flex items-start gap-3">
         <a :href="profileUrl" class="shrink-0 rounded-full ring-2 ring-base-100">
           <UserAvatar :src="avatarUrl" :alt="username" :badge="wornBadge" size="medium" class="h-14 w-14 rounded-full ring-1 ring-line" img-class="rounded-full" />
@@ -180,7 +137,7 @@ onBeforeUnmount(() => {
         <div class="min-w-0 flex-1">
           <div class="flex min-w-0 items-center gap-2">
             <a :href="profileUrl" class="truncate text-base font-bold text-base-content hover:text-primary">{{ displayName }}</a>
-            <span v-if="card?.isAdmin" class="gf-badge gf-badge-warning shrink-0 rounded text-[11px]">Admin</span>
+            <Badge v-if="card?.isAdmin" variant="warning" class="shrink-0 rounded text-[11px]">Admin</Badge>
           </div>
           <div class="mt-0.5 flex items-center gap-2 text-xs text-base-content/55">
             <span class="truncate">@{{ username }}</span>
@@ -217,32 +174,28 @@ onBeforeUnmount(() => {
           <div v-else key="content">
         <p v-if="bioText" class="mt-3 line-clamp-2 text-sm leading-relaxed text-base-content/75">{{ bioText }}</p>
 
-        <div v-if="visibleBadges.length" class="mt-3 flex gap-2">
-          <span
-            v-for="badge in visibleBadges"
-            :key="badge.code"
-            class="group relative flex h-8 w-8 shrink-0 items-center justify-center"
-            tabindex="0"
-            @mouseenter="activeBadgeCode = badge.code"
-            @mouseleave="activeBadgeCode = ''"
-            @focus="activeBadgeCode = badge.code"
-            @blur="activeBadgeCode = ''"
-          >
-            <span
-              class="flex h-8 w-8 items-center justify-center ring-1 ring-inset transition duration-150"
-              :class="[badgeClass(badge.color, badge.level), activeBadgeCode === badge.code ? '-translate-y-0.5 scale-110 shadow-md' : 'shadow-none']"
-              style="clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%)"
-            >
-              <img :src="badgeIconURL(badge)" :alt="badge.name" class="h-4 w-4 object-contain" />
-            </span>
-            <span
-              v-if="activeBadgeCode === badge.code"
-              class="gf-tooltip pointer-events-none absolute left-1/2 top-full z-10 mt-2 w-max max-w-48 -translate-x-1/2 leading-5"
-            >
-              {{ badgeTooltip(badge) }}
-            </span>
-          </span>
-        </div>
+        <TooltipProvider v-if="visibleBadges.length">
+          <div class="mt-3 flex gap-2">
+            <Tooltip v-for="badge in visibleBadges" :key="badge.code">
+              <TooltipTrigger as-child>
+                <span
+                  class="group flex h-8 w-8 shrink-0 cursor-default items-center justify-center"
+                >
+                  <span
+                    class="flex h-8 w-8 items-center justify-center shadow-none ring-1 ring-inset transition duration-150 group-hover:-translate-y-0.5 group-hover:scale-110 group-hover:shadow-md"
+                    :class="[badgeClass(badge.color, badge.level)]"
+                    style="clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%)"
+                  >
+                    <img :src="badgeIconURL(badge)" :alt="badge.name" class="h-4 w-4 object-contain" />
+                  </span>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" class="max-w-48 leading-5">
+                {{ badgeTooltip(badge) }}
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
 
         <div class="mt-3 grid grid-cols-4 divide-x divide-line border-y border-line py-2">
           <div class="px-2 text-center">
@@ -263,50 +216,51 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div v-if="externalLinks.length" class="mt-3 flex items-center gap-2 border-b border-line pb-3">
-          <a
-            v-for="link in externalLinks.slice(0, 8)"
-            :key="`${link.key}-${link.url}`"
-            :href="link.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="group relative inline-flex h-7 w-7 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-200 hover:text-primary"
-            :title="link.label"
-            :aria-label="link.label"
-          >
-            <Bird v-if="link.key === 'website'" class="h-4 w-4" />
-            <svg
-              v-else-if="link.icon"
-              class="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path :d="link.icon.path" />
-            </svg>
-            <ExternalLink v-else class="h-4 w-4" />
-            <span class="gf-tooltip pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 max-w-40 -translate-x-1/2 truncate opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-              {{ link.label }}
-            </span>
-          </a>
-        </div>
+        <TooltipProvider v-if="externalLinks.length">
+          <div class="mt-3 flex items-center gap-2 border-b border-line pb-3">
+            <Tooltip v-for="link in externalLinks.slice(0, 8)" :key="`${link.key}-${link.url}`">
+              <TooltipTrigger as-child>
+                <a
+                  :href="link.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex h-7 w-7 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-200 hover:text-primary"
+                  :aria-label="link.label"
+                >
+                  <Bird v-if="link.key === 'website'" class="h-4 w-4" />
+                  <svg
+                    v-else-if="link.icon"
+                    class="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path :d="link.icon.path" />
+                  </svg>
+                  <ExternalLink v-else class="h-4 w-4" />
+                </a>
+              </TooltipTrigger>
+              <TooltipContent side="top" class="max-w-40 truncate">
+                {{ link.label }}
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
 
         <div class="mt-3 flex items-center justify-between gap-3">
           <div class="inline-flex items-center gap-1.5 text-xs text-base-content/55">
             <CalendarDays class="h-3.5 w-3.5" />
             {{ t('userCard.joinedAt', { date: card?.createdAt ? formatDate(card.createdAt) : '-' }) }}
           </div>
-          <a
-            :href="profileUrl"
-            class="gf-button gf-button-sm gf-button-neutral"
-          >
-            <UserPlus class="h-4 w-4" />
-            {{ card?.isFollowing ? t('userCard.following') : t('userCard.viewProfile') }}
-          </a>
+          <Button as-child variant="neutral" size="sm">
+            <a :href="profileUrl">
+              <UserPlus class="h-4 w-4" />
+              {{ card?.isFollowing ? t('userCard.following') : t('userCard.viewProfile') }}
+            </a>
+          </Button>
         </div>
           </div>
         </Transition>
-      </div>
-    </Transition>
-  </Teleport>
+    </PopoverContent>
+  </Popover>
 </template>

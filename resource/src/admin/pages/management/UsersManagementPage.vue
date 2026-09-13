@@ -6,10 +6,11 @@ import { Award, ChevronLeft, ChevronRight, CheckCircle2, Loader2, RefreshCw, Sea
 import AdminSection from '@/admin/components/AdminSection.vue'
 import AdminToolbar from '@/admin/components/AdminToolbar.vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import { Button } from '@/admin/components/ui/button'
-import { Dialog, DialogContent } from '@/admin/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/admin/components/ui/select'
-import { Switch } from '@/admin/components/ui/switch'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { editUser, getAllRoleItem, getUserBadgeOptions, getUserList, saveUserBadges } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import type { AdminBadge, AdminPayload, AdminUser, ManageHomeProps, UserBadge } from '@/admin/types'
@@ -208,9 +209,9 @@ onMounted(() => {
           <form class="flex min-w-0 flex-1 items-center gap-2" @submit.prevent="applySearch">
             <div class="relative min-w-0 flex-1 sm:max-w-md">
               <Search class="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <input
+              <Input
                 v-model="search"
-                class="h-9 w-full rounded-md border bg-background pl-8 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                class="h-9 w-full pl-8"
                 :placeholder="adminText('k006t')"
               />
             </div>
@@ -225,16 +226,15 @@ onMounted(() => {
               {{ adminText('k004q') }}
             </Button>
             <span class="whitespace-nowrap">{{ rangeStart }}-{{ rangeEnd }} / {{ total }}</span>
-            <select
-              class="h-9 rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              :value="pageSize"
-              @change="changePageSize(Number(($event.target as HTMLSelectElement).value))"
-            >
-              <option :value="10">{{ adminText('k002x') }}</option>
-              <option :value="20">{{ adminText('k002y') }}</option>
-              <option :value="30">{{ adminText('k002z') }}</option>
-              <option :value="50">{{ adminText('k0030') }}</option>
-            </select>
+            <Select :model-value="String(pageSize)" @update:model-value="changePageSize(Number($event))">
+              <SelectTrigger class="w-20"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">{{ adminText('k002x') }}</SelectItem>
+                <SelectItem value="20">{{ adminText('k002y') }}</SelectItem>
+                <SelectItem value="30">{{ adminText('k002z') }}</SelectItem>
+                <SelectItem value="50">{{ adminText('k0030') }}</SelectItem>
+              </SelectContent>
+            </Select>
             <Button
               variant="outline"
               size="icon"
@@ -463,10 +463,11 @@ onMounted(() => {
                   <div class="space-y-2">
                     <div class="text-xs font-medium text-muted-foreground">{{ adminText('k00c0') }}</div>
                     <div v-if="badgeOptions.length" class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-6">
-                      <button
+                      <Button
                         v-for="badge in badgeOptions"
                         :key="badge.code"
-                        class="group relative flex min-h-20 min-w-0 flex-col items-center justify-center gap-1 rounded-md border p-2 text-center transition-colors hover:bg-muted/50"
+                        variant="ghost"
+                        class="group relative h-auto min-h-20 min-w-0 flex-col items-center justify-center gap-1 whitespace-normal rounded-md border p-2 text-center font-normal shadow-none hover:bg-muted/50"
                         :class="selectedBadgeCodes.includes(badge.code) ? 'border-primary bg-primary/5 shadow-xs' : 'border-transparent bg-muted/40'"
                         type="button"
                         :title="badge.description || badge.code"
@@ -481,7 +482,7 @@ onMounted(() => {
                         </span>
                         <span class="block max-w-full truncate text-xs font-medium leading-4">{{ badge.name }}</span>
                         <span class="absolute right-1.5 top-1.5 grid size-4 place-items-center rounded-full border bg-background text-[10px] font-bold" :class="selectedBadgeCodes.includes(badge.code) ? 'border-primary bg-primary text-primary-foreground' : 'text-transparent'">✓</span>
-                      </button>
+                      </Button>
                     </div>
                     <div v-else class="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
                       {{ badgeLoading ? adminText('k006q') : adminText('k006r') }}

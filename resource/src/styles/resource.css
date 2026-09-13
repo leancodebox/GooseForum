@@ -1,6 +1,5 @@
-@import "tailwindcss";
+@import "./ui.css";
 @plugin "@tailwindcss/typography";
-@import "./tokens.css";
 @import "./base.css";
 @import "./motion.css";
 @import "./prose.css";
@@ -8,6 +7,7 @@
 @import "./patterns.css";
 @import "./utilities.css";
 @source "../site/**/*.{ts,vue}";
+@source "../components/**/*.{ts,vue}";
 @source "../runtime/**/*.{ts,vue}";
 @source "../types/**/*.{ts,vue}";
 @source "../../templates/layout/app.gohtml";

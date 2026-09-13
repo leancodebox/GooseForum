@@ -1,6 +1,25 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, Teleport, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { AlertTriangle, Ban, Bell, Bookmark, ChevronsUp, Clock, CornerDownLeft, Eye, Flag, Heart, Loader2, MessageSquare, PencilLine, RotateCcw, Trash2, X } from '@lucide/vue'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Textarea } from '@/components/ui/textarea'
 import { bookmarkTopic, deletePost, getPostWindow, likeTopic, createPost, submitReport, updateModerationTopicStatus, updateModerationPostStatus, updatePost, watchTopic } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
 import { useFlashMessages } from '@/runtime/flash-message'
@@ -1297,6 +1316,10 @@ function closeDeleteDialog() {
   deleteErrorMessage.value = ''
 }
 
+function handleDeleteDialogOpen(open: boolean) {
+  if (!open) closeDeleteDialog()
+}
+
 function requestTopicModeration(action: 'ban' | 'unban') {
   actionMessage.value = ''
   pendingModerationAction.value = action
@@ -1305,6 +1328,10 @@ function requestTopicModeration(action: 'ban' | 'unban') {
 function closeTopicModerationDialog() {
   if (actingModeration.value) return
   pendingModerationAction.value = null
+}
+
+function handleTopicModerationDialogOpen(open: boolean) {
+  if (!open) closeTopicModerationDialog()
 }
 
 async function updateTopicModerationFromDetail() {
@@ -1398,6 +1425,10 @@ function closeReportDialog() {
   if (reportSubmitting.value) return
   pendingReport.value = null
   reportError.value = ''
+}
+
+function handleReportDialogOpen(open: boolean) {
+  if (!open) closeReportDialog()
 }
 
 async function submitCurrentReport() {
@@ -1560,70 +1591,82 @@ async function removePost(postId: number) {
             </a>
             <div class="min-w-0">
               <PostHeader :post="post" :first="isFirstPost(post)" :permalink="postURL(page.props.topic.id, post.postNo)">
-                <button
+                <Button
                   v-if="canEditPost(post)"
                   type="button"
-                  class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  variant="muted"
+                  size="icon-sm"
+                  class="text-icon-muted hover:bg-info/10 hover:text-primary"
                   :disabled="savingEditPostId === post.id || deletingPostId === post.id"
                   :title="t('common.edit')"
                   @click="startEditPost(post)"
                 >
                   <PencilLine class="h-3.5 w-3.5" />
                   <span class="sr-only">{{ t('common.edit') }}</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   v-if="canDeleteRenderedPost(post)"
                   type="button"
-                  class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  variant="muted"
+                  size="icon-sm"
+                  class="text-icon-muted hover:bg-error/10 hover:text-error focus-visible:border-error focus-visible:ring-error/20"
                   :disabled="deletingPostId === post.id"
                   :title="deletingPostId === post.id ? t('topic.deleting') : t('topic.delete')"
                   @click="requestDeletePost(post)"
                 >
                   <Trash2 class="h-3.5 w-3.5" />
                   <span class="sr-only">{{ deletingPostId === post.id ? t('topic.deleting') : t('topic.delete') }}</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   v-if="page.props.permissions.canPost && !post.isHidden"
                   type="button"
-                  class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  variant="muted"
+                  size="icon-sm"
+                  class="text-icon-muted hover:bg-info/10 hover:text-primary"
                   :title="t('topic.reply')"
                   @click="replyTo(post)"
                 >
                   <CornerDownLeft class="h-3.5 w-3.5" />
                   <span class="sr-only">{{ t('topic.reply') }}</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   v-if="!isFirstPost(post) && !post.isOwnPost && !post.isHidden"
                   type="button"
-                  class="gf-icon-button h-8 w-8 shrink-0 hover:bg-warning/10 hover:text-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2"
+                  variant="muted"
+                  size="icon-sm"
+                  class="text-icon-muted hover:bg-warning/10 hover:text-warning focus-visible:border-warning focus-visible:ring-warning/20"
                   :title="t('topic.report')"
                   @click="requestPostReport(post)"
                 >
                   <Flag class="h-3.5 w-3.5" />
                   <span class="sr-only">{{ t('topic.report') }}</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   v-if="!isFirstPost(post) && post.canModerate && post.processStatus === 0"
                   type="button"
-                  class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:opacity-50"
+                  variant="muted"
+                  size="icon-sm"
+                  class="text-icon-muted hover:bg-error/10 hover:text-error focus-visible:border-error focus-visible:ring-error/20"
                   :disabled="postModerationBusy(post.id)"
                   :title="t('topic.moderationBan')"
                   @click="moderatePost(post, 'ban')"
                 >
                   <Ban class="h-3.5 w-3.5" />
                   <span class="sr-only">{{ t('topic.moderationBan') }}</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   v-else-if="!isFirstPost(post) && post.canModerate && post.processStatus === 1"
                   type="button"
-                  class="gf-icon-button h-8 w-8 shrink-0 hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
+                  variant="muted"
+                  size="icon-sm"
+                  class="text-icon-muted hover:bg-info/10 hover:text-primary"
                   :disabled="postModerationBusy(post.id)"
                   :title="t('topic.moderationUnban')"
                   @click="moderatePost(post, 'unban')"
                 >
                   <RotateCcw class="h-3.5 w-3.5" />
                   <span class="sr-only">{{ t('topic.moderationUnban') }}</span>
-                </button>
+                </Button>
               </PostHeader>
               <PostReplyReference v-if="post.replyToPostId" :topic-id="page.props.topic.id" :target="replyTargetFor(post)" />
               <div v-if="post.isHidden && !post.canModerate" class="rounded border border-line bg-base-200/60 px-3 py-2 text-sm text-base-content/45">
@@ -1640,97 +1683,109 @@ async function removePost(postId: number) {
                 {{ t('topic.editedAt', { time: formatDateTime(post.updatedAt) }) }}
               </div>
               <div v-if="isFirstPost(post)" class="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-3">
-                <button
+                <Button
                   type="button"
-                  class="gf-button gf-button-sm px-2.5"
+                  variant="muted"
+                  size="sm"
+                  class="px-2.5"
                   :class="isLiked ? 'bg-error/10 text-error hover:bg-error/10' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
                   :disabled="actingLike"
                   @click="toggleLike"
                 >
                   <Heart class="h-4 w-4" :fill="isLiked ? 'currentColor' : 'none'" />
                   {{ likeCount ? formatNumber(likeCount) : t('topic.like') }}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  class="gf-button gf-button-sm px-2.5"
+                  variant="muted"
+                  size="sm"
+                  class="px-2.5"
                   :class="isBookmarked ? 'bg-info/10 text-primary hover:bg-info/10' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
                   :disabled="actingBookmark"
                   @click="toggleBookmark"
                 >
                   <Bookmark class="h-4 w-4" :fill="isBookmarked ? 'currentColor' : 'none'" />
                   {{ isBookmarked ? t('topic.bookmarked') : t('topic.bookmark') }}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  class="gf-button gf-button-sm px-2.5"
+                  variant="muted"
+                  size="sm"
+                  class="px-2.5"
                   :class="isWatched ? 'bg-success/10 text-success hover:bg-success/15' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
                   :disabled="actingWatch"
                   @click="toggleWatch"
                 >
                   <Bell class="h-4 w-4" :fill="isWatched ? 'currentColor' : 'none'" />
                   {{ isWatched ? t('topic.watched') : t('topic.watch') }}
-                </button>
-                <button
+                </Button>
+                <Button
                   v-if="!page.props.permissions.isOwnTopic"
                   type="button"
-                  class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-warning/10 hover:text-warning"
+                  variant="muted"
+                  size="sm"
+                  class="px-2.5 text-base-content/55 hover:bg-warning/10 hover:text-warning"
                   @click="requestTopicReport"
                 >
                   <Flag class="h-4 w-4" />
                   {{ t('topic.report') }}
-                </button>
-                <button
+                </Button>
+                <Button
                   v-if="page.props.permissions.canModerateTopic && topicProcessStatus === 0"
                   type="button"
-                  class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
+                  variant="muted"
+                  size="sm"
+                  class="px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
                   :disabled="actingModeration"
                   @click="requestTopicModeration('ban')"
                 >
                   <Ban class="h-4 w-4" />
                   {{ t('topic.moderationBan') }}
-                </button>
-                <button
+                </Button>
+                <Button
                   v-else-if="page.props.permissions.canModerateTopic && topicProcessStatus === 1"
                   type="button"
-                  class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
+                  variant="muted"
+                  size="sm"
+                  class="px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
                   :disabled="actingModeration"
                   @click="requestTopicModeration('unban')"
                 >
                   <RotateCcw class="h-4 w-4" />
                   {{ t('topic.moderationUnban') }}
-                </button>
+                </Button>
                 <span v-if="actionMessage" class="text-xs" :class="actionMessageSuccess ? 'text-base-content/75' : 'text-error'">{{ actionMessage }}</span>
               </div>
             </div>
           </article>
 
           <div v-if="postHasAfter || loadingPostDirection === 'after' || postWindowError || (!postHasAfter && posts.length)" ref="postLoadMoreEl" class="gf-post-divider relative px-4 py-3 text-center">
-            <a
-              v-if="postHasAfter && postWindowError"
-              :href="postURL(page.props.topic.id, postAfterPostNo + 1)"
-              rel="next"
-              class="gf-button gf-button-sm gf-button-secondary text-xs"
-              :aria-disabled="loadingPostWindow"
-              @click="loadPostPage($event, 'after')"
-            >
-              <Loader2 v-if="loadingPostDirection === 'after'" class="h-3.5 w-3.5 animate-spin" />
-              {{ t('topic.retryLoadReplies') }}
-            </a>
+            <Button v-if="postHasAfter && postWindowError" as-child variant="surface" size="sm" class="text-xs">
+              <a
+                :href="postURL(page.props.topic.id, postAfterPostNo + 1)"
+                rel="next"
+                :aria-disabled="loadingPostWindow"
+                @click="loadPostPage($event, 'after')"
+              >
+                <Loader2 v-if="loadingPostDirection === 'after'" class="h-3.5 w-3.5 animate-spin" />
+                {{ t('topic.retryLoadReplies') }}
+              </a>
+            </Button>
             <p v-else-if="postWindowError" class="text-xs text-error">{{ postWindowError }}</p>
             <p v-else-if="postHasAfter && loadingPostDirection === 'after'" class="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-base-content/55">
               <Loader2 class="h-3.5 w-3.5 animate-spin" />
               {{ t('topic.loadingMoreReplies') }}
             </p>
-            <a
-              v-else-if="postHasAfter"
-              :href="postURL(page.props.topic.id, postAfterPostNo + 1)"
-              rel="next"
-              class="gf-button gf-button-sm gf-button-secondary text-xs"
-              :aria-disabled="loadingPostWindow"
-              @click="loadPostPage($event, 'after')"
-            >
-              {{ t('topic.loadMoreReplies') }}
-            </a>
+            <Button v-else-if="postHasAfter" as-child variant="surface" size="sm" class="text-xs">
+              <a
+                :href="postURL(page.props.topic.id, postAfterPostNo + 1)"
+                rel="next"
+                :aria-disabled="loadingPostWindow"
+                @click="loadPostPage($event, 'after')"
+              >
+                {{ t('topic.loadMoreReplies') }}
+              </a>
+            </Button>
             <p v-else-if="!postHasAfter && posts.length" class="text-xs font-medium text-base-content/55">{{ t('topic.allRepliesShown') }}</p>
           </div>
           <span class="block h-px scroll-mb-28" aria-hidden="true" />
@@ -1842,33 +1897,20 @@ async function removePost(postId: number) {
 
     <MarkdownImageViewer ref="markdownImageViewer" />
 
-    <Teleport to="body">
-      <Transition name="gf-modal">
-        <div
-          v-if="pendingDeletePost"
-          class="fixed inset-0 z-[110] flex items-center justify-center bg-neutral/45 px-4 py-6 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="delete-post-title"
-          @click.self="closeDeleteDialog"
-        >
-          <div class="gf-menu-surface w-full max-w-sm p-4">
+    <AlertDialog :open="Boolean(pendingDeletePost)" @update:open="handleDeleteDialogOpen">
+      <AlertDialogContent class="rounded-[var(--gf-radius-box)] border-line bg-base-100 p-4 sm:max-w-sm">
+        <template v-if="pendingDeletePost">
             <div class="flex items-start gap-3">
               <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-error/10 text-error">
                 <AlertTriangle class="h-5 w-5" />
               </div>
-              <div class="min-w-0 flex-1">
-                <h2 id="delete-post-title" class="text-base font-bold text-base-content">{{ isFirstPost(pendingDeletePost) ? t('topic.deleteTopicTitle') : t('topic.deleteReplyTitle') }}</h2>
-                <p class="mt-1 text-sm leading-6 text-base-content/55">{{ isFirstPost(pendingDeletePost) ? t('topic.deleteTopicDescription') : t('topic.deleteReplyDescription') }}</p>
-              </div>
-              <button
-                type="button"
-                class="rounded-md p-1 text-base-content/55 transition hover:bg-base-300 hover:text-base-content/75 disabled:cursor-not-allowed disabled:opacity-50"
-                :disabled="Boolean(deletingPostId)"
-                @click="closeDeleteDialog"
-              >
+              <AlertDialogHeader class="min-w-0 flex-1 gap-0 text-left">
+                <AlertDialogTitle class="text-base font-bold text-base-content">{{ isFirstPost(pendingDeletePost) ? t('topic.deleteTopicTitle') : t('topic.deleteReplyTitle') }}</AlertDialogTitle>
+                <AlertDialogDescription class="mt-1 leading-6 text-base-content/55">{{ isFirstPost(pendingDeletePost) ? t('topic.deleteTopicDescription') : t('topic.deleteReplyDescription') }}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <Button type="button" variant="muted" size="icon-sm" class="-mr-1 -mt-1" :disabled="Boolean(deletingPostId)" :aria-label="t('common.close')" @click="closeDeleteDialog">
                 <X class="h-4 w-4" />
-              </button>
+              </Button>
             </div>
 
             <div class="mt-4 border-l-2 border-error/35 pl-3">
@@ -1878,68 +1920,50 @@ async function removePost(postId: number) {
 
             <p v-if="deleteErrorMessage" class="mt-3 text-sm text-error">{{ deleteErrorMessage }}</p>
 
-            <div class="mt-4 flex justify-end gap-2">
-              <button
+            <AlertDialogFooter class="mt-4 flex-row justify-end">
+              <Button type="button" variant="muted" class="px-3" :disabled="Boolean(deletingPostId)" @click="closeDeleteDialog">{{ t('common.cancel') }}</Button>
+              <Button
                 type="button"
-                class="gf-button gf-button-md gf-button-muted"
-                :disabled="Boolean(deletingPostId)"
-                @click="closeDeleteDialog"
-              >
-                {{ t('common.cancel') }}
-              </button>
-              <button
-                type="button"
-                class="gf-button gf-button-md gf-button-danger"
+                variant="danger"
+                class="px-3"
                 :disabled="Boolean(deletingPostId)"
                 @click="removePost(pendingDeletePost.id)"
               >
                 <Loader2 v-if="deletingPostId === pendingDeletePost.id" class="h-4 w-4 animate-spin" />
                 <Trash2 v-else class="h-4 w-4" />
                 {{ deletingPostId === pendingDeletePost.id ? t('topic.deleting') : t('topic.confirmDelete') }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
+              </Button>
+            </AlertDialogFooter>
+        </template>
+      </AlertDialogContent>
+    </AlertDialog>
 
-    <Teleport to="body">
-      <Transition name="gf-modal">
-        <div
-          v-if="pendingReport"
-          class="fixed inset-0 z-[110] flex items-center justify-center bg-neutral/45 px-4 py-6 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="report-title"
-          @click.self="closeReportDialog"
-        >
-          <div class="gf-menu-surface w-full max-w-sm p-4">
+    <Dialog :open="Boolean(pendingReport)" @update:open="handleReportDialogOpen">
+      <DialogContent :show-close-button="false" class="rounded-[var(--gf-radius-box)] border-line bg-base-100 p-4 sm:max-w-sm">
+        <template v-if="pendingReport">
             <div class="flex items-start gap-3">
               <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-warning/10 text-warning">
                 <Flag class="h-5 w-5" />
               </div>
-              <div class="min-w-0 flex-1">
-                <h2 id="report-title" class="text-base font-bold text-base-content">{{ t('topic.reportTitle') }}</h2>
-                <p class="mt-1 line-clamp-2 text-sm leading-6 text-base-content/55">{{ pendingReport.title }}</p>
-              </div>
-              <button
-                type="button"
-                class="rounded-md p-1 text-base-content/55 transition hover:bg-base-300 hover:text-base-content/75 disabled:cursor-not-allowed disabled:opacity-50"
-                :disabled="reportSubmitting"
-                @click="closeReportDialog"
-              >
+              <DialogHeader class="min-w-0 flex-1 gap-0 text-left">
+                <DialogTitle class="text-base font-bold text-base-content">{{ t('topic.reportTitle') }}</DialogTitle>
+                <DialogDescription class="mt-1 line-clamp-2 leading-6 text-base-content/55">{{ pendingReport.title }}</DialogDescription>
+              </DialogHeader>
+              <Button type="button" variant="muted" size="icon-sm" class="-mr-1 -mt-1" :disabled="reportSubmitting" :aria-label="t('common.close')" @click="closeReportDialog">
                 <X class="h-4 w-4" />
-              </button>
+              </Button>
             </div>
 
             <div class="mt-4 space-y-3">
-              <label v-for="reason in reportReasons" :key="reason" class="flex cursor-pointer items-center gap-2 text-sm text-base-content/75">
-                <input v-model="reportReason" class="radio radio-sm" type="radio" name="report-reason" :value="reason" />
-                <span>{{ t(`topic.reportReasons.${reason}`) }}</span>
-              </label>
-              <textarea
+              <RadioGroup v-model="reportReason" class="gap-3">
+                <label v-for="reason in reportReasons" :key="reason" :for="`report-reason-${reason}`" class="flex cursor-pointer items-center gap-2 text-sm text-base-content/75">
+                  <RadioGroupItem :id="`report-reason-${reason}`" :value="reason" class="border-line shadow-none focus-visible:ring-primary" />
+                  <span>{{ t(`topic.reportReasons.${reason}`) }}</span>
+                </label>
+              </RadioGroup>
+              <Textarea
                 v-model="reportNote"
-                class="gf-textarea min-h-24"
+                class="min-h-24 resize-y rounded-[var(--gf-radius-field)] border-line bg-base-100 p-3 shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 dark:bg-base-100"
                 maxlength="300"
                 :placeholder="t('topic.reportNotePlaceholder')"
               />
@@ -1947,85 +1971,74 @@ async function removePost(postId: number) {
 
             <p v-if="reportError" class="mt-3 text-sm text-error">{{ reportError }}</p>
 
-            <div class="mt-4 flex justify-end gap-2">
-              <button
+            <DialogFooter class="mt-4 flex-row justify-end">
+              <Button
                 type="button"
-                class="gf-button gf-button-md gf-button-muted"
+                variant="muted"
+                class="px-3"
                 :disabled="reportSubmitting"
                 @click="closeReportDialog"
               >
                 {{ t('common.cancel') }}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                class="gf-button gf-button-md gf-button-primary"
+                variant="brand"
+                class="px-3"
                 :disabled="reportSubmitting"
                 @click="submitCurrentReport"
               >
                 <Loader2 v-if="reportSubmitting" class="h-4 w-4 animate-spin" />
                 <Flag v-else class="h-4 w-4" />
                 {{ reportSubmitting ? t('common.loadingShort') : t('topic.submitReport') }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
+              </Button>
+            </DialogFooter>
+        </template>
+      </DialogContent>
+    </Dialog>
 
-    <Teleport to="body">
-      <Transition name="gf-modal">
-        <div
-          v-if="pendingModerationAction"
-          class="fixed inset-0 z-[110] flex items-center justify-center bg-neutral/45 px-4 py-6 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="ban-topic-title"
-          @click.self="closeTopicModerationDialog"
-        >
-          <div class="gf-menu-surface w-full max-w-sm p-4">
+    <AlertDialog :open="Boolean(pendingModerationAction)" @update:open="handleTopicModerationDialogOpen">
+      <AlertDialogContent class="rounded-[var(--gf-radius-box)] border-line bg-base-100 p-4 sm:max-w-sm">
+        <template v-if="pendingModerationAction">
             <div class="flex items-start gap-3">
               <AlertTriangle class="mt-0.5 h-5 w-5 shrink-0 text-error" />
-              <div class="min-w-0 flex-1">
-                <h2 id="ban-topic-title" class="text-base font-bold text-base-content">
+              <AlertDialogHeader class="min-w-0 flex-1 gap-0 text-left">
+                <AlertDialogTitle class="text-base font-bold text-base-content">
                   {{ pendingModerationAction === 'ban' ? t('topic.moderationBanTitle') : t('topic.moderationUnbanTitle') }}
-                </h2>
-                <p class="mt-1 text-sm leading-6 text-base-content/55">
+                </AlertDialogTitle>
+                <AlertDialogDescription class="mt-1 leading-6 text-base-content/55">
                   {{ pendingModerationAction === 'ban' ? t('topic.moderationBanDescription') : t('topic.moderationUnbanDescription') }}
-                </p>
-              </div>
-              <button
-                type="button"
-                class="rounded-md p-1 text-base-content/55 transition hover:bg-base-300 hover:text-base-content/75 disabled:cursor-not-allowed disabled:opacity-50"
-                :disabled="actingModeration"
-                @click="closeTopicModerationDialog"
-              >
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <Button type="button" variant="muted" size="icon-sm" class="-mr-1 -mt-1" :disabled="actingModeration" :aria-label="t('common.close')" @click="closeTopicModerationDialog">
                 <X class="h-4 w-4" />
-              </button>
+              </Button>
             </div>
 
-            <div class="mt-4 flex justify-end gap-2">
-              <button
+            <AlertDialogFooter class="mt-4 flex-row justify-end">
+              <Button
                 type="button"
-                class="gf-button gf-button-md gf-button-muted"
+                variant="muted"
+                class="px-3"
                 :disabled="actingModeration"
                 @click="closeTopicModerationDialog"
               >
                 {{ t('common.cancel') }}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                class="gf-button gf-button-md gf-button-danger"
+                variant="danger"
+                class="px-3"
                 :disabled="actingModeration"
                 @click="updateTopicModerationFromDetail"
               >
                 <Loader2 v-if="actingModeration" class="h-4 w-4 animate-spin" />
                 <component :is="pendingModerationAction === 'ban' ? Ban : RotateCcw" v-else class="h-4 w-4" />
                 {{ actingModeration ? t('common.loadingShort') : (pendingModerationAction === 'ban' ? t('topic.confirmModerationBan') : t('topic.confirmModerationUnban')) }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
+              </Button>
+            </AlertDialogFooter>
+        </template>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>

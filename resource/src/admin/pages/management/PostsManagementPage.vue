@@ -8,17 +8,17 @@ import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
 import AdminSection from '@/admin/components/AdminSection.vue'
 import AdminToolbar from '@/admin/components/AdminToolbar.vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import { Button } from '@/admin/components/ui/button'
-import { Badge } from '@/admin/components/ui/badge'
-import { Input } from '@/admin/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/admin/components/ui/dropdown-menu'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/admin/components/ui/select'
+} from '@/components/ui/dropdown-menu'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -26,7 +26,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/admin/components/ui/dialog'
+} from '@/components/ui/dialog'
 import {
   Table,
   TableBody,
@@ -34,7 +34,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/admin/components/ui/table'
+} from '@/components/ui/table'
 import {
   reviewContent,
   getReviewPosts,
@@ -597,10 +597,11 @@ onMounted(() => {
             </DialogDescription>
           </DialogHeader>
           <div class="flex max-h-[46vh] flex-wrap gap-2 overflow-y-auto pr-1">
-            <button
+            <Button
               v-for="category in categoryDialogOptions"
               :key="category.id"
-              class="inline-flex max-w-full items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-left text-sm font-medium transition-colors"
+              variant="ghost"
+              class="h-auto max-w-full items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-left text-sm font-medium shadow-none"
               :class="[
                 selectedCategoryIds.includes(category.id) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-muted-foreground/30 hover:bg-muted/50',
                 category.missing ? 'border-destructive/30 bg-destructive/5 text-destructive hover:bg-destructive/10' : '',
@@ -613,7 +614,7 @@ onMounted(() => {
               <Badge v-if="selectedCategoryIds[0] === category.id" variant="secondary" class="px-1.5 py-0 text-[10px]">
                 {{ t('publish.mainCategoryBadge') }}
               </Badge>
-            </button>
+            </Button>
           </div>
           <DialogFooter>
             <Button variant="outline" type="button" @click="categoryDialogRow = null">{{ adminText('k009q') }}</Button>

@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { formatNumber } from '@/runtime/format'
 import { useI18n } from 'vue-i18n'
+import { Button } from '@/components/ui/button'
 
 const props = defineProps<{
   current: number
@@ -107,14 +108,15 @@ function removePointerListeners() {
 
 <template>
   <div class="px-3 py-2">
-    <button
+    <Button
       type="button"
-      class="mb-3 block max-w-full truncate text-left text-base font-semibold leading-tight text-base-content/55 transition hover:text-base-content/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-base-content/35 focus-visible:ring-offset-2"
+      variant="ghost"
+      class="mb-3 hover:bg-transparent block max-w-full truncate text-left text-base font-semibold leading-tight text-base-content/55 transition hover:text-base-content/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-base-content/35 focus-visible:ring-offset-2"
       :title="t('topic.earliestContent')"
       @click="emit('earliest')"
     >
       {{ startLabel }}
-    </button>
+    </Button>
 
     <div
       class="grid cursor-ns-resize touch-none select-none grid-cols-[24px_minmax(0,1fr)] gap-3"
@@ -154,13 +156,14 @@ function removePointerListeners() {
       </div>
     </div>
 
-    <button
+    <Button
       type="button"
-      class="mt-3 block max-w-full truncate text-left text-base font-semibold leading-tight text-base-content/55 transition hover:text-base-content/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-base-content/35 focus-visible:ring-offset-2"
+      variant="ghost"
+      class="mt-3 hover:bg-transparent block max-w-full truncate text-left text-base font-semibold leading-tight text-base-content/55 transition hover:text-base-content/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-base-content/35 focus-visible:ring-offset-2"
       :title="t('topic.latestReply')"
       @click="emit('latest')"
     >
       {{ endLabel }}
-    </button>
+    </Button>
   </div>
 </template>

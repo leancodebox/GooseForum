@@ -5,11 +5,12 @@ import { Edit3, Plus, RefreshCw, Trash2 } from '@lucide/vue'
 import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import { Button } from '@/admin/components/ui/button'
-import { Badge } from '@/admin/components/ui/badge'
-import { Input } from '@/admin/components/ui/input'
-import { Textarea } from '@/admin/components/ui/textarea'
-import { Switch } from '@/admin/components/ui/switch'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/admin/components/ui/dialog'
+} from '@/components/ui/dialog'
 import { deleteBadge, getBadges, saveBadge } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import type { AdminBadge, AdminPayload, ManageHomeProps } from '@/admin/types'
@@ -187,7 +188,7 @@ onMounted(() => {
       <div v-if="error" class="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{{ error }}</div>
       <div v-else class="grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] gap-3">
         <div v-for="badge in badges" :key="badge.code" class="group relative flex min-w-0 flex-col items-center rounded-md px-1 py-1.5 transition-colors hover:bg-muted/60">
-          <button type="button" class="flex min-w-0 flex-col items-center" :title="`${badge.name} · ${badge.code}`" @click="openEdit(badge)">
+          <Button type="button" variant="ghost" class="h-auto min-w-0 flex-col items-center rounded-none p-0 font-normal shadow-none hover:bg-transparent" :title="`${badge.name} · ${badge.code}`" @click="openEdit(badge)">
             <div class="flex size-12 shrink-0 items-center justify-center ring-1 ring-inset transition-transform group-hover:scale-105" :class="toneClass(badge)" style="clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%)">
               <img :src="badge.iconUrl || '/static/badges/contributor.svg'" :alt="badge.name" class="size-6 object-contain" />
             </div>
@@ -199,7 +200,7 @@ onMounted(() => {
             <div class="max-w-full truncate text-[10px] leading-4 text-muted-foreground">
               {{ badge.grantMode === 'auto' ? adminText('k005b') : adminText('k005c') }} · {{ badge.isEnabled ? badge.level || 'bronze' : adminText('k005d') }}
             </div>
-          </button>
+          </Button>
           <div class="absolute right-0.5 top-0.5 flex gap-0.5 rounded-md bg-background/90 p-0.5 opacity-0 shadow-sm ring-1 ring-border transition-opacity group-hover:opacity-100">
             <AdminActionButton compact :title="adminText('k005j')" @click="openEdit(badge)">
               <Edit3 class="size-3.5" />
@@ -236,9 +237,12 @@ onMounted(() => {
             </label>
             <label class="grid gap-2 text-sm font-medium">
               {{ adminText('k00ad') }}
-              <select v-model="form.color" class="h-9 rounded-md border bg-background px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                <option v-for="color in colorOptions" :key="color" :value="color">{{ color }}</option>
-              </select>
+              <Select v-model="form.color">
+                <SelectTrigger class="w-full"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="color in colorOptions" :key="color" :value="color">{{ color }}</SelectItem>
+                </SelectContent>
+              </Select>
             </label>
             <label class="grid gap-2 text-sm font-medium">
               {{ adminText('k00be') }}
@@ -250,10 +254,13 @@ onMounted(() => {
             </label>
             <label class="grid gap-2 text-sm font-medium">
               {{ adminText('k00bg') }}
-              <select v-model="form.grantMode" class="h-9 rounded-md border bg-background px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring" :disabled="form.type === 'system'">
-                <option value="auto">{{ adminText('k005b') }}</option>
-                <option value="manual">{{ adminText('k005c') }}</option>
-              </select>
+              <Select v-model="form.grantMode" :disabled="form.type === 'system'">
+                <SelectTrigger class="w-full"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">{{ adminText('k005b') }}</SelectItem>
+                  <SelectItem value="manual">{{ adminText('k005c') }}</SelectItem>
+                </SelectContent>
+              </Select>
             </label>
             <div class="grid gap-2 text-sm font-medium">
               {{ adminText('k00bh') }}

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ChevronRight, LayoutGrid, MessageCircle } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
+import { Badge } from '@/components/ui/badge'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
 import { formatNumber } from '@/runtime/format'
@@ -22,7 +23,7 @@ function isImageIcon(icon: string) {
   <div class="pb-12">
     <PageHeader :title="t('categoriesPage.title')" :description="t('categoriesPage.subtitle')" compact>
       <template #badge>
-        <span class="gf-badge gf-badge-muted">{{ t('categoriesPage.total', { count: props.total }) }}</span>
+        <Badge variant="muted">{{ t('categoriesPage.total', { count: props.total }) }}</Badge>
       </template>
     </PageHeader>
 
@@ -53,10 +54,10 @@ function isImageIcon(icon: string) {
         </div>
 
         <div class="ml-3 flex shrink-0 items-center gap-2 self-center">
-          <span class="gf-badge gf-badge-muted inline-flex gap-1 text-[10px] font-medium">
+          <Badge variant="muted" class="gap-1 text-[10px]">
             <MessageCircle class="h-3 w-3" aria-hidden="true" />
             {{ t('categoriesPage.topicCount', { count: formatNumber(category.topicCount) }) }}
-          </span>
+          </Badge>
           <ChevronRight class="h-4 w-4 text-icon-muted transition group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
         </div>
       </a>

@@ -1,6 +1,22 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Box, Check, ChevronDown, Database, Grid3X3, Mountain, SlidersHorizontal, X } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@/components/ui/input-group'
+import { Dialog, DialogContent, DialogClose, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 type PickerMode = 'palette' | 'picker'
 type ColorFormat = 'oklch' | 'hsl' | 'rgb' | 'hex'
@@ -18,7 +34,6 @@ const isOpen = ref(false)
 const mode = ref<PickerMode>('palette')
 const localHex = ref(toHex(props.modelValue))
 const colorFormat = ref<ColorFormat>('hex')
-const formatOpen = ref(false)
 
 const rgb = computed(() => hexToRgb(localHex.value))
 const paletteRows = computed(() => buildPaletteRows())
@@ -45,10 +60,6 @@ function openPicker() {
   isOpen.value = true
 }
 
-function closePicker() {
-  isOpen.value = false
-  formatOpen.value = false
-}
 
 function choose(value: string) {
   localHex.value = value
@@ -72,7 +83,6 @@ function updateColorValue(value: string) {
 
 function selectFormat(format: ColorFormat) {
   colorFormat.value = format
-  formatOpen.value = false
 }
 
 function updateChannel(channel: 'r' | 'g' | 'b', value: number) {
@@ -255,157 +265,150 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
 }
 
-function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    if (formatOpen.value) {
-      formatOpen.value = false
-      return
-    }
-    closePicker()
-  }
-}
-
-onMounted(() => {
-  window.addEventListener('keydown', onKeydown)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeydown)
-})
 </script>
 
 <template>
   <div class="flex min-w-0 flex-col items-center">
-    <button
-      type="button"
-      class="group block rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100"
-      :aria-label="`Pick color for ${activeLabel}`"
-      @click="openPicker"
-    >
-      <span class="grid h-10 w-10 place-items-center rounded-md border border-line text-base font-black transition group-hover:border-primary" :style="{ backgroundColor: modelValue, color: readableTextColor(modelValue) }">
-        <span v-if="tokenLabel.endsWith('content')">A</span>
-      </span>
-    </button>
     <span class="mt-1 block w-16 min-w-0 truncate text-center text-[10px] leading-none text-base-content/55">
       {{ displayLabel }}
     </span>
 
-    <Teleport to="body">
-      <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-neutral/45 p-3" @click.self="closePicker">
-        <section class="gf-menu-surface flex max-h-[84vh] w-full max-w-[736px] flex-col overflow-hidden" role="dialog" aria-modal="true">
-          <header class="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3 py-2">
-            <div class="flex min-w-0 items-center gap-2.5">
-              <span class="grid h-8 w-12 shrink-0 place-items-center rounded-md border border-line bg-base-200 text-base font-black text-base-content">A</span>
-              <span class="h-px w-5 shrink-0 bg-line" />
-              <h2 class="min-w-0 truncate text-xs text-base-content/55">
-                Pick a color for <span class="font-semibold text-base-content">{{ activeLabel }}</span>
-              </h2>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="gf-segmented grid-cols-2">
-                <button
-                  type="button"
-                  class="gf-segmented-item h-6 min-w-20 text-xs leading-none"
-                  :class="mode === 'palette' ? 'gf-segmented-item-active text-base-content' : 'gf-segmented-item-idle'"
-                  @click="mode = 'palette'"
-                >
-                  <Grid3X3 class="h-3.5 w-3.5" /> Palette
-                </button>
-                <button
-                  type="button"
-                  class="gf-segmented-item h-6 min-w-20 text-xs leading-none"
-                  :class="mode === 'picker' ? 'gf-segmented-item-active text-base-content' : 'gf-segmented-item-idle'"
-                  @click="mode = 'picker'"
-                >
-                  <SlidersHorizontal class="h-3.5 w-3.5" /> Picker
-                </button>
-              </div>
-              <button type="button" class="gf-icon-button h-7 w-7" aria-label="Close" @click="closePicker">
-                <X class="h-4 w-4" />
-              </button>
-            </div>
-          </header>
-
-          <div class="min-h-0 flex-1 overflow-y-auto p-3">
-            <div v-if="mode === 'palette'" class="overflow-x-auto">
-              <div class="grid w-max gap-1" :style="{ gridTemplateRows: `repeat(${paletteRows.length}, minmax(0, 1fr))` }">
-                <div v-for="(row, rowIndex) in paletteRows" :key="rowIndex" class="flex gap-1">
-                  <button
-                    v-for="(color, columnIndex) in row"
-                    :key="`${rowIndex}-${columnIndex}`"
-                    type="button"
-                    class="relative grid h-7 w-7 shrink-0 place-items-center rounded-full border border-line/75 text-[8px] font-black transition hover:scale-105"
-                    :class="toHex(modelValue) === color.value ? 'ring-2 ring-primary ring-offset-1 ring-offset-base-100' : ''"
-                    :style="{ backgroundColor: color.value, color: readableTextColor(color.value) }"
-                    :aria-label="color.value"
-                    @click="choose(color.value)"
-                  >
-                    <span v-if="color.label">{{ color.label }}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div v-else class="mx-auto max-w-2xl space-y-4 py-2">
-              <label v-for="channel in ['r', 'g', 'b']" :key="channel" class="block">
-                <span class="mb-1 block text-xs font-semibold capitalize text-base-content">{{ channel === 'r' ? 'Red' : channel === 'g' ? 'Green' : 'Blue' }}</span>
-                <input
-                  class="h-6 w-full cursor-pointer appearance-none rounded-full border border-line bg-base-200 accent-primary"
-                  type="range"
-                  min="0"
-                  max="255"
-                  :value="rgb[channel as 'r' | 'g' | 'b']"
-                  :style="{ background: channelGradient(channel as 'r' | 'g' | 'b') }"
-                  @input="updateChannel(channel as 'r' | 'g' | 'b', Number(($event.target as HTMLInputElement).value))"
-                />
-              </label>
-            </div>
+    <Dialog v-model:open="isOpen">
+      <DialogTrigger as-child>
+        <Button
+          type="button"
+          variant="ghost"
+          class="group block rounded-md outline-none hover:bg-transparent focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100"
+          :aria-label="`Pick color for ${activeLabel}`"
+          @click="openPicker"
+        >
+          <span class="grid h-10 w-10 place-items-center rounded-md border border-line text-base font-black transition group-hover:border-primary" :style="{ backgroundColor: modelValue, color: readableTextColor(modelValue) }">
+            <span v-if="tokenLabel.endsWith('content')">A</span>
+          </span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent class="flex max-h-[84vh] w-full max-w-[736px] flex-col gap-0 overflow-hidden rounded-(--gf-radius-box) border-line bg-base-100 p-0" :show-close-button="false">
+        <DialogTitle class="sr-only">Pick a color for {{ activeLabel }}</DialogTitle>
+        <DialogDescription class="sr-only">Choose a palette color or adjust RGB channels.</DialogDescription>
+        <header class="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3 py-2">
+          <div class="flex min-w-0 items-center gap-2.5">
+            <span class="grid h-8 w-12 shrink-0 place-items-center rounded-md border border-line bg-base-200 text-base font-black text-base-content">A</span>
+            <span class="h-px w-5 shrink-0 bg-line" />
+            <span class="min-w-0 truncate text-xs text-base-content/55">
+              Pick a color for <span class="font-semibold text-base-content">{{ activeLabel }}</span>
+            </span>
           </div>
-
-          <footer class="grid items-end gap-2 border-t border-line bg-base-200 px-3 py-2 md:grid-cols-[minmax(260px,1fr)_auto]">
-            <label class="relative min-w-0">
-              <span class="mb-1 block text-[11px] font-semibold text-base-content/55">Color value</span>
-              <span class="gf-input flex h-8 w-full overflow-hidden p-0">
-                <span class="shrink-0">
-                  <button
-                    type="button"
-                    class="gf-button h-full w-24 rounded-none border-r border-line px-2 text-xs text-base-content/75 hover:bg-base-200 hover:text-base-content"
-                    @click="formatOpen = !formatOpen"
-                  >
-                    {{ activeFormatLabel }}
-                    <ChevronDown class="h-3.5 w-3.5" />
-                  </button>
-                </span>
-                <input
-                  class="h-full min-w-0 flex-1 bg-base-100 px-2.5 text-xs font-semibold text-base-content outline-none"
-                  :value="formattedColorValue"
-                  @change="updateColorValue(($event.target as HTMLInputElement).value)"
-                />
-              </span>
-              <div v-if="formatOpen" class="gf-menu-surface absolute bottom-9 left-0 z-20 w-36 overflow-hidden p-1">
-                <div class="px-2.5 py-1.5 text-[11px] font-bold text-base-content/45">Convert format</div>
-                <button
-                  v-for="[format, label, Icon] in formatOptions"
-                  :key="format"
-                  type="button"
-                  class="flex h-8 w-full items-center gap-2 rounded px-2.5 text-xs font-semibold"
-                  :class="colorFormat === format ? 'bg-neutral text-neutral-content' : 'text-base-content hover:bg-base-200'"
-                  @click="selectFormat(format)"
+          <div class="flex items-center gap-2">
+            <Tabs v-model="mode" class="contents">
+              <TabsList class="inline-grid h-7 w-auto grid-cols-2 rounded-(--gf-radius-field) border border-line bg-base-200 p-0.5">
+                <TabsTrigger
+                  value="palette"
+                  class="h-5 min-w-20 gap-1 rounded-[calc(var(--gf-radius-field)-2px)] px-1.5 text-[11px] font-semibold leading-none text-base-content/55 data-[state=active]:bg-base-100 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-line hover:text-base-content [&_svg]:size-3"
                 >
-                  <component :is="Icon" class="h-3.5 w-3.5" /> {{ label }}
-                </button>
+                  <Grid3X3 class="h-3 w-3" /> Palette
+                </TabsTrigger>
+                <TabsTrigger
+                  value="picker"
+                  class="h-5 min-w-20 gap-1 rounded-[calc(var(--gf-radius-field)-2px)] px-1.5 text-[11px] font-semibold leading-none text-base-content/55 data-[state=active]:bg-base-100 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-line hover:text-base-content [&_svg]:size-3"
+                >
+                  <SlidersHorizontal class="h-3 w-3" /> Picker
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <DialogClose as-child>
+              <Button type="button" variant="muted" size="icon-sm" class="size-7" aria-label="Close">
+                <X class="h-4 w-4" />
+              </Button>
+            </DialogClose>
+          </div>
+        </header>
+
+        <Tabs v-model="mode" class="contents">
+        <div class="min-h-0 flex-1 overflow-y-auto p-3">
+          <TabsContent value="palette" class="overflow-x-auto">
+            <div class="grid w-max gap-1" :style="{ gridTemplateRows: `repeat(${paletteRows.length}, minmax(0, 1fr))` }">
+              <div v-for="(row, rowIndex) in paletteRows" :key="rowIndex" class="flex gap-1">
+                <Button
+                  v-for="(color, columnIndex) in row"
+                  :key="`${rowIndex}-${columnIndex}`"
+                  variant="ghost"
+                  class="relative grid h-7 w-7 shrink-0 place-items-center rounded-full border border-line/75 p-0 text-[8px] font-black transition hover:scale-105 hover:bg-transparent"
+                  :class="toHex(modelValue) === color.value ? 'ring-2 ring-primary ring-offset-1 ring-offset-base-100' : ''"
+                  :style="{ backgroundColor: color.value, color: readableTextColor(color.value) }"
+                  :aria-label="color.value"
+                  @click="choose(color.value)"
+                >
+                  <span v-if="color.label">{{ color.label }}</span>
+                </Button>
               </div>
-            </label>
-            <div class="flex h-8 items-center justify-end gap-2.5">
-              <span class="inline-flex h-7 items-center rounded-full border border-dashed border-base-content px-2.5 text-[11px] font-black text-base-content">AAA</span>
-              <span class="grid h-7 w-7 place-items-center rounded-full bg-neutral text-neutral-content">
-                <Check class="h-3.5 w-3.5" />
-              </span>
-              <span class="h-7 w-16 rounded-full border border-line" :style="{ backgroundColor: localHex }" />
             </div>
-          </footer>
-        </section>
-      </div>
-    </Teleport>
-  </div>
+          </TabsContent>
+
+          <TabsContent value="picker" class="mx-auto max-w-2xl space-y-4 py-2">
+            <label v-for="channel in ['r', 'g', 'b']" :key="channel" class="block">
+              <span class="mb-1 block text-xs font-semibold capitalize text-base-content">{{ channel === 'r' ? 'Red' : channel === 'g' ? 'Green' : 'Blue' }}</span>
+              <input
+                class="h-6 w-full cursor-pointer appearance-none rounded-full border border-line bg-base-200 accent-primary"
+                type="range"
+                min="0"
+                max="255"
+                :value="rgb[channel as 'r' | 'g' | 'b']"
+                :style="{ background: channelGradient(channel as 'r' | 'g' | 'b') }"
+                @input="updateChannel(channel as 'r' | 'g' | 'b', Number(($event.target as HTMLInputElement).value))"
+              />
+            </label>
+          </TabsContent>
+        </div>
+        </Tabs>
+
+        <footer class="grid items-end gap-2 border-t border-line bg-base-200 px-3 py-2 md:grid-cols-[minmax(260px,1fr)_auto]">
+          <label class="relative min-w-0">
+            <span class="mb-1 block text-[11px] font-semibold text-base-content/55">Color value</span>
+            <InputGroup class="h-8 overflow-hidden rounded-[var(--gf-radius-field)] border-line bg-base-100 p-0 shadow-none dark:bg-base-100">
+              <InputGroupAddon class="h-full border-r border-line p-0 has-[>button]:ml-0">
+                <DropdownMenu>
+                  <DropdownMenuTrigger as-child>
+                    <InputGroupButton
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      class="h-full w-24 rounded-none px-2 text-xs text-base-content/75 hover:bg-base-200 hover:text-base-content"
+                    >
+                      {{ activeFormatLabel }}
+                      <ChevronDown class="h-3.5 w-3.5" />
+                    </InputGroupButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="top" align="start" class="w-36 border-line bg-base-100">
+                    <div class="px-2.5 py-1.5 text-[11px] font-bold text-base-content/45">Convert format</div>
+                    <DropdownMenuRadioGroup :model-value="colorFormat" @update:model-value="selectFormat($event as ColorFormat)">
+                      <DropdownMenuRadioItem
+                        v-for="[format, label, Icon] in formatOptions"
+                        :key="format"
+                        :value="format"
+                        class="h-8 gap-2 px-2.5 text-xs font-semibold text-base-content data-[highlighted]:bg-base-200 data-[state=checked]:bg-neutral data-[state=checked]:text-neutral-content"
+                      >
+                        <component :is="Icon" class="h-3.5 w-3.5" /> {{ label }}
+                      </DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </InputGroupAddon>
+              <InputGroupInput
+                class="h-full min-w-0 flex-1 bg-base-100 px-2.5 text-xs font-semibold text-base-content outline-none"
+                :value="formattedColorValue"
+                @change="updateColorValue(($event.target as HTMLInputElement).value)"
+              />
+            </InputGroup>
+          </label>
+          <div class="flex h-8 items-center justify-end gap-2.5">
+            <span class="inline-flex h-7 items-center rounded-full border border-dashed border-base-content px-2.5 text-[11px] font-black text-base-content">AAA</span>
+            <span class="grid h-7 w-7 place-items-center rounded-full bg-neutral text-neutral-content">
+              <Check class="h-3.5 w-3.5" />
+            </span>
+            <span class="h-7 w-16 rounded-full border border-line" :style="{ backgroundColor: localHex }" />
+          </div>
+        </footer>
+      </DialogContent>
+    </Dialog>
+    </div>
 </template>

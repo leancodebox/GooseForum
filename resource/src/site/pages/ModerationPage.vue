@@ -2,6 +2,8 @@
 import { ref, watch } from 'vue'
 import { Ban, CircleAlert, Flag, History, RotateCcw, Scale, XCircle } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { fetchModerationLogs, fetchModerationReports, updateModerationTopicStatus, updateModerationPostStatus, updateModerationReportStatus } from '@/runtime/api'
 import { formatDateTime } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
@@ -227,19 +229,23 @@ function reportResolutionLabel(item: ModerationReportItem) {
   <main class="min-w-0 pb-8">
     <PageHeader :title="t('moderation.title')" :description="t('moderation.description')" compact class="border-b-0 !mb-2 sm:!mb-2 !pb-2 sm:!pb-2" />
 
-    <div class="mb-4 flex flex-wrap gap-2 border-b border-line">
-      <button
-        v-for="tab in managementTabs"
-        :key="tab.key"
-        type="button"
-        class="-mb-px inline-flex h-10 items-center gap-2 border-b-2 px-1 text-sm font-semibold transition"
-        :class="activeConsoleTab === tab.key ? 'border-primary text-primary' : 'border-transparent text-base-content/55 hover:text-base-content'"
-        @click="activeConsoleTab = tab.key as 'reports' | 'ban' | 'logs' | 'guidance'"
-      >
-        <component :is="tab.icon" class="h-4 w-4" />
-        {{ t(`moderation.managementTabs.${tab.key}`) }}
-      </button>
-    </div>
+    <Tabs
+      :model-value="activeConsoleTab"
+      class="mb-4"
+      @update:model-value="activeConsoleTab = $event as 'reports' | 'ban' | 'logs' | 'guidance'"
+    >
+      <TabsList class="h-auto w-fit flex-wrap justify-start gap-2 rounded-none border-b border-line bg-transparent p-0">
+        <TabsTrigger
+          v-for="tab in managementTabs"
+          :key="tab.key"
+          :value="tab.key"
+          class="h-10 flex-none gap-2 rounded-none border-0 border-b-2 border-transparent bg-transparent px-1 text-sm font-semibold text-base-content/55 shadow-none transition-colors hover:bg-transparent hover:text-base-content data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+        >
+          <component :is="tab.icon" class="h-4 w-4" />
+          {{ t(`moderation.managementTabs.${tab.key}`) }}
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
 
     <section v-if="activeConsoleTab === 'reports'" class="space-y-3">
       <p v-if="reportError" class="rounded border border-error/25 bg-error/10 px-3 py-2 text-sm text-error">
@@ -247,24 +253,26 @@ function reportResolutionLabel(item: ModerationReportItem) {
       </p>
 
       <div class="gf-card overflow-hidden">
-        <div class="flex items-center gap-1 border-b border-line bg-base-200/60 p-2">
-          <button
-            type="button"
-            class="gf-tab"
-            :class="reportStatus === 'open' ? 'bg-base-100 text-base-content shadow-sm ring-1 ring-line' : 'text-base-content/55 hover:bg-base-100/70 hover:text-base-content'"
-            @click="switchReportStatus('open')"
-          >
+        <Tabs
+          :model-value="reportStatus"
+          class="gap-0"
+          @update:model-value="switchReportStatus($event as 'open' | 'closed')"
+        >
+          <TabsList class="h-auto w-full justify-start gap-1 rounded-none border-b border-line bg-base-200/60 p-2">
+            <TabsTrigger
+              value="open"
+              class="h-8 flex-none gap-1.5 rounded-[var(--gf-radius-field)] border border-transparent px-3 text-sm font-semibold text-base-content/55 shadow-none transition hover:bg-base-100/70 hover:text-base-content data-[state=active]:bg-base-100 data-[state=active]:text-base-content data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-line"
+            >
             {{ t('moderation.reports.statusTabs.open') }}
-          </button>
-          <button
-            type="button"
-            class="gf-tab"
-            :class="reportStatus === 'closed' ? 'bg-base-100 text-base-content shadow-sm ring-1 ring-line' : 'text-base-content/55 hover:bg-base-100/70 hover:text-base-content'"
-            @click="switchReportStatus('closed')"
-          >
+            </TabsTrigger>
+            <TabsTrigger
+              value="closed"
+              class="h-8 flex-none gap-1.5 rounded-[var(--gf-radius-field)] border border-transparent px-3 text-sm font-semibold text-base-content/55 shadow-none transition hover:bg-base-100/70 hover:text-base-content data-[state=active]:bg-base-100 data-[state=active]:text-base-content data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-line"
+            >
             {{ t('moderation.reports.statusTabs.closed') }}
-          </button>
-        </div>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         <div class="hidden grid-cols-[28px_minmax(260px,1fr)_140px_170px_180px_176px] gap-4 border-b border-line bg-base-200/60 px-3 py-1.5 text-[11px] font-bold uppercase text-base-content/75 lg:grid">
           <div />
@@ -361,24 +369,28 @@ function reportResolutionLabel(item: ModerationReportItem) {
               </div>
             </div>
             <div v-if="reportStatus === 'open'" class="col-start-2 mt-1 flex items-center justify-start gap-2 lg:col-start-auto lg:mt-0 lg:justify-end">
-              <button
+              <Button
                 type="button"
-                class="gf-button gf-button-sm gf-button-danger shrink-0 whitespace-nowrap text-xs"
+                variant="danger"
+                size="sm"
+                class="shrink-0 whitespace-nowrap text-xs"
                 :disabled="reportBusy(item.id)"
                 @click="hideReportTarget(item)"
               >
                 <Ban class="h-4 w-4" />
                 {{ t('moderation.reports.ban') }}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                class="gf-button gf-button-sm gf-button-muted shrink-0 whitespace-nowrap text-xs"
+                variant="muted"
+                size="sm"
+                class="shrink-0 whitespace-nowrap text-xs"
                 :disabled="reportBusy(item.id)"
                 @click="handleReport(item, 'reject')"
               >
                 <XCircle class="h-4 w-4" />
                 {{ t('moderation.reports.reject') }}
-              </button>
+              </Button>
             </div>
             <div v-else class="hidden lg:block" />
           </article>
@@ -398,15 +410,16 @@ function reportResolutionLabel(item: ModerationReportItem) {
         />
 
         <footer v-if="reportLoaded && (reportItems.length || reportHasNext)" class="border-t border-line px-4 py-3 text-center text-xs font-semibold text-base-content/55">
-          <button
+          <Button
             v-if="reportHasNext"
             type="button"
-            class="gf-button gf-button-sm gf-button-ghost"
+            variant="brand-ghost"
+            size="sm"
             :disabled="reportLoading"
             @click="loadModerationReports(false)"
           >
             {{ reportLoading ? t('moderation.reports.loading') : t('moderation.reports.loadMore') }}
-          </button>
+          </Button>
           <span v-else-if="reportItems.length" class="text-xs text-base-content/45">{{ t('moderation.reports.noMore') }}</span>
         </footer>
       </div>
@@ -414,16 +427,16 @@ function reportResolutionLabel(item: ModerationReportItem) {
 
     <section v-else-if="activeConsoleTab === 'ban'" class="space-y-3">
       <div class="flex flex-wrap gap-2">
-        <a
+        <Button
           v-for="tab in currentProps.categoryTabs"
           :key="tab.key"
-          :href="tab.url"
-          class="gf-button gf-button-sm text-xs"
-          :class="tab.active ? 'gf-button-secondary' : 'gf-button-ghost'"
-          @click.prevent="loadModerationURL(tab.url)"
+          as-child
+          :variant="tab.active ? 'surface' : 'brand-ghost'"
+          size="sm"
+          class="text-xs"
         >
-          {{ tab.label }}
-        </a>
+          <a :href="tab.url" @click.prevent="loadModerationURL(tab.url)">{{ tab.label }}</a>
+        </Button>
       </div>
 
       <p v-if="actionError" class="rounded border border-error/25 bg-error/10 px-3 py-2 text-sm text-error">
@@ -436,27 +449,31 @@ function reportResolutionLabel(item: ModerationReportItem) {
             {{ t('moderation.table.action') }}
           </template>
           <template #activity="{ topic }">
-            <button
+            <Button
               type="button"
-              class="gf-button gf-button-sm gf-button-primary shrink-0 text-xs"
+              variant="brand"
+              size="sm"
+              class="shrink-0 text-xs"
               :disabled="isBusy(topic.id)"
               @click="moderateTopic(topic)"
             >
               <RotateCcw class="h-4 w-4" />
               {{ isBusy(topic.id) ? t('common.loadingShort') : t('moderation.unbanAction') }}
-            </button>
+            </Button>
           </template>
           <template #mobile-action="{ topic }">
             <span class="ml-auto">
-              <button
+              <Button
                 type="button"
-                class="gf-button gf-button-sm gf-button-primary shrink-0 text-xs"
+                variant="brand"
+                size="sm"
+                class="shrink-0 text-xs"
                 :disabled="isBusy(topic.id)"
                 @click="moderateTopic(topic)"
               >
                 <RotateCcw class="h-4 w-4" />
                 {{ isBusy(topic.id) ? t('common.loadingShort') : t('moderation.unbanAction') }}
-              </button>
+              </Button>
             </span>
           </template>
           <template #empty>
@@ -465,14 +482,15 @@ function reportResolutionLabel(item: ModerationReportItem) {
         </TopicList>
 
         <footer v-if="currentProps.pagination.hasNext" class="border-t border-line bg-base-200/50 px-4 py-3 text-center">
-          <a
-            :href="currentProps.pagination.nextUrl"
-            class="gf-button gf-button-sm gf-button-secondary"
-            rel="next"
-            @click.prevent="loadModerationURL(currentProps.pagination.nextUrl)"
-          >
-            {{ t('common.nextPage') }}
-          </a>
+          <Button as-child variant="surface" size="sm">
+            <a
+              :href="currentProps.pagination.nextUrl"
+              rel="next"
+              @click.prevent="loadModerationURL(currentProps.pagination.nextUrl)"
+            >
+              {{ t('common.nextPage') }}
+            </a>
+          </Button>
         </footer>
       </div>
     </section>
@@ -534,15 +552,16 @@ function reportResolutionLabel(item: ModerationReportItem) {
         />
 
         <footer v-if="logLoaded && (logItems.length || logHasNext)" class="border-t border-line px-4 py-3 text-center text-xs font-semibold text-base-content/55">
-          <button
+          <Button
             v-if="logHasNext"
             type="button"
-            class="gf-button gf-button-sm gf-button-ghost"
+            variant="brand-ghost"
+            size="sm"
             :disabled="logLoading"
             @click="loadModerationLogs(false)"
           >
             {{ logLoading ? t('moderation.logs.loading') : t('moderation.logs.loadMore') }}
-          </button>
+          </Button>
           <span v-else-if="logItems.length" class="text-xs text-base-content/45">{{ t('moderation.logs.noMore') }}</span>
         </footer>
       </div>

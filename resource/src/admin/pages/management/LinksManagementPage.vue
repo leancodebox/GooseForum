@@ -6,10 +6,10 @@ import { ExternalLink, Eye, EyeOff, GripVertical, Link as LinkIcon, Pencil, Plus
 import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import { Button } from '@/admin/components/ui/button'
-import { Badge } from '@/admin/components/ui/badge'
-import { Input } from '@/admin/components/ui/input'
-import { Switch } from '@/admin/components/ui/switch'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/admin/components/ui/dialog'
+} from '@/components/ui/dialog'
 import { getFriendLinks, saveFriendLinks } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import type { AdminPayload, FriendLink, FriendLinkGroup, ManageHomeProps } from '@/admin/types'
@@ -237,16 +237,18 @@ onMounted(() => {
                         <span v-else class="grid size-8 place-items-center rounded-md border border-border/70 bg-muted text-muted-foreground">
                           <LinkIcon class="size-4" />
                         </span>
-                        <button
+                        <Button
                           type="button"
-                          class="absolute -bottom-1 -right-1 rounded-full border p-0.5 shadow-sm transition-all"
+                          variant="ghost"
+                          size="icon-sm"
+                          class="absolute -bottom-1 -right-1 size-5 rounded-full border p-0.5 shadow-sm transition-all"
                           :class="(link.status ?? 1) === 0 ? 'bg-background text-muted-foreground hover:bg-muted' : 'bg-primary text-primary-foreground opacity-0 group-hover:opacity-100'"
                           :title="(link.status ?? 1) === 0 ? adminText('k006x') : adminText('k006y')"
                           @click="toggleLinkStatus(groupIndex, linkIndex, (link.status ?? 1) === 0)"
                         >
                           <EyeOff v-if="(link.status ?? 1) === 0" class="size-3" />
                           <Eye v-else class="size-3" />
-                        </button>
+                        </Button>
                       </div>
                       <div class="min-w-0 flex-1">
                         <a
@@ -284,15 +286,16 @@ onMounted(() => {
                   </article>
                 </template>
                 <template #footer>
-                  <button
+                  <Button
                     v-if="group.links.length === 0"
                     type="button"
-                    class="flex h-28 w-full flex-col items-center justify-center rounded-lg border border-dashed border-muted-foreground/20 bg-muted/20 text-sm text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+                    variant="ghost"
+                    class="h-28 w-full flex-col items-center justify-center rounded-lg border border-dashed border-muted-foreground/20 bg-muted/20 text-sm font-normal text-muted-foreground shadow-none hover:bg-muted/50 hover:text-foreground"
                     @click="openAddLink(groupIndex)"
                   >
                     <LinkIcon class="mb-2 size-5" />
                     {{ adminText('k00a2') }}
-                  </button>
+                  </Button>
                 </template>
               </Draggable>
             </section>
@@ -341,10 +344,10 @@ onMounted(() => {
               </label>
             </div>
             <div class="flex flex-wrap gap-2">
-              <button v-for="emoji in presetEmojis" :key="emoji" class="grid size-8 place-items-center rounded-md hover:bg-accent" type="button" @click="groupForm.emoji = emoji">{{ emoji }}</button>
+              <Button v-for="emoji in presetEmojis" :key="emoji" variant="ghost" size="icon-sm" class="size-8 rounded-md p-0 text-base font-normal shadow-none hover:bg-accent" type="button" @click="groupForm.emoji = emoji">{{ emoji }}</Button>
             </div>
             <div class="flex flex-wrap gap-2">
-              <button v-for="color in presetColors" :key="color" class="size-7 rounded-full border" :style="{ backgroundColor: color }" type="button" @click="groupForm.color = color" />
+              <Button v-for="color in presetColors" :key="color" variant="ghost" size="icon-sm" class="size-7 rounded-full border p-0 shadow-none hover:bg-transparent" :style="{ backgroundColor: color }" type="button" @click="groupForm.color = color" />
             </div>
             <DialogFooter>
               <Button variant="outline" type="button" @click="groupDialog = null">{{ adminText('k009q') }}</Button>

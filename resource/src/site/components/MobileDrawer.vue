@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { AnimatePresence, Motion } from 'motion-v'
-import { X } from '@lucide/vue'
-import { mobileDrawerMotion, motionTransitions, overlayMotion } from '@/runtime/motion'
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import type { FooterPayload } from '@gooseforum/client'
 
 interface SidebarNavItem {
@@ -51,30 +49,23 @@ const hasFooter = computed(() => props.footer.links.length > 0 || props.footer.p
 function close() {
   emit('close')
 }
+
+function updateOpen(open: boolean) {
+  if (!open) close()
+}
 </script>
 
 <template>
-  <AnimatePresence>
-    <div v-if="open" class="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true">
-      <Motion
-        as="button"
-        class="absolute inset-0 bg-neutral/40"
-        :aria-label="closeLabel"
-        v-bind="overlayMotion"
-        :transition="motionTransitions.fast"
-        @click="close"
-      />
-      <Motion
-        as="nav"
-        class="gf-drawer-surface relative h-full w-80 max-w-[85vw] overflow-y-auto p-3"
-        v-bind="mobileDrawerMotion"
-        :transition="motionTransitions.comfortable"
-      >
+  <Sheet :open="open" @update:open="updateOpen">
+    <SheetContent
+      side="left"
+      :close-label="closeLabel"
+      overlay-class="z-[60] bg-neutral/40 lg:hidden"
+      class="gf-drawer-surface z-[60] w-80 max-w-[85vw] gap-0 overflow-hidden border-r border-line bg-base-100 p-0 sm:max-w-[85vw] lg:hidden [&>button]:right-4 [&>button]:top-4 [&>button]:grid [&>button]:size-8 [&>button]:place-items-center [&>button]:rounded-md [&>button]:text-icon-muted [&>button]:opacity-100 [&>button]:hover:bg-base-300 [&>button]:hover:text-base-content [&>button_svg]:size-5"
+    >
+      <nav class="h-full overflow-y-auto p-3">
         <div class="mb-3 flex h-10 items-center justify-between">
-          <div class="font-bold text-base-content">{{ menuLabel }}</div>
-          <button class="inline-flex h-8 w-8 items-center justify-center rounded-md text-icon-muted hover:bg-base-300 hover:text-base-content" type="button" :aria-label="closeLabel" @click="close">
-            <X class="h-5 w-5" />
-          </button>
+          <SheetTitle class="font-bold text-base-content">{{ menuLabel }}</SheetTitle>
         </div>
         <div class="space-y-0.5">
           <a
@@ -172,7 +163,7 @@ function close() {
             </span>
           </div>
         </footer>
-      </Motion>
-    </div>
-  </AnimatePresence>
+      </nav>
+    </SheetContent>
+  </Sheet>
 </template>

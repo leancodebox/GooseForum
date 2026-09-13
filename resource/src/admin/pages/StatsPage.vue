@@ -3,14 +3,14 @@
 import { FileText, Link as LinkIcon, MessageSquare, Users } from '@lucide/vue'
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import AdminSection from '@/admin/components/AdminSection.vue'
-import { Badge } from '@/admin/components/ui/badge'
+import { Badge } from '@/components/ui/badge'
 import {
   Card,
   CardAction,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/admin/components/ui/card'
+} from '@/components/ui/card'
 import { BasicPage } from '@/admin/components/global-layout'
 import {
   getGithubReleases,

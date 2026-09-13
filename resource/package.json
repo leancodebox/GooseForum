@@ -10,7 +10,10 @@
     "dev:watch": "vite --host 0.0.0.0",
     "build": "pnpm client:build && vue-tsc --noEmit && vite build",
     "typecheck": "pnpm client:build && vue-tsc --noEmit",
-    "audit:site-colors": "node scripts/audit-site-colors.mjs"
+    "audit:site-colors": "node scripts/audit-site-colors.mjs",
+    "scan:site-dom": "node scripts/scan-site-dom.mjs --fail-on-legacy",
+    "scan:admin-dom": "node scripts/scan-site-dom.mjs --scan-root src/admin --fail-on-native-controls --allow-default-buttons",
+    "scan:dom": "pnpm scan:site-dom && pnpm scan:admin-dom"
   },
   "dependencies": {
     "@gooseforum/client": "workspace:*",
@@ -30,7 +33,6 @@
     "markdown-it-anchor": "^9.2.0",
     "markdown-it-task-lists": "^2.1.1",
     "mermaid": "11.17.1",
-    "motion-v": "^2.2.1",
     "node-forge": "^1.4.0",
     "prosemirror-commands": "^1.7.1",
     "prosemirror-history": "^1.5.0",

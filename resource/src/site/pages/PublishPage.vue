@@ -1,6 +1,18 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { Bold, ClipboardPaste, Code, Code2, CornerDownLeft, Eye, Heading, Image, Italic, Link, List, ListChecks, ListOrdered, Lock, MessageSquareQuote, Minus, Send, Strikethrough, Table2, X } from '@lucide/vue'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { submitTopic, uploadImage } from '@/runtime/api'
 import { processImageFile, validateImageFile } from '@/runtime/image'
 import { renderMarkdownPreview } from '@/runtime/markdown'
@@ -44,13 +56,10 @@ const categorySection = ref<HTMLElement | null>(null)
 const bodySection = ref<HTMLElement | null>(null)
 const editor = ref<HTMLTextAreaElement | null>(null)
 const visualEditor = ref<InstanceType<typeof VisualMarkdownEditor> | null>(null)
-const blockPicker = ref<HTMLElement | null>(null)
 const blockPickerOpen = ref(false)
-const linkPicker = ref<HTMLElement | null>(null)
 const linkInput = ref<HTMLInputElement | null>(null)
 const linkPickerOpen = ref(false)
 const linkUrl = ref('https://')
-const tablePicker = ref<HTMLElement | null>(null)
 const tablePickerOpen = ref(false)
 const tablePickerRows = ref(3)
 const tablePickerColumns = ref(3)
@@ -135,6 +144,14 @@ function categoryDisabled(category: PublishPageProps['categories'][number]) {
 function closeMainCategoryPrompt() {
   pendingMainCategoryAction.value = null
   pendingMainCategoryRemovalId.value = null
+}
+
+function handleMainCategoryPromptOpen(open: boolean) {
+  if (!open) closeMainCategoryPrompt()
+}
+
+function handleLeavePromptOpen(open: boolean) {
+  if (!open) closeLeavePrompt()
 }
 
 async function confirmMainCategoryChange() {
@@ -240,10 +257,10 @@ function applyToolbarAction(action: ToolbarAction) {
   visualEditor.value?.applyAction(action)
 }
 
-function openBlockPicker() {
+function openBlockPicker(open: boolean) {
   linkPickerOpen.value = false
   tablePickerOpen.value = false
-  blockPickerOpen.value = !blockPickerOpen.value
+  blockPickerOpen.value = open
 }
 
 function applyBlockType(block: MarkdownBlockType) {
@@ -263,14 +280,14 @@ function setMarkdownLineType(block: Exclude<MarkdownBlockType, 'code_block'>) {
   markdownEditor.setBlock(block)
 }
 
-async function openLinkPicker() {
+async function openLinkPicker(open: boolean) {
   if (editorMode.value === 'markdown') {
     insert('[', '](https://)', t('publish.placeholder.link'))
     return
   }
   blockPickerOpen.value = false
   tablePickerOpen.value = false
-  linkPickerOpen.value = !linkPickerOpen.value
+  linkPickerOpen.value = open
   if (!linkPickerOpen.value) return
   linkUrl.value = visualEditor.value?.activeLinkHref() || 'https://'
   await nextTick()
@@ -285,12 +302,12 @@ function applyLink() {
   visualEditor.value?.setLink(href, t('publish.placeholder.link'))
 }
 
-function openTablePicker() {
+function openTablePicker(open: boolean) {
   blockPickerOpen.value = false
   linkPickerOpen.value = false
   tablePickerRows.value = 3
   tablePickerColumns.value = 3
-  tablePickerOpen.value = !tablePickerOpen.value
+  tablePickerOpen.value = open
 }
 
 function selectTableSize(row: number, column: number) {
@@ -304,16 +321,6 @@ function insertTable(row: number, column: number) {
   else insertMarkdownBlock(createMarkdownTable(row, column))
 }
 
-function closeToolbarPopovers(event: PointerEvent) {
-  const target = event.target as Node
-  if (blockPicker.value?.contains(target) || linkPicker.value?.contains(target) || tablePicker.value?.contains(target)) return
-  blockPickerOpen.value = false
-  linkPickerOpen.value = false
-  tablePickerOpen.value = false
-}
-
-onMounted(() => document.addEventListener('pointerdown', closeToolbarPopovers))
-onBeforeUnmount(() => document.removeEventListener('pointerdown', closeToolbarPopovers))
 
 async function pastePlainText() {
   error.value = ''
@@ -569,11 +576,11 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                 <span class="text-xs text-base-content/55">{{ categorySelectionHint }}</span>
               </div>
               <div class="flex flex-wrap gap-2">
-                <button
+                <Button
                   v-for="category in props.categories"
                   :key="category.id"
-                  type="button"
-                  class="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
+                  variant="surface"
+                  class="h-auto rounded-md px-2.5 py-1.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40"
                   :class="categoryIds.includes(category.id) ? 'border-primary bg-info/10 text-primary' : 'border-line text-base-content/75 hover:border-line hover:bg-base-200'"
                   :disabled="categoryDisabled(category)"
                   :title="category.isRestricted ? t('publish.restrictedCategorySingleHint') : undefined"
@@ -585,7 +592,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                     {{ t('publish.mainCategoryBadge') }}
                   </span>
                   <Lock v-if="category.isRestricted" class="h-3.5 w-3.5" />
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -596,54 +603,64 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
 
               <div class="mb-2 flex flex-wrap items-center gap-1 py-2">
                 <div v-if="!preview" class="flex flex-wrap items-center gap-1">
-                  <div ref="blockPicker" class="relative mr-1">
-                    <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.blockType')" :aria-expanded="blockPickerOpen" @mousedown.prevent @click="openBlockPicker"><Heading class="h-4 w-4" /></button>
-                    <div v-if="blockPickerOpen" class="gf-menu-surface absolute left-0 top-full z-30 mt-1.5 w-48 p-2 shadow-lg" role="menu" @keydown.esc.stop="blockPickerOpen = false">
-                      <button type="button" class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-base-content/75 hover:bg-base-200 hover:text-base-content" @click="applyBlockType('paragraph')">
+                  <Popover :open="blockPickerOpen" @update:open="openBlockPicker">
+                    <PopoverTrigger as-child>
+                      <Button type="button" variant="muted" size="icon" class="mr-1 p-1.5" :title="t('publish.toolbar.blockType')" :aria-label="t('publish.toolbar.blockType')" @mousedown.prevent>
+                        <Heading class="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent side="bottom" align="start" class="w-48 rounded-(--gf-radius-box) border-line bg-base-100 p-2 shadow-lg">
+                      <Button variant="ghost" size="sm" class="h-auto w-full justify-start rounded px-2 py-1.5 font-normal text-base-content/75 hover:bg-base-200 hover:text-base-content" @click="applyBlockType('paragraph')">
                         <span class="w-7 font-medium">P</span>{{ t('publish.toolbar.paragraph') }}
-                      </button>
-                      <button v-for="level in 6" :key="level" type="button" class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-base-content/75 hover:bg-base-200 hover:text-base-content" @click="applyBlockType(`heading_${level}` as MarkdownBlockType)">
+                      </Button>
+                      <Button v-for="level in 6" :key="level" variant="ghost" size="sm" class="h-auto w-full justify-start rounded px-2 py-1.5 font-normal text-base-content/75 hover:bg-base-200 hover:text-base-content" @click="applyBlockType(`heading_${level}` as MarkdownBlockType)">
                         <span class="w-7 font-semibold">H{{ level }}</span>{{ t('publish.toolbar.heading', { level }) }}
-                      </button>
-                      <button type="button" class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-base-content/75 hover:bg-base-200 hover:text-base-content" @click="applyBlockType('code_block')">
+                      </Button>
+                      <Button variant="ghost" size="sm" class="h-auto w-full justify-start rounded px-2 py-1.5 font-normal text-base-content/75 hover:bg-base-200 hover:text-base-content" @click="applyBlockType('code_block')">
                         <Code2 class="h-4 w-7" />{{ t('publish.toolbar.codeBlock') }}
-                      </button>
-                    </div>
-                  </div>
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.bold')" @mousedown.prevent @click="applyToolbarAction('bold')"><Bold class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.italic')" @mousedown.prevent @click="applyToolbarAction('italic')"><Italic class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.strike')" @mousedown.prevent @click="applyToolbarAction('strike')"><Strikethrough class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.inlineCode')" @mousedown.prevent @click="applyToolbarAction('inlineCode')"><Code class="h-4 w-4" /></button>
-                  <div ref="linkPicker" class="relative">
-                    <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.link')" :aria-expanded="linkPickerOpen" @mousedown.prevent @click="openLinkPicker"><Link class="h-4 w-4" /></button>
-                    <form v-if="linkPickerOpen" class="gf-menu-surface absolute left-0 top-full z-30 mt-1.5 flex w-72 items-center gap-1.5 p-2 shadow-lg" @submit.prevent="applyLink">
-                      <input ref="linkInput" v-model="linkUrl" type="text" inputmode="url" class="h-8 min-w-0 flex-1 rounded border border-line bg-base-100 px-2 text-sm outline-none focus:border-primary" :placeholder="t('publish.toolbar.linkUrl')" />
-                      <button type="submit" class="gf-button gf-button-primary h-8 px-2.5" :disabled="!linkUrl.trim()">{{ t('publish.toolbar.applyLink') }}</button>
-                    </form>
-                  </div>
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.quote')" @mousedown.prevent @click="applyToolbarAction('quote')"><MessageSquareQuote class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.code')" @mousedown.prevent @click="applyToolbarAction('code')"><Code2 class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.bulletList')" @mousedown.prevent @click="applyToolbarAction('bulletList')"><List class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.orderedList')" @mousedown.prevent @click="applyToolbarAction('orderedList')"><ListOrdered class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.horizontalRule')" @mousedown.prevent @click="applyToolbarAction('horizontalRule')"><Minus class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.hardBreak')" @mousedown.prevent @click="applyToolbarAction('hardBreak')"><CornerDownLeft class="h-4 w-4" /></button>
-                  <div ref="tablePicker" class="relative">
-                    <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.table')" :aria-expanded="tablePickerOpen" @mousedown.prevent @click="openTablePicker"><Table2 class="h-4 w-4" /></button>
-                    <div
-                      v-if="tablePickerOpen"
-                      class="gf-menu-surface absolute left-0 top-full z-30 mt-1.5 p-2.5 shadow-lg"
-                      role="menu"
-                      @keydown.esc.stop="tablePickerOpen = false"
-                    >
+                      </Button>
+                    </PopoverContent>
+                  </Popover>
+                  <Button variant="muted" size="icon" class="size-auto rounded p-1.5 text-base-content/55 shadow-none hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.bold')" @mousedown.prevent @click="applyToolbarAction('bold')"><Bold class="h-4 w-4" /></Button>
+                  <Button variant="muted" size="icon" class="size-auto rounded p-1.5 text-base-content/55 shadow-none hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.italic')" @mousedown.prevent @click="applyToolbarAction('italic')"><Italic class="h-4 w-4" /></Button>
+                  <Button variant="muted" size="icon" class="size-auto rounded p-1.5 text-base-content/55 shadow-none hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.strike')" @mousedown.prevent @click="applyToolbarAction('strike')"><Strikethrough class="h-4 w-4" /></Button>
+                  <Button variant="muted" size="icon" class="size-auto rounded p-1.5 text-base-content/55 shadow-none hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.inlineCode')" @mousedown.prevent @click="applyToolbarAction('inlineCode')"><Code class="h-4 w-4" /></Button>
+                  <Popover :open="linkPickerOpen" @update:open="openLinkPicker">
+                    <PopoverTrigger as-child>
+                      <Button type="button" variant="muted" size="icon" class="p-1.5" :title="t('publish.toolbar.link')" :aria-label="t('publish.toolbar.link')" @mousedown.prevent>
+                        <Link class="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent side="bottom" align="start" as-child class="z-30">
+                      <form class="flex w-72 items-center gap-1.5 rounded-(--gf-radius-box) border border-line bg-base-100 p-2 shadow-lg" @submit.prevent="applyLink">
+                        <Input ref="linkInput" v-model="linkUrl" type="text" inputmode="url" class="h-8 min-w-0 flex-1" :placeholder="t('publish.toolbar.linkUrl')" />
+                        <Button type="submit" variant="brand" size="sm" class="px-2.5" :disabled="!linkUrl.trim()">{{ t('publish.toolbar.applyLink') }}</Button>
+                      </form>
+                    </PopoverContent>
+                  </Popover>
+                  <Button variant="muted" size="icon" class="size-auto rounded p-1.5 text-base-content/55 shadow-none hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.quote')" @mousedown.prevent @click="applyToolbarAction('quote')"><MessageSquareQuote class="h-4 w-4" /></Button>
+                  <Button variant="muted" size="icon" class="size-auto rounded p-1.5 text-base-content/55 shadow-none hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.code')" @mousedown.prevent @click="applyToolbarAction('code')"><Code2 class="h-4 w-4" /></Button>
+                  <Button variant="muted" size="icon" class="size-auto rounded p-1.5 text-base-content/55 shadow-none hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.bulletList')" @mousedown.prevent @click="applyToolbarAction('bulletList')"><List class="h-4 w-4" /></Button>
+                  <Button variant="muted" size="icon" class="size-auto rounded p-1.5 text-base-content/55 shadow-none hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.orderedList')" @mousedown.prevent @click="applyToolbarAction('orderedList')"><ListOrdered class="h-4 w-4" /></Button>
+                  <Button variant="muted" size="icon" class="size-auto rounded p-1.5 text-base-content/55 shadow-none hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.horizontalRule')" @mousedown.prevent @click="applyToolbarAction('horizontalRule')"><Minus class="h-4 w-4" /></Button>
+                  <Button variant="muted" size="icon" class="size-auto rounded p-1.5 text-base-content/55 shadow-none hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.hardBreak')" @mousedown.prevent @click="applyToolbarAction('hardBreak')"><CornerDownLeft class="h-4 w-4" /></Button>
+                  <Popover :open="tablePickerOpen" @update:open="openTablePicker">
+                    <PopoverTrigger as-child>
+                      <Button type="button" variant="muted" size="icon" class="p-1.5" :title="t('publish.toolbar.table')" :aria-label="t('publish.toolbar.table')" @mousedown.prevent>
+                        <Table2 class="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent side="bottom" align="start" class="rounded-(--gf-radius-box) border-line bg-base-100 p-2.5 shadow-lg">
                       <div class="mb-2 text-center text-xs font-medium text-base-content/75">
                         {{ t('publish.toolbar.tableSize', { rows: tablePickerRows, columns: tablePickerColumns }) }}
                       </div>
                       <div class="grid gap-1" :style="{ gridTemplateColumns: `repeat(${tablePickerMaxColumns}, 1.25rem)` }">
-                        <button
+                        <Button
                           v-for="cell in tablePickerCells"
                           :key="`${cell.row}-${cell.column}`"
                           type="button"
-                          class="h-5 w-5 rounded-[2px] border transition-colors"
+                          variant="muted"
+                          class="h-5 w-5 rounded-[2px] border p-0 shadow-none"
                           :class="cell.row <= tablePickerRows && cell.column <= tablePickerColumns ? 'border-primary bg-primary/25' : 'border-line bg-base-100 hover:border-primary/60'"
                           :aria-label="t('publish.toolbar.tableSize', { rows: cell.row, columns: cell.column })"
                           @mouseenter="selectTableSize(cell.row, cell.column)"
@@ -651,11 +668,11 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                           @click="insertTable(cell.row, cell.column)"
                         />
                       </div>
-                    </div>
-                  </div>
+                    </PopoverContent>
+                  </Popover>
                   <span class="mx-1 h-5 w-px bg-line" />
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.pastePlainText')" @mousedown.prevent @click="pastePlainText"><ClipboardPaste class="h-4 w-4" /></button>
-                  <span v-if="uploadText" class="gf-badge gf-badge-info rounded">{{ uploadText }}</span>
+                  <Button variant="muted" size="icon" class="size-auto rounded p-1.5 text-base-content/55 shadow-none hover:bg-base-200 hover:text-base-content" :title="t('publish.pastePlainText')" @mousedown.prevent @click="pastePlainText"><ClipboardPaste class="h-4 w-4" /></Button>
+                  <Badge v-if="uploadText" variant="info" class="rounded">{{ uploadText }}</Badge>
                   <label class="rounded p-1.5 text-base-content/55 transition hover:bg-base-200 hover:text-base-content" :title="t('publish.uploadImageTitle')">
                     <Image class="h-4 w-4" />
                     <input type="file" accept="image/*" multiple class="hidden" :disabled="uploading" @change="handleImage" />
@@ -664,13 +681,13 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
 
                 <div class="ml-auto flex items-center gap-1.5 text-xs font-semibold">
                   <div class="inline-flex rounded-md border border-line p-0.5">
-                    <button type="button" class="rounded px-2 py-1" :class="editorMode === 'visual' ? 'bg-neutral text-neutral-content' : 'text-base-content/55 hover:text-base-content'" @click="selectEditorMode('visual')">{{ t('publish.visualMode') }}</button>
-                    <button type="button" class="rounded px-2 py-1" :class="editorMode === 'markdown' ? 'bg-neutral text-neutral-content' : 'text-base-content/55 hover:text-base-content'" @click="selectEditorMode('markdown')">{{ t('publish.markdownMode') }}</button>
+                    <Button variant="neutral" size="sm" class="h-auto rounded px-2 py-1 text-xs font-semibold" :class="editorMode === 'visual' ? 'bg-neutral text-neutral-content hover:bg-neutral/90' : 'bg-transparent text-base-content/55 hover:bg-transparent hover:text-base-content'" @click="selectEditorMode('visual')">{{ t('publish.visualMode') }}</Button>
+                    <Button variant="neutral" size="sm" class="h-auto rounded px-2 py-1 text-xs font-semibold" :class="editorMode === 'markdown' ? 'bg-neutral text-neutral-content hover:bg-neutral/90' : 'bg-transparent text-base-content/55 hover:bg-transparent hover:text-base-content'" @click="selectEditorMode('markdown')">{{ t('publish.markdownMode') }}</Button>
                   </div>
-                  <button type="button" class="inline-flex items-center gap-1 rounded-md border border-line px-2 py-1.5" :class="preview ? 'bg-neutral text-neutral-content' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'" @click="togglePreview">
+                  <Button variant="neutral" size="sm" class="h-auto rounded-md border border-line px-2 py-1.5 text-xs font-semibold" :class="preview ? 'bg-neutral text-neutral-content hover:bg-neutral/90' : 'border-line bg-base-100 text-base-content/55 shadow-none hover:bg-base-200 hover:text-base-content'" @click="togglePreview">
                     <Eye class="h-3.5 w-3.5" />
                     {{ t('publish.preview') }}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -724,24 +741,30 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
             <p v-if="message" class="gf-status-message gf-status-message-success">{{ message }}</p>
 
             <div class="flex items-center justify-end gap-2 border-t border-line pt-4">
-              <a href="/" class="gf-button gf-button-lg gf-button-muted">{{ t('common.cancel') }}</a>
-              <button
+              <Button as-child variant="muted" size="lg" class="px-4">
+                <a href="/">{{ t('common.cancel') }}</a>
+              </Button>
+              <Button
                 type="button"
-                class="gf-button gf-button-lg gf-button-secondary"
+                variant="surface"
+                size="lg"
+                class="px-4"
                 :disabled="submitting || uploading"
                 @click="saveDraft"
               >
                 {{ submitting ? t('common.saving') : t('publish.saveDraft') }}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                class="gf-button gf-button-lg gf-button-primary"
+                variant="brand"
+                size="lg"
+                class="px-4"
                 :disabled="submitting || uploading || !canPublishSelection"
                 @click="save"
               >
                 <Send class="h-4 w-4" />
                 {{ submitting ? t('common.saving') : props.isEditing ? t('publish.updateTopic') : t('publish.publishTopic') }}
-              </button>
+              </Button>
             </div>
           </div>
         </section>
@@ -762,11 +785,12 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
           <section v-if="selectedCategories.length" class="gf-card p-4">
             <h2 class="text-sm font-semibold text-base-content">{{ t('publish.selectedCategories') }}</h2>
             <div class="mt-3 flex flex-wrap gap-2">
-              <button
+              <Button
                 v-for="category in selectedCategories"
                 :key="category.id"
                 type="button"
-                class="inline-flex items-center gap-1.5 rounded-md border border-line px-2 py-1 text-sm text-base-content/75 hover:bg-base-200"
+                variant="surface"
+                class="h-auto rounded-md px-2 py-1 text-sm font-normal"
                 @click="toggleCategory(category.id)"
               >
                 <span class="h-2 w-2 rounded-[3px]" :style="{ backgroundColor: category.color }" />
@@ -775,61 +799,59 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                   {{ t('publish.mainCategoryBadge') }}
                 </span>
                 <X class="h-3 w-3" />
-              </button>
+              </Button>
             </div>
           </section>
         </aside>
       </div>
 
-      <div v-if="pendingMainCategoryAction !== null" class="fixed inset-0 z-[100] flex items-center justify-center bg-neutral/50 px-4 backdrop-blur-sm" role="dialog" aria-modal="true">
-        <div class="gf-menu-surface w-full max-w-md overflow-hidden">
-          <div class="border-b border-line px-5 py-4">
-            <h2 class="text-base font-semibold text-base-content">{{ t('publish.mainCategoryChangeTitle') }}</h2>
-            <p class="mt-1 text-sm leading-6 text-base-content/55">
+      <AlertDialog :open="pendingMainCategoryAction !== null" @update:open="handleMainCategoryPromptOpen">
+        <AlertDialogContent class="gap-0 overflow-hidden rounded-[var(--gf-radius-box)] border-line bg-base-100 p-0 sm:max-w-md">
+          <AlertDialogHeader class="gap-0 border-b border-line px-5 py-4">
+            <AlertDialogTitle class="text-base text-base-content">{{ t('publish.mainCategoryChangeTitle') }}</AlertDialogTitle>
+            <AlertDialogDescription class="mt-1 leading-6 text-base-content/55">
               {{ t('publish.mainCategoryChangeDescription', { current: previousMainCategory?.name || '', next: nextMainCategory?.name || '' }) }}
-            </p>
-          </div>
-          <div class="flex items-center justify-end gap-2 bg-base-200 px-5 py-4">
-            <button type="button" class="gf-button gf-button-lg gf-button-muted" @click="closeMainCategoryPrompt">
-              {{ t('common.cancel') }}
-            </button>
-            <button type="button" class="gf-button gf-button-lg gf-button-primary" @click="confirmMainCategoryChange">
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter class="flex-row items-center justify-end bg-base-200 px-5 py-4">
+            <Button type="button" variant="muted" size="lg" class="px-4" @click="closeMainCategoryPrompt">{{ t('common.cancel') }}</Button>
+            <Button type="button" variant="brand" size="lg" class="px-4" @click="confirmMainCategoryChange">
               {{ t('publish.confirmMainCategoryChange') }}
-            </button>
-          </div>
-        </div>
-      </div>
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      <div v-if="leavePromptOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-neutral/50 px-4 backdrop-blur-sm" role="dialog" aria-modal="true">
-        <div class="gf-menu-surface w-full max-w-md overflow-hidden">
-          <div class="border-b border-line px-5 py-4">
-            <h2 class="text-base font-semibold text-base-content">{{ t('publish.leaveTitle') }}</h2>
-            <p class="mt-1 text-sm leading-6 text-base-content/55">
+      <AlertDialog :open="leavePromptOpen" @update:open="handleLeavePromptOpen">
+        <AlertDialogContent class="gap-0 overflow-hidden rounded-[var(--gf-radius-box)] border-line bg-base-100 p-0 sm:max-w-md">
+          <AlertDialogHeader class="gap-0 border-b border-line px-5 py-4">
+            <AlertDialogTitle class="text-base text-base-content">{{ t('publish.leaveTitle') }}</AlertDialogTitle>
+            <AlertDialogDescription class="mt-1 leading-6 text-base-content/55">
               {{ t('publish.leaveDescription') }}
-            </p>
-          </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
 
           <div v-if="!isValid" class="border-b border-warning/20 bg-warning/10 px-5 py-3 text-sm font-medium text-warning">
             {{ t('publish.draftRequirement') }}
           </div>
 
-          <div class="flex flex-wrap items-center justify-end gap-2 bg-base-200 px-5 py-4">
-            <button type="button" class="gf-button gf-button-lg gf-button-muted" @click="closeLeavePrompt">
-              {{ t('publish.continueEditing') }}
-            </button>
-            <button type="button" class="gf-button gf-button-lg gf-button-secondary" @click="discardAndLeave">
+          <AlertDialogFooter class="flex-row flex-wrap items-center justify-end bg-base-200 px-5 py-4">
+            <Button type="button" variant="muted" size="lg" class="px-4" @click="closeLeavePrompt">{{ t('publish.continueEditing') }}</Button>
+            <Button type="button" variant="surface" size="lg" class="px-4" @click="discardAndLeave">
               {{ t('publish.leaveWithoutSaving') }}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              class="gf-button gf-button-lg gf-button-primary min-w-28"
+              variant="brand"
+              size="lg"
+              class="min-w-28 px-4"
               :disabled="!draftSaveable"
               @click="saveDraftAndLeave"
             >
               {{ submitting ? t('common.saving') : t('publish.saveDraft') }}
-            </button>
-          </div>
-        </div>
-      </div>
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
 </template>
