@@ -141,6 +141,7 @@ CMD ["./GooseForum", "serve"]
 ## 文档
 
 - [配置文档](docs/configuration_ZH.md)
+- [React + shadcn 迁移与 Next 并存架构](docs/react-shadcn-next-coexistence.md)
 
 ## 许可证
 
