@@ -275,7 +275,7 @@ async function startChat(user: UserConnectionPayload) {
               :key="conversation.peerId"
               type="button"
               variant="muted"
-              class="flex w-full justify-start gap-3 rounded-none border-b border-line px-4 py-3 font-normal text-base-content shadow-none transition hover:bg-base-200 md:hover:bg-base-100"
+              class="h-auto w-full flex-none justify-start gap-3 whitespace-normal rounded-none border-b border-line px-4 py-3 text-left font-normal text-base-content shadow-none transition hover:bg-base-200 md:hover:bg-base-100"
               :class="active?.peerId === conversation.peerId ? 'bg-info/10 shadow-[inset_3px_0_0_var(--gf-color-primary)] md:bg-base-100' : ''"
               @click="selectConversation(conversation)"
             >
@@ -455,13 +455,13 @@ async function startChat(user: UserConnectionPayload) {
               <InputGroupInput v-model="userSearch" :placeholder="t('messages.searchUsers')" />
             </InputGroup>
           </div>
-          <div class="min-h-0 overflow-y-auto p-2">
+          <div class="min-h-0 flex-1 overflow-y-auto p-2">
             <Button
               v-for="user in filteredUsers"
               :key="user.id"
               type="button"
               variant="muted"
-              class="flex w-full items-center justify-start gap-3 p-3 text-left font-normal text-base-content shadow-none hover:bg-base-200 [border-radius:var(--gf-radius-field)]"
+              class="h-auto w-full flex-none items-center justify-start gap-3 whitespace-normal p-3 text-left font-normal text-base-content shadow-none hover:bg-base-200 [border-radius:var(--gf-radius-field)]"
               @click="startChat(user)"
             >
               <UserAvatar :src="user.avatarUrl" :alt="user.username" class="h-10 w-10 rounded-full object-cover ring-1 ring-line" />
