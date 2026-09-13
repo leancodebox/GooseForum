@@ -90,6 +90,7 @@ func viewRoute(ginApp *gin.Engine) {
 }
 
 func siteInfoRoute(ginApp *gin.Engine) {
+	ginApp.GET("/favicon.ico", controllers.RenderFavicon)
 	ginApp.GET("/robots.txt", controllers.RenderRobotsTxt)
 	ginApp.GET("/sitemap.xml", controllers.RenderSitemapXml)
 	ginApp.GET("/rss.xml", controllers.RenderRss)

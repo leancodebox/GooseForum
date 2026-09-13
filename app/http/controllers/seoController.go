@@ -31,8 +31,24 @@ var robotsTxt string
 var sitemapTpl string
 
 const seoXMLCacheTTL = 10 * time.Second
+const defaultFaviconPath = "/static/pic/icon.webp"
 
 var seoXMLCache = localcache.Cache[string]{MaxEntries: cacheconfig.Current().SEOXML}
+
+// RenderFavicon keeps the conventional favicon URL stable while allowing the
+// image itself to be managed through the site settings.
+func RenderFavicon(c *gin.Context) {
+	c.Header("Cache-Control", "no-cache")
+	c.Redirect(http.StatusTemporaryRedirect, faviconLocation(hotdataserve.GetSiteSettingsConfigCache().SiteLogo))
+}
+
+func faviconLocation(siteLogo string) string {
+	location := strings.TrimSpace(siteLogo)
+	if location == "" || location == "/favicon.ico" {
+		return defaultFaviconPath
+	}
+	return location
+}
 
 // RenderRobotsTxt renders robots.txt.
 func RenderRobotsTxt(c *gin.Context) {
