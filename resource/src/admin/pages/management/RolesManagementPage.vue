@@ -3,7 +3,6 @@ import { adminText } from '@/admin/runtime/i18n-text'
 
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2 } from '@lucide/vue'
-import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
 import AdminToolbar from '@/admin/components/AdminToolbar.vue'
 import { BasicPage } from '@/admin/components/global-layout'
@@ -220,15 +219,13 @@ onMounted(() => {
           </td>
           <td class="px-4 py-3 text-xs text-muted-foreground">{{ role.createTime || '-' }}</td>
           <td class="px-4 py-3">
-            <div class="flex gap-2">
-              <AdminActionButton @click="openEdit(role)">
-                <Pencil class="size-3.5" />
-                {{ adminText('k005j') }}
-              </AdminActionButton>
-              <AdminActionButton tone="danger" @click="deletingRole = role">
-                <Trash2 class="size-3.5" />
-                {{ adminText('k005i') }}
-              </AdminActionButton>
+            <div class="flex justify-end gap-1">
+              <Button variant="ghost" size="icon-sm" type="button" :title="adminText('k005j')" :aria-label="adminText('k005j')" @click="openEdit(role)">
+                <Pencil class="size-4" />
+              </Button>
+              <Button variant="ghost" size="icon-sm" type="button" class="text-destructive hover:text-destructive" :title="adminText('k005i')" :aria-label="adminText('k005i')" @click="deletingRole = role">
+                <Trash2 class="size-4" />
+              </Button>
             </div>
           </td>
         </tr>

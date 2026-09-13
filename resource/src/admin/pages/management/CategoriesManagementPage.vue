@@ -2,7 +2,7 @@
 import { adminText } from '@/admin/runtime/i18n-text'
 
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { LockKeyhole, Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2, UserPlus, X } from '@lucide/vue'
+import { LockKeyhole, Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2, UserPlus, X, MoreHorizontal } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
@@ -11,6 +11,12 @@ import AdminToolbar from '@/admin/components/AdminToolbar.vue'
 import CategoryAccessDialog from '@/admin/components/CategoryAccessDialog.vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { Command, CommandItem, CommandList } from '@/components/ui/command'
 import { Input } from '@/components/ui/input'
@@ -586,19 +592,38 @@ onMounted(() => {
                 </TableCell>
                 <TableCell v-if="canManageCategories">{{ item.sort ?? 0 }}</TableCell>
                 <TableCell>
-                  <div class="flex justify-end gap-2">
-                    <AdminActionButton v-if="canManageAccess" @click="accessCategory = item">
-                      <LockKeyhole class="size-3.5" />
-                      {{ t('accessGroups.configureAccess') }}
-                    </AdminActionButton>
-                    <AdminActionButton v-if="canManageCategories" @click="openEdit(item)">
-                      <Pencil class="size-3.5" />
-                      {{ adminText('k005j') }}
-                    </AdminActionButton>
-                    <AdminActionButton v-if="canManageCategories" tone="danger" @click="deletingRow = item">
-                      <Trash2 class="size-3.5" />
-                      {{ adminText('k005i') }}
-                    </AdminActionButton>
+                  <div class="flex items-center justify-end gap-1">
+                    <template v-if="canManageAccess && canManageCategories">
+                      <Button variant="ghost" size="icon-sm" type="button" :title="t('accessGroups.configureAccess')" :aria-label="t('accessGroups.configureAccess')" @click="accessCategory = item">
+                        <LockKeyhole class="size-4" />
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger as-child>
+                          <Button variant="ghost" size="icon-sm" type="button" :title="adminText('k007m')" :aria-label="adminText('k007m')">
+                            <MoreHorizontal class="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem @select="openEdit(item)">
+                            <Pencil />{{ adminText('k005j') }}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem variant="destructive" @select="deletingRow = item">
+                            <Trash2 />{{ adminText('k005i') }}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </template>
+                    <template v-else>
+                      <Button v-if="canManageAccess" variant="ghost" size="icon-sm" type="button" :title="t('accessGroups.configureAccess')" :aria-label="t('accessGroups.configureAccess')" @click="accessCategory = item">
+                        <LockKeyhole class="size-4" />
+                      </Button>
+                      <Button v-if="canManageCategories" variant="ghost" size="icon-sm" type="button" :title="adminText('k005j')" :aria-label="adminText('k005j')" @click="openEdit(item)">
+                        <Pencil class="size-4" />
+                      </Button>
+                      <Button v-if="canManageCategories" variant="ghost" size="icon-sm" type="button" class="text-destructive hover:text-destructive" :title="adminText('k005i')" :aria-label="adminText('k005i')" @click="deletingRow = item">
+                        <Trash2 class="size-4" />
+                      </Button>
+                    </template>
                   </div>
                 </TableCell>
               </TableRow>

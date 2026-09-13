@@ -318,10 +318,17 @@ onMounted(() => {
               <p v-if="config.rules.length === 0" class="text-sm text-muted-foreground">{{ adminText('k009x') }}</p>
               <div v-for="(rule, index) in config.rules" :key="index" class="flex gap-2">
                 <Input v-model="rule.content" class="border-0 bg-transparent px-2 text-sm shadow-none focus-visible:ring-1" :aria-label="adminText('k004y', { index: index + 1 })" />
-                <AdminActionButton tone="danger" @click="removeRule(index)">
-                  <Trash2 class="size-3.5" />
-                  {{ adminText('k005i') }}
-                </AdminActionButton>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  type="button"
+                  class="text-destructive hover:text-destructive"
+                  :title="adminText('k005i')"
+                  :aria-label="adminText('k005i')"
+                  @click="removeRule(index)"
+                >
+                  <Trash2 class="size-4" />
+                </Button>
               </div>
             </div>
           </div>
