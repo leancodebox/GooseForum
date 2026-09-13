@@ -14,9 +14,9 @@ pnpm --filter @gooseforum/react-app dev
 React 开发环境包含两个入口：
 
 - C 端：`http://localhost:3011/`，HTML 为根目录 `index.html`，代码位于 `src/site/`。
-- 管理后台：`http://localhost:3011/admin/`，HTML 为 `admin/index.html`，代码位于 `src/admin/`。
+- 管理后台：`http://localhost:3011/admin`，HTML 为 `admin/index.html`，代码位于 `src/admin/`。
 
-两个入口都通过 `/__goose_page/*` 代理读取对应的真实 Go 页面 payload。C 端直接打开 `/categories` 等页面时，Vite 会返回根 `index.html`；后台开发入口使用带尾斜杠的 `/admin/`。
+两个入口都通过 `/__goose_page/*` 代理读取对应的真实 Go 页面 payload。C 端直接打开 `/categories` 等页面时，Vite 会返回根 `index.html`。后台是纯 SPA；开发服务器会将 `/admin` 和所有 `/admin/*` 页面导航固定回退到 `admin/index.html`，再由后台路由接管。`admin.shell` 只作为 viewer、权限、主题等启动数据，不表示后台采用页面 SSR。
 
 如果 Go 服务使用其他地址：
 

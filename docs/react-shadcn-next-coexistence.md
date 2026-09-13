@@ -79,6 +79,7 @@ Go 客户端适配   Next 适配
 
 - 建立 React workspace、TypeScript 和构建入口。
 - 使用同一 Vite 应用的两个 HTML 入口：根 `index.html` 对应 C 端，`admin/index.html` 对应管理后台；两套源码分别位于 `src/site/` 和 `src/admin/`。
+- 管理后台保持纯 SPA 模型；开发环境中的 `/admin` 与 `/admin/*` 始终回退到后台 HTML，`admin.shell` 仅提供启动所需的用户、权限和主题数据。
 - 未检测到 Go 注入 payload 时，通过 Vite 代理读取真实 Go 页面 payload。
 - React 开发构建产物保留在新 app 自己的 `dist/`，不进入现有 `resource/static/` 或 Go `embed.FS`。
 - 初始化官方 shadcn/ui，映射现有主题 token；管理后台 shell 以官方 `dashboard-01` block 为起点，C 端按 GooseForum 的信息架构自行设计。
