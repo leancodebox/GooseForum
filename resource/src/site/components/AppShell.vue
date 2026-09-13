@@ -569,9 +569,9 @@ async function loadUserCard() {
                         <Palette class="h-4 w-4 text-icon-muted" /> {{ t('shell.themePreview') }}
                       </a>
                     </DropdownMenuItem>
-                    <DropdownMenuItem v-if="layout.viewer.canAccessAdmin" as-child class="h-9 rounded-none px-3 text-warning focus:bg-warning/10 focus:text-warning">
+                    <DropdownMenuItem v-if="layout.viewer.canAccessAdmin" as-child class="h-9 rounded-none px-3 text-base-content/75 focus:bg-base-200 focus:text-base-content">
                       <a href="/admin">
-                        <Shield class="h-4 w-4" /> {{ t('shell.admin') }}
+                        <Shield class="h-4 w-4 text-warning/80" /> {{ t('shell.admin') }}
                       </a>
                     </DropdownMenuItem>
                   </div>
