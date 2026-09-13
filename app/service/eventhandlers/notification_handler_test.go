@@ -5,21 +5,45 @@ import (
 	"testing"
 )
 
-func TestCommentNotificationExcludeUserIds(t *testing.T) {
+func TestBuildCommentNotificationPlanExcludesDirectRecipientsFromWatchers(t *testing.T) {
 	event := &CommentCreatedEvent{
 		UserId:              1,
 		TopicAuthorId:       2,
+		ReplyToPostId:       10,
+		ReplyToPostAuthorId: 3,
+	}
+
+	plan := buildCommentNotificationPlan(event)
+	if !plan.notifyTopicAuthor || !plan.notifyParentReplyAuthor {
+		t.Fatalf("direct notification plan = %#v", plan)
+	}
+	got := make(map[uint64]bool, len(plan.watcherExcludeUserIDs))
+	for _, userID := range plan.watcherExcludeUserIDs {
+		got[userID] = true
+	}
+	if len(got) != 3 || !got[1] || !got[2] || !got[3] {
+		t.Fatalf("watcher exclusions = %#v, want actor and both direct recipients", plan.watcherExcludeUserIDs)
+	}
+}
+
+func TestBuildCommentNotificationPlanDeduplicatesTopicAuthorReply(t *testing.T) {
+	event := &CommentCreatedEvent{
+		UserId:              1,
+		TopicAuthorId:       2,
+		ReplyToPostId:       10,
 		ReplyToPostAuthorId: 2,
 	}
 
-	userIds := commentNotificationExcludeUserIds(event)
-	got := make(map[uint64]bool, len(userIds))
-	for _, userId := range userIds {
-		got[userId] = true
+	plan := buildCommentNotificationPlan(event)
+	if plan.notifyTopicAuthor || !plan.notifyParentReplyAuthor {
+		t.Fatalf("direct notification plan = %#v", plan)
 	}
-
+	got := make(map[uint64]bool, len(plan.watcherExcludeUserIDs))
+	for _, userID := range plan.watcherExcludeUserIDs {
+		got[userID] = true
+	}
 	if len(got) != 2 || !got[1] || !got[2] {
-		t.Fatalf("unexpected exclude user ids: %#v", userIds)
+		t.Fatalf("watcher exclusions = %#v, want actor and reply recipient once", plan.watcherExcludeUserIDs)
 	}
 }
 

@@ -33,16 +33,51 @@ type CommentCreatedEvent struct {
 func handleCommentCreated(ctx context.Context, event *CommentCreatedEvent) error {
 	contentPreview := TakeUpTo64Chars(event.Content)
 	topic := topics.GetSimple(event.TopicId)
+	plan := buildCommentNotificationPlan(event)
 	// 如果不是主题作者自己发表评论，通知主题作者
-	if shouldNotifyTopicAuthor(event) && canReceiveTopicNotification(event.TopicAuthorId, topic) {
+	if plan.notifyTopicAuthor && canReceiveTopicNotification(event.TopicAuthorId, topic) {
 		_ = notificationservice.SendCommentNotification(event.TopicAuthorId, event.TopicId, contentPreview, event.UserId, event.PostId, event.PostNo)
 	}
 	// 如果是回复 post，且不是回复自己，通知原 post 作者
-	if shouldNotifyParentReplyAuthor(event) && canReceiveTopicNotification(event.ReplyToPostAuthorId, topic) {
+	if plan.notifyParentReplyAuthor && canReceiveTopicNotification(event.ReplyToPostAuthorId, topic) {
 		_ = notificationservice.SendPostReplyNotification(event.ReplyToPostAuthorId, event.PostId, event.PostNo, event.TopicId, contentPreview, event.UserId)
 	}
-	notifyTopicWatchers(event, topic, contentPreview)
+	notifyTopicWatchers(event, topic, contentPreview, plan.watcherExcludeUserIDs)
 	return nil
+}
+
+type commentNotificationPlan struct {
+	notifyTopicAuthor       bool
+	notifyParentReplyAuthor bool
+	watcherExcludeUserIDs   []uint64
+}
+
+// buildCommentNotificationPlan gives direct notifications priority over the
+// broader watched-topic notification. A user present in both audiences gets
+// only the more specific notification.
+func buildCommentNotificationPlan(event *CommentCreatedEvent) commentNotificationPlan {
+	plan := commentNotificationPlan{
+		notifyTopicAuthor:       shouldNotifyTopicAuthor(event),
+		notifyParentReplyAuthor: shouldNotifyParentReplyAuthor(event),
+	}
+	excludeSet := map[uint64]struct{}{}
+	add := func(userID uint64) {
+		if userID > 0 {
+			excludeSet[userID] = struct{}{}
+		}
+	}
+	add(event.UserId)
+	if plan.notifyTopicAuthor {
+		add(event.TopicAuthorId)
+	}
+	if plan.notifyParentReplyAuthor {
+		add(event.ReplyToPostAuthorId)
+	}
+	plan.watcherExcludeUserIDs = make([]uint64, 0, len(excludeSet))
+	for userID := range excludeSet {
+		plan.watcherExcludeUserIDs = append(plan.watcherExcludeUserIDs, userID)
+	}
+	return plan
 }
 
 func shouldNotifyTopicAuthor(event *CommentCreatedEvent) bool {
@@ -56,14 +91,13 @@ func shouldNotifyParentReplyAuthor(event *CommentCreatedEvent) bool {
 	return event.ReplyToPostId > 0 && event.ReplyToPostAuthorId > 0 && event.ReplyToPostAuthorId != event.UserId
 }
 
-func notifyTopicWatchers(event *CommentCreatedEvent, topic topics.Entity, contentPreview string) {
+func notifyTopicWatchers(event *CommentCreatedEvent, topic topics.Entity, contentPreview string, excludeUserIDs []uint64) {
 	if topic.Id == 0 || topic.Status != 1 || topic.ProcessStatus != 0 {
 		return
 	}
-	excludeUserIds := commentNotificationExcludeUserIds(event)
 	afterUserId := uint64(0)
 	for {
-		userIds := topicUserAction.ListActiveWatchUserIDsAfter(event.TopicId, afterUserId, excludeUserIds, topicWatchNotifyBatchSize)
+		userIds := topicUserAction.ListActiveWatchUserIDsAfter(event.TopicId, afterUserId, excludeUserIDs, topicWatchNotifyBatchSize)
 		if len(userIds) == 0 {
 			return
 		}
@@ -85,24 +119,6 @@ func canReceiveTopicNotification(userID uint64, topic topics.Entity) bool {
 	}
 	snapshot, err := accesscontrol.Resolve(userID)
 	return err == nil && snapshot.CanReadCategory(topic.MainCategoryId)
-}
-
-func commentNotificationExcludeUserIds(event *CommentCreatedEvent) []uint64 {
-	excludeSet := map[uint64]struct{}{}
-	add := func(userId uint64) {
-		if userId > 0 {
-			excludeSet[userId] = struct{}{}
-		}
-	}
-	add(event.UserId)
-	add(event.TopicAuthorId)
-	add(event.ReplyToPostAuthorId)
-
-	userIds := make([]uint64, 0, len(excludeSet))
-	for userId := range excludeSet {
-		userIds = append(userIds, userId)
-	}
-	return userIds
 }
 
 // UserFollowedEvent 用户关注事件
