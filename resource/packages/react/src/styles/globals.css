@@ -1,0 +1,104 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "../../../../src/styles/tokens.css";
+
+@custom-variant dark (&:where([data-theme="gf-dark"], [data-theme="gf-dark"] *));
+@source "../../../../apps/react/src/**/*.{ts,tsx}";
+@source "../**/*.{ts,tsx}";
+
+:root {
+  --radius: var(--gf-radius-box);
+  --background: var(--gf-color-base-100);
+  --foreground: var(--gf-color-base-content);
+  --card: var(--gf-color-base-100);
+  --card-foreground: var(--gf-color-base-content);
+  --popover: var(--gf-color-base-100);
+  --popover-foreground: var(--gf-color-base-content);
+  --primary: var(--gf-color-primary);
+  --primary-foreground: var(--gf-color-primary-content);
+  --secondary: var(--gf-color-secondary);
+  --secondary-foreground: var(--gf-color-secondary-content);
+  --muted: var(--gf-color-base-200);
+  --muted-foreground: color-mix(in oklch, var(--gf-color-base-content) 58%, transparent);
+  --accent: var(--gf-color-base-300);
+  --accent-foreground: var(--gf-color-base-content);
+  --destructive: var(--gf-color-error);
+  --border: var(--gf-color-line);
+  --input: var(--gf-color-line);
+  --ring: var(--gf-color-primary);
+  --chart-1: var(--gf-color-primary);
+  --chart-2: var(--gf-color-accent);
+  --chart-3: var(--gf-color-info);
+  --chart-4: var(--gf-color-warning);
+  --chart-5: var(--gf-color-success);
+  --sidebar: var(--gf-color-base-200);
+  --sidebar-foreground: var(--gf-color-base-content);
+  --sidebar-primary: var(--gf-color-primary);
+  --sidebar-primary-foreground: var(--gf-color-primary-content);
+  --sidebar-accent: var(--gf-color-base-300);
+  --sidebar-accent-foreground: var(--gf-color-base-content);
+  --sidebar-border: var(--gf-color-line);
+  --sidebar-ring: var(--gf-color-primary);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    min-width: 320px;
+    background: var(--background);
+  }
+
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+}

@@ -31,7 +31,7 @@ resource/
 │   ├── client/             现有框架无关 payload、API 与浏览器协议
 │   └── react/              React 业务组件、hooks、shadcn/ui 与宿主适配接口
 ├── apps/
-│   ├── client/             Go SSR/payload 的 React 浏览器端适配
+│   ├── react/              带 index.html 的 Vite 开发入口和 Go payload 适配
 │   └── next/               可选 Next App Router 适配与服务端入口
 ├── templates/              长期保留的 Go HTML/SEO/no-js 模板
 └── static/                 Go 模式使用的浏览器端构建产物
@@ -78,6 +78,8 @@ Go 客户端适配   Next 适配
 ### 阶段一：React 基础设施
 
 - 建立 React workspace、TypeScript 和构建入口。
+- 保留独立 `index.html` 作为开发壳；未检测到 Go 注入 payload 时，通过 Vite 代理读取真实 Go 页面 payload。
+- React 开发构建产物保留在新 app 自己的 `dist/`，不进入现有 `resource/static/` 或 Go `embed.FS`。
 - 初始化官方 shadcn/ui，映射现有主题 token。
 - 建立 Go payload、导航、i18n、主题和 flash message 的 React 适配。
 - 保持现有 Go 模板与 `X-Goose-Page` 协议。
@@ -194,4 +196,3 @@ routes = []
 - Next 启动失败时的默认策略。
 - Next 内部回源使用独立 loopback endpoint 还是受保护的内部请求头。
 - Next 缓存、个性化 payload 和多实例部署策略。
-
