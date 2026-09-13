@@ -828,7 +828,7 @@ function hexToRgb(value: string) {
               <h3 class="text-sm font-semibold text-base-content">Search</h3>
               <label class="mt-3 flex h-9 items-center gap-2 rounded-md border border-line bg-base-200 px-3 text-sm text-base-content/55 transition focus-within:border-primary focus-within:bg-base-100 focus-within:ring-4 focus-within:ring-primary/20">
                 <Search class="h-4 w-4" />
-                <input class="min-w-0 flex-1 bg-transparent text-base-content outline-none" value="theme preview" />
+                <Input model-value="theme preview" readonly class="min-w-0 flex-1 border-0 bg-transparent px-0 text-base-content shadow-none focus-visible:ring-0 dark:bg-transparent" />
               </label>
             </section>
             <section class="gf-panel p-3">

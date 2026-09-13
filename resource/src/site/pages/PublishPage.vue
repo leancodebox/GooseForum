@@ -555,10 +555,10 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
           <div class="space-y-5">
             <label class="block">
               <span class="text-sm font-semibold text-base-content/75">{{ t('publish.fields.title') }}</span>
-              <input
+              <Input
                 ref="titleInput"
                 v-model="title"
-                class="mt-1 h-11 w-full rounded-md border border-line px-3 text-lg font-semibold outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/20"
+                class="mt-1 h-11 rounded-md border-line px-3 text-lg font-semibold text-base-content shadow-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20"
                 :placeholder="t('publish.titlePlaceholder')"
               />
             </label>
