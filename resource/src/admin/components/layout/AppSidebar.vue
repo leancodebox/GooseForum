@@ -208,7 +208,7 @@ function isActive(item: NavItem) {
               as-child
               :is-active="isActive(item)"
               :tooltip="item.title"
-              class="h-8 rounded-lg px-2 text-[13px] font-medium data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:shadow-xs"
+              class="h-8 rounded-md px-2 text-[13px] font-medium text-base-content/75 hover:bg-base-300 hover:text-base-content data-[active=true]:border-transparent data-[active=true]:bg-info/10 data-[active=true]:text-primary data-[active=true]:shadow-none data-[active=true]:hover:bg-info/10 data-[active=true]:hover:text-primary"
             >
               <a v-if="item.external" :href="item.url" target="_blank" rel="noopener noreferrer">
                 <component :is="item.icon" />
