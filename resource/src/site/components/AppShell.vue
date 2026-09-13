@@ -34,6 +34,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
+import {
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar'
 import GlobalFlash from './GlobalFlash.vue'
 import { setLocale, supportedLocales, type Locale } from '@/runtime/i18n'
 import { useSiteTheme } from '@/runtime/site-theme'
@@ -593,117 +601,145 @@ async function loadUserCard() {
       class="gf-shell-main mx-auto grid w-full max-w-[1600px] grid-cols-1 gap-0 px-0 py-0 sm:gap-3 sm:px-5 sm:py-3 lg:grid-cols-[210px_minmax(0,1fr)] lg:px-8 xl:grid-cols-[224px_minmax(0,1fr)]"
       :class="{ 'xl:grid-cols-[224px_minmax(0,1fr)_280px]': rail }"
     >
-      <aside class="gf-scrollbar-none sticky top-16 -my-3 hidden h-[calc(100vh-4rem)] overflow-y-auto self-start lg:block" aria-label="Sidebar">
-        <nav class="py-3">
-          <div class="pb-2">
-            <div class="space-y-0.5">
-              <a
-                v-for="item in primaryItems"
-                :key="item.key"
-                :href="item.url"
-                class="flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors duration-150"
-                :class="item.active ? 'bg-info/10 text-primary' : 'text-base-content/75 hover:bg-base-300 hover:text-base-content'"
-              >
-                <component
-                  :is="navIcon(item)"
-                  v-if="navIcon(item)"
-                  class="h-4 w-4 shrink-0"
-                  aria-hidden="true"
-                />
-                <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
-                <span
-                  v-if="(item.key === 'messages' && hasUnreadMessage) || (item.key === 'notifications' && hasUnreadNotification) || (item.key === 'moderation' && hasModerationReports)"
-                  class="h-2 w-2 shrink-0 rounded-full bg-error/100"
-                  aria-hidden="true"
-                />
-              </a>
-            </div>
+      <aside class="sticky top-16 -my-3 hidden h-[calc(100vh-4rem)] min-w-0 self-start lg:flex" aria-label="Sidebar">
+        <SidebarContent class="gf-scrollbar-none gap-0 px-1 py-3">
+          <nav>
+            <SidebarGroup class="p-0 pb-2">
+              <SidebarGroupContent>
+                <SidebarMenu class="gap-0.5">
+                  <SidebarMenuItem v-for="item in primaryItems" :key="item.key">
+                    <Button
+                      as-child
+                      variant="muted"
+                      class="h-8 w-full justify-start gap-2 rounded-md px-2 text-[13px] font-medium focus-visible:ring-2"
+                      :class="item.active ? 'bg-info/10 text-primary hover:bg-info/10 hover:text-primary' : 'text-base-content/75'"
+                    >
+                      <a :href="item.url" :aria-current="item.active ? 'page' : undefined">
+                        <component
+                          :is="navIcon(item)"
+                          v-if="navIcon(item)"
+                          class="h-4 w-4 shrink-0"
+                          aria-hidden="true"
+                        />
+                        <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+                        <span
+                          v-if="(item.key === 'messages' && hasUnreadMessage) || (item.key === 'notifications' && hasUnreadNotification) || (item.key === 'moderation' && hasModerationReports)"
+                          class="h-2 w-2 shrink-0 rounded-full bg-error/100"
+                          aria-hidden="true"
+                        />
+                      </a>
+                    </Button>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
 
-            <div v-if="resourceItems.length" class="mt-2">
-              <div class="mb-1 px-2 text-[10px] font-bold uppercase tracking-wide text-base-content/55">{{ t('shell.resources') }}</div>
-              <div class="space-y-px">
-                <a
-                  v-for="item in resourceItems"
-                  :key="item.key"
-                  :href="item.url"
-                  class="flex h-7 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors duration-150"
-                  :class="item.active ? 'bg-info/10 text-primary' : 'text-base-content/75 hover:bg-base-300 hover:text-base-content'"
-                >
-                  <component
-                    :is="navIcon(item)"
-                    v-if="navIcon(item)"
-                    class="h-4 w-4 shrink-0"
-                    aria-hidden="true"
-                  />
-                  <span class="truncate">{{ item.label }}</span>
-                </a>
-              </div>
-            </div>
+            <SidebarGroup v-if="resourceItems.length" class="mt-2 p-0">
+              <SidebarGroupLabel as="div" class="mb-1 h-auto min-h-0 px-2 py-0 text-[10px] font-bold uppercase tracking-wide text-base-content/55">
+                {{ t('shell.resources') }}
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu class="gap-px">
+                  <SidebarMenuItem v-for="item in resourceItems" :key="item.key">
+                    <Button
+                      as-child
+                      variant="muted"
+                      class="h-7 w-full justify-start gap-2 rounded-md px-2 text-[13px] font-medium focus-visible:ring-2"
+                      :class="item.active ? 'bg-info/10 text-primary hover:bg-info/10 hover:text-primary' : 'text-base-content/75'"
+                    >
+                      <a :href="item.url" :aria-current="item.active ? 'page' : undefined">
+                        <component
+                          :is="navIcon(item)"
+                          v-if="navIcon(item)"
+                          class="h-4 w-4 shrink-0"
+                          aria-hidden="true"
+                        />
+                        <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+                      </a>
+                    </Button>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
 
-            <div
+            <SidebarGroup
               v-for="group in sidebarGroups"
               :key="group.key"
-              class="mt-2"
+              class="mt-2 p-0"
             >
-              <div class="mb-1 px-2 text-[10px] font-bold uppercase tracking-wide text-base-content/55">{{ group.title }}</div>
-              <div class="space-y-px">
+              <SidebarGroupLabel as="div" class="mb-1 h-auto min-h-0 px-2 py-0 text-[10px] font-bold uppercase tracking-wide text-base-content/55">
+                {{ group.title }}
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu class="gap-px">
+                  <SidebarMenuItem v-for="item in group.items" :key="item.key">
+                    <Button
+                      as-child
+                      variant="muted"
+                      class="h-7 w-full justify-start gap-2 rounded-md px-2 text-[13px] font-medium focus-visible:ring-2"
+                      :class="item.active ? 'bg-info/10 text-primary hover:bg-info/10 hover:text-primary' : 'text-base-content/75'"
+                    >
+                      <a :href="item.url" :aria-current="item.active ? 'page' : undefined">
+                        <component
+                          :is="navIcon(item)"
+                          v-if="navIcon(item)"
+                          class="h-4 w-4 shrink-0"
+                          aria-hidden="true"
+                        />
+                        <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+                      </a>
+                    </Button>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup v-if="categoryItems.length" class="mt-2 p-0">
+              <SidebarGroupLabel as="div" class="mb-1 h-auto min-h-0 px-2 py-0 text-[10px] font-bold uppercase tracking-wide text-base-content/55">
+                {{ t('shell.categories') }}
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu class="gap-px">
+                  <SidebarMenuItem v-for="category in categoryItems" :key="category.key">
+                    <Button
+                      as-child
+                      variant="muted"
+                      class="h-7 w-full justify-start gap-2 rounded-md px-2 text-[13px] font-medium focus-visible:ring-2"
+                      :class="category.active ? 'bg-base-300 text-base-content hover:bg-base-300 hover:text-base-content' : 'text-base-content/75'"
+                    >
+                      <a :href="category.url" :aria-current="category.active ? 'page' : undefined">
+                        <span class="h-2 w-2 shrink-0 rounded-[3px]" :style="{ backgroundColor: category.color }" />
+                        <span class="min-w-0 flex-1 truncate">{{ category.label }}</span>
+                      </a>
+                    </Button>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <footer v-if="hasFooter" class="mt-0 px-2 pt-0.5 text-xs leading-5 text-base-content/75">
+              <div v-if="footerLinks.length" class="flex flex-wrap items-center gap-x-3 gap-y-0.5">
                 <a
-                  v-for="item in group.items"
-                  :key="item.key"
-                  :href="item.url"
-                  class="flex h-7 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors duration-150"
-                  :class="item.active ? 'bg-info/10 text-primary' : 'text-base-content/75 hover:bg-base-300 hover:text-base-content'"
+                  v-for="link in footerLinks"
+                  :key="`${link.name}-${link.url}`"
+                  :href="link.url"
+                  class="inline-flex min-h-5 items-center rounded hover:text-primary"
                 >
-                  <component
-                    :is="navIcon(item)"
-                    v-if="navIcon(item)"
-                    class="h-4 w-4 shrink-0"
-                    aria-hidden="true"
-                  />
-                  <span class="truncate">{{ item.label }}</span>
+                  {{ link.name }}
                 </a>
               </div>
-            </div>
-
-            <div v-if="categoryItems.length" class="mt-2">
-              <div class="mb-1 px-2 text-[10px] font-bold uppercase tracking-wide text-base-content/55">{{ t('shell.categories') }}</div>
-              <div class="space-y-px">
-                <a
-                  v-for="category in categoryItems"
-                  :key="category.key"
-                  :href="category.url"
-                  class="flex h-7 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors duration-150"
-                  :class="category.active ? 'bg-base-300 text-base-content' : 'text-base-content/75 hover:bg-base-300 hover:text-base-content'"
+              <div v-if="footerPrimary.length" class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-base-content/75">
+                <span
+                  v-for="item in footerPrimary"
+                  :key="item"
+                  class="inline-flex min-h-5 items-center rounded"
                 >
-                  <span class="h-2 w-2 rounded-[3px]" :style="{ backgroundColor: category.color }" />
-                  <span class="truncate">{{ category.label }}</span>
-                </a>
+                  {{ item }}
+                </span>
               </div>
-            </div>
-          </div>
-
-          <footer v-if="hasFooter" class="mt-0 px-2 pt-0.5 text-xs leading-5 text-base-content/75">
-            <div v-if="footerLinks.length" class="flex flex-wrap items-center gap-x-3 gap-y-0.5">
-              <a
-                v-for="link in footerLinks"
-                :key="`${link.name}-${link.url}`"
-                :href="link.url"
-                class="inline-flex min-h-5 items-center rounded hover:text-primary"
-              >
-                {{ link.name }}
-              </a>
-            </div>
-            <div v-if="footerPrimary.length" class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-base-content/75">
-              <span
-                v-for="item in footerPrimary"
-                :key="item"
-                class="inline-flex min-h-5 items-center rounded"
-              >
-                {{ item }}
-              </span>
-            </div>
-          </footer>
-        </nav>
+            </footer>
+          </nav>
+        </SidebarContent>
       </aside>
 
       <section class="gf-shell-content min-w-0">
