@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
   Bell,
   FileText,
@@ -48,9 +48,7 @@ import { useSiteTheme } from '@/runtime/site-theme'
 import { useNavigationState } from '@/runtime/navigation-state'
 import { useUnreadStatus } from '@/runtime/unread-status'
 import { createGooseClient, type LayoutPayload } from '@gooseforum/client'
-import type { UserCardShowDetail } from '@/runtime/user-card-events'
 import UserAvatar from './UserAvatar.vue'
-import type UserCardComponent from './UserCard.vue'
 
 const client = createGooseClient()
 
@@ -83,7 +81,6 @@ interface SidebarGroupItem {
 }
 
 const MobileDrawer = defineAsyncComponent(() => import('./MobileDrawer.vue'))
-const UserCard = shallowRef<typeof UserCardComponent | null>(null)
 const drawerOpen = ref(false)
 const headerElevated = ref(false)
 const langMenuOpen = ref(false)
@@ -177,8 +174,6 @@ const sidebarIconMap = {
   links: Link,
   sponsors: Heart,
 } as const
-let userCardLoading: Promise<void> | undefined
-
 watch(
   () => props.layout.sidebar.activeKey,
   () => {
@@ -194,12 +189,10 @@ onMounted(() => {
   }
   updateHeaderElevated()
   window.addEventListener('scroll', updateHeaderElevated, { passive: true })
-  window.addEventListener('goose:user-card-show', ensureUserCardForEvent)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateHeaderElevated)
-  window.removeEventListener('goose:user-card-show', ensureUserCardForEvent)
   window.clearTimeout(closeTimers.lang)
   window.clearTimeout(closeTimers.user)
 })
@@ -289,29 +282,6 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
   }, 120)
 }
 
-function ensureUserCardForEvent(event: Event) {
-  if (UserCard.value) return
-  const detail = (event as CustomEvent<UserCardShowDetail>).detail
-  if (!detail?.user?.id || !detail.target) return
-  void loadUserCard().then(async () => {
-    await nextTick()
-    window.dispatchEvent(new CustomEvent<UserCardShowDetail>('goose:user-card-show', { detail }))
-  })
-}
-
-async function loadUserCard() {
-  if (UserCard.value) return
-  if (!userCardLoading) {
-    userCardLoading = import('./UserCard.vue')
-      .then((module) => {
-        UserCard.value = module.default
-      })
-      .finally(() => {
-        userCardLoading = undefined
-      })
-  }
-  await userCardLoading
-}
 </script>
 
 <template>
@@ -774,7 +744,5 @@ async function loadUserCard() {
       :sidebar-icon="navIcon"
       @close="closeDrawer"
     />
-
-    <component :is="UserCard" v-if="UserCard" />
   </div>
 </template>

@@ -25,7 +25,6 @@ import { formatDateTime, formatNumber } from '@/runtime/format'
 import { useFlashMessages } from '@/runtime/flash-message'
 import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
-import { showUserCard } from '@/runtime/user-card-events'
 import { measurePostViewportProgressFromRects } from '@/runtime/post-viewport-progress'
 import { vContentEnhancements } from '@/runtime/content-enhancements'
 import MarkdownImageViewer from '@/site/components/MarkdownImageViewer.vue'
@@ -36,6 +35,7 @@ import { postURL } from '@/runtime/post-url'
 import TopicFloatingControls from '@/site/components/TopicFloatingControls.vue'
 import TopicList from '@/site/components/TopicList.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
+import UserCardPopover from '@/site/components/UserCardPopover.vue'
 import type { TopicDetailProps, LayoutPayload, PostPayload, ReplyTargetPayload } from '@gooseforum/client'
 import { useI18n } from 'vue-i18n'
 
@@ -1516,14 +1516,15 @@ async function removePost(postId: number) {
       <header ref="topicHeaderEl" class="relative z-10 border-b border-line/70 px-4 py-4 sm:mb-4 sm:px-0 sm:pb-4 sm:pt-0 xl:w-[calc(100%+292px)]">
         <h1 id="topic-title" ref="titleEl" class="break-words text-2xl font-bold leading-tight text-base-content [overflow-wrap:anywhere] sm:text-3xl">{{ page.props.topic.title }}</h1>
         <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-base-content/55">
-          <a
-            :href="`/u/${page.props.topic.author.id}`"
-            class="inline-flex items-center gap-2 font-medium text-base-content/75 hover:text-primary"
-            @click="showUserCard(page.props.topic.author, $event)"
-          >
-            <UserAvatar :src="page.props.topic.author.avatarUrl" :alt="page.props.topic.author.username" class="h-5 w-5 rounded-full object-cover" />
-            {{ page.props.topic.author.username }}
-          </a>
+          <UserCardPopover :user="page.props.topic.author">
+            <a
+              :href="`/u/${page.props.topic.author.id}`"
+              class="inline-flex items-center gap-2 font-medium text-base-content/75 hover:text-primary"
+            >
+              <UserAvatar :src="page.props.topic.author.avatarUrl" :alt="page.props.topic.author.username" class="h-5 w-5 rounded-full object-cover" />
+              {{ page.props.topic.author.username }}
+            </a>
+          </UserCardPopover>
           <time :datetime="page.props.topic.createdAt" class="inline-flex items-center gap-1.5">
             <Clock class="h-3.5 w-3.5" />
             {{ formatDateTime(page.props.topic.createdAt) }}
@@ -1582,13 +1583,14 @@ async function removePost(postId: number) {
               '[border-top-left-radius:calc(var(--gf-radius-box)-var(--gf-border))] [border-top-right-radius:calc(var(--gf-radius-box)-var(--gf-border))]': index === 0 && !postHasBefore,
             }"
           >
-            <a
-              :href="`/u/${post.author.id}`"
-              class="sticky top-19 self-start pt-1"
-              @click="showUserCard(post.author, $event)"
-            >
-              <UserAvatar :src="post.author.avatarUrl" :alt="post.author.username" :badge="post.author.wornBadge" class="h-9 w-9 rounded-full ring-1 ring-line sm:h-10 sm:w-10" img-class="rounded-full" />
-            </a>
+            <UserCardPopover :user="post.author">
+              <a
+                :href="`/u/${post.author.id}`"
+                class="sticky top-19 self-start pt-1"
+              >
+                <UserAvatar :src="post.author.avatarUrl" :alt="post.author.username" :badge="post.author.wornBadge" class="h-9 w-9 rounded-full ring-1 ring-line sm:h-10 sm:w-10" img-class="rounded-full" />
+              </a>
+            </UserCardPopover>
             <div class="min-w-0">
               <PostHeader :post="post" :first="isFirstPost(post)" :permalink="postURL(page.props.topic.id, post.postNo)">
                 <Button
@@ -1815,15 +1817,15 @@ async function removePost(postId: number) {
             <div v-if="page.props.topic.participants.length" class="border-t border-line px-4 py-4">
               <h3 class="mb-3 text-sm font-semibold text-base-content/55">{{ t('topic.activeParticipants') }}</h3>
               <div class="flex flex-wrap gap-1.5">
-                <a
+                <UserCardPopover
                   v-for="participant in page.props.topic.participants"
                   :key="participant.id"
-                  :href="`/u/${participant.id}`"
-                  class="rounded-full"
-                  @click="showUserCard(participant, $event)"
+                  :user="participant"
                 >
-                  <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover ring-1 ring-line transition hover:ring-primary/40" />
-                </a>
+                  <a :href="`/u/${participant.id}`" class="rounded-full">
+                    <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover ring-1 ring-line transition hover:ring-primary/40" />
+                  </a>
+                </UserCardPopover>
               </div>
             </div>
 

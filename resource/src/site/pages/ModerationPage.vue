@@ -7,11 +7,11 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { fetchModerationLogs, fetchModerationReports, updateModerationTopicStatus, updateModerationPostStatus, updateModerationReportStatus } from '@/runtime/api'
 import { formatDateTime } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
-import { showUserCard } from '@/runtime/user-card-events'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
 import TopicList from '@/site/components/TopicList.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
+import UserCardPopover from '@/site/components/UserCardPopover.vue'
 import type { LayoutPayload, ModerationLogItem, ModerationPageProps, ModerationReportItem, PagePayload, TopicPayload } from '@gooseforum/client'
 
 const page = defineProps<{
@@ -309,25 +309,26 @@ function reportResolutionLabel(item: ModerationReportItem) {
                   <span class="h-2 w-2 rounded-[3px]" :style="{ backgroundColor: category.color }" />
                   {{ category.name }}
                 </span>
-                <a
-                  :href="`/u/${item.reporter.id}`"
-                  class="inline-flex min-w-0 items-center gap-1.5 hover:text-primary lg:hidden"
-                  @click="showUserCard(item.reporter, $event)"
-                >
-                  <UserAvatar :src="item.reporter.avatarUrl" alt="" class="h-4 w-4 rounded-full object-cover ring-1 ring-line" />
-                  <span class="shrink-0">{{ t('moderation.reports.reporterLabel') }}</span>
-                  <span class="max-w-28 truncate font-medium text-base-content/65">{{ item.reporter.username }}</span>
-                </a>
-                <a
+                <UserCardPopover :user="item.reporter">
+                  <a
+                    :href="`/u/${item.reporter.id}`"
+                    class="inline-flex min-w-0 items-center gap-1.5 hover:text-primary lg:hidden"
+                  >
+                    <UserAvatar :src="item.reporter.avatarUrl" alt="" class="h-4 w-4 rounded-full object-cover ring-1 ring-line" />
+                    <span class="shrink-0">{{ t('moderation.reports.reporterLabel') }}</span>
+                    <span class="max-w-28 truncate font-medium text-base-content/65">{{ item.reporter.username }}</span>
+                  </a>
+                </UserCardPopover>
+                <UserCardPopover
                   v-if="reportStatus === 'closed' && item.handler.id"
-                  :href="`/u/${item.handler.id}`"
-                  class="inline-flex min-w-0 items-center gap-1.5 hover:text-primary lg:hidden"
-                  @click="showUserCard(item.handler, $event)"
+                  :user="item.handler"
                 >
-                  <UserAvatar :src="item.handler.avatarUrl" alt="" class="h-4 w-4 rounded-full object-cover ring-1 ring-line" />
-                  <span class="shrink-0">{{ t('moderation.reports.handlerLabel') }}</span>
-                  <span class="max-w-28 truncate font-medium text-base-content/65">{{ item.handler.username }}</span>
-                </a>
+                  <a :href="`/u/${item.handler.id}`" class="inline-flex min-w-0 items-center gap-1.5 hover:text-primary lg:hidden">
+                    <UserAvatar :src="item.handler.avatarUrl" alt="" class="h-4 w-4 rounded-full object-cover ring-1 ring-line" />
+                    <span class="shrink-0">{{ t('moderation.reports.handlerLabel') }}</span>
+                    <span class="max-w-28 truncate font-medium text-base-content/65">{{ item.handler.username }}</span>
+                  </a>
+                </UserCardPopover>
               </div>
               <time class="mt-1 block text-xs text-base-content/55 lg:hidden">{{ formatDateTime(reportStatus === 'closed' && item.handledAt ? item.handledAt : item.createdAt) }}</time>
             </div>
@@ -342,25 +343,23 @@ function reportResolutionLabel(item: ModerationReportItem) {
               </div>
             </div>
             <div class="hidden min-w-0 space-y-1 text-[13px] text-base-content/55 lg:block">
-              <a
-                :href="`/u/${item.reporter.id}`"
-                class="flex min-w-0 items-center gap-1.5 hover:text-primary"
-                @click="showUserCard(item.reporter, $event)"
-              >
-                <UserAvatar :src="item.reporter.avatarUrl" alt="" class="h-5 w-5 rounded-full object-cover ring-1 ring-line" />
-                <span class="shrink-0">{{ t('moderation.reports.reporterLabel') }}</span>
-                <span class="min-w-0 truncate font-medium text-base-content/65">{{ item.reporter.username }}</span>
-              </a>
-              <a
+              <UserCardPopover :user="item.reporter">
+                <a :href="`/u/${item.reporter.id}`" class="flex min-w-0 items-center gap-1.5 hover:text-primary">
+                  <UserAvatar :src="item.reporter.avatarUrl" alt="" class="h-5 w-5 rounded-full object-cover ring-1 ring-line" />
+                  <span class="shrink-0">{{ t('moderation.reports.reporterLabel') }}</span>
+                  <span class="min-w-0 truncate font-medium text-base-content/65">{{ item.reporter.username }}</span>
+                </a>
+              </UserCardPopover>
+              <UserCardPopover
                 v-if="reportStatus === 'closed' && item.handler.id"
-                :href="`/u/${item.handler.id}`"
-                class="flex min-w-0 items-center gap-1.5 hover:text-primary"
-                @click="showUserCard(item.handler, $event)"
+                :user="item.handler"
               >
-                <UserAvatar :src="item.handler.avatarUrl" alt="" class="h-5 w-5 rounded-full object-cover ring-1 ring-line" />
-                <span class="shrink-0">{{ t('moderation.reports.handlerLabel') }}</span>
-                <span class="min-w-0 truncate font-medium text-base-content/65">{{ item.handler.username }}</span>
-              </a>
+                <a :href="`/u/${item.handler.id}`" class="flex min-w-0 items-center gap-1.5 hover:text-primary">
+                  <UserAvatar :src="item.handler.avatarUrl" alt="" class="h-5 w-5 rounded-full object-cover ring-1 ring-line" />
+                  <span class="shrink-0">{{ t('moderation.reports.handlerLabel') }}</span>
+                  <span class="min-w-0 truncate font-medium text-base-content/65">{{ item.handler.username }}</span>
+                </a>
+              </UserCardPopover>
             </div>
             <div class="col-start-2 mt-1 flex flex-wrap items-center justify-start gap-2 lg:col-start-auto lg:mt-0 lg:block lg:text-right">
               <div class="space-y-0.5 text-xs tabular-nums text-base-content/55">

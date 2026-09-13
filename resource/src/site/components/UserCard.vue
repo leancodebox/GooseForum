@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   Bird,
@@ -11,31 +11,30 @@ import {
 } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Popover, PopoverContent } from '@/components/ui/popover'
+import { PopoverContent } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { getUserCard } from '@/runtime/api'
 import { formatDate, formatNumber, timeAgo } from '@/runtime/format'
-import type { UserCardShowDetail } from '@/runtime/user-card-events'
+import { userCardCache, type UserCardSide, type UserCardTarget } from '@/runtime/user-card'
 import type { UserCardPayload } from '@gooseforum/client'
 import { socialIcons, socialLabels, type SimpleIcon } from '@/site/utils/social-icons'
 import { badgeClass, badgeIconURL, badgeTooltip } from '@/site/utils/badge-style'
 import UserAvatar from './UserAvatar.vue'
 
 const { t } = useI18n()
-const visible = ref(false)
-const loading = ref(false)
+const props = defineProps<{
+  user: UserCardTarget
+  side: UserCardSide
+}>()
+const loading = ref(true)
 const error = ref('')
-const fallbackUser = ref<UserCardShowDetail['user'] | null>(null)
 const card = ref<UserCardPayload | null>(null)
-const anchorTarget = ref<HTMLElement | undefined>(undefined)
-const cache = new Map<number, UserCardPayload>()
-let requestToken = 0
 
-const displayName = computed(() => card.value?.nickname || fallbackUser.value?.username || card.value?.username || '')
-const username = computed(() => card.value?.username || fallbackUser.value?.username || '')
-const avatarUrl = computed(() => card.value?.avatarUrl || fallbackUser.value?.avatarUrl || '')
-const wornBadge = computed(() => card.value?.wornBadge || fallbackUser.value?.wornBadge || null)
-const profileUrl = computed(() => `/u/${card.value?.userId || fallbackUser.value?.id || 0}`)
+const displayName = computed(() => card.value?.nickname || props.user.username || card.value?.username || '')
+const username = computed(() => card.value?.username || props.user.username || '')
+const avatarUrl = computed(() => card.value?.avatarUrl || props.user.avatarUrl || '')
+const wornBadge = computed(() => card.value?.wornBadge || props.user.wornBadge || null)
+const profileUrl = computed(() => `/u/${card.value?.userId || props.user.id}`)
 const bioText = computed(() => card.value?.bio || card.value?.signature || '')
 const externalLinks = computed(() => {
   const links: Array<{ key: string; label: string; url: string; icon?: SimpleIcon }> = []
@@ -68,69 +67,43 @@ function formatLinkLabel(url: string) {
   return url.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/$/, '')
 }
 
-function hideNow() {
-  visible.value = false
-  anchorTarget.value = undefined
-}
-
-async function show(event: Event) {
-  const detail = (event as CustomEvent<UserCardShowDetail>).detail
-  if (!detail?.user?.id || !detail.target) return
-
-  fallbackUser.value = detail.user
-  anchorTarget.value = detail.target
-  visible.value = true
+async function loadCard() {
   error.value = ''
-
-  const cached = cache.get(detail.user.id)
+  const cached = userCardCache.get(props.user.id)
   if (cached) {
     card.value = cached
     loading.value = false
     return
   }
 
-  const token = ++requestToken
   loading.value = true
   card.value = null
   try {
-    const result = await getUserCard(detail.user.id)
-    if (token !== requestToken) return
-    cache.set(detail.user.id, result)
+    const result = await getUserCard(props.user.id)
+    userCardCache.set(props.user.id, result)
     card.value = result
   } catch {
-    if (token !== requestToken) return
     error.value = t('userCard.unavailable')
   } finally {
-    if (token === requestToken) loading.value = false
+    loading.value = false
   }
 }
 
-function onOpenChange(open: boolean) {
-  if (!open) hideNow()
-}
-
 onMounted(() => {
-  window.addEventListener('goose:user-card-show', show)
-  window.addEventListener('goose:page', hideNow)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('goose:user-card-show', show)
-  window.removeEventListener('goose:page', hideNow)
+  void loadCard()
 })
 
 </script>
 
 <template>
-  <Popover :open="visible" @update:open="onOpenChange">
-    <PopoverContent
-      :reference="anchorTarget"
-      :side-offset="10"
-      :collision-padding="12"
-      :aria-label="displayName"
-      class="w-[min(20rem,calc(100vw-1.5rem))] p-3"
-      @focusoutside.prevent
-    >
+  <PopoverContent
+    :side="side"
+    :side-flip="false"
+    :side-offset="10"
+    :collision-padding="12"
+    :aria-label="displayName"
+    class="max-h-[var(--reka-popover-content-available-height)] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto border-line bg-base-100 p-3 text-base-content"
+  >
       <div class="flex items-start gap-3">
         <a :href="profileUrl" class="shrink-0 rounded-full ring-2 ring-base-100">
           <UserAvatar :src="avatarUrl" :alt="username" :badge="wornBadge" size="medium" class="h-14 w-14 rounded-full ring-1 ring-line" img-class="rounded-full" />
@@ -262,6 +235,5 @@ onBeforeUnmount(() => {
         </div>
           </div>
         </Transition>
-    </PopoverContent>
-  </Popover>
+  </PopoverContent>
 </template>
