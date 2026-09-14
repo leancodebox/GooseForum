@@ -17,6 +17,37 @@
   .avatar-crop-workspace cropper-selection {
     outline: 1px solid color-mix(in oklab, var(--primary) 75%, transparent);
   }
+
+  .gf-prose {
+    color: color-mix(in oklch, var(--foreground) 84%, transparent);
+    line-height: 1.7;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .gf-prose > :first-child { margin-top: 0; }
+  .gf-prose > :last-child { margin-bottom: 0; }
+  .gf-prose :where(p, ul, ol, blockquote, pre, table) { margin-block: 0.5rem; }
+  .gf-prose :where(ul, ol) { padding-left: 1.4rem; }
+  .gf-prose ul { list-style: disc; }
+  .gf-prose ol { list-style: decimal; }
+  .gf-prose :where(h1, h2, h3, h4, h5, h6) { margin-block: 1.1em 0.4em; color: var(--foreground); font-weight: 700; line-height: 1.25; }
+  .gf-prose h1 { font-size: 1.75rem; }
+  .gf-prose h2 { font-size: 1.45rem; }
+  .gf-prose h3 { font-size: 1.2rem; }
+  .gf-prose a { color: var(--primary); font-weight: 500; }
+  .gf-prose blockquote { border-left: 4px solid var(--border); background: color-mix(in oklch, var(--muted) 70%, transparent); padding: 0.25rem 0.75rem; }
+  .gf-prose :not(pre) > code { border-radius: 0.25rem; background: var(--muted); padding: 0.1rem 0.3rem; color: var(--destructive); }
+  .gf-prose pre { max-width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--muted); padding: 0.75rem; }
+  .gf-prose pre code { white-space: pre; }
+  .gf-prose table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; }
+  .gf-prose :where(th, td) { border: 1px solid var(--border); padding: 0.4rem 0.6rem; }
+  .gf-prose img { max-width: 100%; max-height: min(360px, 70vh); border-radius: 0.5rem; object-fit: contain; }
+  .visual-markdown-editor .ProseMirror { position: relative; white-space: pre-wrap; word-wrap: break-word; }
+  .visual-markdown-editor .ProseMirror:has(> p:only-child > br.ProseMirror-trailingBreak:only-child)::before { position: absolute; top: 1rem; left: 0.25rem; color: var(--muted-foreground); content: attr(data-placeholder); pointer-events: none; }
+  .visual-markdown-editor .ProseMirror-selectednode { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .visual-markdown-editor :where(th, td) { position: relative; }
+  .visual-markdown-editor .selectedCell::after { position: absolute; inset: 0; background: color-mix(in oklch, var(--primary) 14%, transparent); content: ""; pointer-events: none; }
 }
 
 :root {

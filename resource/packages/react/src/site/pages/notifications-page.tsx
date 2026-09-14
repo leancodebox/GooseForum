@@ -187,6 +187,7 @@ export function NotificationsPageView({
   return (
     <main className="min-w-0 pb-8">
       <PageHeader
+        compact
         title={t("title")}
         description={t("summary", { total: active.items.length })}
         badge={
@@ -210,17 +211,23 @@ export function NotificationsPageView({
       {error ? (
         <p className="px-4 py-2 text-sm text-destructive lg:px-0">{error}</p>
       ) : null}
-      <section className="overflow-hidden rounded-xl border bg-background">
+      <section className="overflow-hidden rounded-xl border bg-background max-sm:rounded-t-none max-sm:border-t-0">
         <Tabs
           value={filter}
           onValueChange={(value) => setFilter(value as NotificationFilter)}
           className="gap-0"
         >
-          <TabsList className="h-auto w-full justify-start rounded-none border-b bg-muted/50 p-2">
-            <TabsTrigger value="all" className="flex-none px-3">
+          <TabsList className="h-auto w-full justify-start gap-1 rounded-none border-b bg-muted/50 p-2">
+            <TabsTrigger
+              value="all"
+              className="h-8 flex-none rounded-md border border-transparent px-3 font-semibold shadow-none hover:bg-background/70 hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-sm data-active:ring-1 data-active:ring-border"
+            >
               {t("tabs.all")}
             </TabsTrigger>
-            <TabsTrigger value="unread" className="flex-none px-3">
+            <TabsTrigger
+              value="unread"
+              className="h-8 flex-none rounded-md border border-transparent px-3 font-semibold shadow-none hover:bg-background/70 hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-sm data-active:ring-1 data-active:ring-border"
+            >
               {t("tabs.unread")}
               {unreadCount ? (
                 <Badge className="px-1.5">{unreadCount}</Badge>

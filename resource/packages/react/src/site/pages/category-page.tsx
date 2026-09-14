@@ -39,6 +39,7 @@ export function CategoryPageView({
   return (
     <div className="pb-12">
       <PageHeader
+        compact
         title={page.category.name}
         description={page.category.description}
         badge={
@@ -55,7 +56,7 @@ export function CategoryPageView({
           </span>
         }
       />
-      <section className="overflow-hidden rounded-xl border bg-background">
+      <section className="overflow-hidden rounded-xl border bg-background max-sm:rounded-t-none max-sm:border-t-0">
         <div className="flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <nav

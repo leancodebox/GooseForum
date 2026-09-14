@@ -22,6 +22,9 @@ export interface GooseRuntime {
   theme: ThemePayload["current"];
   locale: AuthLocale;
   navigate(href: string, options?: GooseNavigateOptions): Promise<void>;
+  registerNavigationBlocker?(
+    blocker: (href: string) => boolean | Promise<boolean>,
+  ): () => void;
   fetchPage?(href: string, signal?: AbortSignal): Promise<AnyPagePayload>;
   queueFlash(message: string, type?: GooseFlashType): void;
   redirect(href: string): void;

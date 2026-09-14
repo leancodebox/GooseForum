@@ -37,6 +37,46 @@ const NotificationsPageView = lazy(() =>
     default: module.NotificationsPageView,
   })),
 );
+const MessagesPageView = lazy(() =>
+  import("../site/pages/messages-page").then((module) => ({
+    default: module.MessagesPageView,
+  })),
+);
+const DraftsPageView = lazy(() =>
+  import("../site/pages/drafts-page").then((module) => ({
+    default: module.DraftsPageView,
+  })),
+);
+const AccessGroupsPageView = lazy(() =>
+  import("../site/pages/access-groups-page").then((module) => ({
+    default: module.AccessGroupsPageView,
+  })),
+);
+const ErrorPageView = lazy(() =>
+  import("../site/pages/error-page").then((module) => ({
+    default: module.ErrorPageView,
+  })),
+);
+const ModerationPageView = lazy(() =>
+  import("../site/pages/moderation-page").then((module) => ({
+    default: module.ModerationPageView,
+  })),
+);
+const PublishPageView = lazy(() =>
+  import("../site/pages/publish-page").then((module) => ({
+    default: module.PublishPageView,
+  })),
+);
+const TopicPageView = lazy(() =>
+  import("../site/pages/topic-page").then((module) => ({
+    default: module.TopicPageView,
+  })),
+);
+const ThemePreviewPageView = lazy(() =>
+  import("../site/pages/theme-preview-page").then((module) => ({
+    default: module.ThemePreviewPageView,
+  })),
+);
 
 export interface GooseAppProps {
   page: AnyPagePayload;
@@ -99,10 +139,64 @@ export function GooseApp({ page }: GooseAppProps) {
         >
           <NotificationsPageView key={page.url} page={page.props} />
         </Suspense>
+      ) : page.component === "messages.index" ? (
+        <Suspense
+          fallback={
+            <div className="grid min-h-48 place-items-center text-sm text-muted-foreground">
+              加载中…
+            </div>
+          }
+        >
+          <MessagesPageView
+            key={page.url}
+            layout={page.layout}
+            page={page.props}
+          />
+        </Suspense>
+      ) : page.component === "drafts.index" ? (
+        <Suspense fallback={<PageLoading />}>
+          <DraftsPageView page={page.props} />
+        </Suspense>
+      ) : page.component === "access-groups.index" ? (
+        <Suspense fallback={<PageLoading />}>
+          <AccessGroupsPageView />
+        </Suspense>
+      ) : page.component === "error.index" ? (
+        <Suspense fallback={<PageLoading />}>
+          <ErrorPageView page={page.props} />
+        </Suspense>
+      ) : page.component === "moderation.index" ? (
+        <Suspense fallback={<PageLoading />}>
+          <ModerationPageView page={page.props} />
+        </Suspense>
+      ) : page.component === "publish.index" ? (
+        <Suspense fallback={<PageLoading />}>
+          <PublishPageView key={page.url} page={page.props} />
+        </Suspense>
+      ) : page.component === "topic.detail" ? (
+        <Suspense fallback={<PageLoading />}>
+          <TopicPageView
+            key={page.url}
+            layout={page.layout}
+            page={page.props}
+          />
+        </Suspense>
+      ) : page.component === "theme.preview" ? (
+        <Suspense fallback={<PageLoading />}>
+          <ThemePreviewPageView layout={page.layout} page={page.props} />
+        </Suspense>
       ) : (
         <PayloadPreview page={page} />
       )}
     </AppShell>
+  );
+}
+
+function PageLoading() {
+  return (
+    <div className="grid min-h-48 place-items-center text-sm text-muted-foreground">
+      加载中…
+    </div>
   );
 }
 

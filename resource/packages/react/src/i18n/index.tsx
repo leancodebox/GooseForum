@@ -9,6 +9,14 @@ import {
   siteResources,
   settingsResources,
   notificationResources,
+  messageResources,
+  contentResources,
+  moderationResources,
+  publishResources,
+  topicResources,
+  themePreviewResources,
+  legacySitePageResources,
+  serverMessageResources,
   supportedLocales,
   type Locale,
 } from "@gooseforum/client/i18n";
@@ -28,6 +36,16 @@ const namespaces = [
   "settings",
   "userCard",
   "notifications",
+  "messages",
+  "drafts",
+  "accessGroups",
+  "error",
+  "contentCommon",
+  "moderation",
+  "publish",
+  "topic",
+  "themePreview",
+  "serverMessages",
 ];
 
 export function createGooseI18n(locale: Locale): i18n {
@@ -56,6 +74,64 @@ export function createGooseI18n(locale: Locale): i18n {
           settings: settingsResources[language],
           userCard: siteResources[language].userCard,
           notifications: notificationResources[language],
+          messages: messageResources[language],
+          drafts: legacySitePageResources[language].drafts,
+          accessGroups: legacySitePageResources[language].accessGroups,
+          error: contentResources[language].error,
+          contentCommon: contentResources[language].common,
+          moderation: {
+            ...moderationResources[language],
+            ...legacySitePageResources[language].moderation,
+            tabs: {
+              ...moderationResources[language].tabs,
+              ...legacySitePageResources[language].moderation.managementTabs,
+            },
+            reports: {
+              ...moderationResources[language].reports,
+              ...legacySitePageResources[language].moderation.reports,
+              statusTabs:
+                legacySitePageResources[language].moderation.reports.statusTabs,
+              targetTypes:
+                legacySitePageResources[language].moderation.reports
+                  .targetTypes,
+              reasons:
+                legacySitePageResources[language].moderation.reports.reasons,
+              resolutions:
+                legacySitePageResources[language].moderation.reports
+                  .resolutions,
+            },
+            logs: {
+              ...moderationResources[language].logs,
+              ...legacySitePageResources[language].moderation.logs,
+              actions:
+                legacySitePageResources[language].moderation.logs.actions,
+            },
+          },
+          publish: {
+            ...publishResources[language],
+            ...legacySitePageResources[language].publish,
+          },
+          topic: {
+            ...topicResources[language],
+            ...legacySitePageResources[language].topic,
+            reportReasons: {
+              ...topicResources[language].reportReasons,
+              ...legacySitePageResources[language].topic.reportReasons,
+            },
+          },
+          themePreview: {
+            ...themePreviewResources[language],
+            ...legacySitePageResources[language].themePreview,
+            presets: {
+              ...themePreviewResources[language].presets,
+              ...Object.fromEntries(
+                Object.entries(
+                  legacySitePageResources[language].themePreview.presets,
+                ).map(([key, value]) => [key, value.label]),
+              ),
+            },
+          },
+          serverMessages: serverMessageResources[language],
         },
       ]),
     ),

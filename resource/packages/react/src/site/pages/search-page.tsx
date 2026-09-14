@@ -39,6 +39,7 @@ export function SearchPageView({ page }: { page: SearchPageProps }) {
   return (
     <main className="min-w-0 pb-8">
       <PageHeader
+        compact
         title={searchT("title")}
         description={description}
         badge={
@@ -78,7 +79,7 @@ export function SearchPageView({ page }: { page: SearchPageProps }) {
           </form>
         }
       />
-      <section className="overflow-hidden rounded-xl border bg-background">
+      <section className="overflow-hidden rounded-xl border bg-background max-sm:rounded-t-none max-sm:border-t-0">
         {page.topics.length ? (
           <>
             <TopicTable topics={page.topics} t={topicT} />
