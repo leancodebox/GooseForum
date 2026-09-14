@@ -14,5 +14,5 @@
       "@gooseforum/react/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "test"]
 }

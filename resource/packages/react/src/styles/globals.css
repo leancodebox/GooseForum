@@ -24,6 +24,8 @@
   --accent: var(--gf-color-base-300);
   --accent-foreground: var(--gf-color-base-content);
   --destructive: var(--gf-color-error);
+  --success: var(--gf-color-success);
+  --warning: var(--gf-color-warning);
   --border: var(--gf-color-line);
   --input: var(--gf-color-line);
   --ring: var(--gf-color-primary);
@@ -58,6 +60,8 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -99,6 +103,8 @@
     margin: 0;
     background: var(--background);
     color: var(--foreground);
-    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Segoe UI", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }

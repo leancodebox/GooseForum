@@ -3,23 +3,29 @@ import zh from '@/locales/zh'
 import en from '@/locales/en'
 import ja from '@/locales/ja'
 import it from '@/locales/it'
+import { authResources, normalizeLocale, oidcConsentResources, supportedLocales, type Locale } from '@gooseforum/client/i18n'
 
-export const supportedLocales = ['zh', 'en', 'ja', 'it'] as const
-export type Locale = (typeof supportedLocales)[number]
+export { normalizeLocale, supportedLocales, type Locale } from '@gooseforum/client/i18n'
 
 export const fallbackLocale: Locale = 'zh'
 
 export const messages = {
-  zh,
-  en,
-  ja,
-  it,
+  zh: withSharedAuth(zh, 'zh'),
+  en: withSharedAuth(en, 'en'),
+  ja: withSharedAuth(ja, 'ja'),
+  it: withSharedAuth(it, 'it'),
 } as const
 
-export function normalizeLocale(value?: string | null): Locale | undefined {
-  const normalized = (value || '').trim().toLowerCase()
-  const short = normalized.split(/[-_,;]/)[0] as Locale
-  return supportedLocales.includes(short) ? short : undefined
+function withSharedAuth<T extends { auth: Record<string, unknown> }>(messages: T, locale: Locale) {
+  return {
+    ...messages,
+    auth: {
+      ...messages.auth,
+      ...authResources[locale],
+      validation: authResources[locale].validation,
+    },
+    oidcConsent: oidcConsentResources[locale],
+  }
 }
 
 function readCookie(name: string) {

@@ -126,6 +126,20 @@ export interface LoginPublicKeyPayload {
   serverTs: number
 }
 
+export interface OIDCConsentDetails {
+  client: {
+    id: string
+    name: string
+    public: boolean
+  }
+  scopes: string[]
+  expires_at: string
+}
+
+export interface OIDCConsentResult {
+  redirect_url: string
+}
+
 export interface LoginInput {
   username: string
   encryptedPassword: string
@@ -217,6 +231,10 @@ export interface GooseSiteApi {
     forgotPassword(email: string, captchaId: string, captchaCode: string): Promise<GooseApiResult<void>>
     resetPassword(token: string, newPassword: string): Promise<GooseApiResult<void>>
     logout(): Promise<void>
+  }
+  oidc: {
+    consentDetails(interaction: string): Promise<OIDCConsentDetails>
+    consentDecision(interaction: string, decision: 'approve' | 'deny'): Promise<OIDCConsentResult>
   }
   themes: {
     save(settings: SiteThemeConfig): Promise<SiteThemeConfig>

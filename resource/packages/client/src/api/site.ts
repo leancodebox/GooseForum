@@ -1,7 +1,8 @@
 import { GooseClientError } from '../http/error.js'
 import type { GooseHttpClient } from '../http/client.js'
-import type { GooseSiteApi, ImageUploadInitResult } from './types.js'
+import type { GooseSiteApi, ImageUploadInitResult, OIDCConsentDetails, OIDCConsentResult } from './types.js'
 import { siteApiRoutes } from './routes.js'
+import { protocolRoutes } from './protocol-routes.js'
 
 type SiteApiRouteName = keyof typeof siteApiRoutes
 const route = (name: SiteApiRouteName) => siteApiRoutes[name][1]
@@ -97,6 +98,18 @@ export function createSiteApi(http: GooseHttpClient): GooseSiteApi {
       resetPassword: (token, newPassword) => postWithMeta(http, route('authResetPassword'), { token, newPassword }),
       logout: () => post(http, route('authLogout')),
     },
+    oidc: {
+      consentDetails: (interaction) => rawJSON<OIDCConsentDetails>(
+        http,
+        protocolRoutes.oidcConsentDetails[1],
+        { query: { interaction } },
+      ),
+      consentDecision: (interaction, decision) => rawJSON<OIDCConsentResult>(
+        http,
+        protocolRoutes.oidcConsentDecision[1],
+        { method: 'POST', json: { interaction, decision } },
+      ),
+    },
     themes: {
       save: (settings) => post(http, route('themeSave'), { settings }),
       publish: () => post(http, route('themePublish')),
@@ -106,6 +119,30 @@ export function createSiteApi(http: GooseHttpClient): GooseSiteApi {
       avatar: (avatar) => uploadAvatar(http, avatar),
     },
   }
+}
+
+async function rawJSON<T>(http: GooseHttpClient, path: string, init: import('../http/client.js').GooseRequestInit = {}) {
+  const { json, query, headers: inputHeaders, ...requestInit } = init
+  const url = query ? http.resolve(`${path}?${new URLSearchParams(Object.entries(query)
+    .filter((entry): entry is [string, string | number | boolean] => entry[1] !== undefined && entry[1] !== null)
+    .map(([key, value]) => [key, String(value)]))}`) : path
+  const headers = new Headers(inputHeaders)
+  headers.set('Accept', 'application/json')
+  let body = requestInit.body
+  if (json !== undefined) {
+    headers.set('Content-Type', 'application/json')
+    body = JSON.stringify(json)
+  }
+  const response = await http.fetch(url, { ...requestInit, headers, body })
+  const payload = await response.json().catch((cause) => {
+    throw new GooseClientError('GooseForum OIDC endpoint returned invalid JSON', { status: response.status, cause })
+  }) as T & { error?: string, error_description?: string }
+  if (!response.ok) {
+    throw new GooseClientError(payload.error_description || payload.error || `GooseForum OIDC request failed with HTTP ${response.status}`, {
+      status: response.status,
+    })
+  }
+  return payload
 }
 
 async function uploadImage(http: GooseHttpClient, file: File) {

@@ -1,1 +1,1 @@
-export { BootstrapError, GooseApp } from './root'
+export { BootstrapError, BootstrapLoading, GooseApp } from './root'

@@ -1,5 +1,6 @@
 import type { AnyPagePayload } from '@gooseforum/client'
 import { ArrowRightIcon } from 'lucide-react'
+import { GooseLink, useGooseRuntime } from '../runtime'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
 import {
@@ -11,13 +12,51 @@ import {
   CardTitle,
 } from '../components/ui/card'
 import { Separator } from '../components/ui/separator'
+import { Skeleton } from '../components/ui/skeleton'
+import { LoginPageView } from '../site/auth/login-page'
+import { ResetPasswordPageView } from '../site/auth/reset-password-page'
+import { OIDCConsentPageView } from '../site/auth/oidc-consent-page'
+import { AppShell } from '../site/layout/app-shell'
+import { LinksPageView } from '../site/pages/links-page'
+import { SponsorsPageView } from '../site/pages/sponsors-page'
+import { CategoriesPageView } from '../site/pages/categories-page'
+import { MembersPageView } from '../site/pages/members-page'
 
 export interface GooseAppProps {
-  initialPage: AnyPagePayload
+  page: AnyPagePayload
 }
 
-export function GooseApp({ initialPage }: GooseAppProps) {
-  const { component, layout, meta, url, version } = initialPage
+export function GooseApp({ page }: GooseAppProps) {
+  if (page.component === 'auth.login') {
+    return <LoginPageView layout={page.layout} page={page.props} />
+  }
+  if (page.component === 'auth.resetPassword') {
+    return <ResetPasswordPageView layout={page.layout} page={page.props} />
+  }
+  if (page.component === 'auth.oidcConsent') {
+    return <OIDCConsentPageView layout={page.layout} page={page.props} />
+  }
+
+  return (
+    <AppShell layout={page.layout}>
+      {page.component === 'links.index'
+        ? <LinksPageView page={page.props} />
+        : page.component === 'sponsors.index'
+          ? <SponsorsPageView page={page.props} />
+          : page.component === 'categories.index'
+            ? <CategoriesPageView page={page.props} />
+            : page.component === 'members.index'
+              ? <MembersPageView page={page.props} />
+              : <PayloadPreview page={page} />}
+    </AppShell>
+  )
+}
+
+function PayloadPreview({ page }: GooseAppProps) {
+  const { component, layout, meta, url, version } = page
+  const { isNavigating, refresh } = useGooseRuntime()
+  const nextUrl = component === 'auth.login' ? '/' : '/login'
+  const nextLabel = component === 'auth.login' ? '返回首页 payload' : '加载登录页 payload'
 
   return (
     <main className="mx-auto flex min-h-svh max-w-5xl items-center px-4 py-10 sm:px-6">
@@ -30,7 +69,7 @@ export function GooseApp({ initialPage }: GooseAppProps) {
           </div>
           <CardTitle className="text-xl">{layout.site.name || 'GooseForum'}</CardTitle>
           <CardDescription>
-            React 旁路开发环境已连接到 GooseForum 页面 payload。
+            React 独立开发入口已通过接口连接到 GooseForum 页面 payload。
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -42,12 +81,19 @@ export function GooseApp({ initialPage }: GooseAppProps) {
             <PayloadField label="当前主题" value={layout.theme.current} />
           </dl>
         </CardContent>
-        <CardFooter className="justify-end">
+        <CardFooter className="flex-wrap justify-end">
+          <Button
+            variant="outline"
+            disabled={isNavigating}
+            onClick={() => void refresh()}
+          >
+            {isNavigating ? '正在加载…' : '刷新接口数据'}
+          </Button>
           <Button asChild>
-            <a href={url || '/'}>
-              在 Go 版本中打开
+            <GooseLink href={nextUrl}>
+              {nextLabel}
               <ArrowRightIcon data-icon="inline-end" />
-            </a>
+            </GooseLink>
           </Button>
         </CardFooter>
       </Card>
@@ -64,7 +110,35 @@ function PayloadField({ label, value }: { label: string; value: string }) {
   )
 }
 
-export function BootstrapError({ error }: { error: unknown }) {
+export function BootstrapLoading() {
+  return (
+    <main
+      className="mx-auto flex min-h-svh max-w-2xl items-center px-4 py-10 sm:px-6"
+      aria-busy="true"
+    >
+      <Card className="w-full" role="status">
+        <CardHeader>
+          <CardTitle>正在读取 GooseForum payload</CardTitle>
+          <CardDescription>React 已启动，正在通过开发接口获取页面数据。</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+        </CardContent>
+      </Card>
+    </main>
+  )
+}
+
+export function BootstrapError({
+  error,
+  onRetry,
+  retrying = false,
+}: {
+  error: unknown
+  onRetry?: () => void
+  retrying?: boolean
+}) {
   const message = error instanceof Error ? error.message : 'Unknown bootstrap error'
 
   return (
@@ -80,6 +154,15 @@ export function BootstrapError({ error }: { error: unknown }) {
         <CardContent>
           <pre className="overflow-auto rounded-lg bg-muted p-3 text-xs">{message}</pre>
         </CardContent>
+        {onRetry
+          ? (
+              <CardFooter className="justify-end">
+                <Button disabled={retrying} onClick={onRetry}>
+                  {retrying ? '正在重试…' : '重新请求 payload'}
+                </Button>
+              </CardFooter>
+            )
+          : null}
       </Card>
     </main>
   )

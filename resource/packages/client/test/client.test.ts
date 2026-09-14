@@ -2,8 +2,11 @@ import { describe, expect, it, vi } from 'vitest'
 import { readFileSync } from 'node:fs'
 import {
   createGooseClient,
+  formatCompactNumber,
   GooseClientError,
   GooseProtocolError,
+  authResources,
+  normalizeLocale,
   pageComponents,
 } from '../src/index.js'
 
@@ -25,6 +28,35 @@ function jsonResponse(value: unknown, status = 200) {
     headers: { 'Content-Type': 'application/json' },
   })
 }
+
+describe('i18n contracts', () => {
+  it.each([
+    ['zh-CN', 'zh'],
+    ['EN_us', 'en'],
+    ['ja,zh;q=0.9', 'ja'],
+    ['it-IT', 'it'],
+    ['unknown', undefined],
+  ])('normalizes %s to %s', (input, expected) => {
+    expect(normalizeLocale(input)).toBe(expected)
+  })
+
+  it('keeps every auth locale structurally complete', () => {
+    expect(Object.keys(authResources)).toEqual(['zh', 'en', 'ja', 'it'])
+    expect(authResources.en.validation.loginRequired).toBeTruthy()
+    expect(authResources.ja.server.passwordResetMailQueued).toBeTruthy()
+  })
+})
+
+describe('format contracts', () => {
+  it.each([
+    [999, '999'],
+    [1_250, '1.3k'],
+    [12_500, '13k'],
+    [1_250_000, '1.3m'],
+  ])('formats %d as %s', (value, expected) => {
+    expect(formatCompactNumber(value)).toBe(expected)
+  })
+})
 
 describe('page client', () => {
   it('requests page payloads with the protocol headers', async () => {
@@ -186,6 +218,42 @@ describe('API client', () => {
     expect(fetchMock.mock.calls[2]?.[0]).toBe('https://forum.example/api/admin/publish-site-theme')
   })
 
+  it('exposes admin category APIs without coupling them to a UI framework', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+
+    await client.admin.categories.list()
+    await client.admin.categories.saveAccess(7, [{ accessGroupId: 3, level: 2 }])
+    await client.admin.categories.addModerator(7, { userId: 42 })
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'https://forum.example/api/admin/category-list',
+      'https://forum.example/api/admin/category-access/save',
+      'https://forum.example/api/admin/category-moderator-add',
+    ])
+    expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(JSON.stringify({
+      categoryId: 7,
+      grants: [{ accessGroupId: 3, level: 2 }],
+    }))
+    expect(fetchMock.mock.calls[2]?.[1]?.body).toBe(JSON.stringify({ categoryId: 7, userId: 42 }))
+  })
+
+  it('exposes access-group administration with stable request bodies', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: 7 }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+
+    await client.admin.accessGroups.save({ name: 'Staff', joinMode: 'invite_only', status: 1 })
+    await client.admin.accessGroups.saveMember({ groupId: 7, username: 'goose', memberRole: 'manager' })
+    await client.admin.accessGroups.reviewApplication(7, 19, true)
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'https://forum.example/api/admin/access-group/save',
+      'https://forum.example/api/admin/access-group/member-save',
+      'https://forum.example/api/admin/access-group/application-review',
+    ])
+    expect(fetchMock.mock.calls[2]?.[1]?.body).toBe(JSON.stringify({ groupId: 7, memberId: 19, approve: true }))
+  })
+
   it('sets JSON accept headers for GET domain APIs', async () => {
     const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
     const client = createGooseClient({ fetch: fetchMock })
@@ -205,6 +273,30 @@ describe('API client', () => {
     expect(fetchMock.mock.calls[0]?.[0]).toBe('https://forum.example/api/oidc/grants')
     expect(fetchMock.mock.calls[1]?.[0]).toBe('https://forum.example/api/oidc/grants/revoke')
     expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(JSON.stringify({ clientId: 'gf_wiki' }))
+  })
+
+  it('uses raw JSON contracts for OIDC consent endpoints', async () => {
+    const fetchMock = vi.fn(async (input: string | URL, init?: RequestInit) => {
+      if (init?.method === 'POST') return jsonResponse({ redirect_url: 'https://client.example/callback' })
+      return jsonResponse({
+        client: { id: 'client-id', name: 'Example', public: true },
+        scopes: ['openid'],
+        expires_at: '2026-09-14T12:00:00Z',
+      })
+    })
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+
+    await expect(client.api.oidc.consentDetails('interaction-id')).resolves.toMatchObject({
+      client: { id: 'client-id' },
+    })
+    await expect(client.api.oidc.consentDecision('interaction-id', 'approve')).resolves.toEqual({
+      redirect_url: 'https://client.example/callback',
+    })
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('https://forum.example/oauth2/consent/details?interaction=interaction-id')
+    expect(new Headers(fetchMock.mock.calls[0]?.[1]?.headers).get('Accept')).toBe('application/json')
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://forum.example/oauth2/consent')
+    expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(JSON.stringify({ interaction: 'interaction-id', decision: 'approve' }))
   })
 
   it('rejects malformed API envelopes', async () => {

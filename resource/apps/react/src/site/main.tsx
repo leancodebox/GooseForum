@@ -1,8 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BootstrapError, GooseApp } from '@gooseforum/react/app'
 import '@gooseforum/react/globals.css'
-import { loadInitialPage, prepareDocument } from '../go-runtime'
+import { sitePageSource } from '../browser-runtime'
+import { SiteApp } from './SiteApp'
 
 const rootElement = document.querySelector<HTMLDivElement>('#goose-app')
 
@@ -12,18 +12,8 @@ if (!rootElement) {
 
 const root = createRoot(rootElement)
 
-try {
-  const page = await loadInitialPage()
-  prepareDocument(page)
-  root.render(
-    <StrictMode>
-      <GooseApp initialPage={page} />
-    </StrictMode>,
-  )
-} catch (error) {
-  root.render(
-    <StrictMode>
-      <BootstrapError error={error} />
-    </StrictMode>,
-  )
-}
+root.render(
+  <StrictMode>
+    <SiteApp pageSource={sitePageSource} />
+  </StrictMode>,
+)
