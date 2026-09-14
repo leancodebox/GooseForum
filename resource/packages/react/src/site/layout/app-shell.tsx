@@ -63,6 +63,11 @@ import { authLocales } from "../../i18n/auth";
 import { cn } from "../../lib/utils";
 import { GooseLink, useGooseRuntime } from "../../runtime";
 import { unreadStatusEvent } from "../../runtime/unread-status";
+import {
+  emptyShellHeader,
+  ShellHeaderContext,
+  type ShellHeaderState,
+} from "./shell-header";
 
 interface ShellNavItem {
   key: string;
@@ -87,6 +92,9 @@ export function AppShell({
   const [unread, setUnread] = useState(layout.unread);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [shellHeader, setShellHeader] = useState<ShellHeaderState>(
+    emptyShellHeader,
+  );
   const menuCloseTimers = useRef<
     Record<"language" | "user", number | undefined>
   >({
@@ -252,7 +260,8 @@ export function AppShell({
   );
 
   return (
-    <div className="min-h-svh bg-muted text-foreground">
+    <ShellHeaderContext.Provider value={setShellHeader}>
+      <div className="min-h-svh bg-muted text-foreground">
       {runtime.isNavigating ? (
         <div className="fixed inset-x-0 top-0 z-50 h-0.5 animate-pulse bg-primary" />
       ) : null}
@@ -296,9 +305,41 @@ export function AppShell({
             </SheetContent>
           </Sheet>
 
-          <SiteBrand layout={layout} />
+          <div className={cn(shellHeader.visible && "hidden md:block")}>
+            <SiteBrand layout={layout} />
+          </div>
+          {shellHeader.visible ? (
+            <button
+              type="button"
+              className="flex min-w-0 flex-1 flex-col items-start justify-center gap-0.5 self-stretch text-left"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            >
+              <span className="block max-w-full truncate text-lg font-semibold leading-6 hover:text-primary md:text-xl">
+                {shellHeader.title}
+              </span>
+              {shellHeader.tags.length ? (
+                <span className="flex max-w-full items-center gap-2 overflow-hidden text-[11px] font-medium leading-4 text-muted-foreground">
+                  {shellHeader.tags.map((tag) => (
+                    <span
+                      key={tag.id}
+                      className="inline-flex min-w-0 shrink-0 items-center gap-1"
+                    >
+                      <span
+                        className="size-1.5 rounded-sm"
+                        style={{ backgroundColor: tag.color || "currentColor" }}
+                      />
+                      <span className="max-w-28 truncate">{tag.name}</span>
+                    </span>
+                  ))}
+                </span>
+              ) : null}
+            </button>
+          ) : null}
           <nav
-            className="hidden items-center gap-1 lg:flex"
+            className={cn(
+              "hidden items-center gap-1 lg:flex",
+              shellHeader.visible && "lg:hidden",
+            )}
             aria-label="Header navigation"
           >
             {headerItems.map((item) => (
@@ -312,7 +353,12 @@ export function AppShell({
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-0.5 lg:gap-1">
+          <div
+            className={cn(
+              "ml-auto items-center gap-0.5 lg:gap-1",
+              shellHeader.visible ? "hidden md:flex" : "flex",
+            )}
+          >
             <Button
               asChild
               variant="ghost"
@@ -521,14 +567,15 @@ export function AppShell({
 
       <main className="mx-auto grid w-full max-w-[1600px] grid-cols-1 lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-3 lg:px-8 lg:py-3 xl:grid-cols-[224px_minmax(0,1fr)]">
         <aside
-          className="sticky top-16 -my-3 hidden h-[calc(100vh-4rem)] min-w-0 self-start overflow-y-auto py-3 pr-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:block"
+          className="sticky top-16 -my-3 hidden h-[calc(100vh-4rem)] min-w-0 self-start overflow-y-auto py-3 pl-1 pr-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:block"
           aria-label="Sidebar"
         >
           {navigation}
         </aside>
         <section className="min-w-0">{children}</section>
       </main>
-    </div>
+      </div>
+    </ShellHeaderContext.Provider>
   );
 }
 
@@ -576,7 +623,7 @@ function ShellNavigation({
   onNavigate(): void;
 }) {
   return (
-    <nav className="flex flex-col gap-3">
+    <nav className="flex flex-col gap-2">
       <NavList items={primary} onNavigate={onNavigate} />
       <NavSection title={labels.resources}>
         <NavList items={resources} onNavigate={onNavigate} />
@@ -644,6 +691,7 @@ function NavList({
               variant="ghost"
               className={cn(
                 "h-8 w-full justify-start text-[13px] leading-[18.5714px] transition-none",
+                "focus-visible:ring-2",
                 item.active
                   ? "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
                   : "text-foreground/75 hover:bg-accent hover:text-foreground",

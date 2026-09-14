@@ -26,7 +26,9 @@ import { GooseApp } from "../src/app/root";
 import { GooseI18nProvider } from "../src/i18n";
 import { GooseRuntimeProvider, type GooseRuntime } from "../src/runtime";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+});
 
 const layout = {
   site: {
@@ -920,6 +922,28 @@ describe("AppShell and static pages", () => {
   });
 
   it("supports topic actions, reply windows, and posting replies", async () => {
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        readonly root = null;
+        readonly rootMargin = "";
+        readonly thresholds = [0];
+        constructor(private callback: IntersectionObserverCallback) {}
+        observe(target: Element) {
+          if (target.tagName === "H1") {
+            this.callback(
+              [{ isIntersecting: false, target } as IntersectionObserverEntry],
+              this as unknown as IntersectionObserver,
+            );
+          }
+        }
+        unobserve() {}
+        disconnect() {}
+        takeRecords() {
+          return [];
+        }
+      },
+    );
     const post = {
       id: 61,
       topicId: 60,
@@ -1018,6 +1042,9 @@ describe("AppShell and static pages", () => {
     expect(
       await screen.findByRole("heading", { level: 1, name: "Topic detail" }),
     ).toBeTruthy();
+    expect(
+      await screen.findByRole("button", { name: "Topic detail" }),
+    ).toBeTruthy();
     const topicHeader = screen
       .getByRole("heading", { level: 1, name: "Topic detail" })
       .closest("header");
@@ -1049,6 +1076,19 @@ describe("AppShell and static pages", () => {
         .querySelector('[data-tone="watch"]')
         ?.classList.contains("text-success"),
     ).toBe(true);
+    const topicAside = screen
+      .getByRole("heading", { level: 2, name: "主题概览" })
+      .parentElement;
+    expect(topicAside?.classList.contains("sticky")).toBe(true);
+    expect(topicAside?.classList.contains("top-19")).toBe(true);
+    expect(topicAside?.closest("section")?.classList.contains("overflow-hidden")).toBe(
+      false,
+    );
+    expect(
+      topicAside
+        ?.closest("section")
+        ?.classList.contains("xl:w-[calc(100%+292px)]"),
+    ).toBe(false);
     await user.click(screen.getByRole("button", { name: "点赞" }));
     expect(like).toHaveBeenCalledWith(60, 1);
     expect(

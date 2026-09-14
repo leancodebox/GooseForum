@@ -55,6 +55,7 @@ import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
 import { cn } from "../../lib/utils";
 import { GooseLink, useGooseRuntime } from "../../runtime";
 import { RenderedContent } from "../content/rendered-content";
+import { emptyShellHeader, useShellHeader } from "../layout/shell-header";
 import { TopicTable } from "../topics/topic-list";
 import { UserCardPopover } from "../users/user-card-popover";
 
@@ -85,6 +86,8 @@ export function TopicPageView({
   const { t } = useTranslation("topic");
   const { t: homeT } = useTranslation("home");
   const runtime = useGooseRuntime();
+  const setShellHeader = useShellHeader();
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const [posts, setPosts] = useState(page.postStream.posts);
   const [replyTargets, setReplyTargets] = useState(
     page.postStream.replyTargets || [],
@@ -146,6 +149,40 @@ export function TopicPageView({
     ...posts.map((post) => post.postNo || 0),
     1,
   );
+
+  useEffect(() => {
+    const title = page.topic.title;
+    const tags = page.topic.categories.map((category) => ({
+      id: category.id,
+      name: category.name,
+      color: category.color,
+    }));
+    setShellHeader({ title, tags, visible: false });
+    const titleNode = titleRef.current;
+    if (!titleNode || !("IntersectionObserver" in window)) {
+      return () =>
+        setShellHeader((current) =>
+          current.title === title ? emptyShellHeader : current,
+        );
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShellHeader((current) =>
+          current.title === title
+            ? { ...current, visible: !entry?.isIntersecting }
+            : current,
+        );
+      },
+      { threshold: 0, rootMargin: "-80px 0px 0px 0px" },
+    );
+    observer.observe(titleNode);
+    return () => {
+      observer.disconnect();
+      setShellHeader((current) =>
+        current.title === title ? emptyShellHeader : current,
+      );
+    };
+  }, [page.topic.categories, page.topic.id, page.topic.title, setShellHeader]);
 
   const loadWindow = useCallback(
     async (direction: "before" | "after" | "anchor", anchor?: number) => {
@@ -509,7 +546,10 @@ export function TopicPageView({
   return (
     <main className="min-w-0 pb-10">
       <header className="border-b px-4 py-4 sm:mb-4 sm:px-0 sm:pt-0">
-        <h1 className="break-words text-2xl font-bold leading-tight sm:text-3xl">
+        <h1
+          ref={titleRef}
+          className="break-words text-2xl font-bold leading-tight sm:text-3xl"
+        >
           {page.topic.title}
         </h1>
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-muted-foreground">
@@ -554,7 +594,7 @@ export function TopicPageView({
         </Alert>
       ) : null}
       <section
-        className="min-w-0 overflow-hidden rounded-xl border bg-background xl:grid xl:grid-cols-[minmax(0,1fr)_256px]"
+        className="min-w-0 rounded-xl border bg-background xl:grid xl:grid-cols-[minmax(0,1fr)_256px]"
         onClick={contentClick}
       >
         <div ref={postsRef} className="min-w-0">
@@ -618,7 +658,10 @@ export function TopicPageView({
               }
             />
           ))}
-          <div ref={sentinel} className="border-t px-4 py-3 text-center">
+          <div
+            ref={sentinel}
+            className={cn("px-4 py-3 text-center", hasAfter && "border-t")}
+          >
             {hasAfter ? (
               <Button
                 variant="ghost"
@@ -1203,7 +1246,7 @@ function TopicAside({
 }) {
   return (
     <aside className="hidden min-w-0 border-l xl:block">
-      <div className="sticky top-20">
+      <div className="sticky top-19">
         <h2 className="border-b px-4 py-4 text-sm font-semibold text-muted-foreground">
           {t("overview")}
         </h2>
