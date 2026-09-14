@@ -217,7 +217,7 @@ export function NotificationsPageView({
           onValueChange={(value) => setFilter(value as NotificationFilter)}
           className="gap-0"
         >
-          <TabsList className="h-auto w-full justify-start gap-1 rounded-none border-b bg-muted/50 p-2">
+          <TabsList className="h-auto w-full justify-start gap-1 rounded-none border-b bg-muted/50 p-2 group-data-horizontal/tabs:h-auto">
             <TabsTrigger
               value="all"
               className="h-8 flex-none rounded-md border border-transparent px-3 font-semibold shadow-none hover:bg-background/70 hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-sm data-active:ring-1 data-active:ring-border"

@@ -30,7 +30,12 @@ import {
   EmptyTitle,
 } from "../../components/ui/empty";
 import { Spinner } from "../../components/ui/spinner";
-import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../components/ui/tabs";
 import { GooseLink, useGooseRuntime } from "../../runtime";
 import { PageHeader } from "../layout/page-header";
 import { UserCardPopover } from "../users/user-card-popover";
@@ -187,60 +192,67 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
       <Tabs
         value={tab}
         onValueChange={(value) => setTab(value as ConsoleTab)}
-        className="mb-4 gap-0"
+        className="mb-4"
       >
-        <TabsList className="h-auto w-fit flex-wrap justify-start gap-2 rounded-none border-b bg-transparent p-0">
-          {consoleTabs.map(({ key, icon: Icon }) => (
-            <TabsTrigger
-              key={key}
-              value={key}
-              className="h-10 flex-none gap-2 rounded-none border-0 border-b-2 border-transparent bg-transparent px-1 shadow-none hover:bg-transparent data-active:border-primary data-active:bg-transparent data-active:text-primary"
-            >
-              <Icon />
-              {t(`tabs.${key}`)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div
+          data-slot="moderation-tabs-frame"
+          className="w-fit max-w-full rounded-xl bg-muted p-1 ring-1 ring-border/50"
+        >
+          <TabsList className="h-auto max-w-full justify-start gap-0.5 overflow-x-auto rounded-lg bg-transparent p-0 group-data-horizontal/tabs:h-auto">
+            {consoleTabs.map(({ key, icon: Icon }) => (
+              <TabsTrigger
+                key={key}
+                value={key}
+                className="h-8 flex-none px-3"
+              >
+                <Icon />
+                {t(`tabs.${key}`)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
+        <TabsContent value="reports">
+          <ReportsPanel
+            status={reportStatus}
+            items={reports}
+            loading={reportLoading}
+            loaded={reportLoaded}
+            hasMore={reportMore}
+            error={reportError}
+            busy={reportBusy}
+            t={t}
+            locale={runtime.locale}
+            onStatus={changeReportStatus}
+            onLoad={() => void loadReports()}
+            onAction={(item, action) => void handleReport(item, action)}
+          />
+        </TabsContent>
+        <TabsContent value="ban">
+          <BlockedPanel
+            page={page}
+            topics={topics}
+            busy={topicBusy}
+            error={topicError}
+            t={t}
+            onRestore={(topic) => void restoreTopic(topic)}
+          />
+        </TabsContent>
+        <TabsContent value="logs">
+          <LogsPanel
+            items={logs}
+            loading={logLoading}
+            loaded={logLoaded}
+            hasMore={logMore}
+            error={logError}
+            t={t}
+            locale={runtime.locale}
+            onLoad={() => void loadLogs()}
+          />
+        </TabsContent>
+        <TabsContent value="guidance">
+          <Guidance t={t} />
+        </TabsContent>
       </Tabs>
-      {tab === "reports" ? (
-        <ReportsPanel
-          status={reportStatus}
-          items={reports}
-          loading={reportLoading}
-          loaded={reportLoaded}
-          hasMore={reportMore}
-          error={reportError}
-          busy={reportBusy}
-          t={t}
-          locale={runtime.locale}
-          onStatus={changeReportStatus}
-          onLoad={() => void loadReports()}
-          onAction={(item, action) => void handleReport(item, action)}
-        />
-      ) : null}
-      {tab === "ban" ? (
-        <BlockedPanel
-          page={page}
-          topics={topics}
-          busy={topicBusy}
-          error={topicError}
-          t={t}
-          onRestore={(topic) => void restoreTopic(topic)}
-        />
-      ) : null}
-      {tab === "logs" ? (
-        <LogsPanel
-          items={logs}
-          loading={logLoading}
-          loaded={logLoaded}
-          hasMore={logMore}
-          error={logError}
-          t={t}
-          locale={runtime.locale}
-          onLoad={() => void loadLogs()}
-        />
-      ) : null}
-      {tab === "guidance" ? <Guidance t={t} /> : null}
     </main>
   );
 }
@@ -286,11 +298,17 @@ function ReportsPanel({
           onValueChange={(value) => onStatus(value as ReportStatus)}
           className="gap-0"
         >
-          <TabsList className="h-auto w-full justify-start gap-1 rounded-none border-b bg-muted/50 p-2">
-            <TabsTrigger value="open">
+          <TabsList className="h-auto w-full justify-start gap-1 rounded-none border-b bg-muted/50 p-2 group-data-horizontal/tabs:h-auto">
+            <TabsTrigger
+              value="open"
+              className="h-8 flex-none rounded-md px-3 font-semibold"
+            >
               {t("reports.statusTabs.open")}
             </TabsTrigger>
-            <TabsTrigger value="closed">
+            <TabsTrigger
+              value="closed"
+              className="h-8 flex-none rounded-md px-3 font-semibold"
+            >
               {t("reports.statusTabs.closed")}
             </TabsTrigger>
           </TabsList>
@@ -445,9 +463,19 @@ function BlockedPanel({
             key={tab.key}
             asChild
             size="sm"
-            variant={tab.active ? "secondary" : "ghost"}
+            variant={tab.active ? "default" : "ghost"}
+            className={
+              tab.active
+                ? "shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }
           >
-            <GooseLink href={tab.url}>{tab.label}</GooseLink>
+            <GooseLink
+              href={tab.url}
+              aria-current={tab.active ? "page" : undefined}
+            >
+              {tab.label}
+            </GooseLink>
           </Button>
         ))}
       </div>

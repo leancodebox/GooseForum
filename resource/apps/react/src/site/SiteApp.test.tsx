@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type {
@@ -11,6 +11,9 @@ import type { PageSource } from "../browser-runtime";
 import { SiteApp } from "./SiteApp";
 
 afterEach(cleanup);
+beforeEach(() => {
+  window.scrollTo = vi.fn();
+});
 
 const layout: LayoutPayload = {
   site: {
@@ -56,6 +59,57 @@ function page(
 }
 
 describe("SiteApp navigation lifecycle", () => {
+  it("keeps one shell and updates navigation together with page content", async () => {
+    window.history.replaceState(null, "", "/");
+    const home = {
+      ...page(
+        "home.index",
+        {
+          sort: "latest",
+          tabs: [],
+          topics: [],
+          pagination: { page: 1, nextPage: 2, hasNext: false, nextUrl: "" },
+          announcement: { enabled: false, html: "" },
+        },
+        "/",
+      ),
+      layout: {
+        ...layout,
+        sidebar: { ...layout.sidebar, activeKey: "topics" },
+      },
+    } as AnyPagePayload;
+    const categories = {
+      ...page("categories.index", { categories: [], total: 0 }, "/categories"),
+      layout: {
+        ...layout,
+        sidebar: { ...layout.sidebar, activeKey: "categories" },
+      },
+    } as AnyPagePayload;
+    const source: PageSource<AnyPagePayload> = {
+      api: {} as GooseSiteApi,
+      admin: {} as GooseAdminApi,
+      load: vi.fn(async (url: URL) =>
+        url.pathname === "/categories" ? categories : home,
+      ),
+    };
+    const user = userEvent.setup();
+    render(<SiteApp pageSource={source} />);
+
+    const sidebar = await screen.findByRole("complementary", { name: "Sidebar" });
+    const categoriesLink = sidebar.querySelector<HTMLAnchorElement>('a[href="/categories"]');
+    expect(categoriesLink?.className).toContain("hover:bg-accent");
+    await user.click(categoriesLink!);
+
+    await waitFor(() => {
+      const currentSidebar = screen.getByRole("complementary", { name: "Sidebar" });
+      expect(document.querySelectorAll('aside[aria-label="Sidebar"]')).toHaveLength(1);
+      expect(
+        currentSidebar.querySelector('a[href="/categories"]')?.getAttribute("aria-current"),
+      ).toBe("page");
+    });
+    expect(await screen.findByText(/暂无分类|No categories/)).toBeTruthy();
+  });
+
   it("blocks dirty SPA navigation until the editor decision is resolved", async () => {
     window.history.replaceState(null, "", "/publish");
     const publish = page(

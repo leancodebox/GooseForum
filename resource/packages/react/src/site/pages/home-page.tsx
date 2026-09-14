@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { HomeProps, LayoutPayload } from "@gooseforum/client";
 import { Bell, Mail, Plus, UsersRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -32,8 +32,14 @@ export function HomePageView({
   const { t } = useTranslation("home");
   const list = useTopicList(page, pageUrl);
   const [unread, setUnread] = useState(() => announcementUnread(page));
+  const announcementVersion = `${page.announcement.enabled}:${page.announcement.publishedAt || ""}`;
+  const currentAnnouncementVersion = useRef(announcementVersion);
 
-  useEffect(() => setUnread(announcementUnread(page)), [page, pageUrl]);
+  useEffect(() => {
+    if (currentAnnouncementVersion.current === announcementVersion) return;
+    currentAnnouncementVersion.current = announcementVersion;
+    setUnread(announcementUnread(page));
+  }, [announcementVersion, page]);
 
   function markRead() {
     setUnread(false);

@@ -44,8 +44,21 @@ export function useTopicList<T extends TopicPage>(page: T, pageUrl: string) {
   const [error, setError] = useState("");
   const sentinel = useRef<HTMLDivElement>(null);
   const revision = useRef(0);
+  const active = useRef(true);
+  const currentPageUrl = useRef(pageUrl);
 
   useEffect(() => {
+    active.current = true;
+    setLoading(false);
+    return () => {
+      active.current = false;
+      revision.current++;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (currentPageUrl.current === pageUrl) return;
+    currentPageUrl.current = pageUrl;
     revision.current++;
     setTopics(page.topics);
     setPagination(page.pagination);
@@ -53,8 +66,22 @@ export function useTopicList<T extends TopicPage>(page: T, pageUrl: string) {
     setError("");
   }, [page, pageUrl]);
 
+  useEffect(() => {
+    const unseenById = new Map(
+      page.topics.map((topic) => [topic.id, topic.unseen]),
+    );
+    setTopics((current) =>
+      current.map((topic) =>
+        unseenById.has(topic.id)
+          ? { ...topic, unseen: unseenById.get(topic.id) }
+          : topic,
+      ),
+    );
+  }, [page.topics]);
+
   const loadMore = useCallback(async () => {
     if (
+      !active.current ||
       mode !== "waterfall" ||
       loading ||
       !pagination.hasNext ||
@@ -70,15 +97,15 @@ export function useTopicList<T extends TopicPage>(page: T, pageUrl: string) {
       const next = (await runtime.fetchPage(
         pagination.nextUrl,
       )) as PagePayload<T>;
-      if (current !== revision.current) return;
+      if (!active.current || current !== revision.current) return;
       setTopics((existing) => appendUnique(existing, next.props.topics));
       setPagination(next.props.pagination);
     } catch (reason) {
-      if (current === revision.current) {
+      if (active.current && current === revision.current) {
         setError(reason instanceof Error ? reason.message : "load failed");
       }
     } finally {
-      if (current === revision.current) setLoading(false);
+      if (active.current && current === revision.current) setLoading(false);
     }
   }, [loading, mode, pagination, runtime]);
 

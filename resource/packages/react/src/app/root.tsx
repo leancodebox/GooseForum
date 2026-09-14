@@ -83,6 +83,15 @@ export interface GooseAppProps {
 }
 
 export function GooseApp({ page }: GooseAppProps) {
+  const content = <GoosePage page={page} />;
+  return isStandalonePage(page) ? (
+    content
+  ) : (
+    <AppShell layout={page.layout}>{content}</AppShell>
+  );
+}
+
+export function GoosePage({ page }: GooseAppProps) {
   if (page.component === "auth.login") {
     return <LoginPageView layout={page.layout} page={page.props} />;
   }
@@ -93,9 +102,7 @@ export function GooseApp({ page }: GooseAppProps) {
     return <OIDCConsentPageView layout={page.layout} page={page.props} />;
   }
 
-  return (
-    <AppShell layout={page.layout}>
-      {page.component === "links.index" ? (
+  return page.component === "links.index" ? (
         <LinksPageView page={page.props} />
       ) : page.component === "sponsors.index" ? (
         <SponsorsPageView page={page.props} />
@@ -187,8 +194,14 @@ export function GooseApp({ page }: GooseAppProps) {
         </Suspense>
       ) : (
         <PayloadPreview page={page} />
-      )}
-    </AppShell>
+      );
+}
+
+export function isStandalonePage(page: AnyPagePayload) {
+  return (
+    page.component === "auth.login" ||
+    page.component === "auth.resetPassword" ||
+    page.component === "auth.oidcConsent"
   );
 }
 

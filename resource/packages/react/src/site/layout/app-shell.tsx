@@ -643,8 +643,10 @@ function NavList({
               asChild
               variant="ghost"
               className={cn(
-                "h-8 w-full justify-start text-[13px] leading-[18.5714px]",
-                item.active && "bg-primary/10 text-primary",
+                "h-8 w-full justify-start text-[13px] leading-[18.5714px] transition-none",
+                item.active
+                  ? "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
+                  : "text-foreground/75 hover:bg-accent hover:text-foreground",
               )}
             >
               <GooseLink

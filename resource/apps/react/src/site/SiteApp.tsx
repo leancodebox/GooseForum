@@ -11,7 +11,9 @@ import type { AnyPagePayload } from "@gooseforum/client";
 import {
   BootstrapError,
   BootstrapLoading,
-  GooseApp,
+  AppShell,
+  GoosePage,
+  isStandalonePage,
 } from "@gooseforum/react/app";
 import {
   GooseRuntimeProvider,
@@ -306,6 +308,20 @@ export function SiteApp({ pageSource }: SiteAppProps) {
       ? routeCacheKey(new URL(page.url, window.location.href))
       : "";
 
+  const pageContent = page ? (
+    <>
+      {cachedPages.map((entry) => (
+        <Activity
+          key={entry.key}
+          mode={entry.key === activeCacheKey ? "visible" : "hidden"}
+        >
+          <GoosePage page={entry.page} />
+        </Activity>
+      ))}
+      {!activeCacheKey ? <GoosePage page={page} /> : null}
+    </>
+  ) : null;
+
   return (
     <GooseI18nProvider locale={locale}>
       <GooseRuntimeProvider runtime={runtime}>
@@ -316,17 +332,9 @@ export function SiteApp({ pageSource }: SiteAppProps) {
             retrying={isNavigating}
           />
         ) : page ? (
-          <>
-            {cachedPages.map((entry) => (
-              <Activity
-                key={entry.key}
-                mode={entry.key === activeCacheKey ? "visible" : "hidden"}
-              >
-                <GooseApp page={entry.page} />
-              </Activity>
-            ))}
-            {!activeCacheKey ? <GooseApp page={page} /> : null}
-          </>
+          isStandalonePage(page) ? pageContent : (
+            <AppShell layout={page.layout}>{pageContent}</AppShell>
+          )
         ) : (
           <BootstrapLoading />
         )}

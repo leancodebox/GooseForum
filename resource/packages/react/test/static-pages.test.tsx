@@ -530,6 +530,13 @@ describe("AppShell and static pages", () => {
     );
     const allTab = screen.getByRole("tab", { name: "全部" });
     expect(allTab.classList.contains("h-8")).toBe(true);
+    const tabsList = allTab.closest('[data-slot="tabs-list"]');
+    expect(tabsList?.classList.contains("group-data-horizontal/tabs:h-auto")).toBe(
+      true,
+    );
+    expect(tabsList?.classList.contains("group-data-horizontal/tabs:h-8")).toBe(
+      false,
+    );
     expect(
       allTab.closest("section")?.classList.contains("max-sm:border-t-0"),
     ).toBe(true);
@@ -754,7 +761,20 @@ describe("AppShell and static pages", () => {
 
   it("loads and handles moderation reports", async () => {
     const props: ModerationPageProps = {
-      categoryTabs: [],
+      categoryTabs: [
+        {
+          key: "all",
+          label: "全部",
+          url: "/moderation?category=all",
+          active: false,
+        },
+        {
+          key: "chat",
+          label: "吐槽/脑洞",
+          url: "/moderation?category=chat",
+          active: true,
+        },
+      ],
       topics: [],
       pagination: { page: 1, nextPage: 2, hasNext: false, nextUrl: "" },
     };
@@ -792,10 +812,37 @@ describe("AppShell and static pages", () => {
     expect(
       await screen.findByRole("link", { name: "Spam topic" }),
     ).toBeTruthy();
+    const tabsLists = document.querySelectorAll('[data-slot="tabs-list"]');
+    expect(tabsLists).toHaveLength(2);
+    expect(
+      tabsLists[0]?.classList.contains("group-data-horizontal/tabs:h-auto"),
+    ).toBe(true);
+    expect(tabsLists[0]?.classList.contains("rounded-lg")).toBe(true);
+    expect(tabsLists[0]?.classList.contains("bg-transparent")).toBe(true);
+    expect(
+      document
+        .querySelector('[data-slot="moderation-tabs-frame"]')
+        ?.classList.contains("bg-muted"),
+    ).toBe(true);
+    expect(
+      tabsLists[1]?.classList.contains("group-data-horizontal/tabs:h-auto"),
+    ).toBe(true);
+    expect(
+      tabsLists[1]?.classList.contains("group-data-horizontal/tabs:h-8"),
+    ).toBe(false);
+    expect(
+      screen.getByRole("tab", { name: "待处理" }).classList.contains("flex-none"),
+    ).toBe(true);
+    expect(tabsLists[0]?.classList.contains("w-fit")).toBe(true);
+    expect(tabsLists[1]?.classList.contains("w-full")).toBe(true);
     await user.click(screen.getByRole("button", { name: "封禁" }));
     expect(setTopicStatus).toHaveBeenCalledWith(21, "ban");
     expect(setReportStatus).toHaveBeenCalledWith(8, "ban");
     await waitFor(() => expect(screen.queryByText("Spam topic")).toBeNull());
+    await user.click(screen.getByRole("tab", { name: "封禁记录" }));
+    const activeCategory = screen.getByRole("link", { name: "吐槽/脑洞" });
+    expect(activeCategory.getAttribute("data-variant")).toBe("default");
+    expect(activeCategory.getAttribute("aria-current")).toBe("page");
   });
 
   it("localizes server-backed error pages", async () => {

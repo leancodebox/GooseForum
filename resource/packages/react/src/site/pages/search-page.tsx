@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { SearchPageProps } from "@gooseforum/client";
 import { Search, UsersRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -21,9 +21,14 @@ export function SearchPageView({ page }: { page: SearchPageProps }) {
   const { t: topicT } = useTranslation("home");
   const runtime = useGooseRuntime();
   const [query, setQuery] = useState(page.query);
+  const payloadQuery = useRef(page.query);
   const hasQuery = Boolean(page.query.trim());
 
-  useEffect(() => setQuery(page.query), [page.query]);
+  useEffect(() => {
+    if (payloadQuery.current === page.query) return;
+    payloadQuery.current = page.query;
+    setQuery(page.query);
+  }, [page.query]);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
