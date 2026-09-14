@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   createContext,
@@ -6,75 +6,85 @@ import {
   type AnchorHTMLAttributes,
   type MouseEvent,
   type ReactNode,
-} from 'react'
-import type { GooseSiteApi } from '@gooseforum/client'
-import type { ThemePayload } from '@gooseforum/client'
-import type { AuthLocale } from '../i18n/auth'
+} from "react";
+import type { AnyPagePayload, GooseSiteApi } from "@gooseforum/client";
+import type { ThemePayload } from "@gooseforum/client";
+import type { AuthLocale } from "../i18n/auth";
 
 export interface GooseNavigateOptions {
-  replace?: boolean
+  replace?: boolean;
 }
 
 export interface GooseRuntime {
-  api: GooseSiteApi
-  currentUrl: string
-  isNavigating: boolean
-  theme: ThemePayload['current']
-  locale: AuthLocale
-  navigate(href: string, options?: GooseNavigateOptions): Promise<void>
-  queueFlash(message: string, type?: GooseFlashType): void
-  redirect(href: string): void
-  refresh(): Promise<void>
-  setLocale(locale: AuthLocale): void
-  toggleTheme(): void
+  api: GooseSiteApi;
+  currentUrl: string;
+  isNavigating: boolean;
+  theme: ThemePayload["current"];
+  locale: AuthLocale;
+  navigate(href: string, options?: GooseNavigateOptions): Promise<void>;
+  fetchPage?(href: string, signal?: AbortSignal): Promise<AnyPagePayload>;
+  queueFlash(message: string, type?: GooseFlashType): void;
+  redirect(href: string): void;
+  refresh(): Promise<void>;
+  setLocale(locale: AuthLocale): void;
+  toggleTheme(): void;
 }
 
-export type GooseFlashType = 'success' | 'info' | 'warning' | 'error'
+export type GooseFlashType = "success" | "info" | "warning" | "error";
 
-const GooseRuntimeContext = createContext<GooseRuntime | null>(null)
+const GooseRuntimeContext = createContext<GooseRuntime | null>(null);
 
 export function GooseRuntimeProvider({
   runtime,
   children,
 }: {
-  runtime: GooseRuntime
-  children: ReactNode
+  runtime: GooseRuntime;
+  children: ReactNode;
 }) {
   return (
     <GooseRuntimeContext.Provider value={runtime}>
       {children}
     </GooseRuntimeContext.Provider>
-  )
+  );
 }
 
 export function useGooseRuntime() {
-  const runtime = useContext(GooseRuntimeContext)
+  const runtime = useContext(GooseRuntimeContext);
   if (!runtime) {
-    throw new Error('useGooseRuntime must be used inside GooseRuntimeProvider')
+    throw new Error("useGooseRuntime must be used inside GooseRuntimeProvider");
   }
-  return runtime
+  return runtime;
 }
 
-export interface GooseLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
-  href: string
-  replace?: boolean
+export interface GooseLinkProps
+  extends AnchorHTMLAttributes<HTMLAnchorElement> {
+  href: string;
+  replace?: boolean;
 }
 
-export function GooseLink({ href, replace, onClick, ...props }: GooseLinkProps) {
-  const runtime = useGooseRuntime()
+export function GooseLink({
+  href,
+  replace,
+  onClick,
+  ...props
+}: GooseLinkProps) {
+  const runtime = useGooseRuntime();
 
   function handleClick(event: MouseEvent<HTMLAnchorElement>) {
-    onClick?.(event)
-    if (!shouldNavigateInApp(event, href)) return
+    onClick?.(event);
+    if (!shouldNavigateInApp(event, href)) return;
 
-    event.preventDefault()
-    void runtime.navigate(href, { replace })
+    event.preventDefault();
+    void runtime.navigate(href, { replace });
   }
 
-  return <a {...props} href={href} onClick={handleClick} />
+  return <a {...props} href={href} onClick={handleClick} />;
 }
 
-function shouldNavigateInApp(event: MouseEvent<HTMLAnchorElement>, href: string) {
+function shouldNavigateInApp(
+  event: MouseEvent<HTMLAnchorElement>,
+  href: string,
+) {
   if (
     event.defaultPrevented ||
     event.button !== 0 ||
@@ -82,14 +92,14 @@ function shouldNavigateInApp(event: MouseEvent<HTMLAnchorElement>, href: string)
     event.ctrlKey ||
     event.shiftKey ||
     event.altKey ||
-    event.currentTarget.target === '_blank' ||
-    event.currentTarget.hasAttribute('download') ||
-    href.startsWith('#')
+    event.currentTarget.target === "_blank" ||
+    event.currentTarget.hasAttribute("download") ||
+    href.startsWith("#")
   ) {
-    return false
+    return false;
   }
 
-  const document = event.currentTarget.ownerDocument
-  const target = new URL(href, document.baseURI)
-  return target.origin === document.location.origin
+  const document = event.currentTarget.ownerDocument;
+  const target = new URL(href, document.baseURI);
+  return target.origin === document.location.origin;
 }

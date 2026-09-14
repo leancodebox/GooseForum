@@ -15,7 +15,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@gooseforum/react/components/ui/card";
-import { Input } from "@gooseforum/react/components/ui/input";
 import {
   Code2,
   ExternalLink,
@@ -25,17 +24,8 @@ import {
   Tag,
   Users,
 } from "lucide-react";
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import type { DashboardTextKey } from "../dashboard-i18n";
+import { TrafficOverview } from "../components/traffic-overview";
 type Text = (k: DashboardTextKey) => string;
 const date = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -55,11 +45,10 @@ export default function DashboardPage({
   const [statsLoading, setStatsLoading] = useState(true);
   const [trafficLoading, setTrafficLoading] = useState(true);
   const [releasesLoading, setReleasesLoading] = useState(true);
-  const [end, setEnd] = useState(() => date(new Date()));
-  const [start, setStart] = useState(() => {
+  const [range, setRange] = useState(() => {
     const d = new Date();
-    d.setDate(d.getDate() - 7);
-    return date(d);
+    d.setDate(d.getDate() - 6);
+    return { start: date(d), end: date(new Date()) };
   });
   useEffect(() => {
     let active = true;
@@ -95,7 +84,7 @@ export default function DashboardPage({
     let active = true;
     setTrafficLoading(true);
     void api.dashboard
-      .traffic(start, end)
+      .traffic(range.start, range.end)
       .then((value) => {
         if (active) setTraffic(value);
       })
@@ -108,7 +97,7 @@ export default function DashboardPage({
     return () => {
       active = false;
     };
-  }, [api, end, start]);
+  }, [api, range.end, range.start]);
   const cards = [
     {
       label: text("users"),
@@ -171,84 +160,14 @@ export default function DashboardPage({
         ))}
       </div>
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="rounded-xl border bg-background p-4">
-          <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h3 className="font-semibold">{text("traffic")}</h3>
-              <p className="text-sm text-muted-foreground">
-                {text("trafficHint")}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Input
-                aria-label={text("start")}
-                type="date"
-                value={start}
-                onChange={(e) => setStart(e.target.value)}
-              />
-              <Input
-                aria-label={text("end")}
-                type="date"
-                value={end}
-                onChange={(e) => setEnd(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="h-80">
-            {traffic.length ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={traffic}>
-                  <defs>
-                    <linearGradient id="reg" x1="0" y1="0" x2="0" y2="1">
-                      <stop
-                        offset="5%"
-                        stopColor="var(--chart-1)"
-                        stopOpacity={0.5}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor="var(--chart-1)"
-                        stopOpacity={0.05}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid vertical={false} stroke="var(--border)" />
-                  <XAxis dataKey="date" tickLine={false} axisLine={false} />
-                  <YAxis tickLine={false} axisLine={false} />
-                  <Tooltip />
-                  <Legend />
-                  <Area
-                    type="monotone"
-                    dataKey="regCount"
-                    name={text("registrations")}
-                    stroke="var(--chart-1)"
-                    fill="url(#reg)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="topicCount"
-                    name={text("topics")}
-                    stroke="var(--chart-2)"
-                    fill="var(--chart-2)"
-                    fillOpacity={0.12}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="replyCount"
-                    name={text("posts")}
-                    stroke="var(--chart-4)"
-                    fill="var(--chart-4)"
-                    fillOpacity={0.1}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="grid h-full place-items-center text-muted-foreground">
-                {trafficLoading ? text("loading") : text("empty")}
-              </div>
-            )}
-          </div>
-        </section>
+        <TrafficOverview
+          data={traffic}
+          loading={trafficLoading}
+          range={range}
+          locale={locale}
+          text={text}
+          onRangeChange={setRange}
+        />
         <section className="overflow-hidden rounded-xl border bg-background">
           <div className="flex items-start justify-between border-b p-4">
             <div>

@@ -1,11 +1,23 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+
 @import "shadcn/tailwind.css";
 @import "../../../../src/styles/tokens.css";
 
 @custom-variant dark (&:where([data-theme="gf-dark"], [data-theme="gf-dark"] *));
 @source "../../../../apps/react/src/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
+
+@layer components {
+  .avatar-crop-workspace cropper-canvas {
+    height: 100%;
+    width: 100%;
+  }
+
+  .avatar-crop-workspace cropper-selection {
+    outline: 1px solid color-mix(in oklab, var(--primary) 75%, transparent);
+  }
+}
 
 :root {
   --radius: var(--gf-radius-box);
@@ -20,7 +32,11 @@
   --secondary: var(--gf-color-secondary);
   --secondary-foreground: var(--gf-color-secondary-content);
   --muted: var(--gf-color-base-200);
-  --muted-foreground: color-mix(in oklch, var(--gf-color-base-content) 58%, transparent);
+  --muted-foreground: color-mix(
+    in oklch,
+    var(--gf-color-base-content) 58%,
+    transparent
+  );
   --accent: var(--gf-color-base-300);
   --accent-foreground: var(--gf-color-base-content);
   --destructive: var(--gf-color-error);
@@ -103,7 +119,10 @@
     margin: 0;
     background: var(--background);
     color: var(--foreground);
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Segoe UI", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif;
+    font-family:
+      -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC",
+      "Hiragino Sans GB", "Segoe UI", "Microsoft YaHei", "Noto Sans CJK SC",
+      Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
