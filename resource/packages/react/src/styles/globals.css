@@ -107,4 +107,11 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  html.goose-admin-document,
+  html.goose-admin-document body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--sidebar);
+  }
 }

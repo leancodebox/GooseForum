@@ -6,6 +6,21 @@ const post = <T>(http: GooseHttpClient, path: string, json: unknown = {}) =>
 
 export function createAdminApi(http: GooseHttpClient): GooseAdminApi {
   return {
+    settings: {
+      site: () => http.request('/api/admin/site-settings'),
+      saveSite: (settings) => post(http, '/api/admin/save-site-settings', { settings }),
+      chrome: () => http.request('/api/admin/site-chrome'),
+      saveChrome: (settings) => post(http, '/api/admin/save-site-chrome', { settings }),
+    },
+    audit: {
+      records: (input) => post(http, '/api/admin/opt-record-page', input),
+    },
+    assets: {
+      badges: () => http.request('/api/admin/badges'),
+      saveBadge: (badge) => post(http, '/api/admin/badge-save', badge),
+      deleteBadge: (code) => post(http, '/api/admin/badge-delete', { code }),
+      files: (input) => post(http, '/api/admin/file-resources', input),
+    },
     pages: {
       links: () => http.request('/api/admin/friend-links'),
       saveLinks: (groups) => post(http, '/api/admin/save-friend-links', { linksInfo: groups }),

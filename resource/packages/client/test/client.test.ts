@@ -323,6 +323,34 @@ describe('API client', () => {
     expect(new Headers(fetchMock.mock.calls[2]?.[1]?.headers).has('Content-Type')).toBe(false)
   })
 
+  it('exposes badge and file-resource administration', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+    await client.admin.assets.deleteBadge('helper')
+    await client.admin.assets.files({ page: 2, pageSize: 20 })
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'https://forum.example/api/admin/badge-delete',
+      'https://forum.example/api/admin/file-resources',
+    ])
+    expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(JSON.stringify({ page: 2, pageSize: 20 }))
+  })
+
+  it('exposes paginated audit records', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: { list: [], page: 1, total: 0 } }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+    await client.admin.audit.records({ page: 3, pageSize: 20 })
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('https://forum.example/api/admin/opt-record-page')
+    expect(fetchMock.mock.calls[0]?.[1]?.body).toBe(JSON.stringify({ page: 3, pageSize: 20 }))
+  })
+
+  it('exposes site and chrome settings contracts', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: {} }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+    await client.admin.settings.saveSite({ siteName:'GooseForum',siteUrl:'https://forum.example',siteLogo:'',siteEmail:'',siteDescription:'',siteKeywords:'' })
+    await client.admin.settings.saveChrome({ header:[],mainMenu:[],resources:[],sidebarGroups:[] })
+    expect(fetchMock.mock.calls.map(([url])=>url)).toEqual(['https://forum.example/api/admin/save-site-settings','https://forum.example/api/admin/save-site-chrome'])
+  })
+
   it('sets JSON accept headers for GET domain APIs', async () => {
     const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
     const client = createGooseClient({ fetch: fetchMock })

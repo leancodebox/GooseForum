@@ -84,13 +84,44 @@ export interface AdminBadge {
   grantMode: 'auto' | 'manual' | string
   name: string
   description: string
+  iconType?: string
+  iconKey?: string
   iconUrl: string
   color: string
   level: string
   isEnabled: boolean
   isWearable: boolean
   sortOrder: number
+  isSystem?: boolean
+  canDelete?: boolean
 }
+
+export interface AdminFileResource {
+  id: number
+  name: string
+  type: string
+  size: number
+  userId: number
+  uploaderUsername?: string
+  createdAt: string
+  url: string
+}
+
+export interface AdminOptRecord {
+  id: number
+  optUserId: number
+  optType: number
+  targetType: number
+  targetId: string
+  optInfo: string
+  optInfoPayload?: { messageCode?: string; params?: Record<string, unknown> }
+  createdAt: string
+}
+
+export interface SiteSettings { siteName:string;siteUrl:string;siteLogo:string;siteEmail:string;siteDescription:string;siteKeywords:string;externalLinks?:string }
+export interface SiteChromeItem { id:string;enabled:boolean;type:'link'|'text'|string;label:string;i18nLabel:string;url:string }
+export interface SiteChromeGroup { id:string;title:string;i18nLabel:string;items:SiteChromeItem[] }
+export interface SiteChromeConfig { header:SiteChromeItem[];mainMenu:SiteChromeItem[];resources:SiteChromeItem[];sidebarGroups:SiteChromeGroup[];footerInfo?:{primary:{content:string}[];list:{name:string;url:string}[]};brandType?:string;brandText?:string;brandImage?:string }
 
 export interface UserBadge extends AdminBadge {
   source?: string
@@ -196,6 +227,21 @@ export interface AdminRole {
 }
 
 export interface GooseAdminApi {
+  settings: {
+    site(): Promise<SiteSettings>
+    saveSite(settings: SiteSettings): Promise<unknown>
+    chrome(): Promise<SiteChromeConfig>
+    saveChrome(settings: SiteChromeConfig): Promise<unknown>
+  }
+  audit: {
+    records(input: { page?: number; pageSize?: number; optUserId?: number; optType?: number; targetType?: number; targetId?: number }): Promise<PageResult<AdminOptRecord>>
+  }
+  assets: {
+    badges(): Promise<AdminBadge[]>
+    saveBadge(badge: AdminBadge): Promise<unknown>
+    deleteBadge(code: string): Promise<unknown>
+    files(input: { page?: number; pageSize?: number }): Promise<PageResult<AdminFileResource>>
+  }
   pages: {
     links(): Promise<FriendLinkGroup[]>
     saveLinks(groups: FriendLinkGroup[]): Promise<unknown>
