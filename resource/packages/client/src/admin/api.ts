@@ -6,11 +6,46 @@ const post = <T>(http: GooseHttpClient, path: string, json: unknown = {}) =>
 
 export function createAdminApi(http: GooseHttpClient): GooseAdminApi {
   return {
+    dashboard: {
+      statistics: () => http.request('/api/forum/get-site-statistics'),
+      traffic: (startDate, endDate) => post(http, '/api/admin/traffic-overview', { startDate, endDate }),
+      version: () => http.request('/api/admin/server-version'),
+      releases: async () => {
+        const response = await http.fetch('https://api.github.com/repos/leancodebox/GooseForum/releases', { headers: { Accept: 'application/vnd.github+json' } })
+        if (!response.ok) throw new Error(`GitHub releases request failed with HTTP ${response.status}`)
+        return response.json()
+      },
+    },
     settings: {
       site: () => http.request('/api/admin/site-settings'),
       saveSite: (settings) => post(http, '/api/admin/save-site-settings', { settings }),
       chrome: () => http.request('/api/admin/site-chrome'),
       saveChrome: (settings) => post(http, '/api/admin/save-site-chrome', { settings }),
+      mail: () => http.request('/api/admin/mail-settings'),
+      saveMail: (settings) => post(http, '/api/admin/save-mail-settings', { settings }),
+      testMail: (settings, testEmail) => post(http, '/api/admin/test-mail-connection', { settings, testEmail }),
+      security: () => http.request('/api/admin/security-settings'),
+      saveSecurity: (settings) => post(http, '/api/admin/save-security-settings', { settings }),
+      posting: () => http.request('/api/admin/posting-settings'),
+      savePosting: (settings) => post(http, '/api/admin/save-posting-settings', { settings }),
+      announcement: () => http.request('/api/admin/announcement'),
+      saveAnnouncement: (settings) => post(http, '/api/admin/save-announcement', { settings }),
+      httpNotify: () => http.request('/api/admin/http-notify-settings'),
+      saveHttpNotify: (settings) => post(http, '/api/admin/save-http-notify-settings', { settings }),
+      sensitiveWordSettings: async () => (await http.request<{ settings: import('./types.js').SensitiveWordSettings }>('/api/admin/sensitive-word-settings')).settings,
+      saveSensitiveWordSettings: (settings) => post(http, '/api/admin/save-sensitive-word-settings', { settings }),
+      sensitiveWords: async () => (await http.request<{ words: import('./types.js').SensitiveWord[] | null }>('/api/admin/sensitive-words')).words || [],
+      saveSensitiveWord: async (word) => (await post<{ word: import('./types.js').SensitiveWord }>(http, '/api/admin/sensitive-word-save', { word })).word,
+      deleteSensitiveWord: (id) => post(http, '/api/admin/sensitive-word-delete', { id }),
+      oauth: () => http.request('/api/admin/oauth-settings'),
+      saveOAuth: (settings) => post(http, '/api/admin/save-oauth-settings', { settings }),
+      oidcStatus: () => http.request('/api/admin/oidc-provider'),
+      saveOIDCStatus: (enabled) => post(http, '/api/admin/oidc-provider', { enabled }),
+      rotateOIDCSigningKey: () => post(http, '/api/admin/oidc-provider/rotate-signing-key'),
+      oidcClients: () => http.request('/api/admin/oidc-clients'),
+      createOIDCClient: (input) => post(http, '/api/admin/oidc-clients/create', input),
+      updateOIDCClient: (client) => post(http, '/api/admin/oidc-clients/update', client),
+      rotateOIDCClientSecret: (clientId) => post(http, '/api/admin/oidc-clients/rotate-secret', { clientId }),
     },
     audit: {
       records: (input) => post(http, '/api/admin/opt-record-page', input),

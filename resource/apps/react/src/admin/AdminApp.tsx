@@ -15,6 +15,11 @@ import { createPageConfigText } from './page-config-i18n'
 import { createAssetText } from './assets-i18n'
 import { createAuditText } from './audit-i18n'
 import { createSettingsText } from './settings-i18n'
+import { createSystemSettingsText } from './system-settings-i18n'
+import { createContentSettingsText } from './content-settings-i18n'
+import { createModerationSettingsText } from './moderation-settings-i18n'
+import { createIdentityText } from './identity-settings-i18n'
+import { createDashboardText } from './dashboard-i18n'
 import { adminNavGroups } from './nav'
 import { normalizeAdminPath } from './navigation'
 
@@ -31,6 +36,14 @@ const loadFilesPage = () => import('./pages/file-resources-management-page').the
 const loadAuditPage = () => import('./pages/opt-records-management-page').then((module) => ({ default: module.OptRecordsManagementPage }))
 const loadSiteInfoPage = () => import('./pages/site-info-management-page').then((module) => ({ default: module.SiteInfoManagementPage }))
 const loadSiteChromePage = () => import('./pages/site-chrome-management-page').then((module) => ({ default: module.SiteChromeManagementPage }))
+const loadMailPage = () => import('./pages/mail-settings-page').then((module) => ({ default: module.MailSettingsPage }))
+const loadSecurityPage = () => import('./pages/security-settings-page').then((module) => ({ default: module.SecuritySettingsPage }))
+const loadPostingPage = () => import('./pages/posting-settings-page').then((module) => ({ default: module.PostingSettingsPage }))
+const loadAnnouncementPage = () => import('./pages/announcement-settings-page').then((module) => ({ default: module.AnnouncementSettingsPage }))
+const loadHttpNotifyPage = () => import('./pages/http-notify-settings-page').then((module) => ({ default: module.HttpNotifySettingsPage }))
+const loadSensitiveWordsPage = () => import('./pages/sensitive-words-settings-page').then((module) => ({ default: module.SensitiveWordsSettingsPage }))
+const loadOAuthPage = () => import('./pages/oauth-settings-page').then((module) => ({ default: module.OAuthSettingsPage }))
+const loadOIDCProviderPage = () => import('./pages/oidc-provider-settings-page').then((module) => ({ default: module.OIDCProviderSettingsPage }))
 const DashboardPage = lazy(loadDashboardPage)
 const CategoriesManagementPage = lazy(loadCategoriesPage)
 const AccessGroupsManagementPage = lazy(loadAccessGroupsPage)
@@ -44,6 +57,14 @@ const FileResourcesManagementPage = lazy(loadFilesPage)
 const OptRecordsManagementPage = lazy(loadAuditPage)
 const SiteInfoManagementPage = lazy(loadSiteInfoPage)
 const SiteChromeManagementPage = lazy(loadSiteChromePage)
+const MailSettingsPage = lazy(loadMailPage)
+const SecuritySettingsPage = lazy(loadSecurityPage)
+const PostingSettingsPage = lazy(loadPostingPage)
+const AnnouncementSettingsPage = lazy(loadAnnouncementPage)
+const HttpNotifySettingsPage = lazy(loadHttpNotifyPage)
+const SensitiveWordsSettingsPage = lazy(loadSensitiveWordsPage)
+const OAuthSettingsPage = lazy(loadOAuthPage)
+const OIDCProviderSettingsPage = lazy(loadOIDCProviderPage)
 
 const shellVariables = {
   '--sidebar-width': 'calc(var(--spacing) * 72)',
@@ -63,6 +84,11 @@ export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi 
   const assetText = useMemo(() => createAssetText(locale), [locale])
   const auditText = useMemo(() => createAuditText(locale), [locale])
   const settingsText = useMemo(() => createSettingsText(locale), [locale])
+  const systemSettingsText = useMemo(() => createSystemSettingsText(locale), [locale])
+  const contentSettingsText = useMemo(() => createContentSettingsText(locale), [locale])
+  const moderationSettingsText = useMemo(() => createModerationSettingsText(locale), [locale])
+  const identityText = useMemo(() => createIdentityText(locale), [locale])
+  const dashboardText = useMemo(() => createDashboardText(locale), [locale])
   const titleKey = adminNavGroups.flatMap((group) => group.items).find((item) => item.url === pathname)?.label || 'console'
 
   useEffect(() => {
@@ -100,6 +126,14 @@ export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi 
     if (path === '/admin/opt-records') void loadAuditPage()
     if (path === '/admin/settings/site-info') void loadSiteInfoPage()
     if (path === '/admin/settings/site-chrome') void loadSiteChromePage()
+    if (path === '/admin/settings/mail') void loadMailPage()
+    if (path === '/admin/settings/security') void loadSecurityPage()
+    if (path === '/admin/settings/posting') void loadPostingPage()
+    if (path === '/admin/settings/announcement') void loadAnnouncementPage()
+    if (path === '/admin/settings/http-notify') void loadHttpNotifyPage()
+    if (path === '/admin/settings/sensitive-words') void loadSensitiveWordsPage()
+    if (path === '/admin/settings/oauth') void loadOAuthPage()
+    if (path === '/admin/settings/oidc-provider') void loadOIDCProviderPage()
   }, [])
 
   const changeLocale = useCallback((nextLocale: typeof locale) => {
@@ -139,8 +173,24 @@ export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi 
         ? <SiteInfoManagementPage api={api} text={settingsText} />
       : pathname === '/admin/settings/site-chrome'
         ? <SiteChromeManagementPage api={api} text={settingsText} layout={page.layout} />
+      : pathname === '/admin/settings/mail'
+        ? <MailSettingsPage api={api} text={systemSettingsText} />
+      : pathname === '/admin/settings/security'
+        ? <SecuritySettingsPage api={api} text={systemSettingsText} />
+      : pathname === '/admin/settings/posting'
+        ? <PostingSettingsPage api={api} text={contentSettingsText} />
+      : pathname === '/admin/settings/announcement'
+        ? <AnnouncementSettingsPage api={api} text={contentSettingsText} />
+      : pathname === '/admin/settings/http-notify'
+        ? <HttpNotifySettingsPage api={api} text={moderationSettingsText} />
+      : pathname === '/admin/settings/sensitive-words'
+        ? <SensitiveWordsSettingsPage api={api} text={moderationSettingsText} />
+      : pathname === '/admin/settings/oauth'
+        ? <OAuthSettingsPage api={api} text={identityText} />
+      : pathname === '/admin/settings/oidc-provider'
+        ? <OIDCProviderSettingsPage api={api} text={identityText} />
       : pathname === '/admin'
-                        ? <DashboardPage />
+                        ? <DashboardPage api={api} text={dashboardText} locale={locale} />
                         : <div className="flex flex-1 items-center justify-center p-6"><div className="max-w-md rounded-xl border bg-card p-6 text-center"><h2 className="text-lg font-semibold">{text(titleKey)}</h2><p className="mt-2 text-sm text-muted-foreground">{text('notAvailable')}</p></div></div>
 
   return <TooltipProvider><SidebarProvider style={shellVariables}><AppSidebar layout={page.layout} pathname={pathname} text={text} onNavigate={navigate} onPrefetch={prefetch} variant="inset" /><SidebarInset className="overflow-clip"><SiteHeader title={text(titleKey)} locale={locale} theme={theme} onLocaleChange={changeLocale} onThemeToggle={toggleTheme} /><div className="flex flex-1 flex-col"><Suspense fallback={<div className="flex min-h-48 items-center justify-center text-sm text-muted-foreground">{text('loading')}</div>}>{content}</Suspense></div></SidebarInset></SidebarProvider><Toaster position="bottom-right" /></TooltipProvider>

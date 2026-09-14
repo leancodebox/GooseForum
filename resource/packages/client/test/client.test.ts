@@ -351,6 +351,54 @@ describe('API client', () => {
     expect(fetchMock.mock.calls.map(([url])=>url)).toEqual(['https://forum.example/api/admin/save-site-settings','https://forum.example/api/admin/save-site-chrome'])
   })
 
+  it('exposes mail and security settings contracts', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: {} }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+    const mail = { enableMail:true,smtpHost:'smtp.example',smtpPort:587,useSSL:true,smtpUsername:'user',smtpPassword:'secret',fromName:'Forum',fromEmail:'noreply@example.com' }
+    await client.admin.settings.testMail(mail, 'admin@example.com')
+    await client.admin.settings.saveSecurity({ enableSignup:true,enableEmailVerification:true,allowedDomains:['example.com'] })
+    expect(fetchMock.mock.calls[0]?.[1]?.body).toBe(JSON.stringify({ settings:mail,testEmail:'admin@example.com' }))
+    expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(JSON.stringify({ settings:{ enableSignup:true,enableEmailVerification:true,allowedDomains:['example.com'] } }))
+  })
+
+  it('exposes posting and announcement settings contracts', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: {} }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+    const posting = { textControl:{minPostLength:5,maxPostLength:50000,minTitleLength:5,maxTitleLength:100,newUserPostCooldownMinutes:0,maxDailyTopicsPerUser:10},uploadControl:{allowAttachments:true,authorizedExtensions:['.png'],maxAttachmentSizeKb:5120,maxDailyUploadsPerUser:10,newUserUploadCooldownMinutes:0} }
+    await client.admin.settings.savePosting(posting)
+    await client.admin.settings.saveAnnouncement({ enabled:true,content:'Hello' })
+    expect(fetchMock.mock.calls[0]?.[1]?.body).toBe(JSON.stringify({ settings:posting }))
+    expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(JSON.stringify({ settings:{ enabled:true,content:'Hello' } }))
+  })
+
+  it('exposes HTTP notify and sensitive-word contracts', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: { words: [] } }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+    await client.admin.settings.saveHttpNotify({ enabled:false,endpoints:[] })
+    await client.admin.settings.deleteSensitiveWord(7)
+    expect(fetchMock.mock.calls[0]?.[1]?.body).toBe(JSON.stringify({ settings:{ enabled:false,endpoints:[] } }))
+    expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(JSON.stringify({ id:7 }))
+  })
+
+  it('exposes OAuth and OIDC provider contracts', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: {} }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+    await client.admin.settings.saveOAuth({ providers:[] })
+    await client.admin.settings.saveOIDCStatus(true)
+    await client.admin.settings.rotateOIDCClientSecret('client-id')
+    expect(fetchMock.mock.calls.map(([url])=>url)).toEqual(['https://forum.example/api/admin/save-oauth-settings','https://forum.example/api/admin/oidc-provider','https://forum.example/api/admin/oidc-clients/rotate-secret'])
+    expect(fetchMock.mock.calls[2]?.[1]?.body).toBe(JSON.stringify({ clientId:'client-id' }))
+  })
+
+  it('exposes dashboard statistics and traffic contracts', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+    await client.admin.dashboard.statistics()
+    await client.admin.dashboard.traffic('2026-01-01','2026-01-08')
+    await client.admin.dashboard.version()
+    expect(fetchMock.mock.calls.map(([url])=>url)).toEqual(['https://forum.example/api/forum/get-site-statistics','https://forum.example/api/admin/traffic-overview','https://forum.example/api/admin/server-version'])
+  })
+
   it('sets JSON accept headers for GET domain APIs', async () => {
     const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
     const client = createGooseClient({ fetch: fetchMock })
