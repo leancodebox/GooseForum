@@ -254,6 +254,75 @@ describe('API client', () => {
     expect(fetchMock.mock.calls[2]?.[1]?.body).toBe(JSON.stringify({ groupId: 7, memberId: 19, approve: true }))
   })
 
+  it('exposes role administration with stable request bodies', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+
+    await client.admin.roles.list()
+    await client.admin.roles.permissions()
+    await client.admin.roles.save({ id: 4, roleName: 'Moderator', permissions: [2, 4] })
+    await client.admin.roles.delete(4)
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'https://forum.example/api/admin/role-list',
+      'https://forum.example/api/admin/get-permission-list',
+      'https://forum.example/api/admin/role-save',
+      'https://forum.example/api/admin/role-delete',
+    ])
+    expect(fetchMock.mock.calls[2]?.[1]?.body).toBe(JSON.stringify({ id: 4, roleName: 'Moderator', permissions: [2, 4] }))
+  })
+
+  it('exposes user editing and badge administration', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+
+    await client.admin.users.edit({ userId: 9, status: 0, validate: 1, roleId: 3 })
+    await client.admin.users.badgeOptions(9)
+    await client.admin.users.saveBadges(9, ['helper'])
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'https://forum.example/api/admin/user-edit',
+      'https://forum.example/api/admin/user-badge-options',
+      'https://forum.example/api/admin/save-user-badges',
+    ])
+    expect(fetchMock.mock.calls[2]?.[1]?.body).toBe(JSON.stringify({ userId: 9, badgeCodes: ['helper'] }))
+  })
+
+  it('exposes topic moderation with stable routes and request bodies', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: true }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+
+    await client.admin.topics.setCategories(12, [3, 7])
+    await client.admin.topics.setPin(12, 20)
+    await client.admin.topics.review('post', { id: 44, version: 2, action: 'reject', reason: 'spam' })
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'https://forum.example/api/admin/topics/categories-edit',
+      'https://forum.example/api/admin/topics/pin-edit',
+      'https://forum.example/api/admin/posts/review',
+    ])
+    expect(fetchMock.mock.calls[0]?.[1]?.body).toBe(JSON.stringify({ topicId: 12, categoryId: [3, 7] }))
+    expect(fetchMock.mock.calls[2]?.[1]?.body).toBe(JSON.stringify({ id: 44, version: 2, action: 'reject', reason: 'spam' }))
+  })
+
+  it('exposes page configuration and image upload contracts', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+
+    await client.admin.pages.saveLinks([{ name: 'Friends', links: [] }])
+    await client.admin.pages.saveSponsors({ sponsors: { level0: [], level1: [], level2: [], level3: [] }, content: { title: 'Sponsors', description: '' }, contact: { title: '', description: '', buttonText: '', buttonLink: '' }, rules: [] })
+    await client.admin.pages.uploadImage(new File(['logo'], 'logo.png', { type: 'image/png' }))
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'https://forum.example/api/admin/save-friend-links',
+      'https://forum.example/api/admin/save-sponsors',
+      'https://forum.example/api/admin/img-upload',
+    ])
+    expect(fetchMock.mock.calls[0]?.[1]?.body).toBe(JSON.stringify({ linksInfo: [{ name: 'Friends', links: [] }] }))
+    expect(fetchMock.mock.calls[2]?.[1]?.body).toBeInstanceOf(FormData)
+    expect(new Headers(fetchMock.mock.calls[2]?.[1]?.headers).has('Content-Type')).toBe(false)
+  })
+
   it('sets JSON accept headers for GET domain APIs', async () => {
     const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
     const client = createGooseClient({ fetch: fetchMock })
