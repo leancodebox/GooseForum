@@ -67,23 +67,30 @@ export function HomePageView({
         </aside>
       ) : null}
       {page.announcement.enabled ? (
-        <aside className="border-l-2 border-l-primary/45 bg-background px-3 py-2 sm:mb-3 sm:px-4 sm:py-2.5">
-          <div className="flex items-start gap-2">
+        <aside
+          aria-label={t("announcement")}
+          className="mb-3 rounded-xl border border-l-2 border-l-primary/45 bg-background px-3 py-2 sm:px-4 sm:py-2.5"
+        >
+          <div className="flex items-start gap-2 sm:gap-2.5">
             {unread ? (
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className="-mx-1 text-primary"
+                className="-mx-1 shrink-0 text-primary hover:bg-primary/10 hover:text-primary"
                 title={t("markRead")}
+                aria-label={t("markRead")}
                 onClick={markRead}
               >
-                <Bell />
+                <Bell className="announcement-unread-bell" />
               </Button>
             ) : (
-              <Bell className="mt-1 size-4 text-primary" />
+              <Bell
+                aria-hidden="true"
+                className="mt-1 size-4 shrink-0 text-primary"
+              />
             )}
             <div
-              className="min-w-0 flex-1 text-sm leading-6"
+              className="gf-prose gf-prose-announcement min-w-0 flex-1"
               dangerouslySetInnerHTML={{ __html: page.announcement.html }}
             />
           </div>

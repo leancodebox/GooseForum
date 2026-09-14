@@ -43,11 +43,28 @@
   .gf-prose table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; }
   .gf-prose :where(th, td) { border: 1px solid var(--border); padding: 0.4rem 0.6rem; }
   .gf-prose img { max-width: 100%; max-height: min(360px, 70vh); border-radius: 0.5rem; object-fit: contain; }
+  .gf-prose-announcement { font-size: 0.875rem; line-height: 1.5rem; }
+  .gf-prose-announcement :where(p, ul, ol, blockquote, pre, table) { margin-block: 0.125rem; }
+  .gf-prose-announcement :where(h1, h2, h3, h4) { margin-block: 0.25rem; font-size: 1rem; line-height: 1.5rem; }
+  .announcement-unread-bell { transform-origin: 50% 15%; animation: announcement-bell-ring 2s ease-in-out infinite; }
   .visual-markdown-editor .ProseMirror { position: relative; white-space: pre-wrap; word-wrap: break-word; }
   .visual-markdown-editor .ProseMirror:has(> p:only-child > br.ProseMirror-trailingBreak:only-child)::before { position: absolute; top: 1rem; left: 0.25rem; color: var(--muted-foreground); content: attr(data-placeholder); pointer-events: none; }
   .visual-markdown-editor .ProseMirror-selectednode { outline: 2px solid var(--primary); outline-offset: 2px; }
   .visual-markdown-editor :where(th, td) { position: relative; }
   .visual-markdown-editor .selectedCell::after { position: absolute; inset: 0; background: color-mix(in oklch, var(--primary) 14%, transparent); content: ""; pointer-events: none; }
+}
+
+@keyframes announcement-bell-ring {
+  0%, 30%, 100% { transform: rotate(0) scale(1); }
+  5% { transform: rotate(20deg) scale(1.12); }
+  10% { transform: rotate(-18deg) scale(1.12); }
+  15% { transform: rotate(14deg) scale(1.08); }
+  20% { transform: rotate(-10deg) scale(1.05); }
+  25% { transform: rotate(5deg) scale(1.02); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .announcement-unread-bell { animation: none; }
 }
 
 :root {

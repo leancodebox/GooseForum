@@ -513,12 +513,12 @@ export function TopicPageView({
           {page.topic.title}
         </h1>
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-muted-foreground">
-          <Person user={page.topic.author} />
+          <Person user={page.topic.author} compact />
           <time
             dateTime={page.topic.createdAt}
             className="inline-flex items-center gap-1.5"
           >
-            <Clock />
+            <Clock className="size-3.5" />
             {formatDate(page.topic.createdAt, runtime.locale)}
           </time>
           {page.topic.categories.map((category) => (
@@ -535,15 +535,15 @@ export function TopicPageView({
             </GooseLink>
           ))}
           <span className="inline-flex items-center gap-1">
-            <MessageSquare />
+            <MessageSquare className="size-3.5" />
             {replyCount}
           </span>
           <span className="inline-flex items-center gap-1">
-            <Eye />
+            <Eye className="size-3.5" />
             {page.topic.viewCount}
           </span>
           <span className="inline-flex items-center gap-1">
-            <Heart />
+            <Heart className="size-3.5" />
             {likeCount}
           </span>
         </div>
@@ -892,63 +892,98 @@ function PostRow({
     >
       <Person user={post.author} avatarOnly />
       <div className="min-w-0">
-        <header className="mb-2 flex min-w-0 flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <Person user={post.author} textOnly />
-          <time dateTime={post.createdAt}>
-            {formatDate(post.createdAt, locale)}
-          </time>
-          <GooseLink
-            href={`/p/post/${post.topicId}${post.postNo > 1 ? `/${post.postNo}` : ""}#post-${post.id}`}
-            className="ml-auto font-medium hover:text-primary"
-          >
-            #{post.postNo}
-          </GooseLink>
-          {post.isOwnPost ? (
-            <>
+        <header className="mb-1.5 flex min-w-0 items-start justify-between gap-2 text-xs text-muted-foreground">
+          <div className="min-w-0">
+            <div className="flex min-w-0 items-center gap-2">
+              <Person user={post.author} textOnly />
+              {first ? (
+                <Badge variant="secondary" className="px-1.5 py-0.5 text-xs">
+                  {t("originalPost")}
+                </Badge>
+              ) : null}
+              <PostPermalink post={post} className="hidden sm:inline" />
+            </div>
+            <div className="mt-0.5 flex items-center gap-2 sm:hidden">
+              <PostPermalink post={post} />
+              <time dateTime={post.createdAt} className="truncate">
+                {formatDate(post.createdAt, locale)}
+              </time>
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
+            {post.isOwnPost ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  className="text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                  aria-label={t("edit")}
+                  onClick={onEdit}
+                >
+                  <PencilLine />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                  aria-label={t("delete")}
+                  onClick={onDelete}
+                >
+                  <Trash2 />
+                </Button>
+              </>
+            ) : null}
+            {canPost && !post.isHidden ? (
               <Button
                 variant="ghost"
                 size="icon-xs"
-                aria-label={t("edit")}
-                onClick={onEdit}
+                className="text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                aria-label={t("reply")}
+                onClick={onReply}
               >
-                <PencilLine />
+                <Reply />
               </Button>
+            ) : null}
+            {!first && !post.isOwnPost && !post.isHidden ? (
               <Button
                 variant="ghost"
                 size="icon-xs"
-                aria-label={t("delete")}
-                onClick={onDelete}
+                className="text-muted-foreground hover:bg-warning/10 hover:text-warning"
+                aria-label={t("report")}
+                onClick={onReport}
               >
-                <Trash2 />
+                <Flag />
               </Button>
-            </>
-          ) : null}
-          {!first && !post.isOwnPost ? (
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-label={t("report")}
-              onClick={onReport}
+            ) : null}
+            {!first && post.canModerate ? (
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                className={cn(
+                  "text-muted-foreground",
+                  post.processStatus === 1
+                    ? "hover:bg-primary/10 hover:text-primary"
+                    : "hover:bg-destructive/10 hover:text-destructive",
+                )}
+                aria-label={
+                  post.processStatus === 1
+                    ? t("moderationUnban")
+                    : t("moderationBan")
+                }
+                onClick={() =>
+                  onModerate(post.processStatus === 1 ? "unban" : "ban")
+                }
+              >
+                {post.processStatus === 1 ? <RotateCcw /> : <Ban />}
+              </Button>
+            ) : null}
+            <time
+              dateTime={post.createdAt}
+              className="hidden w-36 shrink-0 text-right sm:block"
             >
-              <Flag />
-            </Button>
-          ) : null}
-          {!first && post.canModerate ? (
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-label={
-                post.processStatus === 1
-                  ? t("moderationUnban")
-                  : t("moderationBan")
-              }
-              onClick={() =>
-                onModerate(post.processStatus === 1 ? "unban" : "ban")
-              }
-            >
-              {post.processStatus === 1 ? <RotateCcw /> : <Ban />}
-            </Button>
-          ) : null}
+              {formatDate(post.createdAt, locale)}
+            </time>
+          </div>
         </header>
         {post.replyToPostId ? <ReplyReference target={target} t={t} /> : null}
         {hidden ? (
@@ -976,6 +1011,7 @@ function PostRow({
         {first ? (
           <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
             <ActionButton
+              tone="like"
               active={liked}
               busy={actionBusy === "like"}
               icon={Heart}
@@ -983,6 +1019,7 @@ function PostRow({
               onClick={() => onToggle("like")}
             />
             <ActionButton
+              tone="bookmark"
               active={bookmarked}
               busy={actionBusy === "bookmark"}
               icon={Bookmark}
@@ -990,6 +1027,7 @@ function PostRow({
               onClick={() => onToggle("bookmark")}
             />
             <ActionButton
+              tone="watch"
               active={watched}
               busy={actionBusy === "watch"}
               icon={Bell}
@@ -1017,25 +1055,39 @@ function PostRow({
               </Button>
             ) : null}
           </div>
-        ) : canPost ? (
-          <div className="mt-3">
-            <Button variant="ghost" size="sm" onClick={onReply}>
-              <Reply data-icon="inline-start" />
-              {t("reply")}
-            </Button>
-          </div>
         ) : null}
       </div>
     </article>
   );
 }
+function PostPermalink({
+  post,
+  className,
+}: {
+  post: PostPayload;
+  className?: string;
+}) {
+  return (
+    <GooseLink
+      href={`/p/post/${post.topicId}${post.postNo > 1 ? `/${post.postNo}` : ""}#post-${post.id}`}
+      className={cn(
+        "shrink-0 font-semibold tabular-nums text-muted-foreground hover:text-primary",
+        className,
+      )}
+    >
+      #{post.postNo}
+    </GooseLink>
+  );
+}
 function ActionButton({
+  tone,
   active,
   busy,
   icon: Icon,
   label,
   onClick,
 }: {
+  tone: "like" | "bookmark" | "watch";
   active: boolean;
   busy: boolean;
   icon: typeof Heart;
@@ -1044,8 +1096,18 @@ function ActionButton({
 }) {
   return (
     <Button
-      variant={active ? "secondary" : "ghost"}
+      data-tone={tone}
+      variant="ghost"
       size="sm"
+      className={cn(
+        "px-2.5 text-muted-foreground hover:bg-muted hover:text-foreground",
+        active &&
+          (tone === "like"
+            ? "bg-destructive/10 text-destructive hover:bg-destructive/15 hover:text-destructive"
+            : tone === "bookmark"
+              ? "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
+              : "bg-success/10 text-success hover:bg-success/15 hover:text-success"),
+      )}
       disabled={busy}
       onClick={onClick}
     >
@@ -1086,10 +1148,12 @@ function Person({
   user,
   avatarOnly = false,
   textOnly = false,
+  compact = false,
 }: {
   user: { id: number; username: string; avatarUrl: string };
   avatarOnly?: boolean;
   textOnly?: boolean;
+  compact?: boolean;
 }) {
   return (
     <UserCardPopover user={user}>
@@ -1097,7 +1161,8 @@ function Person({
         href={`/u/${user.id}`}
         className={cn(
           "inline-flex min-w-0 items-center gap-2 font-medium hover:text-primary",
-          avatarOnly && "size-10",
+          avatarOnly && !compact && "size-10",
+          avatarOnly && compact && "size-5",
           textOnly && "truncate",
         )}
         title={user.username}
@@ -1105,7 +1170,7 @@ function Person({
         {textOnly ? (
           user.username
         ) : (
-          <Avatar className="size-10">
+          <Avatar className={compact ? "size-5" : "size-10"}>
             <AvatarImage src={user.avatarUrl} alt="" />
             <AvatarFallback>
               {user.username.slice(0, 1).toUpperCase()}

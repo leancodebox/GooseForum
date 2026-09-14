@@ -393,13 +393,25 @@ describe("AppShell and static pages", () => {
           hasNext: true,
           nextUrl: "/?page=2",
         },
-        announcement: { enabled: false, html: "" },
+        announcement: {
+          enabled: true,
+          html: "<p><strong>System notice</strong></p>",
+          publishedAt: new Date().toISOString(),
+        },
       }),
     );
     expect(screen.getByRole("link", { name: "React migration" })).toBeTruthy();
     expect(document.querySelector('a[href="/c/Coding/1"]')).toBeTruthy();
     expect(screen.getByText("hot")).toBeTruthy();
     expect(screen.getByRole("button", { name: "加载更多" })).toBeTruthy();
+    const announcement = screen.getByLabelText("公告");
+    expect(announcement.classList.contains("rounded-xl")).toBe(true);
+    expect(announcement.classList.contains("border")).toBe(true);
+    expect(
+      screen
+        .getByText("System notice")
+        .closest(".gf-prose-announcement"),
+    ).toBeTruthy();
   });
 
   it("renders the complete user summary hierarchy", () => {
@@ -937,8 +949,8 @@ describe("AppShell and static pages", () => {
         viewCount: 10,
         likeCount: 0,
         isLiked: false,
-        isBookmarked: false,
-        isWatched: false,
+        isBookmarked: true,
+        isWatched: true,
         createdAt: post.createdAt,
         updatedAt: post.createdAt,
       },
@@ -1006,8 +1018,44 @@ describe("AppShell and static pages", () => {
     expect(
       await screen.findByRole("heading", { level: 1, name: "Topic detail" }),
     ).toBeTruthy();
+    const topicHeader = screen
+      .getByRole("heading", { level: 1, name: "Topic detail" })
+      .closest("header");
+    expect(
+      topicHeader
+        ?.querySelector(".lucide-clock")
+        ?.classList.contains("size-3.5"),
+    ).toBe(true);
+    expect(
+      topicHeader
+        ?.querySelector('[data-slot="avatar"]')
+        ?.classList.contains("size-5"),
+    ).toBe(true);
+    const firstReply = screen.getByRole("button", { name: "回复" });
+    expect(firstReply.closest("header")).toBeTruthy();
+    const desktopPermalink = Array.from(
+      document.querySelectorAll('a[href="/p/post/60#post-61"]'),
+    ).find((link) => link.classList.contains("sm:inline"));
+    expect(
+      desktopPermalink?.parentElement?.querySelector('a[href="/u/7"]'),
+    ).toBeTruthy();
+    expect(
+      document
+        .querySelector('[data-tone="bookmark"]')
+        ?.classList.contains("text-primary"),
+    ).toBe(true);
+    expect(
+      document
+        .querySelector('[data-tone="watch"]')
+        ?.classList.contains("text-success"),
+    ).toBe(true);
     await user.click(screen.getByRole("button", { name: "点赞" }));
     expect(like).toHaveBeenCalledWith(60, 1);
+    expect(
+      document
+        .querySelector('[data-tone="like"]')
+        ?.classList.contains("text-destructive"),
+    ).toBe(true);
     await user.click(screen.getByRole("button", { name: "加载更多回复" }));
     expect(await screen.findByText("Second")).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "参与讨论" }));
