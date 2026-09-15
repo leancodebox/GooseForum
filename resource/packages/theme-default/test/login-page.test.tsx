@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { GooseSiteApi, LayoutPayload, LoginPageProps } from '@gooseforum/client'
+import { GooseClientError, type GooseSiteApi, type LayoutPayload, type LoginPageProps } from '@gooseforum/client'
 import { createGooseI18n, GooseI18nProvider } from '@gooseforum/runtime/i18n'
 import { GooseRuntimeProvider, type GooseRuntime } from '@gooseforum/runtime'
 import { LoginPageView } from '../src/site/auth/login-page'
@@ -132,6 +132,25 @@ describe('LoginPageView', () => {
     await user.click(screen.getByRole('button', { name: '发送重置邮件' }))
     expect(await screen.findByText('请填写邮箱和验证码')).toBeTruthy()
     expect(auth.forgotPassword).not.toHaveBeenCalled()
+  })
+
+  it('translates backend message codes on registration errors', async () => {
+    const { auth, user } = renderLogin()
+    auth.register.mockRejectedValueOnce(new GooseClientError('auth.email.exists', {
+      messageCode: 'auth.email.exists',
+    }))
+
+    await user.click(screen.getByRole('tab', { name: '注册' }))
+    await user.type(screen.getByLabelText('用户名'), 'goose-user')
+    await user.type(screen.getByLabelText('邮箱'), 'goose@example.com')
+    await user.type(screen.getByLabelText('密码'), 'password1')
+    await user.type(screen.getByLabelText('确认密码'), 'password1')
+    await user.type(screen.getByLabelText('验证码'), '1234')
+    await user.click(screen.getByLabelText('我已阅读并同意服务条款和隐私政策'))
+    await user.click(screen.getByRole('button', { name: '创建账号' }))
+
+    expect(await screen.findByText('邮箱已被使用。')).toBeTruthy()
+    expect(screen.queryByText('auth.email.exists')).toBeNull()
   })
 
   it('updates translations when the host changes locale', async () => {
