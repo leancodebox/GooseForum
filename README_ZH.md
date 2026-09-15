@@ -93,7 +93,7 @@ MySQL/PostgreSQL、邮件、备份、安全和站点配置见 [配置文档](doc
 
 ## 开发
 
-后端使用 Go、Gin 和 GORM，前端使用 Vue 3、TypeScript、Vite 和 TailwindCSS。站内导航由服务端 payload 驱动，同时保留面向 SEO 和无 JavaScript 访问的 GoHTML 页面。
+后端使用 Go、Gin 和 GORM，前端使用 React 19、TypeScript、Vite 和 TailwindCSS。站内导航由服务端 payload 驱动，同时保留面向 SEO 和无 JavaScript 访问的 GoHTML 页面。
 
 ```bash
 # 后端热重载
@@ -103,7 +103,7 @@ air
 cd resource && pnpm dev
 ```
 
-管理后台由同一个 Vue 应用提供，访问路径为 `/admin`，不需要单独启动管理端前端服务。
+管理后台由独立 React 入口提供，访问路径为 `/admin`，不需要单独启动管理端前端服务。
 
 ## 项目结构
 
@@ -114,7 +114,7 @@ GooseForum/
 │   ├── http/               # 控制器、中间件、路由
 │   ├── models/             # GORM 模型
 │   └── service/            # 业务服务
-├── resource/               # Vue 3 前端、模板和静态资源
+├── resource/               # React 19 前端、模板和静态资源
 │   ├── src/site/           # 主站
 │   ├── src/admin/          # 管理后台
 │   ├── src/runtime/        # Payload 运行时和共享浏览器工具

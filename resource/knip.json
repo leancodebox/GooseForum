@@ -1,0 +1,45 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    "apps/web": {
+      "entry": [
+        "src/admin/main.tsx"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,css}"
+      ],
+      "ignore": [
+        "src/admin/components/chart-area-interactive.tsx",
+        "src/admin/components/data-table.tsx",
+        "src/admin/components/nav-documents.tsx",
+        "src/admin/components/nav-main.tsx",
+        "src/admin/components/nav-secondary.tsx",
+        "src/admin/components/nav-user.tsx",
+        "src/admin/components/section-cards.tsx"
+      ]
+    },
+    "packages/theme-default": {
+      "project": [
+        "src/**/*.{ts,tsx,css}",
+        "test/**/*.{ts,tsx}"
+      ]
+    },
+    "packages/runtime": {
+      "project": [
+        "src/**/*.{ts,tsx,css}"
+      ]
+    },
+    "packages/ui": {
+      "project": [
+        "src/**/*.{ts,tsx,css}"
+      ]
+    }
+  },
+  "ignoreDependencies": [
+    "@dnd-kit/modifiers",
+    "@tanstack/react-table",
+    "date-fns",
+    "tailwindcss",
+    "zod"
+  ]
+}

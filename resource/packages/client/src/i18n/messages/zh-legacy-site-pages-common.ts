@@ -1,0 +1,23 @@
+// Canonical translation data; compatibility exports and React loaders share this file.
+export default {
+  back: "返回",
+  cancel: "取消",
+  close: "关闭",
+  edit: "编辑",
+  home: "回到首页",
+  save: "保存",
+  saving: "保存中...",
+  loading: "处理中...",
+  loadingShort: "加载中...",
+  loadFailed: "加载失败",
+  preview: "预览",
+  loadMore: "加载更多",
+  retry: "重试",
+  refresh: "刷新",
+  delete: "删除",
+  search: "搜索",
+  previousPage: "上一页",
+  nextPage: "下一页",
+  currentPage: "第 {page} 页",
+  page: "第 {page} / {total} 页",
+} as const;

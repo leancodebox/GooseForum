@@ -1,0 +1,23 @@
+// Canonical translation data; compatibility exports and React loaders share this file.
+export default {
+  back: "戻る",
+  cancel: "キャンセル",
+  close: "閉じる",
+  edit: "編集",
+  home: "ホームへ",
+  save: "保存",
+  saving: "保存中...",
+  loading: "処理中...",
+  loadingShort: "読み込み中...",
+  loadFailed: "読み込みに失敗しました",
+  preview: "プレビュー",
+  loadMore: "さらに読み込む",
+  retry: "再試行",
+  refresh: "更新",
+  delete: "削除",
+  search: "検索",
+  previousPage: "前へ",
+  nextPage: "次へ",
+  currentPage: "{page} ページ目",
+  page: "{page} / {total} ページ",
+} as const;

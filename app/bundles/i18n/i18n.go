@@ -1,9 +1,9 @@
 // Package i18n provides lightweight server-side translation for the
 // server-rendered surfaces (SEO / no-JS templates, the activation page and
-// e-mail bodies). The Vue SPA has its own vue-i18n dictionaries under
-// resource/src/locales; this package covers only what the Go side renders.
+// e-mail bodies). The React frontend has its own dictionaries under
+// resource/packages/client/src/i18n; this package covers only what the Go side renders.
 //
-// Supported locales mirror the frontend (resource/src/runtime/i18n.ts):
+// Supported locales mirror the frontend (resource/packages/client/src/i18n/locale.ts):
 // zh (source / fallback), en and ja.
 package i18n
 

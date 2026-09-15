@@ -1,0 +1,77 @@
+@import "@gooseforum/ui/styles/base.css";
+@import "./typeset.css";
+.site-more-trigger[data-state="open"],
+.site-more-menu[data-slot="dropdown-menu-content"] {
+  background-color: color-mix(in oklch, var(--muted) 94%, white);
+}
+
+.site-more-menu[data-slot="dropdown-menu-content"] {
+  box-shadow: 0 6px 24px -6px rgb(0 0 0 / 9%);
+}
+
+/* Surface overrides also apply to shared Card utility classes. */
+@media (width < 64rem) {
+  .site-panel {
+    border-radius: 0;
+    border-inline-width: 0;
+    box-shadow: none;
+  }
+}
+@layer components {
+  .avatar-crop-workspace cropper-canvas {
+    height: 100%;
+    width: 100%;
+  }
+
+  .avatar-crop-workspace cropper-selection {
+    outline: 1px solid color-mix(in oklab, var(--primary) 75%, transparent);
+  }
+
+  .gf-prose {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .gf-prose > * { max-width: 100%; }
+  .gf-prose :where(p, li, blockquote, h1, h2, h3, h4, h5, h6, a, strong, em) { overflow-wrap: anywhere; word-break: break-word; }
+  .gf-prose :not(pre) > code { border-radius: 0.25rem; background: var(--muted); padding: 0.1rem 0.3rem; color: var(--destructive); }
+  .gf-prose pre { max-width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--muted); padding: 0.75rem; }
+  .gf-prose pre code { white-space: pre; }
+  .gf-prose table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; }
+  .gf-prose :where(th, td) { border: 1px solid var(--border); padding: 0.4rem 0.6rem; }
+  .gf-prose a { color: var(--primary); text-decoration-line: none; }
+  .gf-prose blockquote { border-inline-start-width: 4px; background: color-mix(in oklch, var(--muted) 70%, transparent); padding-block: 0.25rem; padding-inline: 0.75rem; color: color-mix(in oklch, var(--foreground) 75%, transparent); }
+  .gf-prose img { max-width: 100%; max-height: min(360px, 70vh); margin-block-start: var(--typeset-flow); border-radius: 0.5rem; object-fit: contain; }
+  .gf-prose-post img { cursor: zoom-in; }
+  /* Announcements use the shared renderer, with the legacy compact heading rhythm. */
+  .typeset-announcement :where(h1, h2, h3, h4) {
+    margin-block-start: 0.25rem;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  .typeset-announcement :where(h1, h2, h3, h4, h5, h6) + * {
+    margin-block-start: 0.25rem;
+  }
+  .typeset-announcement > :first-child { margin-block-start: 0; }
+  .announcement-unread-bell { transform-origin: 50% 15%; animation: announcement-bell-ring 2s ease-in-out infinite; }
+  .markdown-composer-content { color: var(--foreground); font-family: var(--typeset-font-body) !important; font-size: var(--typeset-size) !important; font-weight: 400; line-height: var(--typeset-leading) !important; }
+  .visual-markdown-editor .ProseMirror { position: relative; white-space: pre-wrap; word-wrap: break-word; }
+  .markdown-composer-content > :first-child { margin-block-start: 0; }
+  .visual-markdown-editor .ProseMirror:has(> p:only-child > br.ProseMirror-trailingBreak:only-child)::before { position: absolute; top: 1rem; left: 0.25rem; color: var(--muted-foreground); content: attr(data-placeholder); pointer-events: none; }
+  .visual-markdown-editor .ProseMirror-selectednode { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .visual-markdown-editor :where(th, td) { position: relative; }
+  .visual-markdown-editor .selectedCell::after { position: absolute; inset: 0; background: color-mix(in oklch, var(--primary) 14%, transparent); content: ""; pointer-events: none; }
+}
+
+@keyframes announcement-bell-ring {
+  0%, 30%, 100% { transform: rotate(0) scale(1); }
+  5% { transform: rotate(20deg) scale(1.12); }
+  10% { transform: rotate(-18deg) scale(1.12); }
+  15% { transform: rotate(14deg) scale(1.08); }
+  20% { transform: rotate(-10deg) scale(1.05); }
+  25% { transform: rotate(5deg) scale(1.02); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .announcement-unread-bell { animation: none; }
+}

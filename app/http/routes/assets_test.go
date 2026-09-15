@@ -22,7 +22,7 @@ func TestAssetsGzipSwitch(t *testing.T) {
 		Css  []string `json:"css"`
 	}
 
-	content, err := resource.GetTemplateFS().Open("static/dist/.vite/manifest.json")
+	content, err := resource.GetTemplateFS().Open("static/dist/react/.vite/manifest.json")
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			t.Skip("vite manifest is missing; run pnpm -C resource build to enable asset gzip checks")
@@ -36,14 +36,14 @@ func TestAssetsGzipSwitch(t *testing.T) {
 		t.Fatalf("decode manifest: %v", err)
 	}
 
-	entry := manifest["src/site/main.ts"]
+	entry := manifest["index.html"]
 	targets := append([]string{entry.File}, entry.Css...)
 	for _, target := range targets {
 		if target == "" {
 			t.Fatal("manifest contains empty asset path")
 		}
-		assertAssetGzip(t, "/assets/"+strings.TrimPrefix(target, "/"), true)
-		assertAssetGzip(t, "/assets/"+strings.TrimPrefix(target, "/"), false)
+		assertAssetGzip(t, "/assets/react/"+strings.TrimPrefix(target, "/"), true)
+		assertAssetGzip(t, "/assets/react/"+strings.TrimPrefix(target, "/"), false)
 	}
 }
 

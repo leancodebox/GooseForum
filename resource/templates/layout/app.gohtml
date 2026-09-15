@@ -34,7 +34,7 @@
     {{if .Payload.Meta.JSONLD}}<script type="application/ld+json" data-goose-jsonld="page">{{json .Payload.Meta.JSONLD}}</script>{{end}}
     <link rel="icon" href="/favicon.ico">
     {{if .Payload.Layout.Site.ExternalLinks}}{{SafeHTML .Payload.Layout.Site.ExternalLinks}}{{end}}
-    {{ResourceEntry `src/site/main.ts`}}
+    {{ResourceEntry `site`}}
     {{if .Payload.Layout.Theme.Href}}<link id="goose-site-theme-link" rel="stylesheet" href="{{.Payload.Layout.Theme.Href}}">{{end}}
 </head>
 <body class="bg-base-200 text-base-content antialiased">

@@ -93,7 +93,7 @@ See [configuration documentation](docs/configuration.md) for MySQL/PostgreSQL, m
 
 ## Development
 
-The backend uses Go, Gin, and GORM; the frontend uses Vue 3, TypeScript, Vite, and TailwindCSS. Server payloads drive navigation, with GoHTML fallback pages for SEO and access without JavaScript.
+The backend uses Go, Gin, and GORM; the frontend uses React 19, TypeScript, Vite, and TailwindCSS. Server payloads drive navigation, with GoHTML fallback pages for SEO and access without JavaScript.
 
 ```bash
 # Backend with hot reload
@@ -103,7 +103,7 @@ air
 cd resource && pnpm dev
 ```
 
-The admin console is served by the same Vue app under `/admin`; it does not require a separate frontend service.
+The admin console is served by the React admin entry under `/admin`; it does not require a separate frontend service.
 
 ## Project Structure
 
@@ -114,7 +114,7 @@ GooseForum/
 │   ├── http/               # Controllers, middleware, routes
 │   ├── models/             # GORM models
 │   └── service/            # Business services
-├── resource/               # Vue 3 frontend, templates, static assets
+├── resource/               # React 19 frontend, templates, static assets
 │   ├── src/site/           # Public site
 │   ├── src/admin/          # Admin console
 │   ├── src/runtime/        # Payload runtime and shared browser helpers

@@ -1,90 +1,15 @@
+import zh from "./messages/zh-messages.js";
+import en from "./messages/en-messages.js";
+import ja from "./messages/ja-messages.js";
+import it from "./messages/it-messages.js";
 import type { Locale } from "./auth.js";
-
-const en = {
-  title: "Messages",
-  newMessage: "New message",
-  searchConversations: "Search conversations…",
-  noMessagesYet: "No messages yet",
-  emptyConversationsTitle: "No conversations",
-  emptyConversationsDescription: "Start a private conversation.",
-  conversation: "Private conversation",
-  today: "Today",
-  loading: "Loading messages…",
-  loadOlder: "Load earlier messages",
-  startChat: "Start chatting",
-  firstMessageTo: "Send the first message to {user}.",
-  inputPlaceholder: "Type a message…",
-  emoji: "Emoji",
-  enterHint: "Enter to send, Shift + Enter for a new line",
-  send: "Send",
-  sending: "Sending…",
-  selectConversation: "Select a conversation",
-  selectConversationDescription:
-    "Choose a conversation on the left, or start a new one.",
-  searchUsers: "Search users…",
-  userFallback: "User",
-  noContactableUsers: "No contactable users.",
-  close: "Close",
-  back: "Back",
-  more: "More",
-  scrollToLatest: "Scroll to latest message",
-  loadFailed: "Could not load messages.",
-  sendFailed: "Could not send the message.",
-} as const;
 
 type Widen<T> = T extends string ? string : { [K in keyof T]: Widen<T[K]> };
 type Messages = Widen<typeof en>;
 
-const zh: Messages = {
-  title: "私信",
-  newMessage: "新私信",
-  searchConversations: "搜索会话…",
-  noMessagesYet: "还没有消息",
-  emptyConversationsTitle: "暂无会话",
-  emptyConversationsDescription: "开始一次私信聊天。",
-  conversation: "私信对话",
-  today: "今天",
-  loading: "消息加载中…",
-  loadOlder: "加载更早消息",
-  startChat: "开始聊天",
-  firstMessageTo: "给 {user} 发第一条消息。",
-  inputPlaceholder: "输入消息…",
-  emoji: "表情",
-  enterHint: "Enter 发送，Shift + Enter 换行",
-  send: "发送",
-  sending: "发送中…",
-  selectConversation: "选择一个会话",
-  selectConversationDescription: "从左侧选择会话，或开始新的私信。",
-  searchUsers: "搜索用户…",
-  userFallback: "用户",
-  noContactableUsers: "暂无可联系用户。",
-  close: "关闭",
-  back: "返回",
-  more: "更多",
-  scrollToLatest: "滚动到最新消息",
-  loadFailed: "消息加载失败。",
-  sendFailed: "消息发送失败。",
-};
-
 export const messageResources: Record<Locale, Messages> = {
   zh,
   en,
-  ja: {
-    ...en,
-    title: "メッセージ",
-    newMessage: "新規メッセージ",
-    send: "送信",
-    sending: "送信中…",
-    back: "戻る",
-    close: "閉じる",
-  },
-  it: {
-    ...en,
-    title: "Messaggi",
-    newMessage: "Nuovo messaggio",
-    send: "Invia",
-    sending: "Invio…",
-    back: "Indietro",
-    close: "Chiudi",
-  },
-};
+  ja,
+  it,
+} as const;

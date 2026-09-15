@@ -21,51 +21,49 @@ type manifestItem struct {
 	Imports []string `json:"imports"`
 }
 
-var manifest = loadManifest()
+// React assets and their manifest are embedded in production; rebuild Go after the frontend build.
+var reactManifest = loadManifestAt("static/dist/react/.vite/manifest.json")
 
 func resourceEntry(origin string) template.HTML {
-	if devServer := viteDevServer(); devServer != "" {
-		devServer = strings.TrimRight(devServer, "/")
-		origin = strings.TrimPrefix(origin, "/")
-		devBase := strings.Trim(viteDevBase(), "/")
-		if devBase != "" {
-			devBase += "/"
-		}
-		return template.HTML(fmt.Sprintf(`<script type="module" src="%s/%s@vite/client"></script>
-<script type="module" src="%s/%s%s"></script>`, devServer, devBase, devServer, devBase, origin))
+	entry, source := "", ""
+	switch origin {
+	case "site":
+		entry, source = "index.html", "src/site/main.tsx"
+	case "admin":
+		entry, source = "admin/index.html", "src/admin/main.tsx"
 	}
+	if entry != "" {
+		if setting.IsProduction() {
+			return manifestEntry(reactManifest, entry, "react/")
+		}
+		server := strings.TrimRight(preferences.GetString("resource.reactDevServer", "http://localhost:3011"), "/")
+		return template.HTML(fmt.Sprintf(`<script type="module">
+import RefreshRuntime from "%s/@react-refresh";
+RefreshRuntime.injectIntoGlobalHook(window);
+window.$RefreshReg$ = () => {};
+window.$RefreshSig$ = () => (type) => type;
+window.__vite_plugin_react_preamble_installed__ = true;
+</script>
+<script type="module" src="%s/@vite/client"></script>
+<script type="module" src="%s/%s"></script>`, server, server, server, source))
+	}
+	return ""
+}
 
-	item, ok := manifest[origin]
+func manifestEntry(entries map[string]manifestItem, origin, prefix string) template.HTML {
+	item, ok := entries[origin]
 	if !ok {
 		return template.HTML(fmt.Sprintf(`<script type="module" src="%s"></script>`, resourceAsset(origin)))
 	}
 
 	var sb strings.Builder
-	for _, css := range collectCSS(origin, map[string]bool{}) {
-		fmt.Fprintf(&sb, `<link rel="stylesheet" href="%s" crossorigin>`, resourceAsset(css))
+	for _, css := range collectManifestCSS(entries, origin, map[string]bool{}) {
+		fmt.Fprintf(&sb, `<link rel="stylesheet" href="%s" crossorigin>`, resourceAsset(prefix+css))
 		sb.WriteByte('\n')
 	}
-	fmt.Fprintf(&sb, `<script type="module" src="%s" crossorigin></script>`, resourceAsset(item.File))
+	fmt.Fprintf(&sb, `<script type="module" src="%s" crossorigin></script>`, resourceAsset(prefix+item.File))
 	sb.WriteByte('\n')
 	return template.HTML(sb.String())
-}
-
-func viteDevServer() string {
-	return viteDevServerFor(preferences.GetString("resource.devServer", ""), setting.IsProduction())
-}
-
-func viteDevServerFor(devServer string, production bool) string {
-	if devServer != "" {
-		return devServer
-	}
-	if !production {
-		return "http://localhost:3010"
-	}
-	return ""
-}
-
-func viteDevBase() string {
-	return preferences.GetString("resource.devBase", "/assets/")
 }
 
 func resourceAsset(path string) string {
@@ -75,27 +73,27 @@ func resourceAsset(path string) string {
 	return "/assets/" + strings.TrimPrefix(path, "/")
 }
 
-func loadManifest() map[string]manifestItem {
-	content, err := fs.ReadFile(resource.GetTemplateFS(), "static/dist/.vite/manifest.json")
+func loadManifestAt(path string) map[string]manifestItem {
+	content, err := fs.ReadFile(resource.GetTemplateFS(), path)
 	if err != nil {
 		return map[string]manifestItem{}
 	}
 	return jsonopt.Decode[map[string]manifestItem](content)
 }
 
-func collectCSS(entry string, visited map[string]bool) []string {
+func collectManifestCSS(entries map[string]manifestItem, entry string, visited map[string]bool) []string {
 	if visited[entry] {
 		return nil
 	}
 	visited[entry] = true
-	item, ok := manifest[entry]
+	item, ok := entries[entry]
 	if !ok {
 		return nil
 	}
 
 	files := append([]string{}, item.Css...)
 	for _, importKey := range item.Imports {
-		files = append(files, collectCSS(importKey, visited)...)
+		files = append(files, collectManifestCSS(entries, importKey, visited)...)
 	}
 	return dedupeStrings(files)
 }

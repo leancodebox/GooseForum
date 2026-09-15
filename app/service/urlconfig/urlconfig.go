@@ -11,7 +11,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 )
 
-// BuiltinAvatarVersion is bumped when bundled avatars change. Keep SettingsPage.vue in sync.
+// BuiltinAvatarVersion is bumped when bundled avatars change. Keep React avatar settings in sync.
 const BuiltinAvatarVersion = "1788958424"
 
 // VersionBuiltinAvatar refreshes bundled avatars without changing stored user URLs.

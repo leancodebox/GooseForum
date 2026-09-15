@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 )
 
 func TestHomePageRequestReturnsPayload(t *testing.T) {
@@ -61,32 +62,56 @@ func TestHomeHTMLReturnsNoJSContent(t *testing.T) {
 	}
 }
 
-func TestResourceEntryUsesViteInLocalMode(t *testing.T) {
-	if got := viteDevServerFor("", false); got != "http://localhost:3010" {
-		t.Fatalf("expected local mode to default to Vite dev server, got %q", got)
-	}
-	if got := viteDevServerFor("http://127.0.0.1:4173", true); got != "http://127.0.0.1:4173" {
-		t.Fatalf("expected explicit dev server to win, got %q", got)
-	}
-	if got := viteDevServerFor("", true); got != "" {
-		t.Fatalf("expected production mode without override to use manifest, got %q", got)
+func TestHomeSidebarActiveKeyMatchesSelectedSort(t *testing.T) {
+	for _, test := range []struct{ sort, key string }{
+		{"latest", "topics"}, {"hot", "hot"}, {"popular", "popular"}, {"unknown", "topics"},
+	} {
+		if got := activeKeyForHome(test.sort); got != test.key {
+			t.Errorf("sort %q: expected sidebar key %q, got %q", test.sort, test.key, got)
+		}
 	}
 }
 
-func TestResourceEntryUsesConfiguredDevServer(t *testing.T) {
-	t.Setenv("GOOSE_UNUSED", "keeps test isolated")
-	html := string(resourceEntry("src/site/main.ts"))
-	devServer := viteDevServer()
-	if devServer == "" {
-		t.Skip("current test config uses production manifest")
+func TestReactResourceEntryIncludesRefreshPreamble(t *testing.T) {
+	html := string(resourceEntry("site"))
+	if setting.IsProduction() {
+		if !strings.Contains(html, "/assets/react/") || strings.Contains(html, "@vite/client") {
+			t.Fatalf("invalid React production entry: %s", html)
+		}
+		return
 	}
-	if !strings.Contains(html, strings.TrimRight(devServer, "/")+`/assets/@vite/client`) {
-		t.Fatalf("expected resource entry to include Vite client: %s", html)
+	if !strings.Contains(html, "__vite_plugin_react_preamble_installed__") || !strings.Contains(html, "/src/site/main.tsx") {
+		t.Fatalf("missing React development entry: %s", html)
 	}
-	if !strings.Contains(html, strings.TrimRight(devServer, "/")+`/assets/src/site/main.ts`) {
-		t.Fatalf("expected resource entry to include Vite entry: %s", html)
+}
+
+func TestReactProductionManifestEntry(t *testing.T) {
+	entries := map[string]manifestItem{
+		"index.html": {File: "assets/site.js", Imports: []string{"shared"}},
+		"shared":     {Css: []string{"assets/app.css"}},
 	}
-	if strings.Contains(html, `/assets/assets/`) {
-		t.Fatalf("expected dev resource entry not to use built manifest assets: %s", html)
+	html := string(manifestEntry(entries, "index.html", "react/"))
+	for _, path := range []string{"/assets/react/assets/site.js", "/assets/react/assets/app.css"} {
+		if !strings.Contains(html, path) {
+			t.Fatalf("missing production resource %s: %s", path, html)
+		}
+	}
+	if strings.Contains(html, "@vite") {
+		t.Fatal("production entry contains Vite development script")
+	}
+}
+
+func TestAdminResourceEntryUsesIndependentReactEntry(t *testing.T) {
+	html := string(resourceEntry("admin"))
+	if setting.IsProduction() {
+		item := reactManifest["admin/index.html"]
+		if item.File == "" || !strings.Contains(html, "/assets/react/"+item.File) {
+			t.Fatalf("missing React admin production entry: %s", html)
+		}
+	} else if !strings.Contains(html, "/src/admin/main.tsx") || !strings.Contains(html, "__vite_plugin_react_preamble_installed__") {
+		t.Fatalf("missing React admin development entry: %s", html)
+	}
+	if strings.Contains(html, "/src/site/main.tsx") {
+		t.Fatalf("admin must not load site entry: %s", html)
 	}
 }

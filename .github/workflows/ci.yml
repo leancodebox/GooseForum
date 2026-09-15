@@ -16,6 +16,7 @@ env:
 jobs:
   go:
     name: Go tests
+    needs: resource
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,7 +28,13 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Test
+      - name: Download React assets
+        uses: actions/download-artifact@v6
+        with:
+          name: react-assets
+          path: resource/static/dist/react
+
+      - name: Test Go with embedded React assets
         run: go test ./... -coverprofile=coverage.out -covermode=atomic
 
       - name: Upload coverage artifact
@@ -69,3 +76,69 @@ jobs:
       - name: Build
         working-directory: resource
         run: pnpm build
+
+      - name: Upload production assets for Go tests
+        uses: actions/upload-artifact@v6
+        with:
+          name: react-assets
+          path: resource/static/dist/react
+          include-hidden-files: true
+
+  react-quality:
+    name: React quality gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.28.2
+          package_json_file: resource/package.json
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: resource/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: resource
+        run: pnpm install --frozen-lockfile
+
+      - name: Report production dependency vulnerabilities
+        continue-on-error: true
+        working-directory: resource
+        run: pnpm audit:dependencies
+
+      - name: Run React static, unit, dead-code, DOM, and bundle gates
+        working-directory: resource
+        run: pnpm check:react
+
+      - name: Enforce React coverage floors
+        working-directory: resource
+        run: pnpm test:react:coverage
+
+      - name: Install Chromium
+        working-directory: resource
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run desktop and mobile smoke/accessibility tests
+        working-directory: resource
+        run: pnpm test:react:e2e
+
+      - name: Upload React coverage
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: react-coverage
+          path: resource/coverage
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-report
+          path: resource/playwright-report

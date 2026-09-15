@@ -1,0 +1,138 @@
+// Canonical translation data; compatibility exports and React loaders share this file.
+export default {
+  title: "Gruppi di accesso e permessi",
+  description:
+    "Gestisci lettura, risposte, creazione e moderazione delle categorie tramite gruppi.",
+  groups: "Gruppi di accesso",
+  create: "Crea gruppo",
+  edit: "Modifica gruppo",
+  groupName: "Nome del gruppo",
+  groupFormHint:
+    "I gruppi possono essere solo su invito o accettare richieste.",
+  enabled: "Attivo",
+  systemGroupHint:
+    "everyone e registered sono gruppi di sistema senza membri memorizzati.",
+  systemImmutable: "I gruppi di sistema non possono essere modificati.",
+  categoryPermissions: "Permessi categoria",
+  configureAccess: "Permessi",
+  categoryPermissionsTitle: "Permessi per “{category}”",
+  categoryPermissionsDescription:
+    "Imposta la capacità assegnata a ogni gruppo di sistema o personalizzato in questa categoria.",
+  resultingVisibility: "Visibilità risultante",
+  visibilityDerivedHint:
+    "Una categoria è pubblica solo quando il gruppo Tutti può leggerla.",
+  noReadableAudienceWarning:
+    "Nessun gruppo attivo può leggere questa categoria. Potrebbero poterla recuperare solo gli amministratori globali.",
+  legacyImageVisibilityWarning:
+    "Le immagini precedenti senza un record di proprietà potrebbero restare accessibili tramite URL diretto. I nuovi caricamenti tracciati sono protetti dai permessi della categoria principale.",
+  restrictionConflictWarning:
+    "{count} argomenti con più categorie fanno ancora riferimento a questa categoria. Rendili a categoria singola prima di limitarla.",
+  group: "Gruppo di accesso",
+  groupType: "Appartenenza",
+  permissionSummaryHint:
+    "I permessi si configurano nella pagina Categorie; questa tabella è un riepilogo in sola lettura.",
+  manageCategoryPermissions: "Gestisci per categoria",
+  permissionHint:
+    "Le capacità sono cumulative; nessun permesso significa nessun accesso.",
+  members: "Membri",
+  username: "Nome utente o ID",
+  addMember: "Aggiungi membro",
+  noMembers: "Nessun membro",
+  loadFailed: "Caricamento del controllo accessi non riuscito",
+  saveFailed: "Salvataggio del controllo accessi non riuscito",
+  saved: "Salvato",
+  deleted: "Gruppo eliminato",
+  deleteFailed: "Eliminazione del gruppo non riuscita",
+  deleteConfirm: "Eliminare “{name}” con tutti i membri e permessi?",
+  memberSaved: "Membro salvato",
+  memberSaveFailed: "Salvataggio membro non riuscito",
+  memberDeleteFailed: "Rimozione membro non riuscita",
+  applicationFailed: "Invio della richiesta non riuscito",
+  joinTitle: "Richiedi accesso ai gruppi",
+  joinDescription:
+    "Unisciti a un gruppo per accedere alle categorie riservate autorizzate.",
+  noJoinableGroups: "Nessun gruppo accetta richieste",
+  noJoinableGroupsHint:
+    "I gruppi solo su invito richiedono l’aggiunta da parte di un amministratore.",
+  unlocksCategories: "Consente accesso a: {categories}",
+  noCategoryGrants: "Questo gruppo non ha ancora permessi categoria",
+  joined: "Iscritto",
+  pending: "In attesa di revisione",
+  apply: "Richiedi accesso",
+  approve: "Approva",
+  reject: "Rifiuta",
+  applicationsToReview: "Richieste da esaminare",
+  managerReviewHint: "Gestisci questi gruppi di accesso.",
+  noPendingApplications: "Nessuna richiesta in attesa",
+  customGroupCount: "{count} gruppi personalizzati",
+  restrictedCategoryCount: "{count} categorie riservate",
+  refreshing: "Aggiornamento in corso",
+  noGroups: "Nessun gruppo di accesso",
+  noMatchingGroups:
+    "Nessun gruppo corrispondente. Prova un’altra parola chiave.",
+  systemGroup: "Gruppo di sistema",
+  disabled: "Disattivato",
+  memberCount: "{count} membri",
+  pendingCount: "{count} in attesa",
+  grantCount: "{count} permessi categoria",
+  category: "Categoria",
+  visibility: "Visibilità",
+  capability: "Capacità",
+  noCategories: "Nessuna categoria",
+  public: "Pubblica",
+  restricted: "Riservata",
+  memberHint:
+    "I membri ricevono le capacità del gruppo. I gestori possono anche esaminare le richieste di adesione, ma non possono modificare gruppo, membri, permessi o moderare contenuti.",
+  usernamePlaceholder: "Inserisci un nome utente",
+  role: "Ruolo nel gruppo",
+  member: "Membro",
+  status: "Stato",
+  actions: "Azioni",
+  active: "Attivo",
+  memberDeleted: "Membro rimosso",
+  applicationApproved: "Richiesta approvata",
+  applicationRejected: "Richiesta rifiutata",
+  removeMember: "Rimuovi membro",
+  selectGroup: "Seleziona un gruppo di accesso per visualizzarne i dettagli.",
+  groupNamePlaceholder: "Ad esempio: Membri interni",
+  joinModeLabel: "Modalità di adesione",
+  enabledHint:
+    "La disattivazione revoca immediatamente le capacità concesse dal gruppo.",
+  groupNameRequired: "Inserisci il nome del gruppo",
+  deleteGroupTitle: "Elimina gruppo di accesso",
+  removeMemberTitle: "Rimuovi membro dal gruppo",
+  removeMemberConfirm:
+    "Rimuovere “{name}” da questo gruppo? I permessi associati verranno revocati immediatamente.",
+  systemKey: {
+    everyone: "Tutti i visitatori e membri",
+    registered: "Membri autenticati",
+  },
+  joinModeDescription: {
+    invite_only: "Solo gli amministratori possono aggiungere membri.",
+    application:
+      "Gli utenti possono richiedere l’accesso; gestori e amministratori esaminano la richiesta.",
+  },
+  joinMode: {
+    system: "Sistema",
+    invite_only: "Solo invito",
+    application: "Richieste abilitate",
+  },
+  memberRole: {
+    member: "Membro",
+    manager: "Gestore (revisioni)",
+  },
+  level: {
+    none: "Nessun accesso",
+    read: "Solo visualizzazione",
+    reply: "Partecipa",
+    create: "Pubblica argomenti",
+    manage: "Modera contenuti",
+  },
+  levelHint: {
+    none: "nessun permesso",
+    read: "visualizza contenuti",
+    reply: "visualizza e rispondi",
+    create: "visualizza, rispondi e pubblica",
+    manage: "tutti i permessi",
+  },
+} as const;

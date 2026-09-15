@@ -1,5 +1,9 @@
 # React + shadcn 迁移与 Next 并存架构
 
+> 目录已按职责拆分，当前结构与依赖边界以 [resource/README.md](../resource/README.md) 为准。下文保留原迁移设计背景。
+
+> React-only 切换已完成：Vue 源码、依赖和双入口开关已删除。下文保留迁移时的设计背景；旧源码路径可从 Git 历史查看，当前构建使用 pnpm -C resource build。
+
 ## 状态
 
 - 决策状态：方向已确定，隔离的 React workspace 与开发入口已经初始化。
@@ -92,11 +96,11 @@ Go 客户端适配   Next 适配
 ### 组件位置与依赖方向
 
 - shadcn/ui 只作为基础组件层，不是页面和业务组件的替代品。不能因为已有 shadcn primitives，就在每个页面中重复堆叠一整套相同的结构、交互和状态处理。
-- shadcn/ui primitives 放在 `resource/packages/react/src/components/ui/`，保持通用、无业务语义；通用 variant 和视觉基础可以留在这一层，论坛业务规则不得下沉到 primitives。
+- shadcn/ui primitives 放在 `resource/packages/ui/src/components/`，保持通用、无业务语义；通用 variant 和视觉基础可以留在这一层，论坛业务规则不得下沉到 primitives。
 - 具有稳定产品语义或重复交互模式的组合应封装为 GooseForum 业务组件，例如用户摘要、主题列表项、页面标题区、管理表格操作区和内容状态反馈。页面负责组织业务流程，不重复拼装这些细节。
 - 组件封装以清晰职责、稳定语义和实际复用为依据。既避免所有内容都直接“一把梭”式使用 shadcn，也避免只为减少几行 JSX 而制造过度抽象。
-- 可同时被 Vite 和未来 Next 使用的论坛业务组件、hooks 与宿主接口放在 `resource/packages/react/`，不得依赖具体应用入口。
-- 仅属于 C 端或后台 SPA 的布局、路由组合和页面组件分别放在 `resource/apps/react/src/site/` 与 `resource/apps/react/src/admin/`。
+- 论坛业务组件放在 `resource/packages/theme-default/`，通用运行时 hooks 与宿主接口放在 `resource/packages/runtime/`；两者均不得依赖具体应用入口。
+- 仅属于 C 端或后台 SPA 的布局、路由组合和页面组件分别放在 `resource/apps/web/src/site/` 与 `resource/apps/web/src/admin/`。
 - 仅被单个页面使用的组件优先与页面就近放置；出现清晰、稳定的跨页面复用后再提升到共享层，不提前制造抽象。
 - payload、API、路由和主题等宿主差异通过明确的适配层接入，展示组件优先接收数据和回调，不直接读取全局环境。
 - 引入新库前确认其维护状态、社区采用度、React 19 兼容性、无障碍表现和是否真的优于现有依赖，避免同一能力长期并存多套实现。

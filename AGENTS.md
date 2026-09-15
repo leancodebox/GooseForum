@@ -12,7 +12,7 @@
 
 ## 项目概览
 
-GooseForum 是一个现代化论坛平台，后端使用 Go，前端和管理后台统一由 `resource/` 下的 Vue 3 应用提供。后端框架采用 Gin，数据库 ORM 使用 GORM，支持 SQLite、MySQL 与 PostgreSQL。
+GooseForum 是一个现代化论坛平台，后端使用 Go，前端和管理后台统一由 `resource/` 下的 React 19 应用提供。后端框架采用 Gin，数据库 ORM 使用 GORM，支持 SQLite、MySQL 与 PostgreSQL。
 
 ## 开发命令
 
@@ -27,7 +27,7 @@ GooseForum 是一个现代化论坛平台，后端使用 Go，前端和管理后
 # 后端（热重载）
 air
 
-# 前端与管理后台（Vue）
+# 前端与管理后台（React）
 cd resource && pnpm dev
 ```
 
@@ -40,7 +40,7 @@ go build -ldflags="-w -s" .
 goreleaser build --snapshot --clean
 goreleaser build --snapshot --clean --single-target  # 仅当前平台
 
-# 构建前端与管理后台（Vue）
+# 构建前端与管理后台（React）
 cd resource && pnpm build
 ```
 
@@ -53,7 +53,7 @@ go test ./...
 go test -v ./path/to/package -run TestName
 
 # 前端测试（Vitest）
-cd resource && npx vitest run
+cd resource && pnpm test
 ```
 
 ### CLI 命令
@@ -76,11 +76,14 @@ cd resource && npx vitest run
 - `service/`：业务服务
 
 ### 前端目录结构（`resource/`）
-- 技术栈：Vue 3 + TypeScript + Vite + TailwindCSS 4。
-- `src/site/`：主站前端入口、页面与组件。
-- `src/admin/`：管理后台入口、布局、页面、组件和独立样式。
-- `src/runtime/`：共享 payload runtime 与浏览器辅助逻辑。
-- `src/types/`：共享前端类型。
+- 技术栈：React 19 + TypeScript + Vite + TailwindCSS 4。
+- `apps/web/src/site/`：主站启动、导航、缓存和主题装配。
+- `apps/web/src/host/`：Go/Vite 与浏览器环境适配。
+- `packages/theme-default/src/site/`：默认论坛主题的页面与业务组件。
+- `apps/web/src/admin/`：管理后台入口、布局、页面、组件和独立样式。
+- `packages/runtime/src/`：React 运行时接口、Context/hooks 与国际化。
+- `packages/ui/src/`：共享基础组件、工具与基础样式。
+- `packages/client/src/contracts/`：共享前端类型。
 - `templates/`：GoHTML 模板，用于首屏、SEO 与 no-js 降级。
 
 ## 数据库

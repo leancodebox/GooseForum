@@ -1,0 +1,103 @@
+// Canonical translation data; compatibility exports and React loaders share this file.
+export default {
+  moderationPending: "内容を保存しました。審査通過後に公開されます。",
+  moderationRejected:
+    "内容は保存されましたが、審査に通らなかったため公開されません。編集して再投稿するか、管理者に確認を依頼してください。",
+  createTitle: "トピックを投稿",
+  editTitle: "トピックを編集",
+  subtitle:
+    "わかりやすいタイトルと適切なカテゴリで、議論を見つけやすくします。",
+  titlePlaceholder: "トピックタイトルを入力",
+  maxCategories: "最大 3 個",
+  mainCategoryHint:
+    "最初のカテゴリー「{category}」がこのトピックを読める人を決めます",
+  mainCategoryBadge: "メイン",
+  mainCategoryChangeTitle: "メインカテゴリーを変更しますか？",
+  mainCategoryChangeDescription:
+    "「{current}」を外すと「{next}」がメインカテゴリーになり、このトピックを読める人が変わります。",
+  confirmMainCategoryChange: "メインカテゴリーを変更",
+  restrictedCategoryHint:
+    "このカテゴリーへのアクセス権を持つメンバーだけが閲覧できます",
+  restrictedCategorySingleHint:
+    "制限カテゴリーは単独で選択する必要があります。選択すると現在のカテゴリーが置き換わります",
+  noCreatePermission:
+    "選択したカテゴリーには投稿できなくなりましたが、下書きは保存できます。",
+  markdownMode: "Markdown",
+  visualMode: "編集",
+  preview: "プレビュー",
+  pastePlainText: "プレーンテキストとして貼り付け",
+  clipboardReadFailed:
+    "クリップボードを読み取れません。ブラウザの権限を確認してください。",
+  visualUnsupported:
+    "本文にタスクリストが含まれています。Markdown モードで編集してください。",
+  processingImage: "画像を処理中...",
+  processingImages: "画像を処理中 {done}/{total}",
+  imageInserted: "画像を挿入しました。",
+  imagesInserted: "{count} 枚の画像を挿入しました。",
+  moreImageFailures: "；ほか {count} 件が失敗",
+  noUploadableImages: "アップロードできる画像ファイルがありません",
+  topicUpdated: "トピックを更新しました。",
+  topicPublished: "トピックを公開しました。",
+  saveFailed: "保存に失敗しました",
+  draftSaveFailed: "下書きの保存に失敗しました",
+  saveDraft: "下書きを保存",
+  updateTopic: "トピックを更新",
+  publishTopic: "トピックを公開",
+  uploadImageTitle: "画像をアップロード。複数選択、貼り付け、ドラッグに対応",
+  bodyPlaceholder: "本文を入力。Markdown 対応、画像の貼り付けやドラッグも可能",
+  visualPlaceholder: "本文を直接入力して書式を設定",
+  dropToUpload: "離すと画像をアップロードして挿入します",
+  emptyPreview: "プレビューできる内容はまだありません。",
+  selectedCategories: "選択したカテゴリ",
+  leaveTitle: "未保存の編集を保存しますか？",
+  leaveDescription:
+    "現在の内容はまだ保存されていません。離れる前に下書きとして保存すると後で続けられます。",
+  draftRequirement:
+    "下書き保存にはタイトル、本文、少なくとも1つのカテゴリが必要です。",
+  continueEditing: "編集を続ける",
+  leaveWithoutSaving: "保存せず離れる",
+  fields: {
+    title: "タイトル",
+    category: "カテゴリ",
+    body: "本文",
+  },
+  validation: {
+    requiredFields: "タイトル、1つ以上のカテゴリ、本文を入力してください。",
+    categoryRequired: "投稿する前に1つ以上のカテゴリを選択してください。",
+  },
+  toolbar: {
+    bold: "太字",
+    italic: "斜体",
+    strike: "取り消し線",
+    inlineCode: "インラインコード",
+    link: "リンク",
+    linkUrl: "リンク先を入力",
+    applyLink: "適用",
+    quote: "引用",
+    code: "コードブロック",
+    bulletList: "箇条書き",
+    orderedList: "番号付きリスト",
+    horizontalRule: "区切り線",
+    hardBreak: "強制改行",
+    table: "表を挿入",
+    tableSize: "{rows} 行 × {columns} 列",
+    blockType: "段落形式",
+    paragraph: "本文",
+    heading: "見出し {level}",
+    codeBlock: "コードブロック",
+  },
+  placeholder: {
+    bold: "太字テキスト",
+    italic: "斜体テキスト",
+    strike: "取り消しテキスト",
+    link: "リンクテキスト",
+    quote: "引用内容",
+    listItem: "リスト項目",
+  },
+  checklist: {
+    title: "投稿チェック",
+    done: "入力済み",
+    pending: "未入力",
+    characters: "{count} 文字",
+  },
+} as const;

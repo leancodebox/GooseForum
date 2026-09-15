@@ -1,0 +1,26 @@
+{
+  "name": "@gooseforum/runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@gooseforum/client": "workspace:*",
+    "react": "^19.2.8",
+    "i18next": "^26.4.2",
+    "react-i18next": "^17.0.13"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "typescript": "~6.0.3"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./unread-status": "./src/unread-status.ts",
+    "./prepared-page": "./src/prepared-page.tsx",
+    "./i18n": "./src/i18n/index.tsx",
+    "./i18n/*": "./src/i18n/*.ts"
+  }
+}

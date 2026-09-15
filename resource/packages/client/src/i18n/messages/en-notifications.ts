@@ -1,0 +1,41 @@
+// Canonical translation data; compatibility exports and React loaders share this file.
+export default {
+  title: "Notifications",
+  unread: "{count} unread",
+  summary:
+    "{total} loaded, including replies, likes, follows, and system messages.",
+  tabs: {
+    all: "All",
+    unread: "Unread",
+  },
+  markAllRead: "Mark all read",
+  markRead: "Mark read",
+  notification: "Notification",
+  time: "Time",
+  emptyTitle: "No notifications",
+  emptyDescription: "Replies, likes, and follows will show up here.",
+  unreadEmptyTitle: "No unread notifications",
+  unreadEmptyDescription: "New unread notifications will show up here.",
+  loadMore: "Load more",
+  loadingMore: "Loading…",
+  noMore: "No more notifications",
+  fallback: "View notification",
+  actorFallback: "User",
+  markAllReadFailed: "Failed to mark notifications read.",
+  loadFailed: "Failed to load notifications.",
+  followDescription: "{actor} followed you",
+  badgeEarned: "Earned the “{badge}” badge",
+  viewProfile: "View profile",
+  templates: {
+    comment: "commented on your topic",
+    postReply: "replied to you",
+    topicPost: "posted in a topic you watch",
+    follow: "followed you",
+    badge: "earned the “{badge}” badge",
+  },
+  verb: {
+    follow: "followed you",
+    reply: "replied to",
+    comment: "commented on",
+  },
+} as const;

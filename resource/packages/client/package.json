@@ -30,6 +30,14 @@
       "types": "./dist/browser.d.ts",
       "import": "./dist/browser.js"
     },
+    "./i18n/locale": {
+      "types": "./dist/i18n/locale.d.ts",
+      "import": "./dist/i18n/locale.js"
+    },
+    "./i18n/messages/*": {
+      "types": "./dist/i18n/messages/*.d.ts",
+      "import": "./dist/i18n/messages/*.js"
+    },
     "./i18n": {
       "types": "./dist/i18n/index.d.ts",
       "import": "./dist/i18n/index.js"
@@ -53,6 +61,6 @@
   "license": "MIT",
   "devDependencies": {
     "typescript": "~6.0.3",
-    "vitest": "^4.1.9"
+    "vitest": "4.1.11"
   }
 }

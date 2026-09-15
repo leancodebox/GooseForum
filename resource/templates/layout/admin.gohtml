@@ -9,7 +9,7 @@
     <title>{{.Payload.Meta.Title}}</title>
     {{if .Payload.Meta.Robots}}<meta name="robots" content="{{.Payload.Meta.Robots}}">{{end}}
     <link rel="icon" href="/favicon.ico">
-    {{ResourceEntry `src/admin/main.ts`}}
+    {{ResourceEntry `admin`}}
     {{if .Payload.Layout.Theme.Href}}<link id="goose-site-theme-link" rel="stylesheet" href="{{.Payload.Layout.Theme.Href}}">{{end}}
 </head>
 <body class="antialiased">

@@ -1,100 +1,15 @@
+import zh from "./messages/zh-notifications.js";
+import en from "./messages/en-notifications.js";
+import ja from "./messages/ja-notifications.js";
+import it from "./messages/it-notifications.js";
 import type { Locale } from "./auth.js";
-
-const en = {
-  title: "Notifications",
-  unread: "{count} unread",
-  summary:
-    "{total} loaded, including replies, likes, follows, and system messages.",
-  tabs: { all: "All", unread: "Unread" },
-  markAllRead: "Mark all read",
-  markRead: "Mark read",
-  notification: "Notification",
-  time: "Time",
-  emptyTitle: "No notifications",
-  emptyDescription: "Replies, likes, and follows will show up here.",
-  unreadEmptyTitle: "No unread notifications",
-  unreadEmptyDescription: "New unread notifications will show up here.",
-  loadMore: "Load more",
-  loadingMore: "Loading…",
-  noMore: "No more notifications",
-  fallback: "View notification",
-  actorFallback: "User",
-  markAllReadFailed: "Failed to mark notifications read.",
-  loadFailed: "Failed to load notifications.",
-  followDescription: "{actor} followed you",
-  badgeEarned: "Earned the “{badge}” badge",
-  viewProfile: "View profile",
-  templates: {
-    comment: "commented on your topic",
-    postReply: "replied to you",
-    topicPost: "posted in a topic you watch",
-    follow: "followed you",
-    badge: "earned the “{badge}” badge",
-  },
-  verb: {
-    follow: "followed you",
-    reply: "replied to",
-    comment: "commented on",
-  },
-} as const;
 
 type Widen<T> = T extends string ? string : { [K in keyof T]: Widen<T[K]> };
 type Messages = Widen<typeof en>;
 
-const zh: Messages = {
-  title: "通知",
-  unread: "{count} 未读",
-  summary: "已加载 {total} 条，回复、点赞、关注和系统消息会集中展示在这里。",
-  tabs: { all: "全部", unread: "未读" },
-  markAllRead: "全部已读",
-  markRead: "标为已读",
-  notification: "通知",
-  time: "时间",
-  emptyTitle: "暂无通知",
-  emptyDescription: "新的回复、点赞和关注会出现在这里。",
-  unreadEmptyTitle: "暂无未读通知",
-  unreadEmptyDescription: "新的未读通知会出现在这里。",
-  loadMore: "加载更多",
-  loadingMore: "加载中…",
-  noMore: "没有更多通知",
-  fallback: "查看通知详情",
-  actorFallback: "用户",
-  markAllReadFailed: "标记已读失败。",
-  loadFailed: "通知加载失败。",
-  followDescription: "{actor} 关注了你",
-  badgeEarned: "获得了「{badge}」徽章",
-  viewProfile: "查看主页",
-  templates: {
-    comment: "评论了你的主题",
-    postReply: "回复了你",
-    topicPost: "在你关注的主题下发表了新内容",
-    follow: "关注了你",
-    badge: "获得了「{badge}」徽章",
-  },
-  verb: { follow: "关注了你", reply: "回复了", comment: "评论了" },
-};
-
 export const notificationResources: Record<Locale, Messages> = {
   zh,
   en,
-  ja: {
-    ...en,
-    title: "通知",
-    tabs: { all: "すべて", unread: "未読" },
-    markAllRead: "すべて既読",
-    markRead: "既読にする",
-    loadMore: "さらに読み込む",
-    loadingMore: "読み込み中…",
-    noMore: "通知は以上です",
-  },
-  it: {
-    ...en,
-    title: "Notifiche",
-    tabs: { all: "Tutte", unread: "Non lette" },
-    markAllRead: "Segna tutte come lette",
-    markRead: "Segna come letta",
-    loadMore: "Carica altro",
-    loadingMore: "Caricamento…",
-    noMore: "Nessun'altra notifica",
-  },
-};
+  ja,
+  it,
+} as const;

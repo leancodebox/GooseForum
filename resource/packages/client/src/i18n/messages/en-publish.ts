@@ -1,0 +1,95 @@
+// Canonical translation data; compatibility exports and React loaders share this file.
+export default {
+  moderationRejected:
+    "Your content was saved but did not pass moderation and is not public.",
+  createTitle: "Publish topic",
+  editTitle: "Edit topic",
+  subtitle:
+    "Write a clear title and choose suitable categories so the discussion is easier to find.",
+  titlePlaceholder: "Enter topic title",
+  maxCategories: "Up to 3",
+  mainCategoryHint:
+    "The first category, “{category}”, decides who can read this topic",
+  mainCategoryBadge: "Main",
+  restrictedCategorySingleHint: "A restricted category must be selected alone",
+  noCreatePermission:
+    "You can no longer publish in the selected categories, but you can still save a draft.",
+  mainCategoryChangeTitle: "Change the main category?",
+  mainCategoryChangeDescription:
+    "Changing “{current}” to “{next}” changes who can read this topic.",
+  confirmMainCategoryChange: "Change main category",
+  markdownMode: "Markdown",
+  visualMode: "Editor",
+  preview: "Preview",
+  visualUnsupported:
+    "This body contains task lists. Continue editing it in Markdown mode.",
+  processingImage: "Processing image…",
+  processingImages: "Processing images {done}/{total}",
+  imageInserted: "Image inserted.",
+  imagesInserted: "{count} images inserted.",
+  noUploadableImages: "No uploadable image files",
+  imageTooLarge: "Images must be 10 MB or smaller.",
+  uploadImageTitle:
+    "Upload images; multi-select, paste, and drag-and-drop supported",
+  dropToUpload: "Release to upload and insert images",
+  topicUpdated: "Topic updated.",
+  topicPublished: "Topic published.",
+  saveFailed: "Failed to save",
+  draftSaveFailed: "Failed to save draft",
+  saveDraft: "Save draft",
+  updateTopic: "Update topic",
+  publishTopic: "Publish topic",
+  bodyPlaceholder:
+    "Enter body text, Markdown supported; paste or drag images here",
+  visualPlaceholder: "Write and format the body directly",
+  emptyPreview: "There is no content to preview yet.",
+  selectedCategories: "Selected categories",
+  leaveTitle: "Save unfinished edits?",
+  leaveDescription:
+    "Your current content has not been saved. Save it as a draft before leaving so you can continue later.",
+  draftRequirement: "A draft needs a title, body, and at least one category.",
+  continueEditing: "Continue editing",
+  leaveWithoutSaving: "Leave without saving",
+  cancel: "Cancel",
+  fields: {
+    title: "Title",
+    category: "Category",
+    body: "Body",
+  },
+  validation: {
+    requiredFields:
+      "Add a title, select at least one category, and complete the body first.",
+    categoryRequired: "Select at least one category before publishing.",
+  },
+  toolbar: {
+    bold: "Bold",
+    italic: "Italic",
+    strike: "Strikethrough",
+    inlineCode: "Inline code",
+    link: "Link",
+    quote: "Quote",
+    code: "Code block",
+    bulletList: "Bullet list",
+    orderedList: "Ordered list",
+    horizontalRule: "Horizontal rule",
+    hardBreak: "Hard break",
+    table: "Insert table",
+    heading: "Heading",
+    paragraph: "Paragraph",
+  },
+  placeholder: {
+    bold: "bold text",
+    italic: "italic text",
+    strike: "deleted text",
+    link: "link text",
+    quote: "quoted content",
+    listItem: "list item",
+  },
+  checklist: {
+    title: "Publish checklist",
+    done: "Filled",
+    pending: "Pending",
+    characters: "{count} chars",
+  },
+  saving: "Saving…",
+} as const;

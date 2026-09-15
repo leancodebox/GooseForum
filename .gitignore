@@ -33,6 +33,9 @@ dist/
 .trae/rules/project_rules.md
 .vercel
 **/node_modules/
+**/coverage/
+**/playwright-report/
+**/test-results/
 .pnpm-store/
 /resource/static/admin/dict
 tmp_app

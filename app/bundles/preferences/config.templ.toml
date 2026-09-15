@@ -14,6 +14,10 @@ signingKey = "{{.SigningKey}}"
 # 例如: https://cdn.example.com
 cdn_url = ""
 
+[resource]
+# React 开发服务器；生产环境先执行 cd resource && pnpm build，再编译 Go。
+reactDevServer = "http://localhost:3011"
+
 [server]
 url = "http://localhost"
 port = 5234

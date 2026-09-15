@@ -1,0 +1,62 @@
+// Canonical translation data; compatibility exports and React loaders share this file.
+import { localeLabels } from '../locale.js';
+export default {
+  locale: localeLabels.en,
+  login: "Log in",
+  register: "Sign up",
+  loginTitle: "Log in to your account",
+  registerTitle: "Create an account",
+  forgotTitle: "Reset password",
+  loginSubtitle: "Welcome back. Continue your discussions and writing.",
+  registerSubtitle: "Join GooseForum and start your discussion space.",
+  forgotSubtitle: "Enter your email and we will send a password reset message.",
+  usernameOrEmail: "Username or email",
+  username: "Username",
+  email: "Email",
+  registeredEmail: "Registered email",
+  password: "Password",
+  newPassword: "New password",
+  confirmPassword: "Confirm password",
+  captcha: "Captcha",
+  captchaAlt: "Captcha",
+  refreshCaptcha: "Refresh captcha",
+  forgotPassword: "Forgot password?",
+  agreeTerms: "I have read and agree to the terms and privacy policy",
+  createAccount: "Create account",
+  sendResetEmail: "Send reset email",
+  backToLogin: "Back to login",
+  continueWith: "Or continue with",
+  resetPasswordTitle: "Reset password",
+  resetPasswordSubtitle:
+    "Set a new login password. After submitting, return to log in with it.",
+  resetMissingToken:
+    "The reset link is missing a token. Please open it again from your email.",
+  passwordMinLength: "Password must be at least 6 characters",
+  saveNewPassword: "Save new password",
+  passwordAdviceTitle: "Password safety tips",
+  passwordAdviceDescription:
+    "Set a new password used only for GooseForum. Reset links are valid for a limited time; request a new email after expiration.",
+  passwordAdvice: {
+    length: "At least 6 characters",
+    unique: "Avoid reusing passwords from other sites",
+    loginAfterReset: "After resetting, return to log in with the new password",
+  },
+  validation: {
+    loginRequired: "Please enter account, password, and captcha",
+    registerRequired: "Please complete the registration form",
+    forgotRequired: "Please enter email and captcha",
+    passwordMismatch: "The two passwords do not match",
+    termsRequired: "Please agree to the terms and privacy policy first",
+    captchaLoadFailed: "Failed to load captcha",
+    loginFailed: "Login failed",
+    registerFailed: "Registration failed",
+    registerSuccess: "Registration successful",
+    resetEmailFailed: "Failed to send reset email",
+  },
+  server: {
+    passwordResetMailQueued:
+      "If this email is registered, you will receive a password reset email",
+    passwordResetSuccess: "Password reset successful",
+    passwordResetFailed: "Failed to reset password",
+  },
+} as const;

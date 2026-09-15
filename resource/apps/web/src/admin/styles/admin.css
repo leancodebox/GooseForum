@@ -1,0 +1,4 @@
+@import "@gooseforum/ui/styles/base.css";
+@source "../**/*.{ts,tsx}";
+@source "../../host/**/*.{ts,tsx}";
+@source "../../../../../packages/ui/src/**/*.{ts,tsx}";

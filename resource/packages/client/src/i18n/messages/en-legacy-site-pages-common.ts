@@ -1,0 +1,23 @@
+// Canonical translation data; compatibility exports and React loaders share this file.
+export default {
+  back: "Back",
+  cancel: "Cancel",
+  close: "Close",
+  edit: "Edit",
+  home: "Home",
+  save: "Save",
+  saving: "Saving...",
+  loading: "Working...",
+  loadingShort: "Loading...",
+  loadFailed: "Failed to load",
+  preview: "Preview",
+  loadMore: "Load more",
+  retry: "Retry",
+  refresh: "Refresh",
+  delete: "Delete",
+  search: "Search",
+  previousPage: "Previous",
+  nextPage: "Next",
+  currentPage: "Page {page}",
+  page: "Page {page} / {total}",
+} as const;

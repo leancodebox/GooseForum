@@ -1,0 +1,62 @@
+// Canonical translation data; compatibility exports and React loaders share this file.
+import { localeLabels } from '../locale.js';
+export default {
+  locale: localeLabels.ja,
+  login: "ログイン",
+  register: "登録",
+  loginTitle: "アカウントにログイン",
+  registerTitle: "新規アカウント作成",
+  forgotTitle: "パスワード再設定",
+  loginSubtitle: "おかえりなさい。議論と投稿を続けましょう。",
+  registerSubtitle: "GooseForum に参加して、議論の場を始めましょう。",
+  forgotSubtitle: "メールアドレスを入力すると、再設定メールを送信します。",
+  usernameOrEmail: "ユーザー名またはメール",
+  username: "ユーザー名",
+  email: "メール",
+  registeredEmail: "登録メール",
+  password: "パスワード",
+  newPassword: "新しいパスワード",
+  confirmPassword: "パスワード確認",
+  captcha: "認証コード",
+  captchaAlt: "認証コード",
+  refreshCaptcha: "認証コードを更新",
+  forgotPassword: "パスワードを忘れましたか？",
+  agreeTerms: "利用規約とプライバシーポリシーに同意します",
+  createAccount: "アカウント作成",
+  sendResetEmail: "再設定メールを送信",
+  backToLogin: "ログインへ戻る",
+  continueWith: "または次で続行",
+  resetPasswordTitle: "パスワード再設定",
+  resetPasswordSubtitle:
+    "新しいログインパスワードを設定します。送信後、新しいパスワードでログインできます。",
+  resetMissingToken:
+    "再設定リンクにトークンがありません。メールからもう一度開いてください。",
+  passwordMinLength: "パスワードは6文字以上にしてください",
+  saveNewPassword: "新しいパスワードを保存",
+  passwordAdviceTitle: "パスワード安全のヒント",
+  passwordAdviceDescription:
+    "GooseForum 専用の新しいパスワードを設定してください。再設定リンクは有効期限内のみ利用できます。",
+  passwordAdvice: {
+    length: "6文字以上",
+    unique: "他のサイトと同じパスワードを使わない",
+    loginAfterReset: "再設定後は新しいパスワードでログインしてください",
+  },
+  validation: {
+    loginRequired: "アカウント、パスワード、認証コードを入力してください",
+    registerRequired: "登録情報をすべて入力してください",
+    forgotRequired: "メールと認証コードを入力してください",
+    passwordMismatch: "2つのパスワードが一致しません",
+    termsRequired: "先に利用規約とプライバシーポリシーに同意してください",
+    captchaLoadFailed: "認証コードの読み込みに失敗しました",
+    loginFailed: "ログインに失敗しました",
+    registerFailed: "登録に失敗しました",
+    registerSuccess: "登録が完了しました",
+    resetEmailFailed: "再設定メールの送信に失敗しました",
+  },
+  server: {
+    passwordResetMailQueued:
+      "このメールが登録済みの場合、パスワード再設定メールが届きます",
+    passwordResetSuccess: "パスワードの再設定が完了しました",
+    passwordResetFailed: "パスワード再設定に失敗しました",
+  },
+} as const;

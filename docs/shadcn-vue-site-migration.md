@@ -1,5 +1,7 @@
 # C 端 shadcn-vue 迁移章程
 
+> 历史记录：Vue 实现已退役。当前实现位于 resource/apps/web 与 resource/packages/theme-default；本文中的旧路径仅供 Git 历史对照，不再是开发规范。
+
 ## 目标
 
 以 shadcn-vue 官方组件源码和 Reka UI primitives 作为 C 端基础 UI 层，保留 GooseForum 现有的信息架构、内容密度、主题能力和产品辨识度。迁移完成后，不再维护与官方组件能力重复的手写基础交互。

@@ -1,0 +1,20 @@
+// Canonical translation data; compatibility exports and React loaders share this file.
+export default {
+  joinTitle: "申请加入访问组",
+  joinDescription: "加入后可以访问该组获授权的受限分类。",
+  noJoinableGroups: "暂无可申请的访问组",
+  noJoinableGroupsHint: "仅邀请访问组需要由管理员添加成员。",
+  unlocksCategories: "可访问分类：{categories}",
+  noCategoryGrants: "该组暂未关联分类",
+  joined: "已加入",
+  pending: "等待审核",
+  apply: "申请加入",
+  approve: "批准",
+  reject: "拒绝",
+  applicationsToReview: "待审核申请",
+  managerReviewHint: "你是以下访问组的管理员。",
+  noPendingApplications: "暂无待审核申请",
+  loadFailed: "加载访问控制失败",
+  memberSaveFailed: "保存成员失败",
+  applicationFailed: "提交加入申请失败",
+} as const;
