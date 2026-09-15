@@ -34,6 +34,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
+	"github.com/leancodebox/GooseForum/app/service/httpnotifyservice"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
@@ -1439,5 +1440,15 @@ type SaveHttpNotifySettingsReq struct {
 }
 
 func SaveHttpNotifySettings(req component.BetterRequest[SaveHttpNotifySettingsReq]) component.Response {
-	return savePageConfig(pageConfig.HttpNotify, req.Params.Settings, hotdataserve.ClearHttpNotifyConfigCache)
+	config := req.Params.Settings
+	if err := httpnotifyservice.ValidateConfig(config); err != nil {
+		slog.Warn("save HTTP notification settings rejected", "err", err)
+		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
+	}
+	if err := pageConfig.SaveConfig(pageConfig.HttpNotify, jsonopt.Encode(config)); err != nil {
+		slog.Error("save HTTP notification settings failed", "err", err)
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
+	hotdataserve.ClearHttpNotifyConfigCache()
+	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }

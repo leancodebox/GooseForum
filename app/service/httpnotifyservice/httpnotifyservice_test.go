@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"testing"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
@@ -107,5 +108,55 @@ func TestApplyDeliverySuccessResetsFailureCount(t *testing.T) {
 	endpoint := config.Endpoints[0]
 	if endpoint.FailureCount != 0 || endpoint.LastError != "" || endpoint.AbnormalTerminated {
 		t.Fatalf("success did not reset endpoint failure state: %+v", endpoint)
+	}
+}
+
+func TestValidateConfigAllowsLocalAndPrivateEndpoints(t *testing.T) {
+	for index, endpointURL := range []string{
+		"http://localhost:8080/hook",
+		"http://127.0.0.1/hook",
+		"http://192.168.1.20/hook",
+		"https://hooks.example.com/events",
+	} {
+		config := pageConfig.HttpNotifyConfig{Enabled: true, Endpoints: []pageConfig.HttpNotifyEndpoint{{
+			Id: fmt.Sprintf("endpoint-%d", index), Enabled: true, URL: endpointURL,
+			Events: []string{EventTopicPublished}, TimeoutSeconds: 2,
+		}}}
+		if err := ValidateConfig(config); err != nil {
+			t.Fatalf("ValidateConfig(%q): %v", endpointURL, err)
+		}
+	}
+}
+
+func TestValidateConfigRejectsInvalidActiveEndpoints(t *testing.T) {
+	valid := pageConfig.HttpNotifyEndpoint{
+		Id: "endpoint-1", Enabled: true, URL: "https://hooks.example.com/events",
+		Events: []string{EventTopicPublished}, TimeoutSeconds: 2,
+	}
+	tests := []struct {
+		name      string
+		endpoints []pageConfig.HttpNotifyEndpoint
+	}{
+		{name: "missing id", endpoints: []pageConfig.HttpNotifyEndpoint{{Enabled: true, URL: valid.URL, Events: valid.Events, TimeoutSeconds: 2}}},
+		{name: "duplicate id", endpoints: []pageConfig.HttpNotifyEndpoint{valid, valid}},
+		{name: "missing host", endpoints: []pageConfig.HttpNotifyEndpoint{{Id: "endpoint-1", Enabled: true, URL: "http:///hook", Events: valid.Events, TimeoutSeconds: 2}}},
+		{name: "unsupported event", endpoints: []pageConfig.HttpNotifyEndpoint{{Id: "endpoint-1", Enabled: true, URL: valid.URL, Events: []string{"unknown"}, TimeoutSeconds: 2}}},
+		{name: "invalid timeout", endpoints: []pageConfig.HttpNotifyEndpoint{{Id: "endpoint-1", Enabled: true, URL: valid.URL, Events: valid.Events, TimeoutSeconds: 30}}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if err := ValidateConfig(pageConfig.HttpNotifyConfig{Enabled: true, Endpoints: test.endpoints}); err == nil {
+				t.Fatal("invalid configuration was accepted")
+			}
+		})
+	}
+}
+
+func TestValidateConfigAllowsDisablingBrokenEndpoint(t *testing.T) {
+	config := pageConfig.HttpNotifyConfig{Enabled: false, Endpoints: []pageConfig.HttpNotifyEndpoint{{
+		Id: "endpoint-1", Enabled: true, URL: "broken", Events: []string{"unknown"}, TimeoutSeconds: 30,
+	}}}
+	if err := ValidateConfig(config); err != nil {
+		t.Fatalf("disabled configuration should remain saveable: %v", err)
 	}
 }

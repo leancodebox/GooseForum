@@ -2,6 +2,7 @@ package pageConfig
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
@@ -54,6 +55,19 @@ func SaveConfig(pageType string, config string) error {
 		return builder().Create(&entity).Error
 	}
 	return builder().Save(&entity).Error
+}
+
+// CompareAndSwapConfig updates one configuration only when it has not changed
+// since the caller read it. This prevents runtime status updates from
+// overwriting concurrent administrator changes.
+func CompareAndSwapConfig(entity Entity, config string) (bool, error) {
+	if entity.Id == 0 {
+		return false, nil
+	}
+	result := builder().
+		Where("id = ? AND updated_at = ? AND config = ?", entity.Id, entity.UpdatedAt, entity.Config).
+		Updates(map[string]any{"config": config, "updated_at": time.Now()})
+	return result.RowsAffected == 1, result.Error
 }
 
 func GetByPageType(pageType string) (entity Entity) {

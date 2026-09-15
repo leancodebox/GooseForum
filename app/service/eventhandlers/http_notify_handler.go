@@ -24,23 +24,31 @@ type ReportCreatedEvent struct {
 }
 
 func handleHttpNotifyTopicPublished(ctx context.Context, event *TopicPublishedEvent) error {
-	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventTopicPublished) || event == nil || event.Topic == nil || !topicPubliclyReadable(*event.Topic) {
+	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventTopicPublished) || event == nil || event.Topic == nil {
 		return nil
 	}
-	httpnotifyservice.Notify(httpnotifyservice.EventTopicPublished, topicEventNotifyPayload(event))
+	topic := topics.GetSimple(event.Topic.Id)
+	if !topicPubliclyReadable(topic) {
+		return nil
+	}
+	httpnotifyservice.Notify(ctx, httpnotifyservice.EventTopicPublished, topicNotifyPayload(&topic))
 	return nil
 }
 
 func handleHttpNotifyTopicUpdated(ctx context.Context, event *TopicUpdatedEvent) error {
-	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventTopicUpdated) || event == nil || event.Topic == nil || !topicPubliclyReadable(*event.Topic) {
+	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventTopicUpdated) || event == nil || event.Topic == nil {
 		return nil
 	}
-	httpnotifyservice.Notify(httpnotifyservice.EventTopicUpdated, topicUpdatedEventNotifyPayload(event))
+	topic := topics.GetSimple(event.Topic.Id)
+	if !topicPubliclyReadable(topic) {
+		return nil
+	}
+	httpnotifyservice.Notify(ctx, httpnotifyservice.EventTopicUpdated, topicNotifyPayload(&topic))
 	return nil
 }
 
 func handleHttpNotifyCommentCreated(ctx context.Context, event *CommentCreatedEvent) error {
-	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventCommentCreated) {
+	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventCommentCreated) || event == nil {
 		return nil
 	}
 	topic := topics.GetSimple(event.TopicId)
@@ -75,16 +83,16 @@ func handleHttpNotifyCommentCreated(ctx context.Context, event *CommentCreatedEv
 		parentAuthor := userNotifyPayload(event.ReplyToPostAuthorId)
 		payload.Post.ReplyToPostAuthor = &parentAuthor
 	}
-	httpnotifyservice.Notify(httpnotifyservice.EventCommentCreated, payload)
+	httpnotifyservice.Notify(ctx, httpnotifyservice.EventCommentCreated, payload)
 	return nil
 }
 
 func handleHttpNotifyUserSignUp(ctx context.Context, event *UserSignUpEvent) error {
-	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventUserSignup) {
+	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventUserSignup) || event == nil {
 		return nil
 	}
 	user := userNotifyPayload(event.UserId)
-	httpnotifyservice.Notify(httpnotifyservice.EventUserSignup, notifyEventData{
+	httpnotifyservice.Notify(ctx, httpnotifyservice.EventUserSignup, notifyEventData{
 		BaseURI: baseURI(),
 		User:    &user,
 	})
@@ -92,7 +100,7 @@ func handleHttpNotifyUserSignUp(ctx context.Context, event *UserSignUpEvent) err
 }
 
 func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEvent) error {
-	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventReportCreated) {
+	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventReportCreated) || event == nil {
 		return nil
 	}
 	topic := topics.GetSimple(event.TopicId)
@@ -124,7 +132,7 @@ func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEven
 			URL:    postURL(targetPost.TopicId, targetPost.PostNo),
 		}
 	}
-	httpnotifyservice.Notify(httpnotifyservice.EventReportCreated, payload)
+	httpnotifyservice.Notify(ctx, httpnotifyservice.EventReportCreated, payload)
 	return nil
 }
 
@@ -187,20 +195,6 @@ type notifyUser struct {
 	DisplayName string `json:"displayName"`
 	AvatarURL   string `json:"avatarUrl"`
 	URL         string `json:"url"`
-}
-
-func topicEventNotifyPayload(event *TopicPublishedEvent) notifyEventData {
-	if event != nil && event.Topic != nil {
-		return topicNotifyPayload(event.Topic)
-	}
-	return notifyEventData{BaseURI: baseURI()}
-}
-
-func topicUpdatedEventNotifyPayload(event *TopicUpdatedEvent) notifyEventData {
-	if event != nil && event.Topic != nil {
-		return topicNotifyPayload(event.Topic)
-	}
-	return notifyEventData{BaseURI: baseURI()}
 }
 
 func topicNotifyPayload(topic *topics.Entity) notifyEventData {

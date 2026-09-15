@@ -2,12 +2,15 @@ package httpnotifyservice
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -32,9 +35,19 @@ const (
 	maxTimeoutSeconds     = 15
 	contentTypeJSON       = "application/json"
 	disableAfterFailures  = 3
+	maxConfigEndpoints    = 20
+	maxStatusUpdateTries  = 3
 )
 
 var updateMu sync.Mutex
+
+var supportedEvents = map[string]struct{}{
+	EventTopicPublished: {},
+	EventTopicUpdated:   {},
+	EventCommentCreated: {},
+	EventUserSignup:     {},
+	EventReportCreated:  {},
+}
 
 var sendRequest = func(req *http.Request, timeout time.Duration) (*http.Response, error) {
 	return (&http.Client{Timeout: timeout}).Do(req)
@@ -46,7 +59,7 @@ type Envelope struct {
 	Data      any    `json:"data"`
 }
 
-func Notify(eventName string, data any) {
+func Notify(ctx context.Context, eventName string, data any) {
 	config := hotdataserve.GetHttpNotifyConfigCache()
 	if !shouldNotify(config, eventName) {
 		return
@@ -62,11 +75,13 @@ func Notify(eventName string, data any) {
 		return
 	}
 	for _, endpoint := range config.Endpoints {
+		if ctx.Err() != nil {
+			return
+		}
 		if !endpointAccepts(endpoint, eventName) {
 			continue
 		}
-		endpoint := endpoint
-		go deliver(endpoint, eventName, now, body)
+		deliver(ctx, endpoint, eventName, now, body)
 	}
 }
 
@@ -93,23 +108,30 @@ func endpointAccepts(endpoint pageConfig.HttpNotifyEndpoint, eventName string) b
 	return slices.Contains(endpoint.Events, eventName)
 }
 
-func deliver(endpoint pageConfig.HttpNotifyEndpoint, eventName string, timestamp int64, body []byte) {
+func deliver(ctx context.Context, endpoint pageConfig.HttpNotifyEndpoint, eventName string, timestamp int64, body []byte) {
 	req, err := buildRequest(endpoint, eventName, deliveryID(), timestamp, body)
 	if err != nil {
 		slog.Error("httpnotify: build request failed", "endpoint", endpoint.Name, "event", eventName, "err", err)
 		recordDeliveryResult(endpoint, false, err.Error())
 		return
 	}
+	req = req.WithContext(ctx)
 	resp, err := sendRequest(req, endpointTimeout(endpoint))
 	if err != nil {
+		if ctx.Err() != nil {
+			slog.Debug("httpnotify: delivery canceled with event context", "endpoint", endpoint.Name, "event", eventName)
+			return
+		}
 		slog.Error("httpnotify: request failed", "endpoint", endpoint.Name, "event", eventName, "err", err)
 		recordDeliveryResult(endpoint, false, err.Error())
 		return
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		slog.Warn("httpnotify: non-2xx response", "endpoint", endpoint.Name, "event", eventName, "status", resp.StatusCode)
-		recordDeliveryResult(endpoint, false, resp.Status)
+	statusCode, status := resp.StatusCode, resp.Status
+	_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 64*1024))
+	_ = resp.Body.Close()
+	if statusCode < 200 || statusCode >= 300 {
+		slog.Warn("httpnotify: non-2xx response", "endpoint", endpoint.Name, "event", eventName, "status", statusCode)
+		recordDeliveryResult(endpoint, false, status)
 		return
 	}
 	recordDeliveryResult(endpoint, true, "")
@@ -156,6 +178,55 @@ func endpointTimeout(endpoint pageConfig.HttpNotifyEndpoint) time.Duration {
 	return time.Duration(seconds) * time.Second
 }
 
+func ValidateConfig(config pageConfig.HttpNotifyConfig) error {
+	if len(config.Endpoints) > maxConfigEndpoints {
+		return fmt.Errorf("HTTP notification endpoints exceed maximum limit of %d", maxConfigEndpoints)
+	}
+	ids := make(map[string]struct{}, len(config.Endpoints))
+	active := 0
+	for index, endpoint := range config.Endpoints {
+		id := strings.TrimSpace(endpoint.Id)
+		if id == "" || len(id) > 128 {
+			return fmt.Errorf("HTTP notification endpoint %d has an invalid id", index+1)
+		}
+		if _, exists := ids[id]; exists {
+			return fmt.Errorf("HTTP notification endpoint id %q is duplicated", id)
+		}
+		ids[id] = struct{}{}
+		if len(endpoint.Name) > 128 || len(endpoint.Secret) > 4096 || len(endpoint.URL) > 2048 {
+			return fmt.Errorf("HTTP notification endpoint %q exceeds field length limits", id)
+		}
+		if !config.Enabled || !endpoint.Enabled {
+			continue
+		}
+		active++
+		target, err := url.Parse(strings.TrimSpace(endpoint.URL))
+		if err != nil || target.Host == "" || (target.Scheme != "http" && target.Scheme != "https") {
+			return fmt.Errorf("HTTP notification endpoint %q has an invalid URL", id)
+		}
+		if endpoint.TimeoutSeconds < 1 || endpoint.TimeoutSeconds > maxTimeoutSeconds {
+			return fmt.Errorf("HTTP notification endpoint %q has an invalid timeout", id)
+		}
+		if len(endpoint.Events) == 0 {
+			return fmt.Errorf("HTTP notification endpoint %q has no events", id)
+		}
+		seenEvents := make(map[string]struct{}, len(endpoint.Events))
+		for _, eventName := range endpoint.Events {
+			if _, ok := supportedEvents[eventName]; !ok {
+				return fmt.Errorf("HTTP notification endpoint %q has unsupported event %q", id, eventName)
+			}
+			if _, exists := seenEvents[eventName]; exists {
+				return fmt.Errorf("HTTP notification endpoint %q repeats event %q", id, eventName)
+			}
+			seenEvents[eventName] = struct{}{}
+		}
+	}
+	if config.Enabled && active == 0 {
+		return errors.New("HTTP notification requires at least one enabled endpoint")
+	}
+	return nil
+}
+
 func deliveryID() string {
 	var b [8]byte
 	if _, err := rand.Read(b[:]); err != nil {
@@ -168,16 +239,27 @@ func recordDeliveryResult(endpoint pageConfig.HttpNotifyEndpoint, success bool, 
 	updateMu.Lock()
 	defer updateMu.Unlock()
 
-	entity := pageConfig.GetByPageType(pageConfig.HttpNotify)
-	config := pageConfig.GetConfigByPageType(pageConfig.HttpNotify, pageConfig.HttpNotifyConfig{Endpoints: []pageConfig.HttpNotifyEndpoint{}})
-	config, changed := applyDeliveryResult(config, endpoint.Id, endpoint.URL, success, message)
-	if !changed {
-		return
+	for range maxStatusUpdateTries {
+		entity := pageConfig.GetByPageType(pageConfig.HttpNotify)
+		if entity.Id == 0 {
+			return
+		}
+		config := jsonopt.Decode[pageConfig.HttpNotifyConfig](entity.Config)
+		config, changed := applyDeliveryResult(config, endpoint.Id, endpoint.URL, success, message)
+		if !changed {
+			return
+		}
+		saved, err := pageConfig.CompareAndSwapConfig(entity, jsonopt.Encode(config))
+		if err != nil {
+			slog.Error("httpnotify: record delivery result failed", "endpoint", endpoint.Name, "err", err)
+			return
+		}
+		if saved {
+			hotdataserve.ClearHttpNotifyConfigCache()
+			return
+		}
 	}
-	entity.PageType = pageConfig.HttpNotify
-	entity.Config = jsonopt.Encode(config)
-	pageConfig.CreateOrSave(&entity)
-	hotdataserve.ClearHttpNotifyConfigCache()
+	slog.Warn("httpnotify: delivery result dropped after concurrent configuration updates", "endpoint", endpoint.Name)
 }
 
 func applyDeliveryResult(config pageConfig.HttpNotifyConfig, endpointId string, endpointURL string, success bool, message string) (pageConfig.HttpNotifyConfig, bool) {
