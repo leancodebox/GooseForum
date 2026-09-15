@@ -7,9 +7,10 @@ import ts from 'typescript'
 const root = resolve(import.meta.dirname, '..')
 const layers = {
   client: [],
+  markdown: [],
   runtime: ['client'],
   ui: [],
-  'theme-default': ['client', 'runtime', 'ui'],
+  'theme-default': ['client', 'markdown', 'runtime', 'ui'],
 }
 
 for (const [name, allowed] of Object.entries(layers)) {

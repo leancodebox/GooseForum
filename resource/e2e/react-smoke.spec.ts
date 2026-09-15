@@ -184,6 +184,22 @@ test.beforeEach(async ({ page }) => {
     })
   })
   await page.route(url => url.pathname.startsWith('/api/'), async route => {
+    if (route.request().url().includes('/api/admin/announcement')) {
+      await route.fulfill({
+        json: {
+          code: 0,
+          result: {
+            enabled: true,
+            content: '## Maintenance\n\nThe forum will be read-only tonight.',
+          },
+        },
+      })
+      return
+    }
+    if (route.request().url().includes('/api/admin/save-announcement')) {
+      await route.fulfill({ json: { code: 0, result: true } })
+      return
+    }
     if (route.request().url().includes('/api/forum/chat/messages')) {
       await route.fulfill({ json: { code: 0, result: chatMessages } })
       return
@@ -313,6 +329,37 @@ test('keeps short-message avatars inside every message row', async ({ page }, te
   }
   expect(errors).toEqual([])
   await testInfo.attach('verified-message-avatars', {
+    body: await page.screenshot({ fullPage: false }),
+    contentType: 'image/png',
+  })
+})
+
+test('edits, previews, and saves an announcement in Markdown', async ({ page }, testInfo) => {
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  page.on('console', message => {
+    if (message.type() === 'error') errors.push(message.text())
+  })
+
+  await page.goto('/admin/settings/announcement?lang=en')
+  await expect(page).toHaveTitle('Announcement - GooseForum')
+  const editor = page.getByRole('textbox', { name: 'Announcement content' })
+  await expect(editor).toHaveValue(/Maintenance/)
+  await editor.fill('## Updated announcement\n\n**Everything is ready.**')
+  await page.getByRole('radio', { name: 'Preview' }).click()
+  const preview = page.locator('[data-slot="announcement-markdown-preview"]')
+  await expect(preview.getByRole('heading', { name: 'Updated announcement' })).toBeVisible()
+  await expect(preview.getByText('Everything is ready.')).toBeVisible()
+
+  const saveRequest = page.waitForRequest(request =>
+    request.url().includes('/api/admin/save-announcement'),
+  )
+  await page.getByRole('button', { name: 'Save' }).click()
+  expect((await saveRequest).postDataJSON()).toMatchObject({
+    settings: { enabled: true, content: '## Updated announcement\n\n**Everything is ready.**' },
+  })
+  expect(errors).toEqual([])
+  await testInfo.attach('verified-announcement-markdown-editor', {
     body: await page.screenshot({ fullPage: false }),
     contentType: 'image/png',
   })

@@ -72,6 +72,9 @@ importers:
       '@gooseforum/client':
         specifier: workspace:*
         version: link:../../packages/client
+      '@gooseforum/markdown':
+        specifier: workspace:*
+        version: link:../../packages/markdown
       '@gooseforum/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
@@ -155,6 +158,31 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(@types/node@25.9.2)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.1.0(@types/node@25.9.2)(jiti@2.7.0)(yaml@2.9.0))
 
+  packages/markdown:
+    dependencies:
+      markdown-it:
+        specifier: ^14.2.0
+        version: 14.2.0
+      markdown-it-anchor:
+        specifier: ^9.2.0
+        version: 9.2.0(@types/markdown-it@14.1.2)(markdown-it@14.2.0)
+      markdown-it-task-lists:
+        specifier: ^2.1.1
+        version: 2.1.1
+      turndown:
+        specifier: ^7.2.4
+        version: 7.2.4
+    devDependencies:
+      '@types/markdown-it':
+        specifier: ^14.1.2
+        version: 14.1.2
+      '@types/turndown':
+        specifier: ^5.0.6
+        version: 5.0.6
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+
   packages/runtime:
     dependencies:
       '@gooseforum/client':
@@ -182,6 +210,9 @@ importers:
       '@gooseforum/client':
         specifier: workspace:*
         version: link:../client
+      '@gooseforum/markdown':
+        specifier: workspace:*
+        version: link:../markdown
       '@gooseforum/runtime':
         specifier: workspace:*
         version: link:../runtime
@@ -203,12 +234,6 @@ importers:
       markdown-it:
         specifier: ^14.2.0
         version: 14.2.0
-      markdown-it-anchor:
-        specifier: ^9.2.0
-        version: 9.2.0(@types/markdown-it@14.1.2)(markdown-it@14.2.0)
-      markdown-it-task-lists:
-        specifier: ^2.1.1
-        version: 2.1.1
       mermaid:
         specifier: 11.17.1
         version: 11.17.1
@@ -254,9 +279,6 @@ importers:
       simple-icons:
         specifier: ^16.20.0
         version: 16.20.0
-      turndown:
-        specifier: ^7.2.4
-        version: 7.2.4
     devDependencies:
       '@testing-library/react':
         specifier: ^16.3.3
@@ -273,9 +295,6 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.3.0(@types/react@19.3.0)
-      '@types/turndown':
-        specifier: ^5.0.6
-        version: 5.0.6
       jsdom:
         specifier: ^30.0.1
         version: 30.0.1

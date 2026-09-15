@@ -4,14 +4,15 @@ import { Button } from "@gooseforum/ui/components/button";
 import {
   Field,
   FieldDescription,
+  FieldGroup,
   FieldLabel,
 } from "@gooseforum/ui/components/field";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Switch } from "@gooseforum/ui/components/switch";
-import { Textarea } from "@gooseforum/ui/components/textarea";
 import { Code, Save } from "lucide-react";
 import { toast } from "sonner";
 import type { ContentSettingsTextKey } from "../content-settings-i18n";
+import { AnnouncementMarkdownEditor } from "../components/announcement-markdown-editor";
 type Text = (k: ContentSettingsTextKey) => string;
 export function AnnouncementSettingsPage({
   api,
@@ -76,7 +77,7 @@ export function AnnouncementSettingsPage({
           {text("save")}
         </Button>
       </header>
-      <div className="flex max-w-3xl flex-col gap-6">
+      <FieldGroup className="max-w-5xl gap-6">
         <Field orientation="horizontal">
           <div className="flex-1">
             <FieldLabel>{text("announcementEnabled")}</FieldLabel>
@@ -87,17 +88,24 @@ export function AnnouncementSettingsPage({
           <Switch
             checked={form.enabled}
             disabled={loading}
-            onCheckedChange={(enabled) => setForm({ ...form, enabled })}
+            onCheckedChange={(enabled) =>
+              setForm((current) => ({ ...current, enabled }))
+            }
           />
         </Field>
         <Field>
           <FieldLabel>{text("announcementContent")}</FieldLabel>
           <FieldDescription>{text("announcementContentHint")}</FieldDescription>
-          <Textarea
-            className="min-h-64 resize-y font-mono text-sm"
+          <AnnouncementMarkdownEditor
             value={form.content}
             disabled={loading}
-            onChange={(e) => setForm({ ...form, content: e.target.value })}
+            text={text}
+            onChange={(content) => setForm((current) => ({ ...current, content }))}
+            onUploadImage={async (file) => {
+              const result = await api.pages.uploadImage(file);
+              if (!result.url) throw new Error(text("announcementEditorUploadFailed"));
+              return result.url;
+            }}
           />
         </Field>
         <Button
@@ -105,13 +113,16 @@ export function AnnouncementSettingsPage({
           className="self-start"
           onClick={() => {
             if (!form.content)
-              setForm({ ...form, content: text("exampleContent") });
+              setForm((current) => ({
+                ...current,
+                content: text("exampleContent"),
+              }));
           }}
         >
           <Code data-icon="inline-start" />
           {text("example")}
         </Button>
-      </div>
+      </FieldGroup>
     </main>
   );
 }

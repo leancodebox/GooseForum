@@ -24,6 +24,9 @@
         "test/**/*.{ts,tsx}"
       ]
     },
+    "packages/markdown": {
+      "project": ["src/**/*.{ts,css}"]
+    },
     "packages/runtime": {
       "project": [
         "src/**/*.{ts,tsx,css}"

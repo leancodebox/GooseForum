@@ -40,7 +40,7 @@ import {
   insertInline,
   markdownFromClipboard,
   renderMarkdown,
-} from "./markdown";
+} from "@gooseforum/markdown";
 import { optimizeImage, validateImage } from "./image";
 import {
   VisualMarkdownEditor,

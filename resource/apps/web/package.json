@@ -18,6 +18,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@gooseforum/client": "workspace:*",
+    "@gooseforum/markdown": "workspace:*",
     "@tanstack/react-table": "^9.2.4",
     "date-fns": "^4.4.0",
     "lucide-react": "^1.45.0",

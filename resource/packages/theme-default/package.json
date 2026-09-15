@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@gooseforum/client": "workspace:*",
+    "@gooseforum/markdown": "workspace:*",
     "@gooseforum/runtime": "workspace:*",
     "@gooseforum/ui": "workspace:*",
     "react": "^19.2.8",
@@ -20,8 +21,6 @@
     "compressorjs": "^1.3.0",
     "cropperjs": "^2.1.1",
     "markdown-it": "^14.2.0",
-    "markdown-it-anchor": "^9.2.0",
-    "markdown-it-task-lists": "^2.1.1",
     "mermaid": "11.17.1",
     "prosemirror-commands": "^1.7.1",
     "prosemirror-history": "^1.5.0",
@@ -33,8 +32,7 @@
     "prosemirror-state": "^1.4.4",
     "prosemirror-tables": "^1.8.5",
     "prosemirror-view": "^1.42.1",
-    "simple-icons": "^16.20.0",
-    "turndown": "^7.2.4"
+    "simple-icons": "^16.20.0"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.3",
@@ -42,7 +40,6 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@types/markdown-it": "^14.1.2",
-    "@types/turndown": "^5.0.6",
     "jsdom": "^30.0.1",
     "tailwindcss": "^4.1.18",
     "typescript": "~6.0.3",

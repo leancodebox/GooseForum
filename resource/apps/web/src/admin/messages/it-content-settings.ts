@@ -4,6 +4,12 @@ export default {
   ...en,
   posting: "Pubblicazione",
   announcement: "Annuncio",
+  announcementContentHint: "Scrivi in Markdown; l’anteprima corrisponde all’annuncio pubblico.",
+  announcementEditorPreview: "Anteprima",
+  announcementEditorEmptyPreview: "Non c’è ancora alcun contenuto da visualizzare.",
+  announcementEditorUploadImage: "Carica immagine",
+  announcementEditorUploadFailed: "Caricamento immagine non riuscito",
+  announcementEditorPlaceholder: "Scrivi l’annuncio in Markdown",
   exampleContent:
     "## Avviso di manutenzione\n\nStanotte il sito sarà in manutenzione dalle 22:00 alle 24:00. Potrebbe essere temporaneamente non disponibile.",
 } as const;

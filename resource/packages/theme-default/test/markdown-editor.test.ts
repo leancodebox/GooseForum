@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { insertBlock, insertInline, renderMarkdown } from "../src/site/editor/markdown";
+import { insertBlock, insertInline, renderMarkdown } from "@gooseforum/markdown";
 import { parseEditableVisualMarkdown, serializeVisualMarkdown } from "../src/site/editor/visual-markdown-schema";
 
 describe("React Markdown editor primitives", () => {

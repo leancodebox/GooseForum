@@ -3,17 +3,40 @@ tmp_dir = "storage/tmp"
 
 [build]
 bin = "./storage/tmp/GooseForum"
-args_bin = ["serve"]# 最新版配置
+args_bin = ["serve"]
 cmd = "go build -o ./storage/tmp/ ."
 delay = 1000
-exclude_dir = [".git", ".idea", "assets", "tmp", "vendor", "actor", "actor", "web", "storage", "dist", "resource/node_modules","resource/static/dist"," admin"]
+exclude_dir = [
+  ".git",
+  ".idea",
+  ".pnpm-store",
+  "assets",
+  "dist",
+  "node_modules",
+  "resource/apps",
+  "resource/coverage",
+  "resource/e2e",
+  "resource/node_modules",
+  "resource/packages",
+  "resource/playwright-report",
+  "resource/scripts",
+  "resource/src",
+  "resource/static/dist",
+  "resource/test",
+  "resource/test-results",
+  "storage",
+  "themes",
+  "tmp",
+  "tmp_refs",
+  "vendor",
+]
 exclude_file = []
-exclude_regex = []
+exclude_regex = ["_test\\.go$"]
 exclude_unchanged = false
 follow_symlink = false
 full_bin = ""
 include_dir = []
-include_ext = ["go", "tpl", "tmpl", "html", "env", "toml"] # ,"gohtml","css"
+include_ext = ["go", "gohtml", "tpl", "tmpl", "html", "env", "toml"]
 kill_delay = 1000000000
 log = "build-errors.log"
 send_interrupt = true
