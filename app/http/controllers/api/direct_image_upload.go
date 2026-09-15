@@ -31,6 +31,14 @@ type directImageUploadInitResult struct {
 }
 
 func InitDirectImageUpload(c *gin.Context) {
+	initDirectImageUpload(c, false)
+}
+
+func InitDirectAdminImageUpload(c *gin.Context) {
+	initDirectImageUpload(c, true)
+}
+
+func initDirectImageUpload(c *gin.Context, adminUpload bool) {
 	var request directImageUploadInitRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, component.FailDataCode(component.MessageRequestParseFailed, component.MessageParams{"error": err.Error()}))
@@ -41,7 +49,13 @@ func InitDirectImageUpload(c *gin.Context) {
 		return
 	}
 	userId := c.GetUint64("userId")
-	policy, failure := resolveImageUploadPolicy(userId)
+	var policy *imageUploadPolicy
+	var failure *imageUploadFailure
+	if adminUpload {
+		policy, failure = resolveAdminImageUploadPolicy(userId)
+	} else {
+		policy, failure = resolveImageUploadPolicy(userId)
+	}
 	if failure != nil {
 		c.JSON(failure.Status, failure.Data)
 		return
@@ -65,6 +79,14 @@ func InitDirectImageUpload(c *gin.Context) {
 }
 
 func CompleteDirectImageUpload(c *gin.Context) {
+	completeDirectImageUpload(c, false)
+}
+
+func CompleteDirectAdminImageUpload(c *gin.Context) {
+	completeDirectImageUpload(c, true)
+}
+
+func completeDirectImageUpload(c *gin.Context, adminUpload bool) {
 	var request directImageUploadCompleteRequest
 	if err := c.ShouldBindJSON(&request); err != nil || request.Name == "" {
 		c.JSON(http.StatusBadRequest, component.FailDataCode(component.MessageRequestInvalidParams, nil))
@@ -85,7 +107,9 @@ func CompleteDirectImageUpload(c *gin.Context) {
 		writeDirectUploadError(c, err)
 		return
 	}
-	if err := fileusageservice.AddUploadOwner(userId, metadata.Name); err != nil {
+	if adminUpload {
+		fileusageservice.AddAdminUpload(userId, metadata.Name)
+	} else if err := fileusageservice.AddUploadOwner(userId, metadata.Name); err != nil {
 		cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(c.Request.Context()), 5*time.Second)
 		cleanupErr := filestorage.Delete(cleanupCtx, metadata.Name)
 		cancel()

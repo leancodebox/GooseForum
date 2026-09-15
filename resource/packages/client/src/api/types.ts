@@ -162,7 +162,8 @@ export interface ImageUploadInitResult {
   upload?: {
     url: string
     method: string
-    fields: Record<string, string>
+    fields?: Record<string, string>
+    headers?: Record<string, string>
     expiresAt: string
   }
 }

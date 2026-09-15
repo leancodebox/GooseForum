@@ -306,7 +306,12 @@ describe('API client', () => {
   })
 
   it('exposes page configuration and image upload contracts', async () => {
-    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
+    const fetchMock = vi.fn(async (input: string | URL) => {
+      const url = input.toString()
+      if (url.endsWith('/api/admin/img-upload/init')) return jsonResponse({ code: 0, result: { mode: 'proxy' } })
+      if (url.endsWith('/api/admin/img-upload')) return jsonResponse({ code: 0, result: { url: '/file/img/logo.png' } })
+      return jsonResponse({ code: 0, result: [] })
+    })
     const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
 
     await client.admin.pages.saveLinks([{ name: 'Friends', links: [] }])
@@ -316,11 +321,44 @@ describe('API client', () => {
     expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
       'https://forum.example/api/admin/save-friend-links',
       'https://forum.example/api/admin/save-sponsors',
+      'https://forum.example/api/admin/img-upload/init',
       'https://forum.example/api/admin/img-upload',
     ])
     expect(fetchMock.mock.calls[0]?.[1]?.body).toBe(JSON.stringify({ linksInfo: [{ name: 'Friends', links: [] }] }))
-    expect(fetchMock.mock.calls[2]?.[1]?.body).toBeInstanceOf(FormData)
-    expect(new Headers(fetchMock.mock.calls[2]?.[1]?.headers).has('Content-Type')).toBe(false)
+    expect(fetchMock.mock.calls[3]?.[1]?.body).toBeInstanceOf(FormData)
+    expect(new Headers(fetchMock.mock.calls[3]?.[1]?.headers).has('Content-Type')).toBe(false)
+  })
+
+  it('uploads images through a presigned PUT request', async () => {
+    const fetchMock = vi.fn(async (input: string | URL) => {
+      const url = input.toString()
+      if (url.endsWith('/file/img-upload/init')) return jsonResponse({ code: 0, result: {
+        mode: 'direct',
+        name: '2026/09/image.png',
+        upload: {
+          url: 'https://bucket.example/image.png?signature=ok',
+          method: 'PUT',
+          headers: { 'Content-Type': 'image/png' },
+          expiresAt: '2026-09-16T12:00:00Z',
+        },
+      } })
+      if (url.startsWith('https://bucket.example/')) return new Response(null, { status: 204 })
+      if (url.endsWith('/file/img-upload/complete')) return jsonResponse({ code: 0, result: { url: 'https://cdn.example/image.png' } })
+      throw new Error(`unexpected request: ${url}`)
+    })
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+    const file = new File(['image'], 'image.png', { type: 'image/png' })
+
+    await expect(client.api.uploads.image(file)).resolves.toBe('https://cdn.example/image.png')
+    expect(fetchMock.mock.calls.map(([url]) => url.toString())).toEqual([
+      'https://forum.example/file/img-upload/init',
+      'https://bucket.example/image.png?signature=ok',
+      'https://forum.example/file/img-upload/complete',
+    ])
+    const put = fetchMock.mock.calls[1]?.[1]
+    expect(put?.method).toBe('PUT')
+    expect(new Headers(put?.headers).get('Content-Type')).toBe('image/png')
+    expect(put?.body).toBe(file)
   })
 
   it('exposes badge and file-resource administration', async () => {

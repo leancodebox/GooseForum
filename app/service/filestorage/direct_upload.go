@@ -23,7 +23,8 @@ type DirectUploadRequest struct {
 type DirectUpload struct {
 	URL       string            `json:"url"`
 	Method    string            `json:"method"`
-	Fields    map[string]string `json:"fields"`
+	Fields    map[string]string `json:"fields,omitempty"`
+	Headers   map[string]string `json:"headers,omitempty"`
 	ExpiresAt time.Time         `json:"expiresAt"`
 }
 

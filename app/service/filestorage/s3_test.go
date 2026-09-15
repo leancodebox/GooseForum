@@ -3,7 +3,6 @@ package filestorage
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"errors"
 	"io"
 	"net/url"
@@ -24,8 +23,7 @@ type fakeS3Client struct {
 	statErr        error
 	presignName    string
 	presignType    string
-	presignSize    int64
-	presignExpiry  time.Time
+	presignExpiry  time.Duration
 	presignErr     error
 }
 
@@ -54,12 +52,11 @@ func (client *fakeS3Client) RemoveObject(_ context.Context, name string) error {
 	return nil
 }
 
-func (client *fakeS3Client) PresignPost(_ context.Context, name, contentType string, size int64, expiresAt time.Time) (string, map[string]string, error) {
+func (client *fakeS3Client) PresignPut(_ context.Context, name, contentType string, expiresIn time.Duration) (string, map[string]string, error) {
 	client.presignName = name
 	client.presignType = contentType
-	client.presignSize = size
-	client.presignExpiry = expiresAt
-	return "https://objects.example.com/forum", map[string]string{"key": name}, client.presignErr
+	client.presignExpiry = expiresIn
+	return "https://objects.example.com/forum", map[string]string{"Content-Type": contentType}, client.presignErr
 }
 
 func TestS3StoreImplementsObjectOperations(t *testing.T) {
@@ -102,11 +99,11 @@ func TestS3StorePresignsConstrainedUploadAndVerifiesObject(t *testing.T) {
 	if err != nil {
 		t.Fatalf("presign: %v", err)
 	}
-	if upload.Method != "POST" || upload.URL != "https://objects.example.com/forum" || upload.Fields["key"] != request.Name || !upload.ExpiresAt.Equal(now.Add(request.ExpiresIn)) {
+	if upload.Method != "PUT" || upload.URL != "https://objects.example.com/forum" || upload.Headers["Content-Type"] != request.ContentType || !upload.ExpiresAt.Equal(now.Add(request.ExpiresIn)) {
 		t.Fatalf("upload = %#v", upload)
 	}
-	if client.presignType != request.ContentType || client.presignSize != request.Size || !client.presignExpiry.Equal(upload.ExpiresAt) {
-		t.Fatalf("presign constraints = %q %d %s", client.presignType, client.presignSize, client.presignExpiry)
+	if client.presignType != request.ContentType || client.presignExpiry != request.ExpiresIn {
+		t.Fatalf("presign constraints = %q %s", client.presignType, client.presignExpiry)
 	}
 	if err := store.VerifyUpload(context.Background(), request); err != nil {
 		t.Fatalf("verify: %v", err)
@@ -284,7 +281,7 @@ func TestS3StoreRejectsBadExpiryAndStatFailure(t *testing.T) {
 	}
 }
 
-func TestNewS3StoreCreatesMinioPresignedPost(t *testing.T) {
+func TestNewS3StoreCreatesMinioPresignedPut(t *testing.T) {
 	store, err := NewS3Store(S3Config{
 		Endpoint:  "https://objects.example.com",
 		Bucket:    "forum",
@@ -309,17 +306,11 @@ func TestNewS3StoreCreatesMinioPresignedPost(t *testing.T) {
 	if err != nil || parsed.Host != "objects.example.com" {
 		t.Fatalf("upload URL = %q, %v", upload.URL, err)
 	}
-	if upload.Fields["key"] != "images/example.webp" || upload.Fields["Content-Type"] != "image/webp" || upload.Fields["policy"] == "" {
-		t.Fatalf("upload fields = %#v", upload.Fields)
+	if upload.Method != "PUT" || upload.Headers["Content-Type"] != "image/webp" || len(upload.Fields) != 0 {
+		t.Fatalf("upload = %#v", upload)
 	}
-	policy, err := base64.StdEncoding.DecodeString(upload.Fields["policy"])
-	if err != nil {
-		t.Fatalf("decode policy: %v", err)
-	}
-	for _, constraint := range []string{`["eq","$bucket","forum"]`, `["eq","$key","images/example.webp"]`, `["eq","$Content-Type","image/webp"]`, `["content-length-range", 6, 6]`} {
-		if !bytes.Contains(policy, []byte(constraint)) {
-			t.Fatalf("policy missing %s: %s", constraint, policy)
-		}
+	if !strings.Contains(parsed.Query().Get("X-Amz-SignedHeaders"), "content-type") {
+		t.Fatalf("Content-Type is not signed: %s", upload.URL)
 	}
 }
 

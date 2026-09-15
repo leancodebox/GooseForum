@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 )
 
@@ -98,6 +99,16 @@ func TestReactProductionManifestEntry(t *testing.T) {
 	}
 	if strings.Contains(html, "@vite") {
 		t.Fatal("production entry contains Vite development script")
+	}
+}
+
+func TestResourceAssetUsesConfiguredCDN(t *testing.T) {
+	old := preferences.GetString("app.cdn_url", "")
+	preferences.Set("app.cdn_url", "https://cdn.example.com/forum/")
+	t.Cleanup(func() { preferences.Set("app.cdn_url", old) })
+
+	if got := resourceAsset("react/assets/site.js"); got != "https://cdn.example.com/forum/assets/react/assets/site.js" {
+		t.Fatalf("resource asset = %q", got)
 	}
 }
 

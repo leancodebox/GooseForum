@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"path"
 	"strings"
@@ -19,7 +20,7 @@ const (
 	S3Driver                  = "s3"
 	defaultPresignExpiry      = 10 * time.Minute
 	maximumPresignExpiry      = time.Hour
-	presignedUploadHTTPMethod = "POST"
+	presignedUploadHTTPMethod = http.MethodPut
 )
 
 type S3Config struct {
@@ -49,7 +50,7 @@ type s3Client interface {
 	OpenObject(context.Context, string) (io.ReadCloser, error)
 	StatObject(context.Context, string) (s3ObjectInfo, error)
 	RemoveObject(context.Context, string) error
-	PresignPost(context.Context, string, string, int64, time.Time) (string, map[string]string, error)
+	PresignPut(context.Context, string, string, time.Duration) (string, map[string]string, error)
 }
 
 func NewS3Store(config S3Config) (*S3Store, error) {
@@ -166,11 +167,11 @@ func (store *S3Store) PresignUpload(ctx context.Context, request DirectUploadReq
 		return nil, fmt.Errorf("s3 upload expiry must be between %s and %s", time.Minute, maximumPresignExpiry)
 	}
 	expiresAt := store.now().UTC().Add(expiresIn)
-	uploadURL, fields, err := store.client.PresignPost(ctx, request.Name, request.ContentType, request.Size, expiresAt)
+	uploadURL, headers, err := store.client.PresignPut(ctx, request.Name, request.ContentType, expiresIn)
 	if err != nil {
 		return nil, err
 	}
-	return &DirectUpload{URL: uploadURL, Method: presignedUploadHTTPMethod, Fields: fields, ExpiresAt: expiresAt}, nil
+	return &DirectUpload{URL: uploadURL, Method: presignedUploadHTTPMethod, Headers: headers, ExpiresAt: expiresAt}, nil
 }
 
 func (store *S3Store) VerifyUpload(ctx context.Context, request DirectUploadRequest) error {
@@ -232,26 +233,13 @@ func (client *minioS3Client) RemoveObject(ctx context.Context, name string) erro
 	return client.client.RemoveObject(ctx, client.bucket, name, minio.RemoveObjectOptions{})
 }
 
-func (client *minioS3Client) PresignPost(ctx context.Context, name, contentType string, size int64, expiresAt time.Time) (string, map[string]string, error) {
-	policy := minio.NewPostPolicy()
-	setters := []func() error{
-		func() error { return policy.SetBucket(client.bucket) },
-		func() error { return policy.SetKey(name) },
-		func() error { return policy.SetContentType(contentType) },
-		func() error { return policy.SetContentLengthRange(size, size) },
-		func() error { return policy.SetExpires(expiresAt) },
-		func() error { return policy.SetSuccessStatusAction("204") },
-	}
-	for _, set := range setters {
-		if err := set(); err != nil {
-			return "", nil, err
-		}
-	}
-	uploadURL, fields, err := client.client.PresignedPostPolicy(ctx, policy)
+func (client *minioS3Client) PresignPut(ctx context.Context, name, contentType string, expiresIn time.Duration) (string, map[string]string, error) {
+	headers := http.Header{"Content-Type": []string{contentType}}
+	uploadURL, err := client.client.PresignHeader(ctx, http.MethodPut, client.bucket, name, expiresIn, nil, headers)
 	if err != nil {
 		return "", nil, err
 	}
-	return uploadURL.String(), fields, nil
+	return uploadURL.String(), map[string]string{"Content-Type": contentType}, nil
 }
 
 var _ Store = (*S3Store)(nil)

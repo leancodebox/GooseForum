@@ -70,7 +70,11 @@ func resourceAsset(path string) string {
 	if strings.HasPrefix(path, "/") {
 		return path
 	}
-	return "/assets/" + strings.TrimPrefix(path, "/")
+	assetPath := "/assets/" + strings.TrimPrefix(path, "/")
+	if cdnURL := strings.TrimRight(strings.TrimSpace(setting.GetCDNURL()), "/"); cdnURL != "" {
+		return cdnURL + assetPath
+	}
+	return assetPath
 }
 
 func loadManifestAt(path string) map[string]manifestItem {

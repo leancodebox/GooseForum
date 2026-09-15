@@ -36,10 +36,15 @@ cdn_url = ""                    # CDN URL
 [server]
 url = "http://localhost"        # Base site URL
 port = 5234                     # Listening port
+readHeaderTimeoutSeconds = 10   # Request header timeout
+readTimeoutSeconds = 60         # Full request timeout, including upload bodies
+writeTimeoutSeconds = 60        # Response write timeout
+idleTimeoutSeconds = 120        # Keep-Alive idle timeout
 ```
 
 - `url`: Used to generate URLs for features such as RSS and sitemaps.
 - `port`: The listening port; defaults to 5234.
+- All timeout values are in seconds; `0` disables a timeout. Slow uploads must finish within `readTimeoutSeconds`.
 
 ### [jwtopt] JWT Authentication
 
@@ -138,6 +143,10 @@ pathStyle = false
 Leave `publicUrl` empty to keep serving files through GooseForum's `/file/img/`
 route. A path prefix such as `https://cdn.example.com/forum-files` is supported.
 Existing database-backed files are unaffected by the S3 custom domain.
+
+Browser uploads use presigned `PUT` requests. The bucket CORS policy must allow
+the site origin to use `PUT` and the `Content-Type` request header. GooseForum no
+longer uses HTML form presigned `POST`, which Cloudflare R2 does not support.
 
 ### [log] Logging
 

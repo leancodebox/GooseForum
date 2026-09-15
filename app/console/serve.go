@@ -130,11 +130,13 @@ func newServeRuntime(port string) (*serveRuntime, error) {
 	}
 	address := fmt.Sprintf("%v:%v", host, port)
 	srv := &http.Server{
-		Addr:           address,
-		Handler:        engine,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
+		Addr:              address,
+		Handler:           engine,
+		ReadHeaderTimeout: serverTimeout("server.readHeaderTimeoutSeconds", 10),
+		ReadTimeout:       serverTimeout("server.readTimeoutSeconds", 60),
+		WriteTimeout:      serverTimeout("server.writeTimeoutSeconds", 60),
+		IdleTimeout:       serverTimeout("server.idleTimeoutSeconds", 120),
+		MaxHeaderBytes:    1 << 20,
 	}
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
@@ -146,6 +148,14 @@ func newServeRuntime(port string) (*serveRuntime, error) {
 		listener:    listener,
 		quit:        make(chan os.Signal, 1),
 	}, nil
+}
+
+func serverTimeout(key string, defaultSeconds int) time.Duration {
+	seconds := preferences.GetInt(key, defaultSeconds)
+	if seconds < 0 {
+		seconds = defaultSeconds
+	}
+	return time.Duration(seconds) * time.Second
 }
 
 func (r *serveRuntime) start() {

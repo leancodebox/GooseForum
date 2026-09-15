@@ -1,4 +1,5 @@
 import type { GooseHttpClient } from '../http/client.js'
+import { uploadImage } from '../api/image-upload.js'
 import type { GooseAdminApi } from './types.js'
 
 const post = <T>(http: GooseHttpClient, path: string, json: unknown = {}) =>
@@ -61,11 +62,12 @@ export function createAdminApi(http: GooseHttpClient): GooseAdminApi {
       saveLinks: (groups) => post(http, '/api/admin/save-friend-links', { linksInfo: groups }),
       sponsors: () => http.request('/api/admin/sponsors'),
       saveSponsors: (config) => post(http, '/api/admin/save-sponsors', { sponsorsInfo: config }),
-      uploadImage: (file) => {
-        const body = new FormData()
-        body.append('file', file)
-        return http.request('/api/admin/img-upload', { method: 'POST', body })
-      },
+      uploadImage: (file) => uploadImage(http, file, {
+        init: '/api/admin/img-upload/init',
+        complete: '/api/admin/img-upload/complete',
+        abort: '/api/admin/img-upload/abort',
+        proxy: '/api/admin/img-upload',
+      }),
     },
     topics: {
       list: (input) => post(http, '/api/admin/topics/list', input),

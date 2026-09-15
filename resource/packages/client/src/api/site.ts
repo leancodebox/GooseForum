@@ -1,6 +1,7 @@
 import { GooseClientError } from '../http/error.js'
 import type { GooseHttpClient } from '../http/client.js'
-import type { GooseSiteApi, ImageUploadInitResult, OIDCConsentDetails, OIDCConsentResult } from './types.js'
+import type { GooseSiteApi, OIDCConsentDetails, OIDCConsentResult } from './types.js'
+import { uploadImage } from './image-upload.js'
 import { siteApiRoutes } from './routes.js'
 import { protocolRoutes } from './protocol-routes.js'
 
@@ -115,7 +116,12 @@ export function createSiteApi(http: GooseHttpClient): GooseSiteApi {
       publish: () => post(http, route('themePublish')),
     },
     uploads: {
-      image: (file) => uploadImage(http, file),
+      image: async (file) => (await uploadImage(http, file, {
+        init: route('imageUploadInit'),
+        complete: route('imageUploadComplete'),
+        abort: route('imageUploadAbort'),
+        proxy: route('imageUpload'),
+      })).url,
       avatar: (avatar) => uploadAvatar(http, avatar),
     },
   }
@@ -143,77 +149,6 @@ async function rawJSON<T>(http: GooseHttpClient, path: string, init: import('../
     })
   }
   return payload
-}
-
-async function uploadImage(http: GooseHttpClient, file: File) {
-  const init = await post<ImageUploadInitResult>(http, route('imageUploadInit'), {
-    filename: file.name,
-    contentType: file.type,
-    size: file.size,
-  })
-  if (init.mode === 'proxy') return uploadImageThroughServer(http, file)
-  if (init.mode !== 'direct' || !init.name || !init.upload?.url || init.upload.method !== 'POST') {
-    if (init.name) await abortDirectImageUpload(http, init.name)
-    throw new GooseClientError('GooseForum image upload initialization returned incomplete data')
-  }
-
-  const formData = new FormData()
-  for (const [key, value] of Object.entries(init.upload.fields || {})) formData.append(key, value)
-  formData.append('file', file, file.name)
-  let response: Response
-  try {
-    response = await http.fetch(init.upload.url, { method: 'POST', body: formData })
-  } catch (error) {
-    try {
-      return await completeDirectImageUpload(http, init.name)
-    } catch {
-      throw error
-    }
-  }
-  if (!response.ok) {
-    await abortDirectImageUpload(http, init.name)
-    throw new GooseClientError(`Image object upload failed with HTTP ${response.status}`, { status: response.status })
-  }
-  try {
-    return await completeDirectImageUpload(http, init.name)
-  } catch (error) {
-    const transient = error instanceof TypeError
-      || (error instanceof GooseClientError && (error.status || 0) >= 500)
-    if (!transient) throw error
-    return completeDirectImageUpload(http, init.name)
-  }
-}
-
-async function uploadImageThroughServer(http: GooseHttpClient, file: File) {
-  const formData = new FormData()
-  formData.append('file', file)
-  const response = await http.fetch(route('imageUpload'), { method: 'POST', body: formData })
-  if (!response.ok) throw new GooseClientError(`Image upload failed with HTTP ${response.status}`, { status: response.status })
-  const envelope = await response.json() as { code?: number; message?: string; messageCode?: string; result?: { url?: string }; data?: { url?: string } }
-  if (envelope.code !== undefined && envelope.code !== 0) {
-    throw new GooseClientError(envelope.message || envelope.messageCode || 'Image upload failed', {
-      status: response.status,
-      code: envelope.code,
-      messageCode: envelope.messageCode,
-    })
-  }
-  const url = (envelope.result ?? envelope.data)?.url
-  if (!url) throw new GooseClientError('GooseForum image upload returned no URL')
-  return url
-}
-
-async function completeDirectImageUpload(http: GooseHttpClient, name: string) {
-  const result = await post<{ url?: string }>(http, route('imageUploadComplete'), { name })
-  if (!result.url) throw new GooseClientError('GooseForum image upload returned no URL')
-  return result.url
-}
-
-async function abortDirectImageUpload(http: GooseHttpClient, name: string) {
-  try {
-    await post(http, route('imageUploadAbort'), { name })
-  } catch {
-    // Pending uploads also expire server-side; abort remains best effort.
-  }
 }
 
 async function uploadAvatar(http: GooseHttpClient, avatar: Blob | Blob[]) {

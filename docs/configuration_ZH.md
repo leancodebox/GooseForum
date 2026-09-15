@@ -37,11 +37,16 @@ cdn_url = ""                    # CDN 域名
 [server]
 url = "http://localhost"        # 站点基础 URL
 port = 5234                     # 监听端口
+readHeaderTimeoutSeconds = 10   # 请求头读取超时
+readTimeoutSeconds = 60         # 完整请求读取超时（包括上传体）
+writeTimeoutSeconds = 60        # 响应写入超时
+idleTimeoutSeconds = 120        # Keep-Alive 空闲超时
 ```
 
 **配置说明：**
 - `url`: 影响 RSS、Sitemap 等功能返回的 URL 地址
 - `port`: 服务监听端口，默认 5234
+- 四个超时项单位均为秒，设为 `0` 表示不限制；慢速上传至少需要在 `readTimeoutSeconds` 内完成
 
 ### [jwtopt] JWT 认证配置
 
@@ -137,6 +142,9 @@ pathStyle = false
 
 `publicUrl` 可留空；留空时仍通过 GooseForum 的 `/file/img/` 路由访问。它也可以包含路径前缀，
 例如 `https://cdn.example.com/forum-files`。已有数据库存储文件不受 S3 自定义域名影响。
+
+浏览器直传使用预签名 `PUT`。对象存储桶的 CORS 规则需要允许站点来源使用 `PUT`，并允许
+`Content-Type` 请求头；Cloudflare R2 不支持的 HTML 表单预签名 `POST` 不再使用。
 
 ### [log] 日志配置
 
