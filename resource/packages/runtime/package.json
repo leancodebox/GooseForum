@@ -18,6 +18,8 @@
   },
   "exports": {
     ".": "./src/index.ts",
+    "./browser-host": "./src/browser-host.ts",
+    "./page-source": "./src/page-source.ts",
     "./unread-status": "./src/unread-status.ts",
     "./prepared-page": "./src/prepared-page.tsx",
     "./i18n": "./src/i18n/index.tsx",

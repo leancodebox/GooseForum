@@ -1,0 +1,30 @@
+{
+  "name": "@gooseforum/next",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1 --port 3012",
+    "dev:go": "node scripts/dev-with-go.mjs",
+    "build": "next build && node scripts/prepare-standalone.mjs",
+    "start": "node scripts/start-standalone.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@gooseforum/client": "workspace:*",
+    "@gooseforum/runtime": "workspace:*",
+    "@gooseforum/theme-default": "workspace:*",
+    "@gooseforum/ui": "workspace:*",
+    "next": "^16.3.5",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "~6.0.3",
+    "vitest": "4.1.11"
+  }
+}

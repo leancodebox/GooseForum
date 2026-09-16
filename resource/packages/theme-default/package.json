@@ -49,6 +49,7 @@
     ".": "./src/index.ts",
     "./app": "./src/app/index.ts",
     "./app/root": "./src/app/root.tsx",
+    "./app/site-app": "./src/app/site-app.tsx",
     "./site/layout/app-shell": "./src/site/layout/app-shell.tsx",
     "./styles/*": "./src/styles/*"
   }

@@ -1,3 +1,5 @@
+"use client";
+
 import { memo, Suspense } from "react";
 import { preparedPage } from "@gooseforum/runtime/prepared-page";
 import type { AnyPagePayload } from "@gooseforum/client";

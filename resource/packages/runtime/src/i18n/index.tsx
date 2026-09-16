@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
-import i18next, { type i18n } from "i18next";
+import i18next, { type i18n, type Resource } from "i18next";
 import { I18nextProvider, initReactI18next } from "react-i18next";
 import { supportedLocales, type Locale } from "@gooseforum/client/i18n/locale";
 import {
@@ -18,7 +18,10 @@ export {
 } from "./loader";
 export const defaultNamespace = "auth";
 
-export function createGooseI18n(locale: Locale): i18n {
+export function createGooseI18n(
+  locale: Locale,
+  initialResources: Resource = cachedGooseResources(),
+): i18n {
   const instance = i18next.createInstance();
   void instance.use(initReactI18next).init({
     lng: locale,
@@ -27,7 +30,7 @@ export function createGooseI18n(locale: Locale): i18n {
     load: "languageOnly",
     defaultNS: defaultNamespace,
     ns: [],
-    resources: cachedGooseResources(),
+    resources: initialResources,
     interpolation: { escapeValue: false, prefix: "{", suffix: "}" },
     initAsync: false,
     react: { useSuspense: false, bindI18nStore: "added" },
@@ -37,12 +40,30 @@ export function createGooseI18n(locale: Locale): i18n {
 
 export function GooseI18nProvider({
   locale,
+  initialResources,
   children,
 }: {
   locale: Locale;
+  initialResources?: Resource;
   children: ReactNode;
 }) {
-  const [instance] = useState(() => createGooseI18n(locale));
+  const [instance] = useState(() =>
+    createGooseI18n(locale, initialResources ?? cachedGooseResources()),
+  );
+  useEffect(() => {
+    if (!initialResources) return;
+    for (const [language, namespaces] of Object.entries(initialResources)) {
+      for (const [namespace, dictionary] of Object.entries(namespaces)) {
+        instance.addResourceBundle(
+          language,
+          namespace,
+          dictionary,
+          true,
+          true,
+        );
+      }
+    }
+  }, [initialResources, instance]);
   useEffect(
     () =>
       subscribeGooseResources((language, namespace, dictionary) => {

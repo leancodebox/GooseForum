@@ -33,6 +33,9 @@ dist/
 .trae/rules/project_rules.md
 .vercel
 **/node_modules/
+**/.next/
+**/*.tsbuildinfo
+**/next-env.d.ts
 **/coverage/
 **/playwright-report/
 **/test-results/

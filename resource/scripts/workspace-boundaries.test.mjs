@@ -40,6 +40,14 @@ test('admin and browser host do not import the default theme', () => {
   }
 })
 
+test('Next host depends on shared packages rather than the Vite host', () => {
+  for (const file of sources(join(root, 'apps/next'))) {
+    const source = readFileSync(file, 'utf8')
+    assert(!source.includes('@gooseforum/web'), file)
+    assert(!source.includes('../web/'), file)
+  }
+})
+
 function sources(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
     const file = join(directory, entry.name)

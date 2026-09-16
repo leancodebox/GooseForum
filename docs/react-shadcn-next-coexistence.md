@@ -6,6 +6,7 @@
 
 ## 状态
 
+- 2026-09：已新增 `resource/apps/next` 独立服务，默认使用 demo payload，可通过 `GOOSEFORUM_ORIGIN` 接入页面 payload 协议；Next 只负责首屏 SSR，水合后复用现有 SiteApp SPA。尚未接入 Go 进程管理和公开入口路由切流。
 - 决策状态：方向已确定，隔离的 React workspace 与开发入口已经初始化。
 - 下一步：将当前 Vue 客户端迁移为 React，并采用 React 官方 shadcn/ui 生态。
 - 长期并存能力：Next 作为可选渲染方式接入，不取代 Go SSR，也不是 React 迁移的下一阶段或完成条件。
