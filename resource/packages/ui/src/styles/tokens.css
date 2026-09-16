@@ -1,7 +1,7 @@
 :root,
 [data-theme="gf-light"] {
   color-scheme: light;
-  --gf-color-base-100: oklch(100% 0 0);
+  --gf-color-base-100: #fbfdff;
   --gf-color-base-200: oklch(98.5% 0.003 247.858);
   --gf-color-base-300: oklch(96.7% 0.003 264.542);
   --gf-color-base-content: oklch(12.9% 0.042 264.695);

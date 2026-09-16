@@ -34,6 +34,7 @@ import { Textarea } from "@gooseforum/ui/components/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@gooseforum/ui/components/toggle-group";
 import { cn } from "@gooseforum/ui/lib/utils";
 import { useGooseRuntime } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import {
   hasUnsupportedVisualMarkdown,
   insertBlock,
@@ -79,6 +80,7 @@ export function MarkdownComposer({
 }) {
   const { t } = useTranslation("publish");
   const runtime = useGooseRuntime();
+  const serverError = useServerErrorMessage();
   const [mode, setMode] = useState<EditorMode>(() =>
     hasUnsupportedVisualMarkdown(value) ? "markdown" : "visual",
   );
@@ -254,7 +256,7 @@ export function MarkdownComposer({
           inserted.push(`![${alt}](${url})`);
         } catch (reason) {
           failures.push(
-            `${file.name}: ${reason instanceof Error ? reason.message : t("noUploadableImages")}`,
+            `${file.name}: ${serverError(reason, t("noUploadableImages"))}`,
           );
         }
       }

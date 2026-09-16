@@ -17,18 +17,19 @@ import type {
 import {
   Ban,
   Bell,
+  BellRing,
   Bookmark,
   ChevronLeft,
   ChevronRight,
   Clock,
   Eye,
-  Flag,
+  MessageSquareWarning,
   Heart,
   Maximize2,
   Minimize2,
   MessageSquare,
-  PencilLine,
-  Reply,
+  SquarePen,
+  MessageSquareReply,
   RotateCcw,
   Trash2,
   X,
@@ -56,6 +57,7 @@ import { Textarea } from "@gooseforum/ui/components/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@gooseforum/ui/components/toggle-group";
 import { cn } from "@gooseforum/ui/lib/utils";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { RenderedContent } from "../content/rendered-content";
 import { emptyShellHeader, useShellHeader } from "../layout/shell-header";
 import { TopicTable } from "../topics/topic-list";
@@ -90,6 +92,7 @@ export function TopicPageView({
   const { t } = useTranslation("topic");
   const { t: homeT } = useTranslation("home");
   const runtime = useGooseRuntime();
+  const serverError = useServerErrorMessage();
   const setShellHeader = useShellHeader();
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [posts, setPosts] = useState(page.postStream.posts);
@@ -225,13 +228,13 @@ export function TopicPageView({
       } catch (reason) {
         if (revision !== windowRevision.current) return;
         setWindowError(
-          reason instanceof Error ? reason.message : t("loadFailed"),
+          serverError(reason, t("loadFailed")),
         );
       } finally {
         if (revision === windowRevision.current) setLoadingDirection("");
       }
     },
-    [afterNo, beforeNo, loadingDirection, page.topic.id, runtime.api.posts, t],
+    [afterNo, beforeNo, loadingDirection, page.topic.id, runtime.api.posts, serverError, t],
   );
   function applyWindow(
     result: PostWindowPayload,
@@ -345,7 +348,7 @@ export function TopicPageView({
       setWatched(previous.watched);
       setLikeCount(previous.likeCount);
       setActionError(
-        reason instanceof Error ? reason.message : t("actionFailed"),
+        serverError(reason, t("actionFailed")),
       );
     } finally {
       setActionBusy("");
@@ -469,7 +472,8 @@ export function TopicPageView({
                 if (result.posts.some(post => post.id === newPost.id)) applyWindow(result, "anchor");
               }
             } catch (reason) {
-              if (revision === windowRevision.current) setWindowError(reason instanceof Error ? reason.message : t("loadFailed"));
+              if (revision === windowRevision.current)
+                setWindowError(serverError(reason, t("loadFailed")));
             } finally {
               if (revision === windowRevision.current) setLoadingDirection("");
             }
@@ -484,7 +488,7 @@ export function TopicPageView({
       setReplyTargetId(0);
     } catch (reason) {
       setComposerError(
-        reason instanceof Error ? reason.message : t("actionFailed"),
+        serverError(reason, t("actionFailed")),
       );
     } finally {
       setComposerBusy(false);
@@ -506,7 +510,7 @@ export function TopicPageView({
       runtime.queueFlash(t("replyDeleted"), "success");
     } catch (reason) {
       setActionError(
-        reason instanceof Error ? reason.message : t("actionFailed"),
+        serverError(reason, t("actionFailed")),
       );
     } finally {
       setDeleteBusy(false);
@@ -537,7 +541,7 @@ export function TopicPageView({
       runtime.queueFlash(t("reportSubmitted"), "success");
     } catch (reason) {
       setActionError(
-        reason instanceof Error ? reason.message : t("actionFailed"),
+        serverError(reason, t("actionFailed")),
       );
     } finally {
       setReportBusy(false);
@@ -581,7 +585,7 @@ export function TopicPageView({
       setPendingModeration(undefined);
     } catch (reason) {
       setActionError(
-        reason instanceof Error ? reason.message : t("actionFailed"),
+        serverError(reason, t("actionFailed")),
       );
     } finally {
       setModerationBusy(false);
@@ -782,12 +786,12 @@ export function TopicPageView({
           <TopicTable topics={page.hotTopics} showCategories t={homeT} />
         </section>
       ) : null}
-      {page.permissions.canPost || !layout.viewer.isAuthenticated ? (
-        <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30">
-          <div
-            data-slot="topic-reply-float-boundary"
-            className="mx-auto flex w-full max-w-[1600px] justify-end pl-4 pr-6 lg:pl-8 lg:pr-10"
-          >
+      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30">
+        <div
+          data-slot="topic-reply-float-boundary"
+          className="mx-auto flex w-full max-w-[1600px] justify-end gap-2 pl-4 pr-6 lg:pl-8 lg:pr-10"
+        >
+          {page.permissions.canPost || !layout.viewer.isAuthenticated ? (
             <Button
               size="icon-lg"
               className="pointer-events-auto rounded-full shadow-lg"
@@ -798,11 +802,33 @@ export function TopicPageView({
                   : void runtime.navigate(loginUrl(runtime.currentUrl))
               }
             >
-              <Reply />
+              <MessageSquareReply />
             </Button>
-          </div>
+          ) : null}
+          <Button
+            data-slot="topic-watch-float"
+            variant={watched ? "default" : "outline"}
+            size="icon-lg"
+            className="pointer-events-auto rounded-full shadow-lg"
+            aria-label={t(watched ? "watched" : "watch")}
+            aria-pressed={watched}
+            disabled={Boolean(actionBusy)}
+            onClick={() =>
+              layout.viewer.isAuthenticated
+                ? void toggleAction("watch")
+                : void runtime.navigate(loginUrl(runtime.currentUrl))
+            }
+          >
+            {actionBusy === "watch" ? (
+              <Spinner />
+            ) : watched ? (
+              <BellRing />
+            ) : (
+              <Bell />
+            )}
+          </Button>
         </div>
-      ) : null}
+      </div>
       <Suspense fallback={null}>
         <TopicComposer
           open={composerOpen}
@@ -904,7 +930,7 @@ export function TopicPageView({
               {reportBusy ? (
                 <Spinner data-icon="inline-start" />
               ) : (
-                <Flag data-icon="inline-start" />
+                <MessageSquareWarning data-icon="inline-start" />
               )}
               {t("submitReport")}
             </Button>
@@ -1044,12 +1070,12 @@ function PostRow({
     <article
       id={`post-${post.id}`}
       data-post-no={post.postNo}
-      className="group relative grid scroll-mt-24 grid-cols-[42px_minmax(0,1fr)] gap-3 px-4 py-4 after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border last:after:hidden"
+      className="group relative grid scroll-mt-24 grid-cols-[42px_minmax(0,1fr)_auto] gap-x-2 gap-y-1 px-4 pt-3 pb-1 after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border last:after:hidden lg:grid-cols-[42px_minmax(0,1fr)] lg:gap-3 lg:py-4"
     >
       <Person user={post.author} avatarOnly showBadge sticky />
-      <div className="min-w-0">
-        <header className="mb-1.5 flex min-w-0 items-start justify-between gap-2 text-xs text-muted-foreground">
-          <div className="min-w-0">
+      <div className="contents lg:block lg:min-w-0">
+        <header className="contents text-xs text-muted-foreground lg:mb-1.5 lg:flex lg:min-w-0 lg:items-start lg:justify-between lg:gap-2">
+          <div className="col-start-2 row-start-1 min-w-0 self-center">
             <div className="flex min-w-0 items-center gap-2">
               <Person user={post.author} textOnly />
               {first ? (
@@ -1066,7 +1092,8 @@ function PostRow({
               </time>
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-0.5 lg:gap-1.5">
+          <div data-slot="post-actions" className="contents [&_button]:size-9 [&_button]:gap-0 [&_button]:p-0! [&_svg]:size-[18px]! [&_svg]:stroke-2 lg:flex lg:shrink-0 lg:items-center lg:gap-1.5 lg:[&_button]:size-6 lg:[&_svg]:size-3!">
+            <div className="col-start-3 row-start-1 flex items-start justify-end gap-0 self-start lg:contents">
             {post.isOwnPost ? (
               <>
                 <Button
@@ -1076,7 +1103,7 @@ function PostRow({
                   aria-label={t("edit")}
                   onClick={onEdit}
                 >
-                  <PencilLine />
+                  <SquarePen />
                 </Button>
                 <Button
                   variant="ghost"
@@ -1089,26 +1116,19 @@ function PostRow({
                 </Button>
               </>
             ) : null}
-            {canPost && !post.isHidden ? (
+
+            {!post.isOwnPost && !(first && isOwnTopic) && !post.isHidden ? (
               <Button
                 variant="ghost"
                 size="icon-xs"
-                className="text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                aria-label={t("reply")}
-                onClick={onReply}
-              >
-                <Reply />
-              </Button>
-            ) : null}
-            {!first && !post.isOwnPost && !post.isHidden ? (
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                className="text-muted-foreground hover:bg-warning/10 hover:text-warning"
+                className={cn(
+                  "text-muted-foreground hover:bg-warning/10 hover:text-warning lg:order-4",
+                  first && "lg:hidden",
+                )}
                 aria-label={t("report")}
                 onClick={onReport}
               >
-                <Flag />
+                <MessageSquareWarning />
               </Button>
             ) : null}
             {!first && post.canModerate ? (
@@ -1116,7 +1136,7 @@ function PostRow({
                 variant="ghost"
                 size="icon-xs"
                 className={cn(
-                  "text-muted-foreground",
+                  "text-muted-foreground lg:order-5",
                   post.processStatus === 1
                     ? "hover:bg-primary/10 hover:text-primary"
                     : "hover:bg-destructive/10 hover:text-destructive",
@@ -1133,14 +1153,27 @@ function PostRow({
                 {post.processStatus === 1 ? <RotateCcw /> : <Ban />}
               </Button>
             ) : null}
+            </div>
+            {canPost && !post.isHidden ? (
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                className="col-start-3 row-start-3 justify-self-end text-muted-foreground hover:bg-primary/10 hover:text-primary lg:order-3"
+                aria-label={t("reply")}
+                onClick={onReply}
+              >
+                <MessageSquareReply />
+              </Button>
+            ) : null}
             <time
               dateTime={post.createdAt}
-              className="hidden w-36 shrink-0 text-right lg:block"
+              className="hidden w-36 shrink-0 text-right lg:order-6 lg:block"
             >
               {formatDate(post.createdAt, locale)}
             </time>
           </div>
         </header>
+        <div data-slot="post-body" className="col-span-3 row-start-2 min-w-0 pt-1 lg:pt-0">
         {post.replyToPostId ? <ReplyReference topicId={post.topicId} target={target} t={t} /> : null}
         {hidden ? (
           <div className="rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
@@ -1164,8 +1197,9 @@ function PostRow({
             {t("editedAt", { time: formatDate(post.updatedAt, locale) })}
           </p>
         ) : null}
+        </div>
         {first ? (
-          <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
+          <div className="col-span-2 row-start-3 flex min-w-0 flex-wrap items-center gap-0 [&_button]:size-9 [&_button]:gap-0 [&_button]:p-0! [&_svg]:size-[18px]! [&_svg]:stroke-2 lg:mt-4 lg:gap-2 lg:border-t lg:pt-3 lg:[&_button]:h-7 lg:[&_button]:w-auto lg:[&_button]:gap-1 lg:[&_button]:px-2.5! lg:[&_svg]:size-3.5!">
             <ActionButton
               tone="like"
               active={liked}
@@ -1190,10 +1224,15 @@ function PostRow({
               label={t(watched ? "watched" : "watch")}
               onClick={() => onToggle("watch")}
             />
-            {!isOwnTopic ? (
-              <Button variant="ghost" size="sm" onClick={onReport}>
-                <Flag data-icon="inline-start" />
-                {t("report")}
+            {!isOwnTopic && !post.isOwnPost ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden lg:inline-flex"
+                onClick={onReport}
+              >
+                <MessageSquareWarning data-icon="inline-start" />
+                <span className="sr-only lg:not-sr-only">{t("report")}</span>
               </Button>
             ) : null}
             {topicCanModerate ? (
@@ -1207,7 +1246,7 @@ function PostRow({
                 ) : (
                   <Ban data-icon="inline-start" />
                 )}
-                {t(topicStatus === 1 ? "moderationUnban" : "moderationBan")}
+                <span className="sr-only lg:not-sr-only">{t(topicStatus === 1 ? "moderationUnban" : "moderationBan")}</span>
               </Button>
             ) : null}
           </div>
@@ -1268,7 +1307,7 @@ function ActionButton({
       onClick={onClick}
     >
       <Icon data-icon="inline-start" fill={active ? "currentColor" : "none"} />
-      {label}
+      <span className="sr-only lg:not-sr-only">{label}</span>
     </Button>
   );
 }
@@ -1301,7 +1340,7 @@ function Person({
         className={cn(
           "inline-flex min-w-0 items-center gap-2 font-medium hover:text-primary",
           avatarOnly && avatarClassName,
-          sticky && "sticky top-19 self-start mt-1",
+          sticky && "self-start lg:sticky lg:top-19 lg:mt-1",
           textOnly && "truncate",
         )}
         title={user.username}

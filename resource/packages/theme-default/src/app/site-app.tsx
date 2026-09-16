@@ -49,6 +49,13 @@ interface CachedPage {
 
 type ScrollAction = "preserve" | "reset" | "restore";
 
+interface PendingScroll {
+  page: AnyPagePayload;
+  action: Exclude<ScrollAction, "preserve">;
+  entryKey: string;
+  hash: string;
+}
+
 const keepAliveComponents = new Set([
   "home.index",
   "category.index",
@@ -92,6 +99,7 @@ export function SiteApp({
   const scrollPositions = useRef(
     new Map<string, { left: number; top: number }>(),
   );
+  const pendingScroll = useRef<PendingScroll | null>(null);
   const activeHistoryEntry = useRef("");
   const activeHistoryIndex = useRef(0);
   const suppressNextPop = useRef(false);
@@ -109,6 +117,18 @@ export function SiteApp({
       );
       return next;
     });
+  }, []);
+
+  const handleContentReady = useCallback((committedPage: AnyPagePayload) => {
+    const target = pendingScroll.current;
+    if (!target || target.page !== committedPage) return;
+    pendingScroll.current = null;
+    applyScroll(
+      target.action,
+      target.entryKey,
+      target.hash,
+      scrollPositions.current,
+    );
   }, []);
 
   const loadPage = useCallback(
@@ -176,16 +196,18 @@ export function SiteApp({
 
         prepareDocument(nextPage, themeRef.current);
         setError(undefined);
+        pendingScroll.current = scrollAction === "preserve"
+          ? null
+          : {
+              page: nextPage,
+              action: scrollAction,
+              entryKey: nextHistoryEntry,
+              hash: url.hash,
+            };
         startTransition(() => {
           rememberPage(nextPage);
           setPage(nextPage);
         });
-        scheduleScroll(
-          scrollAction,
-          nextHistoryEntry,
-          url.hash,
-          scrollPositions.current,
-        );
       } catch (nextError) {
         if (!request.signal.aborted) setError(nextError);
       } finally {
@@ -296,11 +318,16 @@ export function SiteApp({
         setIsNavigating(false);
         setError(undefined);
         prepareDocument(cached, themeRef.current);
+        pendingScroll.current = {
+          page: cached,
+          action: "restore",
+          entryKey,
+          hash: url.hash,
+        };
         startTransition(() => {
           rememberPage(cached);
           setPage(cached);
         });
-        scheduleScroll("restore", entryKey, url.hash, scrollPositions.current);
         return;
       }
       void loadPage(url, "none", "restore", entryKey, targetIndex);
@@ -366,10 +393,10 @@ export function SiteApp({
           key={entry.key}
           mode={!error && entry.key === activeCacheKey ? "visible" : "hidden"}
         >
-          <GoosePage page={entry.page} />
+          <GoosePage page={entry.page} onContentReady={handleContentReady} />
         </Activity>
       ))}
-      {error ? <BootstrapError error={error} description={errorDescription} onRetry={() => void refresh()} retrying={isNavigating} /> : !activeCacheKey ? <GoosePage page={page} /> : null}
+      {error ? <BootstrapError error={error} description={errorDescription} onRetry={() => void refresh()} retrying={isNavigating} /> : !activeCacheKey ? <GoosePage page={page} onContentReady={handleContentReady} /> : null}
     </>
   ) : null;
 
@@ -384,7 +411,9 @@ export function SiteApp({
             retrying={isNavigating}
           />
         ) : page ? (
-          <AppShell layout={page.layout} standalone={isStandalonePage(page)}>{pageContent}</AppShell>
+          <AppShell layout={page.layout} standalone={isStandalonePage(page)}>
+            {pageContent}
+          </AppShell>
         ) : (
           <BootstrapLoading />
         )}
@@ -464,27 +493,22 @@ function saveScrollPosition(
   positions.set(entryKey, { left: window.scrollX, top: window.scrollY });
 }
 
-function scheduleScroll(
-  action: ScrollAction,
+function applyScroll(
+  action: Exclude<ScrollAction, "preserve">,
   entryKey: string,
   hash: string,
   positions: Map<string, { left: number; top: number }>,
 ) {
-  if (action === "preserve") return;
-  requestAnimationFrame(() =>
-    requestAnimationFrame(() => {
-      if (hash) {
-        document
-          .getElementById(decodeURIComponent(hash.slice(1)))
-          ?.scrollIntoView();
-        return;
-      }
-      const saved = action === "restore" ? positions.get(entryKey) : undefined;
-      window.scrollTo({
-        left: saved?.left || 0,
-        top: saved?.top || 0,
-        behavior: "auto",
-      });
-    }),
-  );
+  if (hash) {
+    document
+      .getElementById(decodeURIComponent(hash.slice(1)))
+      ?.scrollIntoView({ behavior: "instant" });
+    return;
+  }
+  const saved = action === "restore" ? positions.get(entryKey) : undefined;
+  window.scrollTo({
+    left: saved?.left || 0,
+    top: saved?.top || 0,
+    behavior: "instant",
+  });
 }

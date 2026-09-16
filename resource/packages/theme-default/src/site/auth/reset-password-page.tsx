@@ -11,6 +11,7 @@ import { Field, FieldGroup, FieldLabel } from '@gooseforum/ui/components/field'
 import { Input } from '@gooseforum/ui/components/input'
 import { Spinner } from '@gooseforum/ui/components/spinner'
 import { GooseLink, useGooseRuntime } from '@gooseforum/runtime'
+import { useServerErrorMessage } from '@gooseforum/runtime/i18n/server-error'
 import { AuthBrand } from './auth-brand'
 
 export function ResetPasswordPageView({
@@ -22,6 +23,7 @@ export function ResetPasswordPageView({
 }) {
   const { t } = useTranslation('auth')
   const runtime = useGooseRuntime()
+  const serverError = useServerErrorMessage()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [pending, setPending] = useState(false)
@@ -52,9 +54,7 @@ export function ResetPasswordPageView({
       setPassword('')
       setConfirmPassword('')
     } catch (nextError) {
-      setError(nextError instanceof Error && nextError.message
-        ? nextError.message
-        : t('server.passwordResetFailed'))
+      setError(serverError(nextError, t('server.passwordResetFailed')))
     } finally {
       setPending(false)
     }

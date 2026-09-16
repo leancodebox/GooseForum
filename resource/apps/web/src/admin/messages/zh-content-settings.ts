@@ -1,4 +1,9 @@
 export default {
+  externalLinks: "帖子外链安全跳转",
+  externalLinksEnabled: "开启离站提醒",
+  externalLinksHint: "仅处理主题正文和回复，不影响公告。关闭时直接跳转；开启时，白名单直接跳转，其他地址显示离站提醒。",
+  externalLinksWhitelist: "域名白名单",
+  externalLinksWhitelistHint: "每行一个域名，例如 example.com。仅精确匹配，子域名需单独填写；不要填写协议、路径或端口。",
   posting: "发帖设置",
   postingHint: "配置文字限制、冷却时间和附件策略。",
   announcement: "公告",

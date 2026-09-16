@@ -2,6 +2,11 @@
 import en from "./en-content-settings";
 export default {
   ...en,
+  externalLinks: "Link esterni nei post",
+  externalLinksEnabled: "Mostra un avviso prima di lasciare il sito",
+  externalLinksHint: "Si applica solo ai contenuti e alle risposte, non agli annunci. Se disattivato, o per i domini consentiti, il reindirizzamento è immediato.",
+  externalLinksWhitelist: "Domini consentiti",
+  externalLinksWhitelistHint: "Un nome host per riga, ad esempio example.com. Corrispondenza esatta; elenca separatamente i sottodomini, senza protocollo, percorso o porta.",
   posting: "Pubblicazione",
   announcement: "Annuncio",
   announcementContentHint: "Scrivi in Markdown; l’anteprima corrisponde all’annuncio pubblico.",

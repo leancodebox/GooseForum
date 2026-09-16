@@ -33,11 +33,13 @@ import {
   EmptyTitle,
 } from "@gooseforum/ui/components/empty";
 import { GooseLink, useGooseLocale, useGoosePageFetcher } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { TopicListFooter, TopicTable } from "../topics/topic-list";
 
 export function UserActivity({ page }: { page: UserProfileProps }) {
   const { t } = useTranslation("user");
   const { t: topicT } = useTranslation("home");
+  const serverError = useServerErrorMessage();
   const locale = useGooseLocale();
   const fetchPage = useGoosePageFetcher();
   const [topics, setTopics] = useState(page.topics);
@@ -71,11 +73,11 @@ export function UserActivity({ page }: { page: UserProfileProps }) {
       }
       setPagination(next.props.pagination);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("loadFailed"));
+      setError(serverError(reason, t("loadFailed")));
     } finally {
       setLoading(false);
     }
-  }, [loading, page.activityTab, pagination, fetchPage, t]);
+  }, [loading, page.activityTab, pagination, fetchPage, serverError, t]);
 
   useEffect(() => {
     if (!sentinel.current || !("IntersectionObserver" in window)) return;

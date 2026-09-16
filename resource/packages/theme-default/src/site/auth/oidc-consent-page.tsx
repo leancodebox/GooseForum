@@ -9,6 +9,7 @@ import { Button } from '@gooseforum/ui/components/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@gooseforum/ui/components/card'
 import { Spinner } from '@gooseforum/ui/components/spinner'
 import { GooseLink, useGooseRuntime } from '@gooseforum/runtime'
+import { useServerErrorMessage } from '@gooseforum/runtime/i18n/server-error'
 import { AuthBrand } from './auth-brand'
 import { AuthLocaleSwitcher } from './auth-locale-switcher'
 
@@ -23,6 +24,7 @@ export function OIDCConsentPageView({
 }) {
   const { t } = useTranslation('oidcConsent')
   const runtime = useGooseRuntime()
+  const serverError = useServerErrorMessage()
   const [details, setDetails] = useState<OIDCConsentDetails>()
   const [error, setError] = useState('')
   const [decision, setDecision] = useState<Decision>()
@@ -40,10 +42,10 @@ export function OIDCConsentPageView({
         if (active) setDetails(result)
       })
       .catch((reason: unknown) => {
-        if (active) setError(reason instanceof Error && reason.message ? reason.message : t('loadFailed'))
+        if (active) setError(serverError(reason, t('loadFailed')))
       })
     return () => { active = false }
-  }, [page.interaction, runtime.api.oidc, t])
+  }, [page.interaction, runtime.api.oidc, serverError, t])
 
   async function decide(nextDecision: Decision) {
     if (decision) return
@@ -54,7 +56,7 @@ export function OIDCConsentPageView({
       if (!result.redirect_url) throw new Error(t('decisionFailed'))
       runtime.redirect(result.redirect_url)
     } catch (reason) {
-      setError(reason instanceof Error && reason.message ? reason.message : t('decisionFailed'))
+      setError(serverError(reason, t('decisionFailed')))
       setDecision(undefined)
     }
   }

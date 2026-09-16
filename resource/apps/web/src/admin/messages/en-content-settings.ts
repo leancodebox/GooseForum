@@ -1,4 +1,9 @@
 export default {
+  externalLinks: "External links in posts",
+  externalLinksEnabled: "Show a warning before leaving the site",
+  externalLinksHint: "Applies to topic bodies and replies only, not announcements. Disabled: redirect immediately. Enabled: warn unless the destination is allowlisted.",
+  externalLinksWhitelist: "Allowed domains",
+  externalLinksWhitelistHint: "One hostname per line, such as example.com. Exact match only; list subdomains separately. Do not include a scheme, path, or port.",
   posting: "Posting",
   postingHint: "Configure text limits, cooldowns, and attachment policy.",
   announcement: "Announcement",

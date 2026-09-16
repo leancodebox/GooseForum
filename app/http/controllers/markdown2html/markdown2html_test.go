@@ -20,8 +20,8 @@ type markdownCompatCase struct {
 }
 
 func TestMarkdownVersions(t *testing.T) {
-	if got := GetPostVersion(); got != 4 {
-		t.Fatalf("GetPostVersion() = %d, want 4", got)
+	if got := GetPostVersion(); got != 5 {
+		t.Fatalf("GetPostVersion() = %d, want 5", got)
 	}
 	if GetParser() == nil {
 		t.Fatal("GetParser() returned nil")

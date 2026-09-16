@@ -26,6 +26,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@gooseforum/ui/components/tabs";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
 import { announceUnreadStatus } from "@gooseforum/runtime/unread-status";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { PageHeader } from "../layout/page-header";
 import { UserCardPopover } from "../users/user-card-popover";
 
@@ -44,6 +45,7 @@ export function NotificationsPageView({
 }) {
   const { t } = useTranslation("notifications");
   const runtime = useGooseRuntime();
+  const serverError = useServerErrorMessage();
   const [filter, setFilter] = useState<NotificationFilter>("all");
   const [unreadCount, setUnreadCount] = useState(page.unreadCount);
   const [markingAll, setMarkingAll] = useState(false);
@@ -99,14 +101,14 @@ export function NotificationsPageView({
           },
         }));
       } catch (reason) {
-        setError(reason instanceof Error ? reason.message : t("loadFailed"));
+        setError(serverError(reason, t("loadFailed")));
         setLists((state) => ({
           ...state,
           [target]: { ...state[target], loading: false },
         }));
       }
     },
-    [lists, runtime.api.notifications, t],
+    [lists, runtime.api.notifications, serverError, t],
   );
 
   useEffect(() => {
@@ -152,7 +154,7 @@ export function NotificationsPageView({
       setUnreadCount(previousCount);
       announceUnreadStatus({ notifications: previousCount > 0 });
       setError(
-        reason instanceof Error ? reason.message : t("markAllReadFailed"),
+        serverError(reason, t("markAllReadFailed")),
       );
     } finally {
       setMarkingAll(false);

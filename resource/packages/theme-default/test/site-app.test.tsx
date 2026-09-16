@@ -89,6 +89,55 @@ describe("SiteApp navigation lifecycle", () => {
     expect(await screen.findByRole("heading", { level: 1 })).toBeTruthy();
     expect(source.load).not.toHaveBeenCalled();
   });
+  it("keeps the current content and URL until the next payload is ready", async () => {
+    window.history.replaceState(null, "", "/");
+    const home = page("home.index", {
+      sort: "latest",
+      tabs: [],
+      topics: [],
+      pagination: { page: 1, nextPage: 2, hasNext: false, nextUrl: "" },
+      announcement: { enabled: false, html: "" },
+    }, "/");
+    const categories = page(
+      "categories.index",
+      { categories: [], total: 0 },
+      "/categories",
+    );
+    let resolvePage!: (value: AnyPagePayload) => void;
+    const pendingPage = new Promise<AnyPagePayload>((resolve) => {
+      resolvePage = resolve;
+    });
+    const source: PageSource<AnyPagePayload> = {
+      api: {} as GooseSiteApi,
+      load: vi.fn(() => pendingPage),
+    };
+    const user = userEvent.setup();
+    render(<SiteApp pageSource={source} initialPage={home} />);
+
+    const currentContent = await screen.findByText(/暂无主题|No topics/);
+    const sidebar = screen.getByRole("complementary", { name: "Sidebar" });
+    await user.click(
+      sidebar.querySelector<HTMLAnchorElement>('a[href="/categories"]')!,
+    );
+
+    expect(currentContent.isConnected).toBe(true);
+    expect(window.location.pathname).toBe("/");
+    expect(source.load).toHaveBeenCalledOnce();
+    expect(document.querySelector(".goose-navigation-progress")).toBeNull();
+    expect(window.scrollTo).not.toHaveBeenCalled();
+
+    vi.mocked(window.scrollTo).mockImplementation(() => {
+      expect(screen.queryByText(/暂无分类|No categories/)).not.toBeNull();
+    });
+    resolvePage(categories);
+    expect(await screen.findByText(/暂无分类|No categories/)).toBeTruthy();
+    expect(window.location.pathname).toBe("/categories");
+    expect(window.scrollTo).toHaveBeenCalledWith({
+      left: 0,
+      top: 0,
+      behavior: "instant",
+    });
+  });
   it("keeps one shell and updates navigation together with page content", async () => {
     window.history.replaceState(null, "", "/");
     const home = {

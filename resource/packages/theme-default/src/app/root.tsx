@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, Suspense } from "react";
+import { memo, Suspense, useLayoutEffect, type ReactNode } from "react";
 import { preparedPage } from "@gooseforum/runtime/prepared-page";
 import type { AnyPagePayload } from "@gooseforum/client";
 import { ArrowRightIcon } from "lucide-react";
@@ -127,6 +127,7 @@ const ThemePreviewPageView = preparedPage("theme.preview", () =>
 
 export interface GooseAppProps {
   page: AnyPagePayload;
+  onContentReady?: (page: AnyPagePayload) => void;
 }
 
 export function GooseApp({ page }: GooseAppProps) {
@@ -138,13 +139,22 @@ export function GooseApp({ page }: GooseAppProps) {
   );
 }
 
-export const GoosePage = memo(function GoosePage({ page }: GooseAppProps) {
+export const GoosePage = memo(function GoosePage({ page, onContentReady }: GooseAppProps) {
   return (
     <Suspense fallback={<PageLoading />}>
-      <GoosePageContent page={page} />
+      <CommittedPage page={page} onContentReady={onContentReady}>
+        <GoosePageContent page={page} />
+      </CommittedPage>
     </Suspense>
   );
 });
+
+function CommittedPage({ page, onContentReady, children }: GooseAppProps & { children: ReactNode }) {
+  useLayoutEffect(() => {
+    onContentReady?.(page);
+  }, [page, onContentReady]);
+  return children;
+}
 
 function GoosePageContent({ page }: GooseAppProps) {
   if (page.component === "auth.login") {
@@ -178,75 +188,37 @@ function GoosePageContent({ page }: GooseAppProps) {
       ) : page.component === "user.profile" ? (
         <UserProfilePageView key={page.url} page={page.props} />
       ) : page.component === "settings.index" ? (
-        <Suspense
-          fallback={
-            <div className="grid min-h-48 place-items-center text-sm text-muted-foreground">
-              加载中…
-            </div>
-          }
-        >
           <SettingsPageView
             key={page.url}
             layout={page.layout}
             page={page.props}
           />
-        </Suspense>
       ) : page.component === "notifications.index" ? (
-        <Suspense
-          fallback={
-            <div className="grid min-h-48 place-items-center text-sm text-muted-foreground">
-              加载中…
-            </div>
-          }
-        >
           <NotificationsPageView key={page.url} page={page.props} />
-        </Suspense>
       ) : page.component === "messages.index" ? (
-        <Suspense
-          fallback={
-            <div className="grid min-h-48 place-items-center text-sm text-muted-foreground">
-              加载中…
-            </div>
-          }
-        >
           <MessagesPageView
             key={page.url}
             layout={page.layout}
             page={page.props}
           />
-        </Suspense>
       ) : page.component === "drafts.index" ? (
-        <Suspense fallback={<PageLoading />}>
           <DraftsPageView page={page.props} />
-        </Suspense>
       ) : page.component === "access-groups.index" ? (
-        <Suspense fallback={<PageLoading />}>
           <AccessGroupsPageView />
-        </Suspense>
       ) : page.component === "error.index" ? (
-        <Suspense fallback={<PageLoading />}>
           <ErrorPageView page={page.props} />
-        </Suspense>
       ) : page.component === "moderation.index" ? (
-        <Suspense fallback={<PageLoading />}>
           <ModerationPageView page={page.props} />
-        </Suspense>
       ) : page.component === "publish.index" ? (
-        <Suspense fallback={<PageLoading />}>
           <PublishPageView key={page.url} page={page.props} />
-        </Suspense>
       ) : page.component === "topic.detail" ? (
-        <Suspense fallback={<PageLoading />}>
           <TopicPageView
             key={page.url}
             layout={page.layout}
             page={page.props}
           />
-        </Suspense>
       ) : page.component === "theme.preview" ? (
-        <Suspense fallback={<PageLoading />}>
           <ThemePreviewPageView layout={page.layout} page={page.props} />
-        </Suspense>
       ) : (
         <PayloadPreview page={page} />
       );

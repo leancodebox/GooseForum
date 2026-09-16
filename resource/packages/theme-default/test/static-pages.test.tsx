@@ -427,11 +427,13 @@ describe("AppShell and static pages", () => {
       }),
     );
     expect(screen.getByRole("link", { name: "React migration" })).toBeTruthy();
-    const topicCategory = document.querySelector('a[href="/c/Coding/1"]');
-    expect(topicCategory).toBeTruthy();
-    expect(topicCategory?.classList.contains("leading-none")).toBe(true);
-    expect(topicCategory?.classList.contains("shrink-0")).toBe(true);
-    expect(screen.getByText("hot")).toBeTruthy();
+    const topicCategories = document.querySelectorAll('a[href="/c/Coding/1"]');
+    expect(topicCategories).toHaveLength(2);
+    for (const topicCategory of topicCategories) {
+      expect(topicCategory.classList.contains("leading-none")).toBe(true);
+      expect(topicCategory.classList.contains("shrink-0")).toBe(true);
+    }
+    expect(screen.getAllByText("hot")).toHaveLength(2);
     const loadMoreButton = screen.getByRole("button", { name: "加载更多" });
     expect(loadMoreButton.classList.contains("focus-visible:ring-2")).toBe(true);
     expect(loadMoreButton.classList.contains("bg-clip-padding")).toBe(false);
@@ -1221,6 +1223,7 @@ describe("AppShell and static pages", () => {
       permissions: { isOwnTopic: true, canPost: true, canModerateTopic: false },
     };
     const like = vi.fn().mockResolvedValue(true);
+    const watch = vi.fn().mockResolvedValue(true);
     const windowRequest = vi
       .fn()
       .mockResolvedValue({
@@ -1261,7 +1264,7 @@ describe("AppShell and static pages", () => {
       },
     };
     const { user } = renderPage(topicPage, {
-      topics: { like } as unknown as GooseSiteApi["topics"],
+      topics: { like, watch } as unknown as GooseSiteApi["topics"],
       posts: {
         window: windowRequest,
         create,
@@ -1313,9 +1316,20 @@ describe("AppShell and static pages", () => {
     expect(floatingBoundary?.classList.contains("max-w-[1600px]")).toBe(true);
     expect(floatingBoundary?.classList.contains("pr-6")).toBe(true);
     expect(floatingBoundary?.classList.contains("lg:pr-10")).toBe(true);
+    expect(floatingBoundary?.classList.contains("gap-2")).toBe(true);
+    const floatingButtons = floatingBoundary?.querySelectorAll("button");
+    expect(floatingButtons).toHaveLength(2);
+    expect(floatingButtons?.[0]?.getAttribute("aria-label")).toBe("参与讨论");
+    expect(floatingButtons?.[1]?.getAttribute("aria-label")).toBe("已关注");
+    const floatingWatch = floatingBoundary?.querySelector<HTMLButtonElement>(
+      '[data-slot="topic-watch-float"]',
+    );
+    expect(floatingWatch?.getAttribute("aria-pressed")).toBe("true");
+    expect(floatingWatch?.getAttribute("data-variant")).toBe("default");
+    expect(floatingWatch?.querySelector(".lucide-bell-ring")).toBeTruthy();
     const postAvatarLink = firstReply.closest('article')?.querySelector(':scope > a');
-    expect(postAvatarLink?.classList.contains('sticky')).toBe(true);
-    expect(postAvatarLink?.classList.contains('top-19')).toBe(true);
+    expect(postAvatarLink?.classList.contains('lg:sticky')).toBe(true);
+    expect(postAvatarLink?.classList.contains('lg:top-19')).toBe(true);
     expect(postAvatarLink?.classList.contains('self-start')).toBe(true);
     const desktopPermalink = Array.from(
       document.querySelectorAll('a[href="/p/post/60#post-61"]'),
@@ -1333,6 +1347,17 @@ describe("AppShell and static pages", () => {
         .querySelector('[data-tone="watch"]')
         ?.classList.contains("text-success"),
     ).toBe(true);
+    await user.click(floatingWatch as HTMLButtonElement);
+    expect(watch).toHaveBeenCalledWith(60, 2);
+    expect(floatingWatch?.getAttribute("aria-label")).toBe("关注");
+    expect(floatingWatch?.getAttribute("aria-pressed")).toBe("false");
+    expect(floatingWatch?.getAttribute("data-variant")).toBe("outline");
+    expect(floatingWatch?.querySelector(".lucide-bell")).toBeTruthy();
+    expect(
+      document
+        .querySelector('[data-tone="watch"]')
+        ?.classList.contains("text-success"),
+    ).toBe(false);
     const topicAside = screen
       .getByRole("heading", { level: 2, name: "主题概览" })
       .parentElement;

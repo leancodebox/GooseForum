@@ -10,10 +10,10 @@ export type SiteThemePreset = {
 export const themePresets: SiteThemePreset[] = [
   {
     key: 'goose',
-    swatches: ['#ffffff', '#315ef4', '#10b981', '#1b1b1b'],
+    swatches: ['#fbfdff', '#315ef4', '#10b981', '#1b1b1b'],
     themes: {
       'gf-light': {
-        'color-base-100': '#ffffff',
+        'color-base-100': '#fbfdff',
         'color-base-200': '#f8fafc',
         'color-base-300': '#f1f5f9',
         'color-base-content': '#111827',

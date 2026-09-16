@@ -11,6 +11,7 @@ import {
 } from "@gooseforum/ui/components/field";
 import { Input } from "@gooseforum/ui/components/input";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { SettingsSectionHeader } from "./settings-section-header";
 
 export function AccountSettings({
@@ -22,6 +23,7 @@ export function AccountSettings({
 }) {
   const { t } = useTranslation("settings");
   const runtime = useGooseRuntime();
+  const serverError = useServerErrorMessage();
   const [current, setCurrent] = useState("");
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
@@ -39,9 +41,7 @@ export function AccountSettings({
       setConfirmation("");
       showStatus(t("status.passwordChanged"));
     } catch (reason) {
-      showError(
-        reason instanceof Error ? reason.message : t("errors.password"),
-      );
+      showError(serverError(reason, t("errors.password")));
     } finally {
       setSaving(false);
     }

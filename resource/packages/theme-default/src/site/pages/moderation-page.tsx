@@ -38,6 +38,7 @@ import {
   TabsTrigger,
 } from "@gooseforum/ui/components/tabs";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { PageHeader } from "../layout/page-header";
 import { UserCardPopover } from "../users/user-card-popover";
 
@@ -53,6 +54,7 @@ const consoleTabs: Array<{ key: ConsoleTab; icon: ComponentType }> = [
 export function ModerationPageView({ page }: { page: ModerationPageProps }) {
   const { t } = useTranslation("moderation");
   const runtime = useGooseRuntime();
+  const serverError = useServerErrorMessage();
   const [tab, setTab] = useState<ConsoleTab>("reports");
   const [topics, setTopics] = useState(page.topics);
   const [topicBusy, setTopicBusy] = useState<Set<number>>(() => new Set());
@@ -95,13 +97,13 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
         setReportLoaded(true);
       } catch (reason) {
         setReportError(
-          reason instanceof Error ? reason.message : t("reports.loadFailed"),
+          serverError(reason, t("reports.loadFailed")),
         );
       } finally {
         setReportLoading(false);
       }
     },
-    [reportCursor, reportLoading, reportStatus, runtime.api.moderation, t],
+    [reportCursor, reportLoading, reportStatus, runtime.api.moderation, serverError, t],
   );
   const loadLogs = useCallback(
     async (reset = false) => {
@@ -121,13 +123,13 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
         setLogLoaded(true);
       } catch (reason) {
         setLogError(
-          reason instanceof Error ? reason.message : t("logs.loadFailed"),
+          serverError(reason, t("logs.loadFailed")),
         );
       } finally {
         setLogLoading(false);
       }
     },
-    [logCursor, logLoading, runtime.api.moderation, t],
+    [logCursor, logLoading, runtime.api.moderation, serverError, t],
   );
   useEffect(() => {
     if (tab === "reports" && !reportLoaded) void loadReports(true);
@@ -164,7 +166,7 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
       setLogLoaded(false);
     } catch (reason) {
       setReportError(
-        reason instanceof Error ? reason.message : t("reports.actionFailed"),
+        serverError(reason, t("reports.actionFailed")),
       );
     } finally {
       setReportBusy((current) => withoutId(current, item.id));
@@ -180,7 +182,7 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
       setLogLoaded(false);
     } catch (reason) {
       setTopicError(
-        reason instanceof Error ? reason.message : t("blocked.loadFailed"),
+        serverError(reason, t("blocked.loadFailed")),
       );
     } finally {
       setTopicBusy((current) => withoutId(current, topic.id));

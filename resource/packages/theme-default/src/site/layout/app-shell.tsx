@@ -267,9 +267,6 @@ export function AppShell({
   return (
     <ShellHeaderContext.Provider value={setShellHeader}>
       <div className="min-h-svh bg-muted text-foreground">
-      {runtime.isNavigating ? (
-        <div className="fixed inset-x-0 top-0 z-50 h-0.5 animate-pulse bg-primary" />
-      ) : null}
       <header hidden={standalone} className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur-sm">
         <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center gap-2 px-3 lg:gap-8 lg:px-8">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -563,7 +560,9 @@ export function AppShell({
         >
           {renderNavigation()}
         </aside>
-        <section className="min-w-0">{children}</section>
+        <section data-slot="goose-page-content" className="min-w-0">
+          {children}
+        </section>
       </main>
       </div>
     </ShellHeaderContext.Provider>

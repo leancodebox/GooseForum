@@ -28,12 +28,14 @@ import { Input } from "@gooseforum/ui/components/input";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { cn } from "@gooseforum/ui/lib/utils";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { MarkdownComposer } from "../editor/markdown-composer";
 import { PageHeader } from "../layout/page-header";
 
 export function PublishPageView({ page }: { page: PublishPageProps }) {
   const { t } = useTranslation("publish");
   const runtime = useGooseRuntime();
+  const serverError = useServerErrorMessage();
   const [title, setTitle] = useState(page.topic.title || "");
   const [content, setContent] = useState(page.topic.content || "");
   const [categoryIds, setCategoryIds] = useState(page.topic.categoryIds || []);
@@ -158,9 +160,10 @@ export function PublishPageView({ page }: { page: PublishPageProps }) {
       return true;
     } catch (reason) {
       setError(
-        reason instanceof Error
-          ? reason.message
-          : t(status === 0 ? "draftSaveFailed" : "saveFailed"),
+        serverError(
+          reason,
+          t(status === 0 ? "draftSaveFailed" : "saveFailed"),
+        ),
       );
       return false;
     } finally {

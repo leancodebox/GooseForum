@@ -13,7 +13,6 @@ import {
   KeyRoundIcon,
 } from 'lucide-react'
 import {
-  GooseClientError,
   loginWithPassword,
   type LayoutPayload,
   type LoginPageProps,
@@ -28,6 +27,7 @@ import { Input } from '@gooseforum/ui/components/input'
 import { Spinner } from '@gooseforum/ui/components/spinner'
 import { Tabs, TabsList, TabsTrigger } from '@gooseforum/ui/components/tabs'
 import { useGooseRuntime } from '@gooseforum/runtime'
+import { useServerErrorMessage } from '@gooseforum/runtime/i18n/server-error'
 import { AuthBrand } from './auth-brand'
 import { AuthLocaleSwitcher } from './auth-locale-switcher'
 
@@ -41,7 +41,7 @@ interface LoginPageViewProps {
 export function LoginPageView({ layout, page }: LoginPageViewProps) {
   const runtime = useGooseRuntime()
   const { t } = useTranslation('auth')
-  const { t: serverT, i18n: serverI18n } = useTranslation('serverMessages')
+  const resolveError = useServerErrorMessage()
   const [mode, setMode] = useState<Mode>(page.initialMode || 'login')
   const [captcha, setCaptcha] = useState({ id: '', image: '' })
   const [captchaLoading, setCaptchaLoading] = useState(false)
@@ -53,16 +53,6 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
     username: '', email: '', password: '', confirmPassword: '', captcha: '', agree: false,
   })
   const [forgotForm, setForgotForm] = useState({ email: '', captcha: '' })
-
-  const resolveError = useCallback((error: unknown, fallback: string) => {
-    if (error instanceof GooseClientError && error.messageCode) {
-      if (serverI18n.exists(error.messageCode, { ns: 'serverMessages' })) {
-        return serverT(error.messageCode, { ...(error.params || {}) })
-      }
-      if (error.message === error.messageCode) return fallback
-    }
-    return error instanceof Error && error.message ? error.message : fallback
-  }, [serverI18n, serverT])
 
   const refreshCaptcha = useCallback(async () => {
     setCaptchaLoading(true)

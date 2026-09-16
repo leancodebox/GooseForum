@@ -85,6 +85,7 @@ import { ScrollArea } from "@gooseforum/ui/components/scroll-area";
 import { cn } from "@gooseforum/ui/lib/utils";
 import { announceUnreadStatus } from "@gooseforum/runtime/unread-status";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 
 type Conversation = ChatItemPayload & {
   messages: ChatMessagePayload[];
@@ -125,6 +126,7 @@ export function MessagesPageView({
 }) {
   const { t } = useTranslation("messages");
   const runtime = useGooseRuntime();
+  const serverError = useServerErrorMessage();
   const [conversations, setConversations] = useState<Conversation[]>(() =>
     page.conversations.map(toConversation),
   );
@@ -206,7 +208,7 @@ export function MessagesPageView({
           })),
         )
         .catch((reason) => {
-          setError(reason instanceof Error ? reason.message : t("loadFailed"));
+          setError(serverError(reason, t("loadFailed")));
           updateConversation(conversation.peerId, (item) => ({
             ...item,
             loading: false,
@@ -231,7 +233,7 @@ export function MessagesPageView({
     }
     // Only a new conversation or unread change should trigger this load;
     // loading/error updates must not automatically retry a failed request.
-  }, [activePeerId, active?.convId, active?.unreadCount, runtime.api.chat, t]);
+  }, [activePeerId, active?.convId, active?.unreadCount, runtime.api.chat, serverError, t]);
 
   const filteredConversations = useMemo(() => {
     const keyword = conversationSearch.trim().toLowerCase();
@@ -293,7 +295,7 @@ export function MessagesPageView({
         loadingOlder: false,
       }));
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("loadFailed"));
+      setError(serverError(reason, t("loadFailed")));
       updateConversation(active.peerId, (item) => ({
         ...item,
         loadingOlder: false,
@@ -337,7 +339,7 @@ export function MessagesPageView({
       setShowEmoji(false);
       if (inputRef.current) inputRef.current.style.height = "auto";
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("sendFailed"));
+      setError(serverError(reason, t("sendFailed")));
     } finally {
       setSending(false);
     }

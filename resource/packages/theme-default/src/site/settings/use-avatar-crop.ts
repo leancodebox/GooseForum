@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useGooseRuntime } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 
 export function useAvatarCrop({
   initialUrl,
@@ -11,6 +12,7 @@ export function useAvatarCrop({
   onError(message: string): void;
 }) {
   const runtime = useGooseRuntime();
+  const serverError = useServerErrorMessage();
   const inputRef = useRef<HTMLInputElement>(null);
   const [imageElement, imageRef] = useState<HTMLImageElement | null>(null);
   const cropperRef = useRef<import("cropperjs").default | undefined>(undefined);
@@ -149,8 +151,7 @@ export function useAvatarCrop({
       setPreviewUrl("");
       setReady(false);
     } catch (reason) {
-      const message =
-        reason instanceof Error ? reason.message : "头像上传失败。";
+      const message = serverError(reason, "头像上传失败。");
       setCropError(message);
       onError(message);
     } finally {

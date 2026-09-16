@@ -100,6 +100,38 @@ describe("topic list keep-alive state", () => {
     await waitFor(() => expect(screen.getByTestId("topics").textContent).toBe("1,2"));
   });
 
+  it("replaces a cached list when the same URL receives a fresh payload", async () => {
+    const initialPage = topicPage([topic(1, "Before publish")], {
+      page: 1,
+      nextPage: 2,
+      hasNext: false,
+      nextUrl: "",
+    });
+    const refreshedPage = topicPage(
+      [topic(2, "Published topic"), topic(1, "Before publish")],
+      {
+        page: 1,
+        nextPage: 2,
+        hasNext: false,
+        nextUrl: "",
+      },
+    );
+    const runtime = createRuntime();
+    const view = (page: HomeProps) => (
+      <GooseRuntimeProvider runtime={runtime}>
+        <TopicListState page={page} />
+      </GooseRuntimeProvider>
+    );
+    const rendered = render(view(initialPage));
+    expect(screen.getByTestId("topics").textContent).toBe("1");
+
+    rendered.rerender(view(refreshedPage));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("topics").textContent).toBe("2,1"),
+    );
+  });
+
   it("keeps an unfinished search query when an Activity is shown again", async () => {
     const page: SearchPageProps = {
       query: "initial",

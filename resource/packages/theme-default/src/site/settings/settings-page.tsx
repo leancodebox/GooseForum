@@ -37,6 +37,7 @@ import { ProfileSettings } from "./settings-profile";
 import { AvatarCropDialog } from "./avatar-crop-dialog";
 import { useAvatarCrop } from "./use-avatar-crop";
 import { useGooseRuntime } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { cn } from "@gooseforum/ui/lib/utils";
 
 const tabKeys = [
@@ -61,6 +62,7 @@ export function SettingsPageView({
 }) {
   const { t } = useTranslation("settings");
   const runtime = useGooseRuntime();
+  const serverError = useServerErrorMessage();
   const [activeTab, setActiveTab] = useState<TabKey>(readTab);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
@@ -123,7 +125,7 @@ export function SettingsPageView({
       setPresetDraft(url);
       showStatus(t("status.avatarSaved"));
     } catch (reason) {
-      showError(errorMessage(reason, t("errors.avatar")));
+      showError(serverError(reason, t("errors.avatar")));
     } finally {
       setSavingPreset(false);
     }
@@ -135,7 +137,7 @@ export function SettingsPageView({
       await runtime.api.users.wearBadge(wornCode);
       showStatus(t("status.badgeSaved"));
     } catch (reason) {
-      showError(errorMessage(reason, t("errors.badge")));
+      showError(serverError(reason, t("errors.badge")));
     } finally {
       setSavingBadge(false);
     }
@@ -168,7 +170,7 @@ export function SettingsPageView({
                     showStatus(t("status.coverSaved"));
                     return true;
                   } catch (reason) {
-                    showError(errorMessage(reason, t("errors.cover")));
+                    showError(serverError(reason, t("errors.cover")));
                     return false;
                   }
                 }}
@@ -544,10 +546,6 @@ function tabLabel(
   return key === "applications"
     ? t("tabs.applications")
     : t(`tabs.${key}`, { defaultValue: fallback || key });
-}
-
-function errorMessage(reason: unknown, fallback: string) {
-  return reason instanceof Error ? reason.message : fallback;
 }
 
 const defaultCover =

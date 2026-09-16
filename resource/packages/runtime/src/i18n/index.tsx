@@ -16,6 +16,7 @@ export {
   loadedGooseNamespaces,
   prepareGooseTranslations,
 } from "./loader";
+export { useServerErrorMessage } from "./server-error";
 export const defaultNamespace = "auth";
 
 export function createGooseI18n(

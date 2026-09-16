@@ -9,6 +9,7 @@ import (
 	"unicode/utf8"
 
 	headingid "github.com/jkboxomine/goldmark-headingid"
+	"github.com/leancodebox/GooseForum/app/bundles/outbound"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
@@ -18,7 +19,7 @@ import (
 )
 
 func GetPostVersion() uint32 {
-	return 4
+	return 5
 }
 
 var md = goldmark.New(
@@ -108,6 +109,7 @@ func normalizePostHTML(raw string) string {
 			switch node.Data {
 			case "a":
 				if isExternalHTTPLink(getHTMLAttr(node, "href")) {
+					setHTMLAttr(node, "href", outbound.Link(getHTMLAttr(node, "href")))
 					setHTMLAttr(node, "target", "_blank")
 					setHTMLAttr(node, "rel", "nofollow ugc noopener noreferrer")
 				}
@@ -146,7 +148,7 @@ func getHTMLAttr(node *nethtml.Node, key string) string {
 
 func isExternalHTTPLink(value string) bool {
 	parsed, err := url.Parse(strings.TrimSpace(value))
-	return err == nil && parsed.IsAbs() && (parsed.Scheme == "http" || parsed.Scheme == "https")
+	return err == nil && ((parsed.IsAbs() && (parsed.Scheme == "http" || parsed.Scheme == "https")) || strings.HasPrefix(value, "//"))
 }
 
 func findFirstElement(node *nethtml.Node, tag string) *nethtml.Node {

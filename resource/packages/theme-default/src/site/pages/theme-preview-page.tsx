@@ -30,6 +30,7 @@ import { Switch } from "@gooseforum/ui/components/switch";
 import { Tabs, TabsList, TabsTrigger } from "@gooseforum/ui/components/tabs";
 import { Textarea } from "@gooseforum/ui/components/textarea";
 import { useGooseRuntime } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { themePresets } from "../theme/theme-presets";
 
 type ThemeName = "gf-light" | "gf-dark";
@@ -96,6 +97,7 @@ export function ThemePreviewPageView({
 }) {
   const { t } = useTranslation("themePreview");
   const runtime = useGooseRuntime();
+  const serverError = useServerErrorMessage();
   const [draft, setDraft] = useState(() => fromPrepublish(page.theme));
   const [saved, setSaved] = useState(() => cloneConfig(page.theme));
   const [themeName, setThemeName] = useState<ThemeName>(runtime.theme);
@@ -171,7 +173,7 @@ export function ThemePreviewPageView({
       setMessage(t("draftSaved"));
       runtime.queueFlash(t("draftSaved"), "success");
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("saveFailed"));
+      setError(serverError(reason, t("saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -188,7 +190,7 @@ export function ThemePreviewPageView({
       setMessage(t("published"));
       runtime.queueFlash(t("published"), "success");
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("publishFailed"));
+      setError(serverError(reason, t("publishFailed")));
     } finally {
       setPublishing(false);
     }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/buildinfo"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
+	"github.com/leancodebox/GooseForum/app/bundles/outbound"
 	"github.com/leancodebox/GooseForum/app/bundles/randopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -1427,6 +1428,11 @@ type SavePostingSettingsReq struct {
 
 // SavePostingSettings 保存发布内容设置
 func SavePostingSettings(req component.BetterRequest[SavePostingSettingsReq]) component.Response {
+	domains, err := outbound.NormalizeDomains(req.Params.Settings.ExternalLinks.Whitelist)
+	if err != nil {
+		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
+	}
+	req.Params.Settings.ExternalLinks.Whitelist = domains
 	return savePageConfig(pageConfig.PostingSettings, req.Params.Settings, hotdataserve.ClearPostingSettingsConfigCache)
 }
 

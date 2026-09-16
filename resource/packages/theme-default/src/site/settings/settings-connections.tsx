@@ -16,6 +16,7 @@ import {
 } from "@gooseforum/ui/components/empty";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { useGooseRuntime } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { SettingsSectionHeader } from "./settings-section-header";
 
 export function ConnectionsSettings({
@@ -29,6 +30,7 @@ export function ConnectionsSettings({
 }) {
   const { t } = useTranslation("settings");
   const runtime = useGooseRuntime();
+  const serverError = useServerErrorMessage();
   const [bindings, setBindings] = useState<OAuthBindingsPayload>([]);
   const [grants, setGrants] = useState<OIDCGrantPayload[]>([]);
   const [loadingBindings, setLoadingBindings] = useState(true);
@@ -43,7 +45,7 @@ export function ConnectionsSettings({
       .then((items) => {
         if (active) setBindings(items);
       })
-      .catch((reason) => showError(message(reason, t("errors.bindings"))))
+      .catch((reason) => showError(serverError(reason, t("errors.bindings"))))
       .finally(() => {
         if (active) setLoadingBindings(false);
       });
@@ -52,21 +54,21 @@ export function ConnectionsSettings({
       .then((items) => {
         if (active) setGrants(items);
       })
-      .catch((reason) => showError(message(reason, t("errors.applications"))))
+      .catch((reason) => showError(serverError(reason, t("errors.applications"))))
       .finally(() => {
         if (active) setLoadingGrants(false);
       });
     return () => {
       active = false;
     };
-  }, [runtime.api.users, showError, t]);
+  }, [runtime.api.users, serverError, showError, t]);
 
   async function refreshBindings() {
     setLoadingBindings(true);
     try {
       setBindings(await runtime.api.users.oauthBindings());
     } catch (reason) {
-      showError(message(reason, t("errors.bindings")));
+      showError(serverError(reason, t("errors.bindings")));
     } finally {
       setLoadingBindings(false);
     }
@@ -90,7 +92,7 @@ export function ConnectionsSettings({
       );
       showStatus(t("status.bindingDisconnected"));
     } catch (reason) {
-      showError(message(reason, t("errors.unbind")));
+      showError(serverError(reason, t("errors.unbind")));
     } finally {
       setAction("");
     }
@@ -106,7 +108,7 @@ export function ConnectionsSettings({
       setConfirm("");
       showStatus(t("status.applicationRevoked"));
     } catch (reason) {
-      showError(message(reason, t("errors.revoke")));
+      showError(serverError(reason, t("errors.revoke")));
     } finally {
       setAction("");
     }
@@ -198,7 +200,7 @@ export function ConnectionsSettings({
               try {
                 setGrants(await runtime.api.users.oidcGrants());
               } catch (reason) {
-                showError(message(reason, t("errors.applications")));
+                showError(serverError(reason, t("errors.applications")));
               } finally {
                 setLoadingGrants(false);
               }
@@ -311,8 +313,4 @@ function Loading({ label }: { label: string }) {
       {label}
     </div>
   );
-}
-
-function message(reason: unknown, fallback: string) {
-  return reason instanceof Error ? reason.message : fallback;
 }

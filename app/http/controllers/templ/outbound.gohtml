@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#fbfdff"><title>即将离开 {{.Site}}</title>
+<style>
+:root{color-scheme:light dark;--bg:#fbfdff;--fg:#172033;--muted:#64748b;--line:#e2e8f0;--primary:#2563eb}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.6 system-ui,-apple-system,"PingFang SC",sans-serif;min-height:100svh;display:grid;place-items:center;padding:20px}
+main{width:100%;max-width:480px}
+h1{font-size:20px;line-height:1.4;margin:16px 0 8px}
+p{color:var(--muted);margin:8px 0}
+.brand{display:inline-flex;align-items:center;font-size:20px;font-weight:600;color:var(--primary);text-decoration:none}
+.brand span{color:var(--fg)}
+.brand img{display:block;max-width:160px;height:32px;object-fit:contain}
+.destination{margin-top:14px;overflow-wrap:anywhere}
+.host{font-weight:600}
+.url{margin-top:2px;font-size:13px}
+nav{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:16px}
+nav a{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:4px 12px;border-radius:6px;text-decoration:none;color:var(--fg);border:1px solid var(--line)}
+nav a.continue{background:var(--primary);color:white;border-color:var(--primary)}
+a:focus-visible{outline:3px solid #93c5fd;outline-offset:3px}
+@media(prefers-color-scheme:dark){:root{--bg:#101010;--fg:#eee;--muted:#aaa;--line:#333;--primary:#60a5fa}nav a.continue{color:#101010}}
+</style></head>
+<body><main>
+<a class="brand" href="/" aria-label="{{.Site}}">
+{{if and (eq .BrandType "image") .BrandImage}}<img src="{{.BrandImage}}" alt="{{.Site}}">
+{{else if eq .BrandType "text"}}{{if .BrandText}}{{.BrandText}}{{else}}{{.Site}}{{end}}
+{{else}}Goose<span>Forum</span>{{end}}
+</a>
+<h1>即将前往外部网站</h1>
+<p>该链接由用户发布，外部网站的内容与安全性不由本站保证。请确认地址后继续。</p>
+<div class="destination"><div class="host">{{.Host}}</div><p class="url">{{.URL}}</p></div>
+<nav><a href="/">返回首页</a><a class="continue" href="{{.URL}}" rel="noopener noreferrer nofollow">继续访问</a></nav>
+</main></body></html>

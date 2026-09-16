@@ -39,6 +39,7 @@ func assertRouter(ginApp *gin.Engine) {
 }
 
 func viewRoute(ginApp *gin.Engine) {
+	ginApp.GET("/outbound", controllers.Outbound)
 	ginApp.GET("/reload", func(c *gin.Context) {
 		if setting.IsProduction() {
 			c.String(http.StatusNotFound, "404")

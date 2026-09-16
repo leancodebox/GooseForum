@@ -6,7 +6,6 @@ import {
   ChevronRight,
   Grid3X3,
   List,
-  MessageSquare,
   Pin,
   Sparkles,
 } from "lucide-react";
@@ -17,6 +16,7 @@ import {
 } from "@gooseforum/ui/components/avatar";
 import { Button } from "@gooseforum/ui/components/button";
 import { GooseLink, useGoosePageFetcher } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { UserCardPopover } from "../users/user-card-popover";
 
 export type TopicListMode = "waterfall" | "pagination";
@@ -37,6 +37,7 @@ const modeKey = "goose:topic-list-mode";
 
 export function useTopicList<T extends TopicPage>(page: T, pageUrl: string) {
   const fetchPage = useGoosePageFetcher();
+  const serverError = useServerErrorMessage();
   const [topics, setTopics] = useState(page.topics);
   const [pagination, setPagination] = useState(page.pagination);
   const [mode, setMode] = useState<TopicListMode>(readMode);
@@ -46,6 +47,8 @@ export function useTopicList<T extends TopicPage>(page: T, pageUrl: string) {
   const revision = useRef(0);
   const active = useRef(true);
   const currentPageUrl = useRef(pageUrl);
+  const currentTopics = useRef(page.topics);
+  const currentPagination = useRef(page.pagination);
 
   useEffect(() => {
     active.current = true;
@@ -57,8 +60,15 @@ export function useTopicList<T extends TopicPage>(page: T, pageUrl: string) {
   }, []);
 
   useEffect(() => {
-    if (currentPageUrl.current === pageUrl) return;
+    if (
+      currentPageUrl.current === pageUrl &&
+      currentTopics.current === page.topics &&
+      currentPagination.current === page.pagination
+    )
+      return;
     currentPageUrl.current = pageUrl;
+    currentTopics.current = page.topics;
+    currentPagination.current = page.pagination;
     revision.current++;
     setTopics(page.topics);
     setPagination(page.pagination);
@@ -103,12 +113,12 @@ export function useTopicList<T extends TopicPage>(page: T, pageUrl: string) {
       setPagination(next.props.pagination);
     } catch (reason) {
       if (active.current && current === revision.current) {
-        setError(reason instanceof Error ? reason.message : "load failed");
+      setError(serverError(reason, "load failed"));
       }
     } finally {
       if (active.current && current === revision.current) setLoading(false);
     }
-  }, [loading, mode, pagination, fetchPage]);
+  }, [loading, mode, pagination, fetchPage, serverError]);
 
   useEffect(() => {
     if (
@@ -194,13 +204,13 @@ export const TopicTable = memo(function TopicTable({
     <div role="table" aria-label={t("topic")}>
       <div
         role="row"
-        className="hidden grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] gap-3 border-b px-4 py-1.5 text-[13px] text-muted-foreground lg:grid"
+        className="hidden grid-cols-[minmax(0,1fr)_112px_72px_72px_96px] gap-3 border-b px-4 py-1.5 text-[13px] text-muted-foreground lg:grid"
       >
         <span role="columnheader">{t("topic")}</span>
-        <span role="columnheader" className="text-center">{t("users")}</span>
-        <span role="columnheader" className="text-center">{t("replies")}</span>
-        <span role="columnheader" className="text-center">{t("views")}</span>
-        <span role="columnheader" className="text-right">{t("activity")}</span>
+        <span role="columnheader" className="whitespace-nowrap text-center">{t("users")}</span>
+        <span role="columnheader" className="whitespace-nowrap text-center">{t("replies")}</span>
+        <span role="columnheader" className="whitespace-nowrap text-center">{t("views")}</span>
+        <span role="columnheader" className="whitespace-nowrap text-right">{t("activity")}</span>
       </div>
       {topics.map((topic) => (
         <TopicRow
@@ -229,25 +239,58 @@ const TopicRow = memo(function TopicRow({
   showHot: boolean;
   t: TFunction;
 }) {
+  const isHot = showHot && topic.viewCount > 500;
+  const hasMobileLabels =
+    (showCategories && topic.categories.length > 0) || isHot;
+
   return (
     <div
       role="row"
-      className="group relative grid min-h-[88px] gap-2.5 px-4 py-2.5 after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border hover:bg-muted/50 last:after:hidden lg:min-h-16 lg:grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] lg:items-center"
+      data-slot="topic-row"
+      className="group relative grid grid-cols-[40px_minmax(0,1fr)_auto] grid-rows-[auto_auto] gap-x-2.5 gap-y-1 px-3 py-2 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:bg-border hover:bg-muted/50 last:after:hidden sm:grid-cols-[44px_minmax(0,1fr)_auto] sm:px-4 sm:after:inset-x-4 lg:min-h-16 lg:grid-cols-[minmax(0,1fr)_112px_72px_72px_96px] lg:grid-rows-1 lg:items-center lg:gap-3 lg:py-2.5"
     >
-      <div role="cell" className="min-w-0">
+      <div
+        role="cell"
+        data-slot="topic-row-mobile-avatar"
+        className="row-span-2 self-start lg:hidden"
+      >
+        <UserCardPopover user={topic.author}>
+          <GooseLink
+            href={`/u/${topic.author.id}`}
+            title={topic.author.username}
+            className="block size-10 rounded-full sm:size-11"
+          >
+            <Avatar className="size-full after:hidden">
+              <AvatarImage
+                src={topic.author.avatarUrl}
+                alt={topic.author.username}
+              />
+              <AvatarFallback>
+                {topic.author.username.slice(0, 1)}
+              </AvatarFallback>
+            </Avatar>
+          </GooseLink>
+        </UserCardPopover>
+      </div>
+      <div role="cell" className="min-w-0 lg:col-start-1">
         <div className="flex min-h-6 flex-wrap items-center gap-x-2 gap-y-1">
-          <h2 className="flex min-w-0 max-w-full items-center gap-2">
-            {showPinned && topic.pinWeight > 0 ? (
-              <Pin className="size-3.5 rotate-45 text-destructive" />
-            ) : null}
+          <h2 className="flex w-full min-w-0 max-w-full items-start gap-2 lg:w-auto lg:items-center">
             <GooseLink
               href={topic.url}
-              className="truncate text-[15px] font-medium leading-6 group-hover:text-primary sm:text-base"
+              data-slot="topic-row-title"
+              className="line-clamp-2 min-w-0 text-base font-medium leading-[1.35] group-hover:text-primary sm:text-[17px] lg:block lg:truncate lg:text-base lg:leading-6"
             >
+              {showPinned && topic.pinWeight > 0 ? (
+                <Pin
+                  data-slot="topic-row-pin"
+                  aria-hidden="true"
+                  className="mr-2 inline size-[1em] rotate-45 align-[-0.125em] text-destructive"
+                />
+              ) : null}
               {topic.title}
             </GooseLink>
             {topic.unseen ? (
-              <span className="size-2 rounded-full bg-primary" />
+              <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary lg:mt-0" />
             ) : null}
           </h2>
           {showCategories
@@ -255,7 +298,7 @@ const TopicRow = memo(function TopicRow({
                 <GooseLink
                   key={category.id}
                   href={category.url}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border bg-muted px-2.5 py-1 text-[11px] font-semibold leading-none"
+                  className="hidden shrink-0 items-center gap-1.5 rounded-full border bg-muted px-2.5 py-1 text-[11px] font-semibold leading-none lg:inline-flex"
                 >
                   <span
                     className="size-2 rounded-full"
@@ -265,21 +308,65 @@ const TopicRow = memo(function TopicRow({
                 </GooseLink>
               ))
             : null}
-          {showHot && topic.viewCount > 500 ? (
-            <span className="flex items-center gap-1 text-[11px] font-semibold text-warning">
+          {isHot ? (
+            <span className="hidden items-center gap-1 text-[11px] font-semibold text-warning lg:flex">
               <Sparkles className="size-3" />
               hot
             </span>
           ) : null}
         </div>
-        <p className="mt-1 min-h-5 truncate text-[13px] text-muted-foreground">
+        <p className="mt-1 hidden min-h-5 truncate text-[13px] text-muted-foreground lg:block">
           {topicDescription(topic)}
         </p>
       </div>
-      <div role="cell" className="flex items-center gap-3 text-xs text-muted-foreground lg:justify-center">
+      <div
+        role="cell"
+        data-slot="topic-row-mobile-replies"
+        className="self-start text-right text-base font-semibold tabular-nums lg:hidden"
+        aria-label={`${t("replies")}: ${topic.replyCount}`}
+      >
+        {compactNumber(topic.replyCount)}
+      </div>
+      <div
+        role="cell"
+        data-slot="topic-row-mobile-meta"
+        className="col-start-2 flex min-w-0 items-center gap-1 overflow-hidden text-xs text-muted-foreground lg:hidden"
+      >
+        {hasMobileLabels ? (
+          <span className="flex min-w-0 items-center gap-1 overflow-hidden">
+            {showCategories
+              ? topic.categories.map((category) => (
+                  <GooseLink
+                    key={category.id}
+                    href={category.url}
+                    className="inline-flex h-5 max-w-28 shrink-0 items-center gap-1 truncate rounded-md bg-muted px-1.5 text-[11px] font-semibold leading-none"
+                  >
+                    <span
+                      className="size-1.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: category.color }}
+                    />
+                    <span className="truncate">{category.name}</span>
+                  </GooseLink>
+                ))
+              : null}
+            {isHot ? (
+              <span className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold text-warning">
+                <Sparkles className="size-3" />
+                hot
+              </span>
+            ) : null}
+          </span>
+        ) : null}
+      </div>
+      <time
+        role="cell"
+        className="col-start-3 whitespace-nowrap self-end text-right text-[11px] text-muted-foreground lg:hidden"
+        dateTime={topic.lastUpdateTime}
+      >
+        {relativeTime(topic.lastUpdateTime, t)}
+      </time>
+      <div role="cell" className="hidden text-xs text-muted-foreground lg:flex lg:justify-center">
         <AvatarStack users={topic.participants} />
-        <time className="lg:hidden">{relativeTime(topic.lastUpdateTime, t)}</time>
-        <span className="flex items-center gap-1 lg:hidden"><MessageSquare className="size-3.5" />{compactNumber(topic.replyCount)}</span>
       </div>
       <div role="cell" className="hidden text-center font-semibold lg:block">
         {compactNumber(topic.replyCount)}

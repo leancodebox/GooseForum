@@ -239,6 +239,10 @@ type OIDCProviderConfig struct {
 }
 
 type PostingContent struct {
+	ExternalLinks struct {
+		Enabled   bool     `json:"enabled"`
+		Whitelist []string `json:"whitelist"`
+	} `json:"externalLinks"`
 	TextControl struct {
 		MinPostLength              int `json:"minPostLength"`
 		MaxPostLength              int `json:"maxPostLength"`

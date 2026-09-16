@@ -57,3 +57,15 @@ func TestNormalizeConfigIgnoresInvalidPrepublish(t *testing.T) {
 		t.Fatal("expected empty prepublish themes to be treated as missing")
 	}
 }
+
+func TestDefaultLightThemeMatchesBrowserThemeColor(t *testing.T) {
+	for _, theme := range Defaults().Themes {
+		if theme.Name == LightName {
+			if color := theme.Tokens.BaseColor(); color != "#fbfdff" {
+				t.Fatalf("expected default light base color #fbfdff, got %q", color)
+			}
+			return
+		}
+	}
+	t.Fatal("default light theme is missing")
+}

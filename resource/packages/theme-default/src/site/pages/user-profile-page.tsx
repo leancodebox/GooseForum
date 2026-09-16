@@ -31,6 +31,7 @@ import {
 } from "@gooseforum/ui/components/tooltip";
 import { cn } from "@gooseforum/ui/lib/utils";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { ProfileAvatar } from "../users/profile-avatar";
 import { ProfileBadge } from "../users/profile-badge";
 import { UserActivity, UserActivityItem } from "../users/user-activity";
@@ -50,6 +51,7 @@ const socialProfiles = {
 export function UserProfilePageView({ page }: { page: UserProfileProps }) {
   const { t } = useTranslation("user");
   const runtime = useGooseRuntime();
+  const serverError = useServerErrorMessage();
   const [following, setFollowing] = useState(page.user.isFollowing);
   const [followLoading, setFollowLoading] = useState(false);
   const [followError, setFollowError] = useState("");
@@ -65,7 +67,7 @@ export function UserProfilePageView({ page }: { page: UserProfileProps }) {
       setFollowing((current) => !current);
     } catch (reason) {
       setFollowError(
-        reason instanceof Error ? reason.message : t("followFailed"),
+        serverError(reason, t("followFailed")),
       );
     } finally {
       setFollowLoading(false);

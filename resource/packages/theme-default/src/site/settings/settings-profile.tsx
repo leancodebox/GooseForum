@@ -21,6 +21,7 @@ import {
 } from "@gooseforum/ui/components/select";
 import { Textarea } from "@gooseforum/ui/components/textarea";
 import { useGooseRuntime } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { SettingsSectionHeader } from "./settings-section-header";
 
 const socialKeys = [
@@ -57,6 +58,7 @@ export function ProfileSettings({
 }) {
   const { t } = useTranslation("settings");
   const runtime = useGooseRuntime();
+  const serverError = useServerErrorMessage();
   const [editingUsername, setEditingUsername] = useState(false);
   const [editingEmail, setEditingEmail] = useState(false);
   const [saving, setSaving] = useState("");
@@ -72,7 +74,7 @@ export function ProfileSettings({
       if (success) showStatus(success);
       return true;
     } catch (reason) {
-      showError(reason instanceof Error ? reason.message : t("errors.save"));
+      showError(serverError(reason, t("errors.save")));
     } finally {
       setSaving("");
     }
@@ -109,7 +111,7 @@ export function ProfileSettings({
       const result = await runtime.api.users.resendActivationEmail();
       showStatus(result.message || t("status.activationEmailSent"));
     } catch (reason) {
-      showError(reason instanceof Error ? reason.message : t("errors.save"));
+      showError(serverError(reason, t("errors.save")));
     } finally {
       setSaving("");
     }

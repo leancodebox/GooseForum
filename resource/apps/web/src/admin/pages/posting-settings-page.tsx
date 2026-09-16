@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import type { ContentSettingsTextKey } from "../content-settings-i18n";
 type Text = (k: ContentSettingsTextKey) => string;
 const defaults: PostingSettings = {
+  externalLinks: { enabled: false, whitelist: [] },
   textControl: {
     minPostLength: 5,
     maxPostLength: 50000,
@@ -54,6 +55,10 @@ export function PostingSettingsPage({
     try {
       const v = await api.settings.posting();
       setForm({
+        externalLinks: {
+          enabled: v.externalLinks?.enabled ?? false,
+          whitelist: v.externalLinks?.whitelist ?? [],
+        },
         textControl: { ...defaults.textControl, ...v.textControl },
         uploadControl: {
           ...defaults.uploadControl,
@@ -275,6 +280,67 @@ export function PostingSettingsPage({
                   </Badge>
                 ))}
               </div>
+            </Field>
+          </FieldGroup>
+        </FieldSet>
+        <FieldSet>
+          <FieldLegend>{text("externalLinks")}</FieldLegend>
+          <FieldGroup>
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="external-links-enabled">
+                {text("externalLinksEnabled")}
+              </FieldLabel>
+              <Switch
+                id="external-links-enabled"
+                disabled={loading || saving}
+                checked={form.externalLinks?.enabled ?? false}
+                onCheckedChange={(enabled) => setForm(current => ({
+                  ...current,
+                  externalLinks: { enabled, whitelist: current.externalLinks?.whitelist ?? [] },
+                }))}
+              />
+            </Field>
+            <FieldDescription>{text("externalLinksHint")}</FieldDescription>
+            <Field>
+              <FieldLabel>
+                {text("externalLinksWhitelist")}
+              </FieldLabel>
+              {(form.externalLinks?.whitelist ?? []).map((domain, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Input
+                    aria-label={`${text("externalLinksWhitelist")} ${index + 1}`}
+                    placeholder="example.com"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    disabled={loading || saving}
+                    value={domain}
+                    onChange={event => {
+                      const value = event.target.value;
+                      setForm(current => ({ ...current, externalLinks: {
+                        enabled: current.externalLinks?.enabled ?? false,
+                        whitelist: (current.externalLinks?.whitelist ?? []).map((item, i) => i === index ? value : item),
+                      } }));
+                    }}
+                  />
+                  <Button variant="ghost" size="icon" disabled={loading || saving}
+                    aria-label={`${text("remove")} ${index + 1}`}
+                    onClick={() => setForm(current => ({ ...current, externalLinks: {
+                      enabled: current.externalLinks?.enabled ?? false,
+                      whitelist: (current.externalLinks?.whitelist ?? []).filter((_, i) => i !== index),
+                    } }))}>
+                    <Trash2 />
+                  </Button>
+                </div>
+              ))}
+              <Button variant="outline" className="w-fit" disabled={loading || saving}
+                onClick={() => setForm(current => ({ ...current, externalLinks: {
+                  enabled: current.externalLinks?.enabled ?? false,
+                  whitelist: [...(current.externalLinks?.whitelist ?? []), ""],
+                } }))}>
+                <Plus data-icon="inline-start" />
+                {text("add")}
+              </Button>
+              <FieldDescription>{text("externalLinksWhitelistHint")}</FieldDescription>
             </Field>
           </FieldGroup>
         </FieldSet>

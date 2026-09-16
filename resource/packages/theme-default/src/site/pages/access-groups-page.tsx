@@ -16,10 +16,12 @@ import {
 } from "@gooseforum/ui/components/empty";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { useGooseRuntime } from "@gooseforum/runtime";
+import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { PageHeader } from "../layout/page-header";
 
 export function AccessGroupsPageView() {
   const { t } = useTranslation("accessGroups");
+  const serverError = useServerErrorMessage();
   const { t: commonT } = useTranslation("contentCommon");
   const { api } = useGooseRuntime();
   const [groups, setGroups] = useState<JoinableAccessGroup[]>([]);
@@ -40,11 +42,11 @@ export function AccessGroupsPageView() {
       setGroups(nextGroups);
       setManaged(nextManaged);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("loadFailed"));
+      setError(serverError(reason, t("loadFailed")));
     } finally {
       setLoading(false);
     }
-  }, [api.accessGroups, t]);
+  }, [api.accessGroups, serverError, t]);
   useEffect(() => {
     void load();
   }, [load]);
@@ -62,7 +64,7 @@ export function AccessGroupsPageView() {
       );
     } catch (reason) {
       setError(
-        reason instanceof Error ? reason.message : t("applicationFailed"),
+        serverError(reason, t("applicationFailed")),
       );
     } finally {
       setApplyingId(0);
@@ -77,7 +79,7 @@ export function AccessGroupsPageView() {
       setManaged(await api.accessGroups.managed());
     } catch (reason) {
       setError(
-        reason instanceof Error ? reason.message : t("memberSaveFailed"),
+        serverError(reason, t("memberSaveFailed")),
       );
     } finally {
       setReviewingId(0);
