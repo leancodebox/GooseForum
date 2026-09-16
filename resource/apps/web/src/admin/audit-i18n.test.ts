@@ -1,7 +1,7 @@
 /// <reference types="node" />
 
-import { readdirSync, readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
   adminAuditMessageCodes,
@@ -121,7 +121,7 @@ describe("admin audit i18n", () => {
   });
 
   it("covers every operation-log message code emitted by the Go backend", () => {
-    const backendRoot = resolve(process.cwd(), "../../../app");
+    const backendRoot = join(findRepositoryRoot(), "app");
     const sources = collectGoFiles(backendRoot)
       .map((file) => readFileSync(file, "utf8"))
       .join("\n");
@@ -140,6 +140,15 @@ describe("admin audit i18n", () => {
     ).toEqual(["moderator.opt.topic.statusChanged"]);
   });
 });
+
+function findRepositoryRoot() {
+  let current = resolve(process.cwd());
+  while (current !== dirname(current)) {
+    if (existsSync(join(current, "go.mod"))) return current;
+    current = dirname(current);
+  }
+  throw new Error("Unable to locate GooseForum repository root");
+}
 
 function collectGoFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {

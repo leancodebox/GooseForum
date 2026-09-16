@@ -9,7 +9,7 @@
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "tsc -b",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage -c ../../vitest.coverage.config.ts",
     "dev:watch": "vite --host 0.0.0.0"
   },
   "dependencies": {

@@ -6,7 +6,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage -c ../../vitest.coverage.config.ts"
   },
   "dependencies": {
     "@gooseforum/client": "workspace:*",

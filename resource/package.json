@@ -20,7 +20,7 @@
     "typecheck:react": "pnpm client:build && pnpm --filter @gooseforum/markdown --filter @gooseforum/runtime --filter @gooseforum/ui --filter @gooseforum/theme-default --filter @gooseforum/web run typecheck",
     "lint:react": "eslint apps/next apps/web/src packages/markdown/src packages/runtime/src packages/ui/src packages/theme-default/src packages/theme-default/test --max-warnings 183 --format ./scripts/eslint-summary-formatter.mjs",
     "test:react": "pnpm --filter @gooseforum/theme-default test && pnpm --filter @gooseforum/web test && pnpm test:react-dom-scanner",
-    "test:react:coverage": "pnpm --filter @gooseforum/theme-default test:coverage && pnpm --filter @gooseforum/web test:coverage",
+    "test:react:coverage": "vitest run --coverage -c vitest.coverage.config.ts",
     "test:react:e2e": "playwright test",
     "test:next:e2e": "playwright test -c playwright.next.config.ts",
     "check:react:dead-code": "knip --workspace apps/web --workspace packages/markdown --workspace packages/runtime --workspace packages/ui --workspace packages/theme-default --include files,dependencies,unlisted,binaries",

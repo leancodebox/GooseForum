@@ -3,12 +3,11 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type {
   AnyPagePayload,
-  GooseAdminApi,
   GooseSiteApi,
   LayoutPayload,
 } from "@gooseforum/client";
-import type { PageSource } from "../host/browser-runtime";
-import { SiteApp } from "./SiteApp";
+import type { PageSource } from "@gooseforum/runtime/page-source";
+import { SiteApp } from "../src/app/site-app";
 
 afterEach(cleanup);
 beforeEach(() => {
@@ -69,7 +68,6 @@ describe("SiteApp navigation lifecycle", () => {
     const login = { ...page("auth.login", { initialMode: "login", redirectUrl: "/", oauthProviders: [] }, "/login"), layout: home.layout } as AnyPagePayload;
     const source: PageSource<AnyPagePayload> = {
       api: { auth: { captcha: vi.fn().mockResolvedValue({ captchaId: "id", captchaImg: "" }) } } as unknown as GooseSiteApi,
-      admin: {} as GooseAdminApi,
       load: vi.fn(async url => url.pathname === "/login" ? login : home),
     };
     const user = userEvent.setup();
@@ -85,7 +83,6 @@ describe("SiteApp navigation lifecycle", () => {
     const initialPage = page("categories.index", { categories: [], total: 0 }, "/categories");
     const source: PageSource<AnyPagePayload> = {
       api: {} as GooseSiteApi,
-      admin: {} as GooseAdminApi,
       load: vi.fn(),
     };
     render(<SiteApp pageSource={source} initialPage={initialPage} />);
@@ -120,7 +117,6 @@ describe("SiteApp navigation lifecycle", () => {
     } as AnyPagePayload;
     const source: PageSource<AnyPagePayload> = {
       api: {} as GooseSiteApi,
-      admin: {} as GooseAdminApi,
       load: vi.fn(async (url: URL) =>
         url.pathname === "/categories" ? categories : home,
       ),
@@ -179,7 +175,6 @@ describe("SiteApp navigation lifecycle", () => {
     );
     const source: PageSource<AnyPagePayload> = {
       api: {} as GooseSiteApi,
-      admin: {} as GooseAdminApi,
       load,
     };
     const user = userEvent.setup();
