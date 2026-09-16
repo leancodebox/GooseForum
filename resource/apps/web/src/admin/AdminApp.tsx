@@ -154,7 +154,7 @@ export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi 
       : pathname === '/admin/settings/announcement'
         ? <AnnouncementSettingsPage api={api} text={contentSettingsText} />
       : pathname === '/admin/settings/http-notify'
-        ? <HttpNotifySettingsPage api={api} text={moderationSettingsText} />
+        ? <HttpNotifySettingsPage api={api} text={moderationSettingsText} locale={locale} />
       : pathname === '/admin/settings/sensitive-words'
         ? <SensitiveWordsSettingsPage api={api} text={moderationSettingsText} />
       : pathname === '/admin/settings/oauth'

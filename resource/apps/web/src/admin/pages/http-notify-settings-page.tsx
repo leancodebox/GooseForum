@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import type { AuthLocale } from "@gooseforum/runtime/i18n/auth";
 import type {
   GooseAdminApi,
   HttpNotifyEndpoint,
@@ -21,6 +22,7 @@ import { Plus, Save, Trash2, Webhook } from "lucide-react";
 import { toast } from "sonner";
 import type { ModerationSettingsTextKey } from "../moderation-settings-i18n";
 type Text = (k: ModerationSettingsTextKey) => string;
+const HttpNotifyGuide = lazy(() => import("../components/http-notify-guide"));
 const events = [
   ["topic.published", "topicPublished"],
   ["topic.updated", "topicUpdated"],
@@ -43,9 +45,11 @@ const empty = (): HttpNotifyEndpoint => ({
 export function HttpNotifySettingsPage({
   api,
   text,
+  locale,
 }: {
   api: GooseAdminApi;
   text: Text;
+  locale: AuthLocale;
 }) {
   const [form, setForm] = useState<HttpNotifySettings>({
     enabled: false,
@@ -312,15 +316,9 @@ export function HttpNotifySettingsPage({
           </div>
         </TabsContent>
         <TabsContent value="guide">
-          <div className="max-w-3xl rounded-lg border bg-background p-5 text-sm leading-7 text-muted-foreground">
-            <h3 className="mb-2 font-semibold text-foreground">
-              {text("guide")}
-            </h3>
-            <p>{text("guideText")}</p>
-            <pre className="mt-3 overflow-auto rounded-lg bg-muted p-3 font-mono text-xs">
-              POST application/json{`\n`}X-Goose-Signature: sha256=…
-            </pre>
-          </div>
+          <Suspense fallback={<Spinner />}>
+            <HttpNotifyGuide locale={locale} />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </main>
