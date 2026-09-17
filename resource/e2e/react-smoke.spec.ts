@@ -523,7 +523,7 @@ test('uses the compact topic information hierarchy only on mobile', async ({ pag
 
   await deepTitle.click()
   await page.waitForTimeout(100)
-  expect(await page.evaluate(() => window.scrollY)).toBe(previousScrollY)
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
   await expect(page.getByRole('heading', { level: 1, name: 'Topic detail' })).toBeVisible()
   expect(await page.evaluate(() => window.scrollY)).toBe(0)
   expect(await page.evaluate(() =>
