@@ -21,6 +21,12 @@ import { toast } from "sonner";
 import type { IdentityTextKey } from "../identity-settings-i18n";
 type Text = (k: IdentityTextKey) => string;
 type Form = OAuthProviderSettings & { scopeDraft: string };
+function callbackUrl(siteUrl: string, key: string) {
+  const provider = key.trim().toLowerCase();
+  return siteUrl.trim() && provider
+    ? `${siteUrl.trim().replace(/\/+$/, "")}/api/auth/${encodeURIComponent(provider)}/callback`
+    : "";
+}
 function toForm(p: OAuthProviderSettings): Form {
   return {
     ...p,
@@ -38,6 +44,7 @@ export function OAuthSettingsPage({
   text: Text;
 }) {
   const [items, setItems] = useState<Form[]>([]);
+  const [siteUrl, setSiteUrl] = useState("");
   const [active, setActive] = useState("0");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -48,7 +55,9 @@ export function OAuthSettingsPage({
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setItems((await api.settings.oauth()).providers.map(toForm));
+      const settings = await api.settings.oauth();
+      setSiteUrl(settings.siteUrl);
+      setItems(settings.providers.map(toForm));
     } catch (r) {
       toast.error(r instanceof Error ? r.message : tr.current("loadFailed"));
     } finally {
@@ -103,11 +112,12 @@ export function OAuthSettingsPage({
           clientSecret: p.clientSecret?.trim() || "",
           clientSecretConfigured: p.clientSecretConfigured,
           clearClientSecret: Boolean(p.clearClientSecret),
-          callbackUrl: p.callbackUrl,
+          callbackUrl: callbackUrl(siteUrl, p.key),
           discoveryUrl: p.discoveryUrl?.trim() || "",
           scopes: p.scopes || [],
         })),
       });
+      setSiteUrl(result.siteUrl);
       setItems(result.providers.map(toForm));
       setActive(String(Math.min(index, result.providers.length - 1)));
       toast.success(text("saved"));
@@ -346,10 +356,11 @@ export function OAuthSettingsPage({
               </>
             ) : null}
             <Field>
-              <FieldLabel>{text("callback")}</FieldLabel>
+              <FieldLabel htmlFor="oauth-callback">{text("callback")}</FieldLabel>
               <Input
+                id="oauth-callback"
                 readOnly
-                value={current.callbackUrl}
+                value={callbackUrl(siteUrl, current.key)}
                 className="font-mono text-xs"
               />
             </Field>
@@ -371,7 +382,7 @@ function F({
   return (
     <Field>
       <FieldLabel>{label}</FieldLabel>
-      <Input value={value} onChange={(e) => onChange(e.target.value)} />
+      <Input aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} />
     </Field>
   );
 }

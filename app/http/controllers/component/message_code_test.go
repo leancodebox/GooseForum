@@ -52,6 +52,20 @@ func TestFailDataErrorUsesMessageError(t *testing.T) {
 	}
 }
 
+func TestResultStructSerializesErrorMessage(t *testing.T) {
+	data, err := json.Marshal(ResultStruct{Code: FAIL, Message: "OIDC provider requires a discovery URL"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var payload map[string]any
+	if err := json.Unmarshal(data, &payload); err != nil {
+		t.Fatal(err)
+	}
+	if payload["message"] != "OIDC provider requires a discovery URL" {
+		t.Fatalf("message = %v", payload["message"])
+	}
+}
+
 func TestCheckUserPermissionIncludesActionCode(t *testing.T) {
 	user := &users.EntityComplete{
 		Id:       1,

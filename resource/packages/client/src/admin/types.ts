@@ -131,7 +131,7 @@ export interface HttpNotifySettings { enabled:boolean;endpoints:HttpNotifyEndpoi
 export interface SensitiveWordSettings { enabled:boolean;mode:'after_review'|'visible_then_review' }
 export interface SensitiveWord { id:number;word:string;action:'reject'|'replace'|'record';replacement:string;enabled:boolean }
 export interface OAuthProviderSettings { key:string;displayName:string;kind:string;enabled:boolean;clientId:string;clientSecret?:string;clientSecretConfigured:boolean;clearClientSecret?:boolean;callbackUrl:string;discoveryUrl?:string;scopes?:string[] }
-export interface OAuthSettings { providers:OAuthProviderSettings[] }
+export interface OAuthSettings { siteUrl:string;providers:OAuthProviderSettings[] }
 export type OIDCClientAuthMethod='none'|'client_secret_basic'|'client_secret_post'
 export interface OIDCProviderStatus { enabled:boolean;available:boolean;issuer?:string;error?:string }
 export interface OIDCClient { clientId:string;name:string;redirectUris:string[];scopes:string[];grantTypes:string[];tokenEndpointAuthMethod:OIDCClientAuthMethod;requirePkce:boolean;public:boolean;enabled:boolean }
@@ -274,7 +274,7 @@ export interface GooseAdminApi {
     saveSensitiveWord(word: SensitiveWord): Promise<SensitiveWord>
     deleteSensitiveWord(id: number): Promise<unknown>
     oauth(): Promise<OAuthSettings>
-    saveOAuth(settings: OAuthSettings): Promise<OAuthSettings>
+    saveOAuth(settings: Pick<OAuthSettings, 'providers'>): Promise<OAuthSettings>
     oidcStatus(): Promise<OIDCProviderStatus>
     saveOIDCStatus(enabled: boolean): Promise<OIDCProviderStatus>
     rotateOIDCSigningKey(): Promise<OIDCProviderStatus>

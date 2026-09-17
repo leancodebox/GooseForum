@@ -48,6 +48,7 @@ type Response struct {
 type ResultStruct struct {
 	Result      any           `json:"result"`
 	Code        Status        `json:"code"`
+	Message     string        `json:"message,omitempty"`
 	MessageCode MessageCode   `json:"messageCode,omitempty"`
 	Params      MessageParams `json:"params,omitempty"`
 }

@@ -53,6 +53,7 @@ type AdminProviderView struct {
 }
 
 type AdminSettingsView struct {
+	SiteURL   string              `json:"siteUrl"`
 	Providers []AdminProviderView `json:"providers"`
 }
 
@@ -419,7 +420,7 @@ func AdminSettings() AdminSettingsView {
 			CallbackURL: callbackURL(siteURL, custom.Key), DiscoveryURL: custom.DiscoveryURL, Scopes: custom.Scopes,
 		})
 	}
-	return AdminSettingsView{Providers: views}
+	return AdminSettingsView{SiteURL: siteURL, Providers: views}
 }
 
 func adminBuiltInView(key, name string, config pageConfig.OAuthProviderConfig, siteURL string) AdminProviderView {

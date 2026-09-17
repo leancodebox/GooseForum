@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
 )
@@ -15,7 +17,7 @@ type SaveOAuthSettingsReq struct {
 
 func SaveOAuthSettings(req component.BetterRequest[SaveOAuthSettingsReq]) component.Response {
 	if err := oauthservice.SaveSettings(req.Params.Settings); err != nil {
-		return component.FailResponseError(err)
+		return component.BuildResponse(http.StatusOK, component.ResultStruct{Code: component.FAIL, Message: err.Error()})
 	}
 	return component.SuccessResponse(oauthservice.AdminSettings())
 }
