@@ -10,7 +10,7 @@ import (
 //
 // -- go:generate npm run --prefix actor build --emptyOutDir
 //
-//go:generate pnpm --dir resource build:embed
+//go:generate pnpm --dir resource build
 func main() {
 	// 注册静态资源
 	console.Execute()

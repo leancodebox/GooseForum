@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useLayoutEffect, type ReactNode } from "react";
+import { memo, Suspense, useLayoutEffect, type ReactNode } from "react";
 import { preparedPage } from "@gooseforum/runtime/prepared-page";
 import type { AnyPagePayload } from "@gooseforum/client";
 import { ArrowRightIcon } from "lucide-react";
@@ -141,9 +141,11 @@ export function GooseApp({ page }: GooseAppProps) {
 
 export const GoosePage = memo(function GoosePage({ page, onContentReady }: GooseAppProps) {
   return (
-    <CommittedPage page={page} onContentReady={onContentReady}>
-      <GoosePageContent page={page} />
-    </CommittedPage>
+    <Suspense fallback={<PageLoading />}>
+      <CommittedPage page={page} onContentReady={onContentReady}>
+        <GoosePageContent page={page} />
+      </CommittedPage>
+    </Suspense>
   );
 });
 
@@ -227,6 +229,14 @@ export function isStandalonePage(page: AnyPagePayload) {
     page.component === "auth.login" ||
     page.component === "auth.resetPassword" ||
     page.component === "auth.oidcConsent"
+  );
+}
+
+function PageLoading() {
+  return (
+    <div className="grid min-h-48 place-items-center text-sm text-muted-foreground">
+      加载中…
+    </div>
   );
 }
 

@@ -9,6 +9,6 @@
 
 ## Compatibility notes
 
-- The page payload and site API contracts remain in `@gooseforum/client`; the React components do not depend on a Vite or Next host.
+- The page payload and site API contracts remain in `@gooseforum/client`; the React components do not depend on the Vite host.
 - Existing Vue routes and templates are unchanged.
 - The four existing locales are sourced from the established Vue copy so the React pages keep the current terminology.

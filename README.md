@@ -141,7 +141,6 @@ CMD ["./GooseForum", "serve"]
 ## Documentation
 
 - [Configuration](docs/configuration.md)
-- [React + shadcn migration and Next coexistence architecture (Chinese)](docs/react-shadcn-next-coexistence.md)
 
 ## License
 

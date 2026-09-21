@@ -18,9 +18,9 @@ React 开发环境包含两个入口：
 
 独立 Vite 入口没有 `#goose-payload`，仅在开发模式通过 `/__goose_page/*` 代理读取真实 Go 页面数据。Go 模板宿主则必须注入 `#goose-payload`，生产包不会访问开发代理。C 端直接打开 `/categories` 等页面时，Vite 会返回根 `index.html`。后台是纯 SPA；开发服务器会将 `/admin` 和所有 `/admin/*` 页面导航固定回退到 `admin/index.html`，再由后台路由接管。`admin.shell` 只作为 viewer、权限、主题等启动数据，不表示后台采用页面 SSR。
 
-Vite 宿主负责页面接口请求、History 和浏览器 metadata；`@gooseforum/theme-default` 只接收页面 payload 与导航/API runtime，不依赖 Vite、Go 模板或 Next。Go 模板与独立 Vite 页面共用浏览器宿主适配。
+Vite 宿主负责页面接口请求、History 和浏览器 metadata；`@gooseforum/theme-default` 只接收页面 payload 与导航/API runtime，不依赖 Vite 或 Go 模板。Go 模板与独立 Vite 页面共用浏览器宿主适配。
 
-React 国际化使用 `i18next` 与 `react-i18next`。框架无关的 locale、标准化规则和翻译资源放在 `@gooseforum/client/i18n`；`@gooseforum/runtime/i18n` 为每个宿主创建独立 i18next 实例并提供 `I18nextProvider`。Vite 当前根据 query、Cookie 和浏览器语言选择初始 locale；未来 Next 应按请求创建实例，不能共享服务端全局实例。
+React 国际化使用 `i18next` 与 `react-i18next`。框架无关的 locale、标准化规则和翻译资源放在 `@gooseforum/client/i18n`；`@gooseforum/runtime/i18n` 创建独立 i18next 实例并提供 `I18nextProvider`。Vite 根据 query、Cookie 和浏览器语言选择初始 locale。
 
 如果 Go 服务使用其他地址：
 
