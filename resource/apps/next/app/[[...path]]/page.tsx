@@ -8,6 +8,7 @@ import {
 import { NextGooseApp } from "@/next-goose-app";
 import { loadNextPage } from "@/page-adapter";
 import { pagePath, resolveLocale } from "@/request-context";
+import { NextThemeResources } from "@/theme-resources";
 
 interface RouteProps {
   params: Promise<{ path?: string[] }>;
@@ -58,12 +59,15 @@ export default async function GoosePage(props: RouteProps) {
   await prepareGooseTranslations(locale, goosePageNamespaces(page.component));
 
   return (
-    <NextGooseApp
-      page={page}
-      locale={locale}
-      initialResources={cachedGooseResources()}
-      directPageData={process.env.GOOSEFORUM_MANAGED === "true"}
-    />
+    <>
+      <NextThemeResources theme={page.layout.theme} />
+      <NextGooseApp
+        page={page}
+        locale={locale}
+        initialResources={cachedGooseResources()}
+        directPageData={process.env.GOOSEFORUM_MANAGED === "true"}
+      />
+    </>
   );
 }
 
