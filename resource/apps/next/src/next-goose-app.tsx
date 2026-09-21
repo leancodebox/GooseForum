@@ -16,10 +16,12 @@ export function NextGooseApp({
   page,
   locale,
   initialResources,
+  directPageData,
 }: {
   page: AnyPagePayload;
   locale: Locale;
   initialResources: InitialResources;
+  directPageData?: boolean;
 }) {
   const pageSource = useMemo<PageSource<AnyPagePayload>>(() => {
     const client = createGooseClient<AnyPagePayload>();
@@ -27,13 +29,12 @@ export function NextGooseApp({
       api: client.api,
       load(url, signal) {
         const path = `${url.pathname}${url.search}`;
-        return client.pages.fetch(
-          `/goose-page-data?path=${encodeURIComponent(path)}`,
-          { signal },
-        );
+        return client.pages.fetch(pageDataRequestPath(path, directPageData), {
+          signal,
+        });
       },
     };
-  }, []);
+  }, [directPageData]);
 
   return (
     <SiteApp
@@ -44,4 +45,8 @@ export function NextGooseApp({
       initialResources={initialResources}
     />
   );
+}
+
+export function pageDataRequestPath(path: string, direct = false) {
+  return direct ? path : `/goose-page-data?path=${encodeURIComponent(path)}`;
 }

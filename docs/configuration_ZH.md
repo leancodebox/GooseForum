@@ -37,6 +37,7 @@ cdn_url = ""                    # CDN 域名
 [server]
 url = "http://localhost"        # 站点基础 URL
 port = 5234                     # 监听端口
+next = false                    # 使用 Next.js 前端；不可用时自动回退
 readHeaderTimeoutSeconds = 10   # 请求头读取超时
 readTimeoutSeconds = 60         # 完整请求读取超时（包括上传体）
 writeTimeoutSeconds = 60        # 响应写入超时
@@ -46,7 +47,15 @@ idleTimeoutSeconds = 120        # Keep-Alive 空闲超时
 **配置说明：**
 - `url`: 影响 RSS、Sitemap 等功能返回的 URL 地址
 - `port`: 服务监听端口，默认 5234
+- `next`: 启用已构建的 Next.js standalone 前端，默认关闭
 - 四个超时项单位均为秒，设为 `0` 表示不限制；慢速上传至少需要在 `readTimeoutSeconds` 内完成
+
+发布构建通过 `go generate ./...` 将 Next.js standalone 产物嵌入 Go 二进制。本地开发
+未包含内嵌产物时，仍可通过 `pnpm next:build` 使用工作区构建结果。GooseForum 会先将
+内嵌产物释放到独立临时目录，再使用 Node.js 启动，将主站页面交给 Next，并继续直接处理管理后台、API、文件、
+OAuth/OIDC 和 SEO 资源。Next 只监听操作系统动态分配的 loopback 高位端口；端口被抢占时
+会重新分配。Node.js 低于 `20.9.0`、命令或构建产物不存在、启动超时或运行中退出时，
+会自动继续使用内置 Go 前端。Next 退出或 GooseForum 关闭后会清理临时目录。
 
 ### [jwtopt] JWT 认证配置
 
@@ -152,7 +161,6 @@ pathStyle = false
 [log]
 type = "stdout"                   # 日志输出类型: stdout, file
 path = "./storage/logs/run.log"   # 日志文件路径
-rolling = true                    # 是否开启日志滚动
 maxage = 10                       # 日志文件最大保存天数
 maxsize = 256                     # 单个日志文件最大大小（MB）
 maxBackUps = 30                   # 最大保留日志文件数量
@@ -160,7 +168,7 @@ maxBackUps = 30                   # 最大保留日志文件数量
 
 **配置说明：**
 - `type`: `stdout` 输出到控制台，`file` 输出到文件
-- `rolling`: 开启后会自动切割日志文件
+- 使用文件日志时会自动按大小和保留策略滚动
 - `maxage`: 超过指定天数的日志文件会被自动删除
 - `maxsize`: 单个日志文件超过指定大小后会自动切割
 - `maxBackUps`: 保留的历史日志文件数量

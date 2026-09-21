@@ -9,6 +9,9 @@ test("renders the standalone payload and handles theme navigation", async ({
   const html = await response.text();
   expect(html).toContain("Standalone Next host");
   expect(html).toContain("No topics yet");
+  expect(html).not.toContain(
+    '<div class="grid min-h-48 place-items-center text-sm text-muted-foreground">加载中…</div>',
+  );
 
   const errors: string[] = [];
   const documentRequests: string[] = [];

@@ -62,6 +62,7 @@ export default async function GoosePage(props: RouteProps) {
       page={page}
       locale={locale}
       initialResources={cachedGooseResources()}
+      directPageData={process.env.GOOSEFORUM_MANAGED === "true"}
     />
   );
 }

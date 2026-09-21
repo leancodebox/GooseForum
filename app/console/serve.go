@@ -24,6 +24,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/migration"
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
+	"github.com/leancodebox/GooseForum/app/service/nextfrontend"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
 	"github.com/leancodebox/GooseForum/app/service/oidcproviderservice"
 	"github.com/leancodebox/GooseForum/app/service/topicrankservice"
@@ -94,6 +95,7 @@ func ginServe() {
 		panic(err)
 	}
 	serverRuntime.start()
+	serverRuntime.nextFrontend.Start()
 
 	slog.Info("GooseForum:listen " + port)
 	slog.Info("use port:" + port)
@@ -114,6 +116,7 @@ func prepareServeRuntime() error {
 type serveRuntime struct {
 	server       *http.Server
 	startupGate  *middleware.StartupGate
+	nextFrontend *nextfrontend.Frontend
 	listener     net.Listener
 	quit         chan os.Signal
 	shutdownOnce sync.Once
@@ -123,6 +126,14 @@ func newServeRuntime(port string) (*serveRuntime, error) {
 	engine := newGinEngine()
 	startupGate := middleware.NewStartupGate()
 	engine.Use(startupGate.Handler)
+	nextFrontend := nextfrontend.New(port)
+	engine.Use(func(c *gin.Context) {
+		if nextFrontend.Proxy(c.Writer, c.Request) {
+			c.Abort()
+			return
+		}
+		c.Next()
+	})
 	routes.RegisterByGin(engine)
 	host := ``
 	if setting.IsLocal() {
@@ -143,10 +154,11 @@ func newServeRuntime(port string) (*serveRuntime, error) {
 		return nil, fmt.Errorf("listen on %s: %w", address, err)
 	}
 	return &serveRuntime{
-		server:      srv,
-		startupGate: startupGate,
-		listener:    listener,
-		quit:        make(chan os.Signal, 1),
+		server:       srv,
+		startupGate:  startupGate,
+		nextFrontend: nextFrontend,
+		listener:     listener,
+		quit:         make(chan os.Signal, 1),
 	}, nil
 }
 

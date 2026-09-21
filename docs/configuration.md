@@ -36,6 +36,7 @@ cdn_url = ""                    # CDN URL
 [server]
 url = "http://localhost"        # Base site URL
 port = 5234                     # Listening port
+next = false                    # Use Next.js; automatically fall back when unavailable
 readHeaderTimeoutSeconds = 10   # Request header timeout
 readTimeoutSeconds = 60         # Full request timeout, including upload bodies
 writeTimeoutSeconds = 60        # Response write timeout
@@ -44,7 +45,20 @@ idleTimeoutSeconds = 120        # Keep-Alive idle timeout
 
 - `url`: Used to generate URLs for features such as RSS and sitemaps.
 - `port`: The listening port; defaults to 5234.
+- `next`: Enables the built Next.js standalone frontend; disabled by default.
 - All timeout values are in seconds; `0` disables a timeout. Slow uploads must finish within `readTimeoutSeconds`.
+
+Release builds embed the Next.js standalone bundle through `go generate ./...`.
+For local development, `pnpm next:build` remains a filesystem fallback when no
+bundle was embedded. GooseForum extracts an embedded bundle to an isolated
+temporary directory, starts it with Node.js, sends public site pages to Next,
+and continues handling
+the admin console, APIs, files, OAuth/OIDC, and SEO resources directly. It
+binds Next to a dynamically allocated high loopback port and allocates another
+one if that port is taken. It automatically keeps using the built-in Go
+frontend if Node.js is older than `20.9.0`, the command or build is missing,
+startup times out, or the child process exits. The temporary directory is removed
+when the child exits or GooseForum shuts down.
 
 ### [jwtopt] JWT Authentication
 
@@ -154,14 +168,13 @@ longer uses HTML form presigned `POST`, which Cloudflare R2 does not support.
 [log]
 type = "stdout"                 # Output: stdout, file
 path = "./storage/logs/run.log" # Log file path
-rolling = true                  # Enable log rotation
 maxage = 10                     # Maximum retention in days
 maxsize = 256                   # Maximum file size in MB
 maxBackUps = 30                 # Maximum number of backup log files
 ```
 
 - `type`: `stdout` writes to the console; `file` writes to a file.
-- `rolling`: Enables automatic log rotation.
+- File logging rotates automatically according to the size and retention settings.
 - `maxage`: Rotated log files older than this number of days are removed.
 - `maxsize`: Log files are rotated when they exceed this size.
 - `maxBackUps`: Number of rotated log files to retain.

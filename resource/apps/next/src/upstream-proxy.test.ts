@@ -11,7 +11,7 @@ describe("Next runtime proxy", () => {
   it("uses the runtime origin and preserves redirects and cookies", async () => {
     vi.stubEnv("GOOSEFORUM_ORIGIN", "http://127.0.0.1:5234");
     const fetch = vi.fn(
-      (_input: RequestInfo | URL) =>
+      (_input: RequestInfo | URL, _init?: RequestInit) =>
         Promise.resolve(
           new Response(null, {
             status: 302,

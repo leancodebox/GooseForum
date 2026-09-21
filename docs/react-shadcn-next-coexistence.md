@@ -6,7 +6,7 @@
 
 ## 状态
 
-- 2026-09：已新增 `resource/apps/next` 独立服务，默认使用 demo payload，可通过 `GOOSEFORUM_ORIGIN` 接入页面 payload 协议；Next 只负责首屏 SSR，水合后复用现有 SiteApp SPA。尚未接入 Go 进程管理和公开入口路由切流。
+- 2026-09：已新增 `resource/apps/next` 独立服务，默认使用 demo payload，可通过 `GOOSEFORUM_ORIGIN` 接入页面 payload 协议；Next 只负责首屏 SSR，水合后复用现有 SiteApp SPA。Go 可通过单一开关管理 standalone 子进程和主站路由，并在环境不满足时回退。
 - 决策状态：方向已确定，隔离的 React workspace 与开发入口已经初始化。
 - 下一步：将当前 Vue 客户端迁移为 React，并采用 React 官方 shadcn/ui 生态。
 - 长期并存能力：Next 作为可选渲染方式接入，不取代 Go SSR，也不是 React 迁移的下一阶段或完成条件。
@@ -154,8 +154,9 @@ Next 接入建立在可复用的 React 组件和适配边界之上，但属于�
 - Go 根据明确配置启动 Next，并通过反向代理路由请求。
 - Next 服务端携带原始 Cookie 向 Go 获取 payload；Go 始终是认证和权限事实来源。
 - 必须设计内部回源标识或内部 page-data endpoint，避免 Next 请求再次被代理回 Next。
-- 初期按固定配置或路由白名单选择渲染器，不做随机灰度。
-- Next 不可用时采用“启动失败”还是“降级到 Go SSR”，必须由配置明确决定，不能静默切换。
+- Go 管理模式下，水合后的 SPA 导航直接携带 `X-Goose-Page` 请求 Go，Next 只参与首屏。
+- 开启时主站页面统一使用 Next，不做随机灰度；管理后台和服务端资源仍由 Go 处理。
+- Next 不可用时降级到 Go SSR，确保论坛仍可访问。
 
 ## Next 构建与 embed 边界
 
@@ -164,8 +165,8 @@ Next SSR 是需要 Node 运行时的服务，不能像普通 Vite 静态资源�
 预期方案是：
 
 1. 构建 Next standalone 产物。
-2. 将 standalone、`.next/static` 和 `public` 作为发布产物；如要求单 Go 文件携带，可将其嵌入 Go 二进制。
-3. 启动时把嵌入产物释放到临时目录。
+2. 将 standalone、`.next/static` 和 `public` 打包并嵌入 Go 二进制。
+3. 启动时把嵌入产物释放到独立临时目录。
 4. Go 通过 `exec` 启动 Next 服务，并管理健康检查、退出和清理。
 5. Node 运行时采用宿主依赖、发布包 sidecar 或平台专属嵌入方案，另行决策。
 
@@ -173,35 +174,22 @@ Next SSR 是需要 Node 运行时的服务，不能像普通 Vite 静态资源�
 
 ## 配置方向
 
-最终配置名称在实现时确定，语义至少应覆盖：
+最终配置保持为单一开关：
 
 ```toml
-[frontend]
-renderer = "go"
-
-[frontend.next]
-enabled = false
-command = "node"
-host = "127.0.0.1"
-startupTimeout = "15s"
-failurePolicy = "fail-startup"
-routes = []
+[server]
+next = false
 ```
 
-其中：
-
-- `renderer = "go"` 表示使用长期支持的 Go SSR + React 路径。
-- 启用 Next 不代表关闭或删除 Go SSR。
-- `routes` 允许稳定地把部分页面交给 Next；空列表的具体含义必须在实现时定义清楚。
-- `failurePolicy` 必须显式配置是否允许回退。
+Node 命令、standalone 入口、动态 loopback 高位端口、启动超时和回退策略均由程序管理，
+避免把部署细节暴露给普通使用者。启用 Next 不代表关闭或删除 Go SSR。
 
 ## 非目标
 
 - 不以 React 迁移为契机重写 Go 业务服务。
 - 不要求把所有数据修改改造成 Next Server Actions。
 - 不把 Next 作为 GooseForum 的唯一部署方式。
-- 不在 React 迁移阶段实现 Next 进程管理和代理。
-- 不承诺首版就把 Node 运行时嵌入单个 Go 二进制。
+- 不把 Node 运行时嵌入 Go 二进制，首版使用宿主提供的 Node.js。
 - 不同时长期维护两套 React 业务组件。
 
 ## 验收标准
@@ -226,8 +214,5 @@ routes = []
 
 ## 待后续决策
 
-- Next 路由按全局模式、固定白名单还是更细粒度规则切换。
 - Node 由宿主提供、作为 sidecar 发布，还是按平台嵌入。
-- Next 启动失败时的默认策略。
-- Next 内部回源使用独立 loopback endpoint 还是受保护的内部请求头。
 - Next 缓存、个性化 payload 和多实例部署策略。

@@ -23,6 +23,8 @@ url = "http://localhost"
 port = 5234
 accessLog = false
 gzip = true # 应用层 gzip 开关
+# 使用内嵌的 Next.js standalone 前端；Node 不可用或启动失败时自动回退到 Go 前端。
+next = false
 # HTTP 超时（秒）；0 表示不限制。上传请求需要在 readTimeoutSeconds 内读完。
 readHeaderTimeoutSeconds = 10
 readTimeoutSeconds = 60
@@ -87,7 +89,6 @@ masterkey = ""
 [log]
 type = "file"# LOG_TYPE stdout,file
 path = "./storage/logs/run.log"
-rolling = true # 是否开启滚动 true ,false
 maxage = 10 # 最大日期
 maxsize = 256 # 最大文件大小 MB
 maxBackUps = 30 # 最大保留文件数量

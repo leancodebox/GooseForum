@@ -3,6 +3,7 @@ package resource
 
 import (
 	"embed"
+	"errors"
 	"io/fs"
 	"os"
 	"path"
@@ -20,7 +21,7 @@ type ThemeConfig struct {
 	Manifest         string `json:"manifest"`
 }
 
-//go:embed all:templates all:static
+//go:embed all:templates all:static all:next
 var resources embed.FS
 
 // GetTemplateFS returns the template filesystem for the current environment.
@@ -45,6 +46,18 @@ func GetStaticFS() (fs.FS, error) {
 		return os.DirFS(filepath.Join(resourceDir(), "static")), nil
 	}
 	return fs.Sub(resources, "static")
+}
+
+// GetNextStandaloneArchive returns the optional embedded Next.js standalone bundle.
+func GetNextStandaloneArchive() ([]byte, bool, error) {
+	data, err := resources.ReadFile("next/standalone.zip")
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+	return data, true, nil
 }
 
 func resourceDir() string {

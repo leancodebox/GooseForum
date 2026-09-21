@@ -34,6 +34,8 @@ dist/
 .vercel
 **/node_modules/
 **/.next/
+resource/next/standalone.zip
+resource/next/standalone.zip.tmp
 **/*.tsbuildinfo
 **/next-env.d.ts
 **/coverage/

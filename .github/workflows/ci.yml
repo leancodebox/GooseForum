@@ -28,11 +28,11 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Download React assets
+      - name: Download embedded frontend assets
         uses: actions/download-artifact@v6
         with:
-          name: react-assets
-          path: resource/static/dist/react
+          name: resource-assets
+          path: resource
 
       - name: Test Go with embedded React assets
         run: go test ./... -coverprofile=coverage.out -covermode=atomic
@@ -75,13 +75,15 @@ jobs:
 
       - name: Build
         working-directory: resource
-        run: pnpm build
+        run: pnpm build:embed
 
       - name: Upload production assets for Go tests
         uses: actions/upload-artifact@v6
         with:
-          name: react-assets
-          path: resource/static/dist/react
+          name: resource-assets
+          path: |
+            resource/static/dist/react
+            resource/next/standalone.zip
           include-hidden-files: true
 
   react-quality:
