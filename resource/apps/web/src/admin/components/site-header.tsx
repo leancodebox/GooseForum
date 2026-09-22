@@ -10,6 +10,7 @@ const localeLabels: Record<AuthLocale, string> = {
   en: 'English',
   ja: '日本語',
   it: 'Italiano',
+  ru: 'Русский',
 }
 
 const headerLabels = {
@@ -17,6 +18,7 @@ const headerLabels = {
   en: { language: 'Switch language', light: 'Switch to light theme', dark: 'Switch to dark theme', site: 'Back to site' },
   ja: { language: '言語を切り替え', light: 'ライトテーマに切り替え', dark: 'ダークテーマに切り替え', site: 'サイトに戻る' },
   it: { language: 'Cambia lingua', light: 'Passa al tema chiaro', dark: 'Passa al tema scuro', site: 'Torna al sito' },
+  ru: { language: 'Сменить язык', light: 'Переключиться на светлую тему', dark: 'Переключиться на тёмную тему', site: 'Вернуться на сайт'},
 } as const
 
 export function SiteHeader({ title, locale, theme, onLocaleChange, onThemeToggle }: {

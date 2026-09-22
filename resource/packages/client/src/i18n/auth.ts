@@ -2,6 +2,7 @@ import zh from "./messages/zh-auth.js";
 import en from "./messages/en-auth.js";
 import ja from "./messages/ja-auth.js";
 import it from "./messages/it-auth.js";
+import ru from "./messages/ru-auth.js";
 export { supportedLocales, normalizeLocale } from "./locale.js";
 import type { Locale } from "./locale.js";
 export type { Locale } from "./locale.js";
@@ -59,4 +60,4 @@ export interface AuthMessages {
   };
 }
 
-export const authResources = { zh, en, ja, it } as const;
+export const authResources = { zh, en, ja, it, ru } as const;

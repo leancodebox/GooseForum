@@ -1,0 +1,23 @@
+// Канонические данные переводов; этот файл используют экспорты для совместимости и загрузчики React.
+export default {
+  back: "Назад",
+  cancel: "Отмена",
+  close: "Закрыть",
+  edit: "Редактировать",
+  home: "Главная",
+  save: "Сохранить",
+  saving: "Сохранение...",
+  loading: "Выполняется...",
+  loadingShort: "Загрузка...",
+  loadFailed: "Не удалось загрузить",
+  preview: "Предпросмотр",
+  loadMore: "Загрузить ещё",
+  retry: "Повторить",
+  refresh: "Обновить",
+  delete: "Удалить",
+  search: "Поиск",
+  previousPage: "Предыдущая",
+  nextPage: "Следующая",
+  currentPage: "Страница {page}",
+  page: "Страница {page} / {total}",
+} as const;

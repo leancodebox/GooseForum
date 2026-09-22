@@ -250,7 +250,7 @@ export function ProfileSettings({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {["zh", "en", "ja", "it"].map((locale) => (
+                    {["zh", "en", "ja", "it", "ru"].map((locale) => (
                       <SelectItem key={locale} value={locale}>
                         {t(`locales.${locale}`)}
                       </SelectItem>

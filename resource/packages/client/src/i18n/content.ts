@@ -2,6 +2,7 @@ import zh from "./messages/zh-content.js";
 import en from "./messages/en-content.js";
 import ja from "./messages/ja-content.js";
 import it from "./messages/it-content.js";
+import ru from "./messages/ru-content.js";
 import type { Locale } from "./auth.js";
 
 type Widen<T> = T extends string ? string : { [K in keyof T]: Widen<T[K]> };
@@ -12,4 +13,5 @@ export const contentResources: Record<Locale, ContentMessages> = {
   en,
   ja,
   it,
+  ru,
 } as const;

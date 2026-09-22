@@ -90,6 +90,7 @@ export default {
     en: "English",
     ja: "日本語",
     it: "Italiano",
+    ru: "Russian",
   },
   account: {
     title: "账号安全",

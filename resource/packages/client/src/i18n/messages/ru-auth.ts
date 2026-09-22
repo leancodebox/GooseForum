@@ -1,0 +1,62 @@
+// Канонические данные переводов; этот файл используют экспорты для совместимости и загрузчики React.
+import { localeLabels } from '../locale.js';
+export default {
+  locale: localeLabels.ru,
+  login: "Войти",
+  register: "Зарегистрироваться",
+  loginTitle: "Вход в аккаунт",
+  registerTitle: "Создать аккаунт",
+  forgotTitle: "Сброс пароля",
+  loginSubtitle: "Добро пожаловать обратно. Продолжайте обсуждения и публикации.",
+  registerSubtitle: "Присоединяйтесь к GooseForum и создайте своё пространство для обсуждений.",
+  forgotSubtitle: "Введите адрес электронной почты — мы отправим письмо для сброса пароля.",
+  usernameOrEmail: "Имя пользователя или email",
+  username: "Имя пользователя",
+  email: "Email",
+  registeredEmail: "Зарегистрированный email",
+  password: "Пароль",
+  newPassword: "Новый пароль",
+  confirmPassword: "Подтвердите пароль",
+  captcha: "Капча",
+  captchaAlt: "Капча",
+  refreshCaptcha: "Обновить капчу",
+  forgotPassword: "Забыли пароль?",
+  agreeTerms: "Я ознакомился и согласен с условиями и политикой конфиденциальности",
+  createAccount: "Создать аккаунт",
+  sendResetEmail: "Отправить письмо для сброса",
+  backToLogin: "Вернуться к входу",
+  continueWith: "Или продолжить с помощью",
+  resetPasswordTitle: "Сброс пароля",
+  resetPasswordSubtitle:
+    "Установите новый пароль для входа. После отправки вернитесь и войдите с ним.",
+  resetMissingToken:
+    "В ссылке для сброса отсутствует токен. Пожалуйста, откройте её заново из письма на почте.",
+  passwordMinLength: "Пароль должен содержать не менее 6 символов",
+  saveNewPassword: "Сохранить новый пароль",
+  passwordAdviceTitle: "Советы по безопасности пароля",
+  passwordAdviceDescription:
+    "Задайте новый пароль, который используется только для GooseForum. Ссылки для сброса действуют ограниченное время — запрашивайте новое письмо после истечения срока.",
+  passwordAdvice: {
+    length: "Не менее 6 символов",
+    unique: "Не используйте пароли, которые применялись на других сайтах",
+    loginAfterReset: "После сброса вернитесь и войдите с новым паролем",
+  },
+  validation: {
+    loginRequired: "Пожалуйста, введите аккаунт, пароль и пройдите капчу",
+    registerRequired: "Пожалуйста, заполните форму регистрации",
+    forgotRequired: "Пожалуйста, введите email и пройдите капчу",
+    passwordMismatch: "Пароли не совпадают",
+    termsRequired: "Сначала согласитесь с условиями и политикой конфиденциальности",
+    captchaLoadFailed: "Не удалось загрузить капчу",
+    loginFailed: "Ошибка входа",
+    registerFailed: "Ошибка регистрации",
+    registerSuccess: "Регистрация успешна",
+    resetEmailFailed: "Не удалось отправить письмо для сброса пароля",
+  },
+  server: {
+    passwordResetMailQueued:
+      "Если этот email зарегистрирован, вы получите письмо для сброса пароля",
+    passwordResetSuccess: "Пароль успешно сброшен",
+    passwordResetFailed: "Не удалось сбросить пароль",
+  },
+} as const;

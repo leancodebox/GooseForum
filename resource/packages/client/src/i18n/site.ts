@@ -2,6 +2,7 @@ import zh from "./messages/zh-site.js";
 import en from "./messages/en-site.js";
 import ja from "./messages/ja-site.js";
 import it from "./messages/it-site.js";
+import ru from "./messages/ru-site.js";
 import type { Locale } from "./auth.js";
 
 interface SiteMessages {
@@ -196,4 +197,5 @@ export const siteResources: Record<Locale, SiteMessages> = {
   en,
   ja,
   it,
+  ru,
 } as const;
