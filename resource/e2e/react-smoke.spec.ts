@@ -397,6 +397,28 @@ test.beforeEach(async ({ page }) => {
       await route.fulfill({ json: { code: 0, result: true } })
       return
     }
+    if (route.request().url().includes('/api/admin/oauth-settings')) {
+      await route.fulfill({
+        json: {
+          code: 0,
+          result: {
+            siteUrl: 'https://forum.example/base/',
+            providers: [{
+              key: 'company-sso',
+              displayName: 'Company SSO',
+              kind: 'oidc',
+              enabled: true,
+              clientId: 'company-client',
+              clientSecretConfigured: true,
+              callbackUrl: 'https://forum.example/base/api/auth/company-sso/callback',
+              discoveryUrl: 'https://identity.example/.well-known/openid-configuration',
+              scopes: ['openid', 'profile', 'email'],
+            }],
+          },
+        },
+      })
+      return
+    }
     if (route.request().url().includes('/api/forum/chat/messages')) {
       await route.fulfill({ json: { code: 0, result: chatMessages } })
       return
@@ -420,6 +442,33 @@ test.beforeEach(async ({ page }) => {
       return
     }
     await route.fulfill({ json: [] })
+  })
+})
+
+test('presents the OAuth callback as explained copyable segments', async ({ page }, testInfo) => {
+  await page.goto('/admin/settings/oauth?lang=zh')
+  await expect(page.getByRole('heading', { name: 'OAuth 登录' })).toBeVisible()
+
+  const callback = page.getByLabel('回调地址', { exact: true })
+  await expect(callback).toHaveText('https://forum.example/base/api/auth/company-sso/callback')
+  await page.getByText('/api/auth/', { exact: true }).hover()
+  await expect(page.getByRole('tooltip')).toHaveText('GooseForum 固定的 OAuth 回调路径。')
+  await expect(page.getByRole('button', { name: '复制完整回调地址' })).toBeEnabled()
+
+  const callbackBox = await callback.boundingBox()
+  const viewport = page.viewportSize()
+  if (!callbackBox || !viewport) throw new Error('OAuth callback layout was not measurable')
+  expect(callbackBox.x).toBeGreaterThanOrEqual(0)
+  expect(callbackBox.x + callbackBox.width).toBeLessThanOrEqual(viewport.width)
+
+  await page.getByRole('button', { name: '删除提供方' }).click()
+  await expect(page.getByRole('dialog')).toContainText('删除这个 OAuth 提供方？')
+  await page.getByRole('button', { name: '取消' }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+
+  await testInfo.attach('oauth-callback-segments', {
+    body: await page.screenshot({ fullPage: false }),
+    contentType: 'image/png',
   })
 })
 
