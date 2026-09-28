@@ -7,8 +7,8 @@ import {
   CalendarDays,
   FileText,
   List,
+  Pencil,
   Radio,
-  Settings,
   UserPlus,
   UserRound,
   MessageSquare,
@@ -114,17 +114,15 @@ export function UserProfilePageView({ page }: { page: UserProfileProps }) {
                         {t("online")}
                       </Badge>
                     ) : null}
+                    {page.isOwnProfile ? (
+                      <Badge asChild variant="secondary" className="text-primary">
+                        <GooseLink href={page.settingsUrl}>
+                          <Pencil data-icon="inline-start" />
+                          {t("editProfile")}
+                        </GooseLink>
+                      </Badge>
+                    ) : null}
                   </>
-                }
-                usernameActions={
-                  page.isOwnProfile ? (
-                    <Button asChild variant="ghost" size="xs">
-                      <GooseLink href={page.settingsUrl}>
-                        <Settings data-icon="inline-start" />
-                        {t("editProfile")}
-                      </GooseLink>
-                    </Button>
-                  ) : null
                 }
               />
             </div>

@@ -5,13 +5,11 @@ export function ProfileIdentity({
   username,
   description,
   badges,
-  usernameActions,
 }: {
   displayName: string;
   username: string;
   description: string;
   badges?: ReactNode;
-  usernameActions?: ReactNode;
 }) {
   return (
     <div className="min-w-0 flex-1 pt-3">
@@ -25,7 +23,6 @@ export function ProfileIdentity({
         <p className="truncate text-sm font-medium text-muted-foreground">
           @{username}
         </p>
-        {usernameActions}
       </div>
       <p className="mt-2 text-sm leading-relaxed text-foreground/75">
         {description}
