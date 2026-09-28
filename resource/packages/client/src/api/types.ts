@@ -214,6 +214,9 @@ export interface GooseSiteApi {
     resendActivationEmail(): Promise<GooseApiResult<void>>
     saveUsername(username: string): Promise<void>
     changePassword(oldPassword: string, newPassword: string): Promise<void>
+    authSessions(): Promise<AuthSessionPayload[]>
+    revokeAuthSession(id: number): Promise<boolean>
+    revokeOtherAuthSessions(): Promise<boolean>
     oauthBindings(): Promise<OAuthBindingsPayload>
     unbindOAuth(provider: string): Promise<void>
     oidcGrants(): Promise<OIDCGrantPayload[]>
@@ -253,4 +256,15 @@ export interface OIDCGrantPayload {
   scopes: string[]
   grantedAt: string
   enabled: boolean
+}
+
+export interface AuthSessionPayload {
+  id: number
+  authMethod: string
+  oauthProvider?: string
+  clientIp: string
+  userAgent: string
+  createdAt: string
+  lastSeenAt: string
+  current: boolean
 }

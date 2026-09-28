@@ -10,6 +10,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/samber/lo"
+	"gorm.io/gorm"
 )
 
 func Get(id any) (entity EntityComplete, err error) {
@@ -70,6 +71,14 @@ func Create(entity *EntityComplete) error {
 func Save(entity *EntityComplete) error {
 	result := builder().Save(entity)
 	return result.Error
+}
+
+// UpdatePasswordByVersion changes the password and invalidates existing sessions
+// in one conditional database update.
+func UpdatePasswordByVersion(userID, version uint64, passwordHash string) (bool, error) {
+	result := builder().Where("id = ? AND token_version = ?", userID, version).
+		Updates(map[string]any{"password": passwordHash, "token_version": gorm.Expr("token_version + 1")})
+	return result.RowsAffected == 1, result.Error
 }
 
 func UpdateWornBadgeCode(userID uint64, badgeCode string) error {

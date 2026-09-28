@@ -5,11 +5,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/bundles/jwtopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/forum"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/authsessionservice"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/markbates/goth/gothic"
@@ -105,15 +105,11 @@ func ProviderCallback(c *gin.Context) {
 			return
 		}
 
-		// 生成JWT token
-		token, err := jwtopt.CreateOAuthTokenWithVersion(user.Id, user.TokenVersion)
-		if err != nil {
+		if err := authsessionservice.Issue(c, user.Id, user.TokenVersion, authsessionservice.LoginDetails{Method: "oauth", Provider: provider}); err != nil {
 			slog.Error("Generate JWT token failed", "error", err)
 			forum.RenderInternalOAuthErrorPage(c, component.MessageOAuthTokenFailed)
 			return
 		}
-
-		jwtopt.TokenSetting(c, token)
 		redirect := flow.Redirect
 		if redirect == "" {
 			redirect = "/"

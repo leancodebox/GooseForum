@@ -10,7 +10,7 @@
 
 - `[app]` - 应用基础配置
 - `[server]` - 服务器配置
-- `[jwtopt]` - JWT 认证配置
+- `[authsession]` - 登录会话有效期
 - `[db]` - 数据库配置
 - `[storage]` - 文件存储配置
 - `[log]` - 日志配置
@@ -48,17 +48,16 @@ idleTimeoutSeconds = 120        # Keep-Alive 空闲超时
 - `port`: 服务监听端口，默认 5234
 - 四个超时项单位均为秒，设为 `0` 表示不限制；慢速上传至少需要在 `readTimeoutSeconds` 内完成
 
-### [jwtopt] JWT 认证配置
+### [authsession] 登录会话配置
 
 ```toml
-[jwtopt]
-signingKey = "your-random-signing-key"  # JWT 签名密钥
-validTime = 604800                      # Token 有效期（秒）
+[authsession]
+validTime = 604800 # 滑动会话有效期（秒）
 ```
 
 **配置说明：**
-- `signingKey`: JWT 签名密钥，系统会自动生成随机密钥。**修改此值会导致所有已登录用户退出登录**
-- `validTime`: Token 有效期，默认 604800 秒（7天）
+- `validTime`: 会话有效期，默认 604800 秒（7 天）；剩余不足 1 天时延期。旧配置中的 `jwtopt.validTime` 仍受支持。
+- 认证结果在服务进程内缓存最多 15 秒。API 退出、撤销和改密会主动清除缓存；独立进程运行的 `set-user-password` 命令改密后，现有会话最多再延迟 15 秒失效。使用此本地缓存时不要启动多个服务进程。
 
 ### [db] 数据库配置
 
@@ -184,7 +183,7 @@ GooseForum 支持配置文件热重载，修改 `config.toml` 文件后无需重
 
 ## 🛡 安全建议
 
-1. **JWT 签名密钥**：使用强随机密钥，不要使用默认值
+1. **会话数据库**：应保护数据库；其中只存储随机登录令牌的 SHA-256 摘要
 2. **数据库密码**：使用复杂密码，定期更换
 3. **邮箱密码**：使用应用专用密码或授权码
 4. **文件权限**：确保配置文件权限设置正确（建议 600）

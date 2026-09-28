@@ -7,9 +7,9 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
-	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
 	"github.com/leancodebox/GooseForum/app/bundles/logincrypto"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
+	"github.com/leancodebox/GooseForum/app/service/authsessionservice"
 	"github.com/leancodebox/GooseForum/app/service/emailactivationservice"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
@@ -25,7 +25,20 @@ import (
 )
 
 func Logout(c *gin.Context) {
-	jwt.TokenClean(c)
+	raw, _ := authsessionservice.AccessToken(c)
+	if raw != "" {
+		if err := authsessionservice.RevokeRaw(c, raw); err != nil {
+			c.JSON(http.StatusInternalServerError, component.FailDataCode(component.MessageOperationFailed, nil))
+			return
+		}
+	}
+	if cookie, err := c.Cookie("access_token"); err == nil && cookie != raw {
+		if err := authsessionservice.RevokeRaw(c, cookie); err != nil {
+			c.JSON(http.StatusInternalServerError, component.FailDataCode(component.MessageOperationFailed, nil))
+			return
+		}
+	}
+	authsessionservice.ClearCookie(c)
 	c.JSON(http.StatusOK, component.SuccessData(
 		"👋",
 	))
@@ -114,12 +127,10 @@ func Register(c *gin.Context) {
 		})
 	}
 
-	token, err := jwt.CreateNewTokenDefaultWithVersion(userEntity.Id, userEntity.TokenVersion)
-	if err != nil {
+	if err := authsessionservice.Issue(c, userEntity.Id, userEntity.TokenVersion, authsessionservice.LoginDetails{Method: "password", Reauthenticated: true}); err != nil {
 		c.JSON(200, component.FailDataCode(component.MessageAuthRegisterRetryLogin, nil))
 		return
 	}
-	jwt.TokenSetting(c, token)
 
 	if securityConfig.EnableEmailVerification {
 		c.JSON(http.StatusOK, component.SuccessDataCode(
@@ -200,13 +211,10 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := jwt.CreateNewTokenDefaultWithVersion(userEntity.Id, userEntity.TokenVersion)
-	if err != nil {
+	if err := authsessionservice.Issue(c, userEntity.Id, userEntity.TokenVersion, authsessionservice.LoginDetails{Method: "password", Reauthenticated: true}); err != nil {
 		slog.Error("生成 token 失败", "userId", userEntity.Id, "error", err)
 		c.JSON(200, component.FailDataCode(component.MessageAuthLoginFailed, nil))
 		return
 	}
-
-	jwt.TokenSetting(c, token)
 	c.JSON(http.StatusOK, component.SuccessDataCode("登录成功", component.MessageAuthLoginSuccess, nil))
 }

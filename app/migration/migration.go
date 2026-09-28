@@ -14,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroupMembers"
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
+	"github.com/leancodebox/GooseForum/app/models/forum/authsessions"
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
@@ -112,6 +113,8 @@ func defaultSchemaModels() []any {
 		&userOAuth.Entity{},
 		&userPoints.Entity{},
 		&users.EntityComplete{},
+		&authsessions.Token{},
+		&authsessions.Log{},
 		&userStatistics.Entity{},
 		&imConversations.Entity{},
 		&imUserChatConfigs.Entity{},

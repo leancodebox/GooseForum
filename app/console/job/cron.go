@@ -12,6 +12,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
+	"github.com/leancodebox/GooseForum/app/service/authsessionservice"
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/robfig/cron/v3"
 )
@@ -26,6 +27,12 @@ func Run() {
 	slog.Info("start cron")
 	entryID, err := scheduler.AddFunc("17 * * * *", upCmd(cleanupOIDC))
 	slog.Info("reg OIDC cleanup", "entryID", entryID, "spec", "17 * * * *", "err", err)
+	entryID, err = scheduler.AddFunc("27 3 * * *", upCmd(func() {
+		if err := authsessionservice.Cleanup(); err != nil {
+			slog.Error("auth session cleanup failed", "err", err)
+		}
+	}))
+	slog.Info("reg auth session cleanup", "entryID", entryID, "err", err)
 	backupSpec := preferences.Get("db.spec", "0 3 * * *")
 	entryID, err = scheduler.AddFunc(backupSpec, upCmd(func() {
 		dbconnect.BackupSQLiteHandle()

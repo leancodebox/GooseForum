@@ -10,7 +10,7 @@ The configuration uses TOML and contains these main sections:
 
 - `[app]`: Application settings
 - `[server]`: Server settings
-- `[jwtopt]`: JWT authentication
+- `[authsession]`: Login session lifetime
 - `[db]`: Database settings
 - `[storage]`: File storage settings
 - `[log]`: Logging
@@ -46,16 +46,15 @@ idleTimeoutSeconds = 120        # Keep-Alive idle timeout
 - `port`: The listening port; defaults to 5234.
 - All timeout values are in seconds; `0` disables a timeout. Slow uploads must finish within `readTimeoutSeconds`.
 
-### [jwtopt] JWT Authentication
+### [authsession] Login Sessions
 
 ```toml
-[jwtopt]
-signingKey = "your-random-signing-key"  # JWT signing key
-validTime = 604800                      # Token lifetime in seconds
+[authsession]
+validTime = 604800 # Sliding session lifetime in seconds
 ```
 
-- `signingKey`: GooseForum automatically generates a random signing key. **Changing this value signs out all currently logged-in users.**
-- `validTime`: Token lifetime; defaults to 604800 seconds (7 days).
+- `validTime`: Session lifetime; defaults to 604800 seconds (7 days). Active sessions renew when less than one day remains. Existing `jwtopt.validTime` values remain supported for older configurations.
+- Authentication results are cached in the server process for up to 15 seconds. API logout, revocation, and password changes invalidate that cache. Password changes made by the separate `set-user-password` CLI process may take up to 15 seconds to invalidate active sessions. Do not run multiple server processes with this local cache.
 
 ### [db] Database Settings
 
@@ -183,7 +182,7 @@ Restart the service after changing:
 
 ## Security Recommendations
 
-1. **JWT signing key**: Use a strong random key rather than the example placeholder.
+1. **Session storage**: Protect the database; only SHA-256 hashes of random login tokens are stored there.
 2. **Database password**: Use a strong password and rotate it regularly.
 3. **Mail password**: Use an application-specific password or authorization code.
 4. **File permissions**: Restrict access to the configuration file; mode `600` is recommended.

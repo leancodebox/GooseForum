@@ -15,6 +15,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/authsessionservice"
 	"github.com/leancodebox/GooseForum/app/service/emailactivationservice"
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
@@ -496,11 +497,19 @@ func ChangePassword(req component.BetterRequest[ChangePasswordReq]) component.Re
 		return component.FailResponseCode(component.MessageAuthOldPasswordInvalid, nil)
 	}
 
-	userEntity.SetPassword(req.Params.NewPassword)
-	err = userservice.SaveUser(&userEntity)
+	newHash, err := algorithm.MakePassword(req.Params.NewPassword)
 	if err != nil {
 		return component.FailResponseCode(component.MessageAuthPasswordUpdateFailed, nil)
 	}
+	updated, err := users.UpdatePasswordByVersion(userEntity.Id, userEntity.TokenVersion, newHash)
+	if err != nil || !updated {
+		return component.FailResponseCode(component.MessageAuthPasswordUpdateFailed, nil)
+	}
+	authsessionservice.LogPasswordChange(req.GinContext, userEntity.Id)
+	if refreshed, getErr := users.Get(userEntity.Id); getErr == nil {
+		userservice.RefreshUserCaches(&refreshed)
+	}
+	authsessionservice.ClearCookie(req.GinContext)
 
 	return component.SuccessResponseCode("密码修改成功", component.MessageAuthPasswordUpdateSuccess, nil)
 }
@@ -577,10 +586,17 @@ func ResetPassword(req component.BetterRequest[ResetPasswordReq]) component.Resp
 		return component.FailResponseError(err)
 	}
 
-	userEntity.SetPassword(req.Params.NewPassword)
-	err = userservice.SaveUser(&userEntity)
+	newHash, err := algorithm.MakePassword(req.Params.NewPassword)
 	if err != nil {
 		return component.FailResponseCode(component.MessageAuthResetFailed, nil)
+	}
+	updated, err := users.UpdatePasswordByVersion(userEntity.Id, userEntity.TokenVersion, newHash)
+	if err != nil || !updated {
+		return component.FailResponseCode(component.MessageAuthResetFailed, nil)
+	}
+	authsessionservice.LogPasswordChange(req.GinContext, userEntity.Id)
+	if refreshed, getErr := users.Get(userEntity.Id); getErr == nil {
+		userservice.RefreshUserCaches(&refreshed)
 	}
 
 	return component.SuccessResponseCode("密码重置成功", component.MessageAuthResetSuccess, nil)

@@ -50,7 +50,7 @@ func viewRoute(ginApp *gin.Engine) {
 	})
 
 	viewRouteApp := ginApp.Group("")
-	viewRouteApp.Use(middleware.JWTAuth)
+	viewRouteApp.Use(middleware.SessionAuth)
 	if gzipEnabled() {
 		viewRouteApp.Use(gzip.Gzip(gzip.DefaultCompression))
 		slog.Info("view gzip enabled")
@@ -109,10 +109,10 @@ func apiRoute(ginApp *gin.Engine) {
 	baseApi.GET("user-card", UpQueryReq(api.GetUserCard))
 	baseApi.POST("forgot-password", UpButterReq(api.ForgotPassword))
 	baseApi.POST("reset-password", UpButterReq(api.ResetPassword))
-	baseApi.GET("auth/:provider", middleware.JWTAuth, api.ProviderLogin)
-	baseApi.GET("auth/:provider/callback", middleware.JWTAuth, api.ProviderCallback)
+	baseApi.GET("auth/:provider", middleware.SessionAuth, api.ProviderLogin)
+	baseApi.GET("auth/:provider/callback", middleware.SessionAuth, api.ProviderCallback)
 
-	loginApi := ginApp.Group("api").Use(middleware.JWTAuthCheck)
+	loginApi := ginApp.Group("api").Use(middleware.SessionAuthCheck)
 	loginApi.POST("set-user-info", middleware.CheckWritableAccount, UpButterReq(api.EditUserInfo))
 	loginApi.POST("set-user-profile-cover", middleware.CheckWritableAccount, UpButterReq(api.EditUserProfileCover))
 	loginApi.POST("set-user-email", middleware.CheckWritableAccount, UpButterReq(api.EditUserEmail))
@@ -122,16 +122,19 @@ func apiRoute(ginApp *gin.Engine) {
 	loginApi.POST("wear-badge", middleware.CheckWritableAccount, UpButterReq(api.WearBadge))
 	loginApi.POST("upload-avatar", middleware.CheckWritableAccount, api.UploadAvatar)
 	loginApi.POST("change-password", middleware.CheckWritableAccount, UpButterReq(api.ChangePassword))
+	loginApi.GET("auth-sessions", UpButterReq(api.ListAuthSessions))
+	loginApi.POST("auth-sessions/revoke", UpJsonReq(api.RevokeAuthSession))
+	loginApi.POST("auth-sessions/revoke-others", UpButterReq(api.RevokeOtherAuthSessions))
 	loginApi.POST("auth/:provider/unbind", middleware.CheckWritableAccount, UpButterReq(api.UnbindOAuth))
 	loginApi.GET("oauth/bindings", UpButterReq(api.GetOAuthBindings))
 	loginApi.GET("oidc/grants", UpButterReq(api.ListMyOIDCGrants))
 	loginApi.POST("oidc/grants/revoke", middleware.CheckWritableAccount, UpJsonReq(api.RevokeMyOIDCGrant))
 
 	forumApi := baseApi.Group("forum")
-	forumApi.GET("get-site-statistics", middleware.JWTAuthCheck, middleware.CheckPermission(permission.Admin), ginUpNP(api.GetSiteStatistics))
-	forumApi.GET("posts/window", middleware.JWTAuth, middleware.NoUpdateUserActivity, UpQueryReq(forum.PostWindow))
+	forumApi.GET("get-site-statistics", middleware.SessionAuthCheck, middleware.CheckPermission(permission.Admin), ginUpNP(api.GetSiteStatistics))
+	forumApi.GET("posts/window", middleware.SessionAuth, middleware.NoUpdateUserActivity, UpQueryReq(forum.PostWindow))
 
-	forumLoginApi := forumApi.Use(middleware.JWTAuthCheck)
+	forumLoginApi := forumApi.Use(middleware.SessionAuthCheck)
 	forumLoginApi.GET("unread-status", middleware.NoUpdateUserActivity, UpButterReq(api.GetUnreadStatus))
 	forumLoginApi.GET("notifications", middleware.NoUpdateUserActivity, UpQueryReq(api.NotificationList))
 	forumLoginApi.POST("notification/mark-read", middleware.CheckWritableAccount, UpButterReq(api.MarkAsRead))
@@ -156,12 +159,12 @@ func apiRoute(ginApp *gin.Engine) {
 	forumLoginApi.POST("moderation/report-status", middleware.CheckWritableAccount, UpButterReq(forum.UpdateModerationReportStatus))
 	forumLoginApi.POST("moderation/logs", middleware.NoUpdateUserActivity, UpButterReq(forum.ModerationLogList))
 
-	chatApi := forumApi.Group("chat", middleware.JWTAuthCheck)
+	chatApi := forumApi.Group("chat", middleware.SessionAuthCheck)
 	chatApi.POST("send", middleware.CheckWritableAccount, UpButterReq(api.SendMessage))
 	chatApi.POST("messages", UpButterReq(api.GetMessages))
 	chatApi.POST("mark-read", middleware.CheckWritableAccount, UpButterReq(api.MarkChatRead))
 
-	adminApi := baseApi.Group("admin", middleware.JWTAuthCheck, middleware.CheckWritableAccount)
+	adminApi := baseApi.Group("admin", middleware.SessionAuthCheck, middleware.CheckWritableAccount)
 
 	adminApi.POST("traffic-overview", middleware.CheckPermission(permission.Admin), UpButterReq(api.GetTrafficOverview))
 
@@ -261,9 +264,9 @@ func apiRoute(ginApp *gin.Engine) {
 
 func fileServer(ginApp *gin.Engine) {
 	r := ginApp.Group("file")
-	r.POST("/img-upload", middleware.JWTAuthCheck, middleware.CheckWritableAccount, api.SaveImgByGinContext)
-	r.POST("/img-upload/init", middleware.JWTAuthCheck, middleware.CheckWritableAccount, api.InitDirectImageUpload)
-	r.POST("/img-upload/complete", middleware.JWTAuthCheck, middleware.CheckWritableAccount, api.CompleteDirectImageUpload)
-	r.POST("/img-upload/abort", middleware.JWTAuthCheck, middleware.CheckWritableAccount, api.AbortDirectImageUpload)
-	r.GET("/img/*filename", middleware.JWTAuthSilent, api.GetFileByFileName)
+	r.POST("/img-upload", middleware.SessionAuthCheck, middleware.CheckWritableAccount, api.SaveImgByGinContext)
+	r.POST("/img-upload/init", middleware.SessionAuthCheck, middleware.CheckWritableAccount, api.InitDirectImageUpload)
+	r.POST("/img-upload/complete", middleware.SessionAuthCheck, middleware.CheckWritableAccount, api.CompleteDirectImageUpload)
+	r.POST("/img-upload/abort", middleware.SessionAuthCheck, middleware.CheckWritableAccount, api.AbortDirectImageUpload)
+	r.GET("/img/*filename", middleware.SessionAuthSilent, api.GetFileByFileName)
 }

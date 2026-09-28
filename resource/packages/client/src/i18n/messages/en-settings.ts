@@ -104,6 +104,17 @@ export default {
     forgotPasswordDescription:
       "Verify your identity with your registered email to receive a secure reset link.",
     resetByEmail: "Reset password by email",
+    sessionsTitle: "Signed-in devices",
+    sessionsLoading: "Loading devices…",
+    sessionsEmpty: "No active sessions.",
+    sessionsLoadFailed: "Could not load sessions.",
+    sessionRevokeFailed: "Could not sign out device.",
+    sessionRevoked: "Device signed out.",
+    revokeOthers: "Sign out other devices",
+    revokeSession: "Sign out this device",
+    currentSession: "This device",
+    unknownDevice: "Unknown device",
+    unknownIP: "Unknown IP",
   },
   privacy: {
     title: "Privacy preferences",
