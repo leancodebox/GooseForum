@@ -185,7 +185,7 @@ export function SettingsPageView({
             <div className="flex min-w-0 flex-1 gap-4">
               <button
                 type="button"
-                className="group relative -mt-9 size-24 shrink-0 rounded-full outline-none focus-visible:ring-4 focus-visible:ring-primary/20 lg:-mt-10 lg:size-28"
+                className="group relative isolate -mt-9 size-24 shrink-0 rounded-full outline-none focus-visible:ring-4 focus-visible:ring-primary/20 lg:-mt-10 lg:size-28"
                 aria-label={t("avatar.change")}
                 onClick={crop.choose}
               >
@@ -193,9 +193,9 @@ export function SettingsPageView({
                   src={presetDraft}
                   name={username}
                   badge={wornBadge}
-                  className="size-full"
+                  className="size-full isolation-auto"
                 />
-                <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-foreground/0 text-background transition group-hover:bg-foreground/25">
+                <span className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-full bg-foreground/0 text-background transition group-hover:bg-foreground/25">
                   <Camera className="size-8 opacity-0 drop-shadow-sm transition group-hover:opacity-100" />
                 </span>
               </button>

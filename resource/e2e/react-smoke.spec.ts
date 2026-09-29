@@ -803,3 +803,87 @@ test('edits, previews, and saves an announcement in Markdown', async ({ page }, 
     contentType: 'image/png',
   })
 })
+
+test('keeps the avatar edit overlay below the worn badge', async ({ page }, testInfo) => {
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  page.on('console', message => {
+    if (message.type() === 'error') errors.push(message.text())
+  })
+  const badge = {
+    code: 'early-member', name: 'Early member', description: 'Early forum member',
+    iconUrl: '/static/badges/early-member.svg', color: 'green', level: 'normal',
+    grantedAt: '2026-01-01T00:00:00Z',
+  }
+  await page.route('**/__goose_page/settings**', route => route.fulfill({ json: {
+    ...homePage,
+    component: 'settings.index',
+    props: {
+      user: {
+        id: 7, username: 'avatar-editor', nickname: 'Avatar Editor', email: 'avatar@example.test',
+        locale: 'en', avatarUrl: '/static/pic/default-avatar.webp', profileCoverUrl: '',
+        bio: '', signature: '', websiteName: '', website: '', prestige: 0,
+        createdAt: '2026-01-01T00:00:00Z', externalInformation: {},
+        wornBadgeCode: badge.code, badges: [badge], wearableBadges: [badge], wornBadge: badge,
+      },
+      stats: {
+        topicCount: 0, replyCount: 0, followerCount: 0, followingCount: 0,
+        likeReceivedCount: 0, likeGivenCount: 0, collectionCount: 0,
+        createdAt: '2026-01-01T00:00:00Z',
+      },
+      tabs: [],
+    },
+    layout: {
+      ...homePage.layout,
+      viewer: { ...homePage.layout.viewer, id: 7, username: 'avatar-editor', isAuthenticated: true },
+    },
+    meta: { title: 'Avatar settings' },
+    url: '/settings?lang=en',
+  } }))
+  await page.goto('/settings?lang=en')
+  await expect(page).toHaveTitle(/Avatar settings/)
+  const button = page.getByRole('button', { name: 'Change avatar', exact: true })
+  await expect(button).toBeVisible()
+  await expect(button.locator('[data-slot="avatar-image"]')).toBeVisible()
+  const badgeImage = button.getByRole('img', { name: badge.name, exact: true })
+  await expect(badgeImage).toBeVisible()
+  await expect.poll(() => badgeImage.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0)
+  await button.hover()
+  const overlay = button.locator(':scope > span').last()
+  const supportsHover = await page.evaluate(() => matchMedia('(hover: hover)').matches)
+  await expect(overlay.locator('svg')).toHaveCSS('opacity', supportsHover ? '1' : '0')
+  const order = await button.evaluate(element => {
+    const overlay = element.lastElementChild as HTMLElement
+    const image = element.querySelector('img[alt="Early member"]') as HTMLImageElement
+    const badge = image.parentElement as HTMLElement
+    const avatar = element.querySelector('[data-slot="avatar"]') as HTMLElement
+    const rect = badge.getBoundingClientRect()
+    const x = rect.left + rect.width * 0.35
+    const y = rect.top + rect.height * 0.35
+    const originals = [overlay.style.pointerEvents, badge.style.pointerEvents]
+    // Include decorative layers in hit testing to inspect their paint order.
+    overlay.style.pointerEvents = 'auto'
+    badge.style.pointerEvents = 'auto'
+    try {
+      const layers = document.elementsFromPoint(x, y)
+      return {
+        badge: layers.indexOf(image), overlay: layers.indexOf(overlay), avatar: layers.indexOf(avatar),
+      }
+    } finally {
+      overlay.style.pointerEvents = originals[0]
+      badge.style.pointerEvents = originals[1]
+    }
+  })
+  expect(order.badge).toBeGreaterThanOrEqual(0)
+  expect(order.overlay).toBeGreaterThan(order.badge)
+  expect(order.avatar).toBeGreaterThan(order.overlay)
+  const fileChooser = page.waitForEvent('filechooser')
+  await button.click()
+  await fileChooser
+  expect(errors).toEqual([])
+  await testInfo.attach('avatar-overlay-below-badge', {
+    body: await page.screenshot({
+      path: testInfo.outputPath('avatar-overlay-below-badge.png'), fullPage: false,
+    }), contentType: 'image/png',
+  })
+})
