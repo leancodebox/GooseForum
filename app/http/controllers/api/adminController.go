@@ -1211,6 +1211,9 @@ type SaveSiteSettingsReq struct {
 // SaveSiteSettings 保存站点设置
 func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) component.Response {
 	response := savePageConfig(pageConfig.SiteSettings, req.Params.Settings, hotdataserve.ClearSiteSettingsConfigCache)
+	if response.Data.Code != component.SUCCESS {
+		return response
+	}
 	if err := oauthservice.ReloadCurrentProviders(); err != nil {
 		return component.FailResponseError(err)
 	}
@@ -1249,7 +1252,9 @@ func SaveSiteTheme(req component.BetterRequest[SaveSiteThemeReq]) component.Resp
 		UpdatedAt: time.Now().Format(time.RFC3339),
 	}
 	config = themeservice.NormalizeConfig(config)
-	savePageConfig(pageConfig.SiteTheme, config, themeservice.ClearCaches)
+	if response := savePageConfig(pageConfig.SiteTheme, config, themeservice.ClearCaches); response.Data.Code != component.SUCCESS {
+		return response
+	}
 	return component.SuccessResponse(config)
 }
 
@@ -1264,7 +1269,9 @@ func PublishSiteTheme(req component.BetterRequest[component.Null]) component.Res
 	config.PublishedAt = now
 	config.Prepublish = nil
 	config = themeservice.NormalizeConfig(config)
-	savePageConfig(pageConfig.SiteTheme, config, themeservice.ClearCaches)
+	if response := savePageConfig(pageConfig.SiteTheme, config, themeservice.ClearCaches); response.Data.Code != component.SUCCESS {
+		return response
+	}
 	return component.SuccessResponse(config)
 }
 

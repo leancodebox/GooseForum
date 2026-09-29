@@ -1,30 +1,23 @@
 package sensitivewordservice
 
 import (
-	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
-	"sync"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/bundles/sharedcache"
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 )
 
-var configCache struct {
-	sync.Mutex
-	value   pageConfig.SensitiveWordConfig
-	expires time.Time
-}
+var configCache = sharedcache.Cache[pageConfig.SensitiveWordConfig]{Name: "sensitive-word-config", MaxEntries: 1}
 
 func ClearConfigCache() {
-	configCache.Lock()
-	configCache.expires = time.Time{}
-	configCache.Unlock()
+	configCache.Clear()
 }
 
 func Config() pageConfig.SensitiveWordConfig {
-	configCache.Lock()
-	defer configCache.Unlock()
-	if time.Now().Before(configCache.expires) {
-		return configCache.value
-	}
+	return configCache.GetOrLoad("", loadConfig, time.Minute)
+}
 
+func loadConfig() (pageConfig.SensitiveWordConfig, error) {
 	config := pageConfig.GetConfigByPageType(pageConfig.SensitiveWordSettings, pageConfig.SensitiveWordConfig{
 		Enabled: false,
 		Mode:    pageConfig.ModerationAfterReview,
@@ -32,8 +25,7 @@ func Config() pageConfig.SensitiveWordConfig {
 	if config.Mode != pageConfig.ModerationVisibleThenReview {
 		config.Mode = pageConfig.ModerationAfterReview
 	}
-	configCache.value, configCache.expires = config, time.Now().Add(time.Minute)
-	return config
+	return config, nil
 }
 
 func Enabled() bool { return Config().Enabled }

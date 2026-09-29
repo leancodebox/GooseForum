@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/bundles/sharedcache"
 	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
@@ -77,8 +77,8 @@ type UserPublicProfile struct {
 }
 
 var (
-	userInfoCache          = localcache.Cache[UserInfo]{MaxEntries: cacheconfig.Current().UserInfo}
-	userPublicProfileCache = localcache.Cache[UserPublicProfile]{MaxEntries: cacheconfig.Current().UserPublicProfile}
+	userInfoCache          = sharedcache.Cache[UserInfo]{Name: "user-info", MaxEntries: cacheconfig.Current().UserInfo}
+	userPublicProfileCache = sharedcache.Cache[UserPublicProfile]{Name: "user-public-profile", MaxEntries: cacheconfig.Current().UserPublicProfile}
 )
 
 func GetUserInfo(userID uint64) (UserInfo, bool) {

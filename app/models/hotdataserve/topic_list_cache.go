@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/bundles/sharedcache"
 	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
@@ -21,7 +21,7 @@ type TopicSimpleVoPage struct {
 	HasNext bool
 }
 
-var topicSimpleVoCache = &localcache.Cache[TopicSimpleVoPage]{MaxEntries: cacheconfig.Current().TopicList}
+var topicSimpleVoCache = &sharedcache.Cache[TopicSimpleVoPage]{Name: "topic-simple-vo", MaxEntries: cacheconfig.Current().TopicList}
 
 func GetLatestTopicsSimpleVoPaginatedForAudience(
 	page int,

@@ -4,7 +4,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/bundles/sharedcache"
 	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/userBadges"
@@ -14,7 +14,7 @@ import (
 
 const definitionsTTL = 10 * time.Minute
 
-var adminBadgesCache = localcache.Cache[[]AdminBadge]{MaxEntries: cacheconfig.Current().BadgeDefinitions}
+var adminBadgesCache = sharedcache.Cache[[]AdminBadge]{Name: "admin-badges", MaxEntries: cacheconfig.Current().BadgeDefinitions}
 
 type Badge struct {
 	Code        string `json:"code"`

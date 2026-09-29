@@ -2,6 +2,7 @@ package localcache
 
 import (
 	"log/slog"
+	"strings"
 	"sync"
 	"time"
 
@@ -89,6 +90,28 @@ func (c *Cache[V]) GetOrLoadE(
 func (c *Cache[V]) Clear() {
 	c.init()
 	c.cache.DeleteAll()
+}
+
+func (c *Cache[V]) Get(key string) (V, bool) {
+	c.init()
+	if item := c.cache.Get(key); item != nil {
+		return item.Value(), true
+	}
+	return *new(V), false
+}
+
+func (c *Cache[V]) DeletePrefix(prefix string) {
+	c.init()
+	var keys []string
+	c.cache.Range(func(item *ttlcache.Item[string, V]) bool {
+		if strings.HasPrefix(item.Key(), prefix) {
+			keys = append(keys, item.Key())
+		}
+		return true
+	})
+	for _, key := range keys {
+		c.cache.Delete(key)
+	}
 }
 
 func (c *Cache[V]) Set(key string, value V, timeout time.Duration) {

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/bundles/sharedcache"
 	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroupMembers"
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
@@ -245,9 +245,9 @@ func (snapshot Snapshot) categoryIDsAtLeast(required Capability) []uint64 {
 type Resolver struct {
 	store Store
 
-	membershipCache *localcache.Cache[[]uint64]
-	grantCache      *localcache.Cache[[]CategoryGrant]
-	systemCache     *localcache.Cache[map[string]uint64]
+	membershipCache *sharedcache.Cache[[]uint64]
+	grantCache      *sharedcache.Cache[[]CategoryGrant]
+	systemCache     *sharedcache.Cache[map[string]uint64]
 
 	globalContentManager func(userID uint64) bool
 	moderationScope      func(userID uint64) (global bool, categoryIDs []uint64)
@@ -378,9 +378,9 @@ func NewResolver(
 ) *Resolver {
 	return &Resolver{
 		store:                store,
-		membershipCache:      &localcache.Cache[[]uint64]{MaxEntries: cacheconfig.Current().AccessGroupMembers},
-		grantCache:           &localcache.Cache[[]CategoryGrant]{MaxEntries: cacheconfig.Current().AccessGroupGrants},
-		systemCache:          &localcache.Cache[map[string]uint64]{MaxEntries: 1},
+		membershipCache:      &sharedcache.Cache[[]uint64]{Name: "access-group-members", MaxEntries: cacheconfig.Current().AccessGroupMembers},
+		grantCache:           &sharedcache.Cache[[]CategoryGrant]{Name: "access-group-grants", MaxEntries: cacheconfig.Current().AccessGroupGrants},
+		systemCache:          &sharedcache.Cache[map[string]uint64]{Name: "access-system-groups", MaxEntries: 1},
 		globalContentManager: globalContentManager,
 		moderationScope:      moderationScope,
 	}

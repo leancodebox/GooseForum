@@ -3,7 +3,7 @@ package hotdataserve
 import (
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/bundles/sharedcache"
 	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
@@ -15,7 +15,7 @@ const (
 	configRareCacheTTL = time.Hour
 )
 
-var sponsorsConfigCache = &localcache.Cache[pageConfig.SponsorsConfig]{MaxEntries: cacheconfig.Current().PageConfig}
+var sponsorsConfigCache = &sharedcache.Cache[pageConfig.SponsorsConfig]{Name: "sponsors-config", MaxEntries: cacheconfig.Current().PageConfig}
 
 func SponsorsConfigCache() pageConfig.SponsorsConfig {
 	return sponsorsConfigCache.GetOrLoad("", func() (pageConfig.SponsorsConfig, error) {
@@ -23,7 +23,7 @@ func SponsorsConfigCache() pageConfig.SponsorsConfig {
 	}, configSlowCacheTTL)
 }
 
-var siteSettingsConfigCache = &localcache.Cache[pageConfig.SiteSettingsConfig]{MaxEntries: cacheconfig.Current().PageConfig}
+var siteSettingsConfigCache = &sharedcache.Cache[pageConfig.SiteSettingsConfig]{Name: "site-settings-config", MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetSiteSettingsConfigCache() pageConfig.SiteSettingsConfig {
 	return siteSettingsConfigCache.GetOrLoad("", func() (pageConfig.SiteSettingsConfig, error) {
@@ -31,7 +31,7 @@ func GetSiteSettingsConfigCache() pageConfig.SiteSettingsConfig {
 	}, configFastCacheTTL)
 }
 
-var siteThemeConfigCache = &localcache.Cache[pageConfig.SiteThemeConfig]{MaxEntries: cacheconfig.Current().PageConfig}
+var siteThemeConfigCache = &sharedcache.Cache[pageConfig.SiteThemeConfig]{Name: "site-theme-config", MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetSiteThemeConfigCache() pageConfig.SiteThemeConfig {
 	return siteThemeConfigCache.GetOrLoad("", func() (pageConfig.SiteThemeConfig, error) {
@@ -39,7 +39,7 @@ func GetSiteThemeConfigCache() pageConfig.SiteThemeConfig {
 	}, configFastCacheTTL)
 }
 
-var siteChromeConfigCache = &localcache.Cache[pageConfig.SiteChromeConfig]{MaxEntries: cacheconfig.Current().PageConfig}
+var siteChromeConfigCache = &sharedcache.Cache[pageConfig.SiteChromeConfig]{Name: "site-chrome-config", MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetSiteChromeConfigCache() pageConfig.SiteChromeConfig {
 	return siteChromeConfigCache.GetOrLoad("", func() (pageConfig.SiteChromeConfig, error) {
@@ -47,7 +47,7 @@ func GetSiteChromeConfigCache() pageConfig.SiteChromeConfig {
 	}, configFastCacheTTL)
 }
 
-var mailSettingsConfigCache = &localcache.Cache[pageConfig.MailSettingsConfig]{MaxEntries: cacheconfig.Current().PageConfig}
+var mailSettingsConfigCache = &sharedcache.Cache[pageConfig.MailSettingsConfig]{Name: "mail-settings-config", MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetMailSettingsConfigCache() pageConfig.MailSettingsConfig {
 	return mailSettingsConfigCache.GetOrLoad("", func() (pageConfig.MailSettingsConfig, error) {
@@ -55,7 +55,7 @@ func GetMailSettingsConfigCache() pageConfig.MailSettingsConfig {
 	}, configFastCacheTTL)
 }
 
-var announcementConfigCache = &localcache.Cache[pageConfig.AnnouncementConfig]{MaxEntries: cacheconfig.Current().PageConfig}
+var announcementConfigCache = &sharedcache.Cache[pageConfig.AnnouncementConfig]{Name: "announcement-config", MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetAnnouncementConfigCache() pageConfig.AnnouncementConfig {
 	return announcementConfigCache.GetOrLoad("", func() (pageConfig.AnnouncementConfig, error) {
@@ -65,7 +65,7 @@ func GetAnnouncementConfigCache() pageConfig.AnnouncementConfig {
 	}, configFastCacheTTL)
 }
 
-var securitySettingsConfigCache = &localcache.Cache[pageConfig.SecurityAndRegistration]{MaxEntries: cacheconfig.Current().PageConfig}
+var securitySettingsConfigCache = &sharedcache.Cache[pageConfig.SecurityAndRegistration]{Name: "security-settings-config", MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetSecuritySettingsConfigCache() pageConfig.SecurityAndRegistration {
 	return securitySettingsConfigCache.GetOrLoad("", func() (pageConfig.SecurityAndRegistration, error) {
@@ -73,7 +73,7 @@ func GetSecuritySettingsConfigCache() pageConfig.SecurityAndRegistration {
 	}, configFastCacheTTL)
 }
 
-var postingSettingsConfigCache = &localcache.Cache[pageConfig.PostingContent]{MaxEntries: cacheconfig.Current().PageConfig}
+var postingSettingsConfigCache = &sharedcache.Cache[pageConfig.PostingContent]{Name: "posting-settings-config", MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetPostingSettingsConfigCache() pageConfig.PostingContent {
 	return postingSettingsConfigCache.GetOrLoad("", func() (pageConfig.PostingContent, error) {
@@ -81,7 +81,7 @@ func GetPostingSettingsConfigCache() pageConfig.PostingContent {
 	}, configFastCacheTTL)
 }
 
-var httpNotifyConfigCache = &localcache.Cache[pageConfig.HttpNotifyConfig]{MaxEntries: cacheconfig.Current().PageConfig}
+var httpNotifyConfigCache = &sharedcache.Cache[pageConfig.HttpNotifyConfig]{Name: "http-notify-config", MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetHttpNotifyConfigCache() pageConfig.HttpNotifyConfig {
 	return httpNotifyConfigCache.GetOrLoad("", func() (pageConfig.HttpNotifyConfig, error) {
@@ -89,7 +89,7 @@ func GetHttpNotifyConfigCache() pageConfig.HttpNotifyConfig {
 	}, configRareCacheTTL)
 }
 
-var oauthSettingsConfigCache = &localcache.Cache[pageConfig.OAuthSettingsConfig]{MaxEntries: cacheconfig.Current().PageConfig}
+var oauthSettingsConfigCache = &sharedcache.Cache[pageConfig.OAuthSettingsConfig]{Name: "oauth-settings-config", MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetOAuthSettingsConfigCache() pageConfig.OAuthSettingsConfig {
 	return oauthSettingsConfigCache.GetOrLoad("", func() (pageConfig.OAuthSettingsConfig, error) {
@@ -137,7 +137,7 @@ func ClearSponsorsConfigCache() {
 	sponsorsConfigCache.Clear()
 }
 
-var friendLinksConfigCache = &localcache.Cache[[]pageConfig.FriendLinksGroup]{MaxEntries: cacheconfig.Current().PageConfig}
+var friendLinksConfigCache = &sharedcache.Cache[[]pageConfig.FriendLinksGroup]{Name: "friend-links-config", MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetFriendLinksConfigCache() []pageConfig.FriendLinksGroup {
 	return friendLinksConfigCache.GetOrLoad("", func() ([]pageConfig.FriendLinksGroup, error) {

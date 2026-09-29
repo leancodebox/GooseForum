@@ -129,7 +129,9 @@ func GetOIDCProviderStatus(component.BetterRequest[component.Null]) component.Re
 }
 
 func SaveOIDCProviderSettings(req component.BetterRequest[SaveOIDCProviderSettingsReq]) component.Response {
-	savePageConfig(pageConfig.OIDCProvider, pageConfig.OIDCProviderSettingsConfig{Enabled: req.Params.Enabled}, func() {})
+	if response := savePageConfig(pageConfig.OIDCProvider, pageConfig.OIDCProviderSettingsConfig{Enabled: req.Params.Enabled}, func() {}); response.Data.Code != component.SUCCESS {
+		return response
+	}
 	if err := oidcproviderservice.ReloadDefault(); err != nil {
 		slog.Error("reload OIDC provider after settings update", "err", err)
 	}

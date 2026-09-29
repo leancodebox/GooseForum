@@ -3,7 +3,7 @@ package hotdataserve
 import (
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/bundles/sharedcache"
 	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/samber/lo"
@@ -13,7 +13,7 @@ const (
 	categoryCacheTTL = time.Minute
 )
 
-var categoryCache = &localcache.Cache[categorySnapshot]{MaxEntries: cacheconfig.Current().Category}
+var categoryCache = &sharedcache.Cache[categorySnapshot]{Name: "category", MaxEntries: cacheconfig.Current().Category}
 
 type categorySnapshot struct {
 	list        []*category.Entity

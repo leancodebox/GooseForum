@@ -32,6 +32,10 @@ idleTimeoutSeconds = 120
 [authsession]
 validTime = 604800
 
+[cache]
+# Business cache backend; local caches are always in memory. Restart after changes.
+driver = "memory"
+
 [db]
 migration = "on" # on,off
 backupSqlite = true

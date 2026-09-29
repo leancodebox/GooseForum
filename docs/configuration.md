@@ -11,6 +11,7 @@ The configuration uses TOML and contains these main sections:
 - `[app]`: Application settings
 - `[server]`: Server settings
 - `[authsession]`: Login session lifetime
+- `[cache]`: Replaceable business cache backend
 - `[db]`: Database settings
 - `[storage]`: File storage settings
 - `[log]`: Logging
@@ -55,6 +56,18 @@ validTime = 604800 # Sliding session lifetime in seconds
 
 - `validTime`: Session lifetime; defaults to 604800 seconds (7 days). Active sessions renew when less than one day remains. Existing `jwtopt.validTime` values remain supported for older configurations.
 - Authentication results are cached in the server process for up to 15 seconds. API logout, revocation, and password changes invalidate that cache. Password changes made by the separate `set-user-password` CLI process may take up to 15 seconds to invalidate active sessions. Do not run multiple server processes with this local cache.
+
+### [cache] Cache Settings
+
+```toml
+[cache]
+driver = "memory"
+```
+
+Only `memory` is currently supported and is also the default. The backend is validated
+and frozen at startup; restart after changes. This setting controls `sharedcache`
+business read caches. Fixed local caches, login sessions and captcha stores are unaffected.
+Redis is not implemented; setting `redis` prevents startup. See [cache design](cache-design.md).
 
 ### [db] Database Settings
 

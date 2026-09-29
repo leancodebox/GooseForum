@@ -15,10 +15,9 @@ func successDataMap(key string, value any) component.Response {
 }
 
 func savePageConfig(pageType string, config any, clearCache func()) component.Response {
-	configEntity := pageConfig.GetByPageType(pageType)
-	configEntity.PageType = pageType
-	configEntity.Config = jsonopt.Encode(config)
-	pageConfig.CreateOrSave(&configEntity)
+	if err := pageConfig.SaveConfig(pageType, jsonopt.Encode(config)); err != nil {
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
 	clearCache()
 	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }

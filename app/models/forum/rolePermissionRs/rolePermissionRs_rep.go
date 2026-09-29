@@ -52,17 +52,28 @@ func GetRsByRoleIds(roleIds []uint64) (entities []*Entity) {
 }
 
 func GetPermissionIdsByRoleIds(roleIds []uint64) (permissionIds []uint64) {
-	return lo.Map(GetRsByRoleIds(roleIds), func(t *Entity, _ int) uint64 {
+	return lo.Map(getActivePermissionsByRoleIDs(roleIds), func(t activePermission, _ int) uint64 {
 		return t.PermissionId
 	})
 }
 
+type activePermission struct {
+	RoleId       uint64
+	PermissionId uint64
+}
+
+func getActivePermissionsByRoleIDs(roleIDs []uint64) []activePermission {
+	var rows []activePermission
+	builder().Model(&Entity{}).Where("role_id IN ? AND effective = ?", roleIDs, 1).Find(&rows)
+	return rows
+}
+
 func GetRsGroupByRoleIds(roleIds []uint64) map[uint64][]uint64 {
-	entityList := GetRsByRoleIds(roleIds)
-	return lo.MapValues(lo.GroupBy(entityList, func(e *Entity) uint64 {
+	entityList := getActivePermissionsByRoleIDs(roleIds)
+	return lo.MapValues(lo.GroupBy(entityList, func(e activePermission) uint64 {
 		return e.RoleId
-	}), func(items []*Entity, _ uint64) []uint64 {
-		return lo.Map(items, func(e *Entity, _ int) uint64 {
+	}), func(items []activePermission, _ uint64) []uint64 {
+		return lo.Map(items, func(e activePermission, _ int) uint64 {
 			return e.PermissionId
 		})
 	})

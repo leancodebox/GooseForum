@@ -4,10 +4,9 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"sync/atomic"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/bundles/sharedcache"
 	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/models/chat/imUserChatConfigs"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
@@ -15,9 +14,7 @@ import (
 
 const statusTTL = 2 * time.Minute
 
-var statusCache = localcache.Cache[Status]{MaxEntries: cacheconfig.Current().UnreadStatus}
-
-var audienceCacheGenerations [1024]atomic.Uint64
+var statusCache = sharedcache.Cache[Status]{Name: "unread-status", MaxEntries: cacheconfig.Current().UnreadStatus}
 
 type Status struct {
 	Notifications          bool   `json:"notifications"`
@@ -48,7 +45,7 @@ func Invalidate(userID uint64) {
 		return
 	}
 	statusCache.Delete(cacheKey(userID))
-	audienceCacheGenerations[userID%uint64(len(audienceCacheGenerations))].Add(1)
+	statusCache.DeletePrefix(cacheKey(userID) + ":audience:")
 }
 
 func loadStatus(userID uint64) Status {
@@ -74,8 +71,7 @@ func cacheKey(userID uint64) string {
 }
 
 func audienceCacheKey(userID uint64, readableCategoryIDs []uint64, filterAudience bool) string {
-	generation := audienceCacheGenerations[userID%uint64(len(audienceCacheGenerations))].Load()
-	key := cacheKey(userID) + ":audience:" + strconv.FormatUint(generation, 10) + ":"
+	key := cacheKey(userID) + ":audience:"
 	if !filterAudience {
 		return key + "all"
 	}

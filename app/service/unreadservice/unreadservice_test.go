@@ -36,9 +36,14 @@ func TestAudienceStatusCacheSeparatesReadableCategorySets(t *testing.T) {
 	if left, right := audienceCacheKey(userID, []uint64{2, 1, 2}, true), audienceCacheKey(userID, []uint64{1, 2}, true); left != right {
 		t.Fatalf("equivalent audience keys differ: %q != %q", left, right)
 	}
-	before := audienceCacheKey(userID, []uint64{readableCategoryID}, true)
+	if err := conn.Where("user_id = ?", userID).Delete(&eventNotification.Entity{}).Error; err != nil {
+		t.Fatalf("delete notification: %v", err)
+	}
+	if got := GetStatusForAudience(userID, []uint64{readableCategoryID}, true); !got.Notifications {
+		t.Fatal("expected cached notification before invalidation")
+	}
 	Invalidate(userID)
-	if after := audienceCacheKey(userID, []uint64{readableCategoryID}, true); after == before {
-		t.Fatalf("audience generation did not change after invalidation: %q", after)
+	if got := GetStatusForAudience(userID, []uint64{readableCategoryID}, true); got.Notifications {
+		t.Fatal("audience status remained cached after invalidation")
 	}
 }
