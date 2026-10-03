@@ -22,6 +22,7 @@ import {
   MenuIcon,
   MessageCircleIcon,
   MoonIcon,
+  SunMoonIcon,
   PaletteIcon,
   PenSquareIcon,
   SearchIcon,
@@ -70,6 +71,9 @@ import {
   type ShellHeaderState,
 } from "./shell-header";
 
+const headerMenuKeys = ["theme", "language", "user"] as const;
+type HeaderMenu = (typeof headerMenuKeys)[number];
+
 interface ShellNavItem {
   key: string;
   label: string;
@@ -93,14 +97,16 @@ export function AppShell({
   const runtime = useGooseRuntime();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [unread, setUnread] = useState(layout.unread);
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [shellHeader, setShellHeader] = useState<ShellHeaderState>(
     emptyShellHeader,
   );
   const menuCloseTimers = useRef<
-    Record<"language" | "user", number | undefined>
+    Record<HeaderMenu, number | undefined>
   >({
+    theme: undefined,
     language: undefined,
     user: undefined,
   });
@@ -196,21 +202,26 @@ export function AppShell({
     runtime.redirect(runtime.currentUrl);
   }
 
-  function setHeaderMenu(menu: "language" | "user", open: boolean) {
+  function setHeaderMenu(menu: HeaderMenu, open: boolean) {
+    const setters = {
+      theme: setThemeMenuOpen,
+      language: setLanguageMenuOpen,
+      user: setUserMenuOpen,
+    };
     window.clearTimeout(menuCloseTimers.current[menu]);
     menuCloseTimers.current[menu] = undefined;
     if (open) {
-      const other = menu === "language" ? "user" : "language";
-      window.clearTimeout(menuCloseTimers.current[other]);
-      menuCloseTimers.current[other] = undefined;
-      if (other === "language") setLanguageMenuOpen(false);
-      else setUserMenuOpen(false);
+      for (const other of headerMenuKeys) {
+        if (other === menu) continue;
+        window.clearTimeout(menuCloseTimers.current[other]);
+        menuCloseTimers.current[other] = undefined;
+        setters[other](false);
+      }
     }
-    if (menu === "language") setLanguageMenuOpen(open);
-    else setUserMenuOpen(open);
+    setters[menu](open);
   }
 
-  function closeHeaderMenuSoon(menu: "language" | "user") {
+  function closeHeaderMenuSoon(menu: HeaderMenu) {
     window.clearTimeout(menuCloseTimers.current[menu]);
     menuCloseTimers.current[menu] = window.setTimeout(
       () => setHeaderMenu(menu, false),
@@ -246,6 +257,7 @@ export function AppShell({
 
   useEffect(
     () => () => {
+      window.clearTimeout(menuCloseTimers.current.theme);
       window.clearTimeout(menuCloseTimers.current.language);
       window.clearTimeout(menuCloseTimers.current.user);
     },
@@ -372,24 +384,43 @@ export function AppShell({
                 <SearchIcon className="size-5" />
               </GooseLink>
             </Button>
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-lg"
-                  className="[&_svg]:size-5"
-                  aria-label={t("chooseTheme")}
-                >
-                  {runtime.theme === "gf-dark" ? (
-                    <SunIcon className="size-5" />
-                  ) : (
-                    <MoonIcon className="size-5" />
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+            <DropdownMenu
+              modal={false}
+              open={themeMenuOpen}
+              onOpenChange={(open) => setHeaderMenu("theme", open)}
+            >
+              <div
+                className="relative"
+                onMouseEnter={() => setHeaderMenu("theme", true)}
+                onMouseLeave={() => closeHeaderMenuSoon("theme")}
+              >
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-lg"
+                    className="[&_svg]:size-5"
+                    aria-label={t("chooseTheme")}
+                  >
+                    {(!runtime.themePreference || runtime.themePreference === "system") ? (
+                      <SunMoonIcon className="size-5" />
+                    ) : runtime.themePreference === "gf-light" ? (
+                      <SunIcon className="size-5" />
+                    ) : (
+                      <MoonIcon className="size-5" />
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+              </div>
+              <DropdownMenuContent
+                className="w-max min-w-32 whitespace-nowrap"
+                align="end"
+                sideOffset={8}
+                onMouseEnter={() => setHeaderMenu("theme", true)}
+                onMouseLeave={() => closeHeaderMenuSoon("theme")}
+                onCloseAutoFocus={(event) => event.preventDefault()}
+              >
                 <DropdownMenuRadioGroup
-                  value={runtime.themePreference ?? runtime.theme}
+                  value={runtime.themePreference ?? "system"}
                   onValueChange={(value) => {
                     if (value === "system" || value === "gf-light" || value === "gf-dark")
                       runtime.setThemePreference?.(value);

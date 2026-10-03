@@ -80,13 +80,13 @@ describe("SiteApp system theme", () => {
     expect(localStorage.getItem("goose-site-theme")).toBeNull();
     act(() => { media.matches = false; media.dispatchEvent(new Event("change")); });
     expect(document.documentElement.dataset.theme).toBe("gf-light");
-    await user.click(screen.getByRole("button", { name: /选择主题|Choose theme/ }));
+    await user.hover(screen.getByRole("button", { name: /选择主题|Choose theme/ }));
     await user.click(screen.getByRole("menuitemradio", { name: /深色|^Dark$/ }));
     expect(localStorage.getItem("goose-site-theme")).toBe("gf-dark");
     act(() => { media.dispatchEvent(new Event("change")); });
     expect(document.documentElement.dataset.theme).toBe("gf-dark");
-    await user.click(screen.getByRole("button", { name: /选择主题|Choose theme/ }));
-    await user.click(screen.getByRole("menuitemradio", { name: /跟随系统|Follow system/ }));
+    await user.hover(screen.getByRole("button", { name: /选择主题|Choose theme/ }));
+    await user.click(screen.getByRole("menuitemradio", { name: /跟随系统|^System$/ }));
     expect(document.documentElement.dataset.theme).toBe("gf-light");
     expect(localStorage.getItem("goose-site-theme")).toBe("system");
     mounted.unmount();

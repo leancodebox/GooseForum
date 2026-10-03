@@ -1759,7 +1759,7 @@ describe("AppShell and static pages", () => {
     expect(within(dialog).getByRole("link", { name: "Coding" })).toBeTruthy();
 
     await user.click(within(dialog).getByRole("button", { name: "关闭菜单" }));
-    await user.click(screen.getByRole("button", { name: "选择主题" }));
+    await user.hover(screen.getByRole("button", { name: "选择主题" }));
     await user.click(screen.getByRole("menuitemradio", { name: "跟随系统" }));
     expect(setThemePreference).toHaveBeenCalledWith("system");
   });
