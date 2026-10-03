@@ -377,7 +377,7 @@ export function SettingsPageView({
             <TabsList
               variant="line"
               aria-label={t("tabsLabel")}
-              className="-m-1 h-auto w-full justify-start gap-1 overflow-x-auto rounded-none bg-transparent p-1 group-data-horizontal/tabs:h-auto"
+              className="-m-1 h-auto w-full justify-start gap-1 overflow-x-auto rounded-none bg-transparent p-1 group-data-horizontal/tabs:h-auto [--tabs-indicator-color:var(--primary)]"
             >
               {page.tabs.map((tab) => (
                 <TabsTrigger

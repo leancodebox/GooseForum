@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { HomeProps, LayoutPayload } from "@gooseforum/client";
-import { Bell, Mail, Plus, UsersRound } from "lucide-react";
+import { Bell, ChevronDown, Mail, Plus, UsersRound } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@gooseforum/ui/components/collapsible";
 import { useTranslation } from "react-i18next";
 import { Button } from "@gooseforum/ui/components/button";
 import {
@@ -13,6 +14,7 @@ import {
 import { GooseLink } from "@gooseforum/runtime";
 import { RenderedContent } from "../content/rendered-content";
 import { SiteListPanel } from "../layout/site-panel";
+import { useAnnouncementDisclosure } from "./use-announcement-disclosure";
 import {
   TopicListFooter,
   TopicListToolbar,
@@ -36,6 +38,7 @@ export function HomePageView({
   const list = useTopicList(page, pageUrl);
   const [unread, setUnread] = useState(() => announcementUnread(page));
   const announcementVersion = `${page.announcement.enabled}:${page.announcement.publishedAt || ""}`;
+  const announcement = useAnnouncementDisclosure(announcementVersion);
   const currentAnnouncementVersion = useRef(announcementVersion);
 
   useEffect(() => {
@@ -72,32 +75,48 @@ export function HomePageView({
       {page.announcement.enabled ? (
         <aside
           aria-label={t("announcement")}
-          className="mb-0 rounded-none border-y border-l-2 border-l-primary/45 bg-background px-3 py-2 lg:mb-3 lg:rounded-xl lg:border lg:border-l-2 lg:px-4 lg:py-2.5"
+          className="mb-0 rounded-none border-y border-l-2 border-l-primary/45 bg-background px-3 py-1 lg:mb-3 lg:rounded-xl lg:border lg:border-l-2 lg:px-4 lg:py-1.5"
         >
-          <div className="flex items-start gap-2 lg:gap-2.5">
-            {unread ? (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="-mx-1 shrink-0 text-primary hover:bg-primary/10 hover:text-primary"
-                title={t("markRead")}
-                aria-label={t("markRead")}
-                onClick={markRead}
-              >
-                <Bell className="announcement-unread-bell" />
-              </Button>
-            ) : (
-              <Bell
-                aria-hidden="true"
-                className="mt-1 size-4 shrink-0 text-primary"
+          <Collapsible open={announcement.open} onOpenChange={announcement.setOpen}>
+            <div className="flex items-center gap-2 lg:gap-2.5">
+              {unread ? (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="-mx-1 shrink-0 text-primary hover:bg-primary/10 hover:text-primary"
+                  title={t("markRead")}
+                  aria-label={t("markRead")}
+                  onClick={markRead}
+                >
+                  <Bell className="announcement-unread-bell size-4" />
+                </Button>
+              ) : (
+                <span className="-mx-1 flex size-7 shrink-0 items-center justify-center text-primary">
+                  <Bell aria-hidden="true" className="size-4" />
+                </span>
+              )}
+              <CollapsibleTrigger asChild>
+                <button type="button" className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-sm py-1 text-left text-sm font-medium focus-visible:outline-2 focus-visible:outline-ring"
+                  aria-label={announcement.open ? t("collapseAnnouncement") : t("expandAnnouncement")}>
+                  {t("announcement")}
+                  <ChevronDown className={`size-4 shrink-0 ${announcement.animate ? "transition-transform duration-180 motion-reduce:transition-none" : ""}`} style={{ transform: announcement.open ? "rotate(180deg)" : undefined }} />
+                </button>
+              </CollapsibleTrigger>
+            </div>
+            <CollapsibleContent
+              className="goose-announcement-content overflow-hidden"
+              data-animate={announcement.animate ? "true" : undefined}
+              onAnimationEnd={event => {
+                if (event.target === event.currentTarget) announcement.finishAnimation();
+              }}
+            >
+              <RenderedContent
+                html={page.announcement.html}
+                variant="announcement"
+                className="min-w-0 pt-1"
               />
-            )}
-            <RenderedContent
-              html={page.announcement.html}
-              variant="announcement"
-              className="min-w-0 flex-1"
-            />
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
         </aside>
       ) : null}
       <SiteListPanel>

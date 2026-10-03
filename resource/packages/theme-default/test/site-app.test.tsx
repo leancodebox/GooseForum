@@ -92,6 +92,74 @@ describe("SiteApp system theme", () => {
     mounted.unmount();
     expect(removeListener).toHaveBeenCalledWith("change", expect.any(Function));
   });
+
+  it("keeps a pending manual choice when the system reports a change before the snapshot", async () => {
+    const descriptor = Object.getOwnPropertyDescriptor(document, "startViewTransition");
+    let update!: () => void;
+    const start = vi.fn((callback: () => void) => {
+      update = callback;
+      return {
+        skipTransition: vi.fn(),
+        updateCallbackDone: new Promise<void>(() => {}),
+        finished: new Promise<void>(() => {}),
+      };
+    });
+    Object.defineProperty(document, "startViewTransition", { configurable: true, value: start });
+    const media = new EventTarget() as EventTarget & { matches: boolean };
+    media.matches = false;
+    vi.stubGlobal("matchMedia", vi.fn(() => media));
+    const initial = page("categories.index", { categories: [], total: 0 }, "/categories");
+    const source: PageSource<AnyPagePayload> = { api: {} as GooseSiteApi, load: vi.fn() };
+    const user = userEvent.setup();
+    const mounted = render(<SiteApp pageSource={source} initialPage={initial} />);
+    try {
+      const heading = await screen.findByRole("heading", { level: 1 });
+      await user.hover(screen.getByRole("button", { name: /选择主题|Choose theme/ }));
+      await user.click(screen.getByRole("menuitemradio", { name: /深色|^Dark$/ }));
+      expect(start).toHaveBeenCalledOnce();
+      act(() => { media.dispatchEvent(new Event("change")); });
+      act(update);
+      expect(document.documentElement.dataset.theme).toBe("gf-dark");
+      expect(localStorage.getItem("goose-site-theme")).toBe("gf-dark");
+      expect(screen.getByRole("heading", { level: 1 })).toBe(heading);
+      expect(source.load).not.toHaveBeenCalled();
+    } finally {
+      mounted.unmount();
+      if (descriptor) Object.defineProperty(document, "startViewTransition", descriptor);
+      else Reflect.deleteProperty(document, "startViewTransition");
+    }
+  });
+
+  it("uses the latest system color when it changes while the return-to-system snapshot is pending", async () => {
+    const descriptor = Object.getOwnPropertyDescriptor(document, "startViewTransition");
+    let update!: () => void;
+    Object.defineProperty(document, "startViewTransition", { configurable: true, value: (callback: () => void) => {
+      update = callback;
+      return { skipTransition: vi.fn(), updateCallbackDone: new Promise<void>(() => {}), finished: new Promise<void>(() => {}) };
+    } });
+    const media = new EventTarget() as EventTarget & { matches: boolean };
+    media.matches = true;
+    vi.stubGlobal("matchMedia", vi.fn((query: string) => query.includes("prefers-color-scheme") ? media : { matches: false }));
+    localStorage.setItem("goose-site-theme", "gf-light");
+    const initial = page("categories.index", { categories: [], total: 0 }, "/categories");
+    const source: PageSource<AnyPagePayload> = { api: {} as GooseSiteApi, load: vi.fn() };
+    const user = userEvent.setup();
+    const mounted = render(<SiteApp pageSource={source} initialPage={initial} />);
+    try {
+      await screen.findByRole("heading", { level: 1 });
+      await user.hover(screen.getByRole("button", { name: /选择主题|Choose theme/ }));
+      await user.click(screen.getByRole("menuitemradio", { name: /跟随系统|^System$/ }));
+      act(() => { media.matches = false; media.dispatchEvent(new Event("change")); });
+      act(update);
+      expect(document.documentElement.dataset.theme).toBe("gf-light");
+      expect(localStorage.getItem("goose-site-theme")).toBe("system");
+      expect(source.load).not.toHaveBeenCalled();
+    } finally {
+      mounted.unmount();
+      if (descriptor) Object.defineProperty(document, "startViewTransition", descriptor);
+      else Reflect.deleteProperty(document, "startViewTransition");
+    }
+  });
 });
 
 describe("SiteApp navigation lifecycle", () => {

@@ -9,6 +9,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { flushSync } from "react-dom";
+import { createThemeTransition } from "./theme-transition";
 import type { AnyPagePayload } from "@gooseforum/client";
 import type { Locale } from "@gooseforum/client/i18n/locale";
 import type { Resource } from "i18next";
@@ -96,7 +98,10 @@ export function SiteApp({
     initialTheme ?? detectBrowserTheme(),
   );
   const themeRef = useRef(theme);
+  const themeTransition = useMemo(createThemeTransition, []);
+  useEffect(() => () => themeTransition.cancel(), [themeTransition]);
   const [themePreference, setThemePreferenceState] = useState(detectBrowserThemePreference);
+  const themePreferenceRef = useRef(themePreference);
   const activeRequest = useRef<AbortController | null>(null);
   const navigationBlocker = useRef<
     ((href: string) => boolean | Promise<boolean>) | null
@@ -276,12 +281,21 @@ export function SiteApp({
 
   const setThemePreference = useCallback((preference: BrowserThemePreference) => {
     saveBrowserThemePreference(preference);
-    setThemePreferenceState(preference);
+    themePreferenceRef.current = preference;
     const next = resolveBrowserTheme(preference);
+    const changed = next !== themeRef.current;
+    // Record the intent immediately, even while the browser is capturing a snapshot.
     themeRef.current = next;
-    setTheme(next);
-    applyBrowserTheme(next, page?.layout.theme.colors, false);
-  }, [page?.layout.theme.colors]);
+    themeTransition.apply(() => {
+      // Apply first: committing "system" may flush an effect with a newer color.
+      applyBrowserTheme(next, page?.layout.theme.colors, false);
+      // Commit React's theme consumers in the same snapshot as the root attributes.
+      flushSync(() => {
+        setThemePreferenceState(preference);
+        setTheme(next);
+      });
+    }, changed);
+  }, [page?.layout.theme.colors, themeTransition]);
 
   const toggleTheme = useCallback(() => {
     setThemePreference(themeRef.current === "gf-dark" ? "gf-light" : "gf-dark");
@@ -291,15 +305,24 @@ export function SiteApp({
     if (themePreference !== "system" || !window.matchMedia) return;
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const update = () => {
+      // A manual choice already owns the theme, even before its snapshot callback.
+      if (themePreferenceRef.current !== "system") return;
       const next = media.matches ? "gf-dark" : "gf-light";
+      if (next === themeRef.current) {
+        applyBrowserTheme(next, page?.layout.theme.colors, false);
+        return;
+      }
       themeRef.current = next;
-      setTheme(next);
-      applyBrowserTheme(next, page?.layout.theme.colors, false);
+      // System changes apply immediately, without a full-page decorative animation.
+      themeTransition.apply(() => {
+        setTheme(next);
+        applyBrowserTheme(next, page?.layout.theme.colors, false);
+      }, false);
     };
     update();
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
-  }, [themePreference, page?.layout.theme.colors]);
+  }, [themePreference, page?.layout.theme.colors, themeTransition]);
 
   useEffect(() => {
     document.documentElement.lang = locale;

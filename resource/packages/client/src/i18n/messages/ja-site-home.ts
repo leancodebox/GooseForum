@@ -29,6 +29,8 @@ export default {
   emailDescription: "すべての機能を利用するには確認が必要です。",
   emailAction: "設定へ",
   announcement: "お知らせ",
+  collapseAnnouncement: "お知らせを折りたたむ",
+  expandAnnouncement: "お知らせを展開",
   markRead: "既読にする",
   autoLoadFailed: "自動読み込みに失敗しました。",
   justNow: "たった今",

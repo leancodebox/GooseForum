@@ -3,6 +3,9 @@
 @import "shadcn/tailwind.css";
 @import "./tokens.css";
 @custom-variant dark (&:where([data-theme="gf-dark"], [data-theme="gf-dark"] *));
+[data-sliding-indicator="true"] [data-slot="tabs-trigger"]::after {
+  opacity: 0 !important;
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

@@ -221,7 +221,13 @@ export function AppShell({
     setters[menu](open);
   }
 
+  function openHeaderMenuOnHover(menu: HeaderMenu) {
+    if (window.matchMedia?.("(hover: none)").matches) return;
+    setHeaderMenu(menu, true);
+  }
+
   function closeHeaderMenuSoon(menu: HeaderMenu) {
+    if (window.matchMedia?.("(hover: none)").matches) return;
     window.clearTimeout(menuCloseTimers.current[menu]);
     menuCloseTimers.current[menu] = window.setTimeout(
       () => setHeaderMenu(menu, false),
@@ -391,7 +397,7 @@ export function AppShell({
             >
               <div
                 className="relative"
-                onMouseEnter={() => setHeaderMenu("theme", true)}
+                onMouseEnter={() => openHeaderMenuOnHover("theme")}
                 onMouseLeave={() => closeHeaderMenuSoon("theme")}
               >
                 <DropdownMenuTrigger asChild>
@@ -415,7 +421,7 @@ export function AppShell({
                 className="w-max min-w-32 whitespace-nowrap"
                 align="end"
                 sideOffset={8}
-                onMouseEnter={() => setHeaderMenu("theme", true)}
+                onMouseEnter={() => openHeaderMenuOnHover("theme")}
                 onMouseLeave={() => closeHeaderMenuSoon("theme")}
                 onCloseAutoFocus={(event) => event.preventDefault()}
               >
@@ -439,7 +445,7 @@ export function AppShell({
             >
               <div
                 className="relative"
-                onMouseEnter={() => setHeaderMenu("language", true)}
+                onMouseEnter={() => openHeaderMenuOnHover("language")}
                 onMouseLeave={() => closeHeaderMenuSoon("language")}
               >
                 <DropdownMenuTrigger asChild>
@@ -456,7 +462,7 @@ export function AppShell({
               <DropdownMenuContent
                 align="end"
                 sideOffset={8}
-                onMouseEnter={() => setHeaderMenu("language", true)}
+                onMouseEnter={() => openHeaderMenuOnHover("language")}
                 onMouseLeave={() => closeHeaderMenuSoon("language")}
                 onCloseAutoFocus={(event) => event.preventDefault()}
               >
@@ -483,7 +489,7 @@ export function AppShell({
               >
                 <div
                   className="relative ml-1 inline-flex size-10 shrink-0 items-center justify-center rounded-full"
-                  onMouseEnter={() => setHeaderMenu("user", true)}
+                  onMouseEnter={() => openHeaderMenuOnHover("user")}
                   onMouseLeave={() => closeHeaderMenuSoon("user")}
                 >
                   <DropdownMenuTrigger asChild>
@@ -515,7 +521,7 @@ export function AppShell({
                   align="end"
                   sideOffset={8}
                   className="w-48"
-                  onMouseEnter={() => setHeaderMenu("user", true)}
+                  onMouseEnter={() => openHeaderMenuOnHover("user")}
                   onMouseLeave={() => closeHeaderMenuSoon("user")}
                   onCloseAutoFocus={(event) => event.preventDefault()}
                 >

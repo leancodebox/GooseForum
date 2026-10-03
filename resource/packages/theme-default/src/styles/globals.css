@@ -1,5 +1,37 @@
 @import "@gooseforum/ui/styles/base.css";
 @import "@gooseforum/markdown/styles.css";
+
+/* Scope snapshots to explicit theme changes; other view transitions stay untouched. */
+html.goose-theme-transition::view-transition-group(root) {
+  animation: none;
+}
+html.goose-theme-transition::view-transition-image-pair(root) {
+  isolation: isolate;
+}
+html.goose-theme-transition::view-transition-old(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  z-index: 0;
+}
+html.goose-theme-transition::view-transition-new(root) {
+  animation: goose-theme-reveal 450ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  mix-blend-mode: normal;
+  z-index: 1;
+}
+html.goose-theme-transition *,
+html.goose-theme-transition *::before,
+html.goose-theme-transition *::after {
+  transition: none !important;
+}
+@keyframes goose-theme-reveal {
+  from { clip-path: circle(0 at 50% 50%); }
+  to { clip-path: circle(100% at 50% 50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.goose-theme-transition::view-transition-new(root) {
+    animation: none;
+  }
+}
 .site-more-trigger[data-state="open"],
 .site-more-menu[data-slot="dropdown-menu-content"] {
   background-color: color-mix(in oklch, var(--muted) 94%, white);
@@ -53,4 +85,40 @@
 
 @media (prefers-reduced-motion: reduce) {
   .announcement-unread-bell { animation: none; }
+}
+
+/* Closed reply surfaces cannot intercept clicks while their exit completes. */
+.goose-composer-surface[data-state="closed"],
+.goose-composer-surface[data-state="closed"] * {
+  pointer-events: none !important;
+}
+/* The underlying exit state stays hidden after WAAPI releases its fill. */
+.goose-composer-surface[data-state="closed"] {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.goose-announcement-content[data-animate="true"][data-state="open"] {
+  animation: goose-announcement-open 180ms ease-out;
+}
+.goose-announcement-content[data-animate="true"][data-state="closed"] {
+  animation: goose-announcement-close 140ms ease-out;
+}
+@keyframes goose-announcement-open {
+  from { height: 0; opacity: 0; }
+  to { height: var(--radix-collapsible-content-height); opacity: 1; }
+}
+@keyframes goose-announcement-close {
+  from { height: var(--radix-collapsible-content-height); opacity: 1; }
+  to { height: 0; opacity: 0; }
+}
+/* One cadence for small floating surfaces, without changing their placement. */
+:is([data-slot="dialog-overlay"], [data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="tooltip-content"])[data-state="open"],
+[data-slot="tooltip-content"][data-state="delayed-open"],
+[data-slot="tooltip-content"][data-state="instant-open"] {
+  animation-duration: 180ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+:is([data-slot="dialog-overlay"], [data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="tooltip-content"])[data-state="closed"] {
+  animation-duration: 120ms;
+  animation-timing-function: ease-out;
 }

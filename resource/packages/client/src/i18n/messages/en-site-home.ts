@@ -29,6 +29,8 @@ export default {
   emailDescription: "Verify it to use all community features.",
   emailAction: "Open settings",
   announcement: "Announcement",
+  collapseAnnouncement: "Collapse announcement",
+  expandAnnouncement: "Expand announcement",
   markRead: "Mark announcement as read",
   autoLoadFailed: "Automatic loading failed. Try again.",
   justNow: "Just now",

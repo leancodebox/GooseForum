@@ -29,6 +29,8 @@ export default {
   emailDescription: "验证后即可使用完整社区功能。",
   emailAction: "前往设置",
   announcement: "公告",
+  collapseAnnouncement: "收起公告",
+  expandAnnouncement: "展开公告",
   markRead: "标记公告已读",
   autoLoadFailed: "自动加载失败，请手动重试。",
   justNow: "刚刚",

@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 const homePage = {
   component: 'home.index',
@@ -948,4 +948,205 @@ test('keeps the avatar edit overlay below the worn badge', async ({ page }, test
       path: testInfo.outputPath('avatar-overlay-below-badge.png'), fullPage: false,
     }), contentType: 'image/png',
   })
+})
+
+async function openThemeMenu(page: Page) {
+  const trigger = page.getByRole('button', { name: 'Choose theme' })
+  if (await page.evaluate(() => matchMedia('(hover: hover)').matches)) await trigger.hover()
+  else await trigger.click()
+}
+
+test('theme reveal preserves mounted content and scroll without loading data again', async ({ page }) => {
+  await page.route('**/__goose_page/**', route => route.fulfill({ json: {
+    ...homePage,
+    props: { ...homePage.props, announcement: {
+      enabled: true, publishedAt: new Date().toISOString(),
+      html: Array.from({ length: 24 }, (_, i) => `<p>Notice paragraph ${i}</p>`).join(''),
+    } },
+  } }))
+  const requests: string[] = []
+  page.on('request', request => {
+    if (/\/(__goose_page|api)\//.test(request.url())) requests.push(request.url())
+  })
+  await page.goto('/?lang=en')
+  const announcement = page.locator('.gf-prose-announcement')
+  await expect(announcement).toBeVisible()
+  const original = await announcement.elementHandle()
+  await page.evaluate(() => window.scrollTo(0, 180))
+  const scroll = await page.evaluate(() => window.scrollY)
+  expect(scroll).toBeGreaterThan(0)
+  const count = requests.length
+  await openThemeMenu(page)
+  await page.getByRole('menuitemradio', { name: 'Dark', exact: true }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-dark')
+  await expect(page.locator('html')).not.toHaveClass(/goose-theme-transition/)
+  expect(await announcement.evaluate((node, old) => node === old, original)).toBe(true)
+  expect(await page.evaluate(() => window.scrollY)).toBe(scroll)
+  expect(requests).toHaveLength(count)
+})
+
+for (const fallback of ['reduced motion', 'unsupported API']) {
+  test(`theme choice works with ${fallback}`, async ({ page }) => {
+    if (fallback === 'reduced motion') await page.emulateMedia({ reducedMotion: 'reduce' })
+    else await page.addInitScript(() => Object.defineProperty(document, 'startViewTransition', { value: undefined, configurable: true }))
+    await page.goto('/?lang=en')
+    await openThemeMenu(page)
+    await page.getByRole('menuitemradio', { name: 'Dark', exact: true }).click()
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-dark')
+    await expect(page.locator('html')).not.toHaveClass(/goose-theme-transition/)
+    await expect(page.getByText('No topics yet')).toBeVisible()
+  })
+}
+
+test('announcement folding keeps read status independent and loads no data', async ({ page }) => {
+  await page.route('**/__goose_page/**', route => route.fulfill({ json: {
+    ...homePage,
+    props: { ...homePage.props, announcement: {
+      enabled: true, html: '<p>Foldable notice</p>', publishedAt: new Date().toISOString(),
+    } },
+  } }))
+  const requests: string[] = []
+  page.on('request', request => {
+    if (/\/(__goose_page|api)\//.test(request.url())) requests.push(request.url())
+  })
+  await page.goto('/?lang=en')
+  await expect(page.getByText('Foldable notice')).toBeVisible()
+  const count = requests.length
+  await page.getByRole('button', { name: 'Collapse announcement' }).click()
+  await expect(page.getByText('Foldable notice')).not.toBeVisible()
+  await expect(page.getByRole('button', { name: 'Mark announcement as read' })).toBeVisible()
+  expect(await page.evaluate(() => localStorage.getItem('goose:announcement:last-read-published-at'))).toBeNull()
+  await page.getByRole('button', { name: 'Expand announcement' }).click()
+  await expect(page.getByText('Foldable notice')).toBeVisible()
+  await page.getByRole('button', { name: 'Mark announcement as read' }).click()
+  await expect(page.getByRole('button', { name: 'Mark announcement as read' })).toHaveCount(0)
+  expect(requests).toHaveLength(count)
+})
+
+test('reply transitions preserve the minimized draft and existing fresh-reply behavior', async ({ page }) => {
+  await page.goto('/p/test/60?lang=en')
+  const reply = page.locator('[data-slot="topic-reply-float-boundary"]').getByRole('button', { name: 'Join the discussion' })
+  await reply.click()
+  const panel = page.locator('.goose-composer-surface[data-state="open"] section')
+  await panel.getByRole('radio', { name: 'Markdown', exact: true }).click()
+  await panel.locator('textarea').fill('A draft that must survive transitions')
+  await panel.locator('header').getByRole('button', { name: 'Join the discussion' }).click()
+  const closed = page.locator('.goose-composer-surface[data-state="closed"]')
+  // Exit content becomes inert immediately, even before the visual transition ends.
+  await expect(closed).toHaveAttribute('inert', '')
+  const bubble = page.locator('.goose-composer-surface[data-state="open"]')
+  await bubble.getByRole('button', { name: 'Join the discussion', exact: true }).click()
+  await expect(panel.locator('[contenteditable="true"]')).toHaveText('A draft that must survive transitions')
+  await panel.locator('header').getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(page.locator('.goose-composer-surface')).toHaveCount(0)
+  await reply.click()
+  await expect(panel.locator('[contenteditable="true"]')).toHaveText('')
+})
+
+test('settings underline follows variable-width tabs, keyboard selection and resize', async ({ page }) => {
+  await page.route('**/__goose_page/settings**', route => route.fulfill({ json: {
+    ...homePage,
+    component: 'settings.index',
+    props: {
+      user: {
+        id: 7, username: 'alice', nickname: 'Alice', email: 'alice@example.test',
+        locale: 'en', avatarUrl: '', profileCoverUrl: '', bio: '', signature: '',
+        websiteName: '', website: '', prestige: 0, createdAt: '2026-01-01T00:00:00Z',
+        externalInformation: {}, wornBadgeCode: '', badges: [], wearableBadges: [],
+      },
+      stats: {
+        topicCount: 0, replyCount: 0, followerCount: 0, followingCount: 0,
+        likeReceivedCount: 0, likeGivenCount: 0, collectionCount: 0, createdAt: '2026-01-01T00:00:00Z',
+      },
+      privacy: { showTopics: true, showActivity: true, showFollowing: true },
+      tabs: [{ key: 'profile', label: 'Profile' }, { key: 'privacy', label: 'Privacy' }],
+    },
+    layout: { ...homePage.layout, viewer: { ...homePage.layout.viewer, id: 7, username: 'alice', isAuthenticated: true } },
+    url: '/settings?lang=en',
+  } }))
+  await page.goto('/settings?lang=en')
+  const list = page.getByRole('tablist', { name: 'Settings sections' })
+  const indicator = list.locator(':scope > span[aria-hidden="true"]')
+  await expect(list).toHaveAttribute('data-sliding-indicator', 'true')
+  const aligned = async () => list.evaluate(element => {
+    const tab = element.querySelector('[data-state="active"]')!
+    const line = element.querySelector(':scope > span')!
+    const button = tab.getBoundingClientRect()
+    const underline = line.getBoundingClientRect()
+    return Math.abs(button.x - underline.x) < 1 && Math.abs(button.width - underline.width) < 1 && Math.abs(button.bottom - underline.bottom) < 1
+  })
+  await expect(indicator).toBeVisible()
+  await expect.poll(aligned).toBe(true)
+  await page.getByRole('tab', { name: 'Privacy', exact: true }).click()
+  await expect(page.getByRole('checkbox', { name: 'Show my topics' })).toBeVisible()
+  await expect.poll(aligned).toBe(true)
+  await page.getByRole('tab', { name: 'Privacy', exact: true }).press('ArrowLeft')
+  await expect(page.getByRole('tab', { name: 'Profile', exact: true })).toHaveAttribute('aria-selected', 'true')
+  await expect.poll(aligned).toBe(true)
+  await page.setViewportSize({ width: 600, height: 900 })
+  await expect.poll(aligned).toBe(true)
+})
+
+test('announcement restores browser preferences without playing an entry animation', async ({ page }) => {
+  let publishedAt = '2026-10-03T09:00:00Z'
+  await page.route('**/__goose_page/**', route => route.fulfill({ json: {
+    ...homePage,
+    props: { ...homePage.props, announcement: {
+      enabled: true, html: '<p>Persistent notice</p>', publishedAt,
+    } },
+  } }))
+  await page.goto('/?lang=en')
+  const content = page.locator('.goose-announcement-content')
+  await expect(content).toHaveCSS('animation-name', 'none')
+  await page.getByRole('button', { name: 'Collapse announcement' }).click()
+  await expect(page.getByText('Persistent notice')).not.toBeVisible()
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Expand announcement' })).toBeVisible()
+  await expect(page.getByText('Persistent notice')).not.toBeVisible()
+  await page.getByRole('button', { name: 'Expand announcement' }).click()
+  await expect(page.getByText('Persistent notice')).toBeVisible()
+  await expect(content).toHaveCSS('animation-name', 'none')
+  await page.reload()
+  await expect(page.getByText('Persistent notice')).toBeVisible()
+  await expect(content).toHaveCSS('animation-name', 'none')
+  await page.getByRole('button', { name: 'Collapse announcement' }).click()
+  await expect(page.getByText('Persistent notice')).not.toBeVisible()
+  publishedAt = '2026-10-03T10:00:00Z'
+  await page.reload()
+  await expect(page.getByText('Persistent notice')).toBeVisible()
+  await expect(content).toHaveCSS('animation-name', 'none')
+})
+
+test('restoring the reply window never reveals an exiting bubble when its animation is released', async ({ page }) => {
+  await page.addInitScript(() => {
+    const testWindow = window as Window & { exitOpacities?: number[] }
+    testWindow.exitOpacities = []
+    const animate = Element.prototype.animate
+    Element.prototype.animate = function (...args) {
+      const animation = animate.apply(this, args)
+      if (this instanceof HTMLElement && this.classList.contains('goose-composer-surface')) {
+        const node = this
+        const cancel = animation.cancel.bind(animation)
+        animation.cancel = () => {
+          const finishedExit = node.isConnected && node.dataset.state === 'closed' && animation.playState === 'finished'
+          cancel()
+          if (finishedExit) testWindow.exitOpacities!.push(Number(getComputedStyle(node).opacity))
+        }
+      }
+      return animation
+    }
+  })
+  await page.goto('/p/test/60?lang=en')
+  await page.locator('[data-slot="topic-reply-float-boundary"]').getByRole('button', { name: 'Join the discussion' }).click()
+  const panel = page.locator('.goose-composer-surface[data-state="open"] section')
+  for (let i = 0; i < 3; i++) {
+    await panel.locator('header').getByRole('button', { name: 'Join the discussion' }).click()
+    const bubble = page.locator('.goose-composer-surface[data-state="open"]')
+    await bubble.getByRole('button', { name: 'Join the discussion', exact: true }).click()
+    await expect(panel).toBeVisible()
+    await expect(page.locator('.goose-composer-surface[data-state="closed"]')).toHaveCount(0)
+  }
+  const samples = await page.evaluate(() => (window as Window & { exitOpacities: number[] }).exitOpacities)
+  expect(samples.length).toBeGreaterThanOrEqual(3)
+  expect(samples.every(opacity => opacity === 0)).toBe(true)
 })

@@ -15,11 +15,10 @@ it('renders saved values and disables all privacy controls while saving', async 
   const user = userEvent.setup()
   expect(screen.getByRole('checkbox', { name: 'Show my topics' }).getAttribute('aria-checked')).toBe('false')
   await user.click(screen.getByRole('checkbox', { name: 'Show my topics' }))
-  expect(onChange).toHaveBeenCalledWith('showTopics', true)
   view.rerender(<GooseI18nProvider locale="en">
     <PrivacySettings settings={settings} saving={true} onChange={onChange} />
   </GooseI18nProvider>)
   for (const checkbox of screen.getAllByRole('checkbox')) expect(checkbox.hasAttribute('disabled')).toBe(true)
   await user.click(screen.getByRole('checkbox', { name: 'Show follow relationships' }))
-  expect(onChange).toHaveBeenCalledOnce()
+  expect(onChange).toHaveBeenCalledExactlyOnceWith('showTopics', true)
 })

@@ -29,6 +29,8 @@ export default {
   emailDescription: "Verificala per usare tutte le funzioni.",
   emailAction: "Apri impostazioni",
   announcement: "Annuncio",
+  collapseAnnouncement: "Comprimi l’annuncio",
+  expandAnnouncement: "Espandi l’annuncio",
   markRead: "Segna come letto",
   autoLoadFailed: "Caricamento automatico non riuscito.",
   justNow: "Adesso",
