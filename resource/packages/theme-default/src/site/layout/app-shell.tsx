@@ -372,21 +372,35 @@ export function AppShell({
                 <SearchIcon className="size-5" />
               </GooseLink>
             </Button>
-            <Button
-              variant="ghost"
-              size="icon-lg"
-              className="[&_svg]:size-5"
-              onClick={runtime.toggleTheme}
-              aria-label={
-                runtime.theme === "gf-dark" ? t("switchLight") : t("switchDark")
-              }
-            >
-              {runtime.theme === "gf-dark" ? (
-                <SunIcon className="size-5" />
-              ) : (
-                <MoonIcon className="size-5" />
-              )}
-            </Button>
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-lg"
+                  className="[&_svg]:size-5"
+                  aria-label={t("chooseTheme")}
+                >
+                  {runtime.theme === "gf-dark" ? (
+                    <SunIcon className="size-5" />
+                  ) : (
+                    <MoonIcon className="size-5" />
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuRadioGroup
+                  value={runtime.themePreference ?? runtime.theme}
+                  onValueChange={(value) => {
+                    if (value === "system" || value === "gf-light" || value === "gf-dark")
+                      runtime.setThemePreference?.(value);
+                  }}
+                >
+                  <DropdownMenuRadioItem value="system">{t("followSystem")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="gf-light">{t("lightTheme")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="gf-dark">{t("darkTheme")}</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <DropdownMenu
               modal={false}
               open={languageMenuOpen}

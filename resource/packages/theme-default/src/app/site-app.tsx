@@ -26,6 +26,10 @@ import {
   applyBrowserLocale,
   applyBrowserTheme,
   detectBrowserTheme,
+  detectBrowserThemePreference,
+  resolveBrowserTheme,
+  saveBrowserThemePreference,
+  type BrowserThemePreference,
   detectBrowserLocale,
   prepareBrowserDocument as prepareDocument,
   queueBrowserFlash,
@@ -91,6 +95,7 @@ export function SiteApp({
     initialTheme ?? detectBrowserTheme(),
   );
   const themeRef = useRef(theme);
+  const [themePreference, setThemePreferenceState] = useState(detectBrowserThemePreference);
   const activeRequest = useRef<AbortController | null>(null);
   const navigationBlocker = useRef<
     ((href: string) => boolean | Promise<boolean>) | null
@@ -268,14 +273,32 @@ export function SiteApp({
     }
   }, []);
 
-  const toggleTheme = useCallback(() => {
-    setTheme((current) => {
-      const next = current === "gf-dark" ? "gf-light" : "gf-dark";
-      themeRef.current = next;
-      applyBrowserTheme(next, page?.layout.theme.colors);
-      return next;
-    });
+  const setThemePreference = useCallback((preference: BrowserThemePreference) => {
+    saveBrowserThemePreference(preference);
+    setThemePreferenceState(preference);
+    const next = resolveBrowserTheme(preference);
+    themeRef.current = next;
+    setTheme(next);
+    applyBrowserTheme(next, page?.layout.theme.colors, false);
   }, [page?.layout.theme.colors]);
+
+  const toggleTheme = useCallback(() => {
+    setThemePreference(themeRef.current === "gf-dark" ? "gf-light" : "gf-dark");
+  }, [setThemePreference]);
+
+  useEffect(() => {
+    if (themePreference !== "system" || !window.matchMedia) return;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const update = () => {
+      const next = media.matches ? "gf-dark" : "gf-light";
+      themeRef.current = next;
+      setTheme(next);
+      applyBrowserTheme(next, page?.layout.theme.colors, false);
+    };
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, [themePreference, page?.layout.theme.colors]);
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -356,6 +379,8 @@ export function SiteApp({
       currentUrl: page?.url ?? browserHref(),
       isNavigating,
       theme,
+      themePreference,
+      setThemePreference,
       locale,
       navigate,
       registerNavigationBlocker,
@@ -377,6 +402,8 @@ export function SiteApp({
       refresh,
       setLocale,
       theme,
+      themePreference,
+      setThemePreference,
       toggleTheme,
     ],
   );

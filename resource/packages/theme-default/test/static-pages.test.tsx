@@ -86,6 +86,7 @@ const layout = {
 
 function renderPage(page: AnyPagePayload, api: Partial<GooseSiteApi> = {}) {
   const toggleTheme = vi.fn();
+  const setThemePreference = vi.fn();
   const navigate = vi.fn();
   const runtime: GooseRuntime = {
     api: api as GooseSiteApi,
@@ -99,6 +100,7 @@ function renderPage(page: AnyPagePayload, api: Partial<GooseSiteApi> = {}) {
     refresh: vi.fn(),
     setLocale: vi.fn(),
     toggleTheme,
+    setThemePreference,
   };
   render(
     <GooseI18nProvider locale="zh">
@@ -107,7 +109,7 @@ function renderPage(page: AnyPagePayload, api: Partial<GooseSiteApi> = {}) {
       </GooseRuntimeProvider>
     </GooseI18nProvider>,
   );
-  return { navigate, toggleTheme, user: userEvent.setup() };
+  return { navigate, toggleTheme, setThemePreference, user: userEvent.setup() };
 }
 
 function payload(
@@ -514,17 +516,21 @@ describe("AppShell and static pages", () => {
     ).toBe("noopener noreferrer ugc");
   });
 
-  it("places the own-profile edit action beside the username", () => {
+  it("places the own-profile edit action beside the display name and status badges", () => {
     const props = userProfileProps();
     props.isOwnProfile = true;
     props.canMessage = false;
     props.canFollow = false;
     renderPage(payload("user.profile", props));
 
-    const username = screen.getByText("@alice");
+    const heading = screen.getByRole("heading", { level: 1, name: "Alice" });
     const editLink = screen.getByRole("link", { name: "编辑资料" });
-    expect(username.parentElement?.contains(editLink)).toBe(true);
-    expect(editLink.closest('[data-slot="button"]')).toBeTruthy();
+    const identityRow = heading.parentElement!;
+    expect(identityRow.contains(editLink)).toBe(true);
+    expect(within(identityRow).getByText("Admin")).toBeTruthy();
+    expect(within(identityRow).getByText("在线")).toBeTruthy();
+    expect(editLink.getAttribute("href")).toBe(props.settingsUrl);
+    expect(editLink.getAttribute("data-slot")).toBe("badge");
   });
 
   it("updates follow state through the shared site API", async () => {
@@ -559,6 +565,16 @@ describe("AppShell and static pages", () => {
         .getByRole("link", { name: "主题" })
         .getAttribute("aria-current"),
     ).toBe("page");
+  });
+
+  it("saves a preset avatar using the path accepted by the server", async () => {
+    const savePresetAvatar = vi.fn().mockResolvedValue({ avatarUrl: "/static/pic/1.webp" });
+    const { user } = renderPage(payload("settings.index", settingsProps()), {
+      users: { savePresetAvatar } as unknown as GooseSiteApi["users"],
+    });
+    await user.click(screen.getAllByRole("button", { name: "选择预设头像" })[0]);
+    await user.click(screen.getByRole("button", { name: "应用头像" }));
+    expect(savePresetAvatar).toHaveBeenCalledWith("/static/pic/1.webp");
   });
 
   it("edits and saves the React settings profile", async () => {
@@ -1733,7 +1749,7 @@ describe("AppShell and static pages", () => {
   });
 
   it("supports mobile navigation and the shell theme action", async () => {
-    const { toggleTheme, user } = renderPage(
+    const { setThemePreference, user } = renderPage(
       payload("links.index", { totalCount: 0, groups: [] }),
     );
 
@@ -1743,8 +1759,9 @@ describe("AppShell and static pages", () => {
     expect(within(dialog).getByRole("link", { name: "Coding" })).toBeTruthy();
 
     await user.click(within(dialog).getByRole("button", { name: "关闭菜单" }));
-    await user.click(screen.getByRole("button", { name: "切换到深色主题" }));
-    expect(toggleTheme).toHaveBeenCalledOnce();
+    await user.click(screen.getByRole("button", { name: "选择主题" }));
+    await user.click(screen.getByRole("menuitemradio", { name: "跟随系统" }));
+    expect(setThemePreference).toHaveBeenCalledWith("system");
   });
 
   it("renders sponsor tiers, defaults, contact, and rules", () => {

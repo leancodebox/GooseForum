@@ -1,5 +1,9 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  chooseTheme: "Scegli tema",
+  followSystem: "Segui il sistema",
+  lightTheme: "Chiaro",
+  darkTheme: "Scuro",
   more: "Altro",
   openMenu: "Apri menu",
   closeMenu: "Chiudi menu",

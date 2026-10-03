@@ -30,6 +30,8 @@ export interface GooseRuntime {
   redirect(href: string): void;
   refresh(): Promise<void>;
   setLocale(locale: AuthLocale): Promise<void>;
+  themePreference?: ThemePayload["current"] | "system";
+  setThemePreference?(preference: ThemePayload["current"] | "system"): void;
   toggleTheme(): void;
 }
 

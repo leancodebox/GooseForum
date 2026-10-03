@@ -52,7 +52,7 @@ const tabKeys = [
 type TabKey = (typeof tabKeys)[number];
 const presetAvatars = Array.from(
   { length: 12 },
-  (_, index) => `/static/pic/${index + 1}.webp?t=1788958424`,
+  (_, index) => `/static/pic/${index + 1}.webp`,
 );
 
 export function SettingsPageView({
@@ -274,7 +274,7 @@ export function SettingsPageView({
                   onClick={() => setPresetDraft(url)}
                 >
                   <img
-                    src={url}
+                    src={`${url}?t=1788958424`}
                     alt=""
                     className="size-full rounded object-cover"
                   />

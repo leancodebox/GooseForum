@@ -627,6 +627,25 @@ test('translates backend validation codes on the publish page', async ({ page },
   })
 })
 
+test('follows the system theme and remembers explicit preferences across reloads', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await page.goto('/?lang=en')
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-dark')
+  await page.emulateMedia({ colorScheme: 'light' })
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-light')
+  await page.getByRole('button', { name: 'Choose theme' }).click()
+  await page.getByRole('menuitemradio', { name: 'Dark', exact: true }).click()
+  await page.reload()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-dark')
+  await page.getByRole('button', { name: 'Choose theme' }).click()
+  await page.getByRole('menuitemradio', { name: 'Follow system' }).click()
+  await page.reload()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-light')
+  expect(await page.evaluate(() => localStorage.getItem('goose-site-theme'))).toBe('system')
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-dark')
+})
+
 test('loads, responds to a primary control, and meets automated WCAG checks', async ({ page }, testInfo) => {
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))
@@ -644,10 +663,11 @@ test('loads, responds to a primary control, and meets automated WCAG checks', as
       .trim(),
   )).toBe('#fbfdff')
 
-  const themeButton = page.getByRole('button', { name: 'Switch to dark theme' })
+  const themeButton = page.getByRole('button', { name: 'Choose theme' })
   await themeButton.click()
+  await page.getByRole('menuitemradio', { name: 'Dark', exact: true }).click()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-dark')
-  await expect(page.getByRole('button', { name: 'Switch to light theme' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Choose theme' })).toBeVisible()
 
   const accessibility = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
@@ -735,6 +755,10 @@ test('keeps the topic reply control inside the content edge and shares one compo
   await expect(toolbar.getByRole('button', { name: 'Post reply' })).toBeVisible()
   await expect(toolbar.getByRole('radio', { name: 'Markdown' })).toBeVisible()
   await expect(toolbar.getByRole('button', { name: 'Preview' })).toBeVisible()
+  if (testInfo.project.name === 'mobile-chromium') {
+    const editor = page.locator('.markdown-composer-content').filter({ visible: true }).first()
+    expect(await editor.evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(16)
+  }
   expect(errors).toEqual([])
   await testInfo.attach('verified-topic-composer', {
     body: await page.screenshot({ fullPage: false }),

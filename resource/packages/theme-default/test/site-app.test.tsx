@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type {
   AnyPagePayload,
@@ -56,6 +56,43 @@ function page(
     version: "1",
   } as AnyPagePayload;
 }
+
+describe("SiteApp system theme", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    localStorage.removeItem("goose-site-theme");
+    document.cookie = "goose-site-theme=; path=/; max-age=0";
+  });
+
+  it("follows system changes, supports manual overrides, and removes the listener", async () => {
+    localStorage.clear();
+    document.cookie = "goose-site-theme=; path=/; max-age=0";
+    const media = new EventTarget() as EventTarget & { matches: boolean };
+    media.matches = true;
+    const removeListener = vi.spyOn(media, "removeEventListener");
+    vi.stubGlobal("matchMedia", vi.fn(() => media));
+    const initial = page("categories.index", { categories: [], total: 0 }, "/categories");
+    const source: PageSource<AnyPagePayload> = { api: {} as GooseSiteApi, load: vi.fn() };
+    const user = userEvent.setup();
+    const mounted = render(<SiteApp pageSource={source} initialPage={initial} />);
+    await screen.findByRole("heading", { level: 1 });
+    expect(document.documentElement.dataset.theme).toBe("gf-dark");
+    expect(localStorage.getItem("goose-site-theme")).toBeNull();
+    act(() => { media.matches = false; media.dispatchEvent(new Event("change")); });
+    expect(document.documentElement.dataset.theme).toBe("gf-light");
+    await user.click(screen.getByRole("button", { name: /选择主题|Choose theme/ }));
+    await user.click(screen.getByRole("menuitemradio", { name: /深色|^Dark$/ }));
+    expect(localStorage.getItem("goose-site-theme")).toBe("gf-dark");
+    act(() => { media.dispatchEvent(new Event("change")); });
+    expect(document.documentElement.dataset.theme).toBe("gf-dark");
+    await user.click(screen.getByRole("button", { name: /选择主题|Choose theme/ }));
+    await user.click(screen.getByRole("menuitemradio", { name: /跟随系统|Follow system/ }));
+    expect(document.documentElement.dataset.theme).toBe("gf-light");
+    expect(localStorage.getItem("goose-site-theme")).toBe("system");
+    mounted.unmount();
+    expect(removeListener).toHaveBeenCalledWith("change", expect.any(Function));
+  });
+});
 
 describe("SiteApp navigation lifecycle", () => {
   it("keeps cached page DOM when visiting and leaving a standalone page", async () => {

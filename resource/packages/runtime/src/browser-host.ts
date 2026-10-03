@@ -52,25 +52,43 @@ export function queueBrowserFlash(
   }
 }
 
-export function detectBrowserTheme(): ThemePayload["current"] {
+export type BrowserThemePreference = ThemePayload["current"] | "system";
+
+export function detectBrowserThemePreference(): BrowserThemePreference {
   const cookieTheme = readCookie(themeStorageKey);
-  if (cookieTheme === "gf-light" || cookieTheme === "gf-dark")
+  if (cookieTheme === "gf-light" || cookieTheme === "gf-dark" || cookieTheme === "system")
     return cookieTheme;
   try {
     const stored = localStorage.getItem(themeStorageKey);
-    if (stored === "gf-light" || stored === "gf-dark") return stored;
+    if (stored === "gf-light" || stored === "gf-dark" || stored === "system") return stored;
   } catch {
-    // Fall through to the document theme.
+    // Storage can be unavailable in privacy modes.
   }
-  const documentTheme = document.documentElement.dataset.theme;
-  if (documentTheme === "gf-light" || documentTheme === "gf-dark")
-    return documentTheme;
-  return "gf-light";
+  return "system";
+}
+
+export function resolveBrowserTheme(preference: BrowserThemePreference): ThemePayload["current"] {
+  if (preference !== "system") return preference;
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "gf-dark" : "gf-light";
+}
+
+export function detectBrowserTheme(): ThemePayload["current"] {
+  return resolveBrowserTheme(detectBrowserThemePreference());
+}
+
+export function saveBrowserThemePreference(preference: BrowserThemePreference) {
+  document.cookie = `${themeStorageKey}=${preference}; path=/; max-age=31536000; samesite=lax`;
+  try {
+    localStorage.setItem(themeStorageKey, preference);
+  } catch {
+    // Ignore storage failures in restricted browsing modes.
+  }
 }
 
 export function applyBrowserTheme(
   theme: ThemePayload["current"],
   colors?: Record<string, string>,
+  persist = true,
 ) {
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme =
@@ -81,12 +99,7 @@ export function applyBrowserTheme(
       "content",
       colors?.[theme] || (theme === "gf-dark" ? "#101010" : "#fbfdff"),
     );
-  document.cookie = `${themeStorageKey}=${theme}; path=/; max-age=31536000; samesite=lax`;
-  try {
-    localStorage.setItem(themeStorageKey, theme);
-  } catch {
-    // Ignore storage failures in restricted browsing modes.
-  }
+  if (persist) saveBrowserThemePreference(theme);
 }
 
 export function prepareBrowserDocument(
@@ -96,8 +109,9 @@ export function prepareBrowserDocument(
   updateDocumentMetadata(payload);
   document.documentElement.lang ||= "zh-CN";
   applyBrowserTheme(
-    preferredTheme ?? payload.layout.theme.current,
+    preferredTheme ?? detectBrowserTheme(),
     payload.layout.theme.colors,
+    false,
   );
   applyThemeStylesheet(payload.layout.theme);
 }

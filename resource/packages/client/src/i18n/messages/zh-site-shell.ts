@@ -1,5 +1,9 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  chooseTheme: "选择主题",
+  followSystem: "跟随系统",
+  lightTheme: "浅色",
+  darkTheme: "深色",
   more: "更多",
   openMenu: "打开菜单",
   closeMenu: "关闭菜单",

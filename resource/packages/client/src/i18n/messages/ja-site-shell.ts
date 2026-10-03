@@ -1,5 +1,9 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  chooseTheme: "テーマを選択",
+  followSystem: "システムに従う",
+  lightTheme: "ライト",
+  darkTheme: "ダーク",
   more: "その他",
   openMenu: "メニューを開く",
   closeMenu: "メニューを閉じる",
