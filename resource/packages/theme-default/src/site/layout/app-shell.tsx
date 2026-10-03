@@ -22,7 +22,6 @@ import {
   MenuIcon,
   MessageCircleIcon,
   MoonIcon,
-  SunMoonIcon,
   PaletteIcon,
   PenSquareIcon,
   SearchIcon,
@@ -64,6 +63,7 @@ import {
 import { authLocales, localeLabels } from "@gooseforum/runtime/i18n/auth";
 import { cn } from "@gooseforum/ui/lib/utils";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
+import { RoutineIcon } from "./icons/material-symbols/routine-icon";
 import { unreadStatusEvent } from "@gooseforum/runtime/unread-status";
 import {
   emptyShellHeader,
@@ -402,7 +402,7 @@ export function AppShell({
                     aria-label={t("chooseTheme")}
                   >
                     {(!runtime.themePreference || runtime.themePreference === "system") ? (
-                      <SunMoonIcon className="size-5" />
+                      <RoutineIcon className="size-5" />
                     ) : runtime.themePreference === "gf-light" ? (
                       <SunIcon className="size-5" />
                     ) : (

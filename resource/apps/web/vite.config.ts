@@ -51,7 +51,7 @@ function pagePayloadProxy(backendOrigin: string, backendProxy: ProxyOptions): Pr
   }
 }
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const backendOrigin = env.GOOSE_DEV_ORIGIN || 'http://127.0.0.1:5234'
   const backendProxy: ProxyOptions = {
@@ -63,9 +63,20 @@ export default defineConfig(({ mode }) => {
     plugins: [adminSpaFallback(), react(), tailwindcss()],
     base: mode === 'production' ? '/assets/react/' : '/',
     resolve: {
-      alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url)),
-      },
+      alias: [
+        { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
+        // Serve workspace source so rebuilding client/dist does not trigger reloads.
+        ...(command === 'serve' ? [
+          {
+            find: /^@gooseforum\/client$/,
+            replacement: fileURLToPath(new URL('../../packages/client/src/index.ts', import.meta.url)),
+          },
+          {
+            find: /^@gooseforum\/client\//,
+            replacement: fileURLToPath(new URL('../../packages/client/src/', import.meta.url)),
+          },
+        ] : []),
+      ],
     },
     build: {
       manifest: true,
@@ -81,6 +92,9 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3011,
       strictPort: true,
+      watch: {
+        ignored: ['**/packages/client/dist/**', '**/static/dist/**'],
+      },
       proxy: {
         '/__goose_page': pagePayloadProxy(backendOrigin, backendProxy),
         '/api': backendProxy,

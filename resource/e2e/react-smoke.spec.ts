@@ -627,11 +627,22 @@ test('translates backend validation codes on the publish page', async ({ page },
   })
 })
 
+test('serves workspace client source during development', async ({ page }) => {
+  const clientRequests: string[] = []
+  page.on('request', request => {
+    if (request.url().includes('/packages/client/')) clientRequests.push(request.url())
+  })
+  await page.goto('/?lang=en')
+  await expect(page.getByText('No topics yet')).toBeVisible()
+  expect(clientRequests.some(url => url.includes('/packages/client/src/'))).toBe(true)
+  expect(clientRequests.filter(url => url.includes('/packages/client/dist/'))).toEqual([])
+})
+
 test('uses matching hover menus for theme and language', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Desktop hover interaction')
   await page.goto('/?lang=en')
   const theme = page.getByRole('button', { name: 'Choose theme' })
-  await expect(theme.locator('svg')).toHaveClass(/lucide-sun-moon/)
+  await expect(theme.locator('svg')).toHaveAttribute('data-icon', 'system-theme')
   await theme.hover()
   const system = page.getByRole('menuitemradio', { name: 'System', exact: true })
   await expect(system).toBeVisible()
