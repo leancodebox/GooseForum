@@ -125,7 +125,8 @@ export interface SiteChromeConfig { header:SiteChromeItem[];mainMenu:SiteChromeI
 export interface MailSettings { enableMail:boolean;smtpHost:string;smtpPort:number;useSSL:boolean;smtpUsername:string;smtpPassword:string;fromName:string;fromEmail:string }
 export interface SecuritySettings { enableSignup:boolean;enableEmailVerification:boolean;allowedDomains:string[] }
 export interface PostingSettings { externalLinks?:{enabled:boolean;whitelist:string[]};textControl:{minPostLength:number;maxPostLength:number;minTitleLength:number;maxTitleLength:number;newUserPostCooldownMinutes:number;maxDailyTopicsPerUser:number};uploadControl:{allowAttachments:boolean;authorizedExtensions:string[];maxAttachmentSizeKb:number;maxDailyUploadsPerUser:number;newUserUploadCooldownMinutes:number} }
-export interface AnnouncementConfig { enabled:boolean;content:string }
+export interface AnnouncementItemConfig { id: string; title: string; content: string; enabled: boolean }
+export interface AnnouncementConfig { enabled: boolean; content: string; publishedAt?: number | string; items?: AnnouncementItemConfig[] }
 export interface HttpNotifyEndpoint { id:string;name:string;enabled:boolean;url:string;secret:string;events:string[];timeoutSeconds:number;failureCount:number;lastError:string;abnormalTerminated:boolean }
 export interface HttpNotifySettings { enabled:boolean;endpoints:HttpNotifyEndpoint[] }
 export interface SensitiveWordSettings { enabled:boolean;mode:'after_review'|'visible_then_review' }

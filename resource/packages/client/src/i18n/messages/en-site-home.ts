@@ -28,6 +28,8 @@ export default {
   emailTitle: "Verify your email",
   emailDescription: "Verify it to use all community features.",
   emailAction: "Open settings",
+  announcementSelect: "Choose announcement",
+  announcementItem: "Announcement {index}: {title}",
   announcement: "Announcement",
   collapseAnnouncement: "Collapse announcement",
   expandAnnouncement: "Expand announcement",

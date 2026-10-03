@@ -129,3 +129,9 @@
     background: var(--sidebar);
   }
 }
+
+.visual-markdown-editor .ProseMirror { position: relative; white-space: pre-wrap; overflow-wrap: break-word; }
+.visual-markdown-editor .ProseMirror:has(> p:only-child > br.ProseMirror-trailingBreak:only-child)::before { position: absolute; color: var(--muted-foreground); content: attr(data-placeholder); pointer-events: none; }
+.visual-markdown-editor .ProseMirror-selectednode { outline: 2px solid var(--primary); outline-offset: 2px; }
+.visual-markdown-editor :where(th, td) { position: relative; }
+.visual-markdown-editor .selectedCell::after { position: absolute; inset: 0; background: color-mix(in oklch, var(--primary) 14%, transparent); content: ""; pointer-events: none; }

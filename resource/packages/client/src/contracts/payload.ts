@@ -284,9 +284,10 @@ export interface HomeProps {
   topics: TopicPayload[]
   pagination: PaginationPayload
   announcement: {
+    items?: Array<{ id: string; title: string; html: string }>
     enabled: boolean
     html: string
-    publishedAt?: string
+    publishedAt?: number | string
   }
 }
 

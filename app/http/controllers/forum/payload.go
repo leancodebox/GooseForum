@@ -234,9 +234,16 @@ type PaginationPayload struct {
 }
 
 type AnnouncementPayload struct {
-	Enabled     bool   `json:"enabled"`
-	HTML        string `json:"html"`
-	PublishedAt string `json:"publishedAt,omitempty"`
+	Enabled     bool                      `json:"enabled"`
+	HTML        string                    `json:"html"`
+	PublishedAt int64                     `json:"publishedAt,omitempty"`
+	Items       []AnnouncementItemPayload `json:"items"`
+}
+
+type AnnouncementItemPayload struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+	HTML  string `json:"html"`
 }
 
 type TopicPayload struct {
@@ -807,6 +814,14 @@ func buildHomeProps(userID uint64, page int, sort string, topics []*vo.TopicsSim
 	}
 
 	announcement := hotdataserve.GetAnnouncementConfigCache()
+	announcementItems := make([]AnnouncementItemPayload, 0, len(announcement.Items))
+	for _, item := range announcement.ActiveItems() {
+		announcementItems = append(announcementItems, AnnouncementItemPayload{ID: item.ID, Title: item.Title, HTML: item.HTML})
+	}
+	announcementHTML := ""
+	if len(announcementItems) > 0 {
+		announcementHTML = announcementItems[0].HTML
+	}
 	return HomeProps{
 		Sort:   sort,
 		Tabs:   buildHomeTabs(sort),
@@ -819,8 +834,9 @@ func buildHomeProps(userID uint64, page int, sort string, topics []*vo.TopicsSim
 		},
 		Announcement: AnnouncementPayload{
 			Enabled:     announcement.Enabled,
-			HTML:        announcement.GetHtmlContent(),
+			HTML:        announcementHTML,
 			PublishedAt: announcement.PublishedAt,
+			Items:       announcementItems,
 		},
 	}
 }

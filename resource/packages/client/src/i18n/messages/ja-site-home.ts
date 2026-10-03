@@ -28,6 +28,8 @@ export default {
   emailTitle: "メールを確認してください",
   emailDescription: "すべての機能を利用するには確認が必要です。",
   emailAction: "設定へ",
+  announcementSelect: "お知らせを選択",
+  announcementItem: "お知らせ {index}: {title}",
   announcement: "お知らせ",
   collapseAnnouncement: "お知らせを折りたたむ",
   expandAnnouncement: "お知らせを展開",

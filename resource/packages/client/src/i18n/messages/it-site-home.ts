@@ -28,6 +28,8 @@ export default {
   emailTitle: "Verifica la tua email",
   emailDescription: "Verificala per usare tutte le funzioni.",
   emailAction: "Apri impostazioni",
+  announcementSelect: "Scegli annuncio",
+  announcementItem: "Annuncio {index}: {title}",
   announcement: "Annuncio",
   collapseAnnouncement: "Comprimi l’annuncio",
   expandAnnouncement: "Espandi l’annuncio",

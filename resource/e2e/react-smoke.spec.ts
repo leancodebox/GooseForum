@@ -844,6 +844,7 @@ test('edits, previews, and saves an announcement in Markdown', async ({ page }, 
 
   await page.goto('/admin/settings/announcement?lang=en')
   await expect(page).toHaveTitle('Announcement - GooseForum')
+  await page.getByRole('radio', { name: 'Markdown', exact: true }).click()
   const editor = page.getByRole('textbox', { name: 'Announcement content' })
   await expect(editor).toHaveValue(/Maintenance/)
   await editor.fill('## Updated announcement\n\n**Everything is ready.**')
@@ -857,7 +858,7 @@ test('edits, previews, and saves an announcement in Markdown', async ({ page }, 
   )
   await page.getByRole('button', { name: 'Save' }).click()
   expect((await saveRequest).postDataJSON()).toMatchObject({
-    settings: { enabled: true, content: '## Updated announcement\n\n**Everything is ready.**' },
+    settings: { enabled: true, content: '', items: [{ id: 'legacy', title: '', enabled: true, content: '## Updated announcement\n\n**Everything is ready.**' }] },
   })
   expect(errors).toEqual([])
   await testInfo.attach('verified-announcement-markdown-editor', {
@@ -1149,4 +1150,88 @@ test('restoring the reply window never reveals an exiting bubble when its animat
   const samples = await page.evaluate(() => (window as Window & { exitOpacities: number[] }).exitOpacities)
   expect(samples.length).toBeGreaterThanOrEqual(3)
   expect(samples.every(opacity => opacity === 0)).toBe(true)
+})
+
+test('manages ordered announcements with visual editing and preserves drafts across modes', async ({ page }, testInfo) => {
+  await page.route('**/api/admin/announcement', route => route.fulfill({ json: { code: 0, result: {
+    enabled: true, content: '', items: [
+      { id: 'a', title: 'First notice', content: 'First body', enabled: true },
+      { id: 'b', title: 'Second notice', content: 'Second body', enabled: true },
+    ],
+  } } }))
+  await page.goto('/admin/settings/announcement?lang=en')
+  const visual = page.getByRole('textbox', { name: 'Edit the announcement directly' })
+  await expect(visual).toHaveText('First body')
+  await visual.fill('Updated first body')
+  await page.getByRole('radio', { name: 'Markdown', exact: true }).click()
+  await expect(page.getByRole('textbox', { name: 'Announcement content' })).toHaveValue('Updated first body')
+  await page.getByRole('radio', { name: 'Visual', exact: true }).click()
+  await expect(visual).toHaveText('Updated first body')
+  const list = page.getByRole('region', { name: 'Announcements', exact: true })
+  await list.getByRole('button', { name: 'Move down' }).first().click()
+  await expect(list.getByRole('button', { name: /1\. Second notice/ })).toBeVisible()
+  await expect(visual).toHaveText('Updated first body')
+  await list.getByRole('button', { name: 'Add', exact: true }).click()
+  await page.getByRole('textbox', { name: 'Announcement title' }).fill('Third notice')
+  await visual.fill('Third body')
+  await page.getByRole('radio', { name: 'Preview', exact: true }).click()
+  await expect(page.locator('[data-slot="announcement-markdown-preview"]')).toHaveText('Third body')
+  const save = page.waitForRequest(request => request.url().includes('/api/admin/save-announcement'))
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  const items = (await save).postDataJSON().settings.items
+  expect(items.map((item: { title: string }) => item.title)).toEqual(['Second notice', 'First notice', 'Third notice'])
+  expect(items[1].content).toBe('Updated first body')
+  expect(items[2].content).toBe('Third body')
+  expect(new Set(items.map((item: { id: string }) => item.id)).size).toBe(3)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await testInfo.attach('admin-multiple-announcements', {
+    body: await page.screenshot({ path: testInfo.outputPath('admin-multiple-announcements.png'), fullPage: true }), contentType: 'image/png',
+  })
+})
+
+test('shows one announcement at a time in order and reopens the panel after a total update', async ({ page }, testInfo) => {
+  let publishedAt = Date.parse('2026-10-03T10:00:00Z')
+  const requests: string[] = []
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.route('**/__goose_page/**', route => route.fulfill({ json: {
+    ...homePage, props: { ...homePage.props, announcement: {
+      enabled: true, html: '', publishedAt, items: [
+        { id: 'b', title: 'Second notice', html: '<p>Second body</p>' },
+        { id: 'a', title: 'First notice', html: '<p>First body</p>' + '<p>Long announcement paragraph.</p>'.repeat(8) },
+      ],
+    } },
+  } }))
+  page.on('request', request => { if (/\/(__goose_page|api)\//.test(request.url())) requests.push(request.url()) })
+  await page.goto('/?lang=en')
+  const announcement = page.getByRole('complementary', { name: 'Announcement', exact: true })
+  await expect(announcement.getByText('Second body')).toBeVisible()
+  await expect(announcement.getByText('First body')).toHaveCount(0)
+  const count = requests.length
+  const before = await announcement.boundingBox()
+  const arrow = announcement.getByRole('button', { name: /^(Collapse|Expand) announcement$/ }).locator('svg')
+  const arrowBefore = await arrow.boundingBox()
+  const selectors = await announcement.getByLabel('Choose announcement').boundingBox()
+  expect(selectors!.x + selectors!.width).toBeLessThanOrEqual(arrowBefore!.x)
+  await announcement.getByRole('button', { name: 'Announcement 2: First notice' }).click()
+  await expect(announcement.getByText('First body')).toBeVisible()
+  await expect(announcement.getByText('Second body')).toHaveCount(0)
+  expect((await announcement.boundingBox())!.height).toBeGreaterThan(before!.height)
+  const body = announcement.locator('[data-content-variant="announcement"]')
+  expect(await body.evaluate(element => {
+    const container = element.parentElement!
+    return container.scrollHeight <= container.clientHeight
+  })).toBe(true)
+  expect(requests).toHaveLength(count)
+  await arrow.click()
+  expect((await arrow.boundingBox())!.x).toBe(arrowBefore!.x)
+  await page.reload()
+  await expect(announcement.getByRole('button', { name: 'Expand announcement' })).toBeVisible()
+  publishedAt += 1
+  await page.reload()
+  await expect(announcement.getByText('Second body')).toBeVisible()
+  await expect(page.locator('.goose-announcement-content')).toHaveCSS('animation-name', 'none')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await testInfo.attach('home-multiple-announcements', {
+    body: await page.screenshot({ path: testInfo.outputPath('home-multiple-announcements.png'), fullPage: false }), contentType: 'image/png',
+  })
 })

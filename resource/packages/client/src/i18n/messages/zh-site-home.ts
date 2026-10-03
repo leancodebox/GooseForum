@@ -28,6 +28,8 @@ export default {
   emailTitle: "请验证邮箱",
   emailDescription: "验证后即可使用完整社区功能。",
   emailAction: "前往设置",
+  announcementSelect: "选择公告",
+  announcementItem: "公告 {index}：{title}",
   announcement: "公告",
   collapseAnnouncement: "收起公告",
   expandAnnouncement: "展开公告",

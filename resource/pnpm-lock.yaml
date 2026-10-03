@@ -231,42 +231,9 @@ importers:
       lucide-react:
         specifier: ^1.45.0
         version: 1.45.0(react@19.3.0)
-      markdown-it:
-        specifier: ^14.2.0
-        version: 14.2.0
       mermaid:
         specifier: 11.17.1
         version: 11.17.1
-      prosemirror-commands:
-        specifier: ^1.7.1
-        version: 1.7.1
-      prosemirror-history:
-        specifier: ^1.5.0
-        version: 1.5.0
-      prosemirror-inputrules:
-        specifier: ^1.5.1
-        version: 1.5.1
-      prosemirror-keymap:
-        specifier: ^1.2.3
-        version: 1.2.3
-      prosemirror-markdown:
-        specifier: ^1.13.5
-        version: 1.13.5
-      prosemirror-model:
-        specifier: ^1.25.11
-        version: 1.25.11
-      prosemirror-schema-list:
-        specifier: ^1.5.1
-        version: 1.5.1
-      prosemirror-state:
-        specifier: ^1.4.4
-        version: 1.4.4
-      prosemirror-tables:
-        specifier: ^1.8.5
-        version: 1.8.5
-      prosemirror-view:
-        specifier: ^1.42.1
-        version: 1.42.1
       react:
         specifier: ^19.2.8
         version: 19.3.0
@@ -286,9 +253,6 @@ importers:
       '@testing-library/user-event':
         specifier: ^14.6.7
         version: 14.6.7(@testing-library/dom@10.4.2)
-      '@types/markdown-it':
-        specifier: ^14.1.2
-        version: 14.1.2
       '@types/react':
         specifier: ^19.2.7
         version: 19.3.0
@@ -325,9 +289,42 @@ importers:
       lucide-react:
         specifier: ^1.45.0
         version: 1.45.0(react@19.3.0)
+      markdown-it:
+        specifier: ^14.2.0
+        version: 14.2.0
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      prosemirror-commands:
+        specifier: ^1.7.1
+        version: 1.7.1
+      prosemirror-history:
+        specifier: ^1.5.0
+        version: 1.5.0
+      prosemirror-inputrules:
+        specifier: ^1.5.1
+        version: 1.5.1
+      prosemirror-keymap:
+        specifier: ^1.2.3
+        version: 1.2.3
+      prosemirror-markdown:
+        specifier: ^1.13.5
+        version: 1.13.5
+      prosemirror-model:
+        specifier: ^1.25.11
+        version: 1.25.11
+      prosemirror-schema-list:
+        specifier: ^1.5.1
+        version: 1.5.1
+      prosemirror-state:
+        specifier: ^1.4.4
+        version: 1.4.4
+      prosemirror-tables:
+        specifier: ^1.8.5
+        version: 1.8.5
+      prosemirror-view:
+        specifier: ^1.42.1
+        version: 1.42.1
       radix-ui:
         specifier: ^1.6.7
         version: 1.6.7(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -356,6 +353,9 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
     devDependencies:
+      '@types/markdown-it':
+        specifier: ^14.1.2
+        version: 14.1.2
       '@types/react':
         specifier: ^19.2.7
         version: 19.3.0

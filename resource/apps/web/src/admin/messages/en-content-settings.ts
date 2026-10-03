@@ -1,4 +1,18 @@
 export default {
+  announcementEditorVisual: "Visual",
+  announcementEditorVisualPlaceholder: "Edit the announcement directly",
+  announcementList: "Announcements",
+  announcementAdd: "Add announcement",
+  announcementTitle: "Announcement title",
+  announcementUntitled: "Untitled announcement",
+  announcementMoveUp: "Move up",
+  announcementMoveDown: "Move down",
+  announcementReorder: "Drag to reorder",
+  announcementEmpty: "No announcements",
+  announcementEmptyHint: "Add an announcement to set its title, content and display order.",
+  announcementContentRequired: "Enabled announcements need content.",
+  announcementOrderHint: "Show one announcement at a time in list order.",
+
   externalLinks: "External links in posts",
   externalLinksEnabled: "Show a warning before leaving the site",
   externalLinksHint: "Applies to topic bodies and replies only, not announcements. Disabled: redirect immediately. Enabled: warn unless the destination is allowlisted.",
@@ -36,7 +50,7 @@ export default {
   announcementEnabledHint: "Show the announcement in the public site.",
   announcementContent: "Announcement content",
   announcementContentHint:
-    "Write in Markdown; the preview matches the public announcement.",
+    "Edit visually or in Markdown; preview uses the public announcement layout.",
   announcementEditorMarkdown: "Markdown",
   announcementEditorPreview: "Preview",
   announcementEditorEmptyPreview: "There is no announcement content to preview yet.",

@@ -2,7 +2,6 @@ import {
   useRef,
   useState,
   type ChangeEvent,
-  type ClipboardEvent,
 } from "react";
 import {
   Bold,
@@ -38,6 +37,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@gooseforum/ui/components/toggle-group";
+import { VisualMarkdownEditor, type VisualMarkdownEditorHandle } from "@gooseforum/ui/components/visual-markdown-editor";
 import type { ContentSettingsTextKey } from "../content-settings-i18n";
 
 type Text = (key: ContentSettingsTextKey) => string;
@@ -61,17 +61,20 @@ export function AnnouncementMarkdownEditor({
   text,
   onChange,
   onUploadImage,
+  onBusyChange,
 }: {
   value: string;
   disabled: boolean;
   text: Text;
   onChange(value: string): void;
   onUploadImage(file: File): Promise<string>;
+  onBusyChange?(busy: boolean): void;
 }) {
-  const [mode, setMode] = useState<"markdown" | "preview">("markdown");
+  const [mode, setMode] = useState<"visual" | "markdown" | "preview">("visual");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const textarea = useRef<HTMLTextAreaElement>(null);
+  const visual = useRef<VisualMarkdownEditorHandle>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const pendingSelection = useRef<Selection | undefined>(undefined);
 
@@ -96,6 +99,7 @@ export function AnnouncementMarkdownEditor({
   }
 
   function applyInline(action: InlineAction) {
+    if (mode === "visual") { visual.current?.applyAction(action); return; }
     const { start, end } = selected();
     const syntax = {
       bold: ["**", "**"],
@@ -116,11 +120,13 @@ export function AnnouncementMarkdownEditor({
   }
 
   function insertMarkdown(markdown: string) {
+    if (mode === "visual") { visual.current?.insertMarkdown(markdown); return; }
     const { start, end } = selected();
     replace(insertBlock(value, start, end, markdown));
   }
 
   function wrapBlock(prefix: string, fallback: string) {
+    if (mode === "visual") { visual.current?.applyAction(prefix === "> " ? "quote" : prefix === "- " ? "bulletList" : "orderedList"); return; }
     const { start, end } = selected();
     const selectedValue = value.slice(start, end) || fallback;
     const content = selectedValue
@@ -131,6 +137,7 @@ export function AnnouncementMarkdownEditor({
   }
 
   function insertLink() {
+    if (mode === "visual") { visual.current?.insertMarkdown(`[${text("announcementEditorLinkText")}](https://)`); return; }
     const { start, end } = selected();
     replace(
       insertInline(
@@ -145,6 +152,7 @@ export function AnnouncementMarkdownEditor({
   }
 
   function setHeading(level: number) {
+    if (mode === "visual") { visual.current?.setBlock(level ? `heading_${level as 1 | 2 | 3 | 4}` : "paragraph"); return; }
     const { start, end } = selected();
     const lineStart = value.lastIndexOf("\n", start - 1) + 1;
     const nextBreak = value.indexOf("\n", end);
@@ -169,6 +177,7 @@ export function AnnouncementMarkdownEditor({
     event.target.value = "";
     if (!file || uploading) return;
     setUploading(true);
+    onBusyChange?.(true);
     setUploadError("");
     try {
       const url = await onUploadImage(file);
@@ -182,29 +191,31 @@ export function AnnouncementMarkdownEditor({
       );
     } finally {
       setUploading(false);
+      onBusyChange?.(false);
     }
   }
 
-  function paste(event: ClipboardEvent<HTMLTextAreaElement>) {
+  function paste(event: { clipboardData: DataTransfer | null; preventDefault(): void }) {
+    if (!event.clipboardData) return;
     const markdown = markdownFromClipboard(event.clipboardData);
     if (!markdown) return;
     event.preventDefault();
     insertMarkdown(markdown);
   }
 
-  const toolbarDisabled = disabled || mode === "preview";
+  const toolbarDisabled = disabled || uploading || mode === "preview";
   return (
     <div className="overflow-hidden rounded-lg border bg-background">
       <div
         data-slot="announcement-markdown-toolbar"
-        className="flex flex-wrap items-center gap-1 border-b bg-muted/30 p-2"
+        className="flex flex-wrap items-center gap-0.5 border-b bg-muted/30 p-1"
       >
         <Popover>
           <PopoverTrigger asChild>
             <Button
               type="button"
               variant="ghost"
-              size="icon-sm"
+              size="icon-xs"
               disabled={toolbarDisabled}
               aria-label={text("announcementEditorHeading")}
             >
@@ -240,7 +251,7 @@ export function AnnouncementMarkdownEditor({
             key={action}
             type="button"
             variant="ghost"
-            size="icon-sm"
+            size="icon-xs"
             disabled={toolbarDisabled}
             aria-label={text(label)}
             onMouseDown={(event) => event.preventDefault()}
@@ -252,7 +263,7 @@ export function AnnouncementMarkdownEditor({
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
+          size="icon-xs"
           disabled={toolbarDisabled}
           aria-label={text("announcementEditorQuote")}
           onClick={() =>
@@ -264,11 +275,11 @@ export function AnnouncementMarkdownEditor({
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
+          size="icon-xs"
           disabled={toolbarDisabled}
           aria-label={text("announcementEditorCode")}
           onClick={() =>
-            insertMarkdown(
+            mode === "visual" ? visual.current?.applyAction("code") : insertMarkdown(
               `\`\`\`\n${text("announcementEditorPlaceholder")}\n\`\`\``,
             )
           }
@@ -278,7 +289,7 @@ export function AnnouncementMarkdownEditor({
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
+          size="icon-xs"
           disabled={toolbarDisabled}
           aria-label={text("announcementEditorBulletList")}
           onClick={() =>
@@ -290,7 +301,7 @@ export function AnnouncementMarkdownEditor({
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
+          size="icon-xs"
           disabled={toolbarDisabled}
           aria-label={text("announcementEditorOrderedList")}
           onClick={() =>
@@ -302,7 +313,7 @@ export function AnnouncementMarkdownEditor({
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
+          size="icon-xs"
           disabled={toolbarDisabled}
           aria-label={text("announcementEditorRule")}
           onClick={() => insertMarkdown("---")}
@@ -312,7 +323,7 @@ export function AnnouncementMarkdownEditor({
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
+          size="icon-xs"
           disabled={toolbarDisabled}
           aria-label={text("announcementEditorLink")}
           onClick={insertLink}
@@ -322,7 +333,7 @@ export function AnnouncementMarkdownEditor({
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
+          size="icon-xs"
           disabled={toolbarDisabled}
           aria-label={text("announcementEditorTable")}
           onClick={() =>
@@ -334,7 +345,7 @@ export function AnnouncementMarkdownEditor({
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
+          size="icon-xs"
           disabled={disabled || uploading || mode === "preview"}
           aria-label={text("announcementEditorUploadImage")}
           onClick={() => fileInput.current?.click()}
@@ -357,13 +368,16 @@ export function AnnouncementMarkdownEditor({
           spacing={0}
           className="ml-auto"
           onValueChange={(next) => {
-            if (next) setMode(next as "markdown" | "preview");
+            if (next) setMode(next as "visual" | "markdown" | "preview");
           }}
         >
-          <ToggleGroupItem value="markdown" disabled={disabled}>
+          <ToggleGroupItem value="visual" disabled={disabled || uploading}>
+            {text("announcementEditorVisual")}
+          </ToggleGroupItem>
+          <ToggleGroupItem value="markdown" disabled={disabled || uploading}>
             {text("announcementEditorMarkdown")}
           </ToggleGroupItem>
-          <ToggleGroupItem value="preview" disabled={disabled}>
+          <ToggleGroupItem value="preview" disabled={disabled || uploading}>
             <Eye data-icon="inline-start" />
             {text("announcementEditorPreview")}
           </ToggleGroupItem>
@@ -373,24 +387,27 @@ export function AnnouncementMarkdownEditor({
         value.trim() ? (
           <div
             data-slot="announcement-markdown-preview"
-            className="typeset typeset-announcement gf-prose min-h-80 px-4 py-3"
+            className="typeset typeset-announcement gf-prose gf-prose-announcement min-h-48 px-4 py-3"
             dangerouslySetInnerHTML={{ __html: renderMarkdown(value) }}
           />
         ) : (
           <p
             data-slot="announcement-markdown-preview"
-            className="min-h-80 px-4 py-3 text-sm text-muted-foreground"
+            className="min-h-48 px-4 py-3 text-sm text-muted-foreground"
           >
             {text("announcementEditorEmptyPreview")}
           </p>
         )
+      ) : mode === "visual" ? (
+        <VisualMarkdownEditor ref={visual} value={value} disabled={disabled || uploading} placeholder={text("announcementEditorVisualPlaceholder")} onChange={onChange} onPaste={paste}
+          editorClassName="typeset typeset-announcement gf-prose gf-prose-announcement min-h-48 max-w-none px-4 py-3 outline-none text-base" />
       ) : (
         <Textarea
           ref={textarea}
           value={value}
-          disabled={disabled}
+          disabled={disabled || uploading}
           aria-label={text("announcementContent")}
-          className="min-h-80 resize-y rounded-none border-0 px-4 py-3 font-mono text-sm shadow-none focus-visible:ring-0"
+          className="min-h-48 resize-y rounded-none border-0 px-4 py-3 font-mono text-sm shadow-none focus-visible:ring-0"
           placeholder={text("announcementEditorPlaceholder")}
           onChange={(event) => onChange(event.target.value)}
           onPaste={paste}

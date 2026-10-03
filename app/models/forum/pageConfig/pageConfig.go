@@ -3,8 +3,6 @@ package pageConfig
 import (
 	"strings"
 	"time"
-
-	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 )
 
 const tableName = "page_config"
@@ -171,28 +169,6 @@ type MailSettingsConfig struct {
 	SmtpPassword string `json:"smtpPassword"`
 	FromName     string `json:"fromName"`
 	FromEmail    string `json:"fromEmail"`
-}
-
-// AnnouncementConfig 公告设置配置
-type AnnouncementConfig struct {
-	Enabled     bool   `json:"enabled"`               // 是否启用公告
-	Content     string `json:"content"`               // 公告内容
-	PublishedAt string `json:"publishedAt,omitempty"` // 公告生效时间
-	HtmlContent string `json:"-"`                     // 预渲染后的 HTML，仅服务端使用
-}
-
-func (itself *AnnouncementConfig) PrepareHTML() {
-	if itself == nil || itself.HtmlContent != "" || itself.Content == "" {
-		return
-	}
-	itself.HtmlContent = markdown2html.MarkdownToHTML(itself.Content)
-}
-
-func (itself AnnouncementConfig) GetHtmlContent() string {
-	if itself.HtmlContent != "" || itself.Content == "" {
-		return itself.HtmlContent
-	}
-	return markdown2html.MarkdownToHTML(itself.Content)
 }
 
 type SecurityAndRegistration struct {

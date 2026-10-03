@@ -1329,7 +1329,7 @@ func TestMailConnection(req component.BetterRequest[TestMailConnectionReq]) comp
 // GetAnnouncement 获取公告设置
 func GetAnnouncement(req component.BetterRequest[component.Null]) component.Response {
 	config := pageConfig.GetConfigByPageType(pageConfig.Announcement, defaultconfig.GetDefaultAnnouncementConfig())
-	return component.SuccessResponse(config)
+	return component.SuccessResponse(config.Canonical())
 }
 
 type SaveAnnouncementReq struct {
@@ -1338,8 +1338,16 @@ type SaveAnnouncementReq struct {
 
 // SaveAnnouncement 保存公告设置
 func SaveAnnouncement(req component.BetterRequest[SaveAnnouncementReq]) component.Response {
-	req.Params.Settings.PublishedAt = time.Now().Format(time.DateTime)
-	return savePageConfig(pageConfig.Announcement, req.Params.Settings, hotdataserve.ClearAnnouncementConfigCache)
+	config := req.Params.Settings.Canonical()
+	seen := make(map[string]bool, len(config.Items))
+	for _, item := range config.Items {
+		if item.ID == "" || seen[item.ID] {
+			return component.FailResponseCode(component.MessageRequestInvalidFormat, nil)
+		}
+		seen[item.ID] = true
+	}
+	config.SetUpdateTime(hotdataserve.GetAnnouncementConfigCache(), time.Now())
+	return savePageConfig(pageConfig.Announcement, config, hotdataserve.ClearAnnouncementConfigCache)
 }
 
 // GetSecuritySettings 获取安全与注册设置
