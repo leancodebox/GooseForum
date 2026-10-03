@@ -795,7 +795,14 @@ export interface ChatItemPayload {
   peerUrl: string
 }
 
+export interface PrivacySettingsPayload {
+  showActivity: boolean
+  showTopics: boolean
+  showFollowing: boolean
+}
+
 export interface SettingsPageProps {
+  privacy: PrivacySettingsPayload
   user: SettingsUserPayload
   stats: {
     topicCount: number

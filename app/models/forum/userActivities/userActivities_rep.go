@@ -56,7 +56,7 @@ func GetUserTimeline(userId uint64, lastId uint64, limit int) (entities []*Entit
 	return
 }
 
-func GetUserTimelineForAudience(userID uint64, lastID uint64, limit int, readableCategoryIDs []uint64, filterAudience bool) (entities []*Entity, err error) {
+func GetUserTimelineForAudience(userID uint64, lastID uint64, limit int, readableCategoryIDs []uint64, filterAudience bool, excludedActions ...ActionType) (entities []*Entity, err error) {
 	if userID == 0 || limit <= 0 {
 		return []*Entity{}, nil
 	}
@@ -64,6 +64,9 @@ func GetUserTimelineForAudience(userID uint64, lastID uint64, limit int, readabl
 		Select("user_activities.*").
 		Joins("LEFT JOIN topics ON topics.id = user_activities.topic_id").
 		Where("user_activities.user_id = ?", userID)
+	if len(excludedActions) > 0 {
+		query = query.Where("user_activities.action NOT IN ?", excludedActions)
+	}
 	if lastID > 0 {
 		query = query.Where("user_activities.id < ?", lastID)
 	}

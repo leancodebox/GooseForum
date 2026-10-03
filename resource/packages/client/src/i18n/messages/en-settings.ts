@@ -13,6 +13,7 @@ export default {
   joinedAt: "Joined {date}",
   tabsLabel: "Settings sections",
   tabs: {
+    sessions: "Login devices",
     profile: "Profile",
     account: "Account",
     privacy: "Privacy",
@@ -117,13 +118,15 @@ export default {
     unknownIP: "Unknown IP",
   },
   privacy: {
+    showActivity: "Show my activity",
+    showActivityDescription: "Allow others to view your profile activity timeline, including topics, replies, likes, and follows.",
     title: "Privacy preferences",
     showTopics: "Show my topics",
     showTopicsDescription:
-      "Allow others to view public topics from your profile.",
+      "Show public topics and topic creation activity on your profile. Public posts remain accessible through categories and search.",
     showFollowing: "Show follow relationships",
     showFollowingDescription:
-      "Allow others to view following and follower information.",
+      "Show following and follower lists and follow activity on your profile.",
     emailNotifications: "Email notifications",
     emailNotificationsDescription:
       "Keep the existing local preference until server policy is available.",

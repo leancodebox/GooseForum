@@ -113,6 +113,7 @@ func apiRoute(ginApp *gin.Engine) {
 	baseApi.GET("auth/:provider/callback", middleware.SessionAuth, api.ProviderCallback)
 
 	loginApi := ginApp.Group("api").Use(middleware.SessionAuthCheck)
+	loginApi.POST("set-user-privacy", middleware.CheckWritableAccount, UpButterReq(api.EditUserPrivacy))
 	loginApi.POST("set-user-info", middleware.CheckWritableAccount, UpButterReq(api.EditUserInfo))
 	loginApi.POST("set-user-profile-cover", middleware.CheckWritableAccount, UpButterReq(api.EditUserProfileCover))
 	loginApi.POST("set-user-email", middleware.CheckWritableAccount, UpButterReq(api.EditUserEmail))

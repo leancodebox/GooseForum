@@ -3,6 +3,7 @@ import en from "./en-settings.js";
 export default {
   ...en,
   tabs: {
+    sessions: "ログイン端末",
     profile: "プロフィール",
     account: "アカウント",
     privacy: "プライバシー",

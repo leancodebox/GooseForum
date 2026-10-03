@@ -27,6 +27,9 @@ var errUserNotFound = errors.New("user not found")
 // UserInfo is the sanitized user snapshot cached by userservice.
 // It intentionally excludes password hashes and model-only deletion metadata.
 type UserInfo struct {
+	HideActivity        bool
+	HideTopics          bool
+	HideFollowing       bool
 	Id                  uint64
 	Username            string
 	Email               string
@@ -197,6 +200,9 @@ func userInfoFromEntity(user users.EntityComplete) UserInfo {
 		Username:            user.Username,
 		Email:               user.Email,
 		Locale:              user.Locale,
+		HideActivity:        user.HideActivity,
+		HideTopics:          user.HideTopics,
+		HideFollowing:       user.HideFollowing,
 		TokenVersion:        user.TokenVersion,
 		IsFrozen:            user.IsFrozen,
 		IsActivated:         user.IsActivated,
@@ -243,6 +249,9 @@ func (user UserInfo) toEntity() users.EntityComplete {
 		Username:            user.Username,
 		Email:               user.Email,
 		Locale:              user.Locale,
+		HideActivity:        user.HideActivity,
+		HideTopics:          user.HideTopics,
+		HideFollowing:       user.HideFollowing,
 		TokenVersion:        user.TokenVersion,
 		IsFrozen:            user.IsFrozen,
 		IsActivated:         user.IsActivated,

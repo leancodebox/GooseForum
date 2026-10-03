@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import type { GooseSiteApi } from '@gooseforum/client'
 import { GooseI18nProvider } from '@gooseforum/runtime/i18n'
 import { GooseRuntimeProvider, type GooseRuntime } from '@gooseforum/runtime'
+import { SessionSettings } from '../src/site/settings/settings-sessions'
 import { AccountSettings } from '../src/site/settings/settings-account'
 
 afterEach(cleanup)
@@ -22,14 +23,21 @@ it('lists sessions, revokes other devices, and redirects after password change',
   } as unknown as GooseRuntime
   const user = userEvent.setup()
 
-  render(<GooseI18nProvider locale="en"><GooseRuntimeProvider runtime={runtime}>
-    <AccountSettings showStatus={vi.fn()} showError={vi.fn()} />
+  const devices = render(<GooseI18nProvider locale="en"><GooseRuntimeProvider runtime={runtime}>
+    <SessionSettings showStatus={vi.fn()} showError={vi.fn()} />
   </GooseRuntimeProvider></GooseI18nProvider>)
 
   expect(await screen.findByText('Other browser')).toBeTruthy()
   await user.click(screen.getByRole('button', { name: 'Sign out other devices' }))
   await waitFor(() => expect(revokeOtherAuthSessions).toHaveBeenCalledOnce())
   expect(screen.queryByText('Other browser')).toBeNull()
+
+  devices.unmount()
+  render(<GooseI18nProvider locale="en"><GooseRuntimeProvider runtime={runtime}>
+    <AccountSettings showError={vi.fn()} />
+  </GooseRuntimeProvider></GooseI18nProvider>)
+  expect(authSessions).toHaveBeenCalledOnce()
+  expect(screen.queryByText('Current browser')).toBeNull()
 
   await user.type(screen.getByLabelText('Current password'), 'old-password')
   await user.type(screen.getByLabelText('New password'), 'new-password')

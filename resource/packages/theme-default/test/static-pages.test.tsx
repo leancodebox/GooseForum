@@ -267,6 +267,7 @@ function userProfileProps(): UserProfileProps {
 
 function settingsProps(): SettingsPageProps {
   return {
+    privacy: { showActivity: true, showTopics: true, showFollowing: true },
     user: {
       id: 7,
       username: "alice",
@@ -300,6 +301,7 @@ function settingsProps(): SettingsPageProps {
     tabs: [
       { key: "profile", url: "/settings", active: true },
       { key: "account", url: "/settings?tab=account", active: false },
+      { key: "sessions", url: "/settings?tab=sessions", active: false },
       { key: "privacy", url: "/settings?tab=privacy", active: false },
       { key: "binding", url: "/settings?tab=binding", active: false },
       { key: "applications", url: "/settings?tab=applications", active: false },
@@ -2028,4 +2030,34 @@ describe("AppShell and static pages", () => {
       screen.getByRole("link", { name: "下一页" }).getAttribute("rel"),
     ).toBe("next");
   });
+});
+
+it("keeps privacy saves locked across tab switches and preserves successful values after a failure", async () => {
+  const originalURL = window.location.href;
+  window.history.replaceState(null, "", "/settings?tab=privacy");
+  let resolveSave!: () => void;
+  const savePrivacy = vi.fn()
+    .mockImplementationOnce(() => new Promise<void>((resolve) => { resolveSave = resolve; }))
+    .mockRejectedValueOnce(new Error("save failed"));
+  try {
+    const { user } = renderPage(payload("settings.index", settingsProps()), {
+      users: { savePrivacy } as unknown as GooseSiteApi["users"],
+    });
+    await user.click(screen.getByRole("checkbox", { name: "展示我的主题" }));
+    await user.click(screen.getByRole("tab", { name: "账号" }));
+    await user.click(screen.getByRole("tab", { name: "隐私" }));
+    const following = screen.getByRole("checkbox", { name: "展示关注关系" });
+    expect(following.hasAttribute("disabled")).toBe(true);
+    await user.click(following);
+    expect(savePrivacy).toHaveBeenCalledOnce();
+    resolveSave();
+    await waitFor(() => expect(following.hasAttribute("disabled")).toBe(false));
+    expect(screen.getByRole("checkbox", { name: "展示我的主题" }).getAttribute("aria-checked")).toBe("false");
+    await user.click(following);
+    await waitFor(() => expect(following.hasAttribute("disabled")).toBe(false));
+    expect(savePrivacy).toHaveBeenNthCalledWith(2, { showActivity: true, showTopics: false, showFollowing: false });
+    expect(following.getAttribute("aria-checked")).toBe("true");
+  } finally {
+    window.history.replaceState(null, "", originalURL);
+  }
 });

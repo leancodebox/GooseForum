@@ -28,6 +28,7 @@ export const siteApiRoutes = {
   notificationsUnread: ['GET', '/api/forum/unread-status'],
   userCard: ['GET', '/api/user-card'],
   userFollow: ['POST', '/api/forum/follow-user'],
+  userSavePrivacy: ['POST', '/api/set-user-privacy'],
   userSaveInfo: ['POST', '/api/set-user-info'],
   userSaveCover: ['POST', '/api/set-user-profile-cover'],
   userSavePresetAvatar: ['POST', '/api/set-preset-avatar'],

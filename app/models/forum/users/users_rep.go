@@ -235,3 +235,10 @@ func IncrementPrestige(addNumber int64, userId uint64) int64 {
 	result := builder().Exec("UPDATE users SET prestige = prestige+? where id = ?", addNumber, userId)
 	return result.RowsAffected
 }
+
+// UpdatePrivacy changes only privacy fields, without overwriting profile edits.
+func UpdatePrivacy(userID uint64, hideTopics, hideFollowing, hideActivity bool) error {
+	return builder().Where("id = ?", userID).Updates(map[string]any{
+		"hide_activity": hideActivity, "hide_topics": hideTopics, "hide_following": hideFollowing,
+	}).Error
+}

@@ -13,6 +13,7 @@ export default {
   joinedAt: "加入于 {date}",
   tabsLabel: "设置分区",
   tabs: {
+    sessions: "登录设备",
     profile: "资料",
     account: "账号",
     privacy: "隐私",
@@ -114,11 +115,13 @@ export default {
     unknownIP: "未知 IP",
   },
   privacy: {
+    showActivity: "展示我的动态",
+    showActivityDescription: "允许其他人查看个人主页的动态时间轴，包括发主题、回复、点赞和关注记录。",
     title: "隐私偏好",
     showTopics: "展示我的主题",
-    showTopicsDescription: "允许其他人从个人页查看公开主题。",
+    showTopicsDescription: "允许其他人从个人页查看公开主题及发主题的动态；关闭后仍可从分类和搜索访问公开帖子。",
     showFollowing: "展示关注关系",
-    showFollowingDescription: "允许其他人查看关注和粉丝信息。",
+    showFollowingDescription: "允许其他人从个人页查看关注、粉丝列表及关注动态。",
     emailNotifications: "邮件通知",
     emailNotificationsDescription: "保留现有本地偏好，后续可接入服务端策略。",
   },

@@ -60,6 +60,7 @@ export function createSiteApi(http: GooseHttpClient): GooseSiteApi {
     users: {
       card: (userId) => http.request(route('userCard'), { query: { userId } }),
       follow: (userId, following) => post(http, route('userFollow'), { id: userId, action: following ? 2 : 1 }),
+      savePrivacy: (input) => post(http, route('userSavePrivacy'), input),
       saveInfo: (input) => post(http, route('userSaveInfo'), input),
       saveCover: (profileCoverUrl) => post(http, route('userSaveCover'), { profileCoverUrl }),
       savePresetAvatar: (avatarUrl) => post(http, route('userSavePresetAvatar'), { avatarUrl }),

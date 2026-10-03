@@ -13,17 +13,15 @@ export function SettingsSectionHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="flex items-start justify-between gap-3 border-b px-4 py-3">
-      <div className="flex min-w-0 items-start gap-2.5">
-        <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-md bg-muted text-muted-foreground">
-          <Icon className="size-4" />
-        </span>
-        <div>
-          <h2 className="font-semibold">{title}</h2>
-          {description ? (
-            <p className="text-sm text-muted-foreground">{description}</p>
-          ) : null}
-        </div>
+    <header className="flex items-start justify-between gap-3 px-4 pt-6 pb-1">
+      <div className="min-w-0">
+        <h2 className="flex items-center gap-2 text-sm font-medium">
+          <Icon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+          {title}
+        </h2>
+        {description ? (
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{description}</p>
+        ) : null}
       </div>
       {actions}
     </header>

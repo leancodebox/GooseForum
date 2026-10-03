@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   LayoutPayload,
+  PrivacySettingsPayload,
   SaveUserInfoInput,
   SettingsPageProps,
 } from "@gooseforum/client";
@@ -12,6 +13,7 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toast } from "@gooseforum/ui/components/sonner";
 import { Alert, AlertDescription } from "@gooseforum/ui/components/alert";
 import { Badge } from "@gooseforum/ui/components/badge";
 import { Button } from "@gooseforum/ui/components/button";
@@ -32,6 +34,7 @@ import { ProfileAvatar } from "../users/profile-avatar";
 import { SitePanel } from "../layout/site-panel";
 import { ProfileBadge } from "../users/profile-badge";
 import { ProfileIdentity } from "../users/profile-identity";
+import { SessionSettings } from "./settings-sessions";
 import { AccountSettings } from "./settings-account";
 import { ConnectionsSettings } from "./settings-connections";
 import { PrivacySettings } from "./settings-privacy";
@@ -45,6 +48,7 @@ import { cn } from "@gooseforum/ui/lib/utils";
 const tabKeys = [
   "profile",
   "account",
+  "sessions",
   "privacy",
   "binding",
   "applications",
@@ -66,6 +70,9 @@ export function SettingsPageView({
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
   const [activeTab, setActiveTab] = useState<TabKey>(readTab);
+  const [privacy, setPrivacy] = useState(page.privacy);
+  const privacyBusy = useRef(false);
+  const [savingPrivacy, setSavingPrivacy] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [cover, setCover] = useState(page.user.profileCoverUrl || "");
@@ -115,6 +122,23 @@ export function SettingsPageView({
     if (tab === "profile") url.searchParams.delete("tab");
     else url.searchParams.set("tab", tab);
     window.history.replaceState(window.history.state, "", url);
+  }
+
+  async function savePrivacy(key: keyof PrivacySettingsPayload, checked: boolean) {
+    if (privacyBusy.current) return;
+    privacyBusy.current = true;
+    setSavingPrivacy(true);
+    const next = { ...privacy, [key]: checked };
+    try {
+      await runtime.api.users.savePrivacy(next);
+      setPrivacy(next);
+      toast.success(t("status.privacySaved"));
+    } catch (reason) {
+      toast.error(serverError(reason, t("errors.privacy")));
+    } finally {
+      privacyBusy.current = false;
+      setSavingPrivacy(false);
+    }
   }
 
   async function applyPreset() {
@@ -307,7 +331,7 @@ export function SettingsPageView({
                   {t("avatar.applyWornBadge")}
                 </Button>
               </div>
-              <div className="flex gap-2 overflow-x-auto pb-1">
+              <div className="-mx-1 flex gap-2 overflow-x-auto p-1">
                 <button
                   type="button"
                   className={cn(
@@ -344,14 +368,6 @@ export function SettingsPageView({
           ) : null}
         </div>
 
-        {status || error ? (
-          <Alert
-            variant={error ? "destructive" : "default"}
-            className="mx-4 mb-3 w-auto lg:mx-5"
-          >
-            <AlertDescription>{error || status}</AlertDescription>
-          </Alert>
-        ) : null}
         <Tabs
           value={activeTab}
           onValueChange={(value) => changeTab(value as TabKey)}
@@ -375,6 +391,14 @@ export function SettingsPageView({
             </TabsList>
           </div>
 
+          {status || error ? (
+            <Alert
+              variant={error ? "destructive" : "default"}
+              className="mx-4 mt-4 mb-3 w-auto lg:mx-5"
+            >
+              <AlertDescription>{error || status}</AlertDescription>
+            </Alert>
+          ) : null}
           <TabsContent value="profile">
             <ProfileSettings
               page={page}
@@ -390,10 +414,13 @@ export function SettingsPageView({
             />
           </TabsContent>
           <TabsContent value="account">
-            <AccountSettings showStatus={showStatus} showError={showError} />
+            <AccountSettings showError={showError} />
+          </TabsContent>
+          <TabsContent value="sessions">
+            <SessionSettings showStatus={showStatus} showError={showError} />
           </TabsContent>
           <TabsContent value="privacy">
-            <PrivacySettings showStatus={showStatus} showError={showError} />
+            <PrivacySettings settings={privacy} saving={savingPrivacy} onChange={savePrivacy} />
           </TabsContent>
           <TabsContent value="binding">
             <ConnectionsSettings

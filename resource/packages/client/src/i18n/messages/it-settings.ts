@@ -3,6 +3,7 @@ import en from "./en-settings.js";
 export default {
   ...en,
   tabs: {
+    sessions: "Dispositivi di accesso",
     profile: "Profilo",
     account: "Account",
     privacy: "Privacy",

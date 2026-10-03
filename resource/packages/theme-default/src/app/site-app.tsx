@@ -14,6 +14,7 @@ import type { Locale } from "@gooseforum/client/i18n/locale";
 import type { Resource } from "i18next";
 import { GoosePage, isStandalonePage } from "./root";
 import { AppShell } from "../site/layout/app-shell";
+import { Toaster } from "@gooseforum/ui/components/sonner";
 import { BootstrapError, BootstrapLoading } from "@gooseforum/ui/bootstrap";
 import { prepareGoosePage } from "@gooseforum/runtime/prepared-page";
 import {
@@ -444,6 +445,7 @@ export function SiteApp({
         ) : (
           <BootstrapLoading />
         )}
+        <Toaster position="bottom-right" theme={theme === "gf-dark" ? "dark" : "light"} />
       </GooseRuntimeProvider>
     </GooseI18nProvider>
   );

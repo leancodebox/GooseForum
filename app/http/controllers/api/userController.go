@@ -601,3 +601,29 @@ func ResetPassword(req component.BetterRequest[ResetPasswordReq]) component.Resp
 
 	return component.SuccessResponseCode("密码重置成功", component.MessageAuthResetSuccess, nil)
 }
+
+type EditUserPrivacyReq struct {
+	ShowActivity  *bool `json:"showActivity"`
+	ShowTopics    *bool `json:"showTopics" validate:"required"`
+	ShowFollowing *bool `json:"showFollowing" validate:"required"`
+}
+
+func EditUserPrivacy(req component.BetterRequest[EditUserPrivacyReq]) component.Response {
+	user, err := req.GetUser()
+	if err != nil || user.Id == 0 {
+		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
+	}
+	if req.Params.ShowTopics == nil || req.Params.ShowFollowing == nil {
+		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
+	}
+	if req.Params.ShowActivity != nil {
+		user.HideActivity = !*req.Params.ShowActivity
+	}
+	user.HideTopics = !*req.Params.ShowTopics
+	user.HideFollowing = !*req.Params.ShowFollowing
+	if err := users.UpdatePrivacy(user.Id, user.HideTopics, user.HideFollowing, user.HideActivity); err != nil {
+		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
+	}
+	userservice.RefreshUserCaches(&user)
+	return component.SuccessResponseCode("更新成功", component.MessageUserUpdateSuccess, nil)
+}

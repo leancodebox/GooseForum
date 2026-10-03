@@ -206,6 +206,7 @@ export interface GooseSiteApi {
   users: {
     card(userId: number): Promise<UserCardPayload>
     follow(userId: number, following: boolean): Promise<boolean>
+    savePrivacy(input: { showActivity: boolean; showTopics: boolean; showFollowing: boolean }): Promise<void>
     saveInfo(input: SaveUserInfoInput): Promise<void>
     saveCover(profileCoverUrl: string): Promise<void>
     savePresetAvatar(avatarUrl: string): Promise<{ avatarUrl?: string }>

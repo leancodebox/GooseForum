@@ -541,10 +541,17 @@ type MessagesPageProps struct {
 	SuggestedUsers []UserConnectionPayload `json:"suggestedUsers"`
 }
 
+type PrivacySettingsPayload struct {
+	ShowActivity  bool `json:"showActivity"`
+	ShowTopics    bool `json:"showTopics"`
+	ShowFollowing bool `json:"showFollowing"`
+}
+
 type SettingsPageProps struct {
-	User  *vo.UserDetailedVo   `json:"user"`
-	Stats SettingsStatsPayload `json:"stats"`
-	Tabs  []TabPayload         `json:"tabs"`
+	Privacy PrivacySettingsPayload `json:"privacy"`
+	User    *vo.UserDetailedVo     `json:"user"`
+	Stats   SettingsStatsPayload   `json:"stats"`
+	Tabs    []TabPayload           `json:"tabs"`
 }
 
 type SettingsStatsPayload struct {
@@ -1540,6 +1547,16 @@ const (
 
 func buildUserProfileProps(c *gin.Context, snapshot accesscontrol.Snapshot, user users.EntityComplete, section string, activityTab string) UserProfileProps {
 	currentUserID := component.LoginUserId(c)
+	showActivity := currentUserID == user.Id || !user.HideActivity
+	showTopics := currentUserID == user.Id || !user.HideTopics
+	showFollowing := currentUserID == user.Id || !user.HideFollowing
+	excludedActions := []userActivities.ActionType{}
+	if !showTopics {
+		excludedActions = append(excludedActions, userActivities.ActionPost)
+	}
+	if !showFollowing {
+		excludedActions = append(excludedActions, userActivities.ActionFollow)
+	}
 	isFollowing := userFollow.IsFollowing(currentUserID, user.Id)
 	userCard, ok := userservice.GetUserCard(user.Id)
 	if !ok {
@@ -1564,6 +1581,9 @@ func buildUserProfileProps(c *gin.Context, snapshot accesscontrol.Snapshot, user
 	case userProfileSectionActivity:
 		switch activityTab {
 		case userProfileActivityTopics:
+			if !showTopics {
+				break
+			}
 			cursor := positiveUint(c.Query("cursor"))
 			topicPage, _ := topics.GetPublishedByUserBeforeIdForAudience(user.Id, cursor, userProfileTopicPageSize+1, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
 			hasNext := len(topicPage) > userProfileTopicPageSize
@@ -1573,16 +1593,28 @@ func buildUserProfileProps(c *gin.Context, snapshot accesscontrol.Snapshot, user
 			topicPayloads = buildTopicPayloads(transform.Topics2Vo(topicPage, hotdataserve.CategoryMap()))
 			pagination = buildUserActivityTopicPagination(user.Id, topicPage, hasNext)
 		case userProfileActivityLikes:
+			if !showActivity {
+				break
+			}
 			refs, nextCursor := topicUserAction.ListLikedTopicRefsBeforeForAudience(user.Id, c.Query("cursor"), userProfileTimelinePageSize, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
 			likes = buildUserLikes(refs)
 			pagination = buildUserActivityLikePagination(user.Id, nextCursor)
 		case userProfileActivityFollowing:
+			if !showFollowing {
+				break
+			}
 			following = buildUserConnections(userFollow.GetFollowingList(user.Id, 1, userProfileConnectionLimit))
 		case userProfileActivityFollowers:
+			if !showFollowing {
+				break
+			}
 			followers = buildUserConnections(userFollow.GetFollowerList(user.Id, 1, userProfileConnectionLimit))
 		default:
+			if !showActivity {
+				break
+			}
 			cursor := positiveUint(c.Query("cursor"))
-			timeline, _ := userActivities.GetUserTimelineForAudience(user.Id, cursor, userProfileTimelinePageSize+1, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
+			timeline, _ := userActivities.GetUserTimelineForAudience(user.Id, cursor, userProfileTimelinePageSize+1, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage(), excludedActions...)
 			hasNext := len(timeline) > userProfileTimelinePageSize
 			if hasNext {
 				timeline = timeline[:userProfileTimelinePageSize]
@@ -1594,10 +1626,14 @@ func buildUserProfileProps(c *gin.Context, snapshot accesscontrol.Snapshot, user
 		badges = userBadges
 	default:
 		badges = userBadges
-		latestTopics, _ := topics.GetLatestPublishedByUserIdForAudience(user.Id, 8, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
-		topicPayloads = buildTopicPayloads(transform.Topics2Vo(latestTopics, hotdataserve.CategoryMap()))
-		timeline, _ := userActivities.GetUserTimelineForAudience(user.Id, 0, 5, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
-		activities = buildUserActivities(timeline)
+		if showTopics {
+			latestTopics, _ := topics.GetLatestPublishedByUserIdForAudience(user.Id, 8, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
+			topicPayloads = buildTopicPayloads(transform.Topics2Vo(latestTopics, hotdataserve.CategoryMap()))
+		}
+		if showActivity {
+			timeline, _ := userActivities.GetUserTimelineForAudience(user.Id, 0, 5, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage(), excludedActions...)
+			activities = buildUserActivities(timeline)
+		}
 	}
 
 	return UserProfileProps{
@@ -2209,7 +2245,8 @@ func buildMessagesPageProps(c *gin.Context) MessagesPageProps {
 func buildSettingsPageProps(user users.EntityComplete) SettingsPageProps {
 	stats := userStatistics.Get(user.Id)
 	return SettingsPageProps{
-		User: transform.User2UserDetailedVo(user),
+		Privacy: PrivacySettingsPayload{ShowActivity: !user.HideActivity, ShowTopics: !user.HideTopics, ShowFollowing: !user.HideFollowing},
+		User:    transform.User2UserDetailedVo(user),
 		Stats: SettingsStatsPayload{
 			TopicCount:        stats.TopicCount,
 			ReplyCount:        stats.ReplyCount,
@@ -2223,6 +2260,7 @@ func buildSettingsPageProps(user users.EntityComplete) SettingsPageProps {
 		Tabs: []TabPayload{
 			{Key: "profile", URL: "/settings", Active: true},
 			{Key: "account", URL: "/settings?tab=account"},
+			{Key: "sessions", URL: "/settings?tab=sessions"},
 			{Key: "privacy", URL: "/settings?tab=privacy"},
 			{Key: "binding", URL: "/settings?tab=binding"},
 			{Key: "applications", URL: "/settings?tab=applications"},

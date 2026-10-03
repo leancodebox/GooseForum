@@ -103,6 +103,10 @@ type EntityComplete struct {
 	ExternalInformation ExternalInformation `gorm:"column:external_information;type:varchar(2048);default:'{}';serializer:json" json:"externalInformation"` // 外部信息
 	WornBadgeCode       string              `gorm:"column:worn_badge_code;type:varchar(64);not null;default:'';" json:"wornBadgeCode"`                      // 当前佩戴的徽章
 
+	HideActivity  bool `gorm:"column:hide_activity;not null;default:false" json:"-"`
+	HideTopics    bool `gorm:"column:hide_topics;not null;default:false" json:"-"`
+	HideFollowing bool `gorm:"column:hide_following;not null;default:false" json:"-"`
+
 	// status
 	CreatedAt time.Time      `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` //
 	UpdatedAt time.Time      `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
