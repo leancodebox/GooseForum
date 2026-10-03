@@ -391,51 +391,53 @@ export function SettingsPageView({
             </TabsList>
           </div>
 
-          {status || error ? (
-            <Alert
-              variant={error ? "destructive" : "default"}
-              className="mx-4 mt-4 mb-3 w-auto lg:mx-5"
-            >
-              <AlertDescription>{error || status}</AlertDescription>
-            </Alert>
-          ) : null}
-          <TabsContent value="profile">
-            <ProfileSettings
-              page={page}
-              requiresEmailVerification={layout.viewer.requiresEmailVerification}
-              profile={profile}
-              username={username}
-              email={email}
-              setProfile={setProfile}
-              setUsername={setUsername}
-              setEmail={setEmail}
-              showStatus={showStatus}
-              showError={showError}
-            />
-          </TabsContent>
-          <TabsContent value="account">
-            <AccountSettings showError={showError} />
-          </TabsContent>
-          <TabsContent value="sessions">
-            <SessionSettings showStatus={showStatus} showError={showError} />
-          </TabsContent>
-          <TabsContent value="privacy">
-            <PrivacySettings settings={privacy} saving={savingPrivacy} onChange={savePrivacy} />
-          </TabsContent>
-          <TabsContent value="binding">
-            <ConnectionsSettings
-              section="binding"
-              showStatus={showStatus}
-              showError={showError}
-            />
-          </TabsContent>
-          <TabsContent value="applications">
-            <ConnectionsSettings
-              section="applications"
-              showStatus={showStatus}
-              showError={showError}
-            />
-          </TabsContent>
+          <div className="min-h-[max(24rem,calc(100svh-8rem))]">
+            {status || error ? (
+              <Alert
+                variant={error ? "destructive" : "default"}
+                className="mx-4 mt-4 mb-3 w-auto lg:mx-5"
+              >
+                <AlertDescription>{error || status}</AlertDescription>
+              </Alert>
+            ) : null}
+            <TabsContent value="profile">
+              <ProfileSettings
+                page={page}
+                requiresEmailVerification={layout.viewer.requiresEmailVerification}
+                profile={profile}
+                username={username}
+                email={email}
+                setProfile={setProfile}
+                setUsername={setUsername}
+                setEmail={setEmail}
+                showStatus={showStatus}
+                showError={showError}
+              />
+            </TabsContent>
+            <TabsContent value="account">
+              <AccountSettings showError={showError} />
+            </TabsContent>
+            <TabsContent value="sessions">
+              <SessionSettings showStatus={showStatus} showError={showError} />
+            </TabsContent>
+            <TabsContent value="privacy">
+              <PrivacySettings settings={privacy} saving={savingPrivacy} onChange={savePrivacy} />
+            </TabsContent>
+            <TabsContent value="binding">
+              <ConnectionsSettings
+                section="binding"
+                showStatus={showStatus}
+                showError={showError}
+              />
+            </TabsContent>
+            <TabsContent value="applications">
+              <ConnectionsSettings
+                section="applications"
+                showStatus={showStatus}
+                showError={showError}
+              />
+            </TabsContent>
+          </div>
         </Tabs>
       </SitePanel>
       <AvatarCropDialog crop={crop} />

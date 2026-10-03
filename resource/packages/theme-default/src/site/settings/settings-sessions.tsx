@@ -45,15 +45,23 @@ export function SessionSettings({
 
   return (
     <section>
-      <SettingsSectionHeader icon={Monitor} title={t("account.sessionsTitle")} />
+      <SettingsSectionHeader
+        icon={Monitor}
+        title={t("account.sessionsTitle")}
+        actions={sessions.some((item) => !item.current) ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="shrink-0"
+            disabled={revoking !== null}
+            onClick={() => void revoke("others")}
+          >
+            {t("account.revokeOthers")}
+          </Button>
+        ) : undefined}
+      />
       <div className="p-4">
-        {sessions.some((item) => !item.current) && (
-          <div className="mb-3 flex justify-end">
-            <Button type="button" variant="outline" size="sm" disabled={revoking !== null} onClick={() => void revoke("others")}>
-              {t("account.revokeOthers")}
-            </Button>
-          </div>
-        )}
         {loadingSessions ? <p className="text-sm text-muted-foreground">{t("account.sessionsLoading")}</p> : sessions.length === 0 ? <p className="text-sm text-muted-foreground">{t("account.sessionsEmpty")}</p> : (
           <div className="divide-y border-y">
             {sessions.map((item) => <div key={item.id} className="flex min-w-0 items-center justify-between gap-3 py-3">
