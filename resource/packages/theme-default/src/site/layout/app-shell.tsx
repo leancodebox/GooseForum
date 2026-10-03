@@ -96,6 +96,17 @@ export function AppShell({
   const { t, i18n } = useTranslation("shell");
   const runtime = useGooseRuntime();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try { return localStorage.getItem("goose:shell-sidebar-collapsed") === "true"; }
+    catch { return false; }
+  });
+  const [sidebarAnimate, setSidebarAnimate] = useState(false);
+  function toggleSidebar() {
+    const collapsed = !sidebarCollapsed;
+    setSidebarCollapsed(collapsed);
+    setSidebarAnimate(true);
+    try { localStorage.setItem("goose:shell-sidebar-collapsed", String(collapsed)); } catch {}
+  }
   const [unread, setUnread] = useState(layout.unread);
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
@@ -286,7 +297,7 @@ export function AppShell({
     <ShellHeaderContext.Provider value={setShellHeader}>
       <div className="min-h-svh bg-muted text-foreground">
       <header hidden={standalone} className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur-sm">
-        <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center gap-2 px-3 lg:gap-8 lg:px-8">
+        <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center gap-2 px-3 lg:gap-3 lg:px-6">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
               <Button
@@ -324,6 +335,12 @@ export function AppShell({
               </div>
             </SheetContent>
           </Sheet>
+
+          <Button variant="ghost" size="icon" className="hidden shrink-0 lg:inline-flex"
+            aria-label={sidebarCollapsed ? t("expandSidebar") : t("collapseSidebar")}
+            aria-expanded={!sidebarCollapsed} aria-controls="goose-desktop-sidebar" onClick={toggleSidebar}>
+            <MenuIcon className="size-5.5" />
+          </Button>
 
           <div className={cn(shellHeader.visible && "hidden md:block")}>
             <SiteBrand layout={layout} />
@@ -604,12 +621,15 @@ export function AppShell({
         </div>
       </header>
 
-      <main className={standalone ? "w-full" : "mx-auto grid w-full max-w-[1600px] grid-cols-1 lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-3 lg:px-8 lg:py-3 xl:grid-cols-[224px_minmax(0,1fr)]"}>
+      <main data-sidebar-collapsed={sidebarCollapsed} data-sidebar-animate={sidebarAnimate}
+        className={standalone ? "w-full" : "goose-shell-grid mx-auto grid w-full max-w-[1600px] grid-cols-1 lg:px-6 lg:py-3"}>
         <aside
-          className={standalone ? "hidden" : "sticky top-16 -my-3 hidden h-[calc(100vh-4rem)] min-w-0 self-start overflow-y-auto py-3 pl-1 pr-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:block"}
+          id="goose-desktop-sidebar"
+          inert={sidebarCollapsed || standalone} aria-hidden={sidebarCollapsed || standalone}
+          className={cn(standalone ? "hidden" : "sticky top-16 -my-3 hidden h-[calc(100vh-4rem)] min-w-0 self-start overflow-x-hidden overflow-y-auto py-3 pl-1 pr-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:block", sidebarCollapsed && "invisible")}
           aria-label="Sidebar"
         >
-          {renderNavigation()}
+          <div className="w-[194px] xl:w-[208px]">{renderNavigation()}</div>
         </aside>
         <section data-slot="goose-page-content" className="min-w-0">
           {children}
@@ -712,7 +732,7 @@ function ShellNavigation({
 function NavMoreMenu({ label, items, onNavigate }: { label: string; items: ShellNavItem[]; onNavigate(): void }) {
   return <DropdownMenu modal={false}>
     <DropdownMenuTrigger asChild>
-      <Button variant="ghost" aria-label={label} className="site-more-trigger h-8 w-full justify-start gap-2 text-[13px] leading-[18.5714px] text-foreground/75 data-[state=open]:text-foreground">
+      <Button variant="ghost" aria-label={label} className="site-more-trigger h-8 w-full justify-start gap-2 text-[13px] leading-[18.5714px] text-foreground/75 transition-colors duration-150 data-[state=open]:text-foreground">
         <EllipsisVerticalIcon data-icon="inline-start" aria-hidden="true" />
         <span>{label}</span>
         {items.some(item => item.attention) ? <MenuDot /> : <span className="ml-auto" />}

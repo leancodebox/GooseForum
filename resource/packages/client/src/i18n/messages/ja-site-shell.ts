@@ -1,5 +1,7 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  collapseSidebar: "サイドバーを閉じる",
+  expandSidebar: "サイドバーを開く",
   chooseTheme: "テーマを選択",
   followSystem: "システムに従う",
   lightTheme: "ライト",

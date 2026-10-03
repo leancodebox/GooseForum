@@ -122,3 +122,15 @@ html.goose-theme-transition *::after {
   animation-duration: 120ms;
   animation-timing-function: ease-out;
 }
+
+@media (min-width: 64rem) {
+  .goose-shell-grid { grid-template-columns: 210px minmax(0, 1fr); column-gap: 0.75rem; }
+  .goose-shell-grid[data-sidebar-collapsed="true"] { grid-template-columns: 0 minmax(0, 1fr); column-gap: 0; }
+  .goose-shell-grid[data-sidebar-animate="true"] { transition: grid-template-columns 180ms ease, column-gap 180ms ease; }
+}
+@media (min-width: 80rem) {
+  .goose-shell-grid:not([data-sidebar-collapsed="true"]) { grid-template-columns: 224px minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .goose-shell-grid[data-sidebar-animate="true"] { transition: none; }
+}

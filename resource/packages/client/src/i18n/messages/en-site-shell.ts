@@ -1,5 +1,7 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  collapseSidebar: "Collapse sidebar",
+  expandSidebar: "Expand sidebar",
   chooseTheme: "Choose theme",
   followSystem: "System",
   lightTheme: "Light",

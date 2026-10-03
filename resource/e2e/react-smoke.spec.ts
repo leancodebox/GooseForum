@@ -1235,3 +1235,49 @@ test('shows one announcement at a time in order and reopens the panel after a to
     body: await page.screenshot({ path: testInfo.outputPath('home-multiple-announcements.png'), fullPage: false }), contentType: 'image/png',
   })
 })
+
+test('desktop sidebar remembers its width preference and leaves mobile navigation available', async ({ page }) => {
+  const requests: string[] = []
+  await page.route('**/__goose_page/**', route => route.fulfill({ json: homePage }))
+  page.on('request', request => { if (/\/(__goose_page|api)\//.test(request.url())) requests.push(request.url()) })
+  await page.goto('/?lang=en')
+  const content = page.locator('[data-slot="goose-page-content"]')
+  const sidebar = page.locator('#goose-desktop-sidebar')
+  if ((page.viewportSize()?.width || 0) < 1024) {
+    await page.evaluate(() => localStorage.setItem('goose:shell-sidebar-collapsed', 'true'))
+    await page.reload()
+    await expect(page.getByRole('button', { name: 'Expand sidebar' })).toBeHidden()
+    await page.getByRole('button', { name: 'Open menu', exact: true }).click()
+    await expect(page.getByRole('dialog').getByRole('link', { name: 'Topics', exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Close menu', exact: true }).click()
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+    return
+  }
+  const width = (await content.boundingBox())!.width
+  const count = requests.length
+  const more = sidebar.locator('.site-more-trigger')
+  const transition = await more.evaluate(element => getComputedStyle(element).transitionProperty)
+  expect(transition).toContain('background-color')
+  expect(transition).not.toMatch(/\b(all|visibility)\b/)
+  const background = await more.evaluate(element => getComputedStyle(element).backgroundColor)
+  await more.click()
+  await expect(more).toHaveAttribute('data-state', 'open')
+  await expect.poll(() => more.evaluate(element => getComputedStyle(element).backgroundColor)).not.toBe(background)
+  await page.keyboard.press('Escape')
+  await page.getByRole('button', { name: 'Collapse sidebar' }).click()
+  await expect(sidebar.locator('.site-more-trigger')).toHaveCSS('visibility', 'hidden')
+  await expect(sidebar).toHaveAttribute('inert', '')
+  await expect(sidebar).toHaveAttribute('aria-hidden', 'true')
+  await expect.poll(async () => (await content.boundingBox())!.width).toBeGreaterThan(width + 200)
+  expect(requests).toHaveLength(count)
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Expand sidebar' })).toHaveAttribute('aria-expanded', 'false')
+  await expect(page.locator('.goose-shell-grid')).toHaveCSS('transition-duration', '0s')
+  await page.getByRole('button', { name: 'Expand sidebar' }).click()
+  await expect(sidebar).not.toHaveAttribute('inert', '')
+  await expect.poll(async () => (await content.boundingBox())!.width).toBe(width)
+  await page.getByRole('button', { name: 'Collapse sidebar' }).click()
+  await page.getByRole('button', { name: 'Expand sidebar' }).click()
+  await expect.poll(async () => (await content.boundingBox())!.width).toBe(width)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+})
