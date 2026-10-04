@@ -8,10 +8,12 @@ const resourceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const outputRoot = join(resourceRoot, 'static/dist/react')
 const manifestPath = join(outputRoot, '.vite/manifest.json')
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
+// Account security, drafts, announcements, and OIDC bring the site baseline to
+// 212.5 KiB (shell) / 235.7 KiB (home); keep roughly 4% growth headroom.
 const scenarios = {
   'site shell': {
     roots: ['index.html'],
-    budget: 198 * 1024,
+    budget: 220 * 1024,
   },
   'home route (zh)': {
     roots: [
@@ -24,7 +26,7 @@ const scenarios = {
       '../../packages/client/dist/i18n/messages/zh-content-common.js',
       '../../packages/client/dist/i18n/messages/zh-server-messages.js',
     ],
-    budget: 215 * 1024,
+    budget: 245 * 1024,
   },
   'admin shell': {
     roots: ['admin/index.html'],
