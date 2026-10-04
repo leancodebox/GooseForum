@@ -64,6 +64,7 @@ import {
   Inbox,
   Link,
   MessageCircle,
+  MenuIcon,
   Pencil,
   Plus,
   Save,
@@ -243,13 +244,16 @@ export function SiteChromeManagementPage({
       ) : (
         <section className="min-h-[760px] overflow-hidden rounded-xl border bg-muted text-foreground shadow-sm">
           <header className="border-b border-transparent bg-background/0">
-            <div className="mx-auto grid h-16 w-full max-w-[1600px] grid-cols-[auto_minmax(0,1fr)] items-center gap-8 px-5">
+            <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center gap-2 px-3 lg:gap-3 lg:px-6">
+              <span aria-hidden="true" className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg">
+                <MenuIcon className="size-5 lg:size-5.5" />
+              </span>
               <BrandPreview
                 config={config}
                 layout={layout}
                 onEdit={() => setBrandOpen(true)}
               />
-              <nav className="flex min-w-0 items-center gap-1">
+              <nav className="flex min-w-0 flex-1 items-center gap-1">
                 <ChromeList
                   items={config.header}
                   horizontal
@@ -1100,17 +1104,17 @@ function BrandPreview({
     <Button
       type="button"
       variant="ghost"
-      className="group relative -ml-1 h-auto min-w-0 shrink-0 justify-start gap-2 rounded-md border border-dashed border-transparent px-2 py-1 text-left font-normal shadow-none hover:border-primary/25 hover:bg-primary/5"
+      className="group relative h-auto min-w-0 shrink-0 justify-start gap-0 rounded-md border-0 p-0 text-left font-normal shadow-none transition-[padding,background-color] hover:bg-accent hover:pr-8 focus-visible:pr-8 motion-reduce:transition-none"
       onClick={onEdit}
     >
       {type === "image" && image ? (
         <img
           src={image}
           alt={label}
-          className="h-8 w-auto max-w-40 shrink-0 object-contain sm:h-9"
+          className="h-8 w-auto max-w-40 shrink-0 object-contain"
         />
       ) : type === "text" ? (
-        <span className="max-w-44 truncate text-xl font-semibold tracking-tighter text-primary sm:text-2xl md:max-w-none">
+        <span className="max-w-44 truncate text-xl font-semibold tracking-tight text-primary lg:text-2xl md:max-w-none">
           {label}
         </span>
       ) : (
@@ -1119,8 +1123,10 @@ function BrandPreview({
           <img src="/static/brand/gooseforum-dark.svg" alt="" width={1898} height={625} className="hidden h-full w-full object-contain dark:block" />
         </span>
       )}
-      <span className="ml-1 inline-flex size-5 items-center justify-center rounded-sm text-muted-foreground opacity-0 transition group-hover:opacity-100">
-        <Pencil className="size-3.5" />
+      <span className="pointer-events-none absolute right-1 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-sm bg-background p-0.5 text-muted-foreground opacity-0 shadow-sm ring-1 ring-border transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+        <span className="inline-flex size-5 items-center justify-center">
+          <Pencil className="size-3.5" />
+        </span>
       </span>
     </Button>
   );
