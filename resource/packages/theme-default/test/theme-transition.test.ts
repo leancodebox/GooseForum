@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createThemeTransition } from "../src/app/theme-transition";
+import { createThemeTransition } from "@gooseforum/runtime/browser-host";
 
 const original = Object.getOwnPropertyDescriptor(document, "startViewTransition");
 afterEach(() => {

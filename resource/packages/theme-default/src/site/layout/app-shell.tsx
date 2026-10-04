@@ -65,7 +65,7 @@ import {
 import { authLocales, localeLabels } from "@gooseforum/runtime/i18n/auth";
 import { cn } from "@gooseforum/ui/lib/utils";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
-import { RoutineIcon } from "./icons/material-symbols/routine-icon";
+import { RoutineIcon } from "@gooseforum/ui/components/icons/material-symbols/routine-icon";
 import { unreadStatusEvent } from "@gooseforum/runtime/unread-status";
 import {
   emptyShellHeader,

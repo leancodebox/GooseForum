@@ -139,3 +139,4 @@ function readCookie(name: string) {
     ?.slice(prefix.length);
   return value ? decodeURIComponent(value) : undefined;
 }
+export { createThemeTransition } from "./theme-transition";

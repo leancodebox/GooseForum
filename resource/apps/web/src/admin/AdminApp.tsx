@@ -1,9 +1,11 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { flushSync } from 'react-dom'
+import { applyBrowserTheme, createThemeTransition, detectBrowserTheme, detectBrowserThemePreference, resolveBrowserTheme, saveBrowserThemePreference, type BrowserThemePreference } from '@gooseforum/runtime/browser-host'
 import type { GooseAdminApi, PagePayload } from '@gooseforum/client'
 import { Toaster } from '@gooseforum/ui/components/sonner'
 import { SidebarInset, SidebarProvider } from '@gooseforum/ui/components/sidebar'
 import { TooltipProvider } from '@gooseforum/ui/components/tooltip'
-import { applyBrowserLocale, applyBrowserTheme, detectBrowserLocale, detectBrowserTheme } from '../host/browser-runtime'
+import { applyBrowserLocale, detectBrowserLocale } from '../host/browser-runtime'
 import { AppSidebar } from './components/app-sidebar'
 import { SiteHeader } from './components/site-header'
 import { createAdminText } from './i18n'
@@ -42,6 +44,11 @@ export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi 
   const localeVersion = useRef(0)
   const pathnameRef = useRef(pathname)
   const [theme, setTheme] = useState(() => detectBrowserTheme())
+  const themeRef = useRef(theme)
+  const [themePreference, setThemePreference] = useState(detectBrowserThemePreference)
+  const themePreferenceRef = useRef(themePreference)
+  const [themeTransition] = useState(createThemeTransition)
+  useEffect(() => () => themeTransition.cancel(), [themeTransition])
   const text = useMemo(() => createAdminText(locale), [locale])
   const accessGroupText = useMemo(() => createAccessGroupText(locale), [locale])
   const roleText = useMemo(() => createRoleText(locale), [locale])
@@ -114,13 +121,38 @@ export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi 
     }
   }, [])
 
-  const toggleTheme = useCallback(() => {
-    setTheme((current) => {
-      const next = current === 'gf-dark' ? 'gf-light' : 'gf-dark'
-      applyBrowserTheme(next, page.layout.theme.colors)
-      return next
-    })
-  }, [page.layout.theme.colors])
+  const changeTheme = useCallback((preference: BrowserThemePreference) => {
+    saveBrowserThemePreference(preference)
+    themePreferenceRef.current = preference
+    const next = resolveBrowserTheme(preference)
+    const changed = next !== themeRef.current
+    themeRef.current = next
+    themeTransition.apply(() => {
+      applyBrowserTheme(next, page.layout.theme.colors, false)
+      flushSync(() => { setThemePreference(preference); setTheme(next) })
+    }, changed)
+  }, [page.layout.theme.colors, themeTransition])
+
+  useEffect(() => {
+    if (themePreference !== 'system' || !window.matchMedia) return
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+    const update = () => {
+      if (themePreferenceRef.current !== 'system') return
+      const next = media.matches ? 'gf-dark' : 'gf-light'
+      if (next === themeRef.current) {
+        applyBrowserTheme(next, page.layout.theme.colors, false)
+        return
+      }
+      themeRef.current = next
+      themeTransition.apply(() => {
+        setTheme(next)
+        applyBrowserTheme(next, page.layout.theme.colors, false)
+      }, false)
+    }
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [themePreference, page.layout.theme.colors, themeTransition])
 
   const content = pathname === '/admin/categories'
     ? <CategoriesManagementPage api={api} permissions={page.layout.viewer.adminPermissions} text={text} />
@@ -168,5 +200,5 @@ export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi 
                         ? <DashboardPage api={api} text={dashboardText} locale={locale} />
                         : <div className="flex flex-1 items-center justify-center p-6"><div className="max-w-md rounded-xl border bg-card p-6 text-center"><h2 className="text-lg font-semibold">{text(titleKey)}</h2><p className="mt-2 text-sm text-muted-foreground">{text('notAvailable')}</p></div></div>
 
-  return <TooltipProvider><SidebarProvider style={shellVariables}><AppSidebar layout={page.layout} pathname={pathname} text={text} onNavigate={navigate} onPrefetch={prefetch} variant="inset" /><SidebarInset className="overflow-clip" aria-busy={isNavigating}><SiteHeader title={text(titleKey)} locale={locale} theme={theme} onLocaleChange={changeLocale} onThemeToggle={toggleTheme} /><div className="flex flex-1 flex-col">{navigationError ? <p role="alert" className="px-4 py-2 text-sm text-destructive">{navigationError}</p> : null}<Suspense fallback={<div className="flex min-h-48 items-center justify-center text-sm text-muted-foreground">{text('loading')}</div>}>{content}</Suspense></div></SidebarInset></SidebarProvider><Toaster position="bottom-right" /></TooltipProvider>
+  return <TooltipProvider><SidebarProvider style={shellVariables}><AppSidebar layout={page.layout} pathname={pathname} text={text} onNavigate={navigate} onPrefetch={prefetch} variant="inset" /><SidebarInset className="overflow-clip" aria-busy={isNavigating}><SiteHeader title={text(titleKey)} locale={locale} themePreference={themePreference} onLocaleChange={changeLocale} onThemeChange={changeTheme} /><div className="flex flex-1 flex-col">{navigationError ? <p role="alert" className="px-4 py-2 text-sm text-destructive">{navigationError}</p> : null}<Suspense fallback={<div className="flex min-h-48 items-center justify-center text-sm text-muted-foreground">{text('loading')}</div>}>{content}</Suspense></div></SidebarInset></SidebarProvider><Toaster position="bottom-right" /></TooltipProvider>
 }

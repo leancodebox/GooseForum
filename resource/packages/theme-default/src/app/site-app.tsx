@@ -10,7 +10,6 @@ import {
   useState,
 } from "react";
 import { flushSync } from "react-dom";
-import { createThemeTransition } from "./theme-transition";
 import type { AnyPagePayload } from "@gooseforum/client";
 import type { Locale } from "@gooseforum/client/i18n/locale";
 import type { Resource } from "i18next";
@@ -27,6 +26,7 @@ import {
 } from "@gooseforum/runtime";
 import {
   applyBrowserLocale,
+  createThemeTransition,
   applyBrowserTheme,
   detectBrowserTheme,
   detectBrowserThemePreference,

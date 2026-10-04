@@ -30,7 +30,7 @@ vi.mock('./page-registry', () => ({
     OIDCProviderSettingsPage: () => <p>OIDCProviderSettingsPage</p>,
 }))
 vi.mock('./components/app-sidebar', () => ({ AppSidebar: ({ onNavigate }: { onNavigate(path: string): void }) => <nav><button onClick={() => onNavigate('/admin/users')}>Users</button><button onClick={() => onNavigate('/admin/sponsors')}>Sponsors</button></nav> }))
-vi.mock('./components/site-header', () => ({ SiteHeader: () => null }))
+vi.mock('./components/site-header', () => ({ SiteHeader: ({ themePreference, onThemeChange }: { themePreference: string; onThemeChange(value: string): void }) => <div><span data-testid="theme-preference">{themePreference}</span>{['gf-light', 'gf-dark', 'system'].map(value => <button key={value} onClick={() => onThemeChange(value)}>{value}</button>)}</div> }))
 vi.mock('@gooseforum/ui/components/sidebar', () => ({ SidebarProvider: ({ children }: { children: ReactNode }) => <div>{children}</div>, SidebarInset: ({ children }: { children: ReactNode }) => <main>{children}</main> }))
 vi.mock('@gooseforum/ui/components/tooltip', () => ({ TooltipProvider: ({ children }: { children: ReactNode }) => <>{children}</> }))
 vi.mock('@gooseforum/ui/components/sonner', () => ({ Toaster: () => null }))
@@ -41,7 +41,7 @@ const page = { layout: { site: { name: 'GooseForum' }, theme: { colors: {} } } }
 function mount() { render(<AdminApp page={page} api={{} as GooseAdminApi} />) }
 function deferred() { let resolve!: () => void; const promise = new Promise<void>(done => { resolve = done }); return { promise, resolve } }
 beforeEach(() => { window.history.replaceState(null, '', '/admin'); prepare.mockReset() })
-afterEach(cleanup)
+afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
 describe('prepared admin navigation', () => {
   it('retains the current page and URL until the target module is ready', async () => {
@@ -80,5 +80,62 @@ describe('prepared admin navigation', () => {
     await act(async () => { load.resolve(); await load.promise })
     expect(screen.getByText('UsersManagementPage')).toBeTruthy()
     expect(prepare).toHaveBeenCalledWith('/admin/users')
+  })
+})
+
+describe('admin theme preference', () => {
+  const listeners = new Set<() => void>()
+  let dark = false
+  const media = {
+    get matches() { return dark },
+    addEventListener: vi.fn((_event: string, listener: () => void) => listeners.add(listener)),
+    removeEventListener: vi.fn((_event: string, listener: () => void) => listeners.delete(listener)),
+  }
+  beforeEach(() => {
+    dark = false
+    listeners.clear()
+    media.addEventListener.mockClear()
+    media.removeEventListener.mockClear()
+    document.cookie = 'goose-site-theme=; path=/; max-age=0'
+    localStorage.removeItem('goose-site-theme')
+    vi.stubGlobal('matchMedia', () => media)
+  })
+  afterEach(() => {
+    document.cookie = 'goose-site-theme=; path=/; max-age=0'
+    localStorage.removeItem('goose-site-theme')
+  })
+  function systemChange(value: boolean) {
+    act(() => { dark = value; listeners.forEach(listener => listener()) })
+  }
+  it('follows system changes without replacing the saved system preference', () => {
+    mount()
+    expect(screen.getByTestId('theme-preference').textContent).toBe('system')
+    systemChange(true)
+    expect(document.documentElement.dataset.theme).toBe('gf-dark')
+    fireEvent.click(screen.getByText('system', { selector: 'button' }))
+    systemChange(false)
+    expect(document.documentElement.dataset.theme).toBe('gf-light')
+    expect(localStorage.getItem('goose-site-theme')).toBe('system')
+    expect(document.cookie).toContain('goose-site-theme=system')
+  })
+  it('keeps a manual choice across system changes and resumes following when selected', () => {
+    mount()
+    fireEvent.click(screen.getByText('gf-dark', { selector: 'button' }))
+    systemChange(false)
+    expect(document.documentElement.dataset.theme).toBe('gf-dark')
+    expect(localStorage.getItem('goose-site-theme')).toBe('gf-dark')
+    fireEvent.click(screen.getByText('system', { selector: 'button' }))
+    expect(document.documentElement.dataset.theme).toBe('gf-light')
+    systemChange(true)
+    expect(document.documentElement.dataset.theme).toBe('gf-dark')
+    cleanup()
+    expect(listeners.size).toBe(0)
+  })
+  it('restores an explicit theme saved by the site', () => {
+    document.cookie = 'goose-site-theme=gf-dark; path=/'
+    localStorage.setItem('goose-site-theme', 'gf-dark')
+    mount()
+    expect(screen.getByTestId('theme-preference').textContent).toBe('gf-dark')
+    expect(media.addEventListener).not.toHaveBeenCalled()
   })
 })
