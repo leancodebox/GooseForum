@@ -14,23 +14,23 @@ import (
 	"github.com/spf13/viper"
 )
 
-func testSigningKey(t *testing.T) string {
+func testSecretKey(t *testing.T) string {
 	t.Helper()
-	key, err := algorithm.GenerateSigningKey(32)
+	key, err := algorithm.GenerateSecretKey(32)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return key
 }
 
-func withSigningKey(t *testing.T, key string) {
+func withSecretKey(t *testing.T, key string) {
 	t.Helper()
-	old := preferences.GetString("app.signingKey", "")
-	preferences.Set("app.signingKey", key)
-	t.Cleanup(func() { preferences.Set("app.signingKey", old) })
+	old := preferences.Get("app.secretKey")
+	preferences.Set("app.secretKey", key)
+	t.Cleanup(func() { preferences.Set("app.secretKey", old) })
 }
 
-func TestGeneratedSigningKeySupportsEncryption(t *testing.T) {
+func TestGeneratedSecretKeySupportsEncryption(t *testing.T) {
 	config, err := preferences.GenerateConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -40,15 +40,15 @@ func TestGeneratedSigningKeySupportsEncryption(t *testing.T) {
 	if err := parsed.ReadConfig(bytes.NewReader(config)); err != nil {
 		t.Fatal(err)
 	}
-	key := parsed.GetString("app.signingKey")
+	key := parsed.GetString("app.secretKey")
 	decoded, err := base64.RawURLEncoding.Strict().DecodeString(key)
 	if err != nil || len(key) != 43 || len(decoded) != 32 {
-		t.Fatal("generated configuration must contain a canonical 256-bit signing key")
+		t.Fatal("generated configuration must contain a canonical 256-bit secret key")
 	}
 	if parsed.IsSet("mfa") {
-		t.Fatal("configuration must only use the application signing key")
+		t.Fatal("configuration must only use the application secret key")
 	}
-	withSigningKey(t, key)
+	withSecretKey(t, key)
 	sealed, err := seal(1, "SECRET")
 	if err != nil || !strings.HasPrefix(sealed, "v1:") {
 		t.Fatalf("derived encryption failed: %v", err)
@@ -64,17 +64,17 @@ func TestGeneratedSigningKeySupportsEncryption(t *testing.T) {
 	if _, err := open(2, sealed); !errors.Is(err, ErrUnavailable) {
 		t.Fatal("ciphertext was not bound to its user")
 	}
-	preferences.Set("app.signingKey", testSigningKey(t))
+	preferences.Set("app.secretKey", testSecretKey(t))
 	if _, err := open(1, sealed); !errors.Is(err, ErrUnavailable) {
 		t.Fatal("changing signing key did not invalidate ciphertext")
 	}
 }
 
-func TestEncryptionRejectsInvalidSigningKeys(t *testing.T) {
-	withSigningKey(t, testSigningKey(t))
+func TestEncryptionRejectsInvalidSecretKeys(t *testing.T) {
+	withSecretKey(t, testSecretKey(t))
 	for _, value := range []string{"", "short", strings.Repeat("!", 43), strings.Repeat("a", 43),
 		base64.RawURLEncoding.EncodeToString(make([]byte, 31)), base64.RawURLEncoding.EncodeToString(make([]byte, 33))} {
-		preferences.Set("app.signingKey", value)
+		preferences.Set("app.secretKey", value)
 		if _, err := seal(1, "SECRET"); !errors.Is(err, ErrUnavailable) {
 			t.Fatal("invalid signing key accepted")
 		}
@@ -83,14 +83,14 @@ func TestEncryptionRejectsInvalidSigningKeys(t *testing.T) {
 
 func TestStatusChecksTheKeyOfAnExistingFactor(t *testing.T) {
 	user, _ := enabledUser(t)
-	preferences.Set("app.signingKey", testSigningKey(t))
+	preferences.Set("app.secretKey", testSecretKey(t))
 	status, err := Status(user.Id)
 	if err != nil || status["enabled"] != true || status["available"] != false {
 		t.Fatalf("existing factor falsely available after key change: %v %v", status, err)
 	}
 }
 
-func TestMFASetupAndLoginUsingOnlySigningKey(t *testing.T) {
+func TestMFASetupAndLoginUsingOnlySecretKey(t *testing.T) {
 	user := testUser(t)
 	c, _ := testContext(nil)
 	setup, err := Begin(c, user.Id, "password123")

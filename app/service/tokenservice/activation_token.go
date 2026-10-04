@@ -31,13 +31,13 @@ func GenerateActivationToken(userId uint64, email string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(signingKey())
+	return token.SignedString(secretKey())
 }
 
 // ParseActivationToken parses and validates an activation token.
 func ParseActivationToken(tokenString string) (*ActivationClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &ActivationClaims{}, func(token *jwt.Token) (any, error) {
-		return signingKey(), nil
+		return secretKey(), nil
 	})
 
 	if err != nil {

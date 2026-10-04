@@ -121,6 +121,32 @@ func TestAuthorizationCodePKCEAndSingleUse(t *testing.T) {
 	}
 }
 
+func TestDisabledClientInvalidatesExistingAccessToken(t *testing.T) {
+	p, store := testProvider(t)
+	ctx := t.Context()
+	verifier := "authorization-code-verifier-with-43-characters-minimum"
+	code, err := p.Authorize(ctx, AuthorizeRequest{ClientID: "client-1", RedirectURI: "https://app.example/callback", ResponseType: "code", Scope: []string{"openid"}, CodeChallenge: base64URLSHA256(verifier), CodeChallengeMethod: "S256"}, testAuthentication(), true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tokens, err := p.ExchangeCode(ctx, TokenRequest{GrantType: "authorization_code", Code: code.Code, RedirectURI: "https://app.example/callback", CodeVerifier: verifier, ClientID: "client-1", ClientSecret: "secret", AuthMethod: ClientSecretPost})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := p.UserInfo(ctx, tokens.AccessToken); err != nil {
+		t.Fatal(err)
+	}
+	client, err := store.GetClient(ctx, "client-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.Enabled = false
+	store.PutClient(client)
+	if _, err := p.UserInfo(ctx, tokens.AccessToken); !errors.Is(err, ErrTokenRevoked) {
+		t.Fatalf("disabled client's token accepted: %v", err)
+	}
+}
+
 func TestRefreshRotationAndRevocation(t *testing.T) {
 	p, store := testProvider(t)
 	ctx := context.Background()

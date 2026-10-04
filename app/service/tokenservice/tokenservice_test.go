@@ -9,17 +9,17 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
-func withAppSigningKey(t *testing.T, key string) {
+func withAppSecretKey(t *testing.T, key string) {
 	t.Helper()
-	old := preferences.GetString("app.signingKey", "")
-	preferences.Set("app.signingKey", key)
+	old := preferences.Get("app.secretKey")
+	preferences.Set("app.secretKey", key)
 	t.Cleanup(func() {
-		preferences.Set("app.signingKey", old)
+		preferences.Set("app.secretKey", old)
 	})
 }
 
 func TestActivationTokenLifecycle(t *testing.T) {
-	withAppSigningKey(t, "activation-test-key")
+	withAppSecretKey(t, "activation-test-key")
 
 	token, err := GenerateActivationToken(12, "user@example.com")
 	if err != nil {
@@ -42,7 +42,7 @@ func TestActivationTokenLifecycle(t *testing.T) {
 }
 
 func TestGenerateActivationTokenByUser(t *testing.T) {
-	withAppSigningKey(t, "activation-user-key")
+	withAppSecretKey(t, "activation-user-key")
 
 	token, err := GenerateActivationTokenByUser(users.EntityComplete{
 		Id:    99,
@@ -62,7 +62,7 @@ func TestGenerateActivationTokenByUser(t *testing.T) {
 }
 
 func TestPasswordResetTokenLifecycle(t *testing.T) {
-	withAppSigningKey(t, "password-reset-test-key")
+	withAppSecretKey(t, "password-reset-test-key")
 
 	token, err := GeneratePasswordResetToken(34, "reset@example.com", 7)
 	if err != nil {
@@ -88,7 +88,7 @@ func TestPasswordResetTokenLifecycle(t *testing.T) {
 }
 
 func TestPasswordResetTokenRejectsMissingTokenVersion(t *testing.T) {
-	withAppSigningKey(t, "password-reset-version-test-key")
+	withAppSecretKey(t, "password-reset-version-test-key")
 
 	legacyToken := jwt.NewWithClaims(jwt.SigningMethodHS256, PasswordResetClaims{
 		UserId: 34,
@@ -97,7 +97,7 @@ func TestPasswordResetTokenRejectsMissingTokenVersion(t *testing.T) {
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)),
 		},
 	})
-	tokenString, err := legacyToken.SignedString(signingKey())
+	tokenString, err := legacyToken.SignedString(secretKey())
 	if err != nil {
 		t.Fatalf("sign legacy password reset token: %v", err)
 	}
@@ -108,7 +108,7 @@ func TestPasswordResetTokenRejectsMissingTokenVersion(t *testing.T) {
 }
 
 func TestTokenParsingRejectsInvalidInput(t *testing.T) {
-	withAppSigningKey(t, "reject-test-key")
+	withAppSecretKey(t, "reject-test-key")
 
 	if _, err := ParseActivationToken("not-a-token"); err == nil {
 		t.Fatalf("expected invalid activation token error")

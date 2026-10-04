@@ -49,6 +49,42 @@ func TestNewPersistsAndReusesEncryptedSigningKey(t *testing.T) {
 	}
 }
 
+func TestRecoverSigningKeyAfterSystemSecretChanges(t *testing.T) {
+	db := testDB(t)
+	opts := Options{DB: db, SiteURL: "https://forum.example", KeyEncryptionSecret: []byte("01234567890123456789012345678901")}
+	before, err := New(t.Context(), opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldKeys, err := before.Provider().PublicJWKS(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	opts.KeyEncryptionSecret = []byte("abcdefghijklmnopqrstuvwxyz012345")
+	if _, err := New(t.Context(), opts); err == nil {
+		t.Fatal("changed system key unexpectedly decrypted existing private key")
+	}
+	store, err := oidcProviderStore.New(db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	key, err := buildSigningKey(opts.KeyEncryptionSecret, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := store.ResetSigningKey(t.Context(), key, time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	after, err := New(t.Context(), opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	keys, err := after.Provider().PublicJWKS(t.Context())
+	if err != nil || len(keys.Keys) != 1 || keys.Keys[0].Kid == oldKeys.Keys[0].Kid {
+		t.Fatalf("recovery did not install a usable new key: %v %v", keys, err)
+	}
+}
+
 func TestSigningKeyRotationRetainsOldJWKSUntilIDTokensExpire(t *testing.T) {
 	db := testDB(t)
 	now := time.Unix(1_700_000_000, 0)

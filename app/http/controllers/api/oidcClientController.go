@@ -27,7 +27,7 @@ type oidcClientStore interface {
 	ListClients(context.Context) ([]core.Client, error)
 	GetClient(context.Context, string) (*core.Client, error)
 	CreateClient(context.Context, *core.Client) error
-	SaveClient(context.Context, *core.Client) error
+	UpdateClient(context.Context, *core.Client) error
 }
 
 type OIDCClientView struct {
@@ -272,7 +272,7 @@ func updateOIDCClient(ctx context.Context, store oidcClientStore, req UpdateOIDC
 	if err := validateManagedOIDCClient(*client); err != nil {
 		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
 	}
-	if err := store.SaveClient(ctx, client); err != nil {
+	if err := store.UpdateClient(ctx, client); err != nil {
 		return oidcClientFailure("update client", err)
 	}
 	return component.SuccessResponse(oidcClientView(*client))
@@ -295,7 +295,7 @@ func rotateOIDCClientSecret(ctx context.Context, store oidcClientStore, req Rota
 	if err := validateManagedOIDCClient(*client); err != nil {
 		return oidcClientFailure("validate stored client", err)
 	}
-	if err := store.SaveClient(ctx, client); err != nil {
+	if err := store.UpdateClient(ctx, client); err != nil {
 		return oidcClientFailure("rotate client secret", err)
 	}
 	return component.SuccessResponse(OIDCClientCredentials{Client: oidcClientView(*client), ClientSecret: secret})

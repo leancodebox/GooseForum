@@ -1,4 +1,5 @@
 export default {
+  manageOIDC: "OIDC 管理",
   authLogActions: {
     "email_change": "メールアドレス変更",
     "role_change": "役割変更",

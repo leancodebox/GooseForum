@@ -27,7 +27,7 @@ var v *viper.Viper
 var configTempl []byte
 
 func GenerateConfig() ([]byte, error) {
-	signingKey, err := algorithm.GenerateSigningKey(32)
+	secretKey, err := algorithm.GenerateSecretKey(32)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func GenerateConfig() ([]byte, error) {
 	t := template.New("config.templ.toml")
 	t = template.Must(t.Parse(string(configTempl)))
 	err = t.Execute(&b, map[string]any{
-		"SigningKey": signingKey,
+		"SecretKey": secretKey,
 	})
 	if err != nil {
 		return nil, err
@@ -96,6 +96,14 @@ func internalGet(path string, defaultValue ...any) any {
 
 func IsSet(path string) bool {
 	return v.IsSet(path) && v.Get(path) != nil
+}
+
+// SecretKey keeps existing installations compatible without changing key material.
+func SecretKey() string {
+	if IsSet("app.secretKey") {
+		return GetString("app.secretKey")
+	}
+	return GetString("app.signingKey")
 }
 
 func Set(path string, value any) {

@@ -25,13 +25,13 @@ func GeneratePasswordResetToken(userId uint64, email string, tokenVersion uint64
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(signingKey())
+	return token.SignedString(secretKey())
 }
 
 // ParsePasswordResetToken parses and validates a password reset token.
 func ParsePasswordResetToken(tokenString string) (*PasswordResetClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &PasswordResetClaims{}, func(token *jwt.Token) (any, error) {
-		return signingKey(), nil
+		return secretKey(), nil
 	})
 
 	if err != nil {

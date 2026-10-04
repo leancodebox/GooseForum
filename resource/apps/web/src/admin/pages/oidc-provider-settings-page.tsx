@@ -37,7 +37,8 @@ import {
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Switch } from "@gooseforum/ui/components/switch";
 import { Textarea } from "@gooseforum/ui/components/textarea";
-import { Check, Copy, Pencil, Plus, RefreshCw, RotateCw } from "lucide-react";
+import { Check, Copy, Pencil, Plus, RefreshCw, RotateCw, Trash2, Users } from "lucide-react";
+import { OIDCGrantsDialog } from './oidc-grants-dialog';
 import { toast } from "sonner";
 import type { IdentityTextKey } from "../identity-settings-i18n";
 type Text = (k: IdentityTextKey) => string;
@@ -76,6 +77,9 @@ export function OIDCProviderSettingsPage({
   const [editor, setEditor] = useState<Form | null>(null);
   const [rotate, setRotate] = useState<OIDCClient | null>(null);
   const [rotateSigning, setRotateSigning] = useState(false);
+  const [resetSigning, setResetSigning] = useState(false);
+  const [deleting, setDeleting] = useState<OIDCClient | null>(null);
+  const [grants, setGrants] = useState<OIDCClient | null>(null);
   const [secret, setSecret] = useState<{
     clientId: string;
     value: string;
@@ -181,12 +185,12 @@ export function OIDCProviderSettingsPage({
   }
   return (
     <AdminPage spacing="relaxed">
-      <header className="flex items-center justify-between">
-        <div>
+      <header className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="min-w-0">
           <h2 className="text-lg font-semibold">{text("oidc")}</h2>
           <p className="text-xs text-muted-foreground">{text("oidcHint")}</p>
         </div>
-        <Button size="sm" onClick={() => setEditor(blank())}>
+        <Button className="shrink-0" size="sm" onClick={() => setEditor(blank())}>
           <Plus data-icon="inline-start" />
           {text("create")}
         </Button>
@@ -203,11 +207,12 @@ export function OIDCProviderSettingsPage({
                   : text("notEnabled")}
             </Badge>
           </div>
-          <p className="mt-1 font-mono text-xs text-muted-foreground">
+          <p className="mt-1 break-all font-mono text-xs text-muted-foreground">
             {status?.issuer || status?.error || text("issuerHint")}
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {status?.enabled && !status.available ? <Button variant="destructive" size="sm" disabled={saving} onClick={() => setResetSigning(true)}><RotateCw />{text('resetSigning')}</Button> : null}
           <Button
             variant="outline"
             size="sm"
@@ -218,12 +223,23 @@ export function OIDCProviderSettingsPage({
             {text("rotateSigning")}
           </Button>
           <Switch
+            aria-label={text('oidc')}
             checked={status?.enabled || false}
             disabled={!status || saving}
             onCheckedChange={(v) => void toggleProvider(v)}
           />
         </div>
       </section>
+      {status?.issuer ? <section className="space-y-2">
+        <h3 className="font-semibold">{text('endpoints')}</h3>
+        {[
+          ['Issuer', ''], ['Discovery', '/.well-known/openid-configuration'],
+          ['Authorization', '/authorize'], ['Token', '/token'], ['UserInfo', '/userinfo'], ['JWKS', '/jwks.json'], ['Revocation', '/revoke'],
+        ].map(([label, path]) => <div key={label} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b py-2 text-sm sm:grid-cols-[7rem_minmax(0,1fr)_auto]">
+          <span className="col-span-2 sm:col-span-1">{label}</span><code className="min-w-0 break-all text-xs">{status.issuer}{path}</code>
+          <Button variant="ghost" size="icon-sm" title={text('copy')} aria-label={`${text('copy')} ${label}`} onClick={async () => { try { await navigator.clipboard.writeText(status.issuer! + path); toast.success(text('copied')); } catch { toast.error(text('copyFailed')); } }}><Copy /></Button>
+        </div>)}
+      </section> : null}
       <section className="overflow-hidden rounded-lg border">
         <div className="flex items-center justify-between border-b p-3">
           <div>
@@ -233,6 +249,8 @@ export function OIDCProviderSettingsPage({
           <Button
             variant="ghost"
             size="icon-sm"
+            aria-label={text('refresh')}
+            title={text('refresh')}
             disabled={loading}
             onClick={() => void load()}
           >
@@ -251,7 +269,7 @@ export function OIDCProviderSettingsPage({
                 className="grid gap-3 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
               >
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <h4 className="font-semibold">{client.name}</h4>
                     <Badge variant="secondary">
                       {client.public ? text("public") : text("confidential")}
@@ -263,7 +281,7 @@ export function OIDCProviderSettingsPage({
                   <p className="mt-1 font-mono text-xs text-muted-foreground">
                     {client.clientId}
                   </p>
-                  <div className="mt-2 flex gap-1">
+                  <div className="mt-2 flex flex-wrap gap-1">
                     {client.scopes.map((s) => (
                       <Badge key={s} variant="outline" className="font-mono">
                         {s}
@@ -272,7 +290,10 @@ export function OIDCProviderSettingsPage({
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="icon-sm" title={text('grants')} aria-label={text('grants')} onClick={() => setGrants(client)}><Users /></Button>
+                  <Button variant="ghost" size="icon-sm" title={text('deleteClient')} aria-label={text('deleteClient')} disabled={saving} onClick={() => setDeleting(client)}><Trash2 /></Button>
                   <Switch
+                    aria-label={`${text('clientEnabled')} ${client.name}`}
                     checked={client.enabled}
                     disabled={saving}
                     onCheckedChange={async (enabled) => {
@@ -300,6 +321,8 @@ export function OIDCProviderSettingsPage({
                     <Button
                       variant="ghost"
                       size="icon-sm"
+                      title={text('rotateSecret')}
+                      aria-label={text('rotateSecret')}
                       onClick={() => setRotate(client)}
                     >
                       <RotateCw />
@@ -308,6 +331,8 @@ export function OIDCProviderSettingsPage({
                   <Button
                     variant="ghost"
                     size="icon-sm"
+                    title={text('edit')}
+                    aria-label={text('edit')}
                     onClick={() => setEditor(fromClient(client))}
                   >
                     <Pencil />
@@ -330,6 +355,20 @@ export function OIDCProviderSettingsPage({
         onClose={() => setEditor(null)}
         onSave={() => void submit()}
       />
+      {grants ? <OIDCGrantsDialog key={grants.clientId} api={api} client={grants} text={text} onClose={() => setGrants(null)} /> : null}
+      <Confirm open={resetSigning} title={text('resetSigning')} description={text('resetSigningHint')} text={text} saving={saving} onClose={() => setResetSigning(false)} onConfirm={async () => {
+        setSaving(true);
+        try { setStatus(await api.settings.resetOIDCSigningKey()); setResetSigning(false); toast.success(text('saved')); }
+        catch (r) { toast.error(r instanceof Error ? r.message : text('saveFailed')); }
+        finally { setSaving(false); }
+      }} />
+      <Confirm open={Boolean(deleting)} title={text('deleteClient')} description={`${deleting?.name || ''}: ${text('deleteClientHint')}`} text={text} saving={saving} onClose={() => setDeleting(null)} onConfirm={async () => {
+        if (!deleting) return;
+        setSaving(true);
+        try { await api.settings.deleteOIDCClient(deleting.clientId); setDeleting(null); await load(); toast.success(text('saved')); }
+        catch (r) { toast.error(r instanceof Error ? r.message : text('saveFailed')); await load(); }
+        finally { setSaving(false); }
+      }} />
       <Confirm
         open={rotateSigning}
         title={text("rotateSigningTitle")}

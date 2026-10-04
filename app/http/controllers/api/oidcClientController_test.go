@@ -43,7 +43,7 @@ func (s *fakeOIDCClientStore) GetClient(_ context.Context, id string) (*core.Cli
 	return &owned, nil
 }
 
-func (s *fakeOIDCClientStore) SaveClient(_ context.Context, client *core.Client) error {
+func (s *fakeOIDCClientStore) UpdateClient(_ context.Context, client *core.Client) error {
 	if s.err != nil {
 		return s.err
 	}

@@ -36,9 +36,9 @@ func mfaAPIContext(body string, cookie *http.Cookie) (*gin.Context, *httptest.Re
 
 func TestMFAAPIChallengeRequiresCookieAndDoesNotIssueSessionEarly(t *testing.T) {
 	useMailSettings(t, pageConfig.MailSettingsConfig{EnableMail: true, SmtpHost: "smtp.example.com", SmtpPort: 587, FromEmail: "forum@example.com"})
-	oldKey := preferences.GetString("app.signingKey", "")
-	preferences.Set("app.signingKey", base64.RawURLEncoding.EncodeToString(make([]byte, 32)))
-	t.Cleanup(func() { preferences.Set("app.signingKey", oldKey) })
+	oldKey := preferences.Get("app.secretKey")
+	preferences.Set("app.secretKey", base64.RawURLEncoding.EncodeToString(make([]byte, 32)))
+	t.Cleanup(func() { preferences.Set("app.secretKey", oldKey) })
 	db := dbconnect.Connect()
 	if err := db.AutoMigrate(&users.EntityComplete{}, &usermfa.Factor{}, &usermfa.RecoveryCode{}, &authsessions.Token{}, &authsessions.Log{}); err != nil {
 		t.Fatal(err)

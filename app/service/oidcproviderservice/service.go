@@ -247,7 +247,7 @@ func newDefaultService() (*Service, error) {
 	return New(context.Background(), Options{
 		DB:                  dbconnect.Connect(),
 		SiteURL:             siteURL,
-		KeyEncryptionSecret: []byte(preferences.GetString("app.signingKey")),
+		KeyEncryptionSecret: []byte(preferences.SecretKey()),
 		AllowInsecureIssuer: setting.IsLocal(),
 	})
 }
@@ -285,11 +285,59 @@ func RotateDefaultSigningKey(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if err := service.RotateSigningKey(ctx, []byte(preferences.GetString("app.signingKey"))); err != nil {
+	if err := service.RotateSigningKey(ctx, []byte(preferences.SecretKey())); err != nil {
 		return err
 	}
 	next, err := newDefaultService()
 	defaultRuntime.replace(next, err)
+	return err
+}
+
+func ResetDefaultSigningKey(ctx context.Context) error {
+	defaultRuntime.reloadMu.Lock()
+	defer defaultRuntime.reloadMu.Unlock()
+	if !Configured() {
+		return errors.New("enable OIDC before resetting its signing key")
+	}
+	if _, err := defaultRuntime.get(); err == nil {
+		return errors.New("use signing key rotation while OIDC is available")
+	}
+	secret := []byte(preferences.SecretKey())
+	if len(secret) < 32 {
+		return errors.New("system secret key must contain at least 32 bytes")
+	}
+	if _, _, err := deriveIssuer(hotdataserve.GetSiteSettingsConfigCache().SiteUrl, setting.IsLocal()); err != nil {
+		return err
+	}
+	store, err := oidcProviderStore.New(dbconnect.Connect())
+	if err != nil {
+		return err
+	}
+	stored, err := store.GetSigningKey(ctx)
+	if err != nil {
+		return err
+	}
+	if stored == nil {
+		return errors.New("no stored signing key to recover; reload the provider")
+	}
+	plaintext, decryptErr := decryptPrivateKey(secret, stored.KID, stored.EncryptedPrivateKey)
+	if decryptErr == nil {
+		_, decryptErr = core.ParseRSAPrivateKeyPEM(plaintext)
+	}
+	clear(plaintext)
+	if decryptErr == nil {
+		return errors.New("stored key is usable; fix the provider configuration instead")
+	}
+	key, err := buildSigningKey(secret, rand.Reader)
+	if err != nil {
+		return err
+	}
+	defer clear(key.EncryptedPrivateKey)
+	if err := store.ResetSigningKey(ctx, key, time.Now()); err != nil {
+		return err
+	}
+	service, err := newDefaultService()
+	defaultRuntime.replace(service, err)
 	return err
 }
 

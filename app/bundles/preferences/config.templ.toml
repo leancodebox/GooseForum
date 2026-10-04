@@ -8,8 +8,8 @@ env = "production"
 # 维护模式开关
 # 为 true 时所有请求返回503维护页面
 maintenance = false
-# 安全签名密钥
-signingKey = "{{.SigningKey}}"
+# 系统密钥，用于签名和加密。长期保留并与数据库一起备份，不可随意修改。
+secretKey = "{{.SecretKey}}"
 # CDN URL (可选，留空则使用本地资源)
 # 例如: https://cdn.example.com
 cdn_url = ""

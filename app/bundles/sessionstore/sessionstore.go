@@ -15,17 +15,17 @@ var once sync.Once
 
 func GetSession() *sessions.CookieStore {
 	once.Do(func() {
-		store = sessions.NewCookieStore([]byte(sessionSigningKey()))
+		store = sessions.NewCookieStore([]byte(sessionSecretKey()))
 		configureSessionStore(store)
 	})
 	return store
 }
 
-func sessionSigningKey() string {
-	if signingKey := preferences.GetString("app.signingKey"); signingKey != "" {
-		return signingKey
+func sessionSecretKey() string {
+	if secretKey := preferences.SecretKey(); secretKey != "" {
+		return secretKey
 	}
-	return algorithm.SafeGenerateSigningKey(32)
+	return algorithm.SafeGenerateSecretKey(32)
 }
 
 func configureSessionStore(store *sessions.CookieStore) {

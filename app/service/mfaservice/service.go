@@ -68,7 +68,7 @@ func clearUserState(userID uint64) error {
 }
 
 func encryption() (cipher.AEAD, error) {
-	value := preferences.GetString("app.signingKey", "")
+	value := preferences.SecretKey()
 	if len(value) != 43 {
 		return nil, ErrUnavailable
 	}

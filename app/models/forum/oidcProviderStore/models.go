@@ -33,8 +33,8 @@ type ClientEntity struct {
 func (ClientEntity) TableName() string { return clientTable }
 
 type ConsentEntity struct {
-	UserID    string   `gorm:"primaryKey;column:user_id;type:varchar(255);not null"`
-	ClientID  string   `gorm:"primaryKey;column:client_id;type:varchar(255);not null;index:idx_oidc_consents_client"`
+	UserID    string   `gorm:"primaryKey;column:user_id;type:varchar(255);not null;index:idx_oidc_consents_client_user,priority:2"`
+	ClientID  string   `gorm:"primaryKey;column:client_id;type:varchar(255);not null;index:idx_oidc_consents_client;index:idx_oidc_consents_client_user,priority:1"`
 	Scopes    []string `gorm:"column:scopes;type:text;not null;serializer:json"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -46,7 +46,7 @@ type AuthorizationCodeEntity struct {
 	Hash                string    `gorm:"primaryKey;column:code_hash;type:varchar(64);not null"`
 	GrantID             string    `gorm:"column:grant_id;type:varchar(64);not null;default:'';index:idx_oidc_codes_grant"`
 	UserID              string    `gorm:"column:user_id;type:varchar(255);not null;index:idx_oidc_codes_grant_owner,priority:1"`
-	ClientID            string    `gorm:"column:client_id;type:varchar(255);not null;index:idx_oidc_codes_grant_owner,priority:2"`
+	ClientID            string    `gorm:"column:client_id;type:varchar(255);not null;index:idx_oidc_codes_grant_owner,priority:2;index:idx_oidc_codes_client"`
 	RedirectURI         string    `gorm:"column:redirect_uri;type:text;not null"`
 	Scopes              []string  `gorm:"column:scopes;type:text;not null;serializer:json"`
 	Nonce               string    `gorm:"column:nonce;type:varchar(255);not null;default:''"`
@@ -66,7 +66,7 @@ type TokenEntity struct {
 	GrantID         string     `gorm:"column:grant_id;type:varchar(64);not null;default:'';index:idx_oidc_tokens_grant"`
 	FamilyID        string     `gorm:"column:family_id;type:varchar(64);not null;default:'';index:idx_oidc_tokens_family"`
 	UserID          string     `gorm:"column:user_id;type:varchar(255);not null;index:idx_oidc_tokens_owner,priority:1"`
-	ClientID        string     `gorm:"column:client_id;type:varchar(255);not null;index:idx_oidc_tokens_owner,priority:2"`
+	ClientID        string     `gorm:"column:client_id;type:varchar(255);not null;index:idx_oidc_tokens_owner,priority:2;index:idx_oidc_tokens_client"`
 	Scopes          []string   `gorm:"column:scopes;type:text;not null;serializer:json"`
 	ExpiresAt       time.Time  `gorm:"column:expires_at;not null;index:idx_oidc_tokens_type_expiry,priority:2"`
 	FamilyExpiresAt *time.Time `gorm:"column:family_expires_at;index:idx_oidc_tokens_family_expiry"`

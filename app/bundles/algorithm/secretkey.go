@@ -19,8 +19,8 @@ func GenerateRandomBytes(n int) ([]byte, error) {
 	return b, nil
 }
 
-// GenerateSigningKey returns a URL-safe base64 signing key with no padding.
-func GenerateSigningKey(keyLength int) (string, error) {
+// GenerateSecretKey returns a URL-safe base64 secret key with no padding.
+func GenerateSecretKey(keyLength int) (string, error) {
 	bytes, err := GenerateRandomBytes(keyLength)
 	if err != nil {
 		return "", err
@@ -28,15 +28,15 @@ func GenerateSigningKey(keyLength int) (string, error) {
 	return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(bytes), nil
 }
 
-// SafeGenerateSigningKey returns a secure key or stops if secure randomness is unavailable.
-func SafeGenerateSigningKey(keyLength int) string {
+// SafeGenerateSecretKey returns a secure key or stops if secure randomness is unavailable.
+func SafeGenerateSecretKey(keyLength int) string {
 	if keyLength <= 0 {
 		keyLength = 32
 	}
-	signingKey, err := GenerateSigningKey(keyLength)
+	secretKey, err := GenerateSecretKey(keyLength)
 	if err == nil {
-		return signingKey
+		return secretKey
 	}
 
-	panic(fmt.Errorf("secure signing key generation failed: %w", err))
+	panic(fmt.Errorf("secure secret key generation failed: %w", err))
 }

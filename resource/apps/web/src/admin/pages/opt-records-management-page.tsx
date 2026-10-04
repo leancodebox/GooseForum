@@ -12,7 +12,7 @@ import { ChevronLeft, ChevronRight, ListChecks, RefreshCw } from 'lucide-react'
 import { formatAuditMessage, type AuditTextKey } from '../audit-i18n'
 
 type Text = (key: AuditTextKey) => string
-const optTypes: Record<number, AuditTextKey> = { 0: 'editUser', 1: 'editTopic', 2: 'editCategory' }
+const optTypes: Record<number, AuditTextKey> = { 0: 'editUser', 1: 'editTopic', 2: 'editCategory', 3: 'manageOIDC' }
 const targetTypes: Record<number, AuditTextKey> = { 0: 'system', 1: 'user', 2: 'topic', 3: 'docProject', 4: 'docVersion', 5: 'docContent', 6: 'category' }
 
 export function OptRecordsManagementPage({ api, text, locale }: { api: GooseAdminApi; text: Text; locale: AuthLocale }) {

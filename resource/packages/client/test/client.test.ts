@@ -428,6 +428,22 @@ describe('API client', () => {
     expect(fetchMock.mock.calls[2]?.[1]?.body).toBe(JSON.stringify({ clientId:'client-id' }))
   })
 
+  it('exposes administrator OIDC grant and recovery contracts', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: true }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+    await client.admin.settings.oidcClientGrants('client-id', '20', '21')
+    await client.admin.settings.revokeOIDCClientGrant('client-id', '21')
+    await client.admin.settings.deleteOIDCClient('client-id')
+    await client.admin.settings.resetOIDCSigningKey()
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'https://forum.example/api/admin/oidc-clients/grants?clientId=client-id&after=20&userId=21',
+      'https://forum.example/api/admin/oidc-clients/revoke-grant',
+      'https://forum.example/api/admin/oidc-clients/delete',
+      'https://forum.example/api/admin/oidc-provider/reset-signing-key',
+    ])
+    expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(JSON.stringify({ clientId: 'client-id', userId: '21' }))
+  })
+
   it('exposes dashboard statistics and traffic contracts', async () => {
     const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
     const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })

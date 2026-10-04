@@ -734,6 +734,13 @@ func (p *Provider) ValidateAccessToken(ctx context.Context, raw string) (*Token,
 	if token.RevokedAt != nil || !p.cfg.Now().Before(token.ExpiresAt) {
 		return nil, protocolError("invalid_token", "access token is expired or revoked", ErrTokenRevoked)
 	}
+	client, err := p.cfg.Store.GetClient(ctx, token.ClientID)
+	if err != nil {
+		return nil, protocolError("server_error", "access token client lookup failed", errors.Join(ErrServer, err))
+	}
+	if client == nil || !client.Enabled {
+		return nil, protocolError("invalid_token", "access token client is disabled", ErrTokenRevoked)
+	}
 	return token, nil
 }
 

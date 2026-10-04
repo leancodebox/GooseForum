@@ -24,6 +24,8 @@ func (receiver OptEnum) Name() string {
 		return "编辑主题"
 	case EditCategory:
 		return "编辑分类"
+	case ManageOIDC:
+		return "OIDC 管理"
 	}
 	return ""
 }
@@ -36,6 +38,7 @@ const (
 	EditUser OptEnum = iota
 	EditTopic
 	EditCategory
+	ManageOIDC
 )
 
 type TargetTypeEnum int

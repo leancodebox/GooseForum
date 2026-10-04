@@ -23,7 +23,7 @@ import (
 
 func testUser(t *testing.T) users.EntityComplete {
 	t.Helper()
-	withSigningKey(t, testSigningKey(t))
+	withSecretKey(t, testSecretKey(t))
 	db := dbconnect.Connect()
 	if err := db.AutoMigrate(&users.EntityComplete{}, &usermfa.Factor{}, &usermfa.RecoveryCode{}, &authsessions.Token{}, &authsessions.Log{}); err != nil {
 		t.Fatal(err)
@@ -112,7 +112,7 @@ func TestStandardTOTPAndDrift(t *testing.T) {
 	}
 }
 func TestCipherBindingAndMissingKey(t *testing.T) {
-	withSigningKey(t, testSigningKey(t))
+	withSecretKey(t, testSecretKey(t))
 	sealed, err := seal(1, "SECRET")
 	if err != nil {
 		t.Fatal(err)
@@ -120,7 +120,7 @@ func TestCipherBindingAndMissingKey(t *testing.T) {
 	if _, err = open(2, sealed); !errors.Is(err, ErrUnavailable) {
 		t.Fatal("cipher not bound to user")
 	}
-	preferences.Set("app.signingKey", "invalid")
+	preferences.Set("app.secretKey", "invalid")
 	if _, err = open(1, sealed); !errors.Is(err, ErrUnavailable) {
 		t.Fatal("missing key bypassed")
 	}

@@ -1,9 +1,28 @@
 package preferences
 
 import (
+	"github.com/spf13/viper"
 	"strings"
 	"testing"
 )
+
+func TestSecretKeyCompatibility(t *testing.T) {
+	previous := v
+	v = viper.New()
+	t.Cleanup(func() { v = previous })
+	v.Set("app.signingKey", "old-key")
+	if SecretKey() != "old-key" {
+		t.Fatal("legacy key was not preserved")
+	}
+	v.Set("app.secretKey", "new-key")
+	if SecretKey() != "new-key" {
+		t.Fatal("new key did not take priority")
+	}
+	v.Set("app.secretKey", "")
+	if SecretKey() != "" {
+		t.Fatal("explicit empty key unexpectedly fell back to old key")
+	}
+}
 
 func TestGeneratedConfigLeavesOptionalMeilisearchDisabled(t *testing.T) {
 	config, err := GenerateConfig()

@@ -1,4 +1,5 @@
 export default {
+  manageOIDC: "Gestione OIDC",
   authLogActions: {
     "email_change": "Email modificata",
     "role_change": "Ruolo modificato",

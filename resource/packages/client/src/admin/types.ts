@@ -141,6 +141,7 @@ export interface OIDCProviderStatus { enabled:boolean;available:boolean;issuer?:
 export interface OIDCClient { clientId:string;name:string;redirectUris:string[];scopes:string[];grantTypes:string[];tokenEndpointAuthMethod:OIDCClientAuthMethod;requirePkce:boolean;public:boolean;enabled:boolean }
 export type OIDCClientInput=Omit<OIDCClient,'clientId'>
 export interface OIDCClientCredentials { client:OIDCClient;clientSecret?:string }
+export interface OIDCAdminGrant { userId:string;username:string;scopes:string[];createdAt:string;updatedAt:string }
 export interface SiteStatistics { userCount:number;userMonthCount:number;topicMaxId:number;topicMonthCount:number;postMaxId:number;linksCount:number }
 export interface DailyTraffic { date:string;regCount:number;topicCount:number;replyCount:number }
 export interface ServerVersion { version:string;commit:string;buildDate:string;mode:'development'|'snapshot'|'release'|'custom'|string }
@@ -282,6 +283,10 @@ export interface GooseAdminApi {
     oidcStatus(): Promise<OIDCProviderStatus>
     saveOIDCStatus(enabled: boolean): Promise<OIDCProviderStatus>
     rotateOIDCSigningKey(): Promise<OIDCProviderStatus>
+    resetOIDCSigningKey(): Promise<OIDCProviderStatus>
+    deleteOIDCClient(clientId:string): Promise<boolean>
+    oidcClientGrants(clientId:string, after?:string, userId?:string): Promise<{items:OIDCAdminGrant[];hasMore:boolean}>
+    revokeOIDCClientGrant(clientId:string, userId?:string): Promise<boolean>
     oidcClients(): Promise<OIDCClient[]>
     createOIDCClient(input: OIDCClientInput): Promise<OIDCClientCredentials>
     updateOIDCClient(client: OIDCClient): Promise<OIDCClient>

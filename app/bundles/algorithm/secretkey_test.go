@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestGenerateSigningKey(t *testing.T) {
+func TestGenerateSecretKey(t *testing.T) {
 	bytes, err := GenerateRandomBytes(32)
 	if err != nil {
 		t.Fatal(err)
@@ -14,7 +14,7 @@ func TestGenerateSigningKey(t *testing.T) {
 		t.Fatalf("GenerateRandomBytes length = %d, want 32", len(bytes))
 	}
 
-	key, err := GenerateSigningKey(32)
+	key, err := GenerateSecretKey(32)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -23,32 +23,32 @@ func TestGenerateSigningKey(t *testing.T) {
 		t.Fatalf("generated key should be URL-safe base64: %v", err)
 	}
 	if len(decoded) != 32 {
-		t.Fatalf("decoded signing key length = %d, want 32", len(decoded))
+		t.Fatalf("decoded secret key length = %d, want 32", len(decoded))
 	}
 	if len(key) != 43 {
-		t.Fatalf("encoded signing key length = %d, want 43", len(key))
+		t.Fatalf("encoded secret key length = %d, want 43", len(key))
 	}
-	other, err := GenerateSigningKey(32)
+	other, err := GenerateSecretKey(32)
 	if err != nil || other == key {
-		t.Fatal("successive signing keys must be independently generated")
+		t.Fatal("successive secret keys must be independently generated")
 	}
 }
 
-func TestGenerateSigningKeyRejectsInvalidLength(t *testing.T) {
+func TestGenerateSecretKeyRejectsInvalidLength(t *testing.T) {
 	for _, length := range []int{-1, 0} {
-		if _, err := GenerateSigningKey(length); err == nil {
+		if _, err := GenerateSecretKey(length); err == nil {
 			t.Fatal("invalid key length accepted")
 		}
 	}
 }
 
-func TestSafeGenerateSigningKey(t *testing.T) {
-	key := SafeGenerateSigningKey(32)
+func TestSafeGenerateSecretKey(t *testing.T) {
+	key := SafeGenerateSecretKey(32)
 	decoded, err := base64.URLEncoding.WithPadding(base64.NoPadding).DecodeString(key)
 	if err != nil {
 		t.Fatalf("safe key should be URL-safe base64: %v", err)
 	}
 	if len(decoded) != 32 {
-		t.Fatalf("decoded safe signing key length = %d, want 32", len(decoded))
+		t.Fatalf("decoded safe secret key length = %d, want 32", len(decoded))
 	}
 }

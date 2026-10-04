@@ -240,10 +240,14 @@ func apiRoute(ginApp *gin.Engine) {
 		GET("oidc-provider", UpButterReq(api.GetOIDCProviderStatus)).
 		POST("oidc-provider", UpJsonReq(api.SaveOIDCProviderSettings)).
 		POST("oidc-provider/rotate-signing-key", UpButterReq(api.RotateOIDCSigningKey)).
+		POST("oidc-provider/reset-signing-key", UpButterReq(api.ResetOIDCSigningKey)).
 		GET("oidc-clients", UpButterReq(api.ListOIDCClients)).
 		POST("oidc-clients/create", UpJsonReq(api.CreateOIDCClient)).
 		POST("oidc-clients/update", UpJsonReq(api.UpdateOIDCClient)).
 		POST("oidc-clients/rotate-secret", UpJsonReq(api.RotateOIDCClientSecret)).
+		POST("oidc-clients/delete", UpJsonReq(api.DeleteOIDCClient)).
+		GET("oidc-clients/grants", UpButterReq(api.ListOIDCClientGrants)).
+		POST("oidc-clients/revoke-grant", UpJsonReq(api.RevokeOIDCClientGrant)).
 		GET("site-chrome", UpButterReq(api.GetSiteChrome)).
 		POST("save-site-chrome", UpButterReq(api.SaveSiteChrome)).
 		GET("site-theme", UpButterReq(api.GetSiteTheme)).
