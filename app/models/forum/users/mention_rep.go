@@ -26,12 +26,12 @@ func MentionIdentities(ids []uint64, names []string) ([]MentionIdentity, error) 
 	for i, name := range names {
 		keys[i] = identityKey(name)
 	}
-	err := builder().Model(&EntityComplete{}).Where("id IN ? OR username_key IN ?", ids, keys).Find(&result).Error
+	err := builder().Model(&EntityComplete{}).Where("id IN ? OR username IN ?", ids, keys).Find(&result).Error
 	return result, err
 }
 func MentionCandidates(prefix string) ([]MentionIdentity, error) {
 	var result []MentionIdentity
 	prefix = strings.ToLower(prefix)
-	err := builder().Model(&EntityComplete{}).Where("username_key >= ? AND username_key < ?", prefix, prefix+"~").Where("restriction_status IN ? OR restriction_status = '' OR restriction_until <= ?", []string{RestrictionNormal, RestrictionSuspended}, time.Now()).Order("username_key ASC").Limit(8).Find(&result).Error
+	err := builder().Model(&EntityComplete{}).Where("username >= ? AND username < ?", prefix, prefix+"~").Where("restriction_status IN ? OR restriction_status = '' OR restriction_until <= ?", []string{RestrictionNormal, RestrictionSuspended}, time.Now()).Order("username ASC").Limit(8).Find(&result).Error
 	return result, err
 }

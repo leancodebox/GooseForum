@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -79,7 +80,7 @@ func ensureTopicWriteAccess(t *testing.T, conn *gorm.DB) {
 func createTopicWriteUser(t *testing.T, conn *gorm.DB, id uint64, username string) {
 	t.Helper()
 	now := time.Now().Add(-time.Hour)
-	if err := conn.Create(&users.EntityComplete{Id: id, Username: username, IsActivated: users.ActivationSuccess, CreatedAt: now}).Error; err != nil {
+	if err := conn.Create(&users.EntityComplete{Id: id, Username: fmt.Sprintf("%s-%d", username, id), IsActivated: users.ActivationSuccess, CreatedAt: now}).Error; err != nil {
 		t.Fatalf("create user: %v", err)
 	}
 	if err := conn.Create(&userStatistics.Entity{UserId: id}).Error; err != nil {

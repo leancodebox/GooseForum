@@ -24,6 +24,7 @@ func GetIdentity(id any) (identity Identity, err error) {
 }
 
 func Verify(usernameOrEmail string, password string) (*EntityComplete, error) {
+	usernameOrEmail = identityKey(usernameOrEmail)
 	var user EntityComplete
 	var err error
 	if strings.Contains(usernameOrEmail, "@") {
@@ -43,12 +44,12 @@ func Verify(usernameOrEmail string, password string) (*EntityComplete, error) {
 
 // GetByEmail 通过邮箱获取用户
 func GetByEmail(email string) (entity EntityComplete, err error) {
-	err = builder().Where("email = ?", email).First(&entity).Error
+	err = builder().Where("email = ?", identityKey(email)).First(&entity).Error
 	return
 }
 
 func GetByUsername(username string) (entity EntityComplete, err error) {
-	err = builder().Where("username = ?", username).First(&entity).Error
+	err = builder().Where("username = ?", identityKey(username)).First(&entity).Error
 	return
 }
 
@@ -65,11 +66,12 @@ func RandAvatarUrl() string {
 }
 
 func Create(entity *EntityComplete) error {
-	return builder().Create(&entity).Error
+	err := builder().Create(entity).Error
+	return identityWriteError(err, entity.Username, entity.Email, 0)
 }
 
 func Save(entity *EntityComplete) error {
-	result := builder().Omit("username", "username_key", "email", "email_key", "is_activated", "activated_at", "requires_email_verification", "password", "token_version", "role_id", "is_frozen", "restriction_status", "restriction_until", "restriction_reason", "restriction_note").Save(entity)
+	result := builder().Omit("username", "email", "is_activated", "activated_at", "requires_email_verification", "password", "token_version", "role_id", "is_frozen", "restriction_status", "restriction_until", "restriction_reason", "restriction_note").Save(entity)
 	return result.Error
 }
 

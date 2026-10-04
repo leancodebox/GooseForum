@@ -21,7 +21,7 @@ func createMentionUsers(t *testing.T) []users.EntityComplete {
 	if err := conn.AutoMigrate(&users.EntityComplete{}, &eventNotification.Entity{}); err != nil {
 		t.Fatal(err)
 	}
-	identities := []users.EntityComplete{{Id: 970001, Username: "mention_alice"}, {Id: 970002, Username: "mention_bob"}, {Id: 970003, Username: "mention_frozen", IsFrozen: 1}, {Id: 970004, Username: "mention_ambiguous"}, {Id: 970005, Username: "mention_ambiguous"}}
+	identities := []users.EntityComplete{{Id: 970001, Username: "mention_alice"}, {Id: 970002, Username: "mention_bob"}, {Id: 970003, Username: "mention_frozen", IsFrozen: 1}, {Id: 970004, Username: "mention_extra"}, {Id: 970005, Username: "mention_other"}}
 	if err := conn.Create(&identities).Error; err != nil {
 		t.Fatal(err)
 	}
@@ -51,17 +51,13 @@ func TestNormalizeStableIdentityAndProtectedSource(t *testing.T) {
 	if err != nil || legacy != source {
 		t.Fatal("legacy source changed")
 	}
-	unknown, err := Normalize("@missing_user @mention_ambiguous", 1, true)
-	if err != nil || unknown != "@missing_user @mention_ambiguous" {
-		t.Fatalf("unknown/ambiguous resolved: %q %v", unknown, err)
+	unknown, err := Normalize("@missing_user @missing_other", 1, true)
+	if err != nil || unknown != "@missing_user @missing_other" {
+		t.Fatalf("unknown identity resolved: %q %v", unknown, err)
 	}
 	wrongCase, err := Normalize("@MENTION_ALICE", 1, true)
 	if err != nil || wrongCase != markdownext.Canonical(users[0].Id, users[0].Username) {
 		t.Fatalf("case-folded identity not resolved: %q %v", wrongCase, err)
-	}
-	ambiguous, err := Normalize("@MENTION_AMBIGUOUS", 1, true)
-	if err != nil || ambiguous != "@MENTION_AMBIGUOUS" {
-		t.Fatalf("ambiguous case-folded identity resolved: %q %v", ambiguous, err)
 	}
 	if _, err := Normalize("[mention user=\"bad\"]@alice[/mention]", 1, true); !errors.Is(err, ErrInvalid) {
 		t.Fatalf("invalid accepted %v", err)

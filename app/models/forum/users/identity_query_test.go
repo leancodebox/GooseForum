@@ -2,13 +2,14 @@ package users
 
 import (
 	"errors"
+	"fmt"
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"strings"
 	"testing"
 )
 
-func TestIdentityBackfillPreservesDuplicatesAndUsesIndexes(t *testing.T) {
+func TestNormalizedIdentityUsesUniqueIndexes(t *testing.T) {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	if err != nil {
 		t.Fatal(err)
@@ -19,42 +20,48 @@ func TestIdentityBackfillPreservesDuplicatesAndUsesIndexes(t *testing.T) {
 	if err := db.AutoMigrate(&EntityComplete{}); err != nil {
 		t.Fatal(err)
 	}
-	for _, row := range []map[string]any{
-		{"id": 1, "username": "LegacyUser", "email": "Legacy@Example.com"},
-		{"id": 2, "username": "legacyuser", "email": "LEGACY@example.com"},
-		{"id": 3, "username": "   ", "email": ""},
+	for _, row := range []EntityComplete{
+		{Id: 1, Username: "  LegacyUser  ", Email: " Legacy@Example.com "},
+		{Id: 2, Username: "other"},
+		{Id: 3, Username: "another"},
 	} {
-		if err := db.Table("users").Create(row).Error; err != nil {
+		if err := db.Create(&row).Error; err != nil {
 			t.Fatal(err)
 		}
 	}
-	for range 2 {
-		if err := BackfillIdentityKeys(db); err != nil {
-			t.Fatal(err)
-		}
+	if err := db.Create(&EntityComplete{Username: "LEGACYUSER"}).Error; err == nil {
+		t.Fatal("database accepted duplicate normalized username")
+	}
+	if err := db.Create(&EntityComplete{Username: "unique", Email: "LEGACY@example.com"}).Error; err == nil {
+		t.Fatal("database accepted duplicate normalized email")
+	}
+	var nullEmails int64
+	if err := db.Model(&EntityComplete{}).Where("email IS NULL").Count(&nullEmails).Error; err != nil || nullEmails != 2 {
+		t.Fatalf("missing emails must use NULL: %d %v", nullEmails, err)
 	}
 	var rows []EntityComplete
 	if err := db.Order("id").Find(&rows).Error; err != nil {
 		t.Fatal(err)
 	}
-	if len(rows) != 3 || rows[0].Username != "LegacyUser" || rows[1].Email != "LEGACY@example.com" || rows[0].UsernameKey != "legacyuser" || rows[1].EmailKey != "legacy@example.com" {
-		t.Fatalf("legacy accounts changed: %+v", rows)
+	if len(rows) != 3 || rows[0].Username != "legacyuser" || rows[0].Email != "legacy@example.com" || rows[1].Email != "" {
+		t.Fatalf("identity normalization: %+v", rows)
 	}
-	if err := checkIdentityAvailable(db, "LEGACYUSER", "", 0); !errors.Is(err, ErrUsernameExists) {
-		t.Fatalf("legacy username conflict: %v", err)
+	owner := identityTestUser(t)
+	if err := CheckIdentityAvailable(strings.ToUpper(owner.Username), "", 0); !errors.Is(err, ErrUsernameExists) {
+		t.Fatalf("normalized username conflict: %v", err)
 	}
-	if err := checkIdentityAvailable(db, "", "legacy@example.COM", 0); !errors.Is(err, ErrEmailExists) {
-		t.Fatalf("legacy email conflict: %v", err)
+	if err := CheckIdentityAvailable("", strings.ToUpper(owner.Email), 0); !errors.Is(err, ErrEmailExists) {
+		t.Fatalf("normalized email conflict: %v", err)
 	}
 	for _, query := range []struct {
 		sql   string
 		args  []any
 		index string
 	}{
-		{"SELECT id, username FROM users WHERE username_key = ? AND id <> ? AND deleted_at IS NULL LIMIT 1", []any{"legacyuser", 0}, "idx_users_username_key"},
-		{"SELECT id, username FROM users WHERE email_key = ? AND id <> ? AND deleted_at IS NULL LIMIT 1", []any{"legacy@example.com", 0}, "idx_users_email_key"},
-		{"SELECT id, username FROM users WHERE username_key >= ? AND username_key < ? AND deleted_at IS NULL ORDER BY username_key LIMIT 8", []any{"leg", "leg~"}, "idx_users_username_key"},
-		{"SELECT id, username FROM users WHERE (id IN (?) OR username_key IN (?)) AND deleted_at IS NULL", []any{1, "legacyuser"}, "idx_users_username_key"},
+		{"SELECT id, username FROM users WHERE username = ? AND id <> ? AND deleted_at IS NULL LIMIT 1", []any{"legacyuser", 0}, "ux_users_username"},
+		{"SELECT id, username FROM users WHERE email = ? AND id <> ? AND deleted_at IS NULL LIMIT 1", []any{"legacy@example.com", 0}, "ux_users_email"},
+		{"SELECT id, username FROM users WHERE username >= ? AND username < ? AND deleted_at IS NULL ORDER BY username LIMIT 8", []any{"leg", "leg~"}, "ux_users_username"},
+		{"SELECT id, username FROM users WHERE (id IN (?) OR username IN (?)) AND deleted_at IS NULL", []any{1, "legacyuser"}, "ux_users_username"},
 	} {
 		var plan []struct{ Detail string }
 		if err := db.Raw("EXPLAIN QUERY PLAN "+query.sql, query.args...).Scan(&plan).Error; err != nil {
@@ -67,5 +74,52 @@ func TestIdentityBackfillPreservesDuplicatesAndUsesIndexes(t *testing.T) {
 		if !strings.Contains(details, query.index) || strings.Contains(details, "TEMP B-TREE") {
 			t.Fatalf("inefficient plan: %s", details)
 		}
+	}
+}
+
+func TestIdentityConstraintsRejectConcurrentWrites(t *testing.T) {
+	for _, identity := range []string{"username", "email"} {
+		t.Run(identity, func(t *testing.T) {
+			owner := identityTestUser(t)
+			name := owner.Username + "-race"
+			email := "race-" + owner.Email
+			if err := CheckIdentityAvailable(name, email, 0); err != nil {
+				t.Fatal(err)
+			}
+			start := make(chan struct{})
+			results := make(chan error, 2)
+			for i := range 2 {
+				user := EntityComplete{Username: name, Email: email}
+				if identity == "email" {
+					user.Username = fmt.Sprintf("%s-%d", name, i)
+				} else {
+					user.Email = ""
+				}
+				go func() {
+					<-start
+					results <- Create(&user)
+				}()
+			}
+			close(start)
+			successes, conflicts := 0, 0
+			want := ErrUsernameExists
+			if identity == "email" {
+				want = ErrEmailExists
+			}
+			for range 2 {
+				err := <-results
+				if err == nil {
+					successes++
+				} else if errors.Is(err, want) {
+					conflicts++
+				} else {
+					t.Fatalf("unexpected write error: %v", err)
+				}
+			}
+			builder().Unscoped().Where("username LIKE ?", name+"%").Delete(&EntityComplete{})
+			if successes != 1 || conflicts != 1 {
+				t.Fatalf("writes: success=%d conflicts=%d", successes, conflicts)
+			}
+		})
 	}
 }

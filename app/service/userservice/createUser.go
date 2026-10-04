@@ -20,7 +20,7 @@ func CreateUser(username, password, email string, needValid bool, locale ...stri
 
 // CreateUserWithBinding retains a provider identity on the account so failed bindings can be retried.
 func CreateUserWithBinding(username, password, email string, needValid bool, binding *userOAuth.Entity, locale ...string) (*users.EntityComplete, error) {
-	username = strings.TrimSpace(username)
+	username = strings.ToLower(strings.TrimSpace(username))
 	email = strings.ToLower(strings.TrimSpace(email))
 	userEntity := users.MakeUser(username, password, email)
 	userEntity.Locale = normalizeUserLocale(locale...)
@@ -37,7 +37,7 @@ func CreateUserWithBinding(username, password, email string, needValid bool, bin
 		key := users.OAuthRegistrationKey(binding.Provider, binding.ProviderUid)
 		userEntity.OAuthRegistrationKey = &key
 	}
-	err := users.WithIdentityWriteLock(func() error {
+	err := func() error {
 		if binding != nil {
 			recovered, err := users.FindOAuthRegistration(*userEntity.OAuthRegistrationKey)
 			if err != nil {
@@ -67,7 +67,7 @@ func CreateUserWithBinding(username, password, email string, needValid bool, bin
 			}
 		}
 		return nil
-	})
+	}()
 	if err != nil {
 		return nil, err
 	}

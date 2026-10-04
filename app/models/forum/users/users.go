@@ -81,15 +81,13 @@ type ExternalInformation struct {
 type EntityComplete struct {
 	OAuthRegistrationKey *string `gorm:"column:oauth_registration_key;type:varchar(64);uniqueIndex" json:"-"`
 	// base
-	Id                        uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                      //
-	Username                  string     `gorm:"column:username;index;type:varchar(64);not null;default:'';" json:"username"` //
-	UsernameKey               string     `gorm:"column:username_key;index;type:varchar(64);not null;default:''" json:"-"`
-	EmailKey                  string     `gorm:"column:email_key;index;type:varchar(128);not null;default:''" json:"-"`
-	Email                     string     `gorm:"column:email;index;type:varchar(128);not null;default:'';" json:"email"` //
-	Password                  string     `gorm:"column:password;type:varchar(128);not null;default:'';" json:"-"`        //
-	TokenVersion              uint64     `gorm:"column:token_version;not null;default:0;" json:"-"`                      // 登录令牌版本，改密后自增
-	Locale                    string     `gorm:"column:locale;type:varchar(16);not null;default:'';" json:"locale"`      // 用户语言偏好
-	IsFrozen                  int8       `gorm:"column:is_frozen;not null;default:0;" json:"isFrozen"`                   // 状态：0正常 1冻结
+	Id                        uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"` //
+	Username                  string     `gorm:"column:username;uniqueIndex:ux_users_username;type:varchar(64);not null;" json:"username"`
+	Email                     string     `gorm:"column:email;uniqueIndex:ux_users_email;type:varchar(128);default:null;" json:"email"`
+	Password                  string     `gorm:"column:password;type:varchar(128);not null;default:'';" json:"-"`   //
+	TokenVersion              uint64     `gorm:"column:token_version;not null;default:0;" json:"-"`                 // 登录令牌版本，改密后自增
+	Locale                    string     `gorm:"column:locale;type:varchar(16);not null;default:'';" json:"locale"` // 用户语言偏好
+	IsFrozen                  int8       `gorm:"column:is_frozen;not null;default:0;" json:"isFrozen"`              // 状态：0正常 1冻结
 	RestrictionStatus         string     `gorm:"column:restriction_status;type:varchar(16);not null;default:''" json:"restrictionStatus"`
 	RestrictionUntil          *time.Time `gorm:"column:restriction_until" json:"restrictionUntil"`
 	RestrictionReason         string     `gorm:"column:restriction_reason;type:varchar(500);not null;default:''" json:"restrictionReason"`

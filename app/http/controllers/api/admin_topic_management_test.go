@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -64,7 +65,7 @@ func seedAdminTopic(t *testing.T, conn *gorm.DB, topicID uint64) (uint64, uint64
 	firstPostID := topicID + 100
 	categoryID := topicID + 1000
 	now := time.Date(2026, 7, 7, 15, 0, 0, 0, time.UTC)
-	if err := conn.Create(&users.EntityComplete{Id: userID, Username: "author"}).Error; err != nil {
+	if err := conn.Create(&users.EntityComplete{Id: userID, Username: fmt.Sprintf("author-%d", userID)}).Error; err != nil {
 		t.Fatalf("create user: %v", err)
 	}
 	if err := conn.Create(&category.Entity{Id: categoryID, Name: "General", Slug: "general"}).Error; err != nil {

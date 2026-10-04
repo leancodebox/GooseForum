@@ -70,9 +70,6 @@ func migrateSchema() error {
 	} else {
 		slog.Info("dbconnect migration end")
 	}
-	if err := users.BackfillIdentityKeys(db); err != nil {
-		return fmt.Errorf("backfill user identity lookup keys: %w", err)
-	}
 
 	db4file := db4fileconnect.Connect()
 	if err = db4file.AutoMigrate(
