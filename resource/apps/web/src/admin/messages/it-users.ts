@@ -18,7 +18,6 @@ export default {
   restrictionPermanent: "Lasciare vuoto per una limitazione permanente.",
   restrictionReason: "Motivo della restrizione",
   restrictionLiftReason: "Motivo della revoca",
-  restrictionNote: "Nota privata amministratore",
   restrictionHistory: "Cronologia limitazioni",
   historyTab: "Cronologia",
   reasonRequired: "Inserisci un motivo per la limitazione.",

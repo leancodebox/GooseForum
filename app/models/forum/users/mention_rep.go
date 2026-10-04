@@ -8,13 +8,12 @@ import (
 type MentionIdentity struct {
 	Id                uint64     `json:"-"`
 	Username          string     `json:"username"`
-	IsFrozen          int8       `json:"-"`
 	RestrictionStatus string     `json:"-"`
 	RestrictionUntil  *time.Time `json:"-"`
 }
 
 func (user MentionIdentity) EffectiveRestriction(now time.Time) string {
-	return AccountState{IsFrozen: user.IsFrozen, RestrictionStatus: user.RestrictionStatus, RestrictionUntil: user.RestrictionUntil}.EffectiveRestriction(now)
+	return AccountState{RestrictionStatus: user.RestrictionStatus, RestrictionUntil: user.RestrictionUntil}.EffectiveRestriction(now)
 }
 
 func MentionIdentities(ids []uint64, names []string) ([]MentionIdentity, error) {

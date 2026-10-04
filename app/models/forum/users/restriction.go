@@ -15,7 +15,6 @@ type AccountState struct {
 	Id                        uint64
 	RoleId                    uint64
 	TokenVersion              uint64
-	IsFrozen                  int8
 	IsActivated               int8
 	RequiresEmailVerification bool
 	RestrictionStatus         string
@@ -23,11 +22,8 @@ type AccountState struct {
 	RestrictionReason         string
 }
 
-func effectiveRestriction(status string, frozen int8, until *time.Time, now time.Time) string {
+func effectiveRestriction(status string, until *time.Time, now time.Time) string {
 	if status == "" {
-		if frozen == StatusFrozen {
-			return RestrictionSuspended
-		}
 		return RestrictionNormal
 	}
 	if until != nil && !until.After(now) {
@@ -42,7 +38,7 @@ func effectiveRestriction(status string, frozen int8, until *time.Time, now time
 }
 
 func (state AccountState) EffectiveRestriction(now time.Time) string {
-	return effectiveRestriction(state.RestrictionStatus, state.IsFrozen, state.RestrictionUntil, now)
+	return effectiveRestriction(state.RestrictionStatus, state.RestrictionUntil, now)
 }
 
 func (state AccountState) NeedsEmailVerification(enabled bool) bool {
@@ -50,5 +46,5 @@ func (state AccountState) NeedsEmailVerification(enabled bool) bool {
 }
 
 func (user EntityComplete) EffectiveRestriction(now time.Time) string {
-	return effectiveRestriction(user.RestrictionStatus, user.IsFrozen, user.RestrictionUntil, now)
+	return effectiveRestriction(user.RestrictionStatus, user.RestrictionUntil, now)
 }

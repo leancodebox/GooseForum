@@ -37,16 +37,8 @@ const fieldMobileAreaCode = "mobile_area_code"
 // fieldMobilePhoneNumber
 const fieldMobilePhoneNumber = "mobile_phone_number"
 
-// fieldIsFrozen 状态：0正常 1冻结
-const fieldIsFrozen = "is_frozen"
-
 // fieldIsActivated 是否验证通过: 0未激活 1 已激活
 const fieldIsActivated = "is_activated"
-
-const (
-	StatusNormal = 0
-	StatusFrozen = 1
-)
 
 const (
 	ActivationPending = 0
@@ -87,11 +79,9 @@ type EntityComplete struct {
 	Password                  string     `gorm:"column:password;type:varchar(128);not null;default:'';" json:"-"`   //
 	TokenVersion              uint64     `gorm:"column:token_version;not null;default:0;" json:"-"`                 // 登录令牌版本，改密后自增
 	Locale                    string     `gorm:"column:locale;type:varchar(16);not null;default:'';" json:"locale"` // 用户语言偏好
-	IsFrozen                  int8       `gorm:"column:is_frozen;not null;default:0;" json:"isFrozen"`              // 状态：0正常 1冻结
-	RestrictionStatus         string     `gorm:"column:restriction_status;type:varchar(16);not null;default:''" json:"restrictionStatus"`
+	RestrictionStatus         string     `gorm:"column:restriction_status;type:varchar(16);not null;default:normal" json:"restrictionStatus"`
 	RestrictionUntil          *time.Time `gorm:"column:restriction_until" json:"restrictionUntil"`
 	RestrictionReason         string     `gorm:"column:restriction_reason;type:varchar(500);not null;default:''" json:"restrictionReason"`
-	RestrictionNote           string     `gorm:"column:restriction_note;type:varchar(2000);not null;default:''" json:"-"`
 	IsActivated               int8       `gorm:"column:is_activated;not null;default:0;" json:"isActivated"` // 是否验证通过: 0未激活 1 已激活
 	RequiresEmailVerification bool       `gorm:"column:requires_email_verification;not null;default:false;" json:"-"`
 	ActivatedAt               *time.Time `gorm:"column:activated_at;" json:"activatedAt"` // 激活时间

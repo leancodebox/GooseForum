@@ -7,7 +7,7 @@ test('edits account restrictions in the existing flat user manager', async ({ pa
     component:'admin.shell', props:{}, url:'/admin/users?lang=en', version:'1.0',meta:{title:'Users'},
     layout:{site:{name:'GooseForum',description:'',logo:'',favicon:'',brandType:'default',brandText:'',brandImage:''},viewer:{id:1,username:'admin',email:'admin@example.com',avatarUrl:'',isAuthenticated:true,canAccessAdmin:true,isModerator:false,requiresEmailVerification:false,adminPermissions:[0]},header:[],sidebar:{activeKey:'topics',categories:[]},footer:{links:[],primary:[]},unread:{notifications:false,messages:false},theme:{enabled:false,current:'gf-light',themeColor:'#fbfdff'}}
   } }))
-  const member = { userId:7,username:'alice',email:'alice@example.com',avatarUrl:'',status:1,restrictionStatus:'suspended',restrictionReason:'Repeated unsolicited posts',restrictionNote:'Reviewed by administrator',validate:1,prestige:10,roleId:0,roleList:[],createTime:'2026-10-03',lastActiveTime:'2026-10-03',badges:[] }
+  const member = { userId:7,username:'alice',email:'alice@example.com',avatarUrl:'',restrictionStatus:'suspended',restrictionReason:'Repeated unsolicited posts',validate:1,prestige:10,roleId:0,roleList:[],createTime:'2026-10-03',lastActiveTime:'2026-10-03',badges:[] }
   await page.route('**/api/admin/user-mfa-status', route => route.fulfill({ json: { code: 0, result: { enabled: true } } }))
   let resetRequest: Record<string, unknown> | undefined
   await page.route('**/api/admin/user-mfa-reset', route => { resetRequest = route.request().postDataJSON(); return route.fulfill({ json: { code: 0, result: null } }) })
@@ -15,7 +15,7 @@ test('edits account restrictions in the existing flat user manager', async ({ pa
   await page.route('**/api/admin/get-all-role-item', route => route.fulfill({ json:{code:0,result:[]} }))
   const badgeOptions = Array.from({length:5}, (_, index) => ({code:`badge-${index + 1}`,name:`Badge ${index + 1}`,description:`Badge ${index + 1}`,iconUrl:'/static/badges/contributor.svg'}))
   await page.route('**/api/admin/user-badge-options', route => route.fulfill({ json:{code:0,result:{options:badgeOptions,active:[]}} }))
-  await page.route('**/api/admin/user-restriction-history**', route => route.fulfill({ json:{code:0,result:{list:[{id:1,userId:7,actorId:1,status:'suspended',reason:member.restrictionReason,note:member.restrictionNote,createdAt:'2026-10-03T00:00:00Z'}],page:1,pageSize:10,total:1}} }))
+  await page.route('**/api/admin/user-restriction-history**', route => route.fulfill({ json:{code:0,result:{list:[{id:1,userId:7,actorId:1,status:'suspended',reason:member.restrictionReason,createdAt:'2026-10-03T00:00:00Z'}],page:1,pageSize:10,total:1}} }))
   let saved: Record<string,unknown> | undefined
   let savedBadges: Record<string,unknown> | undefined
   await page.route('**/api/admin/user-edit', route => { saved = route.request().postDataJSON(); return route.fulfill({ json:{code:0,result:'success'} }) })
@@ -93,7 +93,7 @@ test('edits account restrictions in the existing flat user manager', async ({ pa
   expect(accessibility.violations).toEqual([])
   await dialog.getByRole('button',{name:'Save changes'}).click()
   await expect(dialog).toBeHidden()
-  expect(saved).toMatchObject({userId:7,restrictionStatus:'banned',restrictionReason:'Repeated spam after warning',status:1})
+  expect(saved).toMatchObject({userId:7,restrictionStatus:'banned',restrictionReason:'Repeated spam after warning'})
   expect(saved?.restrictionUntil).toBeTruthy()
   expect(saved?.restrictionUntil).toBe(new Date('2026-10-06T10:00').toISOString())
   expect(savedBadges).toMatchObject({userId:7,badgeCodes:['badge-1']})

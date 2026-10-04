@@ -14,7 +14,7 @@ func EnsureHistory(entry *History) error {
 		return err
 	}
 	sameUntil := latest.Until == nil && entry.Until == nil || latest.Until != nil && entry.Until != nil && latest.Until.Equal(*entry.Until)
-	if err == nil && latest.ActorId == entry.ActorId && latest.Status == entry.Status && latest.Reason == entry.Reason && latest.Note == entry.Note && sameUntil {
+	if err == nil && latest.ActorId == entry.ActorId && latest.Status == entry.Status && latest.Reason == entry.Reason && sameUntil {
 		return nil
 	}
 	return CreateHistory(entry)

@@ -8,7 +8,7 @@ import { UsersManagementPage } from '../pages/users-management-page'
 afterEach(cleanup)
 vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} })
 
-const member: AdminUser = { userId: 7, username: 'alice', email: 'alice@example.com', status: 0, validate: 1, prestige: 0, roleId: 3, roleList: [{ name: 'Moderator', value: 3 }], createTime: '2026-10-03' }
+const member: AdminUser = { userId: 7, username: 'alice', email: 'alice@example.com', restrictionStatus: 'normal', validate: 1, prestige: 0, roleId: 3, roleList: [{ name: 'Moderator', value: 3 }], createTime: '2026-10-03' }
 
 function mount(roles: ReturnType<typeof vi.fn>, badgeOptions: ReturnType<typeof vi.fn>, users = [member]) {
   const edit = vi.fn().mockResolvedValue(undefined)
@@ -103,7 +103,7 @@ it('ignores late retry results after opening another user', async () => {
 
 it('preserves account edits, the deadline, and selected badges while switching tabs', async () => {
   const until = new Date(2030, 0, 2, 10, 30).toISOString()
-  const { edit, saveBadges } = mount(vi.fn().mockResolvedValue([{ name: 'Moderator', value: 3 }]), vi.fn().mockResolvedValue({ options: [{ code: 'helper', name: 'Helpful' }], active: [] }), [{ ...member, status: 1, restrictionStatus: 'banned', restrictionReason: 'Initial reason', restrictionUntil: until }])
+  const { edit, saveBadges } = mount(vi.fn().mockResolvedValue([{ name: 'Moderator', value: 3 }]), vi.fn().mockResolvedValue({ options: [{ code: 'helper', name: 'Helpful' }], active: [] }), [{ ...member, restrictionStatus: 'banned', restrictionReason: 'Initial reason', restrictionUntil: until }])
   const actor = userEvent.setup()
   await screen.findAllByText('alice')
   await actor.click(screen.getAllByRole('button', { name: 'Edit user' })[0])
@@ -124,7 +124,7 @@ it('preserves account edits, the deadline, and selected badges while switching t
 })
 
 it('returns to Account and blocks all API writes when a hidden restriction reason is blank', async () => {
-  const { edit, saveBadges } = mount(vi.fn().mockResolvedValue([]), vi.fn().mockResolvedValue({ options: [], active: [] }), [{ ...member, status: 1, restrictionStatus: 'banned', restrictionReason: '   ' }])
+  const { edit, saveBadges } = mount(vi.fn().mockResolvedValue([]), vi.fn().mockResolvedValue({ options: [], active: [] }), [{ ...member, restrictionStatus: 'banned', restrictionReason: '   ' }])
   const actor = userEvent.setup()
   await screen.findAllByText('alice')
   await actor.click(screen.getAllByRole('button', { name: 'Edit user' })[0])

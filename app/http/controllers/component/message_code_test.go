@@ -75,8 +75,8 @@ func TestCheckUserPermissionIncludesActionCode(t *testing.T) {
 		t.Fatal(err)
 	}
 	user := &users.EntityComplete{
-		Username: fmt.Sprintf("permission-frozen-%d", time.Now().UnixNano()),
-		IsFrozen: users.StatusFrozen,
+		Username:          fmt.Sprintf("permission-frozen-%d", time.Now().UnixNano()),
+		RestrictionStatus: users.RestrictionSuspended,
 	}
 	if err := db.Create(user).Error; err != nil {
 		t.Fatal(err)

@@ -78,10 +78,10 @@ func TestUser2UserDetailedVo(t *testing.T) {
 
 func TestFrozenUserUsesBannedAvatar(t *testing.T) {
 	user := users.EntityComplete{
-		Id:        9,
-		Username:  "blocked",
-		AvatarUrl: "/static/pic/1.webp",
-		IsFrozen:  users.StatusFrozen,
+		Id:                9,
+		Username:          "blocked",
+		AvatarUrl:         "/static/pic/1.webp",
+		RestrictionStatus: users.RestrictionSuspended,
 	}
 
 	got := User2userShow(user)

@@ -29,7 +29,6 @@ func CreateUserWithBinding(username, password, email string, needValid bool, bin
 	if !needValid {
 		userEntity.IsActivated = users.ActivationSuccess
 	}
-	userEntity.IsFrozen = users.StatusNormal
 	if binding != nil {
 		if binding.Provider == "" || binding.ProviderUid == "" {
 			return nil, fmt.Errorf("OAuth identity is missing")

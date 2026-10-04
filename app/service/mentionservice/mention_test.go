@@ -21,7 +21,7 @@ func createMentionUsers(t *testing.T) []users.EntityComplete {
 	if err := conn.AutoMigrate(&users.EntityComplete{}, &eventNotification.Entity{}); err != nil {
 		t.Fatal(err)
 	}
-	identities := []users.EntityComplete{{Id: 970001, Username: "mention_alice"}, {Id: 970002, Username: "mention_bob"}, {Id: 970003, Username: "mention_frozen", IsFrozen: 1}, {Id: 970004, Username: "mention_extra"}, {Id: 970005, Username: "mention_other"}}
+	identities := []users.EntityComplete{{Id: 970001, Username: "mention_alice"}, {Id: 970002, Username: "mention_bob"}, {Id: 970003, Username: "mention_frozen", RestrictionStatus: users.RestrictionSuspended}, {Id: 970004, Username: "mention_extra"}, {Id: 970005, Username: "mention_other"}}
 	if err := conn.Create(&identities).Error; err != nil {
 		t.Fatal(err)
 	}

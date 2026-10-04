@@ -9,7 +9,6 @@ type History struct {
 	Status    string     `gorm:"type:varchar(16);not null" json:"status"`
 	Until     *time.Time `json:"until"`
 	Reason    string     `gorm:"type:varchar(500);not null" json:"reason"`
-	Note      string     `gorm:"type:varchar(2000);not null" json:"note"`
 	CreatedAt time.Time  `gorm:"autoCreateTime;index:idx_restriction_user_id,priority:2" json:"createdAt"`
 }
 

@@ -138,12 +138,10 @@ type UserItem struct {
 	RestrictionStatus string                              `json:"restrictionStatus"`
 	RestrictionUntil  *time.Time                          `json:"restrictionUntil"`
 	RestrictionReason string                              `json:"restrictionReason"`
-	RestrictionNote   string                              `json:"restrictionNote"`
 	UserId            uint64                              `json:"userId"`
 	Username          string                              `json:"username"`
 	AvatarUrl         string                              `json:"avatarUrl"`
 	Email             string                              `json:"email"`
-	Status            int8                                `json:"status"`
 	Validate          int8                                `json:"validate"`
 	Prestige          int64                               `json:"prestige"`
 	RoleList          []datastruct.Option[string, uint64] `json:"roleList"`
@@ -189,12 +187,10 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 			RestrictionStatus: t.EffectiveRestriction(time.Now()),
 			RestrictionUntil:  t.RestrictionUntil,
 			RestrictionReason: t.RestrictionReason,
-			RestrictionNote:   t.RestrictionNote,
 			UserId:            t.Id,
 			AvatarUrl:         t.GetWebAvatarUrl(),
 			Username:          t.Username,
 			Email:             t.Email,
-			Status:            restrictionCompatibilityStatus(t),
 			Validate:          t.IsActivated,
 			Prestige:          t.Prestige,
 			RoleList:          roleList,
@@ -359,13 +355,11 @@ func SaveUserBadges(req component.BetterRequest[SaveUserBadgesReq]) component.Re
 
 type EditUserReq struct {
 	UserId            uint64     `json:"userId"`
-	Status            int8       `json:"status"`
 	Validate          int8       `json:"validate"`
 	RoleId            uint64     `json:"roleId"`
 	RestrictionStatus string     `json:"restrictionStatus"`
 	RestrictionUntil  *time.Time `json:"restrictionUntil"`
 	RestrictionReason string     `json:"restrictionReason"`
-	RestrictionNote   string     `json:"restrictionNote"`
 }
 
 func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
@@ -375,10 +369,10 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 		return component.FailResponseCode(component.MessageAdminTargetUserFetchFailed, nil)
 	}
 	changes := make([]string, 0, 3)
-	oldFrozen := user.IsFrozen
+	oldStatus := user.EffectiveRestriction(time.Now())
 	oldActivated := user.IsActivated
 	oldRoleID := user.RoleId
-	if user.IsFrozen != params.Status {
+	if oldStatus != params.RestrictionStatus {
 		changes = append(changes, "status")
 	}
 	if user.IsActivated != params.Validate {
@@ -390,7 +384,7 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 	if params.RestrictionStatus == "" {
 		return component.FailResponseCode("admin.restriction.invalid", nil)
 	}
-	if err := accountrestrictionservice.Edit(req.UserId, accountrestrictionservice.Change{UserId: params.UserId, Status: params.RestrictionStatus, Until: params.RestrictionUntil, Reason: params.RestrictionReason, Note: params.RestrictionNote, RoleId: params.RoleId, Validate: params.Validate}); err != nil {
+	if err := accountrestrictionservice.Edit(req.UserId, accountrestrictionservice.Change{UserId: params.UserId, Status: params.RestrictionStatus, Until: params.RestrictionUntil, Reason: params.RestrictionReason, RoleId: params.RoleId, Validate: params.Validate}); err != nil {
 		if errors.Is(err, accountrestrictionservice.ErrProtected) {
 			return component.FailResponseCode("admin.restriction.protected", nil)
 		}
@@ -401,15 +395,15 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 	}
 	if len(changes) > 0 {
 		optlogger.UserOptCode(req.UserId, optlogger.EditUser, user.Id, "admin.opt.user.updated", optlogger.MessageParams{
-			"userId":        user.Id,
-			"changes":       changes,
-			"oldFrozen":     oldFrozen,
-			"newFrozen":     params.Status,
-			"oldActivated":  oldActivated,
-			"newActivated":  params.Validate,
-			"oldRoleId":     oldRoleID,
-			"newRoleId":     params.RoleId,
-			"changedFields": strings.Join(changes, ", "),
+			"userId":               user.Id,
+			"changes":              changes,
+			"oldRestrictionStatus": oldStatus,
+			"newRestrictionStatus": params.RestrictionStatus,
+			"oldActivated":         oldActivated,
+			"newActivated":         params.Validate,
+			"oldRoleId":            oldRoleID,
+			"newRoleId":            params.RoleId,
+			"changedFields":        strings.Join(changes, ", "),
 		})
 	}
 	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)

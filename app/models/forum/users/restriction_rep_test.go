@@ -18,7 +18,7 @@ func TestNormalAdministratorExistsMatchesRestrictionSemantics(t *testing.T) {
 	}
 	now := time.Now()
 	past, future := now.Add(-time.Hour), now.Add(time.Hour)
-	for _, account := range []EntityComplete{{Id: 1, RoleId: 1, Username: "legacy-normal"}, {Id: 2, RoleId: 2, Username: "legacy-frozen", IsFrozen: 1}, {Id: 3, RoleId: 3, Username: "expired-ban", RestrictionStatus: RestrictionBanned, RestrictionUntil: &past, IsFrozen: 1}, {Id: 4, RoleId: 4, Username: "active-ban", RestrictionStatus: RestrictionBanned, RestrictionUntil: &future}, {Id: 5, RoleId: 5, Username: "explicit-normal", RestrictionStatus: RestrictionNormal, IsFrozen: 1}} {
+	for _, account := range []EntityComplete{{Id: 1, RoleId: 1, Username: "legacy-normal"}, {Id: 2, RoleId: 2, Username: "suspended", RestrictionStatus: RestrictionSuspended}, {Id: 3, RoleId: 3, Username: "expired-ban", RestrictionStatus: RestrictionBanned, RestrictionUntil: &past}, {Id: 4, RoleId: 4, Username: "active-ban", RestrictionStatus: RestrictionBanned, RestrictionUntil: &future}, {Id: 5, RoleId: 5, Username: "explicit-normal", RestrictionStatus: RestrictionNormal}} {
 		if err = db.Create(&account).Error; err != nil {
 			t.Fatal(err)
 		}

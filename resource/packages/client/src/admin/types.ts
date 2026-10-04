@@ -67,12 +67,11 @@ export interface AdminUser {
 	 restrictionStatus?: 'normal' | 'suspended' | 'banned'
 	 restrictionUntil?: string | null
 	 restrictionReason?: string
-	 restrictionNote?: string
+
   userId: number
   username: string
   avatarUrl?: string | null
   email: string
-  status: number
   validate: number
   prestige: number
   roleId?: number | null
@@ -319,7 +318,7 @@ export interface GooseAdminApi {
     mfaStatus(userId: number): Promise<{ enabled: boolean }>
     resetMFA(userId: number, reason: string): Promise<unknown>
     list(input: { page?: number; pageSize?: number; username?: string; userId?: number; email?: string }): Promise<PageResult<AdminUser>>
-    edit(input: { userId: number; status: number; validate: number; roleId: number; restrictionStatus?: 'normal' | 'suspended' | 'banned'; restrictionUntil?: string | null; restrictionReason?: string; restrictionNote?: string }): Promise<unknown>
+    edit(input: { userId: number; validate: number; roleId: number; restrictionStatus?: 'normal' | 'suspended' | 'banned'; restrictionUntil?: string | null; restrictionReason?: string }): Promise<unknown>
     restrictionHistory(input: { userId: number; page?: number; pageSize?: number }): Promise<PageResult<UserRestrictionHistory>>
     roles(): Promise<{ name: string; value: number }[]>
     badgeOptions(userId: number): Promise<UserBadgeOptions>
@@ -362,6 +361,5 @@ export interface UserRestrictionHistory {
   status: string
   until?: string | null
   reason: string
-  note: string
   createdAt: string
 }

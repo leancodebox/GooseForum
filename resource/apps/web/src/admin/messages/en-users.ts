@@ -30,7 +30,6 @@ export default {
   restrictionPermanent: "No date means permanent.",
   restrictionReason: "Restriction reason",
   restrictionLiftReason: "Reason for lifting restriction",
-  restrictionNote: "Private administrator note",
   restrictionHistory: "Restriction history",
   historyTab: "History",
   reasonRequired: "Enter a reason for the restriction.",

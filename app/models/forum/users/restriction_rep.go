@@ -15,17 +15,15 @@ func GetAccountState(userID uint64) (AccountState, error) {
 type RestrictionAccount struct {
 	Id                        uint64
 	RoleId                    uint64
-	IsFrozen                  int8
 	RestrictionStatus         string
 	RestrictionUntil          *time.Time
 	RestrictionReason         string
-	RestrictionNote           string
 	IsActivated               int8
 	RequiresEmailVerification bool
 }
 
 func (user RestrictionAccount) EffectiveRestriction(now time.Time) string {
-	return effectiveRestriction(user.RestrictionStatus, user.IsFrozen, user.RestrictionUntil, now)
+	return effectiveRestriction(user.RestrictionStatus, user.RestrictionUntil, now)
 }
 
 func GetRestrictionAccount(userID uint64) (RestrictionAccount, error) {
@@ -52,7 +50,7 @@ func hasNormalAdministrator(db *gorm.DB, roleIDs []uint64, excludeUserID, exclud
 		return false, nil
 	}
 	query := db.Model(&EntityComplete{}).Where("role_id IN ?", roleIDs).
-		Where("restriction_status = ? OR (restriction_status = '' AND is_frozen = ?) OR (restriction_status <> '' AND restriction_until <= ?)", RestrictionNormal, StatusNormal, now)
+		Where("restriction_status IN ? OR restriction_until <= ?", []string{RestrictionNormal, ""}, now)
 	if verificationEnabled {
 		query = query.Where("is_activated <> ?", ActivationPending)
 	} else {
@@ -75,16 +73,11 @@ type RestrictionUpdate struct {
 	Status         string
 	Until          *time.Time
 	Reason         string
-	Note           string
 	RevokeSessions bool
 }
 
 func UpdateRestriction(userID uint64, change RestrictionUpdate) error {
-	frozen := StatusNormal
-	if change.Status != RestrictionNormal {
-		frozen = StatusFrozen
-	}
-	fields := map[string]any{"role_id": change.RoleId, "is_activated": change.Activation, "restriction_status": change.Status, "restriction_until": change.Until, "restriction_reason": change.Reason, "restriction_note": change.Note, "is_frozen": frozen}
+	fields := map[string]any{"role_id": change.RoleId, "is_activated": change.Activation, "restriction_status": change.Status, "restriction_until": change.Until, "restriction_reason": change.Reason}
 	if change.RevokeSessions {
 		fields["token_version"] = gorm.Expr("token_version + 1")
 	}

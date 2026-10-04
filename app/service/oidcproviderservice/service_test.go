@@ -153,7 +153,7 @@ func TestUserResolverMapsClaimsAndAvailability(t *testing.T) {
 	if user.Subject != "7" || user.Name != "Ada" || user.PreferredUsername != "ada" || !user.EmailVerified || user.Picture != "https://forum.example/file/img/avatar.png" {
 		t.Fatalf("resolved user = %+v", user)
 	}
-	if err := db.Model(&users.EntityComplete{}).Where("id = ?", 7).Update("is_frozen", users.StatusFrozen).Error; err != nil {
+	if err := db.Model(&users.EntityComplete{}).Where("id = ?", 7).Update("restriction_status", users.RestrictionSuspended).Error; err != nil {
 		t.Fatal(err)
 	}
 	if _, err := resolver.ResolveUser(t.Context(), "7"); err != nil {

@@ -27,7 +27,6 @@ type Change struct {
 	Status   string     `json:"restrictionStatus"`
 	Until    *time.Time `json:"restrictionUntil"`
 	Reason   string     `json:"restrictionReason"`
-	Note     string     `json:"restrictionNote"`
 	RoleId   uint64     `json:"roleId"`
 	Validate int8       `json:"validate"`
 }
@@ -43,14 +42,13 @@ func Edit(actorID uint64, change Change) error {
 
 func edit(actorID uint64, change Change, now time.Time) error {
 	change.Reason = strings.TrimSpace(change.Reason)
-	change.Note = strings.TrimSpace(change.Note)
 	if change.Status != users.RestrictionNormal && change.Status != users.RestrictionSuspended && change.Status != users.RestrictionBanned {
 		return ErrInvalid
 	}
 	if change.Validate != 0 && change.Validate != 1 {
 		return ErrInvalid
 	}
-	if utf8.RuneCountInString(change.Reason) > 500 || utf8.RuneCountInString(change.Note) > 2000 {
+	if utf8.RuneCountInString(change.Reason) > 500 {
 		return ErrInvalid
 	}
 	if change.Status == users.RestrictionNormal {
@@ -121,11 +119,11 @@ func edit(actorID uint64, change Change, now time.Time) error {
 		if oldStatus == "" {
 			oldStatus = target.EffectiveRestriction(now)
 		}
-		changed := oldStatus != change.Status || !sameTime(target.RestrictionUntil, change.Until) || target.RestrictionReason != change.Reason || target.RestrictionNote != change.Note
+		changed := oldStatus != change.Status || !sameTime(target.RestrictionUntil, change.Until) || target.RestrictionReason != change.Reason
 		if changed && change.Reason == "" {
 			return ErrInvalid
 		}
-		if err := users.UpdateRestriction(target.Id, users.RestrictionUpdate{RoleId: change.RoleId, Activation: change.Validate, Status: change.Status, Until: change.Until, Reason: change.Reason, Note: change.Note, RevokeSessions: changed && change.Status == users.RestrictionBanned || target.RoleId != change.RoleId}); err != nil {
+		if err := users.UpdateRestriction(target.Id, users.RestrictionUpdate{RoleId: change.RoleId, Activation: change.Validate, Status: change.Status, Until: change.Until, Reason: change.Reason, RevokeSessions: changed && change.Status == users.RestrictionBanned || target.RoleId != change.RoleId}); err != nil {
 			return err
 		}
 		if change.Status == users.RestrictionBanned {
@@ -135,7 +133,7 @@ func edit(actorID uint64, change Change, now time.Time) error {
 			}
 		}
 		if changed || change.Reason != "" {
-			if err := accountrestrictions.EnsureHistory(&accountrestrictions.History{UserId: target.Id, ActorId: actorID, Status: change.Status, Until: change.Until, Reason: change.Reason, Note: change.Note, CreatedAt: now}); err != nil {
+			if err := accountrestrictions.EnsureHistory(&accountrestrictions.History{UserId: target.Id, ActorId: actorID, Status: change.Status, Until: change.Until, Reason: change.Reason, CreatedAt: now}); err != nil {
 				return err
 			}
 		}

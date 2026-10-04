@@ -30,7 +30,6 @@ export default {
   restrictionPermanent: "留空表示永久。",
   restrictionReason: "限制原因",
   restrictionLiftReason: "解除限制原因",
-  restrictionNote: "管理员备注（不公开）",
   restrictionHistory: "限制历史",
   historyTab: "限制记录",
   reasonRequired: "请填写限制原因。",

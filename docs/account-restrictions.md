@@ -1,13 +1,13 @@
 # 账号限制
 
-账号限制以 users.restriction_status、restriction_until、restriction_reason 和
-restriction_note 为依据。旧数据中空状态 + IsFrozen=1 按永久禁言处理。
+账号限制以 users.restriction_status、restriction_until、restriction_reason 为依据，
+默认状态为 normal，不保留 is_frozen 或管理员备注字段。
 
 - normal：正常权限。
 - suspended：可登录、阅读、管理密码/MFA/邮箱/外部绑定与会话；禁止受保护业务写入。
 - banned：拒绝登录和会话认证，包括 OAuth、MFA 挑战和 OIDC 身份解析。
 - restriction_until 留空为永久；到期按每次请求时间判断为正常，无定时任务。
-- 原因可向本人公开；分页限制历史仅管理员可见。用户编辑框不提供管理员备注输入或展示，既有备注仍保留在管理员 API 和 CLI 中。
+- 原因可向本人公开；分页限制历史仅管理员可见，保留操作人、状态、期限和原因。
 
 后台用户编辑使用限制服务；先单条更新账号，随后撤销 OIDC 凭据并补齐审计，不使用显式业务事务。部分失败会返回错误并刷新缓存，重新保存相同封禁状态仍执行幂等撤销；审计失败可在重试时补齐，重复保存相同记录不重复写入。
 管理员保护为尽力检查，不使用全局角色锁；并发极端情况下可通过设置管理员 CLI 恢复。
@@ -39,4 +39,4 @@ Token 无法由本站远程撤回，应用仍须遵守令牌有效期。
 完成，不强制中断已获授权的请求。
 
 账号限制统一通过后台用户管理操作。后台编辑必须提交 restrictionStatus，
-新增 restrictionUntil/Reason/Note 字段，旧 status 数值只作为展示兼容字段。
+可同时提交 restrictionUntil/Reason，不再提供重复的 status 数值字段。

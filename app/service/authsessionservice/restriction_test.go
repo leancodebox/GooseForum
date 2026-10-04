@@ -41,7 +41,7 @@ func TestCachedSessionSeesRestrictionsAndExpiredBanDoesNotReviveToken(t *testing
 		t.Fatal(err)
 	}
 	// A separate process does not share this cache, so checking only cache invalidation is insufficient.
-	if err := db.Model(&user).Updates(map[string]any{"restriction_status": users.RestrictionSuspended, "is_frozen": 1}).Error; err != nil {
+	if err := db.Model(&user).Updates(map[string]any{"restriction_status": users.RestrictionSuspended}).Error; err != nil {
 		t.Fatal(err)
 	}
 	if _, err := Authenticate(c, raw, true); err != nil {

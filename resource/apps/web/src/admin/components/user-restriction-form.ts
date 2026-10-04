@@ -1,6 +1,6 @@
 import type { AdminUser } from '@gooseforum/client'
 
-export interface RestrictionForm { status: 'normal' | 'suspended' | 'banned'; until: string; reason: string; note: string }
+export interface RestrictionForm { status: 'normal' | 'suspended' | 'banned'; until: string; reason: string }
 
 function localDate(value?: string | null) {
   if (!value) return ''
@@ -11,5 +11,5 @@ function localDate(value?: string | null) {
 }
 
 export function restrictionForm(user: AdminUser | null): RestrictionForm {
-  return { status: user?.restrictionStatus || (user?.status ? 'suspended' : 'normal'), until: localDate(user?.restrictionUntil), reason: user?.restrictionReason || '', note: user?.restrictionNote || '' }
+  return { status: user?.restrictionStatus || 'normal', until: localDate(user?.restrictionUntil), reason: user?.restrictionReason || '' }
 }

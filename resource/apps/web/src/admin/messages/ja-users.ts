@@ -18,7 +18,6 @@ export default {
   restrictionPermanent: "空欄の場合は無期限。",
   restrictionReason: "制限理由",
   restrictionLiftReason: "解除理由",
-  restrictionNote: "管理者の非公開メモ",
   restrictionHistory: "制限履歴",
   historyTab: "履歴",
   reasonRequired: "制限の理由を入力してください。",

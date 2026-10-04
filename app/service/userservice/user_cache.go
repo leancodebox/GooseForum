@@ -37,7 +37,6 @@ type UserInfo struct {
 	Email                     string
 	Locale                    string
 	TokenVersion              uint64
-	IsFrozen                  int8
 	IsActivated               int8
 	RequiresEmailVerification bool
 	ActivatedAt               *time.Time
@@ -63,7 +62,6 @@ type UserPublicInfo struct {
 	Id                  uint64
 	Username            string
 	Nickname            string
-	IsFrozen            int8
 	RoleId              uint64
 	Prestige            int64
 	AvatarUrl           string
@@ -219,7 +217,6 @@ func userInfoFromEntity(user users.EntityComplete) UserInfo {
 		HideTopics:                user.HideTopics,
 		HideFollowing:             user.HideFollowing,
 		TokenVersion:              user.TokenVersion,
-		IsFrozen:                  user.IsFrozen,
 		IsActivated:               user.IsActivated,
 		RequiresEmailVerification: user.RequiresEmailVerification,
 		ActivatedAt:               user.ActivatedAt,
@@ -246,7 +243,6 @@ func (user UserInfo) toPublicInfo() UserPublicInfo {
 		Id:                  user.Id,
 		Username:            user.Username,
 		Nickname:            user.Nickname,
-		IsFrozen:            user.IsFrozen,
 		RoleId:              user.RoleId,
 		Prestige:            user.Prestige,
 		AvatarUrl:           user.AvatarUrl,
@@ -273,7 +269,6 @@ func (user UserInfo) toEntity() users.EntityComplete {
 		HideTopics:                user.HideTopics,
 		HideFollowing:             user.HideFollowing,
 		TokenVersion:              user.TokenVersion,
-		IsFrozen:                  user.IsFrozen,
 		IsActivated:               user.IsActivated,
 		RequiresEmailVerification: user.RequiresEmailVerification,
 		ActivatedAt:               user.ActivatedAt,
@@ -300,7 +295,6 @@ func (user UserPublicInfo) webAvatarURL() string {
 		Id:                user.Id,
 		Username:          user.Username,
 		Nickname:          user.Nickname,
-		IsFrozen:          user.IsFrozen,
 		AvatarUrl:         user.AvatarUrl,
 	}
 	return entity.GetWebAvatarUrl()

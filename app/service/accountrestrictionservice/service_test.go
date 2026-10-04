@@ -36,7 +36,7 @@ func testDB(t *testing.T) *gorm.DB {
 			t.Fatal(err)
 		}
 	}
-	for _, u := range []users.EntityComplete{{Id: 1, Username: "admin", RoleId: 1}, {Id: 2, Username: "otheradmin", RoleId: 1}, {Id: 3, Username: "manager", RoleId: 2}, {Id: 4, Username: "member", TokenVersion: 7}, {Id: 5, Username: "legacy", IsFrozen: 1}, {Id: 6, Username: "site-manager", RoleId: 3}} {
+	for _, u := range []users.EntityComplete{{Id: 1, Username: "admin", RoleId: 1}, {Id: 2, Username: "otheradmin", RoleId: 1}, {Id: 3, Username: "manager", RoleId: 2}, {Id: 4, Username: "member", TokenVersion: 7}, {Id: 5, Username: "legacy", RestrictionStatus: users.RestrictionSuspended}, {Id: 6, Username: "site-manager", RoleId: 3}} {
 		if err := db.Create(&u).Error; err != nil {
 			t.Fatal(err)
 		}
@@ -48,7 +48,7 @@ func TestRestrictionVersionAuditExpiryAndProtection(t *testing.T) {
 	db := testDB(t)
 	now := time.Now()
 	deadline := now.Add(time.Hour)
-	change := Change{UserId: 4, Status: users.RestrictionSuspended, Until: &deadline, Reason: "spam", Note: "private"}
+	change := Change{UserId: 4, Status: users.RestrictionSuspended, Until: &deadline, Reason: "spam"}
 	if err := edit(1, change, now); err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +98,7 @@ func TestRestrictionVersionAuditExpiryAndProtection(t *testing.T) {
 	}
 	var history []accountrestrictions.History
 	db.Order("id").Find(&history)
-	if len(history) != 3 || history[0].Note != "private" || history[0].ActorId != 1 {
+	if len(history) != 3 || history[0].Reason != "spam" || history[0].ActorId != 1 {
 		t.Fatalf("audit: %+v", history)
 	}
 	for _, attempt := range []struct {
