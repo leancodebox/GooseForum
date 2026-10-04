@@ -37,7 +37,8 @@ import {
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Switch } from "@gooseforum/ui/components/switch";
 import { Textarea } from "@gooseforum/ui/components/textarea";
-import { Check, Copy, Pencil, Plus, RefreshCw, RotateCw, Trash2, Users } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@gooseforum/ui/components/collapsible";
+import { Check, ChevronDown, Copy, Pencil, Plus, RefreshCw, RotateCw, Trash2, Users } from "lucide-react";
 import { OIDCGrantsDialog } from './oidc-grants-dialog';
 import { toast } from "sonner";
 import type { IdentityTextKey } from "../identity-settings-i18n";
@@ -230,8 +231,14 @@ export function OIDCProviderSettingsPage({
           />
         </div>
       </section>
-      {status?.issuer ? <section className="space-y-2">
-        <h3 className="font-semibold">{text('endpoints')}</h3>
+      {status?.issuer ? <Collapsible className="space-y-2">
+        <h3><CollapsibleTrigger asChild>
+          <Button variant="ghost" className="group w-full justify-between px-0 font-semibold">
+            {text('endpoints')}
+            <ChevronDown className="transition-transform group-data-[state=open]:rotate-180" />
+          </Button>
+        </CollapsibleTrigger></h3>
+        <CollapsibleContent>
         {[
           ['Issuer', ''], ['Discovery', '/.well-known/openid-configuration'],
           ['Authorization', '/authorize'], ['Token', '/token'], ['UserInfo', '/userinfo'], ['JWKS', '/jwks.json'], ['Revocation', '/revoke'],
@@ -239,7 +246,8 @@ export function OIDCProviderSettingsPage({
           <span className="col-span-2 sm:col-span-1">{label}</span><code className="min-w-0 break-all text-xs">{status.issuer}{path}</code>
           <Button variant="ghost" size="icon-sm" title={text('copy')} aria-label={`${text('copy')} ${label}`} onClick={async () => { try { await navigator.clipboard.writeText(status.issuer! + path); toast.success(text('copied')); } catch { toast.error(text('copyFailed')); } }}><Copy /></Button>
         </div>)}
-      </section> : null}
+        </CollapsibleContent>
+      </Collapsible> : null}
       <section className="overflow-hidden rounded-lg border">
         <div className="flex items-center justify-between border-b p-3">
           <div>
