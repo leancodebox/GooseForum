@@ -69,6 +69,7 @@ import { GooseClientError } from "@gooseforum/client";
 import { useLocalDraft } from "../drafts/use-local-draft";
 import { useDraftReplyTargets } from "../drafts/use-draft-reply-targets";
 import { UserCardPopover } from "../users/user-card-popover";
+import { userDisplayName } from "../users/display-name";
 import { ProfileAvatar } from "../users/profile-avatar";
 
 type PendingReport = {
@@ -515,6 +516,7 @@ export function TopicPageView({
             author: {
               id: layout.viewer.id,
               username: layout.viewer.username,
+              nickname: layout.viewer.nickname,
               avatarUrl: layout.viewer.avatarUrl,
             },
             createdAt: new Date().toISOString(),
@@ -1499,6 +1501,7 @@ function Person({
     : small
       ? "size-8"
       : "size-9 lg:size-10";
+  const displayName = userDisplayName(user);
   return (
     <UserCardPopover user={user}>
       <GooseLink
@@ -1509,15 +1512,15 @@ function Person({
           sticky && "self-start lg:sticky lg:top-19 lg:mt-1",
           textOnly && "truncate",
         )}
-        title={user.username}
+        title={displayName}
       >
         {textOnly ? (
-          user.username
+          displayName
         ) : (
           showBadge ? (
             <ProfileAvatar
               src={user.avatarUrl}
-              name={user.username}
+              name={displayName}
               badge={user.wornBadge}
               className={cn(
                 avatarClassName,
@@ -1535,12 +1538,12 @@ function Person({
             >
               <AvatarImage src={user.avatarUrl} alt="" />
               <AvatarFallback>
-                {user.username.slice(0, 1).toUpperCase()}
+                {displayName.slice(0, 1).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           )
         )}
-        {!avatarOnly && !textOnly ? user.username : null}
+        {!avatarOnly && !textOnly ? displayName : null}
       </GooseLink>
     </UserCardPopover>
   );

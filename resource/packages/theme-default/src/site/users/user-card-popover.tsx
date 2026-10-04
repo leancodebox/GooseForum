@@ -18,10 +18,12 @@ import { Skeleton } from "@gooseforum/ui/components/skeleton";
 import { GooseLink, useGooseApi, useGooseLocale } from "@gooseforum/runtime";
 import { ProfileAvatar } from "./profile-avatar";
 import { ProfileBadge } from "./profile-badge";
+import { userDisplayName } from "./display-name";
 
 export interface UserCardTarget {
   id: number;
   username: string;
+  nickname?: string;
   avatarUrl?: string;
   wornBadge?: UserBadgePayload | null;
 }
@@ -81,7 +83,7 @@ export function UserCardPopover({
 
   const profileUrl = `/u/${card?.userId || user.id}`;
   const username = card?.username || user.username;
-  const displayName = card?.nickname || username;
+  const displayName = userDisplayName(card ? { username, nickname: card.nickname } : user);
   return (
     <Popover open={open} onOpenChange={openChange}>
       <PopoverTrigger asChild onClickCapture={captureClick}>
@@ -98,7 +100,7 @@ export function UserCardPopover({
             <GooseLink href={profileUrl} className="shrink-0 rounded-full">
               <ProfileAvatar
                 src={card?.avatarUrl || user.avatarUrl || ""}
-                name={username}
+                name={displayName}
                 badge={card?.wornBadge || user.wornBadge}
                 className="size-14"
               />

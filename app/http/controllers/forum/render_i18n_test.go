@@ -67,14 +67,10 @@ func TestTopicListPartialLocalized(t *testing.T) {
 	}
 
 	type category struct{ URL, Name string }
-	type author struct {
-		ID       uint64
-		Username string
-	}
 	type topic struct {
 		URL, Title, Description string
 		Categories              []category
-		Author                  author
+		Author                  TopicAuthorPayload
 		ReplyCount, ViewCount   int
 		ActivityText            string
 		LastUpdateTime          string
@@ -84,12 +80,15 @@ func TestTopicListPartialLocalized(t *testing.T) {
 	var buf bytes.Buffer
 	data := map[string]any{
 		"Lang":   "en",
-		"Topics": []topic{{URL: "/t/1", Title: "Hello", Description: "Topic excerpt", Author: author{ID: 1, Username: "author"}, Categories: []category{{URL: "/c/general/1", Name: "General"}}, ReplyCount: 3, ViewCount: 9, ActivityText: "now"}},
+		"Topics": []topic{{URL: "/t/1", Title: "Hello", Description: "Topic excerpt", Author: TopicAuthorPayload{ID: 1, Username: "author", Nickname: "Author nickname"}, Categories: []category{{URL: "/c/general/1", Name: "General"}}, ReplyCount: 3, ViewCount: 9, ActivityText: "now"}},
 	}
 	if err := tmpl.ExecuteTemplate(&buf, "partials/topic_list.gohtml", data); err != nil {
 		t.Fatalf("render populated partial: %v", err)
 	}
 	out := buf.String()
+	if !strings.Contains(out, `rel="author">Author nickname</a>`) {
+		t.Fatalf("partial should display the author nickname: %s", out)
+	}
 	if !strings.Contains(out, "replies") || !strings.Contains(out, "views") {
 		t.Errorf("partial not localized to English: %q", out)
 	}

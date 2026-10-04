@@ -15,7 +15,7 @@
             <a href="{{.URL}}" rel="tag">{{.Name}}</a>
             {{end}}
             {{end}}
-            <a href="/u/{{.Payload.Props.Topic.Author.ID}}">{{.Payload.Props.Topic.Author.Username}}</a>
+            <a href="/u/{{.Payload.Props.Topic.Author.ID}}">{{.Payload.Props.Topic.Author.DisplayName}}</a>
             <time datetime="{{.Payload.Meta.OpenGraph.PublishedTime}}">{{.Payload.Props.Topic.CreatedAt}}</time>
             {{if .Payload.Meta.OpenGraph.ModifiedTime}}<time datetime="{{.Payload.Meta.OpenGraph.ModifiedTime}}">{{ t .Lang "updatedAt" }} {{.Payload.Props.Topic.UpdatedAt}}</time>{{end}}
             <span>{{.Payload.Props.Topic.ReplyCount}} {{ t .Lang "replies" }}</span>
@@ -33,7 +33,7 @@
                 <article>
                     <p class="gf-crawler-post-meta">
                         <a href="/p/post/{{$.Payload.Props.Topic.ID}}{{if gt .PostNo 1}}/{{.PostNo}}{{end}}">#{{.PostNo}}</a>
-                        <a href="/u/{{.Author.ID}}">{{.Author.Username}}</a>
+                        <a href="/u/{{.Author.ID}}">{{.Author.DisplayName}}</a>
                         <time>{{.CreatedAt}}</time>
                     </p>
                     {{if .ReplyToUsername}}<p>{{ t $.Lang "replyTo" }} @{{.ReplyToUsername}}</p>{{end}}

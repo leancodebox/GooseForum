@@ -20,6 +20,7 @@ import { cn } from "@gooseforum/ui/lib/utils";
 import { GooseLink, useGoosePageFetcher } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { UserCardPopover } from "../users/user-card-popover";
+import { userDisplayName } from "../users/display-name";
 
 export type TopicListMode = "waterfall" | "pagination";
 
@@ -277,16 +278,16 @@ const TopicRow = memo(function TopicRow({
         <UserCardPopover user={topic.author}>
           <GooseLink
             href={`/u/${topic.author.id}`}
-            title={topic.author.username}
+            title={userDisplayName(topic.author)}
             className="block size-10 rounded-full sm:size-11"
           >
             <Avatar className="size-full after:hidden">
               <AvatarImage
                 src={topic.author.avatarUrl}
-                alt={topic.author.username}
+                alt={userDisplayName(topic.author)}
               />
               <AvatarFallback>
-                {topic.author.username.slice(0, 1)}
+                {userDisplayName(topic.author).slice(0, 1)}
               </AvatarFallback>
             </Avatar>
           </GooseLink>
@@ -440,13 +441,13 @@ function AvatarStack({
         <UserCardPopover key={user.id} user={user}>
           <GooseLink
             href={`/u/${user.id}`}
-            title={user.username}
+            title={userDisplayName(user)}
             style={{ left: `calc(${index} * var(--avatar-step))` }}
             className="absolute inset-y-0 size-[var(--avatar-size)] rounded-full ring-2 ring-background transition-transform duration-150 hover:z-10 hover:scale-110 data-[state=open]:z-10 data-[state=open]:scale-110"
           >
             <Avatar className="size-full after:hidden">
-              <AvatarImage src={user.avatarUrl} alt={user.username} />
-              <AvatarFallback>{user.username.slice(0, 1)}</AvatarFallback>
+              <AvatarImage src={user.avatarUrl} alt={userDisplayName(user)} />
+              <AvatarFallback>{userDisplayName(user).slice(0, 1)}</AvatarFallback>
             </Avatar>
           </GooseLink>
         </UserCardPopover>

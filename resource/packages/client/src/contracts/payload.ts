@@ -233,6 +233,7 @@ export interface ViewerPayload {
 	 restrictionReason?: string
   id: number
   username: string
+  nickname?: string
   email: string
   avatarUrl: string
   isAuthenticated: boolean
@@ -315,10 +316,11 @@ export interface TopicDetailPayload {
   author: {
     id: number
     username: string
+    nickname?: string
     avatarUrl: string
     wornBadge?: UserBadgePayload | null
   }
-  participants: Array<{ id: number; username: string; avatarUrl: string; wornBadge?: UserBadgePayload | null }>
+  participants: Array<{ id: number; username: string; nickname?: string; avatarUrl: string; wornBadge?: UserBadgePayload | null }>
   categories: Array<{ id: number; name: string; url: string; color: string }>
   replyCount: number
   maxPostNo: number
@@ -344,6 +346,7 @@ export interface PostPayload {
   author: {
     id: number
     username: string
+    nickname?: string
     avatarUrl: string
     wornBadge?: UserBadgePayload | null
   }
@@ -361,6 +364,7 @@ export interface ReplyTargetPayload {
   author: {
     id: number
     username: string
+    nickname?: string
     avatarUrl: string
     wornBadge?: UserBadgePayload | null
   }
@@ -388,10 +392,11 @@ export interface TopicPayload {
   author: {
     id: number
     username: string
+    nickname?: string
     avatarUrl: string
     wornBadge?: UserBadgePayload | null
   }
-  participants: Array<{ id: number; username: string; avatarUrl: string; wornBadge?: UserBadgePayload | null }>
+  participants: Array<{ id: number; username: string; nickname?: string; avatarUrl: string; wornBadge?: UserBadgePayload | null }>
   categories: Array<{ id: number; name: string; url: string; color: string }>
   replyCount: number
   viewCount: number

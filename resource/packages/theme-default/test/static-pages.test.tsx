@@ -737,6 +737,7 @@ describe("AppShell and static pages", () => {
             {
               id: 27,
               username: "hover-user",
+              nickname: "Hover User",
               avatarUrl: "/hover.webp",
               wornBadge: {
                 code: "list-badge",
@@ -768,7 +769,7 @@ describe("AppShell and static pages", () => {
       users: { card } as unknown as GooseSiteApi["users"],
     });
 
-    const avatar = document.querySelector('a[title="hover-user"]');
+    const avatar = document.querySelector('a[title="Hover User"]');
     expect(avatar).toBeTruthy();
     expect(document.querySelector('img[src="/list-badge.svg"]')).toBeNull();
     expect(document.querySelector('[data-slot="topic-list-toolbar"]')).toBeTruthy();
@@ -796,6 +797,7 @@ describe("AppShell and static pages", () => {
     expect(card).not.toHaveBeenCalled();
     await user.click(avatar as Element);
     expect(await screen.findByLabelText("Hover User")).toBeTruthy();
+    expect(screen.getByText("@hover-user")).toBeTruthy();
     expect(card).toHaveBeenCalledOnce();
     expect(navigate).not.toHaveBeenCalled();
     expect(screen.getByText("查看主页")).toBeTruthy();
@@ -1213,6 +1215,7 @@ describe("AppShell and static pages", () => {
       author: {
         id: 7,
         username: "alice",
+        nickname: "Alice display name",
         avatarUrl: "",
         wornBadge: {
           code: "contributor",
@@ -1309,6 +1312,7 @@ describe("AppShell and static pages", () => {
         id: 7,
         username: "alice",
         isAuthenticated: true,
+        nickname: "Alice display name",
       },
     };
     const { user } = renderPage(topicPage, {
@@ -1322,6 +1326,7 @@ describe("AppShell and static pages", () => {
     expect(
       await screen.findByRole("heading", { level: 1, name: "Topic detail" }),
     ).toBeTruthy();
+    expect(screen.getAllByRole("link", { name: "Alice display name" }).length).toBeGreaterThan(0);
     expect(
       await screen.findByRole("button", { name: "Topic detail" }),
     ).toBeTruthy();
@@ -1435,7 +1440,7 @@ describe("AppShell and static pages", () => {
     expect(wornBadge.parentElement?.classList.contains("z-30")).toBe(true);
     expect(
       topicAside
-        ?.querySelector('a[title="alice"] [data-slot="avatar"]')
+        ?.querySelector('a[title="Alice display name"] [data-slot="avatar"]')
         ?.classList.contains("size-8"),
     ).toBe(true);
     expect(topicAside?.closest("section")?.classList.contains("overflow-hidden")).toBe(
