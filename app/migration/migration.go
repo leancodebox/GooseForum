@@ -64,6 +64,9 @@ func migrateSchema() error {
 	var err error
 
 	db := dbconnect.Connect()
+	if err := users.PrepareIdentitySchema(); err != nil {
+		return fmt.Errorf("prepare user identity schema: %w", err)
+	}
 	if err = db.AutoMigrate(defaultSchemaModels()...); err != nil {
 		slog.Error("dbconnect migration err", "err", err)
 		return fmt.Errorf("migrate default database schema: %w", err)
