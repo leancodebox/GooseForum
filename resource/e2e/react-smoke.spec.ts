@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
+import { fileURLToPath } from 'node:url'
 
 const homePage = {
   component: 'home.index',
@@ -309,6 +310,10 @@ const chatMessages = {
 
 test.beforeEach(async ({ page }) => {
   let published = false
+  // The browser suite starts Vite without Go; serve the real image fixtures locally.
+  await page.route('**/static/**', route => route.fulfill({
+    path: fileURLToPath(new URL(`../${new URL(route.request().url()).pathname.slice(1)}`, import.meta.url)),
+  }))
   await page.route('**/__goose_page/**', async route => {
     const url = route.request().url()
     if (url.includes('/p/test/60') && url.includes('transition=slow')) {
