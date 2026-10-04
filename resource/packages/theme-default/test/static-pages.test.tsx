@@ -1519,6 +1519,7 @@ describe("AppShell and static pages", () => {
     expect(windowRequest).toHaveBeenLastCalledWith({ topicId: 60, beforePostNo: 78, limit: 20 });
   });
 
+  // Allow for the full editor flow with coverage instrumentation on CI runners.
   it("edits and saves the complete site theme draft", async () => {
     const tokens = createEmptySiteThemeTokens();
     Object.assign(tokens, {
@@ -1620,7 +1621,7 @@ describe("AppShell and static pages", () => {
     expect(
       await screen.findByText("主题草稿已保存，不会影响全站。"),
     ).toBeTruthy();
-  });
+  }, 15_000);
 
   it("reuses the topic list for a category without category chips or hot markers", () => {
     renderPage(
