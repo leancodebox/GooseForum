@@ -4,6 +4,8 @@ import anchor from "markdown-it-anchor";
 // @ts-expect-error markdown-it-task-lists is an untyped MarkdownIt plugin.
 import taskLists from "markdown-it-task-lists";
 import TurndownService from "turndown";
+import { forumExtensions } from "./extensions";
+export { forumExtensions, mentionMarkdown, mentionQuery, parseExtensionHeader } from "./extensions";
 
 const renderer = new MarkdownIt({
   html: false,
@@ -14,6 +16,7 @@ const renderer = new MarkdownIt({
     slugify: (value: string) => value.trim().toLowerCase().replace(/\s+/g, "-"),
   })
   .use(taskLists, { enabled: true });
+renderer.use(forumExtensions);
 renderer.renderer.rules.s_open = () => "<del>";
 renderer.renderer.rules.s_close = () => "</del>";
 const turndown = new TurndownService({
@@ -21,13 +24,16 @@ const turndown = new TurndownService({
   bulletListMarker: "-",
   codeBlockStyle: "fenced",
 });
-export const renderMarkdown = (source: string) => renderer.render(source || "");
+export const renderMarkdown = (source: string, sourceVersion: 0 | 1 = 1) => renderer.render(source || "", { sourceVersion });
 export const markdownFromClipboard = (data: DataTransfer | null) => {
   const html = data?.getData("text/html") || "";
   return html.trim() ? turndown.turndown(html).trim() : "";
 };
-export const hasUnsupportedVisualMarkdown = (value: string) =>
-  /^\s*(?:>\s*)*(?:[-+*]|\d+[.)])\s+\[[ xX]\]\s+/m.test(value);
+export const hasUnsupportedVisualMarkdown = (value: string, sourceVersion: 0 | 1 = 1) => {
+  if (/^\s*(?:>\s*)*(?:[-+*]|\d+[.)])\s+\[[ xX]\]\s+/m.test(value)) return true;
+  const tokens = renderer.parse(value, { sourceVersion });
+  return tokens.some((token) => token.type === "forum_opaque" || token.children?.some((child) => child.type === "text" && /\[\/?[a-z][a-z0-9-]*(?:\s|\])/.test(child.content)));
+};
 export function insertInline(
   source: string,
   start: number,

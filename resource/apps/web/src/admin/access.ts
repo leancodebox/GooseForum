@@ -20,6 +20,7 @@ export function hasAnyAdminPermission(values: number[], required: AdminPermissio
 const pathPermissions: Record<string, AdminPermission | AdminPermission[]> = {
   '/admin': AdminPermission.Admin,
   '/admin/users': AdminPermission.UserManager,
+  '/admin/auth-logs': AdminPermission.UserManager,
   '/admin/roles': AdminPermission.RoleManager,
   '/admin/access-groups': AdminPermission.RoleManager,
   '/admin/categories': [AdminPermission.TopicsManager, AdminPermission.RoleManager],

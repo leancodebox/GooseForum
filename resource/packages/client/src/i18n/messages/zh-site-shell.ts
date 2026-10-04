@@ -1,5 +1,9 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  accountSuspended: "账号已被禁言，可继续阅读和管理账号安全。",
+  restrictionUntil: "截止 {date}",
+  restrictionPermanent: "无到期时间",
+  accountSecurity: "账号安全",
   collapseSidebar: "收起侧栏",
   expandSidebar: "展开侧栏",
   chooseTheme: "选择主题",

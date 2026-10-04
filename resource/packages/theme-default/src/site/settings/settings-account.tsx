@@ -13,6 +13,7 @@ import { Input } from "@gooseforum/ui/components/input";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { SettingsSectionHeader } from "./settings-section-header";
+import { useMFAEnabled } from "./use-mfa-enabled";
 
 export function AccountSettings({
   showError,
@@ -26,13 +27,17 @@ export function AccountSettings({
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [saving, setSaving] = useState(false);
+  const mfa = useMFAEnabled();
+  const [mfaCode, setMfaCode] = useState("");
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving || !mfa.ready) return;
     if (password !== confirmation)
       return showError(t("validation.passwordMismatch"));
     setSaving(true);
     try {
-      await runtime.api.users.changePassword(current, password);
+      if (mfa.enabled) await runtime.api.users.changePassword(current, password, mfaCode);
+      else await runtime.api.users.changePassword(current, password);
       setCurrent("");
       setPassword("");
       setConfirmation("");
@@ -91,7 +96,12 @@ export function AccountSettings({
             />
           </Field>
           <div>
-            <Button type="submit" disabled={saving}>
+            {mfa.enabled && <Field className="mb-4">
+              <FieldLabel htmlFor="password-mfa-code">{t("mfa.code")}</FieldLabel>
+              <Input id="password-mfa-code" autoComplete="one-time-code" required maxLength={64} value={mfaCode} onChange={(event) => setMfaCode(event.target.value)} />
+            </Field>}
+            {mfa.error && <Button type="button" variant="outline" onClick={mfa.retry}>{t('mfa.retry')}</Button>}
+            <Button type="submit" variant="outline" disabled={saving || !mfa.ready}>
               {saving ? t("savingShort") : t("account.changePassword")}
             </Button>
           </div>
@@ -112,7 +122,6 @@ export function AccountSettings({
           </Field>
         </FieldGroup>
       </form>
-
     </section>
   );
 }

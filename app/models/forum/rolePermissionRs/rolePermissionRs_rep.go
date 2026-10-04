@@ -23,6 +23,10 @@ func SaveOrCreateById(entity *Entity) int64 {
 	return save(entity)
 }
 
+func Save(entity *Entity) error {
+	return builder().Save(entity).Error
+}
+
 //func saveAll(entities []*Entity) int64 {
 //	result := builder().Save(entities)
 //	return result.RowsAffected

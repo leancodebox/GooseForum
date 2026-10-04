@@ -12,7 +12,7 @@ import { Input } from '@gooseforum/ui/components/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@gooseforum/ui/components/select'
 import { Spinner } from '@gooseforum/ui/components/spinner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@gooseforum/ui/components/table'
-import { Ban, Eye, FileText, Heart, MessageSquare, MoreHorizontal, Pin, RefreshCw, Search, Tags, Trash2, Undo2 } from 'lucide-react'
+import { Ban, FileText, MoreHorizontal, Pin, RefreshCw, Search, Tags, Trash2, Undo2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { PostTextKey } from '../posts-i18n'
 
@@ -94,11 +94,29 @@ function TopicList({ topics, categories, text, onSource, onCategories, onPin, on
 }
 
 function TopicSummary({ topic, categoryMap, text }: { topic: AdminTopic; categoryMap: Map<number, AdminCategory>; text: Text }) {
-  return <div className="flex min-w-0 items-center gap-1.5 overflow-hidden"><a href={`/p/post/${topic.id}`} target="_blank" rel="noreferrer" className="min-w-0 truncate font-semibold hover:text-primary hover:underline">{topic.title}</a>{topic.moderationStatus && topic.moderationStatus !== 'none' ? <Badge variant="outline" title={topic.moderationReason}>{reviewLabel(topic.moderationStatus, text)}</Badge> : null}{topic.processStatus === 1 ? <Badge variant="destructive">{text('processed')}</Badge> : null}{topic.pinWeight > 0 ? <Badge variant="secondary">{text('pin')} {topic.pinWeight}</Badge> : null}{topic.categoryId?.length ? topic.categoryId.map((id) => { const category = categoryMap.get(id); return <Badge key={id} variant="secondary" title={category?.category || `${text('unknownCategory')} ${id}`}><span className="size-1.5 rounded-full" style={{ backgroundColor: category?.color || '#94a3b8' }} />{category?.category || id}</Badge> }) : <Badge variant="secondary">{text('noCategory')}</Badge>}<span className="ml-auto flex shrink-0 items-center gap-2 text-xs text-muted-foreground"><span>{datePart(topic.createdAt)}</span><span title={text('views')}><Eye className="inline size-3.5" />{topic.viewCount}</span><span title={text('repliesCount')}><MessageSquare className="inline size-3.5" />{topic.replyCount}</span><span title={text('likes')}><Heart className="inline size-3.5" />{topic.likeCount}</span></span></div>
+  return <div className="flex min-w-0 flex-1 flex-col gap-1.5 py-0.5">
+    <div className="flex min-w-0 items-center gap-4">
+      <a href={`/p/post/${topic.id}`} target="_blank" rel="noreferrer" title={topic.title} className="min-w-0 flex-1 truncate text-sm font-medium leading-5 hover:text-primary hover:underline">{topic.title}</a>
+      <time className="hidden shrink-0 text-xs tabular-nums text-muted-foreground md:block">{datePart(topic.createdAt)}</time>
+    </div>
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+      <div className="flex min-w-0 flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+        {topic.pinWeight > 0 ? <span className="inline-flex items-center gap-1"><Pin className="size-3" />{text('pin')} {topic.pinWeight}</span> : null}
+        {topic.categoryId?.length ? topic.categoryId.map((id) => { const category = categoryMap.get(id); return <span key={id} className="inline-flex min-w-0 items-center gap-1.5" title={category?.category || `${text('unknownCategory')} ${id}`}><span className="size-1.5 shrink-0 rounded-full" style={{ backgroundColor: category?.color || '#94a3b8' }} /><span className="max-w-32 truncate">{category?.category || id}</span></span> }) : <span>{text('noCategory')}</span>}
+        {topic.moderationStatus && !['none', 'approved'].includes(topic.moderationStatus) ? <Badge variant="outline" title={topic.moderationReason}>{reviewLabel(topic.moderationStatus, text)}</Badge> : null}
+        {topic.processStatus === 1 ? <Badge variant="destructive">{text('processed')}</Badge> : null}
+      </div>
+      <div className="ml-auto flex shrink-0 items-center gap-3 text-xs tabular-nums text-muted-foreground">
+        <span>{text('views')} <span className="text-foreground">{topic.viewCount}</span></span>
+        <span>{text('repliesCount')} <span className="text-foreground">{topic.replyCount}</span></span>
+        <span>{text('likes')} <span className="text-foreground">{topic.likeCount}</span></span>
+      </div>
+    </div>
+  </div>
 }
 
 function Author({ topic }: { topic: AdminTopic }) { return <div className="flex min-w-0 flex-1 items-center gap-2"><Avatar className="size-7"><AvatarImage src={topic.userAvatarUrl || undefined} alt={topic.username} /><AvatarFallback>{topic.username.slice(0, 1).toUpperCase()}</AvatarFallback></Avatar><a href={`/u/${topic.userId}`} target="_blank" rel="noreferrer" className="truncate text-[13px] hover:text-primary hover:underline">{topic.username}</a></div> }
-function StatusBadge({ topic, text }: { topic: AdminTopic; text: Text }) { const label = topic.deleted ? text('deleted') : topic.topicStatus === 1 ? text('active') : ['rejected', 'pending', 'denied'].includes(topic.moderationStatus) ? reviewLabel(topic.moderationStatus, text) : text('inactive'); return <Badge variant={topic.deleted || topic.topicStatus !== 1 ? 'secondary' : 'default'}>{label}</Badge> }
+function StatusBadge({ topic, text }: { topic: AdminTopic; text: Text }) { const label = topic.deleted ? text('deleted') : topic.topicStatus === 1 ? text('active') : ['rejected', 'pending', 'denied'].includes(topic.moderationStatus) ? reviewLabel(topic.moderationStatus, text) : text('inactive'); return <Badge variant={topic.deleted || ['rejected', 'denied'].includes(topic.moderationStatus) ? 'destructive' : 'secondary'}>{label}</Badge> }
 function TopicActions({ topic, text, onSource, onCategories, onPin, onProcess, onDelete }: { topic: AdminTopic; text: Text; onSource(): void; onCategories(): void; onPin(): void; onProcess(): void; onDelete(): void }) { return <div className="ml-auto flex justify-end"><Button variant="ghost" size="icon-sm" title={text('openReview')} onClick={onSource}><FileText /></Button>{!topic.deleted ? <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm" title={text('actions')}><MoreHorizontal /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuGroup><DropdownMenuItem onSelect={onCategories}><Tags />{text('editCategories')}</DropdownMenuItem><DropdownMenuItem onSelect={onPin}><Pin />{text('editPin')}</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuGroup><DropdownMenuItem variant={topic.processStatus === 1 ? 'default' : 'destructive'} onSelect={onProcess}>{topic.processStatus === 1 ? <Undo2 /> : <Ban />}{topic.processStatus === 1 ? text('restore') : text('disable')}</DropdownMenuItem><DropdownMenuItem variant="destructive" onSelect={onDelete}><Trash2 />{text('delete')}</DropdownMenuItem></DropdownMenuGroup></DropdownMenuContent></DropdownMenu> : null}</div> }
 
 function ReplyList({ replies, text, onReview }: { replies: ReviewPost[]; text: Text; onReview(reply: ReviewPost): void }) { return <div className="divide-y">{replies.map((reply) => <article key={reply.id} className="flex flex-col gap-2 p-3"><div className="flex items-center justify-between gap-3"><span className="font-medium">{reply.topicTitle} · #{reply.postNo} · UID {reply.userId}</span><Badge>{reviewLabel(reply.moderationStatus, text)}</Badge></div><p className="line-clamp-3 whitespace-pre-wrap break-words text-sm">{reply.content}</p>{reply.moderationReason ? <p className="text-sm text-muted-foreground">{reply.moderationReason}</p> : null}<Button variant="outline" size="sm" className="self-start" onClick={() => onReview(reply)}>{text('openReview')}</Button></article>)}</div> }
@@ -129,5 +147,5 @@ function TopicActionDialog({ topic, mode, api, text, onClose, onSaved }: { topic
 function FilterSelect({ value, label, options, onChange }: { value: string; label: string; options: [string, string][]; onChange(value: string): void }) { return <Select value={value} onValueChange={onChange}><SelectTrigger aria-label={label} className="min-w-32"><SelectValue /></SelectTrigger><SelectContent><SelectGroup>{options.map(([option, title]) => <SelectItem key={option} value={option}>{title}</SelectItem>)}</SelectGroup></SelectContent></Select> }
 function ContentEmpty({ icon, title }: { icon: React.ReactNode; title: string }) { return <Empty className="min-h-32 rounded-none border-0"><EmptyHeader><EmptyMedia variant="icon">{icon}</EmptyMedia><EmptyTitle>{title}</EmptyTitle></EmptyHeader></Empty> }
 function reviewLabel(status: string, text: Text) { if (status === 'pending') return text('pending'); if (status === 'approved') return text('approved'); if (status === 'rejected' || status === 'denied') return text('rejected'); return text('none') }
-function datePart(value?: string) { return value ? value.slice(0, 10) : '—' }
+function datePart(value?: string) { return value ? value.replace('T', ' ').replace(/\.\d+/, '').slice(0, 19) : '—' }
 function errorMessage(reason: unknown, fallback: string) { return reason instanceof Error && reason.message ? reason.message : fallback }

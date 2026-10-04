@@ -1,4 +1,9 @@
 export default {
+  registrationLimits: "注册请求限制",
+  registrationLimitsHint: "每小时允许的请求次数，0 表示不限制。",
+  registrationIPLimit: "每个 IP 地址",
+  registrationEmailLimit: "每个邮箱地址",
+  registrationGlobalLimit: "全站注册请求",
   mail: "邮件",
   mailHint: "配置 SMTP 发信与发件人身份。",
   security: "安全",

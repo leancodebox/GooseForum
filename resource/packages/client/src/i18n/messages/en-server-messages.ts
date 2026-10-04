@@ -1,5 +1,10 @@
 // Frontend fallbacks for backend MessageCode values; completeness is checked in CI.
+import mfa from './en-mfa.js';
 export default {
+  "auth.registration.rateLimited": "Too many requests. Please try again later.",
+  "markdown.mention.invalid": "Mention syntax is invalid or exceeds 20 recipients. Check the body.",
+  "mfa.invalid": mfa.failed,
+  "mfa.unavailable": mfa.unavailable,
   "common.request.invalidFormat": "The request format is invalid.",
   "common.request.invalidParams": "The request parameters are invalid.",
   "common.request.parseFailed": "Failed to parse the request parameters.",
@@ -30,6 +35,9 @@ export default {
   "auth.password.invalidFormat": "The password format is invalid.",
   "auth.credentials.invalid": "The username, email address, or password is incorrect.",
   "auth.account.frozen": "This account has been suspended.",
+  "auth.account.banned": "This account is banned. {reason}",
+  "admin.restriction.invalid": "Enter a valid status, future expiration time, and a reason for changing the restriction.",
+  "admin.restriction.protected": "You cannot restrict yourself, change an account with higher privileges, or remove the last administrator.",
   "auth.email.unverified": "Please verify your email address first.",
   "auth.login.failed": "Login failed. Please try again later.",
   "auth.password.oldInvalid": "The current password is incorrect.",

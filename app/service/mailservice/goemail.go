@@ -59,6 +59,25 @@ func setMessageFrom(message *mail.Msg, config pageConfig.MailSettingsConfig) err
 	return nil
 }
 
+// CheckConfigured validates local mail settings without connecting to SMTP.
+func CheckConfigured() error {
+	return validateConfiguration(hotdataserve.GetMailSettingsConfigCache())
+}
+
+func validateConfiguration(config pageConfig.MailSettingsConfig) error {
+	if !config.EnableMail {
+		return errors.New("mail settings config is disabled")
+	}
+	if strings.TrimSpace(config.SmtpHost) == "" || config.SmtpPort < 1 || config.SmtpPort > 65535 {
+		return errors.New("SMTP host or port is invalid")
+	}
+	if err := setMessageFrom(mail.NewMsg(), config); err != nil {
+		return err
+	}
+	_, err := buildClientByConfig(config)
+	return err
+}
+
 func SendActivationEmail(to, username, token string, locale ...string) error {
 	config := hotdataserve.GetMailSettingsConfigCache()
 	fromName, fromEmail := normalizeSender(config)

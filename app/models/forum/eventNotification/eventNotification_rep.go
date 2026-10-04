@@ -5,11 +5,20 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // Create 创建通知
 func Create(entity *Entity) error {
-	return builder().Create(entity).Error
+	query := builder()
+	if entity.DedupeKey != nil {
+		conflict := clause.OnConflict{DoNothing: true}
+		if entity.EventType == EventTypeComment || entity.EventType == EventTypePostReply {
+			conflict = clause.OnConflict{Columns: []clause.Column{{Name: "dedupe_key"}}, DoUpdates: clause.AssignmentColumns([]string{"event_type", "payload"})}
+		}
+		query = query.Clauses(conflict)
+	}
+	return query.Create(entity).Error
 }
 
 func CreateBatch(entities []*Entity, batchSize int) error {

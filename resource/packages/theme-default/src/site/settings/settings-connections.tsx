@@ -6,6 +6,7 @@ import type {
 import { AppWindow, Check, KeyRound, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@gooseforum/ui/components/badge";
+import { Alert, AlertDescription } from "@gooseforum/ui/components/alert";
 import { Button } from "@gooseforum/ui/components/button";
 import {
   Empty,
@@ -18,6 +19,9 @@ import { Spinner } from "@gooseforum/ui/components/spinner";
 import { useGooseRuntime } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { SettingsSectionHeader } from "./settings-section-header";
+import { useMFAEnabled } from "./use-mfa-enabled";
+import { Input } from "@gooseforum/ui/components/input";
+import { Field, FieldLabel } from "@gooseforum/ui/components/field";
 
 export function ConnectionsSettings({
   section,
@@ -37,6 +41,8 @@ export function ConnectionsSettings({
   const [loadingGrants, setLoadingGrants] = useState(true);
   const [action, setAction] = useState("");
   const [confirm, setConfirm] = useState("");
+  const { enabled: mfaEnabled, ready: mfaReady, error: mfaError, retry: retryMfa } = useMFAEnabled();
+  const [mfaCode, setMfaCode] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -45,7 +51,7 @@ export function ConnectionsSettings({
       .then((items) => {
         if (active) setBindings(items);
       })
-      .catch((reason) => showError(serverError(reason, t("errors.bindings"))))
+      .catch((reason) => { if (active) showError(serverError(reason, t("errors.bindings"))); })
       .finally(() => {
         if (active) setLoadingBindings(false);
       });
@@ -54,7 +60,7 @@ export function ConnectionsSettings({
       .then((items) => {
         if (active) setGrants(items);
       })
-      .catch((reason) => showError(serverError(reason, t("errors.applications"))))
+      .catch((reason) => { if (active) showError(serverError(reason, t("errors.applications"))); })
       .finally(() => {
         if (active) setLoadingGrants(false);
       });
@@ -75,14 +81,19 @@ export function ConnectionsSettings({
   }
 
   async function toggleBinding(provider: OAuthBindingsPayload[number]) {
+    if (action || loadingBindings || !mfaReady || (mfaEnabled && !mfaCode.trim())) return;
     if (!provider.enabled && !provider.bound) return;
-    if (!provider.bound)
-      return runtime.redirect(
-        `/api/auth/${encodeURIComponent(provider.key)}?mode=bind`,
-      );
     setAction(provider.key);
     try {
-      await runtime.api.users.unbindOAuth(provider.key);
+      if (!provider.bound) {
+        const result = await runtime.api.users.prepareOAuthBind(provider.key, mfaCode.trim());
+        setMfaCode("");
+        runtime.redirect(result.redirect);
+        return;
+      }
+      if (mfaEnabled) await runtime.api.users.unbindOAuth(provider.key, mfaCode);
+      else await runtime.api.users.unbindOAuth(provider.key);
+      setMfaCode("");
       setBindings((items) =>
         items.map((item) =>
           item.key === provider.key
@@ -125,6 +136,7 @@ export function ConnectionsSettings({
               type="button"
               variant="ghost"
               size="sm"
+              disabled={loadingBindings || Boolean(action)}
               onClick={() => void refreshBindings()}
             >
               <RefreshCw data-icon="inline-start" />
@@ -136,6 +148,11 @@ export function ConnectionsSettings({
           <Loading label={t("binding.loading")} />
         ) : (
           <div className="flex flex-col gap-3 p-4">
+            {mfaError && <Alert><AlertDescription className="flex flex-wrap items-center gap-2"><span className="flex-1">{t('mfa.statusFailed')}</span><Button type="button" variant="outline" size="sm" onClick={retryMfa}><RefreshCw />{t('mfa.retry')}</Button></AlertDescription></Alert>}
+            {mfaEnabled && <Field className="max-w-sm">
+              <FieldLabel htmlFor="unbind-mfa-code">{t("mfa.code")}</FieldLabel>
+              <Input id="unbind-mfa-code" autoComplete="one-time-code" maxLength={64} value={mfaCode} onChange={(event) => setMfaCode(event.target.value)} />
+            </Field>}
             {bindings.map((provider) => (
               <article
                 key={provider.key}
@@ -160,7 +177,9 @@ export function ConnectionsSettings({
                   type="button"
                   variant={provider.bound ? "destructive" : "default"}
                   disabled={
-                    action === provider.key ||
+                    Boolean(action) ||
+                    !mfaReady ||
+                    (mfaEnabled && !mfaCode.trim()) ||
                     (!provider.enabled && !provider.bound)
                   }
                   onClick={() => void toggleBinding(provider)}
@@ -195,6 +214,7 @@ export function ConnectionsSettings({
             type="button"
             variant="ghost"
             size="sm"
+            disabled={loadingGrants || Boolean(action)}
             onClick={async () => {
               setLoadingGrants(true);
               try {

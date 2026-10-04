@@ -19,9 +19,46 @@ type markdownCompatCase struct {
 	NotContains []string `json:"notContains"`
 }
 
+func TestSharedMentionFixtures(t *testing.T) {
+	_, file, _, _ := runtime.Caller(0)
+	data, err := os.ReadFile(filepath.Join(filepath.Dir(file), "..", "..", "..", "..", "testdata", "markdown-extensions", "mentions.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cases []struct {
+		Name, Source string
+		Version      uint8
+		Mentions     int
+		NotContains  []string
+		Images       *int
+	}
+	if err := json.Unmarshal(data, &cases); err != nil {
+		t.Fatal(err)
+	}
+	for _, fixture := range cases {
+		t.Run(fixture.Name, func(t *testing.T) {
+			html := PostMarkdownToHTMLVersion(fixture.Source, fixture.Version)
+			if count := strings.Count(html, "data-mention-user="); count != fixture.Mentions {
+				t.Fatalf("got %d mentions want %d: %s", count, fixture.Mentions, html)
+			}
+			for _, unexpected := range fixture.NotContains {
+				if strings.Contains(html, unexpected) {
+					t.Fatalf("rendered unexpected %s: %s", unexpected, html)
+				}
+			}
+			if fixture.Images != nil {
+				analysis := AnalyzePostContentVersion(fixture.Source, fixture.Version)
+				if len(analysis.ImageURLs) != *fixture.Images {
+					t.Fatalf("images=%v want %d", analysis.ImageURLs, *fixture.Images)
+				}
+			}
+		})
+	}
+}
+
 func TestMarkdownVersions(t *testing.T) {
-	if got := GetPostVersion(); got != 5 {
-		t.Fatalf("GetPostVersion() = %d, want 5", got)
+	if got := GetPostVersion(); got != 6 {
+		t.Fatalf("GetPostVersion() = %d, want 6", got)
 	}
 	if GetParser() == nil {
 		t.Fatal("GetParser() returned nil")

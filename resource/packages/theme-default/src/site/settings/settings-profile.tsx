@@ -3,6 +3,7 @@ import type { SaveUserInfoInput, SettingsPageProps } from "@gooseforum/client";
 import { Link as LinkIcon, Mail, Pencil, UserRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@gooseforum/ui/components/button";
+import { Alert, AlertDescription } from "@gooseforum/ui/components/alert";
 import {
   Field,
   FieldDescription,
@@ -23,6 +24,7 @@ import { Textarea } from "@gooseforum/ui/components/textarea";
 import { useGooseRuntime } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { SettingsSectionHeader } from "./settings-section-header";
+import { useMFAEnabled } from "./use-mfa-enabled";
 
 const socialKeys = [
   "github",
@@ -62,6 +64,8 @@ export function ProfileSettings({
   const [editingUsername, setEditingUsername] = useState(false);
   const [editingEmail, setEditingEmail] = useState(false);
   const [saving, setSaving] = useState("");
+  const { enabled: mfaEnabled, ready: mfaReady, error: mfaError, retry: retryMfa } = useMFAEnabled();
+  const [mfaCode, setMfaCode] = useState("");
 
   async function run(
     key: string,
@@ -94,15 +98,22 @@ export function ProfileSettings({
   }
 
   async function saveEmail() {
+    if (!mfaReady) return;
     if (!email.trim()) return showError(t("validation.emailRequired"));
     if (
       await run(
         "email",
-        () => runtime.api.users.saveEmail(email.trim()),
+        () => mfaEnabled
+          ? runtime.api.users.saveEmail(email.trim(), mfaCode)
+          : runtime.api.users.saveEmail(email.trim()),
         t("status.emailSaved"),
       )
     )
-      setEditingEmail(false);
+      {
+        setEditingEmail(false); setMfaCode("");
+        runtime.queueFlash(t("status.emailSaved"), "success");
+        runtime.redirect("/login");
+      }
   }
 
   async function sendActivation() {
@@ -184,7 +195,7 @@ export function ProfileSettings({
                   <>
                     <Button
                       type="button"
-                      disabled={saving === "email"}
+                      disabled={saving === "email" || !mfaReady}
                       onClick={() => void saveEmail()}
                     >
                       {t("save")}
@@ -211,6 +222,11 @@ export function ProfileSettings({
                   </Button>
                 )}
               </div>
+              {editingEmail && mfaError && <Alert><AlertDescription className="flex flex-wrap items-center gap-2"><span className="flex-1">{t('mfa.statusFailed')}</span><Button type="button" variant="outline" size="sm" onClick={retryMfa}>{t('mfa.retry')}</Button></AlertDescription></Alert>}
+              {editingEmail && mfaEnabled && <Field>
+                <FieldLabel htmlFor="email-mfa-code">{t("mfa.code")}</FieldLabel>
+                <Input id="email-mfa-code" autoComplete="one-time-code" maxLength={64} value={mfaCode} onChange={(event) => setMfaCode(event.target.value)} />
+              </Field>}
               {requiresEmailVerification ? (
                 <div className="flex flex-col gap-2 border-l-2 border-warning bg-warning/10 px-3 py-2 lg:flex-row lg:items-center lg:justify-between">
                   <FieldDescription className="text-warning">

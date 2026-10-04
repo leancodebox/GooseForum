@@ -29,6 +29,7 @@ export default {
   templates: {
     comment: "commented on your topic",
     postReply: "replied to you",
+    mention: "mentioned you",
     topicPost: "posted in a topic you watch",
     follow: "followed you",
     badge: "earned the “{badge}” badge",

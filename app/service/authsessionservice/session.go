@@ -15,6 +15,9 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/models/forum/authsessions"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/loginlogservice"
 	"gorm.io/gorm"
 )
 
@@ -30,6 +33,7 @@ type LoginDetails struct {
 	Method          string
 	Provider        string
 	Reauthenticated bool
+	AuthTime        time.Time
 }
 
 type Authenticated struct {
@@ -55,6 +59,15 @@ func hash(raw string) string {
 }
 
 func Issue(c *gin.Context, userID, tokenVersion uint64, details LoginDetails) error {
+	return issue(c, userID, tokenVersion, details, nil)
+}
+
+// IssueVerified consumes the second factor before creating the session.
+func IssueVerified(c *gin.Context, userID, tokenVersion uint64, details LoginDetails, verify func(*gorm.DB) error) error {
+	return issue(c, userID, tokenVersion, details, verify)
+}
+
+func issue(c *gin.Context, userID, tokenVersion uint64, details LoginDetails, verify func(*gorm.DB) error) error {
 	secret := make([]byte, 32)
 	if _, err := rand.Read(secret); err != nil {
 		return err
@@ -62,10 +75,14 @@ func Issue(c *gin.Context, userID, tokenVersion uint64, details LoginDetails) er
 	raw := base64.RawURLEncoding.EncodeToString(secret)
 	clear(secret)
 	now := time.Now()
+	authTime := details.AuthTime
+	if authTime.IsZero() {
+		authTime = now
+	}
 	session := authsessions.Token{
 		UserId: userID, TokenHash: hash(raw), TokenVersion: tokenVersion,
 		AuthMethod: details.Method, OAuthProvider: details.Provider,
-		AuthTime: now, Reauthenticated: details.Reauthenticated,
+		AuthTime: authTime, Reauthenticated: details.Reauthenticated,
 		ClientIP: c.ClientIP(), UserAgent: truncate(c.Request.UserAgent(), 512),
 		CreatedAt: now, LastSeenAt: now, ExpiresAt: now.Add(lifetime()),
 	}
@@ -76,14 +93,23 @@ func Issue(c *gin.Context, userID, tokenVersion uint64, details LoginDetails) er
 			return err
 		}
 	}
-	if err := dbconnect.Connect().Create(&session).Error; err != nil {
+	db := dbconnect.Connect()
+	state, stateErr := users.GetAccountState(userID)
+	if stateErr != nil || state.TokenVersion != tokenVersion || state.EffectiveRestriction(now) == users.RestrictionBanned || state.NeedsEmailVerification(hotdataserve.GetSecuritySettingsConfigCache().EnableEmailVerification) {
+		return ErrInvalidSession
+	}
+	if verify != nil {
+		if err := verify(db); err != nil {
+			return err
+		}
+	}
+	// Verification stays consumed if session creation fails; retry requires another code.
+	if err := authsessions.CreateToken(&session); err != nil {
 		return err
 	}
-	logEvent(c, session, "generate")
+	logEvent(c, session, "login_success")
 	// The limit is a convenience bound; validity always comes from the row lookup.
-	var excess []authsessions.Token
-	dbconnect.Connect().Where("user_id = ? AND revoked_at IS NULL AND expires_at > ?", userID, now).
-		Order("last_seen_at DESC, id DESC").Offset(maxSessions).Find(&excess)
+	excess, _ := authsessions.ExcessTokens(userID, now, maxSessions)
 	for _, old := range excess {
 		if revokeID(old.Id, userID, now) {
 			cachedSessions.InvalidateUser(old.UserId)
@@ -92,6 +118,20 @@ func Issue(c *gin.Context, userID, tokenVersion uint64, details LoginDetails) er
 	}
 	SetCookie(c, raw, lifetime())
 	return nil
+}
+
+func InvalidateUser(userID uint64) { cachedSessions.InvalidateUser(userID) }
+
+func LogSecurityEvent(c *gin.Context, userID uint64, action string) {
+	method := ""
+	if strings.HasPrefix(action, "mfa_") {
+		method = "mfa"
+	}
+	session := authsessions.Token{UserId: userID, AuthMethod: method}
+	if c != nil {
+		session.Id = c.GetUint64("sessionId")
+	}
+	logEvent(c, session, action)
 }
 
 func rawAuthID() (string, error) {
@@ -133,17 +173,20 @@ func Authenticate(c *gin.Context, raw string, fromCookie bool) (Authenticated, e
 			return Authenticated{}, err
 		}
 	}
-	db := dbconnect.Connect()
+	state, stateErr := users.GetAccountState(session.UserId)
+	if stateErr != nil || state.TokenVersion != session.TokenVersion || state.EffectiveRestriction(now) == users.RestrictionBanned || state.NeedsEmailVerification(hotdataserve.GetSecuritySettingsConfigCache().EnableEmailVerification) {
+		cachedSessions.InvalidateUser(session.UserId)
+		return Authenticated{}, ErrInvalidSession
+	}
 	result := Authenticated{Session: session}
 	needsRenewal := session.ExpiresAt.Sub(now) < renewalWindow()
 	if needsRenewal {
 		newExpiry := now.Add(lifetime())
-		update := db.Model(&authsessions.Token{}).Where("id = ? AND revoked_at IS NULL AND expires_at > ? AND expires_at < ?", session.Id, now, newExpiry).
-			Update("expires_at", newExpiry)
-		if update.Error != nil {
-			return Authenticated{}, update.Error
+		updated, err := authsessions.RenewToken(session.Id, now, newExpiry)
+		if err != nil {
+			return Authenticated{}, err
 		}
-		if update.RowsAffected > 0 {
+		if updated {
 			result.Renewed = true
 			session.ExpiresAt = newExpiry
 			cachedSessions.UpdateIfPresent(key, session)
@@ -152,8 +195,8 @@ func Authenticate(c *gin.Context, raw string, fromCookie bool) (Authenticated, e
 		}
 	}
 	if session.LastSeenAt.Before(now.Add(-seenInterval)) {
-		update := db.Model(&authsessions.Token{}).Where("id = ? AND revoked_at IS NULL AND last_seen_at < ?", session.Id, now.Add(-seenInterval)).Update("last_seen_at", now)
-		if update.Error == nil && update.RowsAffected > 0 {
+		updated, err := authsessions.TouchToken(session.Id, now.Add(-seenInterval), now)
+		if err == nil && updated {
 			session.LastSeenAt = now
 			cachedSessions.UpdateIfPresent(key, session)
 		}
@@ -167,11 +210,7 @@ func Authenticate(c *gin.Context, raw string, fromCookie bool) (Authenticated, e
 func loadSession(key string, now time.Time) (authsessions.Token, error) {
 	for range 2 {
 		generation := cachedSessions.Generation()
-		var session authsessions.Token
-		err := dbconnect.Connect().Model(&authsessions.Token{}).
-			Joins("JOIN users ON users.id = user_auth_tokens.user_id AND users.deleted_at IS NULL AND users.token_version = user_auth_tokens.token_version").
-			Where("user_auth_tokens.token_hash = ? AND user_auth_tokens.revoked_at IS NULL AND user_auth_tokens.expires_at > ?", key, now).
-			First(&session).Error
+		session, err := authsessions.GetValidToken(key, now)
 		if err != nil {
 			return authsessions.Token{}, ErrInvalidSession
 		}
@@ -197,21 +236,18 @@ func RevokeRaw(c *gin.Context, raw string) error {
 	if len(raw) != 43 {
 		return nil
 	}
-	var session authsessions.Token
-	err := dbconnect.Connect().Where("token_hash = ?", hash(raw)).First(&session).Error
+	session, err := authsessions.GetTokenByHash(hash(raw))
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil
 	}
 	if err != nil {
 		return err
 	}
-	result := dbconnect.Connect().Model(&authsessions.Token{}).
-		Where("id = ? AND user_id = ? AND revoked_at IS NULL", session.Id, session.UserId).
-		Update("revoked_at", time.Now())
-	if result.Error != nil {
-		return result.Error
+	revoked, err := authsessions.RevokeToken(session.UserId, session.Id, time.Now())
+	if err != nil {
+		return err
 	}
-	if result.RowsAffected > 0 {
+	if revoked {
 		cachedSessions.InvalidateUser(session.UserId)
 		logEvent(c, session, "logout")
 	}
@@ -219,16 +255,16 @@ func RevokeRaw(c *gin.Context, raw string) error {
 }
 
 func revokeID(id, userID uint64, now time.Time) bool {
-	result := dbconnect.Connect().Model(&authsessions.Token{}).Where("id = ? AND user_id = ? AND revoked_at IS NULL", id, userID).Update("revoked_at", now)
-	return result.Error == nil && result.RowsAffected == 1
+	revoked, err := authsessions.RevokeToken(userID, id, now)
+	return err == nil && revoked
 }
 
 func Revoke(c *gin.Context, userID, id, currentID uint64) error {
 	if id == currentID {
 		return ErrInvalidSession
 	}
-	var session authsessions.Token
-	if err := dbconnect.Connect().Where("id = ? AND user_id = ? AND revoked_at IS NULL", id, userID).First(&session).Error; err != nil {
+	session, err := authsessions.GetUserToken(userID, id)
+	if err != nil {
 		return ErrInvalidSession
 	}
 	if !revokeID(id, userID, time.Now()) {
@@ -241,9 +277,8 @@ func Revoke(c *gin.Context, userID, id, currentID uint64) error {
 
 func RevokeOthers(c *gin.Context, userID, currentID uint64) error {
 	now := time.Now()
-	result := dbconnect.Connect().Model(&authsessions.Token{}).Where("user_id = ? AND id <> ? AND revoked_at IS NULL", userID, currentID).Update("revoked_at", now)
-	if result.Error != nil {
-		return result.Error
+	if err := authsessions.RevokeOtherTokens(userID, currentID, now); err != nil {
+		return err
 	}
 	cachedSessions.InvalidateUser(userID)
 	logEvent(c, authsessions.Token{UserId: userID, Id: currentID}, "revoke_others")
@@ -251,10 +286,7 @@ func RevokeOthers(c *gin.Context, userID, currentID uint64) error {
 }
 
 func List(userID, version uint64) ([]authsessions.Token, error) {
-	var sessions []authsessions.Token
-	err := dbconnect.Connect().Where("user_id = ? AND token_version = ? AND revoked_at IS NULL AND expires_at > ?", userID, version, time.Now()).
-		Order("last_seen_at DESC, id DESC").Find(&sessions).Error
-	return sessions, err
+	return authsessions.ListUserTokens(userID, version, time.Now())
 }
 
 func LogPasswordChange(c *gin.Context, userID uint64) {
@@ -263,38 +295,16 @@ func LogPasswordChange(c *gin.Context, userID uint64) {
 }
 
 func logEvent(c *gin.Context, session authsessions.Token, action string) {
-	var ip, ua string
-	if c != nil {
-		ip, ua = c.ClientIP(), truncate(c.Request.UserAgent(), 512)
-	}
-	_ = dbconnect.Connect().Create(&authsessions.Log{UserId: session.UserId, UserAuthTokenId: session.Id, Action: action, ClientIP: ip, UserAgent: ua, CreatedAt: time.Now()}).Error
+	loginlogservice.Record(c, loginlogservice.Event{UserID: session.UserId, SessionID: session.Id,
+		Action: action, Method: session.AuthMethod, Provider: session.OAuthProvider, Result: "success"})
 }
 
 func Cleanup() error {
-	db := dbconnect.Connect()
 	now := time.Now()
-	if err := deleteExpiredInBatches(db, &authsessions.Token{}, "expires_at < ? OR revoked_at < ?", now.Add(-24*time.Hour), now.Add(-24*time.Hour)); err != nil {
+	if err := authsessions.CleanupTokens(now.Add(-24 * time.Hour)); err != nil {
 		return err
 	}
-	return deleteExpiredInBatches(db, &authsessions.Log{}, "created_at < ?", now.Add(-90*24*time.Hour))
+	return authsessions.CleanupLogs(now.Add(-90 * 24 * time.Hour))
 }
 
-const cleanupBatchSize = 500
-
-func deleteExpiredInBatches(db *gorm.DB, model any, condition string, args ...any) error {
-	for {
-		var ids []uint64
-		if err := db.Model(model).Where(condition, args...).Order("id").Limit(cleanupBatchSize).Pluck("id", &ids).Error; err != nil {
-			return err
-		}
-		if len(ids) == 0 {
-			return nil
-		}
-		if err := db.Where("id IN ?", ids).Delete(model).Error; err != nil {
-			return err
-		}
-		if len(ids) < cleanupBatchSize {
-			return nil
-		}
-	}
-}
+const cleanupBatchSize = authsessions.CleanupBatchSize

@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
+	"github.com/leancodebox/GooseForum/app/service/authsessionservice"
+
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -20,12 +23,6 @@ func init() {
 		RunE:  runUserSetPassword,
 	})
 	appendCommand(&cobra.Command{
-		Use:   "set-user-email <userId> <email>",
-		Short: "Set a user email",
-		Args:  cobra.ExactArgs(2),
-		RunE:  runUserSetEmail,
-	})
-	appendCommand(&cobra.Command{
 		Use:   "set-user-admin <userId>",
 		Short: "Grant the administrator role to a user",
 		Args:  cobra.ExactArgs(1),
@@ -38,24 +35,22 @@ func runUserSetPassword(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	user.SetPassword(args[1])
-	if err := userservice.SaveUser(&user); err != nil {
-		return fmt.Errorf("save user password: %w", err)
-	}
-	fmt.Printf("Password updated for user %d (%s).\n", user.Id, user.Username)
-	return nil
-}
-
-func runUserSetEmail(_ *cobra.Command, args []string) error {
-	user, err := getUserArg(args[0])
+	hash, err := algorithm.MakePassword(args[1])
 	if err != nil {
 		return err
 	}
-	user.Email = args[1]
-	if err := userservice.SaveUser(&user); err != nil {
-		return fmt.Errorf("save user email: %w", err)
+	updated, err := users.UpdatePasswordByVersion(user.Id, user.TokenVersion, hash)
+	if err != nil {
+		return fmt.Errorf("save user password: %w", err)
 	}
-	fmt.Printf("Email updated for user %d (%s): %s\n", user.Id, user.Username, user.Email)
+	if !updated {
+		return fmt.Errorf("user security state changed; retry")
+	}
+	authsessionservice.LogPasswordChange(nil, user.Id)
+	if current, err := users.Get(user.Id); err == nil {
+		userservice.RefreshUserCaches(&current)
+	}
+	fmt.Printf("Password updated for user %d (%s).\n", user.Id, user.Username)
 	return nil
 }
 
@@ -83,9 +78,13 @@ func runUserSetAdmin(_ *cobra.Command, args []string) error {
 	}
 	permission.InvalidateRole(roleEntity.Id)
 
-	user.RoleId = roleEntity.Id
-	if err := userservice.SaveUser(&user); err != nil {
+	if err := users.AssignOperatorRole(user.Id, roleEntity.Id); err != nil {
 		return fmt.Errorf("save user role: %w", err)
+	}
+	authsessionservice.InvalidateUser(user.Id)
+	authsessionservice.LogSecurityEvent(nil, user.Id, "role_change")
+	if current, err := users.Get(user.Id); err == nil {
+		userservice.RefreshUserCaches(&current)
 	}
 	fmt.Printf("User %d (%s) is now an administrator.\n", user.Id, user.Username)
 	return nil

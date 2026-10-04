@@ -8,28 +8,83 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
+	"github.com/leancodebox/GooseForum/app/models/forum/userOAuth"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 )
 
 func CreateUser(username, password, email string, needValid bool, locale ...string) (*users.EntityComplete, error) {
+	return CreateUserWithBinding(username, password, email, needValid, nil, locale...)
+}
+
+// CreateUserWithBinding retains a provider identity on the account so failed bindings can be retried.
+func CreateUserWithBinding(username, password, email string, needValid bool, binding *userOAuth.Entity, locale ...string) (*users.EntityComplete, error) {
+	username = strings.TrimSpace(username)
+	email = strings.ToLower(strings.TrimSpace(email))
 	userEntity := users.MakeUser(username, password, email)
 	userEntity.Locale = normalizeUserLocale(locale...)
 	userEntity.Nickname = GenerateGooseNickname()
+	userEntity.RequiresEmailVerification = needValid
 	if !needValid {
 		userEntity.IsActivated = users.ActivationSuccess
 	}
 	userEntity.IsFrozen = users.StatusNormal
-	pointservice.InitUserPoints(userEntity.Id, 100)
-	err := users.Create(userEntity)
+	if binding != nil {
+		if binding.Provider == "" || binding.ProviderUid == "" {
+			return nil, fmt.Errorf("OAuth identity is missing")
+		}
+		key := users.OAuthRegistrationKey(binding.Provider, binding.ProviderUid)
+		userEntity.OAuthRegistrationKey = &key
+	}
+	err := users.WithIdentityWriteLock(func() error {
+		if binding != nil {
+			recovered, err := users.FindOAuthRegistration(*userEntity.OAuthRegistrationKey)
+			if err != nil {
+				return err
+			}
+			if recovered != nil {
+				userEntity = recovered
+			}
+		}
+		if userEntity.Id == 0 {
+			if err := users.CheckIdentityAvailable(username, email, 0); err != nil {
+				return err
+			}
+			if err := users.Create(userEntity); err != nil {
+				return err
+			}
+		}
+		if binding != nil {
+			binding.UserId = userEntity.Id
+			existing := userOAuth.GetByProviderAndUID(binding.Provider, binding.ProviderUid)
+			if existing != nil {
+				if existing.UserId != userEntity.Id {
+					return fmt.Errorf("OAuth identity belongs to another account")
+				}
+			} else if err := userOAuth.Create(binding); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
-	userSt := userStatistics.Entity{UserId: userEntity.Id}
-	userStatistics.SaveOrCreateById(&userSt)
+	pointservice.InitUserPoints(userEntity.Id, 100)
+	if err := userStatistics.EnsureInitialized(userEntity.Id); err != nil {
+		return nil, err
+	}
 	if userEntity.Id == 1 {
-		FirstUserInit(userEntity)
+		if err := FirstUserInit(userEntity); err != nil {
+			return nil, err
+		}
+	}
+	if binding != nil {
+		if err := users.CompleteOAuthRegistration(userEntity.Id); err != nil {
+			return nil, err
+		}
+		userEntity.OAuthRegistrationKey = nil
 	}
 	return userEntity, nil
 }

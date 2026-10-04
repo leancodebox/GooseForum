@@ -16,6 +16,8 @@ type Entity struct {
 	UserId            uint64         `gorm:"column:user_id;not null;default:0;index;" json:"userId"`
 	ReplyToPostId     uint64         `gorm:"column:reply_to_post_id;not null;default:0;" json:"replyToPostId"`
 	Content           string         `gorm:"column:content;type:text;" json:"content"`
+	SourceVersion     uint8          `gorm:"column:source_version;not null;default:0" json:"sourceVersion"`
+	LegacyMentionIDs  []uint64       `gorm:"column:legacy_mention_ids;type:text;serializer:json" json:"-"`
 	RenderedHTML      string         `gorm:"column:rendered_html;type:text;" json:"renderedHTML"`
 	RenderedVersion   uint32         `gorm:"column:rendered_version;not null;default:0;" json:"renderedVersion"`
 	ProcessStatus     int8           `gorm:"column:process_status;not null;default:0;index:idx_posts_topic_process,priority:2;" json:"processStatus"`

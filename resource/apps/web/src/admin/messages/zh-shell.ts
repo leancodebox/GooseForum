@@ -2,6 +2,7 @@ export default {
   console: "管理后台",
   dashboard: "仪表盘",
   users: "用户",
+  authLogs: "登录日志",
   roles: "角色",
   accessGroups: "访问组",
   categories: "分类",

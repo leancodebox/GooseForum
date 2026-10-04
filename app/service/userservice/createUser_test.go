@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
+	"github.com/leancodebox/GooseForum/app/models/forum/role"
+	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
@@ -11,7 +13,7 @@ import (
 func setupCreateUserTestDB(t *testing.T) {
 	t.Helper()
 	conn := db.Connect()
-	if err := conn.AutoMigrate(&users.EntityComplete{}, &userStatistics.Entity{}); err != nil {
+	if err := conn.AutoMigrate(&users.EntityComplete{}, &userStatistics.Entity{}, &role.Entity{}, &rolePermissionRs.Entity{}); err != nil {
 		t.Fatalf("migrate user tables: %v", err)
 	}
 	conn.Where("1 = 1").Delete(&userStatistics.Entity{})

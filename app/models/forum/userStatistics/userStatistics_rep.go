@@ -4,7 +4,12 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"gorm.io/gorm/clause"
 )
+
+func EnsureInitialized(userID uint64) error {
+	return builder().Clauses(clause.OnConflict{DoNothing: true}).Create(&Entity{UserId: userID}).Error
+}
 
 func create(entity *Entity) int64 {
 	result := builder().Create(entity)

@@ -49,7 +49,7 @@ func Get(id uint64) (entity Entity) {
 // SaveReviewed compares the version before changing content or an admin decision.
 func SaveReviewed(entity *Entity, version uint64) error {
 	result := builder().Where("id = ? AND moderation_version = ?", entity.Id, version).
-		Select("content", "rendered_html", "rendered_version", "process_status", "moderation_status", "moderation_reason", "moderation_version", "moderated_at", "updated_at", "published_at").Updates(entity)
+		Select("content", "source_version", "legacy_mention_ids", "rendered_html", "rendered_version", "process_status", "moderation_status", "moderation_reason", "moderation_version", "moderated_at", "updated_at", "published_at").Updates(entity)
 	if result.Error != nil {
 		return result.Error
 	}

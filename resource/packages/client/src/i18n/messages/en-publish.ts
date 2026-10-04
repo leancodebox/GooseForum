@@ -1,5 +1,31 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  localDraft: {
+    "saving": "Saving local copy…",
+    "saved": "Local copy saved",
+    "storage": "Local save failed; your text remains in the editor",
+    "capacity": "Local draft storage is full. Delete copies you no longer need",
+    "attachments": "Temporary attachments remain. Finish uploading and retry",
+    "retry": "Retry",
+    "manage": "Manage local copies",
+    "found": "{count} local copies found",
+    "keep": "Keep current content",
+    "restore": "Restore copy",
+    "delete": "Delete copy",
+    "unavailable": "Permissions or the reply target changed; this copy cannot be restored",
+    "conflict": "The original content changed. Check the restored text before submitting",
+    "localTitle": "Browser local copies",
+    "newTopic": "New topic",
+    "editTopic": "Topic edit",
+    "newReply": "New reply",
+    "editReply": "Reply edit",
+    "empty": "No local copies",
+    "recoveryTitle": "Local draft found",
+    "recoveryDescription": "Restore your unfinished content? Discarding deletes this local draft.",
+    "discard": "Discard local draft",
+    "leave": "You have unsubmitted content. Leave this page?",
+    "confirmRestore": "Restoring this copy replaces your current input. Continue?"
+  },
   moderationRejected:
     "Your content was saved but did not pass moderation and is not public.",
   createTitle: "Publish topic",
@@ -22,7 +48,7 @@ export default {
   visualMode: "Editor",
   preview: "Preview",
   visualUnsupported:
-    "This body contains task lists. Continue editing it in Markdown mode.",
+    "This body contains syntax the visual editor cannot preserve. Continue in Markdown mode.",
   processingImage: "Processing image…",
   processingImages: "Processing images {done}/{total}",
   imageInserted: "Image inserted.",
@@ -42,6 +68,9 @@ export default {
   bodyPlaceholder:
     "Enter body text, Markdown supported; paste or drag images here",
   visualPlaceholder: "Write and format the body directly",
+  mentionUsers: "Mention users",
+  mentionLoading: "Finding users...",
+  mentionEmpty: "No matching users",
   emptyPreview: "There is no content to preview yet.",
   selectedCategories: "Selected categories",
   leaveTitle: "Save unfinished edits?",

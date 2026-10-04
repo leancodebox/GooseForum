@@ -1,0 +1,16 @@
+[
+  {"name":"stable-id","source":"[mention user=\"9007199254740993\"]@alice[/mention]","version":1,"mentions":1},
+  {"name":"trailing-space","source":"[mention   user=\"123\" ]@alice[/mention]","version":1,"mentions":1},
+  {"name":"legacy","source":"[mention user=\"123\"]@alice[/mention]","version":0,"mentions":0},
+  {"name":"escaped","source":"\\[mention user=\"123\"]@alice[/mention]","version":1,"mentions":0},
+  {"name":"inline-code","source":"`[mention user=\"123\"]@alice[/mention]`","version":1,"mentions":0},
+  {"name":"link","source":"[[mention user=\"123\"]@alice[/mention]](/url)","version":1,"mentions":0},
+  {"name":"unknown-inline","source":"[future][mention user=\"123\"]@alice[/mention][/future]","version":1,"mentions":0},
+  {"name":"unknown-block","source":"[future]\n\n[mention user=\"123\"]@alice[/mention]\n\n[/future]","version":1,"mentions":0},
+  {"name":"unknown-block-markup","source":"[future]\n\n**标题**\n\n![x](/file/img/opaque.webp)\n\n[/future]","version":1,"mentions":0,"notContains":["<strong>","<img"],"images":0},
+  {"name":"unknown-block-standard-syntax","source":"[future]\n\n- [x] done\n\n[link](/url)\n\n![x](/file/img/opaque.webp)\n\n[/future]","version":1,"mentions":0,"notContains":["<input","<a ","<img"],"images":0},
+  {"name":"unknown-code-close","source":"[future]\n\n```\n[/future]\n```\n\n[mention user=\"123\"]@alice[/mention]\n\n[/future]","version":1,"mentions":0},
+  {"name":"html","source":"<span>[mention user=\"123\"]@alice[/mention]</span>","version":1,"mentions":0},
+  {"name":"comparison","source":"1 < 2 [mention user=\"123\"]@alice[/mention]","version":1,"mentions":1},
+  {"name":"code-html","source":"`<span>` [mention user=\"123\"]@alice[/mention]","version":1,"mentions":1}
+]

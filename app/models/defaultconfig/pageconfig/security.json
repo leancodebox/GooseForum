@@ -1,5 +1,8 @@
 {
   "enableSignup": true,
   "enableEmailVerification": false,
-  "allowedDomains": []
+  "allowedDomains": [],
+  "registrationIPLimit": 5,
+  "registrationEmailLimit": 3,
+  "registrationGlobalLimit": 100
 }

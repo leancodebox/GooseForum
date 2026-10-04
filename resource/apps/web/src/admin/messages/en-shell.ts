@@ -2,6 +2,7 @@ export default {
   console: "Admin Console",
   dashboard: "Dashboard",
   users: "Users",
+  authLogs: "Login logs",
   roles: "Roles",
   accessGroups: "Access groups",
   categories: "Categories",

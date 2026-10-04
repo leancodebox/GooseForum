@@ -33,6 +33,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/accessadminservice"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
+	"github.com/leancodebox/GooseForum/app/service/accountrestrictionservice"
+	"github.com/leancodebox/GooseForum/app/service/adminpolicyservice"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"github.com/leancodebox/GooseForum/app/service/httpnotifyservice"
@@ -42,6 +44,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/oidcproviderservice"
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/permission"
+	"github.com/leancodebox/GooseForum/app/service/registrationservice"
+	"github.com/leancodebox/GooseForum/app/service/rolemanagementservice"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"github.com/leancodebox/GooseForum/app/service/sensitivewordservice"
 	"github.com/leancodebox/GooseForum/app/service/themeservice"
@@ -131,18 +135,22 @@ type UserListReq struct {
 }
 
 type UserItem struct {
-	UserId         uint64                              `json:"userId"`
-	Username       string                              `json:"username"`
-	AvatarUrl      string                              `json:"avatarUrl"`
-	Email          string                              `json:"email"`
-	Status         int8                                `json:"status"`
-	Validate       int8                                `json:"validate"`
-	Prestige       int64                               `json:"prestige"`
-	RoleList       []datastruct.Option[string, uint64] `json:"roleList"`
-	RoleId         uint64                              `json:"roleId,omitempty"`
-	CreateTime     string                              `json:"createTime"`
-	LastActiveTime string                              `json:"lastActiveTime"`
-	Badges         []badgeservice.UserBadge            `json:"badges"`
+	RestrictionStatus string                              `json:"restrictionStatus"`
+	RestrictionUntil  *time.Time                          `json:"restrictionUntil"`
+	RestrictionReason string                              `json:"restrictionReason"`
+	RestrictionNote   string                              `json:"restrictionNote"`
+	UserId            uint64                              `json:"userId"`
+	Username          string                              `json:"username"`
+	AvatarUrl         string                              `json:"avatarUrl"`
+	Email             string                              `json:"email"`
+	Status            int8                                `json:"status"`
+	Validate          int8                                `json:"validate"`
+	Prestige          int64                               `json:"prestige"`
+	RoleList          []datastruct.Option[string, uint64] `json:"roleList"`
+	RoleId            uint64                              `json:"roleId,omitempty"`
+	CreateTime        string                              `json:"createTime"`
+	LastActiveTime    string                              `json:"lastActiveTime"`
+	Badges            []badgeservice.UserBadge            `json:"badges"`
 }
 
 func UserList(req component.BetterRequest[UserListReq]) component.Response {
@@ -178,18 +186,22 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 			LastActiveTime = usItem.LastActiveTime.Format(time.DateTime)
 		}
 		return UserItem{
-			UserId:         t.Id,
-			AvatarUrl:      t.GetWebAvatarUrl(),
-			Username:       t.Username,
-			Email:          t.Email,
-			Status:         t.IsFrozen,
-			Validate:       t.IsActivated,
-			Prestige:       t.Prestige,
-			RoleList:       roleList,
-			RoleId:         t.RoleId,
-			CreateTime:     t.CreatedAt.Format(time.DateTime),
-			LastActiveTime: LastActiveTime,
-			Badges:         badgeservice.GetUserBadges(t.Id),
+			RestrictionStatus: t.EffectiveRestriction(time.Now()),
+			RestrictionUntil:  t.RestrictionUntil,
+			RestrictionReason: t.RestrictionReason,
+			RestrictionNote:   t.RestrictionNote,
+			UserId:            t.Id,
+			AvatarUrl:         t.GetWebAvatarUrl(),
+			Username:          t.Username,
+			Email:             t.Email,
+			Status:            restrictionCompatibilityStatus(t),
+			Validate:          t.IsActivated,
+			Prestige:          t.Prestige,
+			RoleList:          roleList,
+			RoleId:            t.RoleId,
+			CreateTime:        t.CreatedAt.Format(time.DateTime),
+			LastActiveTime:    LastActiveTime,
+			Badges:            badgeservice.GetUserBadges(t.Id),
 		}
 	})
 	return component.SuccessPage(
@@ -346,10 +358,14 @@ func SaveUserBadges(req component.BetterRequest[SaveUserBadgesReq]) component.Re
 }
 
 type EditUserReq struct {
-	UserId   uint64 `json:"userId"`
-	Status   int8   `json:"status"`
-	Validate int8   `json:"validate"`
-	RoleId   uint64 `json:"roleId"`
+	UserId            uint64     `json:"userId"`
+	Status            int8       `json:"status"`
+	Validate          int8       `json:"validate"`
+	RoleId            uint64     `json:"roleId"`
+	RestrictionStatus string     `json:"restrictionStatus"`
+	RestrictionUntil  *time.Time `json:"restrictionUntil"`
+	RestrictionReason string     `json:"restrictionReason"`
+	RestrictionNote   string     `json:"restrictionNote"`
 }
 
 func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
@@ -358,39 +374,41 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 	if err != nil || user.Id == 0 {
 		return component.FailResponseCode(component.MessageAdminTargetUserFetchFailed, nil)
 	}
-	opt := false
 	changes := make([]string, 0, 3)
 	oldFrozen := user.IsFrozen
 	oldActivated := user.IsActivated
 	oldRoleID := user.RoleId
 	if user.IsFrozen != params.Status {
 		changes = append(changes, "status")
-		user.IsFrozen = params.Status
-		opt = true
 	}
 	if user.IsActivated != params.Validate {
 		changes = append(changes, "activation")
-		user.IsActivated = params.Validate
-		opt = true
 	}
 	if user.RoleId != params.RoleId {
 		changes = append(changes, "role")
-		user.RoleId = params.RoleId
-		opt = true
 	}
-	if opt {
-		if err := userservice.SaveUser(&user); err != nil {
-			return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
+	if params.RestrictionStatus == "" {
+		return component.FailResponseCode("admin.restriction.invalid", nil)
+	}
+	if err := accountrestrictionservice.Edit(req.UserId, accountrestrictionservice.Change{UserId: params.UserId, Status: params.RestrictionStatus, Until: params.RestrictionUntil, Reason: params.RestrictionReason, Note: params.RestrictionNote, RoleId: params.RoleId, Validate: params.Validate}); err != nil {
+		if errors.Is(err, accountrestrictionservice.ErrProtected) {
+			return component.FailResponseCode("admin.restriction.protected", nil)
 		}
+		if errors.Is(err, accountrestrictionservice.ErrInvalid) {
+			return component.FailResponseCode("admin.restriction.invalid", nil)
+		}
+		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
+	}
+	if len(changes) > 0 {
 		optlogger.UserOptCode(req.UserId, optlogger.EditUser, user.Id, "admin.opt.user.updated", optlogger.MessageParams{
 			"userId":        user.Id,
 			"changes":       changes,
 			"oldFrozen":     oldFrozen,
-			"newFrozen":     user.IsFrozen,
+			"newFrozen":     params.Status,
 			"oldActivated":  oldActivated,
-			"newActivated":  user.IsActivated,
+			"newActivated":  params.Validate,
 			"oldRoleId":     oldRoleID,
-			"newRoleId":     user.RoleId,
+			"newRoleId":     params.RoleId,
 			"changedFields": strings.Join(changes, ", "),
 		})
 	}
@@ -737,45 +755,9 @@ type RoleSaveReq struct {
 }
 
 func RoleSave(req component.BetterRequest[RoleSaveReq]) component.Response {
-	var roleEntity role.Entity
-	if req.Params.Id > 0 {
-		roleEntity = role.Get(req.Params.Id)
-	} else {
-		roleEntity = role.Entity{
-			Effective: 1,
-		}
+	if err := rolemanagementservice.Save(req.UserId, uint64(req.Params.Id), req.Params.RoleName, req.Params.Permissions); err != nil {
+		return roleMutationError(err)
 	}
-	roleEntity.RoleName = req.Params.RoleName
-	if err := role.SaveOrCreateById(&roleEntity); err != nil {
-		return component.FailResponseCode(component.MessageOperationFailed, nil)
-	}
-
-	rsList := rolePermissionRs.GetRsByRoleId(roleEntity.Id)
-	canUpdateMap := lo.SliceToMap(req.Params.Permissions, func(id uint64) (uint64, bool) {
-		return id, true
-	})
-
-	// 更新数据
-	for _, item := range rsList {
-		item.Effective = 0
-		if _, ok := canUpdateMap[item.PermissionId]; ok {
-			item.Effective = 1
-			// 如果已经存在，从 map 中删除，避免重复插入
-			delete(canUpdateMap, item.PermissionId)
-		}
-		rolePermissionRs.SaveOrCreateById(item)
-	}
-	// 插入新的条目
-	for id := range canUpdateMap {
-		rsItem := rolePermissionRs.Entity{
-			RoleId:       roleEntity.Id,
-			PermissionId: id,
-			Effective:    1,
-		}
-		rolePermissionRs.SaveOrCreateById(&rsItem)
-	}
-	permission.InvalidateRole(roleEntity.Id)
-
 	return component.SuccessResponse(true)
 }
 
@@ -784,17 +766,9 @@ type RoleSaveDel struct {
 }
 
 func RoleDel(req component.BetterRequest[RoleSaveDel]) component.Response {
-	roleEntity := role.Get(req.Params.Id)
-	if roleEntity.Id == 0 {
-		return component.FailResponseCode(component.MessageAdminRoleNotFound, nil)
+	if err := rolemanagementservice.Delete(req.UserId, uint64(req.Params.Id)); err != nil {
+		return roleMutationError(err)
 	}
-	rsList := rolePermissionRs.GetRsByRoleId(roleEntity.Id)
-	// 删除
-	lo.ForEach(rsList, func(item *rolePermissionRs.Entity, _ int) {
-		rolePermissionRs.DeleteEntity(item)
-	})
-	role.DeleteEntity(&roleEntity)
-	permission.InvalidateRole(roleEntity.Id)
 	return component.SuccessResponse(true)
 }
 
@@ -1353,7 +1327,7 @@ func SaveAnnouncement(req component.BetterRequest[SaveAnnouncementReq]) componen
 // GetSecuritySettings 获取安全与注册设置
 func GetSecuritySettings(req component.BetterRequest[component.Null]) component.Response {
 	defaultSettings := defaultconfig.GetDefaultSecuritySettingsConfig()
-	res := pageConfig.GetConfigByPageType(pageConfig.SecuritySettings, defaultSettings)
+	res := pageConfig.GetSecuritySettings(defaultSettings)
 	return component.SuccessResponse(res)
 }
 
@@ -1363,7 +1337,16 @@ type SaveSecuritySettingsReq struct {
 
 // SaveSecuritySettings 保存安全与注册设置
 func SaveSecuritySettings(req component.BetterRequest[SaveSecuritySettingsReq]) component.Response {
-	return savePageConfig(pageConfig.SecuritySettings, req.Params.Settings, hotdataserve.ClearSecuritySettingsConfigCache)
+	if err := registrationservice.ValidateSettings(&req.Params.Settings); err != nil {
+		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
+	}
+	if err := adminpolicyservice.SaveSecuritySettings(req.Params.Settings); err != nil {
+		if errors.Is(err, adminpolicyservice.ErrNoUsableAdministrator) {
+			return component.FailResponseCode(component.MessageAdminRestrictionProtected, nil)
+		}
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
+	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
 
 type SaveSensitiveWordSettingsReq struct {

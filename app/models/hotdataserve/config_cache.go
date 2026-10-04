@@ -69,7 +69,7 @@ var securitySettingsConfigCache = &sharedcache.Cache[pageConfig.SecurityAndRegis
 
 func GetSecuritySettingsConfigCache() pageConfig.SecurityAndRegistration {
 	return securitySettingsConfigCache.GetOrLoad("", func() (pageConfig.SecurityAndRegistration, error) {
-		return pageConfig.GetConfigByPageType(pageConfig.SecuritySettings, defaultconfig.GetDefaultSecuritySettingsConfig()), nil
+		return pageConfig.GetSecuritySettings(defaultconfig.GetDefaultSecuritySettingsConfig()), nil
 	}, configFastCacheTTL)
 }
 

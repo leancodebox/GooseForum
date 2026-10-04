@@ -39,9 +39,9 @@ func ReviewTopic(topic *topics.Entity, post *posts.Entity) {
 	if post.ProcessStatus == 1 && previouslyRejected {
 		post.ProcessStatus = 0
 	}
-	topic.Excerpt = markdown2html.ExtractDescription(post.Content, 200)
-	topic.FirstImageURL = markdown2html.ExtractFirstImageURL(post.Content)
-	post.RenderedHTML = markdown2html.PostMarkdownToHTML(post.Content)
+	topic.Excerpt = markdown2html.ExtractDescriptionVersion(post.Content, 200, post.SourceVersion)
+	topic.FirstImageURL = markdown2html.ExtractFirstImageURLVersion(post.Content, post.SourceVersion)
+	post.RenderedHTML = markdown2html.PostMarkdownToHTMLVersion(post.Content, post.SourceVersion)
 	post.RenderedVersion = markdown2html.GetPostVersion()
 }
 
@@ -71,7 +71,7 @@ func ReviewPost(post *posts.Entity) {
 		now := time.Now()
 		post.PublishedAt = &now
 	}
-	post.RenderedHTML = markdown2html.PostMarkdownToHTML(post.Content)
+	post.RenderedHTML = markdown2html.PostMarkdownToHTMLVersion(post.Content, post.SourceVersion)
 	post.RenderedVersion = markdown2html.GetPostVersion()
 }
 

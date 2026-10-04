@@ -48,10 +48,13 @@ func ActivateAccount(c *gin.Context) {
 	}
 
 	// 激活账号
-	user.Activate()
-	if err = userservice.SaveUser(&user); err != nil {
+	updated, err := users.ActivateByVersion(user.Id, user.TokenVersion, claims.Email)
+	if err != nil || !updated {
 		renderActivationPage(c, false, "activationFailed")
 		return
+	}
+	if current, err := users.Get(user.Id); err == nil {
+		userservice.RefreshUserCaches(&current)
 	}
 
 	renderActivationPage(c, true, "activationSuccess")

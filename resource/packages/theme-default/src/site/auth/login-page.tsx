@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import {
   loginWithPassword,
+  GooseClientError,
   type LayoutPayload,
   type LoginPageProps,
 } from '@gooseforum/client'
@@ -43,6 +44,9 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
   const { t } = useTranslation('auth')
   const resolveError = useServerErrorMessage()
   const [mode, setMode] = useState<Mode>(page.initialMode || 'login')
+  const [mfa, setMfa] = useState(() => new URL(runtime.currentUrl || '/login', 'http://localhost').searchParams.get('mfa') === '1')
+  const [oauthMfa, setOAuthMfa] = useState(mfa)
+  const [mfaCode, setMfaCode] = useState('')
   const [captcha, setCaptcha] = useState({ id: '', image: '' })
   const [captchaLoading, setCaptchaLoading] = useState(false)
   const [pending, setPending] = useState<Mode | null>(null)
@@ -87,16 +91,27 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
 
     setPending('login')
     setError('')
+    setNotice('')
     try {
-      await loginWithPassword(runtime.api.auth, {
+      const result = await loginWithPassword(runtime.api.auth, {
         username,
         password: loginForm.password,
         captchaId: captcha.id,
         captchaCode,
       })
+      if (result?.mfaRequired) {
+        setOAuthMfa(false)
+        setMfa(true)
+        setLoginForm({ username: '', password: '', captcha: '' })
+        return
+      }
       await runtime.navigate(page.redirectUrl || '/', { replace: true })
     } catch (nextError) {
-      setError(resolveError(nextError, t('validation.loginFailed')))
+      if (nextError instanceof GooseClientError && nextError.messageCode === 'auth.activation.resendSuccess') {
+        setNotice(resolveError(nextError, t('validation.loginFailed')))
+      } else {
+        setError(resolveError(nextError, t('validation.loginFailed')))
+      }
       setLoginForm((current) => ({ ...current, captcha: '' }))
       void refreshCaptcha()
     } finally {
@@ -124,6 +139,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
 
     setPending('register')
     setError('')
+    setNotice('')
     try {
       const result = await runtime.api.auth.register({
         username,
@@ -133,6 +149,14 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
         captchaCode,
         locale: runtime.locale,
       })
+      if (result.messageCode === 'auth.register.emailVerify') {
+        setMode('login')
+        setLoginForm({ username, password: '', captcha: '' })
+        setRegisterForm({ username: '', email: '', password: '', confirmPassword: '', captcha: '', agree: false })
+        setNotice(t(result.messageCode, { ns: 'serverMessages', defaultValue: result.message || t('validation.registerSuccess') }))
+        void refreshCaptcha()
+        return
+      }
       runtime.queueFlash(result.message || t('validation.registerSuccess'), 'success')
       await runtime.navigate(page.redirectUrl || '/', { replace: true })
     } catch (nextError) {
@@ -142,6 +166,21 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
     } finally {
       setPending(null)
     }
+  }
+
+  async function handleMfa(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setPending('login')
+    setError('')
+    try {
+      const result = await runtime.api.auth.mfaLogin(mfaCode.trim())
+      const target = oauthMfa
+        ? result.redirect : page.redirectUrl || '/'
+      await runtime.navigate(target, { replace: true })
+    } catch (reason) {
+      setError(resolveError(reason, t('mfa.failed')))
+      setMfaCode('')
+    } finally { setPending(null) }
   }
 
   async function handleForgot(event: FormEvent<HTMLFormElement>) {
@@ -179,7 +218,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
     : mode === 'forgot'
       ? t('forgotSubtitle')
       : t('loginSubtitle')
-  const showOAuth = mode !== 'forgot' && page.oauthProviders.length > 0
+  const showOAuth = !mfa && mode !== 'forgot' && page.oauthProviders.length > 0
 
   return (
     <main className="relative flex min-h-svh items-center justify-center bg-muted px-4 py-16 sm:px-6">
@@ -189,13 +228,13 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
         <CardHeader>
           <AuthBrand layout={layout} />
           <CardTitle className="text-2xl">
-            <h1>{title}</h1>
+            <h1>{mfa ? t('mfa.title') : title}</h1>
           </CardTitle>
-          <p className="text-sm leading-6 text-muted-foreground">{subtitle}</p>
+          {!mfa && <p className="text-sm leading-6 text-muted-foreground">{subtitle}</p>}
         </CardHeader>
 
         <CardContent className="flex flex-col gap-4">
-          {mode !== 'forgot'
+          {!mfa && mode !== 'forgot'
             ? (
                 <Tabs value={mode} onValueChange={(value) => switchMode(value as Mode)}>
                   <TabsList className="grid w-full grid-cols-2">
@@ -208,8 +247,8 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
 
           {error
             ? (
-                <Alert variant="destructive">
-                  <CircleAlertIcon />
+                <Alert variant={mfa ? 'default' : 'destructive'}>
+                  <CircleAlertIcon className={mfa ? 'text-destructive' : undefined} />
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )
@@ -222,7 +261,15 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
                 )
               : null}
 
-          {mode === 'login'
+          {mfa ? (
+            <form onSubmit={handleMfa}>
+              <FieldGroup className="gap-3">
+                <TextField id="mfa-code" label={t('mfa.code')} value={mfaCode} autoComplete="one-time-code" autoFocus required maxLength={64} onChange={(event) => setMfaCode(event.target.value)} />
+                <Button type="submit" variant="outline" className="w-full" disabled={pending === 'login'}>{pending === 'login' && <Spinner />}{t('mfa.verify')}</Button>
+                <Button type="button" variant="link" disabled={pending === 'login'} onClick={() => { setMfa(false); setMfaCode(''); setError('') }}>{t('backToLogin')}</Button>
+              </FieldGroup>
+            </form>
+          ) : mode === 'login'
             ? (
                 <form onSubmit={handleLogin} noValidate>
                   <FieldGroup className="gap-3">

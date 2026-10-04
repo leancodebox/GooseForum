@@ -25,6 +25,9 @@ export function SecuritySettingsPage({
     enableSignup: true,
     enableEmailVerification: false,
     allowedDomains: [],
+    registrationIPLimit: 5,
+    registrationEmailLimit: 3,
+    registrationGlobalLimit: 100,
   });
   const [domain, setDomain] = useState("");
   const [loading, setLoading] = useState(true);
@@ -39,6 +42,9 @@ export function SecuritySettingsPage({
       const v = await api.settings.security();
       setForm({
         ...v,
+        registrationIPLimit: v.registrationIPLimit ?? 5,
+        registrationEmailLimit: v.registrationEmailLimit ?? 3,
+        registrationGlobalLimit: v.registrationGlobalLimit ?? 100,
         allowedDomains: Array.isArray(v.allowedDomains) ? v.allowedDomains : [],
       });
     } catch (r) {
@@ -93,10 +99,11 @@ export function SecuritySettingsPage({
       <div className="flex max-w-2xl flex-col gap-7">
         <Field orientation="horizontal">
           <div className="flex-1">
-            <FieldLabel>{text("signup")}</FieldLabel>
+            <FieldLabel htmlFor="enable-signup">{text("signup")}</FieldLabel>
             <FieldDescription>{text("signupHint")}</FieldDescription>
           </div>
           <Switch
+            id="enable-signup"
             checked={form.enableSignup}
             disabled={loading}
             onCheckedChange={(enableSignup) =>
@@ -106,13 +113,14 @@ export function SecuritySettingsPage({
         </Field>
         <Field orientation="horizontal">
           <div className="flex-1">
-            <FieldLabel className="flex items-center gap-2">
+            <FieldLabel htmlFor="enable-verification" className="flex items-center gap-2">
               <MailCheck className="size-4" />
               {text("verification")}
             </FieldLabel>
             <FieldDescription>{text("verificationHint")}</FieldDescription>
           </div>
           <Switch
+            id="enable-verification"
             checked={form.enableEmailVerification}
             disabled={loading}
             onCheckedChange={(enableEmailVerification) =>
@@ -129,6 +137,7 @@ export function SecuritySettingsPage({
           </div>
           <div className="flex gap-2">
             <Input
+              aria-label={text("domains")}
               className="max-w-sm"
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
@@ -177,6 +186,23 @@ export function SecuritySettingsPage({
               </span>
             )}
           </div>
+        </section>
+        <section className="flex flex-col gap-4 border-t pt-5">
+          <div>
+            <h3 className="font-medium">{text("registrationLimits")}</h3>
+            <p className="text-sm text-muted-foreground">{text("registrationLimitsHint")}</p>
+          </div>
+          {([
+            ["registrationIPLimit", "registrationIPLimit"],
+            ["registrationEmailLimit", "registrationEmailLimit"],
+            ["registrationGlobalLimit", "registrationGlobalLimit"],
+          ] as const).map(([key, label]) => (
+            <Field key={key} orientation="horizontal">
+              <FieldLabel htmlFor={key} className="flex-1">{text(label)}</FieldLabel>
+              <Input id={key} type="number" min={0} max={100000} step={1} className="w-28 shrink-0" disabled={loading}
+                value={form[key] ?? 0} onChange={(event) => setForm({ ...form, [key]: Math.max(0, Math.trunc(Number(event.target.value))) })} />
+            </Field>
+          ))}
         </section>
       </div>
     </main>

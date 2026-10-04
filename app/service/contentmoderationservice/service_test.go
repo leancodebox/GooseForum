@@ -77,3 +77,25 @@ func TestReviewPreservesDraftAndChecksEdits(t *testing.T) {
 		t.Fatal("manual block cleared")
 	}
 }
+
+func TestTopicImageProjectionUsesSourceVersion(t *testing.T) {
+	db := dbconnect.Connect()
+	if err := db.AutoMigrate(&pageConfig.Entity{}); err != nil {
+		t.Fatal(err)
+	}
+	content := "[future]\n\n![hidden](/file/img/hidden.webp)\n\n[/future]\n\n![visible](/file/img/visible.webp)"
+	for _, project := range []func(*topics.Entity, *posts.Entity){PrepareTopic, ReviewTopic} {
+		for _, version := range []uint8{0, 1} {
+			topic := topics.Entity{}
+			post := posts.Entity{Content: content, SourceVersion: version}
+			project(&topic, &post)
+			want := "/file/img/hidden.webp"
+			if version == 1 {
+				want = "/file/img/visible.webp"
+			}
+			if topic.FirstImageURL != want {
+				t.Fatalf("version %d first image = %q, want %q", version, topic.FirstImageURL, want)
+			}
+		}
+	}
+}

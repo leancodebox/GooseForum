@@ -228,6 +228,9 @@ export interface SitePayload {
 }
 
 export interface ViewerPayload {
+	 restrictionStatus?: 'normal' | 'suspended' | 'banned'
+	 restrictionUntil?: string | null
+	 restrictionReason?: string
   id: number
   username: string
   email: string
@@ -329,6 +332,7 @@ export interface TopicDetailPayload {
 }
 
 export interface PostPayload {
+  sourceVersion?: 0 | 1
   id: number
   topicId: number
   postNo: number
@@ -704,6 +708,7 @@ export interface NotificationListResponse {
 }
 
 export type NotificationTemplateKey =
+  | 'notifications.templates.mention'
   | 'notifications.templates.comment'
   | 'notifications.templates.postReply'
   | 'notifications.templates.topicPost'
@@ -844,6 +849,7 @@ export interface PublishPageProps {
   isEditing: boolean
   categories: PublishCategoryPayload[]
   topic: {
+    sourceVersion?: 0 | 1
     title: string
     content: string
     categoryIds: number[]

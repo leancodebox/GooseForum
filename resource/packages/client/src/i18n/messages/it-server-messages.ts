@@ -1,8 +1,12 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 import en from "./en-server-messages.js";
 
+import mfa from './it-mfa.js';
 export default {
   ...en,
+  "auth.registration.rateLimited": "Troppe richieste. Riprova più tardi.",
+  "mfa.invalid": mfa.failed,
+  "mfa.unavailable": mfa.unavailable,
   "page.notFound": "La pagina non esiste o è stata eliminata.",
   "route.notFound":
     "Route non trovata. Controlla l’URL e il metodo della richiesta.",
@@ -39,6 +43,9 @@ export default {
   "auth.password.invalidFormat": "Il formato della password non è valido.",
   "auth.credentials.invalid": "Nome utente, email o password non corretti.",
   "auth.account.frozen": "Questo account è sospeso.",
+  "auth.account.banned": "Questo account è bloccato. {reason}",
+  "admin.restriction.invalid": "Inserire uno stato valido, una scadenza futura e un motivo per la modifica della limitazione.",
+  "admin.restriction.protected": "Non puoi limitare te stesso, modificare account con privilegi superiori o rimuovere l'ultimo amministratore.",
   "auth.email.unverified": "Verifica prima il tuo indirizzo email.",
   "auth.login.failed": "Accesso non riuscito.",
 } as const;

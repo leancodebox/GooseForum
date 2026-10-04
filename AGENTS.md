@@ -60,7 +60,6 @@ cd resource && pnpm test
 ```bash
 ./gooseforum serve                 # 启动服务
 ./gooseforum set-user-admin <userId>  # 设置管理员
-./gooseforum set-user-email <userId> <email>  # 设置用户邮箱
 ./gooseforum set-user-password <userId> <password>  # 重置用户密码
 ```
 

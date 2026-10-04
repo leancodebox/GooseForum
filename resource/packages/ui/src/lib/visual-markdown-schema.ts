@@ -1,4 +1,5 @@
 import MarkdownIt from "markdown-it";
+import { forumExtensions } from "@gooseforum/markdown";
 import {
   Fragment,
   Schema,
@@ -13,7 +14,12 @@ import {
 } from "prosemirror-markdown";
 import { tableNodes } from "prosemirror-tables";
 
-const nodes = baseSchema.spec.nodes.append(
+const nodes = baseSchema.spec.nodes.addBefore("text", "mention", {
+  inline: true, group: "inline", atom: true,
+  attrs: { user: {}, label: {} },
+  toDOM: (node) => ["span", { "data-mention-user": node.attrs.user as string, class: "mention text-primary" }, node.attrs.label as string],
+  parseDOM: [{ tag: "span[data-mention-user]", getAttrs: (element) => ({ user: element.getAttribute("data-mention-user"), label: element.textContent }) }],
+}).append(
   tableNodes({
     tableGroup: "block",
     cellContent: "inline*",
@@ -43,11 +49,13 @@ const tokenizer = new MarkdownIt({
   linkify: false,
   typographer: false,
 });
+tokenizer.use(forumExtensions);
 export const visualMarkdownParser = new MarkdownParser(
   visualMarkdownSchema,
   tokenizer,
   {
     ...defaultMarkdownParser.tokens,
+    mention: { node: "mention", getAttrs: (token) => ({ user: (token.meta as { id: string }).id, label: token.content }) },
     s: { mark: "strike" },
     table: { block: "table" },
     thead: { ignore: true },
@@ -73,6 +81,7 @@ function renderCell(cell: ProseMirrorNode) {
 export const visualMarkdownSerializer = new MarkdownSerializer(
   {
     ...defaultMarkdownSerializer.nodes,
+    mention(state, node) { state.write(`[mention user="${node.attrs.user}"]${node.attrs.label}[/mention]`); },
     paragraph(state, node, parent, index) {
       if (!node.content.size) {
         (state as typeof state & { flushClose(): void }).flushClose();
@@ -113,11 +122,11 @@ export const visualMarkdownSerializer = new MarkdownSerializer(
     },
   },
 );
-export function parseVisualMarkdown(markdown: string) {
-  return visualMarkdownParser.parse(markdown || "");
+export function parseVisualMarkdown(markdown: string, sourceVersion: 0 | 1 = 1) {
+  return visualMarkdownParser.parse(markdown || "", { sourceVersion });
 }
-export function parseEditableVisualMarkdown(markdown: string) {
-  const doc = parseVisualMarkdown(markdown);
+export function parseEditableVisualMarkdown(markdown: string, sourceVersion: 0 | 1 = 1) {
+  const doc = parseVisualMarkdown(markdown,sourceVersion);
   const blocks: ProseMirrorNode[] = [];
   let previousBoundary = false;
   doc.forEach((node) => {

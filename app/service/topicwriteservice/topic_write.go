@@ -17,6 +17,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
+	"github.com/leancodebox/GooseForum/app/service/mentionservice"
 	"github.com/leancodebox/GooseForum/app/service/topicservice"
 	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
@@ -30,16 +31,19 @@ var (
 )
 
 type WriteInput struct {
-	UserID      uint64
-	TopicID     uint64
-	Title       string
-	Content     string
-	CategoryIDs []uint64
-	Status      int8
-	DailyLimit  int
+	SourceVersion uint8
+	UserID        uint64
+	TopicID       uint64
+	Title         string
+	Content       string
+	CategoryIDs   []uint64
+	Status        int8
+	DailyLimit    int
 }
 
 type WriteResult struct {
+	Content          string
+	SourceVersion    uint8
 	ID               uint64
 	ModerationStatus string
 	TopicStatus      int8
@@ -71,6 +75,7 @@ func Write(input WriteInput) (WriteResult, error) {
 	}
 	runWriteSideEffects(state, input.UserID)
 	return WriteResult{
+		Content: state.firstPost.Content, SourceVersion: state.firstPost.SourceVersion,
 		ID: state.topic.Id, ModerationStatus: state.topic.ModerationStatus, TopicStatus: state.topic.Status,
 	}, nil
 }
@@ -107,11 +112,16 @@ func loadWriteState(input WriteInput) (*writeState, error) {
 }
 
 func prepareWrite(state *writeState, input WriteInput) ([]uint64, error) {
+	content, normalizeErr := mentionservice.Normalize(input.Content, input.SourceVersion, input.Status == 1)
+	if normalizeErr != nil {
+		return nil, normalizeErr
+	}
+	input.Content = content
 	categoryIDs, err := authorizeCategories(input.UserID, &state.topic, input.CategoryIDs, state.isNew, !state.wasPublished && input.Status == 1)
 	if err != nil {
 		return nil, errors.Join(ErrPermissionDenied, err)
 	}
-	analysis := markdown2html.AnalyzeContent(input.Content, 200)
+	analysis := markdown2html.AnalyzeContentVersion(input.Content, 200, input.SourceVersion)
 	state.imageURLs = analysis.ImageURLs
 	state.topic.CategoryIds = categoryIDs
 	state.topic.Status = input.Status
@@ -126,10 +136,15 @@ func prepareWrite(state *writeState, input WriteInput) ([]uint64, error) {
 			RenderedVersion: markdown2html.GetPostVersion(),
 		}
 	} else {
+		wasEverPublished := state.topic.PublishedAt != nil || state.wasPublished
+		if err := mentionservice.PreserveLegacyMentions(&state.firstPost, input.SourceVersion, wasEverPublished); err != nil {
+			return nil, err
+		}
 		state.firstPost.Content = input.Content
 		state.firstPost.RenderedHTML = ""
 		state.firstPost.RenderedVersion = markdown2html.GetPostVersion()
 	}
+	state.firstPost.SourceVersion = input.SourceVersion
 	contentmoderationservice.PrepareTopic(&state.topic, &state.firstPost)
 	return categoryIDs, nil
 }

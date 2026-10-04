@@ -37,11 +37,13 @@ type resendState struct {
 
 func Resend(userEntity users.EntityComplete) (ResendResult, error) {
 	result := ResendResult{DailyLimit: resendDailyLimit}
-
-	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
-	if !securityConfig.EnableEmailVerification {
+	if !userEntity.NeedsEmailVerification(hotdataserve.GetSecuritySettingsConfigCache().EnableEmailVerification) {
+		if userEntity.IsActivated != users.ActivationPending {
+			return result, ErrAlreadyVerified
+		}
 		return result, ErrDisabled
 	}
+
 	if userEntity.IsActivated != users.ActivationPending {
 		return result, ErrAlreadyVerified
 	}

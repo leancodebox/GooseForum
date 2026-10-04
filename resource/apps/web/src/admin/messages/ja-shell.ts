@@ -5,6 +5,7 @@ export default {
   console: "管理コンソール",
   dashboard: "ダッシュボード",
   users: "ユーザー",
+  authLogs: "ログイン履歴",
   roles: "ロール",
   accessGroups: "アクセスグループ",
   categories: "カテゴリー",

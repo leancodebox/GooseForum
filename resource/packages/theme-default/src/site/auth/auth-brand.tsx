@@ -1,5 +1,6 @@
 import type { LayoutPayload } from '@gooseforum/client'
 import { GooseLink } from '@gooseforum/runtime'
+import { DefaultBrand } from '../layout/default-brand'
 
 export function AuthBrand({ layout }: { layout: LayoutPayload }) {
   const { site } = layout
@@ -9,7 +10,7 @@ export function AuthBrand({ layout }: { layout: LayoutPayload }) {
   } else if (site.brandType === 'text') {
     content = site.brandText || site.name
   } else {
-    content = <>Goose<span className="text-foreground">Forum</span></>
+    content = <DefaultBrand />
   }
 
   return (

@@ -2,7 +2,10 @@ package component
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"testing"
+	"time"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
@@ -67,10 +70,18 @@ func TestResultStructSerializesErrorMessage(t *testing.T) {
 }
 
 func TestCheckUserPermissionIncludesActionCode(t *testing.T) {
+	db := dbconnect.Connect()
+	if err := db.AutoMigrate(&users.EntityComplete{}); err != nil {
+		t.Fatal(err)
+	}
 	user := &users.EntityComplete{
-		Id:       1,
+		Username: fmt.Sprintf("permission-frozen-%d", time.Now().UnixNano()),
 		IsFrozen: users.StatusFrozen,
 	}
+	if err := db.Create(user).Error; err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { db.Unscoped().Delete(user) })
 
 	code, err := CheckUserPermission(user, PermissionActionPost)
 	if code != 403 {

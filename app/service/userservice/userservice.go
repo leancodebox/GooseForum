@@ -17,9 +17,9 @@ func GetWelcomeTopicContent() string {
 	return welcomeTopic
 }
 
-func FirstUserInit(adminUser *users.EntityComplete) {
+func FirstUserInit(adminUser *users.EntityComplete) error {
 	if adminUser.Id != 1 {
-		return
+		return nil
 	}
 
 	roleEntity := role.Get(1)
@@ -28,7 +28,7 @@ func FirstUserInit(adminUser *users.EntityComplete) {
 		roleEntity.Effective = 1
 		if err := role.SaveOrCreateById(&roleEntity); err != nil {
 			slog.Error("create admin role failed", "error", err)
-			return
+			return err
 		}
 		slog.Info("created missing admin role")
 	}
@@ -38,13 +38,18 @@ func FirstUserInit(adminUser *users.EntityComplete) {
 		rp.RoleId = roleEntity.Id
 		rp.PermissionId = permission.Admin.Id()
 		rp.Effective = 1
-		rolePermissionRs.SaveOrCreateById(&rp)
+		if err := rolePermissionRs.Save(&rp); err != nil {
+			return err
+		}
 		permission.InvalidateRole(roleEntity.Id)
 		slog.Info("created missing admin role permission relation")
 	}
 
 	adminUser.RoleId = roleEntity.Id
-	if err := SaveUser(adminUser); err != nil {
+	if err := users.AssignInitialRole(adminUser.Id, roleEntity.Id); err != nil {
 		slog.Error("save first admin user failed", "userId", adminUser.Id, "error", err)
+		return err
 	}
+	RefreshUserCaches(adminUser)
+	return nil
 }

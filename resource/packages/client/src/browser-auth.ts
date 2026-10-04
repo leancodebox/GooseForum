@@ -37,7 +37,7 @@ export async function loginWithPassword(auth: GooseSiteApi['auth'], input: Passw
   const submit = async () => {
     const key = await auth.loginPublicKey()
     const encryptedPassword = await encryptLoginPassword(key.publicKey, input.password, key.serverTs)
-    await auth.login({
+    return auth.login({
       username: input.username,
       encryptedPassword,
       captchaId: input.captchaId,
@@ -45,10 +45,10 @@ export async function loginWithPassword(auth: GooseSiteApi['auth'], input: Passw
     })
   }
   try {
-    await submit()
+    return await submit()
   } catch (error) {
     if (!(error instanceof GooseClientError) || error.messageCode !== 'auth.login.invalidRequest') throw error
-    await submit()
+    return submit()
   }
 }
 

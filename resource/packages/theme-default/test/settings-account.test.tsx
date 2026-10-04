@@ -18,7 +18,7 @@ it('lists sessions, revokes other devices, and redirects after password change',
   const changePassword = vi.fn().mockResolvedValue(undefined)
   const redirect = vi.fn()
   const runtime = {
-    api: { users: { authSessions, revokeOtherAuthSessions, revokeAuthSession: vi.fn(), changePassword } } as unknown as GooseSiteApi,
+    api: { users: { authSessions, authLogs: vi.fn().mockResolvedValue({ list: [], total: 0, page: 1, pageSize: 20 }), revokeOtherAuthSessions, revokeAuthSession: vi.fn(), changePassword } } as unknown as GooseSiteApi,
     locale: 'en', redirect, navigate: vi.fn(),
   } as unknown as GooseRuntime
   const user = userEvent.setup()

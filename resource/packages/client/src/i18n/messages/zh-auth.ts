@@ -1,6 +1,8 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 import { localeLabels } from '../locale.js';
+import mfa from './zh-mfa.js';
 export default {
+  mfa,
   locale: localeLabels.zh,
   login: "登录",
   register: "注册",

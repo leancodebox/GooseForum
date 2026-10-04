@@ -2,8 +2,10 @@ package middleware
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/forum"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -50,18 +52,19 @@ func CheckWritableAccount(c *gin.Context) {
 		return
 	}
 
-	user, ok := userservice.GetUserInfo(userId)
-	if !ok {
+	user, err := users.GetAccountState(userId)
+	if err != nil {
 		c.JSON(http.StatusForbidden, component.FailDataCode(component.MessagePermissionResolveFailed, nil))
 		c.Abort()
 		return
 	}
-	if user.IsFrozen == users.StatusFrozen {
+	if user.EffectiveRestriction(time.Now()) != users.RestrictionNormal {
 		c.JSON(http.StatusForbidden, component.FailDataCode(
 			component.MessagePermissionUserFrozen,
 			component.MessageParams{
 				"action":     "写入",
 				"actionCode": string(component.PermissionActionWrite),
+				"reason":     user.RestrictionReason,
 			},
 		))
 		c.Abort()

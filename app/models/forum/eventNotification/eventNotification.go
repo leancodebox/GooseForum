@@ -14,6 +14,7 @@ const (
 	EventTypeSystem    = "system"     // 系统通知
 	EventTypeFollow    = "follow"     // 关注通知
 	EventTypeBadge     = "badge"      // 徽章通知
+	EventTypeMention   = "mention"
 )
 
 const (
@@ -22,6 +23,7 @@ const (
 	TemplateTopicPost = "notifications.templates.topicPost"
 	TemplateFollow    = "notifications.templates.follow"
 	TemplateBadge     = "notifications.templates.badge"
+	TemplateMention   = "notifications.templates.mention"
 )
 
 // Future unread-scope design:
@@ -80,6 +82,7 @@ type Extra struct {
 }
 
 type Entity struct {
+	DedupeKey *string             `gorm:"column:dedupe_key;type:varchar(96);uniqueIndex:idx_notification_dedupe" json:"-"`
 	Id        uint64              `gorm:"primaryKey;column:id;autoIncrement;not null;index:idx_user_id_desc,priority:2;index:idx_user_read_id,priority:3" json:"id"`
 	UserId    uint64              `gorm:"column:user_id;type:bigint;index:idx_user_id_event_type_read;index:idx_user_read;index:idx_user_id_desc,priority:1;index:idx_user_read_id,priority:1" json:"userId"` // 接收通知的用户ID
 	TopicId   uint64              `gorm:"column:topic_id;not null;default:0;index:idx_notification_topic;" json:"topicId"`

@@ -79,20 +79,28 @@ type ExternalInformation struct {
 }
 
 type EntityComplete struct {
+	OAuthRegistrationKey *string `gorm:"column:oauth_registration_key;type:varchar(64);uniqueIndex" json:"-"`
 	// base
-	Id           uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                      //
-	Username     string     `gorm:"column:username;index;type:varchar(64);not null;default:'';" json:"username"` //
-	Email        string     `gorm:"column:email;index;type:varchar(128);not null;default:'';" json:"email"`      //
-	Password     string     `gorm:"column:password;type:varchar(128);not null;default:'';" json:"-"`             //
-	TokenVersion uint64     `gorm:"column:token_version;not null;default:0;" json:"-"`                           // 登录令牌版本，改密后自增
-	Locale       string     `gorm:"column:locale;type:varchar(16);not null;default:'';" json:"locale"`           // 用户语言偏好
-	IsFrozen     int8       `gorm:"column:is_frozen;not null;default:0;" json:"isFrozen"`                        // 状态：0正常 1冻结
-	IsActivated  int8       `gorm:"column:is_activated;not null;default:0;" json:"isActivated"`                  // 是否验证通过: 0未激活 1 已激活
-	ActivatedAt  *time.Time `gorm:"column:activated_at;" json:"activatedAt"`                                     // 激活时间
+	Id                        uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                      //
+	Username                  string     `gorm:"column:username;index;type:varchar(64);not null;default:'';" json:"username"` //
+	UsernameKey               string     `gorm:"column:username_key;index;type:varchar(64);not null;default:''" json:"-"`
+	EmailKey                  string     `gorm:"column:email_key;index;type:varchar(128);not null;default:''" json:"-"`
+	Email                     string     `gorm:"column:email;index;type:varchar(128);not null;default:'';" json:"email"` //
+	Password                  string     `gorm:"column:password;type:varchar(128);not null;default:'';" json:"-"`        //
+	TokenVersion              uint64     `gorm:"column:token_version;not null;default:0;" json:"-"`                      // 登录令牌版本，改密后自增
+	Locale                    string     `gorm:"column:locale;type:varchar(16);not null;default:'';" json:"locale"`      // 用户语言偏好
+	IsFrozen                  int8       `gorm:"column:is_frozen;not null;default:0;" json:"isFrozen"`                   // 状态：0正常 1冻结
+	RestrictionStatus         string     `gorm:"column:restriction_status;type:varchar(16);not null;default:''" json:"restrictionStatus"`
+	RestrictionUntil          *time.Time `gorm:"column:restriction_until" json:"restrictionUntil"`
+	RestrictionReason         string     `gorm:"column:restriction_reason;type:varchar(500);not null;default:''" json:"restrictionReason"`
+	RestrictionNote           string     `gorm:"column:restriction_note;type:varchar(2000);not null;default:''" json:"-"`
+	IsActivated               int8       `gorm:"column:is_activated;not null;default:0;" json:"isActivated"` // 是否验证通过: 0未激活 1 已激活
+	RequiresEmailVerification bool       `gorm:"column:requires_email_verification;not null;default:false;" json:"-"`
+	ActivatedAt               *time.Time `gorm:"column:activated_at;" json:"activatedAt"` // 激活时间
 
 	// info
 	Nickname            string              `gorm:"column:nickname;type:varchar(64);not null;default:'';" json:"nickname"`                                  //
-	RoleId              uint64              `gorm:"column:role_id;not null;default:0;" json:"roleId"`                                                       //
+	RoleId              uint64              `gorm:"column:role_id;index:idx_users_role_id;not null;default:0;" json:"roleId"`                               //
 	Prestige            int64               `gorm:"column:prestige;type:bigint;not null;default:0;" json:"prestige"`                                        // 声望
 	AvatarUrl           string              `gorm:"column:avatar_url;type:varchar(255);" json:"avatarUrl"`                                                  // 头像URL
 	ProfileCoverUrl     string              `gorm:"column:profile_cover_url;type:varchar(512);not null;default:'';" json:"profileCoverUrl"`                 // 个人主页封面URL
@@ -119,7 +127,7 @@ type Identity struct {
 }
 
 func (itself *EntityComplete) GetWebAvatarUrl() string {
-	if itself.IsFrozen == StatusFrozen {
+	if itself.EffectiveRestriction(time.Now()) != RestrictionNormal {
 		return urlconfig.GetBannedAvatar()
 	}
 	if itself.AvatarUrl == "" {

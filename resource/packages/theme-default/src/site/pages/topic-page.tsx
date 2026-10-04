@@ -63,6 +63,11 @@ import { RenderedContent } from "../content/rendered-content";
 import { emptyShellHeader, useShellHeader } from "../layout/shell-header";
 import { TopicTable } from "../topics/topic-list";
 import { ReplyReference } from "../topics/reply-reference";
+import { LocalDraftPanel } from "../drafts/local-draft-panel";
+import { clearAccountDrafts, draftOwner, draftFingerprint, type DraftValues, type LocalDraft } from "../drafts/local-draft-store";
+import { GooseClientError } from "@gooseforum/client";
+import { useLocalDraft } from "../drafts/use-local-draft";
+import { useDraftReplyTargets } from "../drafts/use-draft-reply-targets";
 import { UserCardPopover } from "../users/user-card-popover";
 import { ProfileAvatar } from "../users/profile-avatar";
 
@@ -129,7 +134,13 @@ export function TopicPageView({
   const [composerContent, setComposerContent] = useState("");
   const [replyTargetId, setReplyTargetId] = useState(0);
   const [editingId, setEditingId] = useState(0);
+  const sourceVersion = 1 as const;
+  const [draftBranch, setDraftBranch] = useState(0);
+  const [composerBase, setComposerBase] = useState<DraftValues>({ title: "", content: "", categoryIds: [], replyTargetId: 0, sourceVersion: 1 });
+  const composerValues = useMemo(() => ({ title: "", content: composerContent, categoryIds: [], replyTargetId, sourceVersion }), [composerContent, replyTargetId, sourceVersion]);
+  const localDraft = useLocalDraft({ userId: layout.viewer.id, kind: editingId ? "edit-reply" : "new-reply", objectId: editingId || page.topic.id, topicId: page.topic.id, branch: draftBranch, base: composerBase, values: composerValues, enabled: composerOpen });
   const [composerBusy, setComposerBusy] = useState(false);
+  const composerSubmitting = useRef(false);
   const [composerError, setComposerError] = useState("");
   const [pendingDelete, setPendingDelete] = useState<PostPayload>();
   const [deleteBusy, setDeleteBusy] = useState(false);
@@ -166,7 +177,44 @@ export function TopicPageView({
     () => new Map(replyTargets.map((target) => [target.id, target])),
     [replyTargets],
   );
-  const replyTarget = posts.find((post) => post.id === replyTargetId);
+  const draftTargets = useDraftReplyTargets({ candidates: localDraft.candidates, posts, references: replyTargets, api: runtime.api.posts, topicId: page.topic.id, context: `${layout.viewer.id}:${page.topic.id}:${draftBranch}`, enabled: composerOpen && page.permissions.canPost });
+  const replyTarget = posts.find((post) => post.id === replyTargetId) || draftTargets.target(replyTargetId).post;
+  const composerDirty = JSON.stringify(composerValues) !== JSON.stringify(composerBase);
+  const composerDirtyRef = useRef(false);
+  const allowComposerLeave = useRef(false);
+  composerDirtyRef.current = composerDirty;
+  useEffect(() => { allowComposerLeave.current = false; }, [composerValues]);
+  useEffect(() => {
+    const beforeUnload = (event: BeforeUnloadEvent) => {
+      if (composerDirtyRef.current && !allowComposerLeave.current) { event.preventDefault(); event.returnValue = ""; }
+    };
+    window.addEventListener("beforeunload", beforeUnload);
+    const beforeLogout = (event: Event) => {
+      if (composerDirtyRef.current && !window.confirm(t("localDraft.leave", { ns: "publish" }))) event.preventDefault();
+      else allowComposerLeave.current = true;
+    };
+    window.addEventListener("goose:before-logout", beforeLogout);
+    const remove = runtime.registerNavigationBlocker?.(() => !composerDirtyRef.current || window.confirm(t("localDraft.leave", { ns: "publish" })));
+    return () => { window.removeEventListener("beforeunload", beforeUnload); window.removeEventListener("goose:before-logout", beforeLogout); remove?.(); };
+  }, [runtime.registerNavigationBlocker, t]);
+  const openedLocalCopy = useRef(false);
+  useEffect(() => {
+    if (openedLocalCopy.current || !layout.viewer.isAuthenticated || !page.permissions.canPost) return;
+    const query = new URL(runtime.currentUrl, window.location.origin).searchParams;
+    const postId = Number(query.get("localEditPost"));
+    if (!query.has("localReply") && !(postId > 0)) return;
+    openedLocalCopy.current = true;
+    if (!postId) { openComposer(); return; }
+    let disposed = false;
+    void runtime.api.posts.window({ topicId: page.topic.id, anchorPostId: postId, limit: 20 }).then((result) => {
+      if (disposed) return;
+      const post = result.posts.find((post) => post.id === postId && post.isOwnPost && !post.isHidden);
+      if (post) { applyWindow(result, "anchor"); editPost(post); }
+    }).catch((reason) => { if (!disposed) setActionError(serverError(reason, t("loadFailed"))); });
+    return () => { disposed = true; openedLocalCopy.current = false; };
+    // This is an explicit entry from the local draft list, only once per page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layout.viewer.isAuthenticated, page.permissions.canPost, page.topic.id, runtime.currentUrl]);
   const maxPostNo = Math.max(
     maxNo,
     ...posts.map((post) => post.postNo || 0),
@@ -367,49 +415,66 @@ export function TopicPageView({
     }
   }
   function openComposer(post?: PostPayload) {
+    if (composerSubmitting.current) return;
     if (!layout.viewer.isAuthenticated || !page.permissions.canPost) {
       void runtime.navigate(loginUrl(runtime.currentUrl));
       return;
     }
+    if (composerDirty && !window.confirm(t("localDraft.leave", { ns: "publish" }))) return;
     setEditingId(0);
     setReplyTargetId(post?.id || 0);
     setComposerContent("");
+    setComposerBase({ title: "", content: "", categoryIds: [], replyTargetId: post?.id || 0, sourceVersion: 1 });
+    setDraftBranch((value) => value + 1);
     setComposerError("");
     setComposerMinimized(false);
     setComposerOpen(true);
   }
   function editPost(post: PostPayload) {
+    if (composerSubmitting.current) return;
     if (post.postNo === 1) {
       void runtime.navigate(`/publish?id=${page.topic.id}`);
       return;
     }
+    if (composerDirty && !window.confirm(t("localDraft.leave", { ns: "publish" }))) return;
     setEditingId(post.id);
     setReplyTargetId(0);
     setComposerContent(post.content);
+    setComposerBase({ title: "", content: post.content, categoryIds: [], replyTargetId: 0, sourceVersion: 1 });
+    setDraftBranch((value) => value + 1);
     setComposerError("");
     setComposerMinimized(false);
     setComposerOpen(true);
   }
   async function submitComposer() {
+    if (localDraft.recoveryPending) return;
+    if (composerSubmitting.current) return;
     const content = composerContent.trim();
     if (!content) {
       setComposerError(t("replyRequired"));
       return;
     }
+    composerSubmitting.current = true;
     setComposerBusy(true);
     setComposerError("");
+    const submission = localDraft.writer?.capture(composerValues);
+    let canonical: DraftValues = composerValues;
     try {
       if (editingId) {
         const updated = await runtime.api.posts.update({
           postId: editingId,
           content,
+          sourceVersion,
         });
+        if (updated.moderationStatus === "rejected") { setComposerError(t("actionFailed")); return; }
+        canonical = { ...composerValues, content: updated.content, sourceVersion: updated.sourceVersion ?? sourceVersion };
         setPosts((items) =>
           items.map((post) =>
             post.id === editingId
               ? {
                   ...post,
                   content: updated.content,
+                  sourceVersion: updated.sourceVersion ?? sourceVersion,
                   renderedContent: updated.renderedContent,
                   updatedAt: updated.updatedAt,
                   processStatus: updated.processStatus ?? post.processStatus,
@@ -423,6 +488,7 @@ export function TopicPageView({
           topicId: page.topic.id,
           content,
           replyToPostId: replyTargetId,
+          sourceVersion,
         });
         if (
           typeof created === "object" &&
@@ -435,11 +501,13 @@ export function TopicPageView({
         }
         const result = typeof created === "object" && created ? created : null;
         if (result) {
+          canonical = { ...composerValues, content: result.content ?? content, sourceVersion: result.sourceVersion ?? sourceVersion };
           const newPost: PostPayload = {
             id: result.id,
             topicId: page.topic.id,
             postNo: result.postNo || maxPostNo + 1,
-            content,
+            content: canonical.content,
+            sourceVersion: canonical.sourceVersion,
             renderedContent: result.renderedContent,
             processStatus: result.processStatus || 0,
             isHidden: false,
@@ -474,7 +542,6 @@ export function TopicPageView({
           }]));
           setMaxNo(current => Math.max(current, newPost.postNo));
           if (newPost.processStatus === 0) setReplyCount((count) => count + 1);
-          setComposerOpen(false);
           if (newPost.processStatus === 0) {
             setLoadingDirection("anchor");
             try {
@@ -494,17 +561,36 @@ export function TopicPageView({
         } else await runtime.refresh();
         runtime.queueFlash(t("replyPosted"), "success");
       }
+      const unchanged = !submission || await localDraft.writer!.submitted(submission, canonical);
+      setComposerBase(canonical);
+      if (!unchanged) return;
+      composerDirtyRef.current = false;
       setComposerOpen(false);
       setComposerContent("");
       setEditingId(0);
       setReplyTargetId(0);
+      setComposerBase({ title: "", content: "", categoryIds: [], replyTargetId: 0, sourceVersion: 1 });
     } catch (reason) {
       setComposerError(
         serverError(reason, t("actionFailed")),
       );
+      if (reason instanceof GooseClientError && (reason.status === 401 || reason.messageCode === "auth.required")) await clearAccountDrafts(draftOwner(layout.viewer.id));
     } finally {
+      composerSubmitting.current = false;
       setComposerBusy(false);
     }
+  }
+  function availableDraft(draft: LocalDraft) {
+    if (composerBusy || !page.permissions.canPost) return false;
+    if (editingId && !posts.some((post) => post.id === editingId && post.isOwnPost && !post.isHidden)) return false;
+    return draftTargets.target(draft.replyTargetId).status === "available";
+  }
+  function restoreDraft(draft: LocalDraft) {
+    if (!availableDraft(draft)) return false;
+    if (composerDirty && !window.confirm(t("localDraft.confirmRestore", { ns: "publish" }))) return false;
+    localDraft.restore(draft);
+    setComposerContent(draft.content); setReplyTargetId(draft.replyTargetId);
+    return true;
   }
   async function deletePost() {
     if (!pendingDelete || deleteBusy) return;
@@ -712,6 +798,7 @@ export function TopicPageView({
               watched={watched}
               likeCount={likeCount}
               actionBusy={actionBusy}
+              composerBusy={composerBusy}
               canPost={page.permissions.canPost}
               isOwnTopic={page.permissions.isOwnTopic}
               topicCanModerate={page.permissions.canModerateTopic}
@@ -808,6 +895,7 @@ export function TopicPageView({
               size="icon-lg"
               className="pointer-events-auto rounded-full shadow-lg"
               aria-label={t("joinDiscussion")}
+              disabled={composerBusy}
               onClick={() =>
                 page.permissions.canPost
                   ? openComposer()
@@ -847,18 +935,21 @@ export function TopicPageView({
           minimized={composerMinimized}
           expanded={composerExpanded}
           content={composerContent}
+          sourceVersion={sourceVersion}
           editing={Boolean(editingId)}
           target={replyTarget}
           viewer={layout.viewer}
           topicTitle={page.topic.title}
           busy={composerBusy}
+          submitDisabled={localDraft.recoveryPending}
           error={composerError}
           onContent={setComposerContent}
           onSubmit={() => void submitComposer()}
-          onClose={() => setComposerOpen(false)}
+          onClose={() => { if (!composerSubmitting.current) setComposerOpen(false); }}
           onMinimize={() => setComposerMinimized((value) => !value)}
           onExpand={() => setComposerExpanded((value) => !value)}
-          onClearTarget={() => setReplyTargetId(0)}
+          onClearTarget={() => { if (!composerSubmitting.current) setReplyTargetId(0); }}
+          draftPanel={<LocalDraftPanel compact status={localDraft.status} candidates={localDraft.candidates} onRestore={restoreDraft} onDiscard={localDraft.discard} onRetry={localDraft.retry} available={availableDraft} checking={(draft) => page.permissions.canPost && draftTargets.target(draft.replyTargetId).status === "checking"} failed={(draft) => draftTargets.target(draft.replyTargetId).status === "error"} onRetryTarget={draftTargets.retry} conflicts={(draft) => draft.sourceFingerprint !== draftFingerprint(composerBase)} />}
         />
       </Suspense>
       <ConfirmDialog
@@ -1104,6 +1195,7 @@ function PostRow({
   likeCount,
   actionBusy,
   canPost,
+  composerBusy,
   isOwnTopic,
   topicCanModerate,
   topicStatus,
@@ -1125,6 +1217,7 @@ function PostRow({
   likeCount: number;
   actionBusy: string;
   canPost: boolean;
+  composerBusy: boolean;
   isOwnTopic: boolean;
   topicCanModerate: boolean;
   topicStatus: number;
@@ -1172,6 +1265,7 @@ function PostRow({
                   size="icon-xs"
                   className="text-muted-foreground hover:bg-primary/10 hover:text-primary"
                   aria-label={t("edit")}
+                  disabled={composerBusy}
                   onClick={onEdit}
                 >
                   <SquarePen />
@@ -1232,6 +1326,7 @@ function PostRow({
                 className="col-start-3 row-start-3 justify-self-end text-muted-foreground hover:bg-primary/10 hover:text-primary lg:order-3"
                 aria-label={t("reply")}
                 onClick={onReply}
+                disabled={composerBusy}
               >
                 <MessageSquareReply />
               </Button>

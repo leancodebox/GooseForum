@@ -1,5 +1,10 @@
 // 后端 MessageCode 的前端兜底翻译；完整性由 check-server-message-i18n.mjs 校验。
+import mfa from './zh-mfa.js';
 export default {
+  "auth.registration.rateLimited": "请求过于频繁，请稍后重试。",
+  "markdown.mention.invalid": "提及语法不正确，或提及用户超过 20 人。请检查正文。",
+  "mfa.invalid": mfa.failed,
+  "mfa.unavailable": mfa.unavailable,
   "common.request.invalidFormat": "请求格式不正确。",
   "common.request.invalidParams": "请求参数不正确。",
   "common.request.parseFailed": "请求参数解析失败。",
@@ -30,6 +35,9 @@ export default {
   "auth.password.invalidFormat": "密码格式不正确。",
   "auth.credentials.invalid": "用户名、邮箱或密码错误。",
   "auth.account.frozen": "账号已被冻结。",
+  "auth.account.banned": "账号已被封禁。{reason}",
+  "admin.restriction.invalid": "请填写有效的限制状态、将来的截止时间以及变更原因。",
+  "admin.restriction.protected": "不能限制自己、修改更高权限账号，或限制、降权最后一个管理员。",
   "auth.email.unverified": "请先完成邮箱验证。",
   "auth.login.failed": "登录失败，请稍后重试。",
   "auth.password.oldInvalid": "原密码错误。",

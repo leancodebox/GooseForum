@@ -27,34 +27,39 @@ var errUserNotFound = errors.New("user not found")
 // UserInfo is the sanitized user snapshot cached by userservice.
 // It intentionally excludes password hashes and model-only deletion metadata.
 type UserInfo struct {
-	HideActivity        bool
-	HideTopics          bool
-	HideFollowing       bool
-	Id                  uint64
-	Username            string
-	Email               string
-	Locale              string
-	TokenVersion        uint64
-	IsFrozen            int8
-	IsActivated         int8
-	ActivatedAt         *time.Time
-	Nickname            string
-	RoleId              uint64
-	Prestige            int64
-	AvatarUrl           string
-	ProfileCoverUrl     string
-	Bio                 string
-	Signature           string
-	WebsiteName         string
-	Website             string
-	ExternalInformation users.ExternalInformation
-	WornBadgeCode       string
-	CreatedAt           time.Time
-	UpdatedAt           time.Time
+	RestrictionStatus         string
+	RestrictionUntil          *time.Time
+	HideActivity              bool
+	HideTopics                bool
+	HideFollowing             bool
+	Id                        uint64
+	Username                  string
+	Email                     string
+	Locale                    string
+	TokenVersion              uint64
+	IsFrozen                  int8
+	IsActivated               int8
+	RequiresEmailVerification bool
+	ActivatedAt               *time.Time
+	Nickname                  string
+	RoleId                    uint64
+	Prestige                  int64
+	AvatarUrl                 string
+	ProfileCoverUrl           string
+	Bio                       string
+	Signature                 string
+	WebsiteName               string
+	Website                   string
+	ExternalInformation       users.ExternalInformation
+	WornBadgeCode             string
+	CreatedAt                 time.Time
+	UpdatedAt                 time.Time
 }
 
 // UserPublicInfo contains only fields needed by public display surfaces.
 type UserPublicInfo struct {
+	RestrictionStatus   string
+	RestrictionUntil    *time.Time
 	Id                  uint64
 	Username            string
 	Nickname            string
@@ -161,6 +166,14 @@ func InvalidateUserPublicProfileCache(userID uint64) {
 	userPublicProfileCache.Delete(userPublicProfileKey(userID))
 }
 
+func InvalidateUserCaches(userID uint64) {
+	if userID == 0 {
+		return
+	}
+	userInfoCache.Delete(userInfoKey(userID))
+	InvalidateUserPublicProfileCache(userID)
+}
+
 func ClearUserPublicProfileCache() {
 	userPublicProfileCache.Clear()
 }
@@ -196,35 +209,40 @@ func refreshUserInfo(user users.EntityComplete) {
 
 func userInfoFromEntity(user users.EntityComplete) UserInfo {
 	return UserInfo{
-		Id:                  user.Id,
-		Username:            user.Username,
-		Email:               user.Email,
-		Locale:              user.Locale,
-		HideActivity:        user.HideActivity,
-		HideTopics:          user.HideTopics,
-		HideFollowing:       user.HideFollowing,
-		TokenVersion:        user.TokenVersion,
-		IsFrozen:            user.IsFrozen,
-		IsActivated:         user.IsActivated,
-		ActivatedAt:         user.ActivatedAt,
-		Nickname:            user.Nickname,
-		RoleId:              user.RoleId,
-		Prestige:            user.Prestige,
-		AvatarUrl:           user.AvatarUrl,
-		ProfileCoverUrl:     user.ProfileCoverUrl,
-		Bio:                 user.Bio,
-		Signature:           user.Signature,
-		WebsiteName:         user.WebsiteName,
-		Website:             user.Website,
-		ExternalInformation: user.ExternalInformation,
-		WornBadgeCode:       user.WornBadgeCode,
-		CreatedAt:           user.CreatedAt,
-		UpdatedAt:           user.UpdatedAt,
+		RestrictionStatus:         user.RestrictionStatus,
+		RestrictionUntil:          user.RestrictionUntil,
+		Id:                        user.Id,
+		Username:                  user.Username,
+		Email:                     user.Email,
+		Locale:                    user.Locale,
+		HideActivity:              user.HideActivity,
+		HideTopics:                user.HideTopics,
+		HideFollowing:             user.HideFollowing,
+		TokenVersion:              user.TokenVersion,
+		IsFrozen:                  user.IsFrozen,
+		IsActivated:               user.IsActivated,
+		RequiresEmailVerification: user.RequiresEmailVerification,
+		ActivatedAt:               user.ActivatedAt,
+		Nickname:                  user.Nickname,
+		RoleId:                    user.RoleId,
+		Prestige:                  user.Prestige,
+		AvatarUrl:                 user.AvatarUrl,
+		ProfileCoverUrl:           user.ProfileCoverUrl,
+		Bio:                       user.Bio,
+		Signature:                 user.Signature,
+		WebsiteName:               user.WebsiteName,
+		Website:                   user.Website,
+		ExternalInformation:       user.ExternalInformation,
+		WornBadgeCode:             user.WornBadgeCode,
+		CreatedAt:                 user.CreatedAt,
+		UpdatedAt:                 user.UpdatedAt,
 	}
 }
 
 func (user UserInfo) toPublicInfo() UserPublicInfo {
 	return UserPublicInfo{
+		RestrictionStatus:   user.RestrictionStatus,
+		RestrictionUntil:    user.RestrictionUntil,
 		Id:                  user.Id,
 		Username:            user.Username,
 		Nickname:            user.Nickname,
@@ -245,40 +263,45 @@ func (user UserInfo) toPublicInfo() UserPublicInfo {
 
 func (user UserInfo) toEntity() users.EntityComplete {
 	return users.EntityComplete{
-		Id:                  user.Id,
-		Username:            user.Username,
-		Email:               user.Email,
-		Locale:              user.Locale,
-		HideActivity:        user.HideActivity,
-		HideTopics:          user.HideTopics,
-		HideFollowing:       user.HideFollowing,
-		TokenVersion:        user.TokenVersion,
-		IsFrozen:            user.IsFrozen,
-		IsActivated:         user.IsActivated,
-		ActivatedAt:         user.ActivatedAt,
-		Nickname:            user.Nickname,
-		RoleId:              user.RoleId,
-		Prestige:            user.Prestige,
-		AvatarUrl:           user.AvatarUrl,
-		ProfileCoverUrl:     user.ProfileCoverUrl,
-		Bio:                 user.Bio,
-		Signature:           user.Signature,
-		WebsiteName:         user.WebsiteName,
-		Website:             user.Website,
-		ExternalInformation: user.ExternalInformation,
-		WornBadgeCode:       user.WornBadgeCode,
-		CreatedAt:           user.CreatedAt,
-		UpdatedAt:           user.UpdatedAt,
+		RestrictionStatus:         user.RestrictionStatus,
+		RestrictionUntil:          user.RestrictionUntil,
+		Id:                        user.Id,
+		Username:                  user.Username,
+		Email:                     user.Email,
+		Locale:                    user.Locale,
+		HideActivity:              user.HideActivity,
+		HideTopics:                user.HideTopics,
+		HideFollowing:             user.HideFollowing,
+		TokenVersion:              user.TokenVersion,
+		IsFrozen:                  user.IsFrozen,
+		IsActivated:               user.IsActivated,
+		RequiresEmailVerification: user.RequiresEmailVerification,
+		ActivatedAt:               user.ActivatedAt,
+		Nickname:                  user.Nickname,
+		RoleId:                    user.RoleId,
+		Prestige:                  user.Prestige,
+		AvatarUrl:                 user.AvatarUrl,
+		ProfileCoverUrl:           user.ProfileCoverUrl,
+		Bio:                       user.Bio,
+		Signature:                 user.Signature,
+		WebsiteName:               user.WebsiteName,
+		Website:                   user.Website,
+		ExternalInformation:       user.ExternalInformation,
+		WornBadgeCode:             user.WornBadgeCode,
+		CreatedAt:                 user.CreatedAt,
+		UpdatedAt:                 user.UpdatedAt,
 	}
 }
 
 func (user UserPublicInfo) webAvatarURL() string {
 	entity := users.EntityComplete{
-		Id:        user.Id,
-		Username:  user.Username,
-		Nickname:  user.Nickname,
-		IsFrozen:  user.IsFrozen,
-		AvatarUrl: user.AvatarUrl,
+		RestrictionStatus: user.RestrictionStatus,
+		RestrictionUntil:  user.RestrictionUntil,
+		Id:                user.Id,
+		Username:          user.Username,
+		Nickname:          user.Nickname,
+		IsFrozen:          user.IsFrozen,
+		AvatarUrl:         user.AvatarUrl,
 	}
 	return entity.GetWebAvatarUrl()
 }

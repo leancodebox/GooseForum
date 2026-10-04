@@ -136,7 +136,7 @@ export function goosePageNamespaces(component: string) {
     "settings.index": ["settings", "user", "publish"],
     "notifications.index": ["notifications"],
     "messages.index": ["messages"],
-    "drafts.index": ["drafts"],
+    "drafts.index": ["drafts", "publish"],
     "access-groups.index": ["accessGroups"],
     "error.index": ["error"],
     "moderation.index": ["moderation"],

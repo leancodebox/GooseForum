@@ -64,6 +64,10 @@ export interface AccessControlOverview {
 }
 
 export interface AdminUser {
+	 restrictionStatus?: 'normal' | 'suspended' | 'banned'
+	 restrictionUntil?: string | null
+	 restrictionReason?: string
+	 restrictionNote?: string
   userId: number
   username: string
   avatarUrl?: string | null
@@ -123,7 +127,7 @@ export interface SiteChromeItem { id:string;enabled:boolean;type:'link'|'text'|s
 export interface SiteChromeGroup { id:string;title:string;i18nLabel:string;items:SiteChromeItem[] }
 export interface SiteChromeConfig { header:SiteChromeItem[];mainMenu:SiteChromeItem[];resources:SiteChromeItem[];sidebarGroups:SiteChromeGroup[];footerInfo?:{primary:{content:string}[];list:{name:string;url:string}[]};brandType?:string;brandText?:string;brandImage?:string }
 export interface MailSettings { enableMail:boolean;smtpHost:string;smtpPort:number;useSSL:boolean;smtpUsername:string;smtpPassword:string;fromName:string;fromEmail:string }
-export interface SecuritySettings { enableSignup:boolean;enableEmailVerification:boolean;allowedDomains:string[] }
+export interface SecuritySettings { enableSignup:boolean;enableEmailVerification:boolean;allowedDomains:string[];registrationIPLimit?:number;registrationEmailLimit?:number;registrationGlobalLimit?:number }
 export interface PostingSettings { externalLinks?:{enabled:boolean;whitelist:string[]};textControl:{minPostLength:number;maxPostLength:number;minTitleLength:number;maxTitleLength:number;newUserPostCooldownMinutes:number;maxDailyTopicsPerUser:number};uploadControl:{allowAttachments:boolean;authorizedExtensions:string[];maxAttachmentSizeKb:number;maxDailyUploadsPerUser:number;newUserUploadCooldownMinutes:number} }
 export interface AnnouncementItemConfig { id: string; title: string; content: string; enabled: boolean }
 export interface AnnouncementConfig { enabled: boolean; content: string; publishedAt?: number | string; items?: AnnouncementItemConfig[] }
@@ -285,6 +289,7 @@ export interface GooseAdminApi {
     rotateOIDCClientSecret(clientId: string): Promise<OIDCClientCredentials>
   }
   audit: {
+    authLogs(input?: import('../api/types.js').AuthLogFilter): Promise<import('../api/types.js').AuthLogPage>
     records(input: { page?: number; pageSize?: number; optUserId?: number; optType?: number; targetType?: number; targetId?: number }): Promise<PageResult<AdminOptRecord>>
   }
   assets: {
@@ -311,8 +316,11 @@ export interface GooseAdminApi {
     review(kind: 'topic' | 'post', input: { id: number; version: number; action: 'approve' | 'reject' | 'recheck'; reason: string }): Promise<boolean>
   }
   users: {
+    mfaStatus(userId: number): Promise<{ enabled: boolean }>
+    resetMFA(userId: number, reason: string): Promise<unknown>
     list(input: { page?: number; pageSize?: number; username?: string; userId?: number; email?: string }): Promise<PageResult<AdminUser>>
-    edit(input: { userId: number; status: number; validate: number; roleId: number }): Promise<unknown>
+    edit(input: { userId: number; status: number; validate: number; roleId: number; restrictionStatus?: 'normal' | 'suspended' | 'banned'; restrictionUntil?: string | null; restrictionReason?: string; restrictionNote?: string }): Promise<unknown>
+    restrictionHistory(input: { userId: number; page?: number; pageSize?: number }): Promise<PageResult<UserRestrictionHistory>>
     roles(): Promise<{ name: string; value: number }[]>
     badgeOptions(userId: number): Promise<UserBadgeOptions>
     saveBadges(userId: number, badgeCodes: string[]): Promise<unknown>
@@ -345,4 +353,15 @@ export interface GooseAdminApi {
     add(user: { userId?: number; username?: string }): Promise<unknown>
     delete(id: number): Promise<unknown>
   }
+}
+
+export interface UserRestrictionHistory {
+  id: number
+  userId: number
+  actorId: number
+  status: string
+  until?: string | null
+  reason: string
+  note: string
+  createdAt: string
 }

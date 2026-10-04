@@ -7,6 +7,7 @@ import type { Locale } from "./locale.js";
 export type { Locale } from "./locale.js";
 
 export interface AuthMessages {
+  mfa: { [K in keyof typeof import('./messages/en-mfa.js').default]: string };
   locale: { label: string; short: string };
   login: string;
   register: string;

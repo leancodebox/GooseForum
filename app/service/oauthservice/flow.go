@@ -18,9 +18,22 @@ type Flow struct {
 	UserID   uint64 `json:"userId,omitempty"`
 	Redirect string `json:"redirect,omitempty"`
 	IssuedAt int64  `json:"issuedAt"`
+	BindingAuthority
 }
 
-func StartFlow(res http.ResponseWriter, req *http.Request, provider string, userID uint64, requestedMode, redirect string) error {
+type BindingAuthority struct {
+	SessionID    uint64 `json:"sessionId,omitempty"`
+	TokenVersion uint64 `json:"tokenVersion,omitempty"`
+}
+
+func (flow Flow) ValidateBinding(userID, sessionID, version uint64) error {
+	if flow.Mode != "bind" || userID == 0 || sessionID == 0 || flow.UserID != userID || flow.SessionID != sessionID || flow.TokenVersion != version {
+		return errors.New("OAuth binding authentication has changed")
+	}
+	return nil
+}
+
+func StartFlow(res http.ResponseWriter, req *http.Request, provider string, userID uint64, requestedMode, redirect string, authority ...BindingAuthority) error {
 	mode := "login"
 	if requestedMode == "bind" {
 		if userID == 0 {
@@ -34,6 +47,9 @@ func StartFlow(res http.ResponseWriter, req *http.Request, provider string, user
 		UserID:   userID,
 		Redirect: safeRedirect(redirect),
 		IssuedAt: time.Now().Unix(),
+	}
+	if mode == "bind" && len(authority) > 0 {
+		flow.BindingAuthority = authority[0]
 	}
 	encoded, err := json.Marshal(flow)
 	if err != nil {

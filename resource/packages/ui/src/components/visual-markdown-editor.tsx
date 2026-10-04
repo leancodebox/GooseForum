@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { mentionQuery } from "@gooseforum/markdown";
 import {
   baseKeymap,
   chainCommands,
@@ -77,6 +78,7 @@ export type EditorAction =
   | "horizontalRule"
   | "hardBreak";
 export interface VisualMarkdownEditorHandle {
+  insertMention(id: string, username: string): void;
   focus(): void;
   applyAction(action: EditorAction): void;
   insertMarkdown(markdown: string): void;
@@ -95,11 +97,14 @@ export const VisualMarkdownEditor = forwardRef<
     disabled?: boolean;
     editorClassName?: string;
     onChange(value: string): void;
+    sourceVersion?: 0 | 1;
+    onMentionQuery?(query: string | null): void;
+    onMentionKeyDown?(event: KeyboardEvent): boolean;
     onPaste?(event: ClipboardEvent): void;
     onDrop?(event: DragEvent): void;
   }
 >(function VisualMarkdownEditor(
-  { value, placeholder, disabled = false, editorClassName, onChange, onPaste, onDrop },
+  { value, placeholder, disabled = false, editorClassName, onChange, onPaste, onDrop, sourceVersion = 1, onMentionQuery, onMentionKeyDown },
   ref,
 ) {
   const root = useRef<HTMLDivElement>(null);
@@ -109,6 +114,13 @@ export const VisualMarkdownEditor = forwardRef<
   const pasteRef = useRef(onPaste);
   const dropRef = useRef(onDrop);
   const disabledRef = useRef(disabled);
+  const versionRef = useRef(sourceVersion);
+  const previousVersion = useRef(sourceVersion);
+  const mentionRef = useRef(onMentionQuery);
+  const mentionKeyRef = useRef(onMentionKeyDown);
+  versionRef.current = sourceVersion;
+  mentionRef.current = onMentionQuery;
+  mentionKeyRef.current = onMentionKeyDown;
   disabledRef.current = disabled;
   valueRef.current = value;
   changeRef.current = onChange;
@@ -117,7 +129,7 @@ export const VisualMarkdownEditor = forwardRef<
   function createState(markdown: string) {
     const listItem = visualMarkdownSchema.nodes.list_item;
     return EditorState.create({
-      doc: parseEditableVisualMarkdown(markdown),
+      doc: parseEditableVisualMarkdown(markdown, versionRef.current),
       plugins: [
         history(),
         inputRules({
@@ -138,7 +150,7 @@ export const VisualMarkdownEditor = forwardRef<
             textblockTypeInputRule(
               /^(#{1,6})\s$/,
               visualMarkdownSchema.nodes.heading,
-              (match) => ({ level: match[1]!.length }),
+              (match) => ({ level: match[1].length }),
             ),
             textblockTypeInputRule(
               /^```$/,
@@ -169,6 +181,7 @@ export const VisualMarkdownEditor = forwardRef<
       dispatchTransaction(transaction) {
         const next = view.state.apply(transaction);
         view.updateState(next);
+        mentionRef.current?.(currentMention(next)?.query ?? null);
         if (transaction.docChanged)
           changeRef.current(serializeVisualMarkdown(next.doc));
       },
@@ -182,6 +195,9 @@ export const VisualMarkdownEditor = forwardRef<
         role: "textbox",
       },
       handleDOMEvents: {
+        keydown(_view, event) {
+          return mentionKeyRef.current?.(event) ?? false;
+        },
         paste(_view, event) {
           pasteRef.current?.(event);
           return event.defaultPrevented;
@@ -197,12 +213,14 @@ export const VisualMarkdownEditor = forwardRef<
       view.destroy();
       viewRef.current = null;
     };
-  }, []);
+  }, [editorClassName, placeholder]);
   useEffect(() => {
     const view = viewRef.current;
-    if (!view || serializeVisualMarkdown(view.state.doc) === value) return;
+    if (!view) return;
+    if (serializeVisualMarkdown(view.state.doc) === value && sourceVersion === previousVersion.current) return;
     view.updateState(createState(value));
-  }, [value]);
+    previousVersion.current = sourceVersion;
+  }, [value, sourceVersion]);
   useEffect(() => {
     viewRef.current?.setProps({
       attributes: {
@@ -225,9 +243,26 @@ export const VisualMarkdownEditor = forwardRef<
       insertText,
       setBlock,
       insertTable,
+      insertMention,
     }),
-    [],
   );
+  function currentMention(state: EditorState) {
+    const { $from, empty } = state.selection;
+    if (!empty || versionRef.current === 0 || $from.parent.type.spec.code ||
+        $from.marks().some((mark) => mark.type.name === "code" || mark.type.name === "link")) return null;
+    return mentionQuery($from.parent.textBetween(0, $from.parentOffset, "\0", "\0"));
+  }
+  function insertMention(id: string, username: string) {
+    const view = viewRef.current;
+    if (!view) return;
+    const mention = currentMention(view.state);
+    if (!mention) return;
+    const end = view.state.selection.from;
+    const node = visualMarkdownSchema.nodes.mention.create({ user: id, label: `@${username}` });
+    view.dispatch(view.state.tr.replaceWith(end - mention.length, end, node).scrollIntoView());
+    mentionRef.current?.(null);
+    view.focus();
+  }
   function run(command: Command) {
     const view = viewRef.current;
     if (!view) return;

@@ -189,7 +189,7 @@ function GoosePageContent({ page }: GooseAppProps) {
         <UserProfilePageView key={page.url} page={page.props} />
       ) : page.component === "settings.index" ? (
           <SettingsPageView
-            key={page.url}
+            key={`${page.url}:${page.layout.viewer.id}`}
             layout={page.layout}
             page={page.props}
           />
@@ -202,7 +202,7 @@ function GoosePageContent({ page }: GooseAppProps) {
             page={page.props}
           />
       ) : page.component === "drafts.index" ? (
-          <DraftsPageView page={page.props} />
+          <DraftsPageView page={page.props} layout={page.layout} />
       ) : page.component === "access-groups.index" ? (
           <AccessGroupsPageView />
       ) : page.component === "error.index" ? (
@@ -210,7 +210,7 @@ function GoosePageContent({ page }: GooseAppProps) {
       ) : page.component === "moderation.index" ? (
           <ModerationPageView page={page.props} />
       ) : page.component === "publish.index" ? (
-          <PublishPageView key={page.url} page={page.props} />
+          <PublishPageView key={page.url} page={page.props} layout={page.layout} />
       ) : page.component === "topic.detail" ? (
           <TopicPageView
             key={page.url}

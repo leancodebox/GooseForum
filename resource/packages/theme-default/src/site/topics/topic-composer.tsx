@@ -75,11 +75,13 @@ export function TopicComposer({
   minimized,
   expanded,
   content,
+  sourceVersion,
   editing,
   target,
   viewer,
   topicTitle,
   busy,
+  submitDisabled = false,
   error,
   onContent,
   onSubmit,
@@ -87,16 +89,19 @@ export function TopicComposer({
   onMinimize,
   onExpand,
   onClearTarget,
+  draftPanel,
 }: {
   open: boolean;
   minimized: boolean;
   expanded: boolean;
   content: string;
+  sourceVersion?: 0 | 1;
   editing: boolean;
   target?: PostPayload;
   viewer: ViewerPayload;
   topicTitle: string;
   busy: boolean;
+  submitDisabled?: boolean;
   error: string;
   onContent(value: string): void;
   onSubmit(): void;
@@ -104,6 +109,7 @@ export function TopicComposer({
   onMinimize(): void;
   onExpand(): void;
   onClearTarget(): void;
+  draftPanel?: ReactNode;
 }) {
   const { t } = useTranslation("topic");
   return (
@@ -140,6 +146,7 @@ export function TopicComposer({
             variant="ghost"
             size="icon-sm"
             aria-label={t("close")}
+            disabled={busy}
             onClick={onClose}
           >
             <X />
@@ -169,6 +176,7 @@ export function TopicComposer({
                 {topicTitle}
               </p>
             </div>
+            {draftPanel}
             <Button
               variant="ghost"
               size="icon-sm"
@@ -209,6 +217,7 @@ export function TopicComposer({
                 size="icon-xs"
                 aria-label={t("close")}
                 onClick={onClearTarget}
+                disabled={busy}
               >
                 <X />
               </Button>
@@ -217,6 +226,7 @@ export function TopicComposer({
           <div className="min-h-0 flex-1">
             <MarkdownComposer
               value={content}
+              sourceVersion={sourceVersion}
               onChange={onContent}
               minHeight={expanded ? "min-h-[45vh]" : "min-h-32"}
               toolbarPlacement="bottom"
@@ -226,7 +236,7 @@ export function TopicComposer({
                 ) : null
               }
               actions={
-                <Button disabled={busy} onClick={onSubmit}>
+                <Button disabled={busy || submitDisabled} onClick={onSubmit}>
                   {busy ? (
                     <Spinner data-icon="inline-start" />
                   ) : (

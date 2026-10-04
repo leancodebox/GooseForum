@@ -1,6 +1,7 @@
 import {
   useRef,
   useState,
+  useEffect,
   type ChangeEvent,
   type ClipboardEvent as ReactClipboardEvent,
   type DragEvent as ReactDragEvent,
@@ -41,6 +42,8 @@ import {
   insertInline,
   markdownFromClipboard,
   renderMarkdown,
+  mentionMarkdown,
+  mentionQuery,
 } from "@gooseforum/markdown";
 import { optimizeImage, validateImage } from "./image";
 import {
@@ -70,6 +73,7 @@ export function MarkdownComposer({
   toolbarPlacement = "top",
   actions,
   status,
+  sourceVersion = 1,
 }: {
   value: string;
   onChange(value: string): void;
@@ -77,13 +81,15 @@ export function MarkdownComposer({
   toolbarPlacement?: "top" | "bottom";
   actions?: ReactNode;
   status?: ReactNode;
+  sourceVersion?: 0 | 1;
 }) {
   const { t } = useTranslation("publish");
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
-  const [mode, setMode] = useState<EditorMode>(() =>
-    hasUnsupportedVisualMarkdown(value) ? "markdown" : "visual",
+  const [selectedMode, setMode] = useState<EditorMode>(() =>
+    hasUnsupportedVisualMarkdown(value,sourceVersion) ? "markdown" : "visual",
   );
+  const mode = hasUnsupportedVisualMarkdown(value, sourceVersion) ? "markdown" : selectedMode;
   const [preview, setPreview] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<[number, number]>([
@@ -95,16 +101,79 @@ export function MarkdownComposer({
   const textarea = useRef<HTMLTextAreaElement>(null);
   const visual = useRef<VisualMarkdownEditorHandle>(null);
   const pendingSelection = useRef<Selection | undefined>(undefined);
+  const [query, setQuery] = useState<string | null>(null);
+  const [candidateResult, setCandidateResult] = useState<{
+    query: string | null;
+    items: Array<{ id: string; username: string }>;
+  }>({ query: null, items: [] });
+  const candidates = candidateResult.query === query ? candidateResult.items : [];
+  const candidateLoading = query !== null && candidateResult.query !== query;
+  const [candidateIndex, setCandidateIndex] = useState(0);
+  const mentionSelection = useRef<Selection | null>(null);
+  useEffect(() => {
+    if (query === null || sourceVersion === 0) return;
+    let active = true;
+    const timer = setTimeout(() => {
+      void runtime.api.users.mentions(query)
+        .then((items) => { if (active) setCandidateResult({ query, items }); })
+        .catch(() => { if (active) setCandidateResult({ query, items: [] }); });
+    }, 200);
+    return () => { active = false; clearTimeout(timer); };
+  }, [query, sourceVersion, runtime]);
+  function updateQuery(next: string | null) {
+    setQuery(next);
+    if (next !== query) setCandidateIndex(0);
+  }
+  function updateMention(target: HTMLTextAreaElement) {
+    if (sourceVersion === 0 || target.selectionStart !== target.selectionEnd) { updateQuery(null); return; }
+    const end = target.selectionStart;
+    const match = mentionQuery(target.value.slice(0, end));
+    mentionSelection.current = match ? { start: end - match.length, end } : null;
+    updateQuery(match?.query ?? null);
+  }
+  function selectMention(user: { id: string; username: string }) {
+    if (mode === "visual") visual.current?.insertMention(user.id, user.username);
+    else {
+      const selection = mentionSelection.current;
+      if (!selection) return;
+      const text = mentionMarkdown(user.id, user.username);
+      replace({ value: value.slice(0, selection.start) + text + value.slice(selection.end), start: selection.start + text.length, end: selection.start + text.length });
+    }
+    updateQuery(null);
+  }
+  function mentionKey(event: {
+    key: string;
+    isComposing?: boolean;
+    keyCode?: number;
+    nativeEvent?: { isComposing?: boolean; keyCode?: number };
+    preventDefault(): void;
+  }) {
+    if (sourceVersion === 0 || query === null || event.isComposing || event.nativeEvent?.isComposing || event.keyCode === 229 || event.nativeEvent?.keyCode === 229) return false;
+    if (event.key === "Escape") { event.preventDefault(); updateQuery(null); return true; }
+    if (!candidates.length) return false;
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      setCandidateIndex((index) => (index + (event.key === "ArrowDown" ? 1 : -1) + candidates.length) % candidates.length);
+      return true;
+    }
+    if (event.key === "Enter") {
+      event.preventDefault();
+      selectMention(candidates[candidateIndex] ?? candidates[0]);
+      return true;
+    }
+    return false;
+  }
 
   function updateMode(next: string) {
     if (!next) return;
-    if (next === "visual" && hasUnsupportedVisualMarkdown(value)) {
+    if (next === "visual" && hasUnsupportedVisualMarkdown(value,sourceVersion)) {
       setError(t("visualUnsupported"));
       return;
     }
     setError("");
     setPreview(false);
     setMode(next as EditorMode);
+    updateQuery(null);
     requestAnimationFrame(() =>
       next === "visual" ? visual.current?.focus() : textarea.current?.focus(),
     );
@@ -478,7 +547,7 @@ export function MarkdownComposer({
                   "markdown-composer-content markdown-composer-preview typeset typeset-forum gf-prose gf-prose-post px-1 py-4",
                   minHeight,
                 )}
-                dangerouslySetInnerHTML={{ __html: renderMarkdown(value) }}
+                dangerouslySetInnerHTML={{ __html: renderMarkdown(value,sourceVersion) }}
               />
             ) : (
               <p
@@ -496,6 +565,9 @@ export function MarkdownComposer({
               ref={visual}
               value={value}
               onChange={onChange}
+              sourceVersion={sourceVersion}
+              onMentionQuery={updateQuery}
+              onMentionKeyDown={mentionKey}
               placeholder={t("visualPlaceholder")}
               onPaste={(event) => {
                 if (event.clipboardData)
@@ -517,9 +589,11 @@ export function MarkdownComposer({
             <Textarea
               ref={textarea}
               value={value}
-              onChange={(event) => onChange(event.target.value)}
+              onChange={(event) => {onChange(event.target.value);updateMention(event.target);}}
+              onSelect={(event)=>updateMention(event.currentTarget)}
               onPaste={handlePaste}
               onKeyDown={(event) => {
+                if(mentionKey(event))return;
                 if (!(event.ctrlKey || event.metaKey)) return;
                 const key = event.key.toLowerCase();
                 if (key === "b" || key === "i" || key === "k") {
@@ -535,6 +609,13 @@ export function MarkdownComposer({
               placeholder={t("bodyPlaceholder")}
             />
           )}
+          {query!==null && !preview && sourceVersion===1 ? (
+            <div className="border-t py-1" role="listbox" aria-label={t("mentionUsers")}>
+              {candidateLoading ? <p className="px-2 py-1 text-sm text-muted-foreground">{t("mentionLoading")}</p> : candidates.length ? candidates.map((user,index)=>(
+                <button key={user.id} type="button" role="option" aria-selected={index===candidateIndex} className={cn("block w-full px-2 py-1.5 text-left text-sm hover:bg-muted focus-visible:bg-muted",index===candidateIndex&&"bg-muted")} onMouseDown={(event)=>event.preventDefault()} onClick={()=>selectMention(user)}>@{user.username}</button>
+              )) : <p className="px-2 py-1 text-sm text-muted-foreground">{t("mentionEmpty")}</p>}
+            </div>
+          ) : null}
         </div>
         {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
         {message ? <p className="mt-2 text-sm text-success">{message}</p> : null}

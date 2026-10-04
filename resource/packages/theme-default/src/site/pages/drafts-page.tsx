@@ -1,5 +1,6 @@
-import type { DraftPayload, DraftsPageProps } from "@gooseforum/client";
-import { FileText, PenSquare, ShieldAlert } from "lucide-react";
+import { useEffect, useState } from "react";
+import type { DraftPayload, DraftsPageProps, LayoutPayload } from "@gooseforum/client";
+import { FileText, PenSquare, ShieldAlert, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@gooseforum/ui/components/badge";
 import { Button } from "@gooseforum/ui/components/button";
@@ -14,10 +15,42 @@ import {
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
 import { PageHeader } from "../layout/page-header";
 import { SiteListPanel } from "../layout/site-panel";
+import { deleteLocalDraft, draftOwner, listenDraftChanges, listLocalDrafts, type LocalDraft } from "../drafts/local-draft-store";
 
-export function DraftsPageView({ page }: { page: DraftsPageProps }) {
+export function DraftsPageView({ page, layout }: { page: DraftsPageProps; layout?: LayoutPayload }) {
   const { t } = useTranslation("drafts");
+  const { t: publishT } = useTranslation("publish");
   const { locale } = useGooseRuntime();
+  const [localEntry, setLocalEntry] = useState<{ owner: string; copies: LocalDraft[]; error: boolean }>({ owner: "", copies: [], error: false });
+  const userId = layout?.viewer.id || 0;
+  const owner = userId ? draftOwner(userId) : "";
+  const localCopies = localEntry.owner === owner ? localEntry.copies : [];
+  const localError = localEntry.owner === owner && localEntry.error;
+  useEffect(() => {
+    if (!owner) return;
+    let disposed = false;
+    let epoch = 0;
+    const load = () => {
+      const request = ++epoch;
+      void listLocalDrafts(owner).then((copies) => {
+        if (!disposed && request === epoch) setLocalEntry({ owner, copies, error: false });
+      }).catch(() => {
+        if (!disposed && request === epoch) setLocalEntry((entry) => ({ owner, copies: entry.owner === owner ? entry.copies : [], error: true }));
+      });
+    };
+    load();
+    const remove = listenDraftChanges((changedOwner, action) => {
+      if (changedOwner !== owner) return;
+      if (action === "clear") { epoch++; setLocalEntry({ owner, copies: [], error: false }); }
+      else load();
+    });
+    return () => { disposed = true; remove(); };
+  }, [owner]);
+  async function discardLocal(draft: LocalDraft) {
+    // The change listener reloads the retained revision, including concurrent edits.
+    try { await deleteLocalDraft(draft.id, draft.owner, draft.revision); }
+    catch { setLocalEntry((entry) => entry.owner === draft.owner ? { ...entry, error: true } : entry); }
+  }
 
   return (
     <main className="min-w-0 pb-8">
@@ -66,6 +99,16 @@ export function DraftsPageView({ page }: { page: DraftsPageProps }) {
           </Empty>
         )}
       </SiteListPanel>
+      {userId ? <section className="mt-6 border-t">
+        <h2 className="px-4 py-3 text-sm font-semibold">{publishT("localDraft.localTitle")}</h2>
+        {localError ? <p role="status" className="px-4 py-2 text-sm text-destructive">{publishT("localDraft.storage")}</p> : null}
+        {localCopies.length ? <div className="divide-y">
+          {localCopies.map((draft) => <div key={draft.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+            <div className="min-w-0"><span className="text-sm font-medium">{publishT(`localDraft.${draft.kind === "new-topic" ? "newTopic" : draft.kind === "edit-topic" ? "editTopic" : draft.kind === "new-reply" ? "newReply" : "editReply"}`)}</span><time className="ml-3 text-xs text-muted-foreground" dateTime={new Date(draft.updatedAt).toISOString()}>{formatDate(new Date(draft.updatedAt).toISOString(), locale)}</time></div>
+            <div className="flex items-center gap-1"><Button asChild size="sm" variant="outline"><GooseLink href={draft.kind === "new-topic" ? "/publish" : draft.kind === "edit-topic" ? `/publish?id=${draft.objectId}` : `/p/post/${draft.topicId}?${draft.kind === "edit-reply" ? `localEditPost=${draft.objectId}` : "localReply=1"}`}><PenSquare />{t("edit")}</GooseLink></Button><Button size="icon-sm" variant="ghost" aria-label={publishT("localDraft.delete")} onClick={() => void discardLocal(draft)}><Trash2 /></Button></div>
+          </div>)}
+        </div> : <p className="px-4 py-3 text-sm text-muted-foreground">{publishT("localDraft.empty")}</p>}
+      </section> : null}
     </main>
   );
 }

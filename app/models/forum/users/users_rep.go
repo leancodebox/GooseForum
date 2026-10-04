@@ -69,7 +69,7 @@ func Create(entity *EntityComplete) error {
 }
 
 func Save(entity *EntityComplete) error {
-	result := builder().Save(entity)
+	result := builder().Omit("username", "username_key", "email", "email_key", "is_activated", "activated_at", "requires_email_verification", "password", "token_version", "role_id", "is_frozen", "restriction_status", "restriction_until", "restriction_reason", "restriction_note").Save(entity)
 	return result.Error
 }
 
@@ -176,7 +176,7 @@ func PublicPage(q PublicPageQuery) PublicPageResult {
 	listQuery := builder().
 		Model(&EntityComplete{}).
 		Where("deleted_at IS NULL").
-		Where("is_frozen = ?", StatusNormal)
+		Where("restriction_status = ? OR (restriction_status = '' AND is_frozen = ?) OR restriction_until <= ?", RestrictionNormal, StatusNormal, time.Now())
 	ascending := q.AfterID > 0
 	if ascending {
 		listQuery = listQuery.Where("id > ?", q.AfterID).Order(queryopt.Asc(pid))

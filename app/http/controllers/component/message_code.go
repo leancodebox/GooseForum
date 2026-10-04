@@ -1,5 +1,11 @@
 package component
 
+const (
+	MessageMentionInvalid MessageCode = "markdown.mention.invalid" // 提及语法错误或超过20个不同收件人。
+	MessageMFAInvalid     MessageCode = "mfa.invalid"
+	MessageMFAUnavailable MessageCode = "mfa.unavailable"
+)
+
 // MessageCode is a stable, frontend-facing identifier for i18n messages.
 // Backend responses expose messageCode and params only; clients translate them locally.
 type MessageCode string
@@ -41,10 +47,11 @@ const (
 )
 
 const (
-	MessageAuthRequired                  MessageCode = "auth.required"                   // 需要登录后才能继续操作。
-	MessageAuthSignupDisabled            MessageCode = "auth.signupDisabled"             // 当前站点关闭了注册。
-	MessageAuthEmailDomainInvalid        MessageCode = "auth.emailDomain.invalid"        // 邮箱格式不正确或无法提取域名。
-	MessageAuthEmailDomainNotAllowed     MessageCode = "auth.emailDomain.notAllowed"     // 邮箱域名不在注册白名单。
+	MessageAuthRequired                  MessageCode = "auth.required"               // 需要登录后才能继续操作。
+	MessageAuthSignupDisabled            MessageCode = "auth.signupDisabled"         // 当前站点关闭了注册。
+	MessageAuthEmailDomainInvalid        MessageCode = "auth.emailDomain.invalid"    // 邮箱格式不正确或无法提取域名。
+	MessageAuthEmailDomainNotAllowed     MessageCode = "auth.emailDomain.notAllowed" // 邮箱域名不在注册白名单。
+	MessageRegistrationRateLimited       MessageCode = "auth.registration.rateLimited"
 	MessageAuthUsernameInvalid           MessageCode = "auth.username.invalid"           // 用户名格式不符合规则。
 	MessageAuthUsernameExists            MessageCode = "auth.username.exists"            // 用户名已存在。
 	MessageAuthEmailExists               MessageCode = "auth.email.exists"               // 邮箱已被使用。
@@ -60,6 +67,9 @@ const (
 	MessageAuthPasswordInvalidFormat     MessageCode = "auth.password.invalidFormat"     // 登录密码格式不正确。
 	MessageAuthInvalidCredentials        MessageCode = "auth.credentials.invalid"        // 用户名、邮箱或密码错误。
 	MessageAuthAccountFrozen             MessageCode = "auth.account.frozen"             // 账号被冻结。
+	MessageAuthAccountBanned             MessageCode = "auth.account.banned"
+	MessageAdminRestrictionInvalid       MessageCode = "admin.restriction.invalid"
+	MessageAdminRestrictionProtected     MessageCode = "admin.restriction.protected"
 	MessageAuthEmailUnverified           MessageCode = "auth.email.unverified"           // 邮箱未验证。
 	MessageAuthLoginFailed               MessageCode = "auth.login.failed"               // 登录异常。
 	MessageAuthOldPasswordInvalid        MessageCode = "auth.password.oldInvalid"        // 原密码错误。

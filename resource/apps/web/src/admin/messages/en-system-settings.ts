@@ -36,4 +36,9 @@ export default {
   add: "Add",
   remove: "Remove",
   noDomains: "All email domains are allowed",
+  registrationLimits: "Registration limits",
+  registrationLimitsHint: "Requests per hour. 0 disables a limit.",
+  registrationIPLimit: "Per IP address",
+  registrationEmailLimit: "Per email address",
+  registrationGlobalLimit: "All registrations",
 } as const;

@@ -30,11 +30,11 @@ const fieldUpdatedAt = "updated_at"
 const fieldDeletedAt = "deleted_at"
 
 type Entity struct {
-	Id           uint64         `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                            //
-	RoleId       uint64         `gorm:"column:role_id;not null;default:0;" json:"roleId"`             //
-	PermissionId uint64         `gorm:"column:permission_id;not null;default:0;" json:"permissionId"` //
-	Effective    int            `gorm:"column:effective;type:int;not null;default:0;" json:"effective"`                    //
-	CreatedAt    time.Time      `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`                //
+	Id           uint64         `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"` //
+	RoleId       uint64         `gorm:"column:role_id;not null;default:0;index:idx_role_grants_role,priority:1;index:idx_role_grants_permission,priority:3" json:"roleId"`
+	PermissionId uint64         `gorm:"column:permission_id;not null;default:0;index:idx_role_grants_permission,priority:1" json:"permissionId"`
+	Effective    int            `gorm:"column:effective;type:int;not null;default:0;index:idx_role_grants_role,priority:2;index:idx_role_grants_permission,priority:2" json:"effective"`
+	CreatedAt    time.Time      `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` //
 	UpdatedAt    time.Time      `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 	DeletedAt    gorm.DeletedAt //
 }

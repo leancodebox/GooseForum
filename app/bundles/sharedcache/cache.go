@@ -129,6 +129,40 @@ func (c *Cache[V]) Set(key string, value V, ttl time.Duration) error {
 	return err
 }
 
+// AtomicUpdate serializes a read and optional write within this cache. The
+// callback must be short and must not call this cache. Its TTL must preserve
+// the original deadline when updating an existing security counter.
+// This operation is process-local, like the currently supported memory backend.
+func (c *Cache[V]) AtomicUpdate(key string, update func(V, bool) (V, time.Duration, error)) error {
+	if err := c.init(); err != nil {
+		return err
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	value, found, err := c.backend.Get(key)
+	if err != nil {
+		return err
+	}
+	value, ttl, err := update(value, found)
+	if err != nil {
+		return err
+	}
+	delete(c.flights, key)
+	if ttl <= 0 {
+		return c.backend.Delete(key)
+	}
+	return c.backend.Set(key, value, ttl)
+}
+
+func (c *Cache[V]) Get(key string) (V, bool, error) {
+	if err := c.init(); err != nil {
+		return *new(V), false, err
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.backend.Get(key)
+}
+
 func (c *Cache[V]) Delete(key string) error {
 	if err := c.init(); err != nil {
 		c.logError("delete", err)

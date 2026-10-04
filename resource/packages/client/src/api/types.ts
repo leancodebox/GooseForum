@@ -13,12 +13,15 @@ import type { GooseApiResult } from '../http/client.js'
 export type ToggleAction = 1 | 2
 
 export interface CreatePostInput {
+  sourceVersion?: 0 | 1
   topicId: number
   content: string
   replyToPostId?: number
 }
 
 export interface CreatePostResult {
+  content?: string
+  sourceVersion?: 0 | 1
   processStatus?: number
   moderationStatus?: string
   id: number
@@ -27,11 +30,13 @@ export interface CreatePostResult {
 }
 
 export interface UpdatePostInput {
+  sourceVersion?: 0 | 1
   postId: number
   content: string
 }
 
 export interface UpdatePostResult {
+  sourceVersion?: 0 | 1
   moderationStatus?: string
   processStatus?: number
   id: number
@@ -51,6 +56,7 @@ export interface PostWindowInput {
 }
 
 export interface SubmitTopicInput {
+  sourceVersion?: 0 | 1
   topicId: number
   title: string
   content: string
@@ -187,7 +193,7 @@ export interface GooseSiteApi {
     watch(topicId: number, action: ToggleAction): Promise<boolean>
     setStatus(topicId: number, topicStatus: 0 | 1): Promise<boolean>
     write(input: SubmitTopicInput): Promise<number>
-    writeReviewed(input: SubmitTopicInput): Promise<{ id: number, moderationStatus: string, topicStatus: number }>
+    writeReviewed(input: SubmitTopicInput): Promise<{ id: number, moderationStatus: string, topicStatus: number, content?: string, sourceVersion?: 0 | 1 }>
   }
   moderation: {
     setTopicStatus(topicId: number, action: 'ban' | 'unban'): Promise<boolean>
@@ -204,6 +210,7 @@ export interface GooseSiteApi {
     unread(): Promise<UnreadStatusPayload>
   }
   users: {
+    mentions(query: string): Promise<Array<{ id: string; username: string }>>
     card(userId: number): Promise<UserCardPayload>
     follow(userId: number, following: boolean): Promise<boolean>
     savePrivacy(input: { showActivity: boolean; showTopics: boolean; showFollowing: boolean }): Promise<void>
@@ -211,15 +218,20 @@ export interface GooseSiteApi {
     saveCover(profileCoverUrl: string): Promise<void>
     savePresetAvatar(avatarUrl: string): Promise<{ avatarUrl?: string }>
     wearBadge(badgeCode: string): Promise<void>
-    saveEmail(email: string): Promise<void>
+    saveEmail(email: string, mfaCode?: string): Promise<void>
     resendActivationEmail(): Promise<GooseApiResult<void>>
     saveUsername(username: string): Promise<void>
-    changePassword(oldPassword: string, newPassword: string): Promise<void>
+    changePassword(oldPassword: string, newPassword: string, mfaCode?: string): Promise<void>
     authSessions(): Promise<AuthSessionPayload[]>
+    authLogs(input?: AuthLogFilter): Promise<AuthLogPage>
+    mfaStatus(): Promise<{ enabled: boolean; available: boolean; remainingCodes: number }>
+    mfaBegin(password: string): Promise<{ secret: string; uri: string }>
+    mfaChange(password: string, code: string, action: 'enable' | 'disable' | 'regenerate'): Promise<{ recoveryCodes: string[] | null }>
     revokeAuthSession(id: number): Promise<boolean>
     revokeOtherAuthSessions(): Promise<boolean>
     oauthBindings(): Promise<OAuthBindingsPayload>
-    unbindOAuth(provider: string): Promise<void>
+    prepareOAuthBind(provider: string, mfaCode?: string): Promise<{ redirect: string }>
+    unbindOAuth(provider: string, mfaCode?: string): Promise<void>
     oidcGrants(): Promise<OIDCGrantPayload[]>
     revokeOIDCGrant(clientId: string): Promise<boolean>
   }
@@ -231,7 +243,8 @@ export interface GooseSiteApi {
   auth: {
     captcha(): Promise<CaptchaPayload>
     loginPublicKey(): Promise<LoginPublicKeyPayload>
-    login(input: LoginInput): Promise<void>
+    login(input: LoginInput): Promise<{ mfaRequired?: boolean } | void>
+    mfaLogin(code: string): Promise<{ redirect: string }>
     register(input: RegisterInput): Promise<GooseApiResult<void>>
     forgotPassword(email: string, captchaId: string, captchaCode: string): Promise<GooseApiResult<void>>
     resetPassword(token: string, newPassword: string): Promise<GooseApiResult<void>>
@@ -258,6 +271,29 @@ export interface OIDCGrantPayload {
   grantedAt: string
   enabled: boolean
 }
+
+export interface AuthLogFilter {
+  cursor?: number
+  pageSize?: number
+  userId?: number
+  result?: string
+  method?: string
+  since?: string
+  until?: string
+}
+export interface AuthLogPayload {
+  id: number
+  userId: number
+  action: string
+  authMethod: string
+  oauthProvider: string
+  result: string
+  reason?: string
+  clientIp: string
+  userAgent: string
+  createdAt: string
+}
+export interface AuthLogPage { list: AuthLogPayload[]; nextCursor: number; hasMore: boolean; pageSize: number }
 
 export interface AuthSessionPayload {
   id: number

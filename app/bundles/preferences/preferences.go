@@ -27,12 +27,15 @@ var v *viper.Viper
 var configTempl []byte
 
 func GenerateConfig() ([]byte, error) {
-	signingKey := algorithm.SafeGenerateSigningKey(32)
+	signingKey, err := algorithm.GenerateSigningKey(32)
+	if err != nil {
+		return nil, err
+	}
 
 	var b bytes.Buffer
 	t := template.New("config.templ.toml")
 	t = template.Must(t.Parse(string(configTempl)))
-	err := t.Execute(&b, map[string]any{
+	err = t.Execute(&b, map[string]any{
 		"SigningKey": signingKey,
 	})
 	if err != nil {

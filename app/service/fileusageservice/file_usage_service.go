@@ -15,12 +15,12 @@ type Usage struct {
 	UsageType string
 }
 
-func ReplaceTopic(topicID uint64, userID uint64, content string) {
-	ReplaceTopicImages(topicID, userID, markdown2html.ExtractImageURLs(content))
+func ReplaceTopic(topicID uint64, userID uint64, content string, sourceVersion uint8) {
+	ReplaceTopicImages(topicID, userID, markdown2html.ExtractImageURLsVersion(content, sourceVersion))
 }
 
-func ReplacePost(postID uint64, userID uint64, content string) {
-	ReplacePostImages(postID, userID, markdown2html.ExtractImageURLs(content))
+func ReplacePost(postID uint64, userID uint64, content string, sourceVersion uint8) {
+	ReplacePostImages(postID, userID, markdown2html.ExtractImageURLsVersion(content, sourceVersion))
 }
 
 func ReplaceTopicImages(topicID uint64, userID uint64, imageURLs []string) {

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/bundles/redirectopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -32,6 +33,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/chatservice"
+	"github.com/leancodebox/GooseForum/app/service/mentionservice"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
@@ -166,15 +168,18 @@ type SitePayload struct {
 }
 
 type ViewerPayload struct {
-	ID                        uint64   `json:"id"`
-	Username                  string   `json:"username"`
-	Email                     string   `json:"email"`
-	AvatarURL                 string   `json:"avatarUrl"`
-	IsAuthenticated           bool     `json:"isAuthenticated"`
-	CanAccessAdmin            bool     `json:"canAccessAdmin"`
-	IsModerator               bool     `json:"isModerator"`
-	RequiresEmailVerification bool     `json:"requiresEmailVerification"`
-	AdminPermissions          []uint64 `json:"adminPermissions"`
+	RestrictionStatus         string     `json:"restrictionStatus"`
+	RestrictionUntil          *time.Time `json:"restrictionUntil"`
+	RestrictionReason         string     `json:"restrictionReason"`
+	ID                        uint64     `json:"id"`
+	Username                  string     `json:"username"`
+	Email                     string     `json:"email"`
+	AvatarURL                 string     `json:"avatarUrl"`
+	IsAuthenticated           bool       `json:"isAuthenticated"`
+	CanAccessAdmin            bool       `json:"canAccessAdmin"`
+	IsModerator               bool       `json:"isModerator"`
+	RequiresEmailVerification bool       `json:"requiresEmailVerification"`
+	AdminPermissions          []uint64   `json:"adminPermissions"`
 }
 
 type NavItemPayload struct {
@@ -308,6 +313,7 @@ type TopicDetailPayload struct {
 }
 
 type PostPayload struct {
+	SourceVersion   uint8              `json:"sourceVersion"`
 	ID              uint64             `json:"id"`
 	TopicID         uint64             `json:"topicId"`
 	PostNo          uint64             `json:"postNo"`
@@ -594,10 +600,11 @@ type ModerationPageProps struct {
 }
 
 type PublishTopicPayload struct {
-	Title       string   `json:"title"`
-	Content     string   `json:"content"`
-	CategoryIDs []uint64 `json:"categoryIds"`
-	TopicStatus int8     `json:"topicStatus"`
+	SourceVersion uint8    `json:"sourceVersion"`
+	Title         string   `json:"title"`
+	Content       string   `json:"content"`
+	CategoryIDs   []uint64 `json:"categoryIds"`
+	TopicStatus   int8     `json:"topicStatus"`
 }
 
 type SearchPageProps struct {
@@ -614,7 +621,6 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 	currentUser := component.GetLoginUser(c)
 	viewer := ViewerPayload{}
 	if currentUser != nil {
-		securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
 		viewer = ViewerPayload{
 			ID:                        currentUser.UserId,
 			Username:                  currentUser.Username,
@@ -623,8 +629,15 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 			IsAuthenticated:           currentUser.UserId > 0,
 			CanAccessAdmin:            currentUser.CanAccessAdmin,
 			IsModerator:               false,
-			RequiresEmailVerification: currentUser.UserId > 0 && securityConfig.EnableEmailVerification && currentUser.IsActivated == users.ActivationPending,
+			RequiresEmailVerification: currentUser.UserId > 0 && currentUser.IsActivated == users.ActivationPending && (hotdataserve.GetSecuritySettingsConfigCache().EnableEmailVerification || currentUser.RequiresEmailVerification),
 			AdminPermissions:          buildAdminPermissions(currentUser.UserId),
+		}
+		if currentUser.UserId > 0 {
+			if state, err := users.GetAccountState(currentUser.UserId); err == nil {
+				viewer.RestrictionStatus = state.EffectiveRestriction(time.Now())
+				viewer.RestrictionUntil = state.RestrictionUntil
+				viewer.RestrictionReason = state.RestrictionReason
+			}
 		}
 	}
 	snapshot, accessOK := requestAccessSnapshot(c)
@@ -1210,6 +1223,7 @@ func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.E
 			renderedContent = ""
 		}
 		res = append(res, PostPayload{
+			SourceVersion:   item.SourceVersion,
 			ID:              item.Id,
 			TopicID:         item.TopicId,
 			PostNo:          item.PostNo,
@@ -1226,6 +1240,20 @@ func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.E
 			IsOwnPost:       currentUserID == item.UserId,
 			UpdatedAt:       item.UpdatedAt.Format(time.DateTime),
 		})
+	}
+	values := make([]string, 0, len(res)+len(replyTargets))
+	for _, post := range res {
+		values = append(values, post.RenderedContent)
+	}
+	for _, target := range replyTargets {
+		values = append(values, target.RenderedContent)
+	}
+	hydrated := mentionservice.HydrateHTMLs(values)
+	for i := range res {
+		res[i].RenderedContent = hydrated[i]
+	}
+	for i := range replyTargets {
+		replyTargets[i].RenderedContent = hydrated[len(res)+i]
 	}
 	return res, replyTargets
 }
@@ -2277,6 +2305,7 @@ func buildSettingsPageProps(user users.EntityComplete) SettingsPageProps {
 			{Key: "profile", URL: "/settings", Active: true},
 			{Key: "account", URL: "/settings?tab=account"},
 			{Key: "sessions", URL: "/settings?tab=sessions"},
+			{Key: "mfa", URL: "/settings?tab=mfa"},
 			{Key: "privacy", URL: "/settings?tab=privacy"},
 			{Key: "binding", URL: "/settings?tab=binding"},
 			{Key: "applications", URL: "/settings?tab=applications"},
@@ -2313,10 +2342,11 @@ func buildPublishPageProps(c *gin.Context, topicID uint64) (PublishPageProps, er
 		firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
 	}
 	props.Topic = PublishTopicPayload{
-		Title:       topic.Title,
-		Content:     firstPost.Content,
-		CategoryIDs: topic.CategoryIds,
-		TopicStatus: topic.Status,
+		SourceVersion: firstPost.SourceVersion,
+		Title:         topic.Title,
+		Content:       firstPost.Content,
+		CategoryIDs:   topic.CategoryIds,
+		TopicStatus:   topic.Status,
 	}
 	props.Categories = buildPublishCategories(actor, everyone, topic.CategoryIds)
 	return props, nil

@@ -16,7 +16,7 @@ export const adminAuditMessageCodes = {
   "admin.opt.category.moderatorAdded": "categoryModeratorAdded",
   "admin.opt.category.moderatorRemoved": "categoryModeratorRemoved",
 } as const satisfies Record<string, MessageKey>;
-export type AuditTextKey = keyof EnglishDictionary;
+export type AuditTextKey = Exclude<keyof EnglishDictionary, 'authLogs' | 'authLogActions'>;
 
 export function createAuditText(locale: AuthLocale) {
   return (key: AuditTextKey) =>
@@ -43,10 +43,10 @@ function normalizeParams(locale: AuthLocale, params: Record<string, unknown>) {
   const values: Record<string, string> = {};
   for (const [key, value] of Object.entries(params))
     values[key] = Array.isArray(value)
-      ? value.join(", ")
+      ? value.map((item: unknown) => typeof item === "object" && item !== null ? JSON.stringify(item) : String(item ?? "")).join(", ")
       : value == null
         ? ""
-        : String(value);
+        : typeof value === "object" ? JSON.stringify(value) : String(value);
   if (
     typeof params.status === "string" &&
     params.status in

@@ -11,19 +11,25 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/models/forum/authsessions"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/authsessionservice"
 	"gorm.io/gorm"
 )
 
 func TestLogoutReportsRevocationFailure(t *testing.T) {
 	db := dbconnect.Connect()
-	if err := db.AutoMigrate(&authsessions.Token{}, &authsessions.Log{}); err != nil {
+	if err := db.AutoMigrate(&users.EntityComplete{}, &authsessions.Token{}, &authsessions.Log{}); err != nil {
 		t.Fatal(err)
 	}
 	userID := uint64(800000000 + time.Now().UnixNano()%100000000)
+	user := users.EntityComplete{Id: userID, Username: "logout-fixture", TokenVersion: 1}
+	if err := db.Create(&user).Error; err != nil {
+		t.Fatal(err)
+	}
 	t.Cleanup(func() {
 		db.Where("user_id = ?", userID).Delete(&authsessions.Token{})
 		db.Where("user_id = ?", userID).Delete(&authsessions.Log{})
+		db.Unscoped().Delete(&user)
 	})
 	issued := httptest.NewRecorder()
 	issueContext, _ := gin.CreateTestContext(issued)

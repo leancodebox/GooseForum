@@ -11,12 +11,15 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/randopt"
 	"github.com/leancodebox/GooseForum/app/bundles/sessionstore"
+	"github.com/leancodebox/GooseForum/app/service/emailactivationservice"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
+	"github.com/leancodebox/GooseForum/app/service/registrationservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
@@ -44,44 +47,93 @@ func InitOAuth() {
 
 // OAuthUserInfo is the normalized user data from an OAuth provider.
 type OAuthUserInfo struct {
-	ID        string `json:"id"`
-	Login     string `json:"login"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
-	AvatarURL string `json:"avatar_url"`
-	Bio       string `json:"bio"`
-	Blog      string `json:"blog"`
-	Location  string `json:"location"`
-	Provider  string `json:"provider"`
+	ID            string `json:"id"`
+	Login         string `json:"login"`
+	Name          string `json:"name"`
+	Email         string `json:"email"`
+	AvatarURL     string `json:"avatar_url"`
+	Bio           string `json:"bio"`
+	Blog          string `json:"blog"`
+	Location      string `json:"location"`
+	Provider      string `json:"provider"`
+	EmailVerified bool   `json:"emailVerified"`
 }
 
+var oauthRegistrationMu sync.Mutex
+
 // ProcessOAuthCallback logs in an existing OAuth user or creates a new one.
-func ProcessOAuthCallback(gothUser goth.User) (*users.EntityComplete, error) {
+func ProcessOAuthCallback(gothUser goth.User, clientIP ...string) (*users.EntityComplete, error) {
 	userInfo := parseOAuthUserInfo(gothUser)
 	if err := validateOAuthUserInfo(userInfo); err != nil {
 		return nil, err
 	}
+	// Recheck the provider identity while serializing first-time callbacks.
+	oauthRegistrationMu.Lock()
+	ip := ""
+	if len(clientIP) > 0 {
+		ip = clientIP[0]
+	}
+	// Recover before the existing-binding path or new-signup restrictions.
+	pending, err := users.FindOAuthRegistration(users.OAuthRegistrationKey(userInfo.Provider, userInfo.ID))
+	if err != nil {
+		oauthRegistrationMu.Unlock()
+		return nil, err
+	}
+	if pending != nil {
+		recovered, err := userservice.CreateUserWithBinding(pending.Username, "", pending.Email, pending.RequiresEmailVerification, &userOAuth.Entity{Provider: userInfo.Provider, ProviderUid: userInfo.ID})
+		oauthRegistrationMu.Unlock()
+		if err != nil {
+			return nil, err
+		}
+		return finishOAuthRegistration(recovered, userInfo, ip), nil
+	}
 
 	existingOAuth := userOAuth.GetByProviderAndUID(userInfo.Provider, userInfo.ID)
 	if existingOAuth != nil {
+		oauthRegistrationMu.Unlock()
 		user, err := users.Get(existingOAuth.UserId)
 		if err != nil {
 			return nil, fmt.Errorf("获取用户信息失败: %w", err)
 		}
+		if user.NeedsEmailVerification(hotdataserve.GetSecuritySettingsConfigCache().EnableEmailVerification) && user.Email != "" {
+			if registrationservice.AllowMail(ip, user.Email) == nil {
+				if _, err := emailactivationservice.Resend(user); err != nil && !errors.Is(err, emailactivationservice.ErrCooldown) && !errors.Is(err, emailactivationservice.ErrDailyLimit) {
+					slog.Warn("OAuth verification email could not be sent", "userId", user.Id, "error", err)
+				}
+			}
+		}
 		return &user, nil
 	}
-	if !hotdataserve.GetSecuritySettingsConfigCache().EnableSignup {
-		return nil, errors.New("registration is disabled")
+	email, config, err := registrationservice.Check(userInfo.Email, ip, true)
+	if err != nil {
+		oauthRegistrationMu.Unlock()
+		return nil, err
 	}
-
-	newUser, err := createUserFromOAuth(userInfo)
+	userInfo.Email = email
+	needVerification := (config.EnableEmailVerification || len(config.AllowedDomains) > 0) && !userInfo.EmailVerified
+	if err := registrationservice.CheckVerificationMail(needVerification); err != nil {
+		oauthRegistrationMu.Unlock()
+		return nil, err
+	}
+	newUser, err := createUserFromOAuth(userInfo, needVerification)
+	oauthRegistrationMu.Unlock()
 	if err != nil {
 		return nil, err
 	}
+	return finishOAuthRegistration(newUser, userInfo, ip), nil
+}
 
-	err = createOAuthRecord(newUser.Id, userInfo)
-	if err != nil {
-		return nil, err
+func finishOAuthRegistration(newUser *users.EntityComplete, userInfo OAuthUserInfo, ip string) *users.EntityComplete {
+	if err := populateOAuthProfile(newUser, userInfo); err != nil {
+		slog.Warn("OAuth profile update failed", "userId", newUser.Id, "error", err)
+	}
+
+	if newUser.IsActivated == users.ActivationPending && newUser.Email != "" {
+		if registrationservice.AllowMail(ip, newUser.Email) == nil {
+			if err := emailactivationservice.SendActivationEmail(newUser); err != nil {
+				slog.Warn("OAuth verification email could not be sent", "userId", newUser.Id, "error", err)
+			}
+		}
 	}
 
 	eventbus.Publish(context.Background(), &eventhandlers.UserSignUpEvent{
@@ -89,7 +141,7 @@ func ProcessOAuthCallback(gothUser goth.User) (*users.EntityComplete, error) {
 		Username: newUser.Username,
 	})
 
-	return newUser, nil
+	return newUser
 }
 
 // parseOAuthUserInfo normalizes provider-specific user data.
@@ -104,6 +156,10 @@ func parseOAuthUserInfo(gothUser goth.User) OAuthUserInfo {
 	}
 
 	if gothUser.RawData != nil {
+		userInfo.EmailVerified, _ = gothUser.RawData["email_verified"].(bool)
+		if gothUser.Provider == "discord" {
+			userInfo.EmailVerified, _ = gothUser.RawData["verified"].(bool)
+		}
 		if bio, ok := gothUser.RawData["bio"].(string); ok {
 			userInfo.Bio = bio
 		}
@@ -132,7 +188,7 @@ func validateOAuthUserInfo(userInfo OAuthUserInfo) error {
 }
 
 // createUserFromOAuth creates a local account from OAuth user data.
-func createUserFromOAuth(userInfo OAuthUserInfo) (*users.EntityComplete, error) {
+func createUserFromOAuth(userInfo OAuthUserInfo, needVerification bool) (*users.EntityComplete, error) {
 	username := oauthUsername(userInfo)
 	originalUsername := username
 	counter := 1
@@ -146,10 +202,24 @@ func createUserFromOAuth(userInfo OAuthUserInfo) (*users.EntityComplete, error) 
 		counter++
 	}
 
-	userEntity, err := userservice.CreateUser(username, randopt.RandomString(32), "", false)
+	binding := &userOAuth.Entity{Provider: userInfo.Provider, ProviderUid: userInfo.ID}
+	var userEntity *users.EntityComplete
+	var err error
+	for attempts := 0; attempts < 10; attempts++ {
+		userEntity, err = userservice.CreateUserWithBinding(username, randopt.RandomString(32), userInfo.Email, needVerification, binding)
+		if !errors.Is(err, users.ErrUsernameExists) {
+			break
+		}
+		username = fmt.Sprintf("%.20s_%d", originalUsername, counter)
+		counter++
+	}
 	if err != nil {
 		return nil, fmt.Errorf("创建用户失败: %w", err)
 	}
+	return userEntity, nil
+}
+
+func populateOAuthProfile(userEntity *users.EntityComplete, userInfo OAuthUserInfo) error {
 
 	if userInfo.AvatarURL != "" {
 		localAvatarPath, err := downloadAndSaveAvatar(userEntity.Id, userInfo.AvatarURL)
@@ -165,15 +235,15 @@ func createUserFromOAuth(userInfo OAuthUserInfo) (*users.EntityComplete, error) 
 
 	userEntity.Nickname = strings.TrimSpace(userInfo.Name)
 	if userEntity.Nickname == "" {
-		userEntity.Nickname = username
+		userEntity.Nickname = userEntity.Username
 	}
 	userEntity.Bio = userInfo.Bio
 	userEntity.Website = userInfo.Blog
 	if err := userservice.SaveUser(userEntity); err != nil {
-		return nil, err
+		return err
 	}
 
-	return userEntity, nil
+	return nil
 }
 
 var invalidUsernameCharacters = regexp.MustCompile(`[^a-zA-Z0-9_-]+`)
@@ -258,6 +328,8 @@ func ProcessOAuthBind(userID uint64, gothUser goth.User) error {
 	if err := validateOAuthUserInfo(userInfo); err != nil {
 		return err
 	}
+	oauthRegistrationMu.Lock()
+	defer oauthRegistrationMu.Unlock()
 
 	existingOAuth := userOAuth.GetByProviderAndUID(userInfo.Provider, userInfo.ID)
 	if existingOAuth != nil {

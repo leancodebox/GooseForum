@@ -18,12 +18,27 @@ func TestGenerateSigningKey(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	decoded, err := base64.URLEncoding.WithPadding(base64.NoPadding).DecodeString(key)
+	decoded, err := base64.RawURLEncoding.Strict().DecodeString(key)
 	if err != nil {
 		t.Fatalf("generated key should be URL-safe base64: %v", err)
 	}
 	if len(decoded) != 32 {
 		t.Fatalf("decoded signing key length = %d, want 32", len(decoded))
+	}
+	if len(key) != 43 {
+		t.Fatalf("encoded signing key length = %d, want 43", len(key))
+	}
+	other, err := GenerateSigningKey(32)
+	if err != nil || other == key {
+		t.Fatal("successive signing keys must be independently generated")
+	}
+}
+
+func TestGenerateSigningKeyRejectsInvalidLength(t *testing.T) {
+	for _, length := range []int{-1, 0} {
+		if _, err := GenerateSigningKey(length); err == nil {
+			t.Fatal("invalid key length accepted")
+		}
 	}
 }
 

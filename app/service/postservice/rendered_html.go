@@ -23,7 +23,7 @@ func ensureRenderedHTML(entity *posts.Entity, save func(*posts.Entity) error) (s
 		return entity.RenderedHTML, nil
 	}
 
-	entity.RenderedHTML = markdown2html.PostMarkdownToHTML(entity.Content)
+	entity.RenderedHTML = markdown2html.PostMarkdownToHTMLVersion(entity.Content, entity.SourceVersion)
 	entity.RenderedVersion = markdown2html.GetPostVersion()
 	if err := save(entity); err != nil {
 		return entity.RenderedHTML, err

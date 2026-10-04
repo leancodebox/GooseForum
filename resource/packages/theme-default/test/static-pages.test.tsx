@@ -1483,6 +1483,7 @@ describe("AppShell and static pages", () => {
       topicId: 60,
       content: "Reply body",
       replyToPostId: 62,
+      sourceVersion: 1,
     });
     expect(await screen.findByText("Reply body")).toBeTruthy();
     const reference = screen.getByText("Reply body").closest("article")!.querySelector('[data-slot="reply-reference"]')!;

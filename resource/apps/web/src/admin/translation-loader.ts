@@ -55,6 +55,7 @@ export function adminPageNamespaces(path: string) {
     "/admin/badges": ["assets"],
     "/admin/files/resources": ["assets"],
     "/admin/opt-records": ["audit", "audit-extra"],
+    "/admin/auth-logs": ["audit"],
     "/admin/settings/site-info": ["settings"],
     "/admin/settings/site-chrome": ["settings"],
     "/admin/settings/mail": ["system-settings"],

@@ -156,8 +156,14 @@ func TestUserResolverMapsClaimsAndAvailability(t *testing.T) {
 	if err := db.Model(&users.EntityComplete{}).Where("id = ?", 7).Update("is_frozen", users.StatusFrozen).Error; err != nil {
 		t.Fatal(err)
 	}
+	if _, err := resolver.ResolveUser(t.Context(), "7"); err != nil {
+		t.Fatalf("legacy suspension should allow identity access: %v", err)
+	}
+	if err := db.Model(&users.EntityComplete{}).Where("id = ?", 7).Update("restriction_status", users.RestrictionBanned).Error; err != nil {
+		t.Fatal(err)
+	}
 	if _, err := resolver.ResolveUser(t.Context(), "7"); !errors.Is(err, core.ErrUserUnavailable) {
-		t.Fatalf("frozen user error = %v", err)
+		t.Fatalf("banned user error = %v", err)
 	}
 	if _, err := resolver.ResolveUser(t.Context(), "invalid"); !errors.Is(err, core.ErrUserUnavailable) {
 		t.Fatalf("invalid subject error = %v", err)

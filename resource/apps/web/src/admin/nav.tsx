@@ -14,6 +14,7 @@ export const adminNavGroups: { label?: AdminTextKey; items: AdminNavItem[] }[] =
   { items: [
     { label: 'dashboard', url: '/admin', icon: <Monitor />, permission: AdminPermission.Admin },
     { label: 'users', url: '/admin/users', icon: <UserCog />, permission: AdminPermission.UserManager },
+    { label: 'authLogs', url: '/admin/auth-logs', icon: <ListChecks />, permission: AdminPermission.UserManager },
     { label: 'roles', url: '/admin/roles', icon: <ShieldCheck />, permission: AdminPermission.RoleManager },
     { label: 'accessGroups', url: '/admin/access-groups', icon: <UsersRound />, permission: AdminPermission.RoleManager },
     { label: 'categories', url: '/admin/categories', icon: <Tags />, permission: [AdminPermission.TopicsManager, AdminPermission.RoleManager] },

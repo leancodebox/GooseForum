@@ -20,6 +20,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
+	"github.com/leancodebox/GooseForum/app/service/mfaservice"
+	"github.com/leancodebox/GooseForum/app/service/registrationservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
@@ -60,8 +62,11 @@ func GetUserCard(req component.BetterRequest[GetUserCardReq]) component.Response
 }
 
 type EditUserEmailReq struct {
-	Email string `json:"email" validate:"required,email"`
+	Email   string `json:"email" validate:"required,email"`
+	MFACode string `json:"mfaCode"`
 }
+
+var sendEmailChangeVerification = emailactivationservice.SendActivationEmailNow
 
 // EditUserEmail updates the current user's email and resets activation state.
 func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Response {
@@ -70,7 +75,7 @@ func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Resp
 		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
 	}
 
-	newEmail := req.GetParams().Email
+	newEmail := strings.TrimSpace(req.GetParams().Email)
 
 	if err := component.ValidateEmailDomain(newEmail); err != nil {
 		return component.FailResponseError(err)
@@ -79,18 +84,36 @@ func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Resp
 	if users.ExistEmail(newEmail) {
 		return component.FailResponseCode(component.MessageAuthEmailExists, nil)
 	}
-	userEntity.Email = newEmail
-	userEntity.IsActivated = users.ActivationPending
-	userEntity.ActivatedAt = nil
-
-	err = userservice.SaveUser(&userEntity)
+	if err := mailservice.CheckConfigured(); err != nil {
+		return component.FailResponseCode(component.MessageAuthActivationResendFailed, nil)
+	}
+	if err := mfaservice.VerifySecondFactor(req.GinContext, userEntity.Id, req.Params.MFACode); err != nil {
+		return component.FailResponseCode(mfaErrorCode(err), nil)
+	}
+	prospective := userEntity
+	prospective.Email = newEmail
+	prospective.IsActivated = users.ActivationPending
+	prospective.ActivatedAt = nil
+	prospective.RequiresEmailVerification = true
+	if err := sendEmailChangeVerification(&prospective); err != nil {
+		slog.Info("验证邮件发送失败", "userId", userEntity.Id, "error", err)
+		return component.FailResponseCode(component.MessageAuthActivationResendFailed, nil)
+	}
+	err = users.UpdateEmailByVersion(userEntity.Id, userEntity.TokenVersion, newEmail)
+	if errors.Is(err, users.ErrEmailExists) {
+		return component.FailResponseCode(component.MessageAuthEmailExists, nil)
+	}
 	if err != nil {
 		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
 	}
-
-	if err = emailactivationservice.SendActivationEmail(&userEntity); err != nil {
-		slog.Info("验证邮件发送失败", "error", err)
+	userEntity, err = users.Get(userEntity.Id)
+	if err != nil {
+		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
 	}
+	userservice.RefreshUserCaches(&userEntity)
+	authsessionservice.InvalidateUser(userEntity.Id)
+	authsessionservice.LogSecurityEvent(req.GinContext, userEntity.Id, "email_change")
+	authsessionservice.ClearCookie(req.GinContext)
 
 	return component.SuccessResponseCode("更新成功", component.MessageUserUpdateSuccess, nil)
 }
@@ -101,6 +124,9 @@ func ResendActivationEmail(req component.BetterRequest[component.Null]) componen
 		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
 	}
 
+	if err := registrationservice.AllowMail(req.GinContext.ClientIP(), userEntity.Email); err != nil {
+		return component.FailResponseCode(component.MessageRegistrationRateLimited, nil)
+	}
 	result, err := emailactivationservice.Resend(userEntity)
 	if err != nil {
 		if errors.Is(err, emailactivationservice.ErrDisabled) {
@@ -140,17 +166,22 @@ func EditUsername(req component.BetterRequest[EditUsernameReq]) component.Respon
 	if err != nil {
 		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
 	}
-	newUsername := req.GetParams().Username
+	newUsername := strings.TrimSpace(req.GetParams().Username)
 	if !component.ValidateUsername(newUsername) {
 		return component.FailResponseCode(component.MessageAuthUsernameInvalid, nil)
 	}
 	if users.ExistUsername(newUsername) {
 		return component.FailResponseCode(component.MessageAuthUsernameExists, nil)
 	}
-	userEntity.Username = newUsername
-	err = userservice.SaveUser(&userEntity)
+	err = users.UpdateUsernameByVersion(userEntity.Id, userEntity.TokenVersion, newUsername)
+	if errors.Is(err, users.ErrUsernameExists) {
+		return component.FailResponseCode(component.MessageAuthUsernameExists, nil)
+	}
 	if err != nil {
 		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
+	}
+	if current, err := users.Get(userEntity.Id); err == nil {
+		userservice.RefreshUserCaches(&current)
 	}
 
 	return component.SuccessResponseCode("更新成功", component.MessageUserUpdateSuccess, nil)
@@ -479,6 +510,7 @@ func readAvatarUploadFile(file *multipart.FileHeader, maxSize int64, allowedExts
 
 // ChangePasswordReq is the password change request.
 type ChangePasswordReq struct {
+	MFACode     string `json:"mfaCode"`
 	OldPassword string `json:"oldPassword" validate:"required"`
 	NewPassword string `json:"newPassword" validate:"required"`
 }
@@ -495,6 +527,9 @@ func ChangePassword(req component.BetterRequest[ChangePasswordReq]) component.Re
 	err = algorithm.VerifyEncryptPassword(userEntity.Password, req.Params.OldPassword)
 	if err != nil {
 		return component.FailResponseCode(component.MessageAuthOldPasswordInvalid, nil)
+	}
+	if err = mfaservice.VerifySecondFactor(req.GinContext, userEntity.Id, req.Params.MFACode); err != nil {
+		return component.FailResponseCode(mfaErrorCode(err), nil)
 	}
 
 	newHash, err := algorithm.MakePassword(req.Params.NewPassword)
@@ -525,6 +560,9 @@ type ForgotPasswordReq struct {
 func ForgotPassword(req component.BetterRequest[ForgotPasswordReq]) component.Response {
 	if !captchaOpt.VerifyCaptcha(req.Params.CaptchaId, req.Params.CaptchaCode) {
 		return component.FailResponseCode(component.MessageAuthCaptchaInvalid, nil)
+	}
+	if err := registrationservice.AllowMail(req.GinContext.ClientIP(), req.Params.Email); err != nil {
+		return component.FailResponseCode(component.MessageRegistrationRateLimited, nil)
 	}
 
 	userEntity, err := users.GetByEmail(req.Params.Email)
@@ -575,7 +613,7 @@ func ResetPassword(req component.BetterRequest[ResetPasswordReq]) component.Resp
 		return component.FailResponseCode(component.MessageAuthResetTokenInvalid, nil)
 	}
 
-	if userEntity.IsFrozen == users.StatusFrozen {
+	if userEntity.EffectiveRestriction(time.Now()) == users.RestrictionBanned {
 		return component.FailResponseCode(component.MessagePermissionUserFrozen, component.MessageParams{
 			"action":     "写入",
 			"actionCode": string(component.PermissionActionWrite),

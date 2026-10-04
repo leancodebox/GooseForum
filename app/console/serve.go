@@ -120,7 +120,10 @@ type serveRuntime struct {
 }
 
 func newServeRuntime(port string) (*serveRuntime, error) {
-	engine := newGinEngine()
+	engine, err := newGinEngine()
+	if err != nil {
+		return nil, err
+	}
 	startupGate := middleware.NewStartupGate()
 	engine.Use(startupGate.Handler)
 	routes.RegisterByGin(engine)
@@ -204,13 +207,18 @@ func (r *serveRuntime) wait() {
 	slog.Info("Server exiting")
 }
 
-func newGinEngine() *gin.Engine {
+func newGinEngine() (*gin.Engine, error) {
+	var engine *gin.Engine
 	if setting.IsDebug() {
 		gin.SetMode(gin.DebugMode)
-		return gin.Default()
+		engine = gin.Default()
 	} else {
 		gin.DisableConsoleColor()
 		gin.SetMode(gin.ReleaseMode)
+		engine = gin.New()
 	}
-	return gin.New()
+	if err := engine.SetTrustedProxies(preferences.GetStringSlice("server.trustedProxies")); err != nil {
+		return nil, fmt.Errorf("invalid server.trustedProxies: %w", err)
+	}
+	return engine, nil
 }

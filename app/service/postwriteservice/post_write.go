@@ -15,6 +15,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
+	"github.com/leancodebox/GooseForum/app/service/mentionservice"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
 )
@@ -27,6 +28,7 @@ var (
 )
 
 type CreateInput struct {
+	SourceVersion uint8
 	UserID        uint64
 	TopicID       uint64
 	Content       string
@@ -46,10 +48,16 @@ func Create(input CreateInput) (posts.Entity, error) {
 		}
 	}
 
-	analysis := markdown2html.AnalyzePostContent(input.Content)
+	content, err := mentionservice.Normalize(input.Content, input.SourceVersion, true)
+	if err != nil {
+		return posts.Entity{}, err
+	}
+	input.Content = content
+	analysis := markdown2html.AnalyzePostContentVersion(input.Content, input.SourceVersion)
 	post := posts.Entity{
 		TopicId: input.TopicID, Content: input.Content, RenderedHTML: analysis.RenderedHTML,
 		RenderedVersion: markdown2html.GetPostVersion(), UserId: input.UserID, ReplyToPostId: input.ReplyToPostID,
+		SourceVersion: input.SourceVersion,
 	}
 	if err := postservice.CreateTopicPost(&post, topic); err != nil {
 		return posts.Entity{}, err
@@ -68,9 +76,10 @@ func Create(input CreateInput) (posts.Entity, error) {
 }
 
 type UpdateInput struct {
-	UserID  uint64
-	PostID  uint64
-	Content string
+	SourceVersion uint8
+	UserID        uint64
+	PostID        uint64
+	Content       string
 }
 
 func Update(input UpdateInput) (posts.Entity, error) {
@@ -87,9 +96,18 @@ func Update(input UpdateInput) (posts.Entity, error) {
 	}
 
 	expectedVersion := post.ModerationVersion
+	content, err := mentionservice.Normalize(input.Content, input.SourceVersion, true)
+	if err != nil {
+		return posts.Entity{}, err
+	}
+	input.Content = content
+	if err := mentionservice.PreserveLegacyMentions(&post, input.SourceVersion, post.WasPublished()); err != nil {
+		return posts.Entity{}, err
+	}
+	post.SourceVersion = input.SourceVersion
 	wasPublished := post.WasPublished()
 	wasVisible := post.ProcessStatus == 0
-	analysis := markdown2html.AnalyzePostContent(input.Content)
+	analysis := markdown2html.AnalyzePostContentVersion(input.Content, input.SourceVersion)
 	post.Content = input.Content
 	post.RenderedHTML = analysis.RenderedHTML
 	post.RenderedVersion = markdown2html.GetPostVersion()
@@ -106,6 +124,7 @@ func Update(input UpdateInput) (posts.Entity, error) {
 		}
 	}
 	enqueueReview(post.Id, post.ModerationVersion, post.ModerationStatus)
+	mentionservice.Notify(topic, post)
 	return post, nil
 }
 

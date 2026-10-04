@@ -130,10 +130,10 @@ func TestSessionLifecycle(t *testing.T) {
 	if err != nil || !updated {
 		t.Fatalf("password update: %v, %v", updated, err)
 	}
-	if _, err := Authenticate(second, secondRaw, true); err != nil {
-		t.Fatalf("external password change was not bounded by cache TTL: %v", err)
+	if _, err := Authenticate(second, secondRaw, true); !errors.Is(err, ErrInvalidSession) {
+		t.Fatalf("external password change must invalidate even a cached session: %v", err)
 	}
-	// The CLI is a separate process; an in-process password change invalidates the cache.
+	// In-process invalidation remains useful to release cached session data.
 	LogPasswordChange(second, user.Id)
 	if _, err := Authenticate(second, secondRaw, true); err == nil {
 		t.Fatal("session survived password change")

@@ -6,7 +6,12 @@ func SaveUser(userEntity *users.EntityComplete) error {
 	if err := users.Save(userEntity); err != nil {
 		return err
 	}
-	RefreshUserCaches(userEntity)
+	current, err := users.Get(userEntity.Id)
+	if err != nil {
+		return err
+	}
+	*userEntity = current
+	RefreshUserCaches(&current)
 	return nil
 }
 

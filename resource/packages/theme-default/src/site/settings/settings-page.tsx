@@ -36,6 +36,7 @@ import { ProfileBadge } from "../users/profile-badge";
 import { ProfileIdentity } from "../users/profile-identity";
 import { SessionSettings } from "./settings-sessions";
 import { AccountSettings } from "./settings-account";
+import { MFASettings } from "./settings-mfa";
 import { ConnectionsSettings } from "./settings-connections";
 import { PrivacySettings } from "./settings-privacy";
 import { ProfileSettings } from "./settings-profile";
@@ -48,6 +49,7 @@ import { cn } from "@gooseforum/ui/lib/utils";
 const tabKeys = [
   "profile",
   "account",
+  "mfa",
   "sessions",
   "privacy",
   "binding",
@@ -417,8 +419,11 @@ export function SettingsPageView({
             <TabsContent value="account">
               <AccountSettings showError={showError} />
             </TabsContent>
+            <TabsContent value="mfa">
+              <MFASettings showError={showError} />
+            </TabsContent>
             <TabsContent value="sessions">
-              <SessionSettings showStatus={showStatus} showError={showError} />
+              <SessionSettings key={layout.viewer.id} showStatus={showStatus} showError={showError} />
             </TabsContent>
             <TabsContent value="privacy">
               <PrivacySettings settings={privacy} saving={savingPrivacy} onChange={savePrivacy} />
@@ -566,6 +571,7 @@ function tabLabel(
   fallback: string | undefined,
   t: ReturnType<typeof useTranslation>["t"],
 ) {
+  if (key === "mfa") return t("mfa.title");
   return key === "applications"
     ? t("tabs.applications")
     : t(`tabs.${key}`, { defaultValue: fallback || key });

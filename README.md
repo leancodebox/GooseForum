@@ -87,7 +87,6 @@ See [configuration documentation](docs/configuration.md) for MySQL/PostgreSQL, m
 ```bash
 ./GooseForum migrate
 ./GooseForum set-user-admin <userId>
-./GooseForum set-user-email <userId> <email>
 ./GooseForum set-user-password <userId> <password>
 ```
 

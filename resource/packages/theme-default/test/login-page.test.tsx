@@ -46,6 +46,8 @@ function createAuthApi() {
 function renderLogin(options: { locale?: Locale, page?: LoginPageProps } = {}) {
   const auth = createAuthApi()
   const user = userEvent.setup()
+  const navigate = vi.fn()
+  const queueFlash = vi.fn()
 
   function Harness({ children }: { children: ReactNode }) {
     const [locale, setLocale] = useState<Locale>(options.locale || 'zh')
@@ -55,8 +57,8 @@ function renderLogin(options: { locale?: Locale, page?: LoginPageProps } = {}) {
       isNavigating: false,
       theme: 'gf-light',
       locale,
-      navigate: vi.fn(),
-      queueFlash: vi.fn(),
+      navigate,
+      queueFlash,
       redirect: vi.fn(),
       refresh: vi.fn(),
       setLocale: (nextLocale) => {
@@ -78,7 +80,7 @@ function renderLogin(options: { locale?: Locale, page?: LoginPageProps } = {}) {
       <LoginPageView layout={layout} page={options.page || loginPage} />
     </Harness>,
   )
-  return { auth, user }
+  return { auth, user, navigate, queueFlash }
 }
 
 describe('GooseForum i18n', () => {
@@ -96,6 +98,17 @@ describe('GooseForum i18n', () => {
 })
 
 describe('LoginPageView', () => {
+  it('shows resent verification mail as a notice without completing login', async () => {
+    const { auth, user } = renderLogin({ locale: 'en' })
+    auth.loginPublicKey.mockRejectedValue(new GooseClientError('Queued', { messageCode: 'auth.activation.resendSuccess' }))
+    await user.type(screen.getByLabelText('Username or email'), 'pending-user')
+    await user.type(screen.getByLabelText('Password'), 'password123')
+    await user.type(screen.getByLabelText('Captcha'), 'valid')
+    await user.click(screen.getByRole('button', { name: 'Log in' }))
+    expect(await screen.findByText('Verification email sent again.')).toBeTruthy()
+    expect(screen.queryByLabelText('Authenticator or recovery code')).toBeNull()
+    expect(auth.login).not.toHaveBeenCalled()
+  })
   it('loads and refreshes the captcha through the runtime API', async () => {
     const { auth, user } = renderLogin()
 
@@ -153,10 +166,41 @@ describe('LoginPageView', () => {
     expect(screen.queryByText('auth.email.exists')).toBeNull()
   })
 
+  async function submitRegistration(user: ReturnType<typeof userEvent.setup>) {
+    await user.type(screen.getByLabelText('Username'), 'pending-user')
+    await user.type(screen.getByLabelText('Email'), 'pending@example.com')
+    await user.type(screen.getByLabelText('Password'), 'password123')
+    await user.type(screen.getByLabelText('Confirm password'), 'password123')
+    await user.type(screen.getByLabelText('Captcha'), 'valid')
+    await user.click(screen.getByLabelText('I have read and agree to the terms and privacy policy'))
+    await user.click(screen.getByRole('button', { name: 'Create account' }))
+  }
+
+  it('returns to the login form after registration requiring email verification', async () => {
+    const { auth, user, navigate, queueFlash } = renderLogin({ locale: 'en', page: { ...loginPage, initialMode: 'register' } })
+    auth.register.mockResolvedValueOnce({ code: 0, messageCode: 'auth.register.emailVerify', message: 'Registration message', result: null })
+    await submitRegistration(user)
+    await waitFor(() => expect(auth.register).toHaveBeenCalled())
+    expect(await screen.findByText('Registration succeeded. Please verify your email address.')).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Log in to your account' })).toBeTruthy()
+    expect(screen.getByLabelText<HTMLInputElement>('Username or email').value).toBe('pending-user')
+    expect(screen.getByLabelText<HTMLInputElement>('Password').value).toBe('')
+    expect(navigate).not.toHaveBeenCalled()
+    expect(queueFlash).not.toHaveBeenCalled()
+  })
+
+  it('navigates after registration that signs the user in', async () => {
+    const { auth, user, navigate, queueFlash } = renderLogin({ locale: 'en', page: { ...loginPage, initialMode: 'register' } })
+    auth.register.mockResolvedValueOnce({ code: 0, messageCode: 'auth.login.success', message: 'Registration message', result: null })
+    await submitRegistration(user)
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/', { replace: true }))
+    expect(queueFlash).toHaveBeenCalledWith('Registration message', 'success')
+  })
+
   it('updates translations when the host changes locale', async () => {
     const { user } = renderLogin()
 
-    await user.click(screen.getByRole('tab', { name: 'EN' }))
+    await user.click(screen.getByRole('radio', { name: 'EN' }))
 
     expect(await screen.findByRole('heading', { name: 'Log in to your account' })).toBeTruthy()
     expect(screen.getByLabelText('Username or email')).toBeTruthy()

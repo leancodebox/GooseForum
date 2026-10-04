@@ -23,6 +23,8 @@ url = "http://localhost"
 port = 5234
 accessLog = false
 gzip = true # 应用层 gzip 开关
+# Only explicit reverse-proxy IPs/CIDRs may supply forwarding headers.
+trustedProxies = []
 # HTTP 超时（秒）；0 表示不限制。上传请求需要在 readTimeoutSeconds 内读完。
 readHeaderTimeoutSeconds = 10
 readTimeoutSeconds = 60

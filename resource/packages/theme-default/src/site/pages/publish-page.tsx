@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   PublishCategoryPayload,
   PublishPageProps,
+  LayoutPayload,
 } from "@gooseforum/client";
 import { Check, Crown, ListChecks, Lock, Send, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -32,8 +33,12 @@ import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { MarkdownComposer } from "../editor/markdown-composer";
 import { PageHeader } from "../layout/page-header";
 import { SitePanel } from "../layout/site-panel";
+import { LocalDraftPanel } from "../drafts/local-draft-panel";
+import { clearAccountDrafts, draftOwner, draftFingerprint, type DraftValues, type LocalDraft } from "../drafts/local-draft-store";
+import { GooseClientError } from "@gooseforum/client";
+import { useLocalDraft } from "../drafts/use-local-draft";
 
-export function PublishPageView({ page }: { page: PublishPageProps }) {
+export function PublishPageView({ page, layout }: { page: PublishPageProps; layout?: LayoutPayload }) {
   const { t } = useTranslation("publish");
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
@@ -41,6 +46,10 @@ export function PublishPageView({ page }: { page: PublishPageProps }) {
   const [content, setContent] = useState(page.topic.content || "");
   const [categoryIds, setCategoryIds] = useState(page.topic.categoryIds || []);
   const [topicId, setTopicId] = useState(page.topicId);
+  const sourceVersion = 1 as const;
+  const [base, setBase] = useState<DraftValues>(() => ({ title: page.topic.title || "", content: page.topic.content || "", categoryIds: page.topic.categoryIds || [], replyTargetId: 0, sourceVersion: 1 }));
+  const values = useMemo(() => ({ title, content, categoryIds, replyTargetId: 0, sourceVersion }), [title, content, categoryIds, sourceVersion]);
+  const localDraft = useLocalDraft({ userId: layout?.viewer.id || 0, kind: page.isEditing ? "edit-topic" : "new-topic", objectId: page.topicId, topicId: page.topicId, base, values });
   const [submitting, setSubmitting] = useState(false);
   const [validation, setValidation] = useState(false);
   const [error, setError] = useState("");
@@ -51,11 +60,12 @@ export function PublishPageView({ page }: { page: PublishPageProps }) {
   const leaveResolver = useRef<((allow: boolean) => void) | null>(null);
   const allowNavigation = useRef(false);
   const initialMain = useRef(page.topic.categoryIds?.[0] || 0);
-  const savedSnapshot = useRef(snapshot(title, content, categoryIds));
-  const currentSnapshot = snapshot(title, content, categoryIds);
+  const savedSnapshot = useRef(snapshot(title, content, categoryIds, sourceVersion));
+  const currentSnapshot = snapshot(title, content, categoryIds, sourceVersion);
   const hasChanges = currentSnapshot !== savedSnapshot.current;
   const hasChangesRef = useRef(hasChanges);
   hasChangesRef.current = hasChanges;
+  useEffect(() => { if (hasChanges) allowNavigation.current = false; }, [currentSnapshot, hasChanges]);
   const selected = useMemo(
     () =>
       page.categories.filter((category) => categoryIds.includes(category.id)),
@@ -76,6 +86,11 @@ export function PublishPageView({ page }: { page: PublishPageProps }) {
       }
     }
     window.addEventListener("beforeunload", beforeUnload);
+    const beforeLogout = (event: Event) => {
+      if (hasChangesRef.current && !window.confirm(t("localDraft.leave"))) event.preventDefault();
+      else allowNavigation.current = true;
+    };
+    window.addEventListener("goose:before-logout", beforeLogout);
     const remove = runtime.registerNavigationBlocker?.((href) => {
       if (allowNavigation.current || !hasChangesRef.current) return true;
       setPendingHref(href);
@@ -86,10 +101,11 @@ export function PublishPageView({ page }: { page: PublishPageProps }) {
     });
     return () => {
       window.removeEventListener("beforeunload", beforeUnload);
+      window.removeEventListener("goose:before-logout", beforeLogout);
       remove?.();
       leaveResolver.current?.(true);
     };
-  }, [runtime.registerNavigationBlocker]);
+  }, [runtime.registerNavigationBlocker, t]);
 
   function chooseCategory(category: PublishCategoryPayload) {
     setValidation(false);
@@ -117,6 +133,7 @@ export function PublishPageView({ page }: { page: PublishPageProps }) {
     return valid;
   }
   async function persist(status: 0 | 1, destination: string) {
+    if (localDraft.recoveryPending) return false;
     if (submitting || !validate()) return false;
     if (status === 1 && !canPublish) {
       setError(t("noCreatePermission"));
@@ -134,6 +151,7 @@ export function PublishPageView({ page }: { page: PublishPageProps }) {
     setSubmitting(true);
     setError("");
     setMessage("");
+    const submission = localDraft.writer?.capture(values);
     try {
       const result = await runtime.api.topics.writeReviewed({
         topicId,
@@ -141,25 +159,31 @@ export function PublishPageView({ page }: { page: PublishPageProps }) {
         content: content.trim(),
         categoryId: categoryIds,
         topicStatus: status,
+        sourceVersion,
       });
       setTopicId(result.id);
-      savedSnapshot.current = snapshot(title, content, categoryIds);
-      allowNavigation.current = true;
       if (status === 1 && result.moderationStatus === "rejected") {
         setError(t("moderationRejected"));
         allowNavigation.current = false;
         return false;
       }
+      const canonical = { ...values, content: result.content ?? content, sourceVersion: result.sourceVersion ?? sourceVersion };
+      const unchanged = !submission || await localDraft.writer!.submitted(submission, canonical);
+      setBase(canonical);
+      savedSnapshot.current = snapshot(canonical.title, canonical.content, canonical.categoryIds, canonical.sourceVersion);
+      allowNavigation.current = unchanged;
+      if (unchanged) setContent(canonical.content);
       setMessage(
         status === 0
           ? t("saveDraft")
           : t(page.isEditing ? "topicUpdated" : "topicPublished"),
       );
-      if (destination) {
+      if (destination && unchanged) {
         await runtime.navigate(destination.replace(":id", String(result.id)));
       }
-      return true;
+      return unchanged;
     } catch (reason) {
+      if (layout?.viewer.id && reason instanceof GooseClientError && (reason.status === 401 || reason.messageCode === "auth.required")) await clearAccountDrafts(draftOwner(layout.viewer.id));
       setError(
         serverError(
           reason,
@@ -170,6 +194,16 @@ export function PublishPageView({ page }: { page: PublishPageProps }) {
     } finally {
       setSubmitting(false);
     }
+  }
+  function availableDraft(draft: LocalDraft) {
+    return draft.categoryIds.every((id) => page.categories.some((category) => category.id === id && (category.canCreate || (page.isEditing && base.categoryIds.includes(id)))));
+  }
+  function restoreDraft(draft: LocalDraft) {
+    if (!availableDraft(draft)) return false;
+    if (hasChanges && !window.confirm(t("localDraft.confirmRestore"))) return false;
+    localDraft.restore(draft);
+    setTitle(draft.title); setContent(draft.content); setCategoryIds(draft.categoryIds);
+    return true;
   }
   function resolveLeave(allow: boolean) {
     leaveResolver.current?.(allow);
@@ -187,6 +221,7 @@ export function PublishPageView({ page }: { page: PublishPageProps }) {
       <PageHeader
         title={t(page.isEditing ? "editTitle" : "createTitle")}
         description={t("subtitle")}
+        divided={false}
       />
       <div className="grid gap-0 lg:gap-3 xl:grid-cols-[minmax(0,1fr)_280px]">
         <SitePanel className="p-4 lg:p-5">
@@ -284,6 +319,7 @@ export function PublishPageView({ page }: { page: PublishPageProps }) {
               <FieldLabel>{t("fields.body")}</FieldLabel>
               <MarkdownComposer
                 value={content}
+                sourceVersion={sourceVersion}
                 onChange={(value) => {
                   setContent(value);
                   setValidation(false);
@@ -313,7 +349,7 @@ export function PublishPageView({ page }: { page: PublishPageProps }) {
               <Button
                 type="button"
                 variant="outline"
-                disabled={submitting}
+                disabled={submitting || localDraft.recoveryPending}
                 onClick={() => void persist(0, "/drafts")}
               >
                 {submitting ? <Spinner data-icon="inline-start" /> : null}
@@ -321,7 +357,7 @@ export function PublishPageView({ page }: { page: PublishPageProps }) {
               </Button>
               <Button
                 type="button"
-                disabled={submitting || !canPublish}
+                disabled={submitting || localDraft.recoveryPending || !canPublish}
                 onClick={() => void persist(1, "/p/post/:id")}
               >
                 <Send data-icon="inline-start" />
@@ -360,6 +396,7 @@ export function PublishPageView({ page }: { page: PublishPageProps }) {
               />
             </ul>
           </SitePanel>
+          <LocalDraftPanel status={localDraft.status} candidates={localDraft.candidates} onRestore={restoreDraft} onDiscard={localDraft.discard} onRetry={localDraft.retry} available={availableDraft} conflicts={(draft) => draft.sourceFingerprint !== draftFingerprint(base)} />
           {selected.length ? (
             <SitePanel className="p-4">
               <h2 className="text-sm font-semibold">
@@ -475,10 +512,11 @@ function CheckItem({
     </li>
   );
 }
-function snapshot(title: string, content: string, categories: number[]) {
+function snapshot(title: string, content: string, categories: number[], sourceVersion: 0 | 1) {
   return JSON.stringify({
     title: title.trim(),
     content: content.trim(),
     categories,
+    sourceVersion,
   });
 }

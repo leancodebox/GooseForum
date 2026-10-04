@@ -12,6 +12,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/themeservice"
@@ -20,17 +21,32 @@ import (
 
 func TestRoleSaveRevokesWarmPermissionCache(t *testing.T) {
 	db := dbconnect.Connect()
-	if err := db.AutoMigrate(&role.Entity{}, &rolePermissionRs.Entity{}); err != nil {
+	if err := db.AutoMigrate(&users.EntityComplete{}, &role.Entity{}, &rolePermissionRs.Entity{}, &pageConfig.Entity{}); err != nil {
 		t.Fatal(err)
 	}
 	const roleID uint64 = 980901
+	const actorRoleID uint64 = 980902
+	const actorID uint64 = 980903
 	cleanup := func() {
 		db.Unscoped().Where("role_id = ?", roleID).Delete(&rolePermissionRs.Entity{})
 		db.Unscoped().Delete(&role.Entity{}, roleID)
 		permission.InvalidateRole(roleID)
+		db.Unscoped().Where("role_id = ?", actorRoleID).Delete(&rolePermissionRs.Entity{})
+		db.Unscoped().Delete(&role.Entity{}, actorRoleID)
+		db.Unscoped().Delete(&users.EntityComplete{}, actorID)
+		permission.InvalidateRole(actorRoleID)
 	}
 	cleanup()
 	t.Cleanup(cleanup)
+	if err := db.Create(&role.Entity{Id: actorRoleID, RoleName: "cache-actor", Effective: 1}).Error; err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Create(&rolePermissionRs.Entity{RoleId: actorRoleID, PermissionId: permission.Admin.Id(), Effective: 1}).Error; err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Create(&users.EntityComplete{Id: actorID, Username: "cache-actor", Email: "cache-actor@example.test", RoleId: actorRoleID}).Error; err != nil {
+		t.Fatal(err)
+	}
 	if err := db.Create(&role.Entity{Id: roleID, RoleName: "cache-revocation", Effective: 1}).Error; err != nil {
 		t.Fatal(err)
 	}
@@ -40,7 +56,7 @@ func TestRoleSaveRevokesWarmPermissionCache(t *testing.T) {
 	if !permission.CheckRole(roleID, permission.Admin) {
 		t.Fatal("administrator permission was not cached")
 	}
-	response := RoleSave(component.BetterRequest[RoleSaveReq]{Params: RoleSaveReq{
+	response := RoleSave(component.BetterRequest[RoleSaveReq]{UserId: actorID, Params: RoleSaveReq{
 		Id: uint(roleID), RoleName: "cache-revocation", Permissions: []uint64{permission.SiteManager.Id()},
 	}})
 	if response.Data.Code != component.SUCCESS {
@@ -55,7 +71,7 @@ func TestRoleSaveRevokesWarmPermissionCache(t *testing.T) {
 	if ids := rolePermissionRs.GetRsGroupByRoleIds([]uint64{roleID})[roleID]; slices.Contains(ids, permission.Admin.Id()) || !slices.Contains(ids, permission.SiteManager.Id()) {
 		t.Fatalf("batch permission query retained revoked grant: %v", ids)
 	}
-	response = RoleDel(component.BetterRequest[RoleSaveDel]{Params: RoleSaveDel{Id: uint(roleID)}})
+	response = RoleDel(component.BetterRequest[RoleSaveDel]{UserId: actorID, Params: RoleSaveDel{Id: uint(roleID)}})
 	if response.Data.Code != component.SUCCESS || permission.CheckAnyRole(roleID) {
 		t.Fatalf("deleted role retained permissions: %+v", response)
 	}

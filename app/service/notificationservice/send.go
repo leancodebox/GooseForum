@@ -1,6 +1,7 @@
 package notificationservice
 
 import (
+	"fmt"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/service/unreadservice"
 	"github.com/spf13/cast"
@@ -26,6 +27,8 @@ func SendCommentNotification(userId uint64, topicId uint64, commentContent strin
 		EventType: eventNotification.EventTypeComment,
 		Payload:   payload,
 	}
+	key := fmt.Sprintf("post:%d:user:%d", postId, userId)
+	notification.DedupeKey = &key
 
 	err := eventNotification.Create(notification)
 	if err == nil {
@@ -54,6 +57,8 @@ func SendPostReplyNotification(userId uint64, postId uint64, postNo uint64, topi
 		EventType: eventNotification.EventTypePostReply,
 		Payload:   payload,
 	}
+	key := fmt.Sprintf("post:%d:user:%d", postId, userId)
+	notification.DedupeKey = &key
 
 	err := eventNotification.Create(notification)
 	if err == nil {

@@ -9,7 +9,7 @@ const layers = {
   client: [],
   markdown: [],
   runtime: ['client'],
-  ui: [],
+  ui: ['markdown'],
   'theme-default': ['client', 'markdown', 'runtime', 'ui'],
 }
 

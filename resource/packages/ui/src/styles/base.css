@@ -131,6 +131,8 @@
 }
 
 .visual-markdown-editor .ProseMirror { position: relative; white-space: pre-wrap; overflow-wrap: break-word; }
+/* ProseMirror's caret spacer must not inherit content image layout. */
+.visual-markdown-editor img.ProseMirror-separator { display: inline !important; border: none !important; margin: 0 !important; }
 .visual-markdown-editor .ProseMirror:has(> p:only-child > br.ProseMirror-trailingBreak:only-child)::before { position: absolute; color: var(--muted-foreground); content: attr(data-placeholder); pointer-events: none; }
 .visual-markdown-editor .ProseMirror-selectednode { outline: 2px solid var(--primary); outline-offset: 2px; }
 .visual-markdown-editor :where(th, td) { position: relative; }

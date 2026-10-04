@@ -8,6 +8,15 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 )
 
+// SendActivationEmailNow confirms SMTP acceptance before a security-sensitive change.
+func SendActivationEmailNow(userEntity *users.EntityComplete) error {
+	token, err := tokenservice.GenerateActivationTokenByUser(*userEntity)
+	if err != nil {
+		return err
+	}
+	return mailservice.SendActivationEmail(userEntity.Email, userEntity.Username, token, userEntity.Locale)
+}
+
 func SendActivationEmail(userEntity *users.EntityComplete) error {
 	token, err := tokenservice.GenerateActivationTokenByUser(*userEntity)
 	if err != nil {

@@ -71,8 +71,10 @@
             letter-spacing: -0.04em;
         }
 
-        .brand span {
-            color: var(--text);
+        .brand img {
+            width: 134px;
+            height: 44px;
+            object-fit: contain;
         }
 
         .status {
@@ -204,7 +206,7 @@
     <section class="card" aria-labelledby="activation-title">
         <div class="content">
             <div class="topline">
-                <a class="brand" href="/" aria-label="GooseForum">Goose<span>Forum</span></a>
+                <a class="brand" href="/" aria-label="GooseForum"><img src="/static/brand/gooseforum-light.svg" alt="GooseForum" width="1898" height="625"></a>
 
                 <div class="status {{if .Data.Success}}success{{else}}fail{{end}}" aria-hidden="true">
                     {{if .Data.Success}}

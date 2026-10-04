@@ -1,5 +1,9 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  accountSuspended: "Account sospeso. Puoi leggere e gestire la sicurezza dell'account.",
+  restrictionUntil: "Fino al {date}",
+  restrictionPermanent: "Senza scadenza",
+  accountSecurity: "Sicurezza dell'account",
   collapseSidebar: "Comprimi barra laterale",
   expandSidebar: "Espandi barra laterale",
   chooseTheme: "Scegli tema",

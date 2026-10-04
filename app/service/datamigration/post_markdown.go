@@ -27,14 +27,7 @@ func RebuildPostMarkdownWithDB(conn *gorm.DB) PostMarkdownResult {
 
 	var cursor uint64
 	for {
-		var batch []posts.Entity
-		err := conn.Model(&posts.Entity{}).
-			Select("id", "content").
-			Where("id > ?", cursor).
-			Where("rendered_html = ? OR rendered_version < ?", "", version).
-			Order("id ASC").
-			Limit(batchSize).
-			Find(&batch).Error
+		batch, err := posts.PendingMarkdownBatchWithDB(conn, cursor, version, batchSize)
 		if err != nil {
 			result.Failed++
 			result.LastFailed = err.Error()
@@ -43,13 +36,8 @@ func RebuildPostMarkdownWithDB(conn *gorm.DB) PostMarkdownResult {
 		for i := range batch {
 			item := &batch[i]
 			cursor = item.Id
-			renderedHTML := markdown2html.PostMarkdownToHTML(item.Content)
-			if err := conn.Model(&posts.Entity{}).
-				Where("id = ?", item.Id).
-				UpdateColumns(map[string]any{
-					"rendered_html":    renderedHTML,
-					"rendered_version": version,
-				}).Error; err != nil {
+			renderedHTML := markdown2html.PostMarkdownToHTMLVersion(item.Content, item.SourceVersion)
+			if err := posts.UpdateRenderedMarkdownWithDB(conn, item.Id, renderedHTML, version); err != nil {
 				result.Failed++
 				result.LastFailed = err.Error()
 				continue

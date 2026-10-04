@@ -4,9 +4,11 @@ import (
 	"context"
 
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
+	"github.com/leancodebox/GooseForum/app/service/mentionservice"
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 )
 
@@ -31,7 +33,8 @@ type CommentCreatedEvent struct {
 
 // handleCommentCreated 发送评论/回复通知
 func handleCommentCreated(ctx context.Context, event *CommentCreatedEvent) error {
-	contentPreview := TakeUpTo64Chars(event.Content)
+	post := posts.Get(event.PostId)
+	contentPreview := markdown2html.ExtractPreviewVersion(event.Content, 64, post.SourceVersion)
 	topic := topics.GetSimple(event.TopicId)
 	plan := buildCommentNotificationPlan(event)
 	// 如果不是主题作者自己发表评论，通知主题作者
@@ -42,7 +45,8 @@ func handleCommentCreated(ctx context.Context, event *CommentCreatedEvent) error
 	if plan.notifyParentReplyAuthor && canReceiveTopicNotification(event.ReplyToPostAuthorId, topic) {
 		_ = notificationservice.SendPostReplyNotification(event.ReplyToPostAuthorId, event.PostId, event.PostNo, event.TopicId, contentPreview, event.UserId)
 	}
-	notifyTopicWatchers(event, topic, contentPreview, plan.watcherExcludeUserIDs)
+	mentionservice.Notify(topic, post)
+	notifyTopicWatchers(event, topic, contentPreview, append(plan.watcherExcludeUserIDs, mentionservice.Recipients(post)...))
 	return nil
 }
 

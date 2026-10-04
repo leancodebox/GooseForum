@@ -14,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
+	"github.com/leancodebox/GooseForum/app/service/mentionservice"
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/sensitivewordservice"
@@ -71,7 +72,7 @@ func ReviewAdminTopic(req component.BetterRequest[ReviewContentReq]) component.R
 		return component.FailResponseError(err)
 	}
 	hotdataserve.ClearTopicWriteCaches(wasCounted != (topic.Status == 1 && topic.ProcessStatus == 0))
-	fileusageservice.ReplaceTopic(topic.Id, topic.UserId, post.Content)
+	fileusageservice.ReplaceTopic(topic.Id, topic.UserId, post.Content, post.SourceVersion)
 	eventhandlers.PublishTopicReviewResult(&topic, &post, firstPublication)
 	logContentReview(req, "topic", topic.Id)
 	enqueueContentReview(true, topic.Id, topic.ModerationVersion, topic.ModerationStatus)
@@ -162,9 +163,11 @@ func ReviewAdminPost(req component.BetterRequest[ReviewContentReq]) component.Re
 		postservice.SyncTopicPostStats(topic, post, post.ProcessStatus != 0)
 	}
 	hotdataserve.ClearTopicListCache()
-	fileusageservice.ReplacePost(post.Id, post.UserId, post.Content)
+	fileusageservice.ReplacePost(post.Id, post.UserId, post.Content, post.SourceVersion)
 	if !wasPublished && post.ProcessStatus == 0 {
 		eventhandlers.PublishVisiblePost(topic, post)
+	} else {
+		mentionservice.Notify(topic, post)
 	}
 	logContentReview(req, "post", topic.Id)
 	enqueueContentReview(false, post.Id, post.ModerationVersion, post.ModerationStatus)

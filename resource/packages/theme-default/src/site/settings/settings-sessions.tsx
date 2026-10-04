@@ -6,6 +6,7 @@ import { Button } from "@gooseforum/ui/components/button";
 import { useGooseRuntime } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { SettingsSectionHeader } from "./settings-section-header";
+import { AuthLogSettings } from "./settings-auth-logs";
 
 export function SessionSettings({
   showStatus,
@@ -44,7 +45,7 @@ export function SessionSettings({
   }
 
   return (
-    <section>
+    <><section>
       <SettingsSectionHeader
         icon={Monitor}
         title={t("account.sessionsTitle")}
@@ -74,6 +75,6 @@ export function SessionSettings({
           </div>
         )}
       </div>
-    </section>
+    </section><AuthLogSettings /></>
   );
 }

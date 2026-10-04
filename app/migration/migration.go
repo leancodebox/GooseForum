@@ -14,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroupMembers"
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
+	"github.com/leancodebox/GooseForum/app/models/forum/accountrestrictions"
 	"github.com/leancodebox/GooseForum/app/models/forum/authsessions"
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
@@ -45,6 +46,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userOAuth"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
+	"github.com/leancodebox/GooseForum/app/models/forum/usermfa"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
@@ -67,6 +69,9 @@ func migrateSchema() error {
 		return fmt.Errorf("migrate default database schema: %w", err)
 	} else {
 		slog.Info("dbconnect migration end")
+	}
+	if err := users.BackfillIdentityKeys(db); err != nil {
+		return fmt.Errorf("backfill user identity lookup keys: %w", err)
 	}
 
 	db4file := db4fileconnect.Connect()
@@ -115,6 +120,9 @@ func defaultSchemaModels() []any {
 		&users.EntityComplete{},
 		&authsessions.Token{},
 		&authsessions.Log{},
+		&accountrestrictions.History{},
+		&usermfa.Factor{},
+		&usermfa.RecoveryCode{},
 		&userStatistics.Entity{},
 		&imConversations.Entity{},
 		&imUserChatConfigs.Entity{},

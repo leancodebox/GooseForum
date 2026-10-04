@@ -1,4 +1,5 @@
 "use client";
+import { DefaultBrand } from "./default-brand";
 
 import {
   useEffect,
@@ -35,6 +36,7 @@ import {
 } from "lucide-react";
 import type { LayoutPayload, NavItemPayload } from "@gooseforum/client";
 import { useTranslation } from "react-i18next";
+import { activateDraftAccount, clearAccountDrafts, draftOwner } from "../drafts/local-draft-store";
 import {
   Avatar,
   AvatarFallback,
@@ -95,6 +97,7 @@ export function AppShell({
 }) {
   const { t, i18n } = useTranslation("shell");
   const runtime = useGooseRuntime();
+  useEffect(() => { void activateDraftAccount(layout.viewer.isAuthenticated ? layout.viewer.id : 0); }, [layout.viewer.id, layout.viewer.isAuthenticated]);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem("goose:shell-sidebar-collapsed") === "true"; }
@@ -209,7 +212,9 @@ export function AppShell({
   }
 
   async function logout() {
+    if (!window.dispatchEvent(new Event("goose:before-logout", { cancelable: true }))) return;
     await runtime.api.auth.logout();
+    await clearAccountDrafts(draftOwner(layout.viewer.id));
     runtime.redirect(runtime.currentUrl);
   }
 
@@ -632,6 +637,15 @@ export function AppShell({
           <div className="w-[194px] xl:w-[208px]">{renderNavigation()}</div>
         </aside>
         <section data-slot="goose-page-content" className="min-w-0">
+          {layout.viewer.isAuthenticated && layout.viewer.restrictionStatus === "suspended" ? <div role="status" className="flex flex-wrap items-start gap-2 border-b px-4 py-3 text-sm">
+            <ShieldIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            <div className="min-w-0 flex-1 break-words">
+              <p className="font-medium">{t("accountSuspended")}</p>
+              {layout.viewer.restrictionUntil ? <p className="text-muted-foreground">{t("restrictionUntil", { date: new Date(layout.viewer.restrictionUntil).toLocaleString(i18n.language) })}</p> : <p className="text-muted-foreground">{t("restrictionPermanent")}</p>}
+              {layout.viewer.restrictionReason ? <p className="mt-1">{layout.viewer.restrictionReason}</p> : null}
+            </div>
+            <GooseLink href="/settings?tab=account" className="underline underline-offset-4">{t("accountSecurity")}</GooseLink>
+          </div> : null}
           {children}
         </section>
       </main>
@@ -652,9 +666,7 @@ function SiteBrand({ layout }: { layout: LayoutPayload }) {
     ) : site.brandType === "text" ? (
       site.brandText || site.name
     ) : (
-      <>
-        Goose<span className="text-foreground">Forum</span>
-      </>
+      <DefaultBrand />
     );
   return (
     <GooseLink
@@ -792,7 +804,7 @@ function NavList({
                 compact ? "h-7" : "h-8",
                 "focus-visible:ring-2",
                 item.active
-                  ? "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
+                  ? "bg-primary/10 text-foreground hover:bg-primary/15 hover:text-foreground [&>svg]:text-primary"
                   : "text-foreground/75 hover:bg-accent hover:text-foreground",
               )}
             >

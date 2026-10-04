@@ -5,6 +5,7 @@ export default {
   console: "Console amministrativa",
   dashboard: "Dashboard",
   users: "Utenti",
+  authLogs: "Log di accesso",
   roles: "Ruoli",
   accessGroups: "Gruppi di accesso",
   categories: "Categorie",

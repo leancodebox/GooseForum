@@ -28,6 +28,7 @@ export default {
   templates: {
     comment: "评论了你的主题",
     postReply: "回复了你",
+    mention: "提及了你",
     topicPost: "在你关注的主题下发表了新内容",
     follow: "关注了你",
     badge: "获得了「{badge}」徽章",

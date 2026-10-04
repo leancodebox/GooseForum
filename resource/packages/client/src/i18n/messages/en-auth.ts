@@ -1,6 +1,8 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 import { localeLabels } from '../locale.js';
+import mfa from './en-mfa.js';
 export default {
+  mfa,
   locale: localeLabels.en,
   login: "Log in",
   register: "Sign up",

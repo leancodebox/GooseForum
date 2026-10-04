@@ -101,6 +101,7 @@ func apiRoute(ginApp *gin.Engine) {
 	baseApi := ginApp.Group("api")
 
 	baseApi.POST("login", api.Login)
+	baseApi.POST("mfa/login", api.MFALogin)
 	baseApi.GET("login-public-key", api.LoginPublicKey)
 	baseApi.POST("register", api.Register)
 	baseApi.POST("logout", api.Logout)
@@ -110,26 +111,32 @@ func apiRoute(ginApp *gin.Engine) {
 	baseApi.POST("forgot-password", UpButterReq(api.ForgotPassword))
 	baseApi.POST("reset-password", UpButterReq(api.ResetPassword))
 	baseApi.GET("auth/:provider", middleware.SessionAuth, api.ProviderLogin)
+	baseApi.POST("auth/:provider", middleware.SessionAuth, api.ProviderLogin)
 	baseApi.GET("auth/:provider/callback", middleware.SessionAuth, api.ProviderCallback)
 
 	loginApi := ginApp.Group("api").Use(middleware.SessionAuthCheck)
+	loginApi.GET("mention-users", middleware.NoUpdateUserActivity, UpQueryReq(api.MentionUsers))
 	loginApi.POST("set-user-privacy", middleware.CheckWritableAccount, UpButterReq(api.EditUserPrivacy))
 	loginApi.POST("set-user-info", middleware.CheckWritableAccount, UpButterReq(api.EditUserInfo))
 	loginApi.POST("set-user-profile-cover", middleware.CheckWritableAccount, UpButterReq(api.EditUserProfileCover))
-	loginApi.POST("set-user-email", middleware.CheckWritableAccount, UpButterReq(api.EditUserEmail))
-	loginApi.POST("resend-activation-email", middleware.CheckWritableAccount, UpButterReq(api.ResendActivationEmail))
+	loginApi.POST("set-user-email", UpButterReq(api.EditUserEmail))
+	loginApi.POST("resend-activation-email", UpButterReq(api.ResendActivationEmail))
 	loginApi.POST("set-user-name", middleware.CheckWritableAccount, UpButterReq(api.EditUsername))
 	loginApi.POST("set-preset-avatar", middleware.CheckWritableAccount, UpButterReq(api.SetPresetAvatar))
 	loginApi.POST("wear-badge", middleware.CheckWritableAccount, UpButterReq(api.WearBadge))
 	loginApi.POST("upload-avatar", middleware.CheckWritableAccount, api.UploadAvatar)
-	loginApi.POST("change-password", middleware.CheckWritableAccount, UpButterReq(api.ChangePassword))
+	loginApi.POST("change-password", UpButterReq(api.ChangePassword))
 	loginApi.GET("auth-sessions", UpButterReq(api.ListAuthSessions))
+	loginApi.GET("mfa", UpButterReq(api.MFAStatus))
+	loginApi.GET("auth-logs", middleware.NoUpdateUserActivity, UpQueryReq(api.ListAuthLogs))
+	loginApi.POST("mfa/begin", UpJsonReq(api.MFABegin))
+	loginApi.POST("mfa/change", UpJsonReq(api.MFAChange))
 	loginApi.POST("auth-sessions/revoke", UpJsonReq(api.RevokeAuthSession))
 	loginApi.POST("auth-sessions/revoke-others", UpButterReq(api.RevokeOtherAuthSessions))
-	loginApi.POST("auth/:provider/unbind", middleware.CheckWritableAccount, UpButterReq(api.UnbindOAuth))
+	loginApi.POST("auth/:provider/unbind", UpJsonReq(api.UnbindOAuth))
 	loginApi.GET("oauth/bindings", UpButterReq(api.GetOAuthBindings))
 	loginApi.GET("oidc/grants", UpButterReq(api.ListMyOIDCGrants))
-	loginApi.POST("oidc/grants/revoke", middleware.CheckWritableAccount, UpJsonReq(api.RevokeMyOIDCGrant))
+	loginApi.POST("oidc/grants/revoke", UpJsonReq(api.RevokeMyOIDCGrant))
 
 	forumApi := baseApi.Group("forum")
 	forumApi.GET("get-site-statistics", middleware.SessionAuthCheck, middleware.CheckPermission(permission.Admin), ginUpNP(api.GetSiteStatistics))
@@ -168,9 +175,13 @@ func apiRoute(ginApp *gin.Engine) {
 	adminApi := baseApi.Group("admin", middleware.SessionAuthCheck, middleware.CheckWritableAccount)
 
 	adminApi.POST("traffic-overview", middleware.CheckPermission(permission.Admin), UpButterReq(api.GetTrafficOverview))
+	adminApi.POST("user-mfa-status", middleware.CheckPermission(permission.Admin), UpButterReq(api.AdminMFAStatus))
+	adminApi.POST("user-mfa-reset", middleware.CheckPermission(permission.Admin), UpButterReq(api.AdminMFAReset))
 
 	adminApi.
 		Group("", middleware.CheckPermission(permission.UserManager)).
+		GET("user-restriction-history", UpQueryReq(api.UserRestrictionHistory)).
+		GET("auth-logs", UpQueryReq(api.AdminAuthLogs)).
 		POST("user-list", UpButterReq(api.UserList)).
 		POST("user-edit", UpButterReq(api.EditUser)).
 		POST("user-badge-options", UpButterReq(api.UserBadgeOptions)).

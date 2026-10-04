@@ -706,6 +706,7 @@ test('loads, responds to a primary control, and meets automated WCAG checks', as
   await page.getByRole('menuitemradio', { name: 'Dark', exact: true }).click()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-dark')
   await expect(page.getByRole('button', { name: 'Choose theme' })).toBeVisible()
+  await expect(page.getByRole('menu')).toHaveCount(0)
 
   const accessibility = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
@@ -1025,6 +1026,19 @@ test('announcement folding keeps read status independent and loads no data', asy
 })
 
 test('reply transitions preserve the minimized draft and existing fresh-reply behavior', async ({ page }) => {
+  page.on('dialog', dialog => dialog.accept())
+  await page.addInitScript(() => {
+    const animate = Element.prototype.animate
+    let paused = false
+    Element.prototype.animate = function (...args) {
+      const animation = animate.apply(this, args)
+      if (!paused && this instanceof HTMLElement && this.classList.contains('goose-composer-surface') && this.dataset.state === 'closed') {
+        paused = true
+        animation.pause()
+      }
+      return animation
+    }
+  })
   await page.goto('/p/test/60?lang=en')
   const reply = page.locator('[data-slot="topic-reply-float-boundary"]').getByRole('button', { name: 'Join the discussion' })
   await reply.click()
@@ -1037,7 +1051,9 @@ test('reply transitions preserve the minimized draft and existing fresh-reply be
   await expect(closed).toHaveAttribute('inert', '')
   const bubble = page.locator('.goose-composer-surface[data-state="open"]')
   await bubble.getByRole('button', { name: 'Join the discussion', exact: true }).click()
+  await panel.getByRole('radio', { name: 'Editor', exact: true }).click()
   await expect(panel.locator('[contenteditable="true"]')).toHaveText('A draft that must survive transitions')
+  await page.evaluate(() => document.getAnimations().forEach(animation => animation.play()))
   await panel.locator('header').getByRole('button', { name: 'Close', exact: true }).click()
   await expect(page.locator('.goose-composer-surface')).toHaveCount(0)
   await reply.click()
@@ -1086,6 +1102,389 @@ test('settings underline follows variable-width tabs, keyboard selection and res
   await expect.poll(aligned).toBe(true)
   await page.setViewportSize({ width: 600, height: 900 })
   await expect.poll(aligned).toBe(true)
+})
+
+test('keeps the active reply branch while its submission is pending', async ({ page }) => {
+  let complete!: () => void
+  const created = { ...topicPage.props.postStream.posts[0], id: 62, postNo: 2, content: 'Submitted reply', renderedContent: '<p>Submitted reply</p>', sourceVersion: 1 }
+  await page.route('**/api/forum/posts/create', async route => {
+    await new Promise<void>(resolve => { complete = resolve })
+    await route.fulfill({ json: { code: 0, result: created } })
+  })
+  await page.route('**/api/forum/posts/window**', route => route.fulfill({ json: { code: 0, result: {
+    ...topicPage.props.postStream, posts: [...topicPage.props.postStream.posts, created], afterPostNo: 2, maxPostNo: 2, total: 2,
+  } } }))
+  await page.goto('/p/test/60?lang=en')
+  const reply = page.getByRole('button', { name: 'Reply', exact: true }).first()
+  await reply.click()
+  const panel = page.locator('.goose-composer-surface section')
+  await panel.getByRole('radio', { name: 'Markdown', exact: true }).click()
+  await panel.locator('textarea').fill('Submitted reply')
+  await panel.getByRole('button', { name: 'Post reply', exact: true }).click()
+  await expect(reply).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Edit', exact: true }).first()).toBeDisabled()
+  await panel.locator('textarea').fill('Unsubmitted next reply')
+  complete()
+  await expect(panel.getByRole('button', { name: 'Post reply', exact: true })).toBeEnabled()
+  await expect(panel.locator('textarea')).toHaveValue('Unsubmitted next reply')
+  await expect(panel).toBeVisible()
+})
+
+test('shows a flat suspension notice with the account security entry', async ({ page }, testInfo) => {
+  await page.route('**/__goose_page/**', route => route.fulfill({ json: {
+    ...homePage, layout: { ...homePage.layout, viewer: { ...publishPage.layout.viewer, restrictionStatus: 'suspended', restrictionUntil: '2099-01-01T00:00:00Z', restrictionReason: 'Community moderation decision' } },
+  } }))
+  await page.goto('/?lang=en')
+  await expect(page.getByText('Your account is suspended. You can read and manage account security.')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Account security', exact: true })).toHaveAttribute('href', '/settings?tab=account')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await page.screenshot({ path: testInfo.outputPath('account-suspended.png'), fullPage: true })
+})
+
+test('filters personal login history with controls that fit the settings panel', async ({ page }, testInfo) => {
+  await page.clock.setFixedTime(new Date('2026-10-04T12:00:00Z'))
+  await page.route('**/__goose_page/settings**', route => route.fulfill({ json: {
+    ...homePage, component: 'settings.index', url: '/settings?tab=sessions&lang=en',
+    props: {
+      user: {
+        id: 7, username: 'alice', nickname: 'Alice', email: 'alice@example.test',
+        locale: 'en', avatarUrl: '', profileCoverUrl: '', bio: '', signature: '',
+        websiteName: '', website: '', prestige: 0, createdAt: '2026-01-01T00:00:00Z',
+        externalInformation: {}, wornBadgeCode: '', badges: [], wearableBadges: [],
+      },
+      stats: { topicCount: 0, replyCount: 0, followerCount: 0, followingCount: 0, likeReceivedCount: 0, likeGivenCount: 0, collectionCount: 0, createdAt: '2026-01-01T00:00:00Z' },
+      privacy: { showTopics: true, showActivity: true, showFollowing: true },
+      tabs: [{ key: 'profile', label: 'Profile' }, { key: 'sessions', label: 'Login devices' }],
+    },
+    layout: { ...homePage.layout, viewer: { ...homePage.layout.viewer, id: 7, username: 'alice', isAuthenticated: true } },
+  } }))
+  await page.route('**/api/auth-sessions', route => route.fulfill({ json: { code: 0, result: [] } }))
+  let method = ''
+  let cursor = 0
+  let since = ''
+  let until = ''
+  await page.route('**/api/auth-logs**', route => {
+    const query = new URL(route.request().url()).searchParams
+    method = query.get('method') || ''
+    cursor = Number(query.get('cursor') || 0)
+    since = query.get('since') || ''
+    until = query.get('until') || ''
+    expect(query.has('page')).toBe(false)
+    return route.fulfill({ json: { code: 0, result: {
+      list: [{id:cursor ? 5 : 45,userId:7,action:'login_success',authMethod:method || 'password',result:'success',oauthProvider:'',clientIp:'127.0.0.1',userAgent:cursor ? 'Older security browser' : 'Recent security browser',createdAt:'2026-10-03T09:00:00Z'}],
+      nextCursor:cursor ? 0 : 45,hasMore:cursor === 0,pageSize:20,
+    } } })
+  })
+  await page.goto('/settings?tab=sessions&lang=en')
+  await expect(page.getByRole('heading', { name: 'Login and security history' })).toBeVisible()
+  const select = page.getByLabel('Method', { exact: true })
+  await expect(select).toHaveAttribute('data-slot', 'select-trigger')
+  await page.getByRole('button', {name:'Next', exact:true}).click()
+  await expect.poll(() => cursor).toBe(45)
+  await expect(page.getByText('Older security browser', {exact:true})).toBeVisible()
+  await expect(page.getByRole('button', {name:'Next', exact:true})).toBeDisabled()
+  await page.getByRole('button', {name:'Previous', exact:true}).click()
+  await expect.poll(() => cursor).toBe(0)
+  await page.getByRole('button', {name:'Next', exact:true}).click()
+  await expect.poll(() => cursor).toBe(45)
+  await select.click()
+  const menu = page.getByRole('listbox')
+  const triggerBounds = await select.boundingBox()
+  await expect.poll(async () => Math.abs((await menu.boundingBox())!.width - triggerBounds!.width)).toBeLessThanOrEqual(1)
+  await expect.poll(async () => Math.abs((await menu.boundingBox())!.x - triggerBounds!.x)).toBeLessThanOrEqual(1)
+  await page.screenshot({path: testInfo.outputPath('personal-log-select.png')})
+  await page.getByRole('option', { name: 'Two-factor authentication', exact: true }).click()
+  await expect.poll(() => method).toBe('mfa')
+  await expect.poll(() => cursor).toBe(0)
+  const range = page.getByLabel('Date range', {exact:true})
+  await range.click()
+  const calendar = page.locator('[data-slot="date-range-picker-content"][data-state="open"]')
+  await expect(calendar).toHaveCSS('opacity', '1')
+  expect(await calendar.evaluate(element => element.getBoundingClientRect().right <= innerWidth + 1 && element.getBoundingClientRect().left >= 0)).toBe(true)
+  await page.screenshot({path:testInfo.outputPath('personal-log-date-range.png')})
+  await calendar.locator('[data-day="10/1/2026"]').first().click()
+  expect(since).toBe('')
+  await calendar.locator('[data-day="10/4/2026"]').first().click()
+  await expect.poll(() => since).not.toBe('')
+  expect(new Date(since).getDate()).toBe(1)
+  expect(new Date(until).getDate()).toBe(4)
+  await range.click()
+  await page.getByRole('button', {name:'Clear date range',exact:true}).click()
+  await expect.poll(() => since).toBe('')
+  expect(until).toBe('')
+  await expect(select.locator('[data-slot="select-value"]')).toHaveText('Two-factor authentication')
+  expect(await select.locator('[data-slot="select-value"]').evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true)
+  await page.getByRole('heading', { name: 'Login and security history' }).scrollIntoViewIfNeeded()
+  await page.screenshot({ path: testInfo.outputPath('personal-login-logs.png'), fullPage: true })
+  await select.click()
+  await page.getByRole('option', { name: 'All', exact: true }).click()
+  await expect.poll(() => method).toBe('')
+})
+
+test('filters the new administrator login history in the existing flat layout', async ({ page }, testInfo) => {
+  await page.clock.setFixedTime(new Date('2026-10-04T12:00:00Z'))
+  await page.route('**/__goose_page/admin/auth-logs**', route => route.fulfill({ json: {
+    ...adminPage, url: '/admin/auth-logs?lang=en',
+  } }))
+  let filter = ''
+  let cursor = 0
+  await page.route('**/api/admin/auth-logs**', route => {
+    const query = new URL(route.request().url()).searchParams
+    filter = query.get('result') || ''
+    cursor = Number(query.get('cursor') || 0)
+    expect(query.has('page')).toBe(false)
+    return route.fulfill({ json: { code: 0, result: {
+      list: [{ id: cursor ? 12 : 32, userId: 7, action: 'login_success', authMethod: 'password', result: 'success', oauthProvider: '', clientIp: '127.0.0.1', userAgent: cursor ? 'Older browser' : 'Quality browser', createdAt: '2026-10-03T09:00:00Z' }], nextCursor:cursor ? 0 : 32,hasMore:cursor === 0,pageSize:20,
+    } } })
+  })
+  await page.goto('/admin/auth-logs?lang=en')
+  await expect(page.getByRole('heading', { name: 'Login and security history' })).toBeVisible()
+  await expect(page.getByText('Quality browser')).toBeVisible()
+  await page.getByRole('button', {name:'Next', exact:true}).click()
+  await expect.poll(() => cursor).toBe(32)
+  await expect(page.getByText('Older browser', {exact:true})).toBeVisible()
+  await expect(page.getByRole('button', {name:'Next', exact:true})).toBeDisabled()
+  await page.getByRole('button', {name:'Previous', exact:true}).click()
+  await expect.poll(() => cursor).toBe(0)
+  await page.getByRole('button', {name:'Next', exact:true}).click()
+  await expect.poll(() => cursor).toBe(32)
+  await page.getByLabel('Result', { exact: true }).click()
+  const triggerBounds = await page.getByLabel('Result', {exact:true}).boundingBox()
+  const menu = page.getByRole('listbox')
+  await expect.poll(async () => Math.abs((await menu.boundingBox())!.width - triggerBounds!.width)).toBeLessThanOrEqual(1)
+  await expect.poll(async () => Math.abs((await menu.boundingBox())!.x - triggerBounds!.x)).toBeLessThanOrEqual(1)
+  await page.screenshot({path: testInfo.outputPath('admin-log-select.png')})
+  await page.getByRole('option', { name: 'Failure', exact: true }).click()
+  await expect.poll(() => filter).toBe('failure')
+  await expect.poll(() => cursor).toBe(0)
+  await page.getByLabel('Date range', {exact:true}).click()
+  const calendar = page.locator('[data-slot="date-range-picker-content"][data-state="open"]')
+  await expect(calendar).toHaveCSS('opacity', '1')
+  expect(await calendar.evaluate(element => element.getBoundingClientRect().right <= innerWidth + 1 && element.getBoundingClientRect().left >= 0)).toBe(true)
+  await page.screenshot({path:testInfo.outputPath('admin-log-date-range.png')})
+  await calendar.locator('[data-day="10/1/2026"]').first().click()
+  await calendar.locator('[data-day="10/4/2026"]').first().click()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await page.screenshot({ path: testInfo.outputPath('admin-login-logs.png'), fullPage: true })
+  expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()).violations).toEqual([])
+})
+
+test('restores the browser local draft only after an explicit choice', async ({ page }, testInfo) => {
+  page.on('dialog', dialog => dialog.accept())
+  await page.goto('/publish?lang=en')
+  await page.getByPlaceholder('Enter topic title').fill('Browser draft survives refresh')
+  await page.getByRole('button', { name: 'Coding', exact: true }).click()
+  await page.getByRole('textbox', { name: 'Write and format the body directly' }).fill('The complete unfinished draft')
+  await expect(page.getByText('Local copy saved', { exact: true })).toBeVisible()
+  await page.reload()
+  await expect(page.getByRole('dialog', { name: 'Local draft found' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Restore copy', exact: true })).toBeVisible()
+  await expect(page.getByPlaceholder('Enter topic title')).toHaveValue('')
+  await page.getByRole('button', { name: 'Restore copy', exact: true }).click()
+  await expect(page.getByPlaceholder('Enter topic title')).toHaveValue('Browser draft survives refresh')
+  await expect(page.getByRole('textbox', { name: 'Write and format the body directly' })).toHaveText('The complete unfinished draft')
+  const header = page.getByRole('heading', { name: 'Publish topic', exact: true }).locator('xpath=ancestor::header')
+  expect(await header.evaluate(element => getComputedStyle(element).borderBottomWidth)).toBe('0px')
+  await expect(page.getByText('Local copy saved', { exact: true })).toBeVisible()
+  const checklist = page.getByRole('heading', { name: 'Publish checklist', exact: true })
+  expect(await checklist.evaluate(element => Boolean(element.closest('aside')?.querySelector('[data-slot="local-draft-status"]')))).toBe(true)
+  const checklistBox = await checklist.boundingBox()
+  const statusBox = await page.locator('[data-slot="local-draft-status"]').boundingBox()
+  expect(statusBox!.y).toBeGreaterThan(checklistBox!.y + checklistBox!.height)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await page.screenshot({ path: testInfo.outputPath('local-draft-restored.png'), fullPage: true })
+})
+
+test('does not save empty metadata and cleans cleared or discarded local drafts', async ({ page }, testInfo) => {
+  const storedDrafts = () => page.evaluate(async () => {
+    const request = indexedDB.open('gooseforum-local-drafts', 1)
+    const database = await new Promise<IDBDatabase>((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    const all = database.transaction('drafts', 'readonly').objectStore('drafts').getAll()
+    const count = await new Promise<number>((resolve, reject) => {
+      all.onsuccess = () => resolve(all.result.length)
+      all.onerror = () => reject(all.error)
+    })
+    database.close()
+    return count
+  })
+  await page.goto('/publish?lang=en')
+  page.on('dialog', dialog => dialog.accept())
+  await page.getByRole('button', { name: 'Coding', exact: true }).click()
+  await page.waitForTimeout(1200)
+  expect(await storedDrafts()).toBe(0)
+  const title = page.getByPlaceholder('Enter topic title')
+  const editor = page.getByRole('textbox', { name: 'Write and format the body directly' })
+  await title.fill('Unfinished topic')
+  await editor.fill('A single local draft')
+  await expect(page.getByText('Local copy saved', { exact: true })).toBeVisible()
+  expect(await storedDrafts()).toBe(1)
+  await title.clear()
+  await editor.press('ControlOrMeta+A')
+  await editor.press('Backspace')
+  await expect(editor).toHaveText('')
+  await expect.poll(storedDrafts).toBe(0)
+  await editor.fill('Keep this until choosing discard')
+  await expect(page.getByText('Local copy saved', { exact: true })).toBeVisible()
+  await page.reload()
+  const prompt = page.getByRole('dialog', { name: 'Local draft found' })
+  await expect(prompt).toBeVisible()
+  await page.screenshot({ path: testInfo.outputPath('single-draft-recovery.png'), fullPage: true })
+  await prompt.getByRole('button', { name: 'Discard local draft', exact: true }).click()
+  await expect(prompt).not.toBeVisible()
+  await expect.poll(storedDrafts).toBe(0)
+  await page.reload()
+  await expect(page.getByPlaceholder('Enter topic title')).toBeVisible()
+  await expect(prompt).not.toBeVisible()
+  expect(await storedDrafts()).toBe(0)
+})
+
+test('inserts a stable mention and preserves it across editor modes', async ({ page }, testInfo) => {
+  await page.route('**/api/mention-users**', route => route.fulfill({ json: { code: 0, result: [{ id: '12', username: 'alice' }] } }))
+  await page.goto('/publish?lang=en')
+  await page.getByRole('radio', { name: 'Markdown', exact: true }).click()
+  const body = page.getByPlaceholder('Enter body text, Markdown supported; paste or drag images here')
+  await body.fill('Hello @ali')
+  await body.press('End')
+  await expect(page.getByRole('option', { name: '@alice', exact: true })).toBeVisible()
+  await body.press('Enter')
+  await expect(body).toHaveValue('Hello [mention user="12"]@alice[/mention]')
+  await page.getByRole('radio', { name: 'Editor', exact: true }).click()
+  await expect(page.locator('[contenteditable="true"] [data-mention-user="12"]')).toHaveText('@alice')
+  await page.getByRole('radio', { name: 'Markdown', exact: true }).click()
+  await expect(body).toHaveValue('Hello [mention user="12"]@alice[/mention]')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await page.screenshot({ path: testInfo.outputPath('stable-mention-editor.png'), fullPage: true })
+})
+
+for (const selection of ['click', 'keyboard'] as const) {
+  test(`keeps the caret on the same line after ${selection} mention selection`, async ({ page }, testInfo) => {
+    await page.route('**/api/mention-users**', route => route.fulfill({ json: { code: 0, result: [{ id: '12', username: 'alice' }] } }))
+    await page.goto('/publish?lang=en')
+    const editor = page.getByRole('textbox', { name: 'Write and format the body directly' })
+    await editor.fill('Hello @ali')
+    await editor.press('End')
+    const option = page.getByRole('option', { name: '@alice', exact: true })
+    await expect(option).toBeVisible()
+    if (selection === 'click') await option.click()
+    else await editor.press('Enter')
+    const mention = editor.locator('[data-mention-user="12"]')
+    await expect(mention).toHaveText('@alice')
+    await expect(editor).toBeFocused()
+    const separator = editor.locator('img.ProseMirror-separator')
+    await expect(separator).toHaveCSS('display', 'inline')
+    await expect(separator).toHaveCSS('margin-top', '0px')
+    const mentionBox = await mention.boundingBox()
+    const caretLine = await editor.evaluate(element => {
+      const range = window.getSelection()?.getRangeAt(0)
+      if (!range || !range.collapsed || !element.contains(range.startContainer)) return null
+      const paragraph = element.querySelector('p')!
+      const rect = paragraph.getBoundingClientRect()
+      return { y: rect.y, height: rect.height, lineHeight: Number.parseFloat(getComputedStyle(paragraph).lineHeight) }
+    })
+    expect(caretLine).not.toBeNull()
+    expect(mentionBox).not.toBeNull()
+    expect(caretLine!.height).toBeLessThanOrEqual(caretLine!.lineHeight + 1)
+    expect(mentionBox!.y).toBeLessThan(caretLine!.y + caretLine!.lineHeight)
+    await page.screenshot({ path: testInfo.outputPath('mention-caret-before-typing.png'), fullPage: true })
+    await editor.pressSequentially(' continues')
+    await expect(editor).toHaveText('Hello @alice continues')
+    await editor.press('Enter')
+    await editor.pressSequentially('Next line')
+    await expect(editor.locator('p')).toHaveCount(2)
+    await expect(editor.locator('p').last()).toHaveText('Next line')
+    await page.getByRole('radio', { name: 'Markdown', exact: true }).click()
+    await expect(page.getByPlaceholder('Enter body text, Markdown supported; paste or drag images here'))
+      .toHaveValue('Hello [mention user="12"]@alice[/mention] continues\n\nNext line')
+  })
+}
+
+test('completes the second-factor challenge with recoverable feedback', async ({ page }, testInfo) => {
+  await page.route('**/__goose_page/login**', route => route.fulfill({ json: {
+    ...homePage,
+    component: 'auth.login',
+    props: { initialMode: 'login', redirectUrl: '/', oauthProviders: [] },
+    url: '/login?mfa=1&lang=en',
+  } }))
+  let attempts = 0
+  await page.route('**/api/mfa/login', async route => {
+    attempts++
+    const input = route.request().postDataJSON() as { code: string }
+    expect(input.code).toBe(attempts === 1 ? '000000' : '123456')
+    await route.fulfill({ json: attempts === 1
+      ? { code: 1, messageCode: 'mfa.invalid' }
+      : { code: 0, result: { redirect: '/' } },
+    })
+  })
+  await page.goto('/login?mfa=1&lang=en')
+  await expect(page.getByRole('heading', { name: 'Two-factor authentication' })).toBeVisible()
+  const code = page.getByLabel('Authenticator or recovery code')
+  await code.fill('000000')
+  await page.getByRole('button', { name: 'Verify', exact: true }).click()
+  await expect(page.getByRole('alert')).toBeVisible()
+  await expect(code).toBeEnabled()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await testInfo.attach('second-factor-login', { body: await page.screenshot({ path: testInfo.outputPath('mfa-login.png') }), contentType: 'image/png' })
+  expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()).violations).toEqual([])
+  await code.fill('123456')
+  await page.getByRole('button', { name: 'Verify', exact: true }).click()
+  await expect(page).toHaveURL(/\/$/)
+  expect(attempts).toBe(2)
+})
+
+test('shows MFA availability in its dedicated settings tab', async ({ page }, testInfo) => {
+  await page.route('**/__goose_page/settings**', route => route.fulfill({ json: {
+    ...homePage,
+    component: 'settings.index',
+    props: {
+      user: {
+        id: 7, username: 'alice', nickname: 'Alice', email: 'alice@example.test',
+        locale: 'en', avatarUrl: '', profileCoverUrl: '', bio: '', signature: '',
+        websiteName: '', website: '', prestige: 0, createdAt: '2026-01-01T00:00:00Z',
+        externalInformation: {}, wornBadgeCode: '', badges: [], wearableBadges: [],
+      },
+      stats: {
+        topicCount: 0, replyCount: 0, followerCount: 0, followingCount: 0,
+        likeReceivedCount: 0, likeGivenCount: 0, collectionCount: 0, createdAt: '2026-01-01T00:00:00Z',
+      },
+      privacy: { showTopics: true, showActivity: true, showFollowing: true },
+      tabs: [{ key: 'account', label: 'Account', url: '/settings?tab=account' }, { key: 'mfa', label: 'Two-factor authentication', url: '/settings?tab=mfa' }],
+    },
+    layout: { ...homePage.layout, viewer: { ...homePage.layout.viewer, id: 7, username: 'alice', isAuthenticated: true } },
+    url: '/settings?tab=mfa&lang=en',
+  } }))
+  await page.route('**/api/mfa', route => route.fulfill({ json: {
+    code: 0, result: { enabled: false, available: false, remainingCodes: 0 },
+  } }))
+  await page.goto('/settings?tab=mfa&lang=en')
+  await expect(page.getByRole('heading', { name: 'Two-factor authentication' })).toBeVisible()
+  await expect(page.getByText('Two-factor authentication is unavailable. Contact the administrator.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Set up authenticator' })).toHaveCount(0)
+  await expect(page.getByRole('tab', { name: 'Two-factor authentication' })).toHaveAttribute('aria-selected', 'true')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await testInfo.attach('flat-mfa-settings', { body: await page.screenshot({ path: testInfo.outputPath('mfa-settings.png'), fullPage: true }), contentType: 'image/png' })
+  expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()).violations).toEqual([])
+  await page.route('**/api/mfa', route => route.fulfill({ json: {
+    code: 0, result: { enabled: false, available: true, remainingCodes: 0 },
+  } }))
+  await page.route('**/api/mfa/begin', route => route.fulfill({ json: {
+    code: 0, result: { secret: 'JBSWY3DPEHPK3PXP', uri: 'otpauth://totp/GooseForum:alice?secret=JBSWY3DPEHPK3PXP&issuer=GooseForum' },
+  } }))
+  await page.reload()
+  await page.getByLabel('Account password', { exact: true }).fill('password123')
+  await page.getByRole('button', { name: 'Set up authenticator' }).click()
+  const qr = page.getByRole('img', { name: 'Authenticator setup QR code' })
+  await expect(qr).toBeVisible()
+  await expect(page.getByLabel('Account password', { exact: true })).toHaveCount(0)
+  expect(await qr.locator('path').count()).toBeGreaterThan(0)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await testInfo.attach('mfa-qr-setup', { body: await page.screenshot({ path: testInfo.outputPath('mfa-qr-setup.png'), fullPage: true }), contentType: 'image/png' })
+  await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'gf-dark'))
+  await expect(qr).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+  await testInfo.attach('mfa-qr-dark', { body: await page.screenshot({ path: testInfo.outputPath('mfa-qr-dark.png'), fullPage: true }), contentType: 'image/png' })
 })
 
 test('announcement restores browser preferences without playing an entry animation', async ({ page }) => {

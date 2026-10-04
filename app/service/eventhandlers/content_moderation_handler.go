@@ -10,6 +10,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
+	"github.com/leancodebox/GooseForum/app/service/mentionservice"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/topicservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
@@ -53,7 +54,7 @@ func reviewTopicContent(event *ContentReviewRequestedEvent) error {
 	}); err != nil {
 		return err
 	}
-	fileusageservice.ReplaceTopic(topic.Id, topic.UserId, post.Content)
+	fileusageservice.ReplaceTopic(topic.Id, topic.UserId, post.Content, post.SourceVersion)
 	hotdataserve.ClearTopicWriteCaches(wasCounted != (topic.Status == 1 && topic.ProcessStatus == 0))
 	PublishTopicReviewResult(&topic, &post, firstPublication)
 	return nil
@@ -76,10 +77,12 @@ func reviewPostContent(event *ContentReviewRequestedEvent) error {
 	if wasVisible != (post.ProcessStatus == 0) {
 		postservice.SyncTopicPostStats(topic, post, post.ProcessStatus != 0)
 	}
-	fileusageservice.ReplacePost(post.Id, post.UserId, post.Content)
+	fileusageservice.ReplacePost(post.Id, post.UserId, post.Content, post.SourceVersion)
 	hotdataserve.ClearTopicListCache()
 	if !wasPublished && post.ProcessStatus == 0 {
 		PublishVisiblePost(topic, post)
+	} else {
+		mentionservice.Notify(topic, post)
 	}
 	return nil
 }
@@ -87,6 +90,7 @@ func reviewPostContent(event *ContentReviewRequestedEvent) error {
 // PublishTopicReviewResult dispatches the domain event produced by a topic
 // write or review result.
 func PublishTopicReviewResult(topic *topics.Entity, post *posts.Entity, firstPublication bool) {
+	mentionservice.Notify(*topic, *post)
 	userservice.InvalidateUserPublicProfileCache(topic.UserId)
 	if firstPublication && topic.Status == 1 && topic.ProcessStatus == 0 {
 		userStatistics.WriteTopic(topic.UserId)

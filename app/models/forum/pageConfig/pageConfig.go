@@ -175,6 +175,9 @@ type SecurityAndRegistration struct {
 	EnableSignup            bool     `json:"enableSignup"`
 	EnableEmailVerification bool     `json:"enableEmailVerification"`
 	AllowedDomains          []string `json:"allowedDomains"`
+	RegistrationIPLimit     int      `json:"registrationIPLimit"`
+	RegistrationEmailLimit  int      `json:"registrationEmailLimit"`
+	RegistrationGlobalLimit int      `json:"registrationGlobalLimit"`
 }
 
 // SensitiveWordConfig controls automatic content moderation.

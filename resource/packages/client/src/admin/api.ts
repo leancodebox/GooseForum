@@ -49,6 +49,7 @@ export function createAdminApi(http: GooseHttpClient): GooseAdminApi {
       rotateOIDCClientSecret: (clientId) => post(http, '/api/admin/oidc-clients/rotate-secret', { clientId }),
     },
     audit: {
+      authLogs: (input = {}) => http.request('/api/admin/auth-logs', { query: { ...input } }),
       records: (input) => post(http, '/api/admin/opt-record-page', input),
     },
     assets: {
@@ -80,6 +81,9 @@ export function createAdminApi(http: GooseHttpClient): GooseAdminApi {
       review: (kind, input) => post(http, `/api/admin/${kind === 'topic' ? 'topics' : 'posts'}/review`, input),
     },
     users: {
+      mfaStatus: (userId) => post(http, '/api/admin/user-mfa-status', { userId }),
+      resetMFA: (userId, reason) => post(http, '/api/admin/user-mfa-reset', { userId, reason }),
+	  restrictionHistory: (input) => http.request('/api/admin/user-restriction-history', { query: { ...input } }),
       list: (input) => post(http, '/api/admin/user-list', input),
       edit: (input) => post(http, '/api/admin/user-edit', input),
       roles: () => http.request('/api/admin/get-all-role-item'),

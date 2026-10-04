@@ -1,8 +1,12 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 import en from "./en-server-messages.js";
 
+import mfa from './ja-mfa.js';
 export default {
   ...en,
+  "auth.registration.rateLimited": "リクエストが多すぎます。しばらくしてから再試行してください。",
+  "mfa.invalid": mfa.failed,
+  "mfa.unavailable": mfa.unavailable,
   "page.notFound": "ページが存在しないか、削除されています。",
   "route.notFound":
     "ルートが見つかりません。URL とリクエストメソッドを確認してください。",
@@ -38,6 +42,9 @@ export default {
   "auth.password.invalidFormat": "パスワードの形式が正しくありません。",
   "auth.credentials.invalid": "ユーザー名、メールアドレス、またはパスワードが正しくありません。",
   "auth.account.frozen": "このアカウントは停止されています。",
+  "auth.account.banned": "このアカウントはログイン禁止です。{reason}",
+  "admin.restriction.invalid": "有効な制限状態、将来の終了日時と変更理由を入力してください。",
+  "admin.restriction.protected": "自分自身や上位権限のアカウントを制限したり、最後の管理者を制限・降格したりすることはできません。",
   "auth.email.unverified": "先にメールアドレスを確認してください。",
   "auth.login.failed": "ログインに失敗しました。",
 } as const;

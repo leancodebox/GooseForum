@@ -1,5 +1,9 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  accountSuspended: "アカウントは投稿停止中です。閲覧とアカウントのセキュリティ設定は利用できます。",
+  restrictionUntil: "期限 {date}",
+  restrictionPermanent: "期限なし",
+  accountSecurity: "アカウントのセキュリティ",
   collapseSidebar: "サイドバーを閉じる",
   expandSidebar: "サイドバーを開く",
   chooseTheme: "テーマを選択",

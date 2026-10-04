@@ -1114,9 +1114,9 @@ function BrandPreview({
           {label}
         </span>
       ) : (
-        <span className="max-w-44 truncate text-xl font-semibold tracking-tighter sm:text-2xl md:max-w-none">
-          <span className="text-primary">Goose</span>
-          <span className="text-foreground">Forum</span>
+        <span className="block h-11 w-[134px] shrink-0" role="img" aria-label="GooseForum">
+          <img src="/static/brand/gooseforum-light.svg" alt="" width={1898} height={625} className="h-full w-full object-contain dark:hidden" />
+          <img src="/static/brand/gooseforum-dark.svg" alt="" width={1898} height={625} className="hidden h-full w-full object-contain dark:block" />
         </span>
       )}
       <span className="ml-1 inline-flex size-5 items-center justify-center rounded-sm text-muted-foreground opacity-0 transition group-hover:opacity-100">

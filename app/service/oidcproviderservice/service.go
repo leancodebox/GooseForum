@@ -386,7 +386,7 @@ func (r *userResolver) ResolveUser(ctx context.Context, subject string) (*core.U
 	if err != nil {
 		return nil, err
 	}
-	if entity.IsFrozen == users.StatusFrozen {
+	if entity.EffectiveRestriction(time.Now()) == users.RestrictionBanned {
 		return nil, core.ErrUserUnavailable
 	}
 	name := entity.Nickname

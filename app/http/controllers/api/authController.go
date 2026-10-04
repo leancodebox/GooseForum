@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
@@ -12,6 +13,9 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/authsessionservice"
 	"github.com/leancodebox/GooseForum/app/service/emailactivationservice"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
+	"github.com/leancodebox/GooseForum/app/service/loginlogservice"
+	"github.com/leancodebox/GooseForum/app/service/mfaservice"
+	"github.com/leancodebox/GooseForum/app/service/registrationservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 
 	"log/slog"
@@ -44,6 +48,8 @@ func Logout(c *gin.Context) {
 	))
 }
 
+var verifyRegistrationCaptcha = captchaOpt.VerifyCaptcha
+
 // Register 注册
 func Register(c *gin.Context) {
 	var r vo.RegReq
@@ -56,18 +62,16 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
-
-	if !securityConfig.EnableSignup {
-		c.JSON(200, component.FailDataCode(component.MessageAuthSignupDisabled, nil))
-		return
-	}
-
 	r.Username = strings.TrimSpace(r.Username)
 	r.Email = strings.TrimSpace(strings.ToLower(r.Email))
-
-	if err := component.ValidateEmailDomain(r.Email); err != nil {
-		c.JSON(200, component.FailDataError(err))
+	email, securityConfig, err := registrationservice.CheckPolicy(r.Email, false)
+	if err != nil {
+		c.JSON(200, component.FailDataError(registrationError(err)))
+		return
+	}
+	r.Email = email
+	if err := registrationservice.CheckVerificationMail(securityConfig.EnableEmailVerification); err != nil {
+		c.JSON(200, component.FailDataError(registrationError(err)))
 		return
 	}
 
@@ -81,8 +85,12 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	if !captchaOpt.VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
+	if !verifyRegistrationCaptcha(r.CaptchaId, r.CaptchaCode) {
 		c.JSON(200, component.FailDataCode(component.MessageAuthCaptchaInvalid, nil))
+		return
+	}
+	if err := registrationservice.ConsumeSignup(r.Email, c.ClientIP(), securityConfig); err != nil {
+		c.JSON(200, component.FailDataError(registrationError(err)))
 		return
 	}
 
@@ -96,18 +104,20 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	userEntity, err := userservice.CreateUser(r.Username, r.Password, r.Email, true, r.Locale)
+	userEntity, err := userservice.CreateUser(r.Username, r.Password, r.Email, securityConfig.EnableEmailVerification, r.Locale)
 	if userEntity == nil || err != nil {
 		slog.Error("注册创建用户失败", "username", r.Username, "email", r.Email, "error", err)
-		c.JSON(200, component.FailDataCode(component.MessageAuthRegisterFailed, nil))
+		c.JSON(200, component.FailDataError(registrationError(err)))
 		return
 	}
 
 	slog.Debug("注册用户创建成功", "userId", userEntity.Id, "username", userEntity.Username, "email", userEntity.Email, "enableEmailVerification", securityConfig.EnableEmailVerification)
-	if err = emailactivationservice.SendActivationEmail(userEntity); err != nil {
-		slog.Error("添加邮件任务到队列失败", "userId", userEntity.Id, "email", userEntity.Email, "error", err)
-	} else {
-		slog.Debug("注册激活邮件任务已提交", "userId", userEntity.Id, "email", userEntity.Email, "enableEmailVerification", securityConfig.EnableEmailVerification)
+	if securityConfig.EnableEmailVerification {
+		if err = emailactivationservice.SendActivationEmail(userEntity); err != nil {
+			slog.Error("添加邮件任务到队列失败", "userId", userEntity.Id, "email", userEntity.Email, "error", err)
+		} else {
+			slog.Debug("注册激活邮件任务已提交", "userId", userEntity.Id, "email", userEntity.Email, "enableEmailVerification", securityConfig.EnableEmailVerification)
+		}
 	}
 
 	eventbus.Publish(context.Background(), &eventhandlers.UserSignUpEvent{
@@ -127,17 +137,17 @@ func Register(c *gin.Context) {
 		})
 	}
 
-	if err := authsessionservice.Issue(c, userEntity.Id, userEntity.TokenVersion, authsessionservice.LoginDetails{Method: "password", Reauthenticated: true}); err != nil {
-		c.JSON(200, component.FailDataCode(component.MessageAuthRegisterRetryLogin, nil))
-		return
-	}
-
 	if securityConfig.EnableEmailVerification {
 		c.JSON(http.StatusOK, component.SuccessDataCode(
 			"注册成功，请前往邮箱验证您的账号",
 			component.MessageAuthRegisterEmailVerify,
 
 			nil))
+		return
+	}
+
+	if err := authsessionservice.Issue(c, userEntity.Id, userEntity.TokenVersion, authsessionservice.LoginDetails{Method: "password", Reauthenticated: true}); err != nil {
+		c.JSON(200, component.FailDataCode(component.MessageAuthRegisterRetryLogin, nil))
 		return
 	}
 
@@ -151,6 +161,8 @@ type LoginReq struct {
 	CaptchaCode       string `json:"captchaCode"`
 }
 
+var verifyLoginCaptcha = captchaOpt.VerifyCaptcha
+
 func LoginPublicKey(c *gin.Context) {
 	c.JSON(http.StatusOK, component.SuccessData(map[string]any{
 		"publicKey": logincrypto.PublicKeyPEM(),
@@ -161,6 +173,14 @@ func LoginPublicKey(c *gin.Context) {
 
 // Login 处理登录请求
 func Login(c *gin.Context) {
+	completed := false
+	reason := "invalid_request"
+	identity := ""
+	defer func() {
+		if !completed {
+			loginlogservice.Failure(c, "password", "", reason, identity)
+		}
+	}()
 	var req LoginReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(200, component.FailDataCode(component.MessageRequestInvalidFormat, nil))
@@ -173,6 +193,7 @@ func Login(c *gin.Context) {
 	}
 
 	username := strings.TrimSpace(req.Username)
+	identity = username
 	captchaId := req.CaptchaId
 	captchaCode := req.CaptchaCode
 
@@ -193,7 +214,8 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	if !captchaOpt.VerifyCaptcha(captchaId, captchaCode) {
+	if !verifyLoginCaptcha(captchaId, captchaCode) {
+		reason = "captcha_rejected"
 		c.JSON(200, component.FailDataCode(component.MessageAuthCaptchaInvalid, nil))
 		return
 	}
@@ -201,20 +223,38 @@ func Login(c *gin.Context) {
 	userEntity, err := users.Verify(username, password)
 	if err != nil {
 		slog.Info("登录失败", "username", username, "error", err)
+		reason = "credentials_rejected"
 		c.JSON(200, component.FailDataCode(component.MessageAuthInvalidCredentials, nil))
 		return
 	}
-
-	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
-	if securityConfig.EnableEmailVerification && userEntity.IsActivated == users.ActivationPending {
-		c.JSON(200, component.FailDataCode(component.MessageAuthEmailUnverified, nil))
+	if userEntity.EffectiveRestriction(time.Now()) == users.RestrictionBanned {
+		reason = "account_banned"
+		c.JSON(http.StatusForbidden, component.FailDataCode("auth.account.banned", component.MessageParams{"reason": userEntity.RestrictionReason}))
 		return
 	}
 
-	if err := authsessionservice.Issue(c, userEntity.Id, userEntity.TokenVersion, authsessionservice.LoginDetails{Method: "password", Reauthenticated: true}); err != nil {
+	if userEntity.NeedsEmailVerification(hotdataserve.GetSecuritySettingsConfigCache().EnableEmailVerification) {
+		reason = "email_unverified"
+		c.JSON(200, resendPendingLogin(c, *userEntity))
+		return
+	}
+
+	challenge, err := mfaservice.CompleteFirstFactor(c, userEntity.Id, userEntity.TokenVersion, authsessionservice.LoginDetails{Method: "password", Reauthenticated: true}, "/")
+	if err != nil {
 		slog.Error("生成 token 失败", "userId", userEntity.Id, "error", err)
-		c.JSON(200, component.FailDataCode(component.MessageAuthLoginFailed, nil))
+		reason = "session_rejected"
+		code := component.MessageAuthLoginFailed
+		if errors.Is(err, mfaservice.ErrUnavailable) || errors.Is(err, mfaservice.ErrVerification) {
+			code = mfaErrorCode(err)
+		}
+		c.JSON(200, component.FailDataCode(code, nil))
 		return
 	}
+	if challenge {
+		completed = true
+		c.JSON(http.StatusOK, component.SuccessData(map[string]any{"mfaRequired": true}))
+		return
+	}
+	completed = true
 	c.JSON(http.StatusOK, component.SuccessDataCode("登录成功", component.MessageAuthLoginSuccess, nil))
 }

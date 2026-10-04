@@ -21,6 +21,7 @@ import { createModerationSettingsText } from './moderation-settings-i18n'
 import { createIdentityText } from './identity-settings-i18n'
 import { createDashboardText } from './dashboard-i18n'
 import { adminNavGroups } from './nav'
+import { AuthLogsPage } from './page-registry'
 import { normalizeAdminPath } from './navigation'
 import { prepareAdminTranslations, adminPageNamespaces, loadedAdminNamespaces } from './translation-loader'
 
@@ -128,7 +129,7 @@ export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi 
       : pathname === '/admin/roles'
         ? <RolesManagementPage api={api} text={roleText} />
       : pathname === '/admin/users'
-        ? <UsersManagementPage api={api} text={userText} />
+        ? <UsersManagementPage api={api} text={userText} locale={locale} canResetMFA={page.layout.viewer?.adminPermissions?.includes(0)} currentUserId={page.layout.viewer?.id} />
       : pathname === '/admin/posts'
         ? <PostsManagementPage api={api} text={postText} />
       : pathname === '/admin/links'
@@ -141,6 +142,8 @@ export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi 
         ? <FileResourcesManagementPage api={api} text={assetText} />
       : pathname === '/admin/opt-records'
         ? <OptRecordsManagementPage api={api} text={auditText} locale={locale} />
+      : pathname === '/admin/auth-logs'
+        ? <AuthLogsPage key={page.layout.viewer.id} api={api} locale={locale} />
       : pathname === '/admin/settings/site-info'
         ? <SiteInfoManagementPage api={api} text={settingsText} />
       : pathname === '/admin/settings/site-chrome'

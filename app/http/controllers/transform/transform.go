@@ -10,18 +10,19 @@ import (
 // User2userShow maps a user entity to the authenticated user summary payload.
 func User2userShow(user users.EntityComplete) *vo.UserInfoShow {
 	return &vo.UserInfoShow{
-		UserId:              user.Id,
-		Username:            user.Username,
-		Email:               user.Email,
-		Nickname:            user.Nickname,
-		Bio:                 user.Bio,
-		Signature:           user.Signature,
-		Prestige:            user.Prestige,
-		AvatarUrl:           user.GetWebAvatarUrl(),
-		CreateTime:          user.CreatedAt,
-		CanAccessAdmin:      user.RoleId > 0,
-		IsActivated:         user.IsActivated,
-		ExternalInformation: user.ExternalInformation,
+		UserId:                    user.Id,
+		Username:                  user.Username,
+		Email:                     user.Email,
+		Nickname:                  user.Nickname,
+		Bio:                       user.Bio,
+		Signature:                 user.Signature,
+		Prestige:                  user.Prestige,
+		AvatarUrl:                 user.GetWebAvatarUrl(),
+		CreateTime:                user.CreatedAt,
+		CanAccessAdmin:            user.RoleId > 0,
+		IsActivated:               user.IsActivated,
+		RequiresEmailVerification: user.RequiresEmailVerification,
+		ExternalInformation:       user.ExternalInformation,
 	}
 }
 

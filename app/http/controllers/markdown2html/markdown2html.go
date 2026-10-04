@@ -9,6 +9,7 @@ import (
 	"unicode/utf8"
 
 	headingid "github.com/jkboxomine/goldmark-headingid"
+	"github.com/leancodebox/GooseForum/app/bundles/markdownext"
 	"github.com/leancodebox/GooseForum/app/bundles/outbound"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
@@ -19,7 +20,7 @@ import (
 )
 
 func GetPostVersion() uint32 {
-	return 5
+	return 6
 }
 
 var md = goldmark.New(
@@ -35,6 +36,29 @@ var md = goldmark.New(
 		parser.WithAutoHeadingID(),
 	),
 )
+
+var mdExtended = goldmark.New(goldmark.WithExtensions(extension.GFM, extension.Linkify, extension.Typographer, markdownext.Extension{}), goldmark.WithParserOptions(parser.WithAutoHeadingID()))
+
+func ParseExtended(content string) ([]byte, ast.Node) {
+	source := []byte(content)
+	return source, mdExtended.Parser().Parse(text.NewReader(source))
+}
+
+func PostMarkdownToHTMLVersion(content string, version uint8) string {
+	if version == 0 {
+		return PostMarkdownToHTML(content)
+	}
+	source, doc := ParseExtended(content)
+	return renderExtended(source, doc)
+}
+
+func renderExtended(source []byte, doc ast.Node) string {
+	var buffer bytes.Buffer
+	if err := mdExtended.Renderer().Render(&buffer, source, doc); err != nil {
+		slog.Error("render extensions failed", "error", err)
+	}
+	return normalizePostHTML(buffer.String())
+}
 
 // MarkdownToHTML renders Markdown to HTML with the shared server parser.
 func MarkdownToHTML(markdown string) string {
@@ -72,14 +96,34 @@ type ContentAnalysis struct {
 
 // AnalyzeContent extracts topic metadata without rendering HTML.
 func AnalyzeContent(content string, maxDescriptionLength int) ContentAnalysis {
-	source, doc := parseMarkdown(content)
+	return AnalyzeContentVersion(content, maxDescriptionLength, 0)
+}
+
+func AnalyzeContentVersion(content string, maxDescriptionLength int, version uint8) ContentAnalysis {
+	var source []byte
+	var doc ast.Node
+	if version > 0 {
+		source, doc = ParseExtended(content)
+	} else {
+		source, doc = parseMarkdown(content)
+	}
 	return analyzeDocument(source, doc, maxDescriptionLength, false)
 }
 
 // AnalyzePostContent renders a post and extracts its file references from the same AST.
 func AnalyzePostContent(content string) ContentAnalysis {
-	source, doc := parseMarkdown(content)
-	return analyzeDocument(source, doc, 0, true)
+	return AnalyzePostContentVersion(content, 0)
+}
+
+func AnalyzePostContentVersion(content string, version uint8) ContentAnalysis {
+	if version == 0 {
+		source, doc := parseMarkdown(content)
+		return analyzeDocument(source, doc, 0, true)
+	}
+	source, doc := ParseExtended(content)
+	result := analyzeDocument(source, doc, 0, false)
+	result.RenderedHTML = renderExtended(source, doc)
+	return result
 }
 
 func analyzeDocument(source []byte, doc ast.Node, maxDescriptionLength int, render bool) ContentAnalysis {
@@ -183,7 +227,11 @@ func GetParser() goldmark.Markdown {
 
 // ExtractFirstImageURL returns the first public image destination from Markdown.
 func ExtractFirstImageURL(content string) string {
-	urls := ExtractImageURLs(content)
+	return ExtractFirstImageURLVersion(content, 0)
+}
+
+func ExtractFirstImageURLVersion(content string, version uint8) string {
+	urls := ExtractImageURLsVersion(content, version)
 	if len(urls) == 0 {
 		return ""
 	}
@@ -191,6 +239,14 @@ func ExtractFirstImageURL(content string) string {
 }
 
 func ExtractImageURLs(content string) []string {
+	return ExtractImageURLsVersion(content, 0)
+}
+
+func ExtractImageURLsVersion(content string, version uint8) []string {
+	if version > 0 {
+		_, doc := ParseExtended(content)
+		return extractImageURLs(doc)
+	}
 	_, doc := parseMarkdown(content)
 	return extractImageURLs(doc)
 }
@@ -230,10 +286,20 @@ func isPublicImageURL(value string) bool {
 
 // ExtractDescription extracts readable summary text from Markdown.
 func ExtractDescription(content string, maxLength int) string {
+	return ExtractDescriptionVersion(content, maxLength, 0)
+}
+
+func ExtractDescriptionVersion(content string, maxLength int, version uint8) string {
 	if maxLength <= 0 {
 		maxLength = 200
 	}
-	source, doc := parseMarkdown(content)
+	var source []byte
+	var doc ast.Node
+	if version > 0 {
+		source, doc = ParseExtended(content)
+	} else {
+		source, doc = parseMarkdown(content)
+	}
 	return extractDescriptionFromDocument(source, doc, maxLength)
 }
 
@@ -281,18 +347,29 @@ func extractDescriptionFromDocument(source []byte, doc ast.Node, maxLength int) 
 
 // ExtractPreview converts Markdown into compact readable text for notifications and activity lists.
 func ExtractPreview(content string, maxLength int) string {
+	return ExtractPreviewVersion(content, maxLength, 0)
+}
+
+func ExtractPreviewVersion(content string, maxLength int, version uint8) string {
 	if maxLength <= 0 {
 		return ""
 	}
 
 	reader := text.NewReader([]byte(content))
-	doc := GetParser().Parser().Parse(reader)
+	var doc ast.Node
+	if version > 0 {
+		_, doc = ParseExtended(content)
+	} else {
+		doc = GetParser().Parser().Parse(reader)
+	}
 	var builder strings.Builder
 	_ = ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
 		}
 		switch node := n.(type) {
+		case *markdownext.Node:
+			builder.Write(node.Text(reader.Source()))
 		case *ast.Text:
 			builder.Write(node.Segment.Value(reader.Source()))
 			if node.SoftLineBreak() || node.HardLineBreak() {
@@ -326,6 +403,8 @@ func extractDescriptionBlockText(node ast.Node, source []byte) string {
 			return ast.WalkContinue, nil
 		}
 		switch typed := n.(type) {
+		case *markdownext.Node:
+			builder.Write(typed.Text(source))
 		case *ast.Text:
 			builder.Write(typed.Segment.Value(source))
 			if typed.SoftLineBreak() || typed.HardLineBreak() {

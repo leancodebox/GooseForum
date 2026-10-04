@@ -9,19 +9,20 @@ import (
 
 // UserInfoShow is the authenticated user summary exposed to pages and APIs.
 type UserInfoShow struct {
-	UserId              uint64                    `json:"userId,omitempty"`
-	Username            string                    `json:"username"`
-	Email               string                    `json:"email"`
-	Nickname            string                    `json:"nickname"`
-	Bio                 string                    `json:"bio"`
-	Signature           string                    `json:"Signature"`
-	Prestige            int64                     `json:"prestige"`
-	AvatarUrl           string                    `json:"avatarUrl"`
-	UserPoint           int64                     `json:"userPoint"`
-	CreateTime          time.Time                 `json:"createTime"`
-	CanAccessAdmin      bool                      `json:"canAccessAdmin"`
-	IsActivated         int8                      `json:"isActivated"`
-	ExternalInformation users.ExternalInformation `json:"externalInformation"`
+	UserId                    uint64                    `json:"userId,omitempty"`
+	Username                  string                    `json:"username"`
+	Email                     string                    `json:"email"`
+	Nickname                  string                    `json:"nickname"`
+	Bio                       string                    `json:"bio"`
+	Signature                 string                    `json:"Signature"`
+	Prestige                  int64                     `json:"prestige"`
+	AvatarUrl                 string                    `json:"avatarUrl"`
+	UserPoint                 int64                     `json:"userPoint"`
+	CreateTime                time.Time                 `json:"createTime"`
+	CanAccessAdmin            bool                      `json:"canAccessAdmin"`
+	IsActivated               int8                      `json:"isActivated"`
+	RequiresEmailVerification bool                      `json:"-"`
+	ExternalInformation       users.ExternalInformation `json:"externalInformation"`
 }
 
 // UserDetailedVo is the editable profile payload used by account settings.

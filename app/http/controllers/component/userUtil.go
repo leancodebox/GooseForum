@@ -3,13 +3,14 @@ package component
 import (
 	"fmt"
 	"regexp"
-	"slices"
-	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/registrationservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
 
@@ -87,7 +88,11 @@ func CheckUserPermission(userEntity *users.EntityComplete, action PermissionActi
 	actionText := permissionActionFallback(action)
 
 	// 1. 检查用户是否被冻结
-	if userEntity.IsFrozen == users.StatusFrozen {
+	current, stateErr := users.GetAccountState(userEntity.Id)
+	if stateErr != nil {
+		return 403, NewMessageError(MessagePermissionResolveFailed, "无法读取账号状态", nil)
+	}
+	if current.EffectiveRestriction(time.Now()) != users.RestrictionNormal {
 		return 403, NewMessageError(
 			MessagePermissionUserFrozen,
 			fmt.Sprintf("您的账号已被封禁，无法进行%s操作", actionText),
@@ -95,9 +100,7 @@ func CheckUserPermission(userEntity *users.EntityComplete, action PermissionActi
 		)
 	}
 
-	// 2. 检查邮箱验证（如果系统开启了强制要求）
-	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
-	if securityConfig.EnableEmailVerification && userEntity.IsActivated == users.ActivationPending {
+	if userEntity.NeedsEmailVerification(hotdataserve.GetSecuritySettingsConfigCache().EnableEmailVerification) {
 		return 403, NewMessageError(
 			MessagePermissionEmailRequired,
 			fmt.Sprintf("请先完成邮箱验证后再进行%s操作", actionText),
@@ -129,19 +132,17 @@ func ValidateEmailDomain(email string) error {
 		return nil
 	}
 
-	parts := strings.Split(email, "@")
-	if len(parts) != 2 {
-		return NewMessageError(MessageAuthEmailDomainInvalid, "邮箱格式不正确", nil)
-	}
-
-	domain := parts[1]
-	if slices.Contains(securityConfig.AllowedDomains, domain) {
+	_, err := registrationservice.ValidateEmail(email, securityConfig)
+	if err == nil {
 		return nil
+	}
+	if err == registrationservice.ErrEmailRequired {
+		return NewMessageError(MessageAuthEmailDomainInvalid, "邮箱格式不正确", nil)
 	}
 
 	return NewMessageError(
 		MessageAuthEmailDomainNotAllowed,
 		"该邮箱域名不在允许的注册白名单中",
-		MessageParams{"domain": domain},
+		nil,
 	)
 }
