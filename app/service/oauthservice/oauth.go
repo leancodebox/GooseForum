@@ -205,7 +205,7 @@ func createUserFromOAuth(userInfo OAuthUserInfo, needVerification bool) (*users.
 	binding := &userOAuth.Entity{Provider: userInfo.Provider, ProviderUid: userInfo.ID}
 	var userEntity *users.EntityComplete
 	var err error
-	for attempts := 0; attempts < 10; attempts++ {
+	for range 10 {
 		userEntity, err = userservice.CreateUserWithBinding(username, randopt.RandomString(32), userInfo.Email, needVerification, binding)
 		if !errors.Is(err, users.ErrUsernameExists) {
 			break

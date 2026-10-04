@@ -8,8 +8,8 @@ import (
 )
 
 func TestBuildParticipantsPreservesWornBadges(t *testing.T) {
-	moderator := &badgeservice.UserBadge{Badge: badgeservice.Badge{Code: "moderator"}}
-	robot := &badgeservice.UserBadge{Badge: badgeservice.Badge{Code: "robot"}}
+	moderator := &badgeservice.UserBadge{Code: "moderator"}
+	robot := &badgeservice.UserBadge{Code: "robot"}
 	topic := &vo.TopicsSimpleVo{
 		AuthorId:  1,
 		Username:  "author",

@@ -14,7 +14,7 @@ import (
 func TestFailureBudgetBoundsAndExpiry(t *testing.T) {
 	b := failureBudget{ips: make(map[string]window)}
 	now := time.Now()
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		if !b.allow("one", now) {
 			t.Fatal("premature rejection")
 		}
@@ -22,7 +22,7 @@ func TestFailureBudgetBoundsAndExpiry(t *testing.T) {
 	if b.allow("one", now) {
 		t.Fatal("IP exceeded its budget")
 	}
-	for i := 0; i < 990; i++ {
+	for i := range 990 {
 		if !b.allow(fmt.Sprint(i), now) {
 			t.Fatal("premature global rejection")
 		}
@@ -41,9 +41,8 @@ func TestFailureBudgetBoundsAndExpiry(t *testing.T) {
 func TestConcurrentFailureBudget(t *testing.T) {
 	b := failureBudget{ips: make(map[string]window)}
 	var wg sync.WaitGroup
-	for i := 0; i < 100; i++ {
-		wg.Add(1)
-		go func() { defer wg.Done(); b.allow("ip", time.Now()) }()
+	for range 100 {
+		wg.Go(func() { b.allow("ip", time.Now()) })
 	}
 	wg.Wait()
 	if b.global.count != 10 {
@@ -54,7 +53,7 @@ func TestConcurrentFailureBudget(t *testing.T) {
 func TestAccountBudgetAcrossIPs(t *testing.T) {
 	b := failureBudget{ips: make(map[string]window)}
 	now := time.Now()
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		if !b.allow(fmt.Sprint(i), now, "digest") {
 			t.Fatal("premature account rejection")
 		}

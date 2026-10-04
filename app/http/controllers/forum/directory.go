@@ -140,8 +140,8 @@ func buildDirectoryMeta(c *gin.Context, titleKey, descriptionKey, path, previous
 	meta := PageMeta{
 		Title: pageTitle(i18n.T(lang, titleKey)), Description: i18n.T(lang, descriptionKey, "site", siteTitle()),
 		Canonical: component.GetBaseUri(c) + path,
+		PrevURL:   previousURL,
+		NextURL:   nextURL,
 	}
-	meta.PrevURL = previousURL
-	meta.NextURL = nextURL
 	return meta
 }

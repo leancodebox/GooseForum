@@ -40,7 +40,7 @@ func NormalizeDomain(domain string) (string, error) {
 	if err != nil || !strings.Contains(value, ".") || len(value) > 253 {
 		return "", ErrDomain
 	}
-	for _, label := range strings.Split(value, ".") {
+	for label := range strings.SplitSeq(value, ".") {
 		if label == "" || len(label) > 63 || strings.HasPrefix(label, "-") || strings.HasSuffix(label, "-") {
 			return "", ErrDomain
 		}

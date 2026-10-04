@@ -33,10 +33,10 @@ func TestRankScheduleMigrationResumesThenDropsOnlyLegacyField(t *testing.T) {
 	created := due.Add(-48 * time.Hour)
 	rows := make([]legacyRankTopic, 212)
 	for i := range rows {
-		rows[i] = legacyRankTopic{Entity: topics.Entity{Id: uint64(i + 1), Status: 1, Title: "preserved", CreatedAt: created, UpdatedAt: created}, NextRankAt: &due}
+		rows[i] = legacyRankTopic{Id: uint64(i + 1), Status: 1, Title: "preserved", CreatedAt: created, UpdatedAt: created, NextRankAt: &due}
 	}
 	must(db.CreateInBatches(rows, 100).Error)
-	must(db.Create(&legacyRankTopic{Entity: topics.Entity{Id: 213, Title: "settled"}}).Error)
+	must(db.Create(&legacyRankTopic{Id: 213, Title: "settled"}).Error)
 	must(db.Table("topics").Where("id > 0").UpdateColumns(map[string]any{"rank_score": 17000, "published_at": created}).Error)
 	earlier := due.Add(-time.Hour)
 	must(db.Create(&topicrank.Entity{TopicID: 1, NextRunAt: &earlier, Version: 7}).Error)

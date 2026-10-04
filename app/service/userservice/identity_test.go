@@ -88,7 +88,7 @@ func TestOAuthCompletionFailureRetriesExistingBinding(t *testing.T) {
 	}
 	const callback = "test:registration-completion-failure"
 	if err := conn.Callback().Update().Before("gorm:update").Register(callback, func(tx *gorm.DB) {
-		values, ok := tx.Statement.Dest.(map[string]interface{})
+		values, ok := tx.Statement.Dest.(map[string]any)
 		if ok && tx.Statement.Table == "users" {
 			if _, completing := values["oauth_registration_key"]; completing {
 				tx.AddError(errors.New("completion failure"))

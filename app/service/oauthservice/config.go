@@ -209,7 +209,7 @@ func buildProviders(config pageConfig.OAuthSettingsConfig, siteURL string) ([]go
 			return fmt.Errorf("%s requires both client ID and client secret", displayName)
 		}
 		providers = append(providers, factory(callbackURL(siteURL, key)))
-		enabled[key] = runtimeProvider{PublicProvider: PublicProvider{Key: key, DisplayName: displayName}, Kind: key}
+		enabled[key] = runtimeProvider{Key: key, DisplayName: displayName, Kind: key}
 		return nil
 	}
 
@@ -244,7 +244,7 @@ func buildProviders(config pageConfig.OAuthSettingsConfig, siteURL string) ([]go
 			return nil, nil, fmt.Errorf("initialize OIDC provider %s: %w", custom.Key, err)
 		}
 		providers = append(providers, provider)
-		enabled[custom.Key] = runtimeProvider{PublicProvider: PublicProvider{Key: custom.Key, DisplayName: custom.DisplayName}, Kind: "oidc"}
+		enabled[custom.Key] = runtimeProvider{Key: custom.Key, DisplayName: custom.DisplayName, Kind: "oidc"}
 	}
 	return providers, enabled, nil
 }

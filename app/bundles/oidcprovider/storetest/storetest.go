@@ -55,7 +55,7 @@ func Run(t *testing.T, factory Factory) {
 		const workers = 12
 		var wg sync.WaitGroup
 		results := make(chan error, workers)
-		for i := 0; i < workers; i++ {
+		for i := range workers {
 			wg.Add(1)
 			go func(i int) {
 				defer wg.Done()
@@ -81,7 +81,7 @@ func Run(t *testing.T, factory Factory) {
 			t.Fatal(err)
 		}
 		revoked := 0
-		for i := 0; i < workers; i++ {
+		for i := range workers {
 			token, _ := store.GetAccessToken(context.Background(), "access-"+string(rune('a'+i)))
 			if token != nil && token.RevokedAt != nil {
 				revoked++

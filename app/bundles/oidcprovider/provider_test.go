@@ -879,12 +879,10 @@ func TestAuthorizationCodeConcurrentExchangeHasOneWinner(t *testing.T) {
 	}
 	results := make(chan exchangeResult, workers)
 	for range workers {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			tokens, err := p.ExchangeCode(ctx, request)
 			results <- exchangeResult{tokens: tokens, err: err}
-		}()
+		})
 	}
 	wg.Wait()
 	close(results)
@@ -940,8 +938,10 @@ func TestConcurrentRefreshReuseRevokesWinningFamily(t *testing.T) {
 	results := make(chan *TokenResponse, 2)
 	var wg sync.WaitGroup
 	for range 2 {
-		wg.Add(1)
-		go func() { defer wg.Done(); result, _ := p.Refresh(ctx, request); results <- result }()
+		wg.Go(func() {
+			result, _ := p.Refresh(ctx, request)
+			results <- result
+		})
 	}
 	wg.Wait()
 	close(results)

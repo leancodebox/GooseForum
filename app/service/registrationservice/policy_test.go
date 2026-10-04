@@ -29,15 +29,13 @@ func TestLimiterCountsConcurrentAttemptsAndExpires(t *testing.T) {
 	accepted := 0
 	var wg sync.WaitGroup
 	for range 30 {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			if l.consume(now, []quota{{"ip:local", 5}, {"global", 100}}) == nil {
 				mu.Lock()
 				accepted++
 				mu.Unlock()
 			}
-		}()
+		})
 	}
 	wg.Wait()
 	if accepted != 5 {

@@ -11,15 +11,13 @@ func TestAtomicUpdateSerializesCounters(t *testing.T) {
 	c := Cache[int]{Name: "atomic-counter"}
 	var wg sync.WaitGroup
 	for range 100 {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			if err := c.AtomicUpdate("key", func(value int, found bool) (int, time.Duration, error) {
 				return value + 1, time.Minute, nil
 			}); err != nil {
 				t.Error(err)
 			}
-		}()
+		})
 	}
 	wg.Wait()
 	value, found, err := c.Get("key")

@@ -41,10 +41,7 @@ type Authenticated struct {
 }
 
 func lifetime() time.Duration {
-	seconds := preferences.GetInt64("authsession.validTime", preferences.GetInt64("jwtopt.validTime", 86400*7))
-	if seconds < 86400 {
-		seconds = 86400
-	}
+	seconds := max(preferences.GetInt64("authsession.validTime", preferences.GetInt64("jwtopt.validTime", 86400*7)), 86400)
 	return time.Duration(seconds) * time.Second
 }
 
@@ -150,8 +147,8 @@ func truncate(s string, n int) string {
 
 func AccessToken(c *gin.Context) (string, bool) {
 	header := c.GetHeader("Authorization")
-	if strings.HasPrefix(header, "Bearer ") {
-		return strings.TrimPrefix(header, "Bearer "), false
+	if after, ok := strings.CutPrefix(header, "Bearer "); ok {
+		return after, false
 	}
 	token, _ := c.Cookie("access_token")
 	return token, true

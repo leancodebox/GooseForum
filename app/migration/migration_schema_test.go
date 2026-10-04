@@ -103,7 +103,7 @@ func TestStartupSchemaCreatesAllOIDCTables(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = sqlDB.Close() })
 	// Use the actual startup registry, not Store.Migrate, and verify reruns too.
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		if err := db.AutoMigrate(defaultSchemaModels()...); err != nil {
 			t.Fatal(err)
 		}

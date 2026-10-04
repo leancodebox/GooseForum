@@ -94,7 +94,7 @@ func (s *MemoryStore) RotateRefreshToken(_ context.Context, x RefreshTokenRotati
 	if old.RevokedAt != nil {
 		for _, token := range s.access {
 			if token.FamilyID == old.FamilyID {
-				token.RevokedAt = timePointer(x.Now)
+				token.RevokedAt = new(x.Now)
 			}
 		}
 		for _, token := range s.refresh {
@@ -116,18 +116,18 @@ func (s *MemoryStore) RevokeToken(_ context.Context, hash, clientID string, now 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if v := s.access[hash]; v != nil && v.ClientID == clientID {
-		v.RevokedAt = timePointer(now)
+		v.RevokedAt = new(now)
 		return nil
 	}
 	if v := s.refresh[hash]; v != nil && v.ClientID == clientID {
 		for _, token := range s.access {
 			if token.FamilyID == v.FamilyID {
-				token.RevokedAt = timePointer(now)
+				token.RevokedAt = new(now)
 			}
 		}
 		for _, token := range s.refresh {
 			if token.FamilyID == v.FamilyID {
-				token.RevokedAt = timePointer(now)
+				token.RevokedAt = new(now)
 			}
 		}
 	}
@@ -144,12 +144,12 @@ func (s *MemoryStore) RevokeGrant(_ context.Context, userID, clientID string, no
 	}
 	for _, token := range s.access {
 		if token.UserID == userID && token.ClientID == clientID {
-			token.RevokedAt = timePointer(now)
+			token.RevokedAt = new(now)
 		}
 	}
 	for _, token := range s.refresh {
 		if token.UserID == userID && token.ClientID == clientID {
-			token.RevokedAt = timePointer(now)
+			token.RevokedAt = new(now)
 		}
 	}
 	return nil
@@ -171,12 +171,12 @@ func (s *MemoryStore) revokeAuthorizationGrantLocked(grantID string, now time.Ti
 	}
 	for _, token := range s.access {
 		if token.GrantID == grantID {
-			token.RevokedAt = timePointer(now)
+			token.RevokedAt = new(now)
 		}
 	}
 	for _, token := range s.refresh {
 		if token.GrantID == grantID {
-			token.RevokedAt = timePointer(now)
+			token.RevokedAt = new(now)
 		}
 	}
 }
@@ -185,12 +185,12 @@ func (s *MemoryStore) RevokeTokenFamily(_ context.Context, family string, now ti
 	defer s.mu.Unlock()
 	for _, token := range s.access {
 		if token.FamilyID == family {
-			token.RevokedAt = timePointer(now)
+			token.RevokedAt = new(now)
 		}
 	}
 	for _, token := range s.refresh {
 		if token.FamilyID == family {
-			token.RevokedAt = timePointer(now)
+			token.RevokedAt = new(now)
 		}
 	}
 	return nil
@@ -281,8 +281,7 @@ func cloneToken(v *Token) *Token {
 	copy := *v
 	copy.Scopes = cloneStrings(v.Scopes)
 	if v.RevokedAt != nil {
-		copy.RevokedAt = timePointer(*v.RevokedAt)
+		copy.RevokedAt = new(*v.RevokedAt)
 	}
 	return &copy
 }
-func timePointer(value time.Time) *time.Time { return &value }

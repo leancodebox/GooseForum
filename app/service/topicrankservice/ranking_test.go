@@ -121,7 +121,7 @@ func TestRebuildBatchesPreservesPublicationAndCanRepeat(t *testing.T) {
 	// SQLite can retain old decimal values when a column's affinity changes.
 	// Rebuild must not try to scan those old scores into an int64.
 	must(t, db.Table("topics").Where("id > 0").Updates(map[string]any{"rank_score": 12.345, "published_at": published}).Error)
-	for attempt := 0; attempt < 2; attempt++ {
+	for range 2 {
 		var batches []int64
 		count, err := Rebuild(context.Background(), func(n int64) { batches = append(batches, n) })
 		must(t, err)

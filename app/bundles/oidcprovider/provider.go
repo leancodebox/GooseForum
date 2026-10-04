@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 )
@@ -1046,12 +1047,7 @@ func randomString(reader io.Reader, n int) (string, error) {
 	return base64.RawURLEncoding.EncodeToString(b), nil
 }
 func contains(values []string, value string) bool {
-	for _, v := range values {
-		if v == value {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(values, value)
 }
 func allAllowed(values, allowed []string) bool {
 	for _, v := range values {

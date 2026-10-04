@@ -114,7 +114,7 @@ func TestOAuthDomainPolicyRequiresVerifiedMailbox(t *testing.T) {
 		if verified {
 			uid, email, name = "verified", "verified@example.com", "registration-test-verified"
 		}
-		user, err := ProcessOAuthCallback(goth.User{Provider: "registration-test", UserID: uid, NickName: name, Email: email, RawData: map[string]interface{}{"email_verified": verified}}, "192.0.2.4")
+		user, err := ProcessOAuthCallback(goth.User{Provider: "registration-test", UserID: uid, NickName: name, Email: email, RawData: map[string]any{"email_verified": verified}}, "192.0.2.4")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -155,7 +155,7 @@ func TestOAuthRegistrationWithUnverifiedEmailRequiresConfiguredMail(t *testing.T
 	if users.ExistEmail("no-mail@example.com") || userOAuth.GetByProviderAndUID("registration-test", "no-mail") != nil {
 		t.Fatal("registration wrote an unusable account")
 	}
-	verified, err := ProcessOAuthCallback(goth.User{Provider: "registration-test", UserID: "trusted-mail", NickName: "registration-test-trusted-mail", Email: "trusted-mail@example.com", RawData: map[string]interface{}{"email_verified": true}}, "192.0.2.200")
+	verified, err := ProcessOAuthCallback(goth.User{Provider: "registration-test", UserID: "trusted-mail", NickName: "registration-test-trusted-mail", Email: "trusted-mail@example.com", RawData: map[string]any{"email_verified": true}}, "192.0.2.200")
 	if err != nil || verified.IsActivated != users.ActivationSuccess {
 		t.Fatalf("verified provider needlessly blocked: %v", err)
 	}

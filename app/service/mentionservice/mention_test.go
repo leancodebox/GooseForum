@@ -133,8 +133,8 @@ func TestMentionVisibilityModerationAndNotificationDedupe(t *testing.T) {
 	accesscontrol.Default = accesscontrol.NewResolver(mentionAccessStore{}, nil, nil)
 	t.Cleanup(func() { accesscontrol.Default = previous })
 	topic := topics.Entity{Id: 970101, Status: 1, MainCategoryId: 7}
-	post := posts.Entity{Id: 970201, TopicId: topic.Id, PostNo: 2, UserId: identities[0].Id, SourceVersion: 1, Content: markdownext.Canonical(identities[1].Id, identities[1].Username) + " " + markdownext.Canonical(identities[0].Id, identities[0].Username) + " " + markdownext.Canonical(identities[2].Id, identities[2].Username)}
-	post.ModerationStatus = "pending"
+	post := posts.Entity{Id: 970201, TopicId: topic.Id, PostNo: 2, UserId: identities[0].Id, SourceVersion: 1, Content: markdownext.Canonical(identities[1].Id, identities[1].Username) + " " + markdownext.Canonical(identities[0].Id, identities[0].Username) + " " + markdownext.Canonical(identities[2].Id, identities[2].Username),
+		ModerationStatus: "pending"}
 	Notify(topic, post)
 	var count int64
 	conn := dbconnect.Connect()

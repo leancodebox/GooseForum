@@ -91,11 +91,9 @@ func TestPasswordResetTokenRejectsMissingTokenVersion(t *testing.T) {
 	withAppSecretKey(t, "password-reset-version-test-key")
 
 	legacyToken := jwt.NewWithClaims(jwt.SigningMethodHS256, PasswordResetClaims{
-		UserId: 34,
-		Email:  "reset@example.com",
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)),
-		},
+		UserId:    34,
+		Email:     "reset@example.com",
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)),
 	})
 	tokenString, err := legacyToken.SignedString(secretKey())
 	if err != nil {

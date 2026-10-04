@@ -36,12 +36,10 @@ func TestInteractionIsUserBoundSingleUseAndExpires(t *testing.T) {
 	var wg sync.WaitGroup
 	results := make(chan error, workers)
 	for range workers {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			_, err := store.ConsumeInteraction(context.Background(), interaction.Hash, "user-1", now)
 			results <- err
-		}()
+		})
 	}
 	wg.Wait()
 	close(results)
