@@ -1,7 +1,6 @@
 package posts
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"gorm.io/gorm"
 )
 
@@ -12,7 +11,7 @@ type MarkdownSource struct {
 }
 
 func PendingMarkdownBatch(afterID uint64, version uint32, limit int) ([]MarkdownSource, error) {
-	return PendingMarkdownBatchWithDB(dbconnect.Connect(), afterID, version, limit)
+	return PendingMarkdownBatchWithDB(builder(), afterID, version, limit)
 }
 
 func PendingMarkdownBatchWithDB(db *gorm.DB, afterID uint64, version uint32, limit int) ([]MarkdownSource, error) {
@@ -24,7 +23,7 @@ func PendingMarkdownBatchWithDB(db *gorm.DB, afterID uint64, version uint32, lim
 }
 
 func UpdateRenderedMarkdown(id uint64, html string, version uint32) error {
-	return UpdateRenderedMarkdownWithDB(dbconnect.Connect(), id, html, version)
+	return UpdateRenderedMarkdownWithDB(builder(), id, html, version)
 }
 
 func UpdateRenderedMarkdownWithDB(db *gorm.DB, id uint64, html string, version uint32) error {

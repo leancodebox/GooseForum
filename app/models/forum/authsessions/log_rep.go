@@ -2,7 +2,6 @@ package authsessions
 
 import (
 	"cmp"
-	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"slices"
 	"time"
 
@@ -38,7 +37,7 @@ type LogPage struct {
 }
 
 func ListLogs(filter LogFilter, owner uint64, admin bool, since, until *time.Time) (LogPage, error) {
-	return listLogs(dbconnect.Connect(), filter, owner, admin, since, until)
+	return listLogs(logBuilder(), filter, owner, admin, since, until)
 }
 
 func listLogs(db *gorm.DB, filter LogFilter, owner uint64, admin bool, since, until *time.Time) (LogPage, error) {

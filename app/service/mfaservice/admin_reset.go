@@ -24,6 +24,8 @@ func AdminResetBy(actorID, userID uint64, reason string) error {
 }
 
 func adminReset(actorID, userID uint64, reason string) error {
+	unlock := lockOperation(userID)
+	defer unlock()
 	if strings.TrimSpace(reason) == "" || len(reason) > 256 {
 		return errors.New("a recovery reason of at most 256 bytes is required")
 	}

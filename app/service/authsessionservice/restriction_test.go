@@ -105,7 +105,7 @@ func TestUnverifiedIdentityRejectsCachedSessionsAndSessionIssuance(t *testing.T)
 		t.Fatalf("pending identity received ordinary session: %v", err)
 	}
 	consumed := false
-	err := IssueVerified(newContext, user.Id, user.TokenVersion, LoginDetails{}, func(*gorm.DB) error {
+	err := IssueVerified(newContext, user.Id, user.TokenVersion, LoginDetails{}, func() error {
 		consumed = true
 		return nil
 	})

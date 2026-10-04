@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/models/forum/authsessions"
@@ -63,11 +62,11 @@ func Issue(c *gin.Context, userID, tokenVersion uint64, details LoginDetails) er
 }
 
 // IssueVerified consumes the second factor before creating the session.
-func IssueVerified(c *gin.Context, userID, tokenVersion uint64, details LoginDetails, verify func(*gorm.DB) error) error {
+func IssueVerified(c *gin.Context, userID, tokenVersion uint64, details LoginDetails, verify func() error) error {
 	return issue(c, userID, tokenVersion, details, verify)
 }
 
-func issue(c *gin.Context, userID, tokenVersion uint64, details LoginDetails, verify func(*gorm.DB) error) error {
+func issue(c *gin.Context, userID, tokenVersion uint64, details LoginDetails, verify func() error) error {
 	secret := make([]byte, 32)
 	if _, err := rand.Read(secret); err != nil {
 		return err
@@ -93,13 +92,12 @@ func issue(c *gin.Context, userID, tokenVersion uint64, details LoginDetails, ve
 			return err
 		}
 	}
-	db := dbconnect.Connect()
 	state, stateErr := users.GetAccountState(userID)
 	if stateErr != nil || state.TokenVersion != tokenVersion || state.EffectiveRestriction(now) == users.RestrictionBanned || state.NeedsEmailVerification(hotdataserve.GetSecuritySettingsConfigCache().EnableEmailVerification) {
 		return ErrInvalidSession
 	}
 	if verify != nil {
-		if err := verify(db); err != nil {
+		if err := verify(); err != nil {
 			return err
 		}
 	}

@@ -16,7 +16,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
-	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/bundles/sharedcache"
@@ -152,8 +151,8 @@ func allow(userID uint64, ip string) bool {
 	}
 	return true
 }
-func policy(db *gorm.DB, userID, version uint64) (users.MFAAuthState, error) {
-	user, err := users.GetMFAAuthStateWithDB(db, userID, version)
+func policy(userID, version uint64) (users.MFAAuthState, error) {
+	user, err := users.GetMFAAuthState(userID, version)
 	if err != nil {
 		return user, ErrVerification
 	}
@@ -166,8 +165,10 @@ func policy(db *gorm.DB, userID, version uint64) (users.MFAAuthState, error) {
 	return user, nil
 }
 func CompleteFirstFactor(c *gin.Context, userID, version uint64, details authsessionservice.LoginDetails, redirect string) (bool, error) {
+	unlock := lockOperation(userID)
+	defer unlock()
 	details.AuthTime = time.Now()
-	if _, err := policy(dbconnect.Connect(), userID, version); err != nil {
+	if _, err := policy(userID, version); err != nil {
 		return false, err
 	}
 	factor, err := usermfa.GetFactor(userID)
@@ -214,15 +215,21 @@ func Login(c *gin.Context, code string) (string, error) {
 		loginlogservice.Failure(c, "mfa", "", "challenge_invalid")
 		return "", ErrVerification
 	}
+	unlock := lockOperation(item.UserID)
+	defer unlock()
+	if !item.Expires.After(time.Now()) {
+		_ = challenges.Delete(raw)
+		return "", ErrVerification
+	}
 	if !allow(item.UserID, c.ClientIP()) {
 		_ = challenges.Delete(raw)
 		return "", ErrVerification
 	}
-	err = authsessionservice.IssueVerified(c, item.UserID, item.Version, item.Details, func(tx *gorm.DB) error {
-		if _, err := policy(tx, item.UserID, item.Version); err != nil {
+	err = authsessionservice.IssueVerified(c, item.UserID, item.Version, item.Details, func() error {
+		if _, err := policy(item.UserID, item.Version); err != nil {
 			return err
 		}
-		return consume(tx, item.UserID, code)
+		return consume(item.UserID, code)
 	})
 	if err != nil {
 		_ = challenges.AtomicUpdate(raw, func(current challenge, found bool) (challenge, time.Duration, error) {
@@ -254,8 +261,8 @@ func codeHash(code string) string {
 	sum := sha256.Sum256([]byte(normalized))
 	return hex.EncodeToString(sum[:])
 }
-func consume(tx *gorm.DB, userID uint64, code string) error {
-	factor, err := usermfa.GetFactorWithDB(tx, userID)
+func consume(userID uint64, code string) error {
+	factor, err := usermfa.GetFactor(userID)
 	if err != nil {
 		return ErrVerification
 	}
@@ -268,7 +275,7 @@ func consume(tx *gorm.DB, userID uint64, code string) error {
 		if err != nil {
 			return err
 		}
-		accepted, err := usermfa.AcceptStepWithDB(tx, userID, step)
+		accepted, err := usermfa.AcceptStep(userID, step)
 		if err != nil {
 			return err
 		}
@@ -277,7 +284,7 @@ func consume(tx *gorm.DB, userID uint64, code string) error {
 		}
 		return nil
 	}
-	accepted, err := usermfa.ConsumeRecoveryCodeWithDB(tx, userID, codeHash(code), time.Now())
+	accepted, err := usermfa.ConsumeRecoveryCode(userID, codeHash(code), time.Now())
 	if err != nil {
 		return err
 	}
@@ -310,12 +317,14 @@ func verifyPassword(userID uint64, password string) (users.EntityComplete, error
 	if err = algorithm.VerifyEncryptPassword(user.Password, password); err != nil {
 		return user, ErrVerification
 	}
-	_, err = policy(dbconnect.Connect(), userID, user.TokenVersion)
+	_, err = policy(userID, user.TokenVersion)
 	return user, err
 }
 
 // VerifySecondFactor protects account security changes when MFA is enabled.
 func VerifySecondFactor(c *gin.Context, userID uint64, code string) (err error) {
+	unlock := lockOperation(userID)
+	defer unlock()
 	defer func() {
 		if err != nil {
 			loginlogservice.Record(c, loginlogservice.Event{UserID: userID, Action: "security_failure", Method: "mfa", Result: "failure", Reason: "second_factor_rejected"})
@@ -332,9 +341,11 @@ func VerifySecondFactor(c *gin.Context, userID uint64, code string) (err error) 
 	if !allowed || len(code) > 128 {
 		return ErrVerification
 	}
-	return consume(dbconnect.Connect(), userID, strings.TrimSpace(code))
+	return consume(userID, strings.TrimSpace(code))
 }
 func Begin(c *gin.Context, userID uint64, password string) (map[string]any, error) {
+	unlock := lockOperation(userID)
+	defer unlock()
 	allowed := allow(userID, c.ClientIP())
 	if !allowed {
 		return nil, ErrVerification
@@ -366,25 +377,24 @@ func Begin(c *gin.Context, userID uint64, password string) (map[string]any, erro
 	}
 	return map[string]any{"secret": key.Secret(), "uri": key.URL()}, nil
 }
-func recoveryCodes(tx *gorm.DB, userID uint64) ([]string, error) {
-	if err := usermfa.DeleteRecoveryCodesWithDB(tx, userID); err != nil {
-		return nil, err
-	}
+func recoveryCodes(userID uint64) ([]string, []usermfa.RecoveryCode, error) {
 	codes := make([]string, 10)
 	rows := make([]usermfa.RecoveryCode, 10)
 	for i := range codes {
 		b := make([]byte, 16)
 		if _, err := rand.Read(b); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		h := strings.ToUpper(hex.EncodeToString(b))
 		codes[i] = h[:8] + "-" + h[8:16] + "-" + h[16:24] + "-" + h[24:]
 		rows[i] = usermfa.RecoveryCode{UserID: userID, Hash: codeHash(codes[i])}
 		clear(b)
 	}
-	return codes, usermfa.CreateRecoveryCodesWithDB(tx, rows)
+	return codes, rows, nil
 }
 func Change(c *gin.Context, userID uint64, password, code, action string) ([]string, error) {
+	unlock := lockOperation(userID)
+	defer unlock()
 	allowed := allow(userID, c.ClientIP())
 	item, ok, cacheErr := bindings.Get(userStateKey(userID))
 	if cacheErr != nil {
@@ -397,64 +407,89 @@ func Change(c *gin.Context, userID uint64, password, code, action string) ([]str
 	if err != nil {
 		return nil, err
 	}
-	var codes []string
-	err = dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
-		if _, err := policy(tx, userID, user.TokenVersion); err != nil {
-			return err
-		}
-		if action == "enable" {
-			if !ok || item.Version != user.TokenVersion || !item.Expires.After(time.Now()) {
-				return ErrVerification
-			}
-			secret, err := open(userID, item.Secret)
-			if err != nil {
-				return err
-			}
-			step, err := acceptedStep(secret, code, time.Now())
-			if err != nil {
-				return err
-			}
-			if err = usermfa.CreateFactorWithDB(tx, &usermfa.Factor{UserID: userID, Secret: item.Secret, EnabledAt: time.Now(), LastStep: step}); err != nil {
-				return err
-			}
-		} else if action == "disable" || action == "regenerate" {
-			if err := consume(tx, userID, code); err != nil {
-				return err
-			}
-		} else {
-			return ErrVerification
-		}
-		if action == "disable" {
-			if _, err := usermfa.DeleteFactorWithDB(tx, userID); err != nil {
-				return err
-			}
-			if err := usermfa.DeleteRecoveryCodesWithDB(tx, userID); err != nil {
-				return err
-			}
-		} else {
-			var err error
-			codes, err = recoveryCodes(tx, userID)
-			if err != nil {
-				return err
-			}
-		}
-		advanced, err := users.CompareAndAdvanceTokenVersionWithDB(tx, userID, user.TokenVersion)
+	if _, err := policy(userID, user.TokenVersion); err != nil {
+		return nil, ErrVerification
+	}
+	var factor usermfa.Factor
+	if action == "enable" {
+		exists, err := usermfa.HasFactor(userID)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		if !advanced {
-			return ErrVerification
+		if exists {
+			return nil, ErrVerification
 		}
-		return authsessions.RevokeAllTokensWithDB(tx, userID, time.Now())
-	})
+		if !ok || item.Version != user.TokenVersion || !item.Expires.After(time.Now()) {
+			return nil, ErrVerification
+		}
+		secret, err := open(userID, item.Secret)
+		if err != nil {
+			return nil, err
+		}
+		step, err := acceptedStep(secret, code, time.Now())
+		if err != nil {
+			return nil, err
+		}
+		factor = usermfa.Factor{UserID: userID, Secret: item.Secret, EnabledAt: time.Now(), LastStep: step}
+	} else if action == "disable" || action == "regenerate" {
+		if err := consume(userID, code); err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, ErrVerification
+	}
+	var codes []string
+	var rows []usermfa.RecoveryCode
+	if action != "disable" {
+		codes, rows, err = recoveryCodes(userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	advanced, err := users.CompareAndAdvanceTokenVersion(userID, user.TokenVersion)
 	if err != nil {
 		return nil, err
 	}
-	_ = clearUserState(userID)
-	authsessionservice.InvalidateUser(userID)
-	if current, err := users.Get(userID); err == nil {
-		userservice.RefreshUserCaches(&current)
+	if !advanced {
+		return nil, ErrVerification
 	}
+	defer func() {
+		authsessionservice.InvalidateUser(userID)
+		if current, err := users.Get(userID); err == nil {
+			userservice.RefreshUserCaches(&current)
+		}
+	}()
+	// Preserve a pending binding for retry after the session version changes.
+	if action == "enable" {
+		item.Version = user.TokenVersion + 1
+		if err := bindings.Set(userStateKey(userID), item, time.Until(item.Expires)); err != nil {
+			return nil, err
+		}
+	}
+	if err := authsessions.RevokeAllTokens(userID, time.Now()); err != nil {
+		return nil, err
+	}
+	if action == "disable" {
+		if err := usermfa.DeleteRecoveryCodes(userID); err != nil {
+			return nil, err
+		}
+		if _, err := usermfa.DeleteFactor(userID); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := usermfa.CreateRecoveryCodes(rows); err != nil {
+			return nil, err
+		}
+		if err := usermfa.DeleteOtherRecoveryCodes(userID, rows); err != nil {
+			return nil, err
+		}
+		if action == "enable" {
+			if err := usermfa.CreateFactor(&factor); err != nil {
+				return nil, err
+			}
+		}
+	}
+	_ = clearUserState(userID)
 	authsessionservice.ClearCookie(c)
 	authsessionservice.LogSecurityEvent(c, userID, "mfa_"+action)
 	return codes, nil

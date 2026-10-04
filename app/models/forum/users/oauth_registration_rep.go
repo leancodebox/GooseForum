@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 
 	"gorm.io/gorm"
 )
@@ -19,7 +18,7 @@ func OAuthRegistrationKey(provider, uid string) string {
 
 func FindOAuthRegistration(key string) (*EntityComplete, error) {
 	var user EntityComplete
-	err := dbconnect.Connect().Where("oauth_registration_key = ?", key).First(&user).Error
+	err := builder().Where("oauth_registration_key = ?", key).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -27,5 +26,5 @@ func FindOAuthRegistration(key string) (*EntityComplete, error) {
 }
 
 func CompleteOAuthRegistration(id uint64) error {
-	return dbconnect.Connect().Model(&EntityComplete{}).Where("id = ?", id).Update("oauth_registration_key", nil).Error
+	return builder().Model(&EntityComplete{}).Where("id = ?", id).Update("oauth_registration_key", nil).Error
 }

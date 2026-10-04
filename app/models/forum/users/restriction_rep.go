@@ -1,7 +1,6 @@
 package users
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"time"
 
 	"gorm.io/gorm"
@@ -9,7 +8,7 @@ import (
 
 func GetAccountState(userID uint64) (AccountState, error) {
 	var state AccountState
-	err := dbconnect.Connect().Model(&EntityComplete{}).Where("id = ?", userID).First(&state).Error
+	err := builder().Model(&EntityComplete{}).Where("id = ?", userID).First(&state).Error
 	return state, err
 }
 
@@ -31,7 +30,7 @@ func (user RestrictionAccount) EffectiveRestriction(now time.Time) string {
 
 func GetRestrictionAccount(userID uint64) (RestrictionAccount, error) {
 	var account RestrictionAccount
-	err := dbconnect.Connect().Model(&EntityComplete{}).Where("id = ?", userID).First(&account).Error
+	err := builder().Model(&EntityComplete{}).Where("id = ?", userID).First(&account).Error
 	return account, err
 }
 
@@ -40,12 +39,12 @@ func AccountsInRoles(roleIDs []uint64) ([]AccountState, error) {
 	if len(roleIDs) == 0 {
 		return accounts, nil
 	}
-	err := dbconnect.Connect().Model(&EntityComplete{}).Where("role_id IN ?", roleIDs).Order("id").Find(&accounts).Error
+	err := builder().Model(&EntityComplete{}).Where("role_id IN ?", roleIDs).Order("id").Find(&accounts).Error
 	return accounts, err
 }
 
 func HasNormalAdministrator(roleIDs []uint64, excludeUserID, excludeRoleID uint64, now time.Time, verificationEnabled bool) (bool, error) {
-	return hasNormalAdministrator(dbconnect.Connect(), roleIDs, excludeUserID, excludeRoleID, now, verificationEnabled)
+	return hasNormalAdministrator(builder(), roleIDs, excludeUserID, excludeRoleID, now, verificationEnabled)
 }
 
 func hasNormalAdministrator(db *gorm.DB, roleIDs []uint64, excludeUserID, excludeRoleID uint64, now time.Time, verificationEnabled bool) (bool, error) {
@@ -89,12 +88,12 @@ func UpdateRestriction(userID uint64, change RestrictionUpdate) error {
 	if change.RevokeSessions {
 		fields["token_version"] = gorm.Expr("token_version + 1")
 	}
-	return dbconnect.Connect().Model(&EntityComplete{}).Where("id = ?", userID).Updates(fields).Error
+	return builder().Model(&EntityComplete{}).Where("id = ?", userID).Updates(fields).Error
 }
 
 func RoleMemberIDs(roleID uint64) ([]uint64, error) {
 	var members []struct{ Id uint64 }
-	if err := dbconnect.Connect().Model(&EntityComplete{}).Where("role_id = ?", roleID).Find(&members).Error; err != nil {
+	if err := builder().Model(&EntityComplete{}).Where("role_id = ?", roleID).Find(&members).Error; err != nil {
 		return nil, err
 	}
 	ids := make([]uint64, 0, len(members))
@@ -109,5 +108,5 @@ func RevokeRoleMembers(roleID uint64, removeRole bool) error {
 	if removeRole {
 		fields["role_id"] = 0
 	}
-	return dbconnect.Connect().Model(&EntityComplete{}).Where("role_id = ?", roleID).Updates(fields).Error
+	return builder().Model(&EntityComplete{}).Where("role_id = ?", roleID).Updates(fields).Error
 }

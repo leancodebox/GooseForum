@@ -221,10 +221,10 @@ func TestTOTPStepConsumedOnce(t *testing.T) {
 		t.Fatal(err)
 	}
 	code, _ := totp.GenerateCode(secret, time.Now())
-	if err = consume(dbconnect.Connect(), user.Id, code); err != nil {
+	if err = consume(user.Id, code); err != nil {
 		t.Fatal(err)
 	}
-	if err = consume(dbconnect.Connect(), user.Id, code); err == nil {
+	if err = consume(user.Id, code); err == nil {
 		t.Fatal("TOTP replay accepted")
 	}
 }
@@ -242,7 +242,7 @@ func TestRegenerateThenDisableInvalidatesOldCodesAndChallenges(t *testing.T) {
 	if _, err = Login(c, codes[1]); err == nil || r.Header().Get("New-Token") != "" {
 		t.Fatal("old challenge survived regeneration")
 	}
-	if err = consume(dbconnect.Connect(), user.Id, codes[1]); err == nil {
+	if err = consume(user.Id, codes[1]); err == nil {
 		t.Fatal("old recovery code survived regeneration")
 	}
 	c, _ = testContext(nil)
@@ -264,7 +264,7 @@ func TestRegenerateThenDisableInvalidatesOldCodesAndChallenges(t *testing.T) {
 func TestExhaustedRecoveryCodesStillAllowTOTP(t *testing.T) {
 	user, codes := enabledUser(t)
 	for _, code := range codes {
-		if err := consume(dbconnect.Connect(), user.Id, code); err != nil {
+		if err := consume(user.Id, code); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -289,7 +289,7 @@ func TestExhaustedRecoveryCodesStillAllowTOTP(t *testing.T) {
 	if _, err = Login(c, code); err != nil || r.Header().Get("New-Token") == "" {
 		t.Fatalf("TOTP after recovery exhaustion: %v", err)
 	}
-	if err = consume(dbconnect.Connect(), user.Id, codes[0]); err == nil {
+	if err = consume(user.Id, codes[0]); err == nil {
 		t.Fatal("exhausted recovery code accepted")
 	}
 }
