@@ -2,6 +2,7 @@ package users
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -19,18 +20,18 @@ func UpdateVerifiedEmailByVersion(userID, version uint64, email string) error {
 }
 
 func updateEmailByVersion(userID, version uint64, email string, verified bool) error {
-	email = identityKey(email)
+	email = strings.TrimSpace(email)
 	db := builder()
 	if err := CheckIdentityAvailable("", email, userID); err != nil {
 		return err
 	}
 	changes := map[string]any{
-		"email": email, "is_activated": ActivationPending, "activated_at": nil,
+		"email": email, "email_normalized": identityKey(email), "is_activated": ActivationPending, "activated_at": nil,
 		"requires_email_verification": true,
 		"token_version":               gorm.Expr("token_version + 1"),
 	}
 	if email == "" {
-		changes["email"] = nil
+		changes["email_normalized"] = nil
 	}
 	if verified {
 		changes["is_activated"] = ActivationSuccess
@@ -48,12 +49,12 @@ func updateEmailByVersion(userID, version uint64, email string, verified bool) e
 }
 
 func UpdateUsernameByVersion(userID, version uint64, username string) error {
-	username = identityKey(username)
+	username = strings.TrimSpace(username)
 	db := builder()
 	if err := CheckIdentityAvailable(username, "", userID); err != nil {
 		return err
 	}
-	result := db.Where("id = ? AND token_version = ?", userID, version).Updates(map[string]any{"username": username})
+	result := db.Where("id = ? AND token_version = ?", userID, version).Updates(map[string]any{"username": username, "username_lower": identityKey(username)})
 	if result.Error != nil {
 		return identityWriteError(result.Error, username, "", userID)
 	}

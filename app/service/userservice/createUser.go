@@ -20,8 +20,8 @@ func CreateUser(username, password, email string, needValid bool, locale ...stri
 
 // CreateUserWithBinding retains a provider identity on the account so failed bindings can be retried.
 func CreateUserWithBinding(username, password, email string, needValid bool, binding *userOAuth.Entity, locale ...string) (*users.EntityComplete, error) {
-	username = strings.ToLower(strings.TrimSpace(username))
-	email = strings.ToLower(strings.TrimSpace(email))
+	username = strings.TrimSpace(username)
+	email = strings.TrimSpace(email)
 	userEntity := users.MakeUser(username, password, email)
 	userEntity.Locale = normalizeUserLocale(locale...)
 	userEntity.Nickname = GenerateGooseNickname()

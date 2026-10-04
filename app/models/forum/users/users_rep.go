@@ -28,9 +28,9 @@ func Verify(usernameOrEmail string, password string) (*EntityComplete, error) {
 	var user EntityComplete
 	var err error
 	if strings.Contains(usernameOrEmail, "@") {
-		err = builder().Where("email = ?", usernameOrEmail).First(&user).Error
+		err = builder().Where("email_normalized = ?", usernameOrEmail).First(&user).Error
 	} else {
-		err = builder().Where("username = ?", usernameOrEmail).First(&user).Error
+		err = builder().Where("username_lower = ?", usernameOrEmail).First(&user).Error
 	}
 	if err != nil {
 		return &user, err
@@ -44,12 +44,12 @@ func Verify(usernameOrEmail string, password string) (*EntityComplete, error) {
 
 // GetByEmail 通过邮箱获取用户
 func GetByEmail(email string) (entity EntityComplete, err error) {
-	err = builder().Where("email = ?", identityKey(email)).First(&entity).Error
+	err = builder().Where("email_normalized = ?", identityKey(email)).First(&entity).Error
 	return
 }
 
 func GetByUsername(username string) (entity EntityComplete, err error) {
-	err = builder().Where("username = ?", identityKey(username)).First(&entity).Error
+	err = builder().Where("username_lower = ?", identityKey(username)).First(&entity).Error
 	return
 }
 
@@ -71,7 +71,7 @@ func Create(entity *EntityComplete) error {
 }
 
 func Save(entity *EntityComplete) error {
-	result := builder().Omit("username", "email", "is_activated", "activated_at", "requires_email_verification", "password", "token_version", "role_id", "restriction_status", "restriction_until", "restriction_reason").Save(entity)
+	result := builder().Omit("username", "username_lower", "email", "email_normalized", "is_activated", "activated_at", "requires_email_verification", "password", "token_version", "role_id", "restriction_status", "restriction_until", "restriction_reason").Save(entity)
 	return result.Error
 }
 
@@ -224,13 +224,13 @@ func GetMapByIds(userIds []uint64) map[uint64]*EntityComplete {
 // ExistUsername 检查用户名是否已存在
 func ExistUsername(username string) bool {
 	var id uint64
-	return builder().Select("1").Where("username = ?", username).Limit(1).Scan(&id).RowsAffected > 0
+	return builder().Select("1").Where("username_lower = ?", identityKey(username)).Limit(1).Scan(&id).RowsAffected > 0
 }
 
 // ExistEmail 检查邮箱是否已存在
 func ExistEmail(email string) bool {
 	var id uint64
-	return builder().Select("1").Where("email = ?", email).Limit(1).Scan(&id).RowsAffected > 0
+	return builder().Select("1").Where("email_normalized = ?", identityKey(email)).Limit(1).Scan(&id).RowsAffected > 0
 }
 
 func IncrementPrestige(addNumber int64, userId uint64) int64 {

@@ -51,6 +51,30 @@ func TestEmailAndUsernameChangesRejectStaleTokenVersion(t *testing.T) {
 	}
 }
 
+func TestIdentityChangesPreserveDisplayCaseAndNormalizeLookup(t *testing.T) {
+	user := identityTestUser(t)
+	username := "Mixed-" + user.Username
+	email := "Mixed-" + user.Email
+	if err := UpdateUsernameByVersion(user.Id, user.TokenVersion, "  "+username+"  "); err != nil {
+		t.Fatal(err)
+	}
+	if err := UpdateEmailByVersion(user.Id, user.TokenVersion, "  "+email+"  "); err != nil {
+		t.Fatal(err)
+	}
+	actual := readIdentityTestUser(t, user.Id)
+	if actual.Username != username || actual.Email != email || actual.UsernameLower != strings.ToLower(username) || actual.EmailNormalized != strings.ToLower(email) {
+		t.Fatalf("identity fields were not synchronized: %+v", actual)
+	}
+	byUsername, err := GetByUsername(strings.ToUpper(username))
+	if err != nil || byUsername.Id != user.Id || !ExistUsername(strings.ToUpper(username)) {
+		t.Fatalf("case-insensitive username lookup failed: id=%d error=%v", byUsername.Id, err)
+	}
+	byEmail, err := GetByEmail(strings.ToUpper(email))
+	if err != nil || byEmail.Id != user.Id || !ExistEmail(strings.ToUpper(email)) {
+		t.Fatalf("case-insensitive email lookup failed: id=%d error=%v", byEmail.Id, err)
+	}
+}
+
 func TestEmailAndUsernameChangesRejectCaseInsensitiveConflicts(t *testing.T) {
 	owner, target := identityTestUser(t), identityTestUser(t)
 	if err := UpdateEmailByVersion(target.Id, target.TokenVersion, strings.ToUpper(owner.Email)); !errors.Is(err, ErrEmailExists) {

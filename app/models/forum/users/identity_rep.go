@@ -21,7 +21,7 @@ func CheckIdentityAvailable(username, email string, excludeUserID uint64) error 
 		column, value string
 		conflict      error
 	}{
-		{"username", username, ErrUsernameExists}, {"email", email, ErrEmailExists},
+		{"username_lower", username, ErrUsernameExists}, {"email_normalized", email, ErrEmailExists},
 	} {
 		if strings.TrimSpace(identity.value) == "" {
 			continue
@@ -41,8 +41,10 @@ func CheckIdentityAvailable(username, email string, excludeUserID uint64) error 
 func identityKey(value string) string { return strings.ToLower(strings.TrimSpace(value)) }
 
 func (user *EntityComplete) BeforeCreate(_ *gorm.DB) error {
-	user.Username = identityKey(user.Username)
-	user.Email = identityKey(user.Email)
+	user.Username = strings.TrimSpace(user.Username)
+	user.Email = strings.TrimSpace(user.Email)
+	user.UsernameLower = identityKey(user.Username)
+	user.EmailNormalized = identityKey(user.Email)
 	return nil
 }
 

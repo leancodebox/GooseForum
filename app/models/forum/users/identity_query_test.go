@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestNormalizedIdentityUsesUniqueIndexes(t *testing.T) {
@@ -36,14 +37,14 @@ func TestNormalizedIdentityUsesUniqueIndexes(t *testing.T) {
 		t.Fatal("database accepted duplicate normalized email")
 	}
 	var nullEmails int64
-	if err := db.Model(&EntityComplete{}).Where("email IS NULL").Count(&nullEmails).Error; err != nil || nullEmails != 2 {
+	if err := db.Model(&EntityComplete{}).Where("email_normalized IS NULL").Count(&nullEmails).Error; err != nil || nullEmails != 2 {
 		t.Fatalf("missing emails must use NULL: %d %v", nullEmails, err)
 	}
 	var rows []EntityComplete
 	if err := db.Order("id").Find(&rows).Error; err != nil {
 		t.Fatal(err)
 	}
-	if len(rows) != 3 || rows[0].Username != "legacyuser" || rows[0].Email != "legacy@example.com" || rows[1].Email != "" {
+	if len(rows) != 3 || rows[0].Username != "LegacyUser" || rows[0].Email != "Legacy@Example.com" || rows[0].UsernameLower != "legacyuser" || rows[0].EmailNormalized != "legacy@example.com" || rows[1].EmailNormalized != "" {
 		t.Fatalf("identity normalization: %+v", rows)
 	}
 	owner := identityTestUser(t)
@@ -58,10 +59,10 @@ func TestNormalizedIdentityUsesUniqueIndexes(t *testing.T) {
 		args  []any
 		index string
 	}{
-		{"SELECT id, username FROM users WHERE username = ? AND id <> ? AND deleted_at IS NULL LIMIT 1", []any{"legacyuser", 0}, "ux_users_username"},
-		{"SELECT id, username FROM users WHERE email = ? AND id <> ? AND deleted_at IS NULL LIMIT 1", []any{"legacy@example.com", 0}, "ux_users_email"},
-		{"SELECT id, username FROM users WHERE username >= ? AND username < ? AND deleted_at IS NULL ORDER BY username LIMIT 8", []any{"leg", "leg~"}, "ux_users_username"},
-		{"SELECT id, username FROM users WHERE (id IN (?) OR username IN (?)) AND deleted_at IS NULL", []any{1, "legacyuser"}, "ux_users_username"},
+		{"SELECT id, username FROM users WHERE username_lower = ? AND id <> ? AND deleted_at IS NULL LIMIT 1", []any{"legacyuser", 0}, "ux_users_username_lower"},
+		{"SELECT id, username FROM users WHERE email_normalized = ? AND id <> ? AND deleted_at IS NULL LIMIT 1", []any{"legacy@example.com", 0}, "ux_users_email_normalized"},
+		{"SELECT id, username, restriction_status, restriction_until FROM users WHERE username_lower >= ? AND username_lower < ? AND (restriction_status IN (?, ?) OR restriction_status = '' OR restriction_until <= ?) AND deleted_at IS NULL ORDER BY username_lower LIMIT 8", []any{"leg", "leg~", RestrictionNormal, RestrictionSuspended, time.Now()}, "ux_users_username_lower"},
+		{"SELECT id, username FROM users WHERE (id IN (?) OR username_lower IN (?)) AND deleted_at IS NULL", []any{1, "legacyuser"}, "ux_users_username_lower"},
 	} {
 		var plan []struct{ Detail string }
 		if err := db.Raw("EXPLAIN QUERY PLAN "+query.sql, query.args...).Scan(&plan).Error; err != nil {
@@ -71,7 +72,7 @@ func TestNormalizedIdentityUsesUniqueIndexes(t *testing.T) {
 		for _, row := range plan {
 			details += row.Detail + "\n"
 		}
-		if !strings.Contains(details, query.index) || strings.Contains(details, "TEMP B-TREE") {
+		if !strings.Contains(details, query.index) || strings.Contains(details, "TEMP B-TREE") || strings.Contains(details, "SCAN users") {
 			t.Fatalf("inefficient plan: %s", details)
 		}
 	}

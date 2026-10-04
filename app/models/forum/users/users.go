@@ -74,8 +74,10 @@ type EntityComplete struct {
 	OAuthRegistrationKey *string `gorm:"column:oauth_registration_key;type:varchar(64);uniqueIndex" json:"-"`
 	// base
 	Id                        uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"` //
-	Username                  string     `gorm:"column:username;uniqueIndex:ux_users_username;type:varchar(64);not null;" json:"username"`
-	Email                     string     `gorm:"column:email;uniqueIndex:ux_users_email;type:varchar(128);default:null;" json:"email"`
+	Username                  string     `gorm:"column:username;type:varchar(64);not null;" json:"username"`
+	UsernameLower             string     `gorm:"column:username_lower;uniqueIndex:ux_users_username_lower;type:varchar(64);not null" json:"-"`
+	Email                     string     `gorm:"column:email;type:varchar(128);not null;default:''" json:"email"`
+	EmailNormalized           string     `gorm:"column:email_normalized;uniqueIndex:ux_users_email_normalized;type:varchar(128);default:null" json:"-"`
 	Password                  string     `gorm:"column:password;type:varchar(128);not null;default:'';" json:"-"`   //
 	TokenVersion              uint64     `gorm:"column:token_version;not null;default:0;" json:"-"`                 // 登录令牌版本，改密后自增
 	Locale                    string     `gorm:"column:locale;type:varchar(16);not null;default:'';" json:"locale"` // 用户语言偏好
