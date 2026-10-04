@@ -18,6 +18,7 @@ import { Spinner } from '@gooseforum/ui/components/spinner'
 import { Switch } from '@gooseforum/ui/components/switch'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@gooseforum/ui/components/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@gooseforum/ui/components/tabs'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@gooseforum/ui/components/tooltip'
 import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, RefreshCw, Search, ShieldOff, UserCog } from 'lucide-react'
 import { toast } from 'sonner'
 import type { UserTextKey } from '../users-i18n'
@@ -58,7 +59,7 @@ export function UsersManagementPage({ api, text, locale = 'en', canResetMFA = fa
   }, [beginRequest, api, appliedSearch, page, pageSize, text])
 
   useEffect(() => { void load() }, [load])
-  useEffect(() => { if (page > totalPages) setPage(totalPages) }, [page, totalPages])
+  useEffect(() => { if (!loading && !error && page > totalPages) setPage(totalPages) }, [page, totalPages, loading, error])
 
   function applySearch(event?: React.FormEvent) {
     event?.preventDefault()
@@ -67,21 +68,63 @@ export function UsersManagementPage({ api, text, locale = 'en', canResetMFA = fa
   }
 
   return <AdminPage>
-    <header><h2 className="text-lg font-semibold tracking-tight">{text('title')}</h2><p className="text-xs text-muted-foreground">{text('description')}</p></header>
+    <header className="space-y-1"><h2 className="text-xl font-semibold">{text('title')}</h2><p className="text-sm text-muted-foreground">{text('description')}</p></header>
     {error ? <Alert variant="destructive"><AlertTriangle /><AlertTitle>{text('loadFailed')}</AlertTitle><AlertDescription className="flex items-center justify-between gap-3"><span>{error}</span><Button variant="outline" size="sm" onClick={() => void load()}>{text('retry')}</Button></AlertDescription></Alert> : null}
-    <section className="overflow-hidden rounded-lg border bg-background">
-      <div className="flex flex-col gap-2 border-b bg-muted/20 p-2 lg:flex-row lg:items-center lg:justify-between">
-        <form className="flex min-w-0 flex-1 items-center gap-1.5 lg:max-w-md" onSubmit={applySearch}><div className="relative min-w-0 flex-1"><Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} className="h-8 pl-8" placeholder={text('search')} /></div><Button size="sm" type="submit">{text('searchAction')}</Button>{appliedSearch ? <Button variant="ghost" size="sm" type="button" onClick={() => { setSearch(''); setAppliedSearch(''); setPage(1) }}>{text('clear')}</Button> : null}</form>
-        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground"><Button variant="outline" size="sm" disabled={loading} onClick={() => void load()}><RefreshCw data-icon="inline-start" className={loading ? 'animate-spin' : undefined} />{text('refresh')}</Button><span className="whitespace-nowrap">{rangeStart}-{rangeEnd} / {total}</span><Select value={String(pageSize)} onValueChange={(value) => { setPageSize(Number(value)); setPage(1) }}><SelectTrigger size="sm" className="w-20"><SelectValue /></SelectTrigger><SelectContent><SelectGroup>{[10, 20, 30, 50].map((size) => <SelectItem key={size} value={String(size)}>{size}</SelectItem>)}</SelectGroup></SelectContent></Select><Button variant="outline" size="icon-sm" disabled={page <= 1 || loading} title={text('previous')} onClick={() => setPage(page - 1)}><ChevronLeft /></Button><span className="min-w-12 text-center">{page}/{totalPages}</span><Button variant="outline" size="icon-sm" disabled={page >= totalPages || loading} title={text('next')} onClick={() => setPage(page + 1)}><ChevronRight /></Button></div>
-      </div>
-      {loading && !users.length ? <UserEmpty icon={<Spinner />} title={text('loading')} /> : !users.length ? <UserEmpty icon={<Search />} title={text('empty')} /> : <><div className="hidden md:block"><Table className="min-w-220 table-fixed"><TableHeader className="bg-muted/30"><TableRow><TableHead className="h-8">{text('user')}</TableHead><TableHead className="h-8 w-48">{text('roles')}</TableHead><TableHead className="h-8 w-28">{text('status')}</TableHead><TableHead className="h-8 w-40">{text('createdAt')}</TableHead><TableHead className="h-8 w-40">{text('lastActive')}</TableHead><TableHead className="h-8 w-16 text-right">{text('actions')}</TableHead></TableRow></TableHeader><TableBody>{users.map((user) => <TableRow key={user.userId}><TableCell className="py-2"><UserIdentity user={user} text={text} /></TableCell><TableCell className="py-2"><div className="flex flex-wrap gap-1">{user.roleList?.length ? user.roleList.map((role) => <Badge key={role.value} variant="secondary">{role.name}</Badge>) : <span className="text-xs text-muted-foreground">{text('noRole')}</span>}</div></TableCell><TableCell className="py-2"><Badge variant={(user.restrictionStatus || 'normal') === 'normal' ? 'outline' : 'destructive'}>{(user.restrictionStatus || 'normal') === 'normal' ? <CheckCircle2 data-icon="inline-start" /> : <ShieldOff data-icon="inline-start" />}{(user.restrictionStatus || 'normal') === 'normal' ? text('enabled') : user.restrictionStatus === 'banned' ? text('banned') : text('suspended')}</Badge></TableCell><TableCell className="truncate py-2 text-xs text-muted-foreground">{user.createTime || '—'}</TableCell><TableCell className="truncate py-2 text-xs text-muted-foreground">{user.lastActiveTime || text('never')}</TableCell><TableCell className="py-2 text-right"><Button variant="ghost" size="icon-sm" title={text('edit')} onClick={() => setEditingUser(user)}><UserCog /></Button></TableCell></TableRow>)}</TableBody></Table></div><div className="divide-y md:hidden">{users.map((user) => <article key={user.userId} className="flex items-start gap-2.5 px-3 py-2.5"><UserIdentity user={user} text={text} compact /><Button variant="ghost" size="icon-sm" title={text('edit')} onClick={() => setEditingUser(user)}><UserCog /></Button></article>)}</div></>}
+    <div className="flex flex-wrap items-center justify-between gap-2">
+      <form className="flex min-w-0 flex-1 items-center gap-2 sm:max-w-md" onSubmit={applySearch}>
+        <div className="relative min-w-0 flex-1">
+          <Search aria-hidden="true" className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input aria-label={text('search')} value={search} onChange={(event) => setSearch(event.target.value)} className="h-9 pl-9" placeholder={text('search')} />
+        </div>
+        <Button variant="outline" size="sm" type="submit" className="h-9">{text('searchAction')}</Button>
+        {search || appliedSearch ? <Button variant="ghost" size="sm" type="button" onClick={() => { setSearch(''); setAppliedSearch(''); setPage(1) }}>{text('clear')}</Button> : null}
+      </form>
+      <UserIconButton label={text('refresh')} disabled={loading} onClick={() => void load()}><RefreshCw className={loading ? 'animate-spin motion-reduce:animate-none' : undefined} /></UserIconButton>
+    </div>
+    <section aria-label={text('title')} aria-busy={loading} className="relative overflow-hidden rounded-md border bg-background">
+      {loading && users.length ? <div role="status" className="absolute inset-x-0 top-0 z-10 flex h-8 items-center justify-center gap-2 bg-background/95 text-xs text-muted-foreground"><Spinner />{text('loading')}</div> : null}
+      {loading && !users.length ? <UserEmpty icon={<Spinner />} title={text('loading')} /> : !users.length ? <UserEmpty icon={<Search />} title={text('empty')} /> : <><div className="hidden md:block"><Table className="min-w-220 table-fixed"><TableHeader className="bg-muted/30"><TableRow><TableHead className="h-8">{text('user')}</TableHead><TableHead className="h-8 w-48">{text('roles')}</TableHead><TableHead className="h-8 w-28">{text('status')}</TableHead><TableHead className="h-8 w-40">{text('createdAt')}</TableHead><TableHead className="h-8 w-40">{text('lastActive')}</TableHead><TableHead className="h-8 w-16 text-right">{text('actions')}</TableHead></TableRow></TableHeader><TableBody>{users.map((user) => <TableRow key={user.userId}><TableCell className="py-2"><UserIdentity user={user} text={text} /></TableCell><TableCell className="py-2"><div className="flex flex-wrap gap-1">{user.roleList?.length ? user.roleList.map((role) => <Badge key={role.value} variant="secondary">{role.name}</Badge>) : <span className="text-xs text-muted-foreground">{text('noRole')}</span>}</div></TableCell><TableCell className="py-2"><Badge variant={(user.restrictionStatus || 'normal') === 'normal' ? 'outline' : 'destructive'}>{(user.restrictionStatus || 'normal') === 'normal' ? <CheckCircle2 data-icon="inline-start" /> : <ShieldOff data-icon="inline-start" />}{(user.restrictionStatus || 'normal') === 'normal' ? text('enabled') : user.restrictionStatus === 'banned' ? text('banned') : text('suspended')}</Badge></TableCell><TableCell className="truncate py-2 text-xs text-muted-foreground">{user.createTime || '—'}</TableCell><TableCell className="truncate py-2 text-xs text-muted-foreground">{user.lastActiveTime || text('never')}</TableCell><TableCell className="py-2 text-right"><UserIconButton variant="ghost" label={text('edit')} onClick={() => setEditingUser(user)}><UserCog /></UserIconButton></TableCell></TableRow>)}</TableBody></Table></div><div className="divide-y md:hidden">{users.map((user) => <article key={user.userId} className="flex items-start gap-2.5 px-3 py-2.5"><UserIdentity user={user} text={text} compact /><UserIconButton variant="ghost" label={text('edit')} onClick={() => setEditingUser(user)}><UserCog /></UserIconButton></article>)}</div></>}
     </section>
+    <footer className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 text-xs">
+      <span className="text-muted-foreground" aria-live="polite">{rangeStart}-{rangeEnd} / {total}</span>
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex items-center gap-2">
+          <label htmlFor="users-page-size" className="text-muted-foreground">{text('perPage')}</label>
+          <Select value={String(pageSize)} onValueChange={(value) => { setPageSize(Number(value)); setPage(1) }}>
+            <SelectTrigger id="users-page-size" size="sm" className="w-18"><SelectValue /></SelectTrigger>
+            <SelectContent><SelectGroup>{[10, 20, 30, 50].map((size) => <SelectItem key={size} value={String(size)}>{size}</SelectItem>)}</SelectGroup></SelectContent>
+          </Select>
+        </div>
+        <nav aria-label={text('page')} className="flex items-center gap-2">
+          <span className="min-w-12 text-center tabular-nums">{page} / {totalPages}</span>
+          <UserIconButton label={text('previous')} disabled={page <= 1 || loading} onClick={() => setPage(page - 1)}><ChevronLeft /></UserIconButton>
+          <UserIconButton label={text('next')} disabled={page >= totalPages || loading} onClick={() => setPage(page + 1)}><ChevronRight /></UserIconButton>
+        </nav>
+      </div>
+    </footer>
     <UserEditor key={editingUser?.userId || 'closed'} user={editingUser} api={api} text={text} locale={locale} canResetMFA={canResetMFA && editingUser?.userId !== currentUserId} onClose={() => setEditingUser(null)} onSaved={async () => { setEditingUser(null); await load() }} />
   </AdminPage>
 }
 
+function UserIconButton({ label, children, variant = 'outline', ...props }: Omit<React.ComponentProps<typeof Button>, 'size'> & { label: string }) {
+  return <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant={variant} size="icon-sm" aria-label={label} {...props}>{children}</Button></TooltipTrigger><TooltipContent>{label}</TooltipContent></Tooltip></TooltipProvider>
+}
+
 function UserIdentity({ user, text, compact = false }: { user: AdminUser; text: Text; compact?: boolean }) {
-  return <div className="flex min-w-0 flex-1 items-center gap-2.5"><a href={`/u/${user.userId}`} target="_blank" rel="noreferrer" className="shrink-0"><Avatar className={compact ? 'size-10' : 'size-9'}><AvatarImage src={user.avatarUrl || undefined} alt={user.username} /><AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar></a><div className="min-w-0 flex-1"><a href={`/u/${user.userId}`} target="_blank" rel="noreferrer" className="block truncate font-semibold hover:text-primary hover:underline">{user.username}</a><div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground"><span className="truncate">{user.email || '—'}</span><Badge variant="outline" className="shrink-0">{user.validate === 1 ? text('verified') : text('unverified')}</Badge></div>{compact ? <div className="mt-1 flex flex-wrap gap-1"><Badge variant={(user.restrictionStatus || 'normal') === 'normal' ? 'outline' : 'destructive'}>{(user.restrictionStatus || 'normal') === 'normal' ? text('enabled') : user.restrictionStatus === 'banned' ? text('banned') : text('suspended')}</Badge>{user.roleList?.map((role) => <Badge key={role.value} variant="secondary">{role.name}</Badge>)}</div> : null}</div></div>
+  return <div className="flex min-w-0 flex-1 items-start gap-2.5">
+    <a href={`/u/${user.userId}`} target="_blank" rel="noreferrer" className="shrink-0"><Avatar className={compact ? 'size-10' : 'size-9'}><AvatarImage src={user.avatarUrl || undefined} alt={user.username} /><AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar></a>
+    <div className="min-w-0 flex-1">
+      <a href={`/u/${user.userId}`} target="_blank" rel="noreferrer" className="block truncate font-semibold hover:text-primary hover:underline">{user.username}</a>
+      <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground"><span className="truncate" title={user.email}>{user.email || '—'}</span><Badge variant="outline" className="shrink-0">{user.validate === 1 ? text('verified') : text('unverified')}</Badge></div>
+      {compact ? <>
+        <div className="mt-2 flex flex-wrap gap-1"><Badge variant={(user.restrictionStatus || 'normal') === 'normal' ? 'outline' : 'destructive'}>{(user.restrictionStatus || 'normal') === 'normal' ? text('enabled') : user.restrictionStatus === 'banned' ? text('banned') : text('suspended')}</Badge>{user.roleList?.map((role) => <Badge key={role.value} variant="secondary">{role.name}</Badge>)}</div>
+        <dl className="mt-2 grid gap-1 text-xs text-muted-foreground">
+          <div className="flex flex-wrap gap-x-2"><dt>{text('createdAt')}</dt><dd>{user.createTime || '—'}</dd></div>
+          <div className="flex flex-wrap gap-x-2"><dt>{text('lastActive')}</dt><dd>{user.lastActiveTime || text('never')}</dd></div>
+        </dl>
+      </> : null}
+    </div>
+  </div>
 }
 
 function UserEditor({ user, api, text, locale, canResetMFA, onClose, onSaved }: { user: AdminUser | null; api: GooseAdminApi; text: Text; locale: string; canResetMFA: boolean; onClose(): void; onSaved(): Promise<void> }) {
@@ -198,14 +241,14 @@ function UserEditor({ user, api, text, locale, canResetMFA, onClose, onSaved }: 
                   <FieldLabel htmlFor="user-email-verification">{text('emailVerification')}</FieldLabel>
                   <span className="flex h-9 items-center justify-between gap-2 text-xs text-muted-foreground">
                     {form.validate === 1 ? text('verified') : text('unverified')}
-                    <Switch id="user-email-verification" checked={form.validate === 1} onCheckedChange={(checked) => setForm({ ...form, validate: checked ? 1 : 0 })} />
+                    <Switch id="user-email-verification" disabled={saving} checked={form.validate === 1} onCheckedChange={(checked) => setForm({ ...form, validate: checked ? 1 : 0 })} />
                   </span>
                 </Field>
                 <RestrictionFields value={restriction} initialStatus={restrictionForm(user).status} onChange={(value) => { setRestriction(value.status !== restriction.status ? { ...value, reason: value.status === restrictionForm(user).status ? restrictionForm(user).reason : '' } : value); setValidationError('') }} text={text} locale={locale} reasonClassName="order-5 sm:col-span-3" />
                 {validationError ? <p role="alert" className="order-6 text-sm sm:col-span-3">{validationError}</p> : null}
               </FieldGroup>
               {user && canResetMFA ? <UserMFAReset userId={user.userId} username={user.username} api={api} text={text} disabled={saving} /> : null}
-              <dl className="mt-4 grid grid-cols-3 gap-3 border-t pt-3 text-xs">
+              <dl className="mt-4 grid grid-cols-2 gap-3 border-t pt-3 text-xs sm:grid-cols-3">
                 <Detail label={text('createdAt')} value={user?.createTime || '—'} />
                 <Detail label={text('lastActive')} value={user?.lastActiveTime || text('never')} />
                 <Detail label={text('prestige')} value={String(user?.prestige || 0)} />
