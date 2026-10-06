@@ -228,6 +228,7 @@ type HomeProps struct {
 type TabPayload struct {
 	Key    string `json:"key"`
 	Label  string `json:"label"`
+	Color  string `json:"color,omitempty"`
 	URL    string `json:"url"`
 	Active bool   `json:"active"`
 }

@@ -106,7 +106,7 @@ function TabsList({
       {children}
       {variant === "line" && indicator ? (
         <span aria-hidden="true" className="pointer-events-none absolute left-0 top-0 h-0.5 w-px origin-left transition-transform duration-200 ease-out motion-reduce:transition-none"
-          style={{ transform: `translate(${indicator.x}px, ${indicator.y}px) scaleX(${indicator.width})`, backgroundColor: "var(--tabs-indicator-color, var(--foreground))" }} />
+          style={{ width: 1, height: 2, transform: `translate(${indicator.x}px, ${indicator.y}px) scaleX(${indicator.width})`, backgroundColor: "var(--tabs-indicator-color, var(--foreground))" }} />
       ) : null}
     </TabsPrimitive.List>
   )

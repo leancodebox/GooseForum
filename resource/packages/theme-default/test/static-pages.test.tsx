@@ -981,6 +981,7 @@ describe("AppShell and static pages", () => {
         {
           key: "chat",
           label: "吐槽/脑洞",
+          color: "#8241d6",
           url: "/moderation?category=chat",
           active: true,
         },
@@ -998,7 +999,7 @@ describe("AppShell and static pages", () => {
           title: "Spam topic",
           excerpt: "Bad content",
           reason: "spam",
-          note: "",
+          note: "Please check the full conversation.",
           status: "open",
           resolution: "",
           reporter: { id: 2, username: "reporter", avatarUrl: "" },
@@ -1024,36 +1025,19 @@ describe("AppShell and static pages", () => {
     ).toBeTruthy();
     const tabsLists = document.querySelectorAll('[data-slot="tabs-list"]');
     expect(tabsLists).toHaveLength(2);
-    expect(
-      tabsLists[0]?.classList.contains("group-data-horizontal/tabs:h-auto"),
-    ).toBe(true);
-    expect(tabsLists[0]?.classList.contains("rounded-none")).toBe(true);
-    expect(tabsLists[0]?.classList.contains("bg-transparent")).toBe(true);
-    const moderationTabsFrame = document.querySelector(
-      '[data-slot="moderation-tabs-frame"]',
-    );
-    expect(moderationTabsFrame?.classList.contains("bg-muted/50")).toBe(true);
-    expect(moderationTabsFrame?.classList.contains("border-b")).toBe(true);
-    const moderationCard = moderationTabsFrame?.closest('[data-slot="card"]');
-    expect(moderationCard).toBeTruthy();
-    expect(moderationCard?.contains(screen.getByText("Spam topic"))).toBe(true);
-    expect(
-      tabsLists[1]?.classList.contains("group-data-horizontal/tabs:h-auto"),
-    ).toBe(true);
-    expect(
-      tabsLists[1]?.classList.contains("group-data-horizontal/tabs:h-8"),
-    ).toBe(false);
-    expect(
-      screen.getByRole("tab", { name: "待处理" }).classList.contains("flex-none"),
-    ).toBe(true);
-    expect(tabsLists[0]?.classList.contains("w-full")).toBe(true);
-    expect(tabsLists[1]?.classList.contains("w-full")).toBe(true);
+    expect(tabsLists[0]?.getAttribute("data-variant")).toBe("line");
+    expect(tabsLists[1]?.getAttribute("data-variant")).toBe("default");
+    expect(screen.getByText("Bad content")).toBeTruthy();
+    expect(screen.getByText(/Please check the full conversation/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: /reporter/ })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "刷新举报" }));
+    await waitFor(() => expect(reports).toHaveBeenCalledTimes(2));
+    expect(reports).toHaveBeenLastCalledWith(0, 20, "open");
     await user.click(screen.getByRole("tab", { name: "管理提醒" }));
     const reminder = screen
       .getByText(/权力越大责任越大/)
       .closest('[data-slot="alert"]');
     expect(reminder).toBeTruthy();
-    expect(reminder?.parentElement?.classList.contains("lg:p-4")).toBe(true);
     expect(screen.getByText("先对照规则").closest("article")).toBeTruthy();
     await user.click(screen.getByRole("tab", { name: "举报" }));
     await user.click(screen.getByRole("button", { name: "封禁" }));
@@ -1062,8 +1046,10 @@ describe("AppShell and static pages", () => {
     await waitFor(() => expect(screen.queryByText("Spam topic")).toBeNull());
     await user.click(screen.getByRole("tab", { name: "封禁记录" }));
     const activeCategory = screen.getByRole("link", { name: "吐槽/脑洞" });
-    expect(activeCategory.getAttribute("data-variant")).toBe("default");
+    expect(activeCategory.getAttribute("data-variant")).toBe("outline");
     expect(activeCategory.getAttribute("aria-current")).toBe("page");
+    expect(activeCategory.style.borderColor).toBe("rgb(130, 65, 214)");
+    expect(activeCategory.querySelector("span")?.style.backgroundColor).toBe("rgb(130, 65, 214)");
   });
 
   it("localizes server-backed error pages", async () => {

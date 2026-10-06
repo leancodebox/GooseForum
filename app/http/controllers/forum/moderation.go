@@ -474,6 +474,7 @@ func buildModerationCategoryTabs(categories []TopicCategoryPayload, activeID uin
 		tabs = append(tabs, TabPayload{
 			Key:    strconv.FormatUint(category.ID, 10),
 			Label:  category.Name,
+			Color:  category.Color,
 			URL:    buildModerationPageURL(category.ID, 1),
 			Active: category.ID == activeID,
 		})

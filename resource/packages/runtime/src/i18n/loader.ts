@@ -104,6 +104,7 @@ function loadNamespace(locale: string, namespace: string): Promise<void> {
             ...legacy.reportReasons,
           };
         if (namespace === "moderation") {
+          dictionary.blocked = base.blocked;
           dictionary.tabs = { ...base.tabs, ...legacy.managementTabs };
           dictionary.reports = { ...base.reports, ...legacy.reports };
           dictionary.logs = { ...base.logs, ...legacy.logs };

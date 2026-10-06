@@ -28,7 +28,7 @@ import {
   AvatarImage,
 } from "@gooseforum/ui/components/avatar";
 import { Button } from "@gooseforum/ui/components/button";
-import { Card } from "@gooseforum/ui/components/card";
+import { Badge } from "@gooseforum/ui/components/badge";
 import {
   Empty,
   EmptyDescription,
@@ -50,7 +50,7 @@ import { UserCardPopover } from "../users/user-card-popover";
 
 type ConsoleTab = "reports" | "ban" | "logs" | "guidance";
 type ReportStatus = "open" | "closed";
-const consoleTabs: Array<{ key: ConsoleTab; icon: ComponentType }> = [
+const consoleTabs: Array<{ key: ConsoleTab; icon: ComponentType<{ className?: string }> }> = [
   { key: "reports", icon: Flag },
   { key: "ban", icon: Ban },
   { key: "logs", icon: History },
@@ -201,27 +201,31 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
       <Tabs
         value={tab}
         onValueChange={(value) => setTab(value as ConsoleTab)}
-        className="gap-0"
+        className="gap-0 px-4 lg:px-0"
       >
-        <Card className="site-panel mb-0 gap-0 py-0 lg:mb-4">
+        <div className="min-w-0">
           <div
             data-slot="moderation-tabs-frame"
-            className="border-b bg-muted/50 p-2"
+            className="border-b"
           >
-            <TabsList className="-m-1 h-auto w-full max-w-full justify-start gap-1 overflow-x-auto rounded-none bg-transparent p-1 group-data-horizontal/tabs:h-auto">
+            <TabsList
+              variant="line"
+              aria-label={t("title")}
+              className="h-auto min-h-9 w-full max-w-full justify-start gap-1 rounded-none group-data-horizontal/tabs:h-auto sm:gap-4"
+            >
               {consoleTabs.map(({ key, icon: Icon }) => (
                 <TabsTrigger
                   key={key}
                   value={key}
-                  className="h-8 flex-none px-3"
+                  className="h-auto min-h-8 min-w-0 flex-1 gap-1.5 whitespace-normal px-1 text-center text-xs leading-6 sm:px-3 sm:text-sm"
                 >
-                  <Icon />
+                  <Icon className="hidden size-4 shrink-0 sm:block" />
                   {t(`tabs.${key}`)}
                 </TabsTrigger>
               ))}
             </TabsList>
           </div>
-          <TabsContent value="reports">
+          <TabsContent value="reports" className="mt-0">
             <ReportsPanel
               status={reportStatus}
               items={reports}
@@ -234,10 +238,11 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
               locale={runtime.locale}
               onStatus={changeReportStatus}
               onLoad={() => void loadReports()}
+              onRefresh={() => void loadReports(true)}
               onAction={(item, action) => void handleReport(item, action)}
             />
           </TabsContent>
-          <TabsContent value="ban">
+          <TabsContent value="ban" className="mt-0 pt-5">
             <BlockedPanel
               page={page}
               topics={topics}
@@ -247,7 +252,7 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
               onRestore={(topic) => void restoreTopic(topic)}
             />
           </TabsContent>
-          <TabsContent value="logs">
+          <TabsContent value="logs" className="mt-0 pt-1">
             <LogsPanel
               items={logs}
               loading={logLoading}
@@ -259,10 +264,10 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
               onLoad={() => void loadLogs()}
             />
           </TabsContent>
-          <TabsContent value="guidance">
+          <TabsContent value="guidance" className="mt-0 pt-5">
             <Guidance t={t} />
           </TabsContent>
-        </Card>
+        </div>
       </Tabs>
     </main>
   );
@@ -281,6 +286,7 @@ function ReportsPanel({
   locale,
   onStatus,
   onLoad,
+  onRefresh,
   onAction,
 }: {
   status: ReportStatus;
@@ -294,6 +300,7 @@ function ReportsPanel({
   locale: string;
   onStatus(value: ReportStatus): void;
   onLoad(): void;
+  onRefresh(): void;
   onAction(item: ModerationReportItem, action: "ban" | "reject"): void;
 }) {
   return (
@@ -303,50 +310,52 @@ function ReportsPanel({
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
-      <div className="overflow-hidden">
-        <Tabs
-          value={status}
-          onValueChange={(value) => onStatus(value as ReportStatus)}
-          className="gap-0"
-        >
-          <TabsList className="h-auto w-full justify-start gap-1 rounded-none border-b bg-muted/50 p-2 group-data-horizontal/tabs:h-auto">
-            <TabsTrigger
-              value="open"
-              className="h-8 flex-none rounded-md px-3 font-semibold"
-            >
-              {t("reports.statusTabs.open")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="closed"
-              className="h-8 flex-none rounded-md px-3 font-semibold"
-            >
-              {t("reports.statusTabs.closed")}
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+      <div className="min-w-0">
+        <div className="flex items-center justify-between gap-4 py-5">
+          <Tabs value={status} onValueChange={(value) => onStatus(value as ReportStatus)} className="gap-0">
+            <TabsList aria-label={t("tabs.reports")} className="h-8">
+              <TabsTrigger value="open" className="flex-none px-3 text-xs">
+                {t("reports.statusTabs.open")}
+              </TabsTrigger>
+              <TabsTrigger value="closed" className="flex-none px-3 text-xs">
+                {t("reports.statusTabs.closed")}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            aria-label={t("reports.refresh")}
+            title={t("reports.refresh")}
+            disabled={loading}
+            onClick={onRefresh}
+          >
+            {loading ? <Spinner /> : <RotateCcw />}
+          </Button>
+        </div>
         {items.length ? (
-          <div className="divide-y">
+          <div className="divide-y border-t" aria-busy={loading}>
             {items.map((item) => (
               <article
                 key={item.id}
-                className="grid grid-cols-[28px_minmax(0,1fr)] gap-3 px-3 py-2.5 hover:bg-muted/40 lg:grid-cols-[28px_minmax(0,1fr)_150px_180px_auto] lg:items-center"
+                className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 py-4 hover:bg-muted/40 sm:px-3 lg:grid-cols-[minmax(0,1fr)_140px_130px_150px] lg:items-center"
+                aria-busy={busy.has(item.id)}
               >
-                <span className="flex size-7 items-center justify-center rounded bg-muted text-warning">
-                  <Flag />
+                <div className="col-span-2 flex min-w-0 items-start gap-3 lg:col-span-1">
+                <span className="flex size-7 shrink-0 items-center justify-center rounded bg-muted text-muted-foreground">
+                  <Flag className="size-4" />
                 </span>
-                <div className="min-w-0">
-                  <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                <div className="min-w-0 flex-1">
+                  <div className="flex min-h-7 min-w-0 flex-wrap items-center gap-2">
                     <span className="text-xs text-muted-foreground">
                       {t(`reports.targetTypes.${item.targetType}`)}
                     </span>
-                    <GooseLink
-                      href={item.targetUrl}
-                      className="min-w-0 truncate font-medium text-primary"
-                    >
-                      {item.title}
-                    </GooseLink>
+                    <Badge variant="secondary" className="text-xs">
+                      {t(`reports.reasons.${item.reason}`, { defaultValue: item.reason })}
+                    </Badge>
                     {item.categories.map((category) => (
-                      <span
+                      <GooseLink
+                        href={category.url}
                         key={category.id}
                         className="inline-flex items-center gap-1 text-xs text-muted-foreground"
                       >
@@ -355,50 +364,44 @@ function ReportsPanel({
                           style={{ backgroundColor: category.color }}
                         />
                         {category.name}
-                      </span>
+                      </GooseLink>
                     ))}
                   </div>
-                  <p className="line-clamp-1 text-sm text-muted-foreground">
-                    {item.excerpt || item.note || t("reports.noExcerpt")}
+                  <GooseLink href={item.targetUrl} className="block text-sm font-medium leading-6 hover:text-primary">
+                    {item.title}
+                  </GooseLink>
+                  <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
+                    {item.excerpt || t("reports.noExcerpt")}
                   </p>
-                  <time className="text-xs text-muted-foreground lg:hidden">
-                    {formatDate(item.createdAt, locale)}
-                  </time>
-                </div>
-                <div className="hidden min-w-0 text-sm lg:block">
-                  <p>
-                    <span className="text-muted-foreground">
-                      {t("reports.reason")}{" "}
-                    </span>
-                    {t(`reports.reasons.${item.reason}`, {
-                      defaultValue: item.reason,
-                    })}
-                  </p>
-                  {status === "closed" ? (
-                    <p>
-                      <span className="text-muted-foreground">
-                        {t("reports.status")}{" "}
-                      </span>
-                      {resolution(item, t)}
+                  {item.note && (
+                    <p className="mt-1 text-xs leading-5">
+                      <span className="text-muted-foreground">{t("reports.note")}: </span>{item.note}
                     </p>
-                  ) : null}
+                  )}
+                  {status === "closed" && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t("reports.submitted")} {formatDate(item.createdAt, locale)}
+                    </p>
+                  )}
                 </div>
-                <div className="hidden min-w-0 lg:block">
+                </div>
+                <div className="grid min-w-0 gap-2 pl-10 lg:pl-0">
                   <Person user={item.reporter} label={t("reports.reporter")} />
                   {status === "closed" && item.handler.id ? (
                     <Person user={item.handler} label={t("reports.handler")} />
                   ) : null}
                 </div>
-                <div className="col-start-2 flex flex-wrap items-center gap-2 lg:col-start-auto lg:justify-end">
+                <time dateTime={status === "closed" ? item.handledAt || item.createdAt : item.createdAt} className="col-start-1 pl-10 text-xs text-muted-foreground lg:col-start-auto lg:pl-0">{formatDate(status === "closed" ? item.handledAt || item.createdAt : item.createdAt, locale)}</time>
+                <div className="col-start-2 row-start-2 row-end-4 flex flex-wrap items-center justify-end gap-2 lg:col-start-auto lg:row-auto">
                   {status === "open" ? (
                     <>
                       <Button
                         size="sm"
-                        variant="destructive"
+                        variant="outline"
                         disabled={busy.has(item.id)}
                         onClick={() => onAction(item, "ban")}
                       >
-                        <Ban data-icon="inline-start" />
+                        {busy.has(item.id) ? <Spinner /> : <Ban data-icon="inline-start" />}
                         {t("reports.block")}
                       </Button>
                       <Button
@@ -412,9 +415,7 @@ function ReportsPanel({
                       </Button>
                     </>
                   ) : (
-                    <time className="text-xs text-muted-foreground">
-                      {formatDate(item.handledAt || item.createdAt, locale)}
-                    </time>
+                    <span className="text-xs text-muted-foreground">{resolution(item, t)}</span>
                   )}
                 </div>
               </article>
@@ -468,23 +469,28 @@ function BlockedPanel({
 }) {
   return (
     <section className="flex flex-col">
-      <div className="flex flex-wrap gap-2 border-b bg-muted/20 px-3 py-2.5">
+      <div className="mb-4 flex flex-wrap gap-1">
         {page.categoryTabs.map((tab) => (
           <Button
             key={tab.key}
             asChild
             size="sm"
-            variant={tab.active ? "default" : "ghost"}
+            variant={tab.active ? "outline" : "ghost"}
             className={
               tab.active
-                ? "shadow-sm"
+                ? "font-semibold text-foreground shadow-none"
                 : "text-muted-foreground hover:text-foreground"
             }
+            style={tab.active ? {
+              backgroundColor: `color-mix(in srgb, ${tab.color || "var(--primary)"} 14%, var(--background))`,
+              borderColor: tab.color || "var(--primary)",
+            } : undefined}
           >
             <GooseLink
               href={tab.url}
               aria-current={tab.active ? "page" : undefined}
             >
+              <span aria-hidden="true" className="size-2 shrink-0 rounded-sm" style={{ backgroundColor: tab.color || "var(--primary)" }} />
               {tab.label}
             </GooseLink>
           </Button>
@@ -501,21 +507,24 @@ function BlockedPanel({
             {topics.map((topic) => (
               <article
                 key={topic.id}
-                className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-muted/40"
+                className="flex items-center justify-between gap-4 py-4 hover:bg-muted/40 sm:px-3"
               >
                 <div className="min-w-0">
                   <GooseLink
                     href={topic.url}
-                    className="block truncate font-semibold hover:text-primary"
+                    className="block text-sm font-medium leading-6 hover:text-primary"
                   >
                     {topic.title}
                   </GooseLink>
-                  <p className="truncate text-sm text-muted-foreground">
+                  <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
                     {topic.description}
                   </p>
+                  <div className="mt-1 flex flex-wrap gap-2">{topic.categories.map((category) => <GooseLink key={category.id} href={category.url} className="inline-flex items-center gap-1 text-xs text-muted-foreground"><span className="size-2 rounded-sm" style={{ backgroundColor: category.color }} />{category.name}</GooseLink>)}</div>
                 </div>
                 <Button
                   size="sm"
+                  variant="outline"
+                  className="shrink-0"
                   disabled={busy.has(topic.id)}
                   onClick={() => onRestore(topic)}
                 >
@@ -581,14 +590,14 @@ function LogsPanel({
             {items.map((item) => (
               <article
                 key={item.id}
-                className="grid grid-cols-[34px_minmax(0,1fr)] gap-3 px-3 py-2.5 hover:bg-muted/40 lg:grid-cols-[34px_minmax(0,1fr)_150px]"
+                className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-3 gap-y-2 py-3.5 hover:bg-muted/40 sm:px-3 lg:grid-cols-[28px_minmax(0,1fr)_130px]"
               >
-                <span className="flex size-8 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                  <History />
+                <span className="flex h-7 items-center justify-center text-muted-foreground">
+                  <History className="size-4" />
                 </span>
                 <div className="min-w-0">
-                  <p className="truncate text-sm">
-                    <strong>{item.actor.username}</strong>{" "}
+                  <div className="flex min-h-7 flex-wrap items-center gap-1.5 text-sm leading-7">
+                    <Person user={item.actor} inline />
                     <span className="text-muted-foreground">
                       {t(`logs.actions.${item.action}`, {
                         defaultValue: t("logs.actions.operation"),
@@ -597,21 +606,22 @@ function LogsPanel({
                     {item.subject.url ? (
                       <GooseLink
                         href={item.subject.url}
-                        className="font-semibold text-primary"
+                        className="font-medium hover:text-primary"
                       >
                         {item.subject.title}
                       </GooseLink>
                     ) : (
-                      <strong>{item.subject.title}</strong>
+                      <strong className="font-medium">{item.subject.title}</strong>
                     )}
-                  </p>
+                  </div>
                   {item.subject.excerpt ? (
-                    <p className="truncate text-xs text-muted-foreground">
+                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
                       {item.subject.excerpt}
                     </p>
                   ) : null}
+                  <div className="mt-1 flex flex-wrap gap-2">{item.categories.map((category) => <GooseLink key={category.id} href={category.url} className="inline-flex items-center gap-1 text-xs text-muted-foreground"><span className="size-2 rounded-sm" style={{ backgroundColor: category.color }} />{category.name}</GooseLink>)}</div>
                 </div>
-                <time className="hidden text-right text-xs text-muted-foreground lg:block">
+                <time dateTime={item.createdAt} className="col-start-2 text-xs leading-7 text-muted-foreground lg:col-start-auto lg:text-right">
                   {formatDate(item.createdAt, locale)}
                 </time>
               </article>
@@ -649,25 +659,25 @@ function LogsPanel({
   );
 }
 function PanelFooter({ children }: { children: ReactNode }) {
-  return <footer className="border-t px-4 py-3 text-center">{children}</footer>;
+  return <footer className="flex min-h-12 flex-wrap items-center gap-3 pt-4 text-xs text-muted-foreground">{children}</footer>;
 }
 
 function Guidance({ t }: { t: Translate }) {
   return (
-    <section className="p-3 lg:p-4">
+    <section>
       <Alert className="border-warning/30 bg-warning/10">
-        <CircleAlert className="text-warning" />
+        <CircleAlert className="h-6 w-4 self-start text-warning translate-y-0 row-span-1" />
         <AlertDescription className="leading-6 text-foreground/75">
           {t("notice")}
         </AlertDescription>
       </Alert>
       <div className="mt-3 divide-y">
         {(["rule", "context", "restraint"] as const).map((key) => (
-          <article key={key} className="py-3 first:pt-1 last:pb-1">
+          <article key={key} className="py-4">
             <h3 className="text-sm font-semibold">
               {t(`guidance.${key}.title`)}
             </h3>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">
               {t(`guidance.${key}.description`)}
             </p>
           </article>
@@ -679,23 +689,25 @@ function Guidance({ t }: { t: Translate }) {
 function Person({
   user,
   label,
+  inline = false,
 }: {
   user: ModerationReportItem["reporter"];
-  label: string;
+  label?: string;
+  inline?: boolean;
 }) {
   return (
     <UserCardPopover user={user}>
       <GooseLink
         href={`/u/${user.id}`}
-        className="flex min-w-0 items-center gap-1.5 text-xs hover:text-primary"
+        className={`flex min-w-0 items-center gap-1.5 hover:text-primary ${inline ? "text-sm leading-7" : "text-xs"}`}
       >
-        <Avatar className="size-5">
+        <Avatar className="size-5 shrink-0">
           <AvatarImage src={user.avatarUrl} alt="" />
           <AvatarFallback>
             {user.username.slice(0, 1).toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <span className="text-muted-foreground">{label}</span>
+        {label && <span className="shrink-0 text-muted-foreground">{label}</span>}
         <span className="truncate font-medium">{user.username}</span>
       </GooseLink>
     </UserCardPopover>

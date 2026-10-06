@@ -4,6 +4,14 @@ beforeEach(() => {
   vi.resetModules();
 });
 describe("on-demand C translations", () => {
+  it.each(["zh", "en", "ja", "it"] as const)("preserves moderation action dictionaries in %s", async (locale) => {
+    const loader = await import("@gooseforum/runtime/i18n/loader");
+    const { resourceLoaders } = await import("@gooseforum/runtime/i18n/resource-loaders");
+    await loader.prepareGooseTranslations(locale, ["moderation"]);
+    const canonical = (await resourceLoaders[`${locale}/moderation`]()).default;
+    expect(loader.cachedGooseResources()[locale].moderation).toHaveProperty("blocked.restore", canonical.blocked.restore);
+    expect(loader.cachedGooseResources()[locale].moderation).toHaveProperty("blocked.emptyTitle", canonical.blocked.emptyTitle);
+  });
   it("loads only the requested language and page namespaces on the home page", async () => {
     const loader = await import("@gooseforum/runtime/i18n/loader");
     expect(loader.cachedGooseResources()).toEqual({});

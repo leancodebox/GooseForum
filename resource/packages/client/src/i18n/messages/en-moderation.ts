@@ -37,6 +37,8 @@ export default {
       resolved: "Handled",
     },
     reason: "Reason",
+    note: "Additional Details",
+    refresh: "Refresh Reports",
     status: "Status",
     reporter: "Reporter",
     handler: "Handler",

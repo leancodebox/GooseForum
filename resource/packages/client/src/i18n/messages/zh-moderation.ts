@@ -37,6 +37,8 @@ export default {
       resolved: "已处理",
     },
     reason: "原因",
+    note: "补充说明",
+    refresh: "刷新举报",
     status: "状态",
     reporter: "提交人",
     handler: "处理人",

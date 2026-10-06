@@ -408,7 +408,7 @@ export interface TopicPayload {
 }
 
 export interface ModerationPageProps {
-  categoryTabs: Array<{ key: string; label?: string; url: string; active: boolean }>
+  categoryTabs: Array<{ key: string; label?: string; color?: string; url: string; active: boolean }>
   topics: TopicPayload[]
   pagination: {
     page: number

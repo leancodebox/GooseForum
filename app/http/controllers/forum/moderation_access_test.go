@@ -16,6 +16,19 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/datamigration"
 )
 
+func TestModerationCategoryTabsPreserveCategoryColor(t *testing.T) {
+	tabs := buildModerationCategoryTabs([]TopicCategoryPayload{
+		{ID: 12, Name: "Coding", Color: "#8241d6"},
+		{ID: 13, Name: "HelpMe", Color: "#16a34a"},
+	}, 13)
+	if tabs[0].Color != "#8241d6" || tabs[1].Color != "#16a34a" {
+		t.Fatalf("category colors were lost: %+v", tabs)
+	}
+	if tabs[0].Active || !tabs[1].Active || tabs[1].URL != "/moderation?category=13" {
+		t.Fatalf("unexpected category selection: %+v", tabs)
+	}
+}
+
 func TestAccessGroupManageGrantCanModerateCategoryContent(t *testing.T) {
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(
