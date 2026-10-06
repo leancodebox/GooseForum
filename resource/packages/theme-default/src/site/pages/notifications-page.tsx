@@ -24,6 +24,7 @@ import {
   EmptyTitle,
 } from "@gooseforum/ui/components/empty";
 import { Tabs, TabsList, TabsTrigger } from "@gooseforum/ui/components/tabs";
+import { ListFilter, ListFilterItem } from "@gooseforum/ui/components/list-filter";
 import { cn } from "@gooseforum/ui/lib/utils";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
 import { announceUnreadStatus } from "@gooseforum/runtime/unread-status";
@@ -31,9 +32,6 @@ import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { PageHeader } from "../layout/page-header";
 import { SiteListPanel } from "../layout/site-panel";
 import { UserCardPopover } from "../users/user-card-popover";
-
-const notificationTabClassName =
-  "h-8 flex-none rounded-md border border-transparent px-3 font-semibold shadow-none hover:bg-background/70 hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-sm data-active:ring-1 data-active:ring-border";
 
 type ListState = {
   items: NotificationPayload[];
@@ -224,23 +222,23 @@ export function NotificationsPageView({
           onValueChange={(value) => setFilter(value as NotificationFilter)}
           className="gap-0"
         >
-          <TabsList className="h-auto w-full justify-start gap-1 rounded-none border-b bg-muted/50 p-2 group-data-horizontal/tabs:h-auto">
-            <TabsTrigger
-              value="all"
-              className={notificationTabClassName}
-            >
-              {t("tabs.all")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="unread"
-              className={notificationTabClassName}
-            >
-              {t("tabs.unread")}
-              {unreadCount ? (
-                <Badge className="px-1.5">{unreadCount}</Badge>
-              ) : null}
-            </TabsTrigger>
-          </TabsList>
+          <div className="border-b px-3 py-3">
+            <ListFilter asChild>
+              <TabsList>
+                <ListFilterItem asChild>
+                  <TabsTrigger value="all">{t("tabs.all")}</TabsTrigger>
+                </ListFilterItem>
+                <ListFilterItem asChild>
+                  <TabsTrigger value="unread">
+                    {t("tabs.unread")}
+                    {unreadCount ? (
+                      <Badge className="h-4 px-1 text-[10px]">{unreadCount}</Badge>
+                    ) : null}
+                  </TabsTrigger>
+                </ListFilterItem>
+              </TabsList>
+            </ListFilter>
+          </div>
         </Tabs>
         <div className="hidden grid-cols-[34px_minmax(0,1fr)_116px] gap-3 border-b bg-muted/50 px-3 py-2 text-[11px] font-bold uppercase text-muted-foreground lg:grid">
           <span />

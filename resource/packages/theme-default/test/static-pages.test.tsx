@@ -448,8 +448,9 @@ describe("AppShell and static pages", () => {
       .getByRole("link", { name: "最新" })
       .closest("nav");
     expect(topicTabs?.classList.contains("overflow-x-auto")).toBe(true);
-    expect(topicTabs?.classList.contains("p-1")).toBe(true);
-    expect(topicTabs?.classList.contains("-m-1")).toBe(true);
+    expect(topicTabs?.classList.contains("p-0.5")).toBe(true);
+    expect(topicTabs?.getAttribute("data-filter")).toBe("group");
+    expect(screen.getByRole("link", { name: "最新" }).getAttribute("aria-current")).toBe("page");
     const primaryNavItem = document.querySelector('aside a[href="/"]');
     const categoryNavItem = document.querySelector(
       'aside a[href="/c/Coding/4"]',
@@ -680,14 +681,10 @@ describe("AppShell and static pages", () => {
       true,
     );
     const allTab = screen.getByRole("tab", { name: "全部" });
-    expect(allTab.classList.contains("h-8")).toBe(true);
+    expect(allTab.getAttribute("data-filter")).toBe("item");
     const tabsList = allTab.closest('[data-slot="tabs-list"]');
-    expect(tabsList?.classList.contains("group-data-horizontal/tabs:h-auto")).toBe(
-      true,
-    );
-    expect(tabsList?.classList.contains("group-data-horizontal/tabs:h-8")).toBe(
-      false,
-    );
+    expect(tabsList?.getAttribute("data-filter")).toBe("group");
+    expect(allTab.getAttribute("data-state")).toBe("active");
     expect(
       allTab.closest("section")?.classList.contains("lg:rounded-xl"),
     ).toBe(true);
@@ -803,6 +800,34 @@ describe("AppShell and static pages", () => {
     expect(screen.getByText("查看主页")).toBeTruthy();
   });
 
+  it.each([0, 1, 2])("opens a user card from private message avatar %s without navigating", async (index) => {
+    const peerId = 190 + index;
+    const props = messagesProps();
+    props.conversations[0].peerId = peerId;
+    props.conversations[0].peerUrl = `/u/${peerId}`;
+    const page = payload("messages.index", props);
+    page.url = `/messages?userId=${peerId}`;
+    const messages = vi.fn().mockResolvedValue({
+      list: [{ id: 31, senderId: peerId, content: "Avatar card test", msgType: 1, isRead: 1, createdAt: "2026-09-14T08:00:00Z", isSelf: false }],
+      hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 0, latestId: 31,
+    });
+    const card = vi.fn().mockResolvedValue({ ...userProfileProps().user, userId: peerId, username: "bob", nickname: "Bob card", badges: [] });
+    const { user, navigate } = renderPage(page, {
+      chat: { messages, markRead: vi.fn().mockResolvedValue(true) } as unknown as GooseSiteApi["chat"],
+      users: { card } as unknown as GooseSiteApi["users"],
+    });
+    await screen.findByText("Avatar card test");
+    expect(card).not.toHaveBeenCalled();
+    const avatars = screen.getAllByRole("link", { name: "bob" }).filter(link => link.querySelector('[data-slot="avatar"]'));
+    expect(avatars).toHaveLength(3);
+    expect(document.querySelector("button a")).toBeNull();
+    await user.click(avatars[index]);
+    expect(await screen.findByText("@bob")).toBeTruthy();
+    expect(card).toHaveBeenCalledWith(peerId);
+    expect(navigate).not.toHaveBeenCalled();
+    expect(messages).toHaveBeenCalledTimes(1);
+  });
+
   it("loads a selected conversation, marks it read, and sends on Enter", async () => {
     const messages = vi
       .fn()
@@ -885,6 +910,7 @@ describe("AppShell and static pages", () => {
   });
 
   it("starts a new conversation from the shadcn user picker", async () => {
+    const card = vi.fn().mockResolvedValue({ ...userProfileProps().user, userId: 10, username: "carol", nickname: "Carol", badges: [] });
     const page = payload("messages.index", messagesProps());
     page.layout = {
       ...page.layout,
@@ -897,6 +923,7 @@ describe("AppShell and static pages", () => {
     };
     const { user } = renderPage(page, {
       chat: {} as GooseSiteApi["chat"],
+      users: { card } as unknown as GooseSiteApi["users"],
     });
 
     await user.click(
@@ -907,6 +934,11 @@ describe("AppShell and static pages", () => {
       dialog.querySelectorAll('[data-slot="item-separator"]'),
     ).toHaveLength(1);
     await user.type(within(dialog).getByPlaceholderText("搜索用户…"), "carol");
+    await user.click(within(dialog).getByRole("link", { name: "Carol" }));
+    expect(await screen.findByText("@carol", { selector: "span" })).toBeTruthy();
+    expect(card).toHaveBeenCalledWith(10);
+    await user.keyboard("{Escape}");
+    expect(dialog.isConnected).toBe(true);
     await user.click(within(dialog).getByRole("button", { name: /Carol/ }));
     expect(await screen.findByText("给 Carol 发第一条消息。")).toBeTruthy();
   });

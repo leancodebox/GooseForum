@@ -2,6 +2,7 @@ import type { HomeProps, LayoutPayload } from "@gooseforum/client";
 import { Mail, Plus, UsersRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@gooseforum/ui/components/button";
+import { ListFilter, ListFilterItem } from "@gooseforum/ui/components/list-filter";
 import {
   Empty,
   EmptyDescription,
@@ -58,13 +59,12 @@ export function HomePageView({
             </Button>
           }
         >
-            <nav className="-m-1 flex min-w-0 gap-2 overflow-x-auto p-1">
+            <ListFilter asChild>
+            <nav>
               {page.tabs.map((tab) => (
-                <Button
+                <ListFilterItem
                   key={tab.key}
                   asChild
-                  variant={tab.active ? "default" : "secondary"}
-                  size="sm"
                 >
                   <GooseLink
                     href={tab.url}
@@ -78,9 +78,10 @@ export function HomePageView({
                           ? t("popular")
                           : tab.label || tab.key}
                   </GooseLink>
-                </Button>
+                </ListFilterItem>
               ))}
             </nav>
+            </ListFilter>
             <TopicListModeSwitch
               mode={list.mode}
               t={t}

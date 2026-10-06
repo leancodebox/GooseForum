@@ -28,6 +28,7 @@ import {
   AvatarImage,
 } from "@gooseforum/ui/components/avatar";
 import { Button } from "@gooseforum/ui/components/button";
+import { ListFilter, ListFilterItem } from "@gooseforum/ui/components/list-filter";
 import { Badge } from "@gooseforum/ui/components/badge";
 import {
   Empty,
@@ -313,14 +314,16 @@ function ReportsPanel({
       <div className="min-w-0">
         <div className="flex items-center justify-between gap-4 py-5">
           <Tabs value={status} onValueChange={(value) => onStatus(value as ReportStatus)} className="gap-0">
-            <TabsList aria-label={t("tabs.reports")} className="h-8">
-              <TabsTrigger value="open" className="flex-none px-3 text-xs">
-                {t("reports.statusTabs.open")}
-              </TabsTrigger>
-              <TabsTrigger value="closed" className="flex-none px-3 text-xs">
-                {t("reports.statusTabs.closed")}
-              </TabsTrigger>
-            </TabsList>
+            <ListFilter asChild>
+              <TabsList aria-label={t("tabs.reports")}>
+                <ListFilterItem asChild>
+                  <TabsTrigger value="open">{t("reports.statusTabs.open")}</TabsTrigger>
+                </ListFilterItem>
+                <ListFilterItem asChild>
+                  <TabsTrigger value="closed">{t("reports.statusTabs.closed")}</TabsTrigger>
+                </ListFilterItem>
+              </TabsList>
+            </ListFilter>
           </Tabs>
           <Button
             variant="outline"

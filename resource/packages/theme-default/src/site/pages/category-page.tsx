@@ -2,6 +2,7 @@ import type { CategoryPageProps } from "@gooseforum/client";
 import { Plus, UsersRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@gooseforum/ui/components/button";
+import { ListFilter, ListFilterItem } from "@gooseforum/ui/components/list-filter";
 import {
   Empty,
   EmptyDescription,
@@ -69,16 +70,14 @@ export function CategoryPageView({
             </Button>
           }
         >
+            <ListFilter asChild>
             <nav
-              className="flex min-w-0 gap-2 overflow-x-auto"
               aria-label={t("topic")}
             >
               {page.tabs.map((tab) => (
-                <Button
+                <ListFilterItem
                   key={tab.key}
                   asChild
-                  variant={tab.active ? "default" : "secondary"}
-                  size="sm"
                 >
                   <GooseLink
                     href={tab.url}
@@ -86,9 +85,10 @@ export function CategoryPageView({
                   >
                     {tabLabel(tab.key, tab.label)}
                   </GooseLink>
-                </Button>
+                </ListFilterItem>
               ))}
             </nav>
+            </ListFilter>
             <TopicListModeSwitch
               mode={list.mode}
               t={t}

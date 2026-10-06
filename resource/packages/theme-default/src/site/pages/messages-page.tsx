@@ -86,6 +86,7 @@ import { cn } from "@gooseforum/ui/lib/utils";
 import { announceUnreadStatus } from "@gooseforum/runtime/unread-status";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
+import { UserCardPopover } from "../users/user-card-popover";
 
 type Conversation = ChatItemPayload & {
   messages: ChatMessagePayload[];
@@ -447,15 +448,7 @@ export function MessagesPageView({
                   >
                     <ArrowLeft />
                   </Button>
-                  <Avatar className="size-9">
-                    <AvatarImage
-                      src={active.peerAvatar}
-                      alt={active.peerUsername}
-                    />
-                    <AvatarFallback>
-                      {active.peerUsername.slice(0, 1).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <ChatUserAvatar userId={active.peerId} username={active.peerUsername} avatarUrl={active.peerAvatar} profileUrl={active.peerUrl} size="size-9" />
                   <div className="min-w-0">
                     <GooseLink
                       href={active.peerUrl}
@@ -520,6 +513,7 @@ export function MessagesPageView({
                             <ChatMessageItem
                               key={message.id}
                               message={message}
+                              peerId={active.peerId}
                               peerAvatar={active.peerAvatar}
                               peerUsername={active.peerUsername}
                               locale={runtime.locale}
@@ -692,16 +686,11 @@ export function MessagesPageView({
             <ItemGroup className="gap-0 p-2">
               {filteredUsers.map((user, index) => (
                 <Fragment key={user.id}>
-                  <Item asChild className="border-0">
-                    <button type="button" onClick={() => startChat(user)}>
-                      <ItemMedia>
-                        <Avatar className="size-10">
-                          <AvatarImage src={user.avatarUrl} alt={user.username} />
-                          <AvatarFallback>
-                            {user.username.slice(0, 1).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                      </ItemMedia>
+                  <Item className="border-0">
+                    <ItemMedia>
+                      <ChatUserAvatar userId={user.id} username={user.nickname || user.username} avatarUrl={user.avatarUrl} profileUrl={user.url} size="size-10" />
+                    </ItemMedia>
+                    <button type="button" className="min-w-0 flex-1 rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-ring" onClick={() => startChat(user)}>
                       <ItemContent>
                         <ItemTitle>{user.nickname || user.username}</ItemTitle>
                         <ItemDescription>@{user.username}</ItemDescription>
@@ -741,28 +730,19 @@ function ConversationListItem({
 }) {
   return (
     <Item
-      asChild
       size="sm"
       className={cn(
         "rounded-none border-0 px-4 py-3",
         active && "bg-primary/5 shadow-[inset_3px_0_0_var(--primary)]",
       )}
     >
-      <button type="button" onClick={onSelect}>
-        <ItemMedia className="relative">
-          <Avatar className="size-10">
-            <AvatarImage
-              src={conversation.peerAvatar}
-              alt={conversation.peerUsername}
-            />
-            <AvatarFallback>
-              {conversation.peerUsername.slice(0, 1).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          {conversation.unreadCount ? (
-            <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-destructive ring-2 ring-background" />
-          ) : null}
-        </ItemMedia>
+      <ItemMedia className="relative">
+        <ChatUserAvatar userId={conversation.peerId} username={conversation.peerUsername} avatarUrl={conversation.peerAvatar} profileUrl={conversation.peerUrl} size="size-10" />
+        {conversation.unreadCount ? (
+          <span className="pointer-events-none absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-destructive ring-2 ring-background" />
+        ) : null}
+      </ItemMedia>
+      <button type="button" className="min-w-0 flex-1 rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-ring" onClick={onSelect}>
         <ItemContent className="min-w-0">
           <ItemTitle className="w-full justify-between">
             <span className="truncate font-semibold">
@@ -788,11 +768,13 @@ function ConversationListItem({
 
 function ChatMessageItem({
   message,
+  peerId,
   peerAvatar,
   peerUsername,
   locale,
 }: {
   message: ChatMessagePayload;
+  peerId: number;
   peerAvatar: string;
   peerUsername: string;
   locale: string;
@@ -808,10 +790,7 @@ function ChatMessageItem({
       >
         {!message.isSelf ? (
           <MessageAvatar>
-            <Avatar className="size-8">
-              <AvatarImage src={peerAvatar} alt={peerUsername} />
-              <AvatarFallback>{peerUsername.slice(0, 1)}</AvatarFallback>
-            </Avatar>
+            <ChatUserAvatar userId={peerId} username={peerUsername} avatarUrl={peerAvatar} size="size-8" />
           </MessageAvatar>
         ) : null}
         <MessageContent className="w-auto max-w-full gap-1">
@@ -829,6 +808,25 @@ function ChatMessageItem({
         </MessageContent>
       </Message>
     </MessageScrollerItem>
+  );
+}
+
+function ChatUserAvatar({ userId, username, avatarUrl, profileUrl, size }: {
+  userId: number;
+  username: string;
+  avatarUrl: string;
+  profileUrl?: string;
+  size: "size-8" | "size-9" | "size-10";
+}) {
+  return (
+    <UserCardPopover user={{ id: userId, username, avatarUrl }}>
+      <GooseLink href={profileUrl || `/u/${userId}`} aria-label={username} className="block shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <Avatar className={size}>
+          <AvatarImage src={avatarUrl} alt="" />
+          <AvatarFallback>{username.slice(0, 1).toUpperCase()}</AvatarFallback>
+        </Avatar>
+      </GooseLink>
+    </UserCardPopover>
   );
 }
 
