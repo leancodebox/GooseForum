@@ -12,7 +12,7 @@ import (
 )
 
 // BuiltinAvatarVersion is bumped when bundled avatars change. Keep React avatar settings in sync.
-const BuiltinAvatarVersion = "1788958424"
+const BuiltinAvatarVersion = "1791244800"
 
 // VersionBuiltinAvatar refreshes bundled avatars without changing stored user URLs.
 func VersionBuiltinAvatar(rawURL string) string {

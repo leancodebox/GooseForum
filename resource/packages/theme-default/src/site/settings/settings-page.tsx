@@ -300,7 +300,7 @@ export function SettingsPageView({
                   onClick={() => setPresetDraft(url)}
                 >
                   <img
-                    src={`${url}?t=1788958424`}
+                    src={`${url}?t=1791244800`}
                     alt=""
                     className="size-full rounded object-cover"
                   />
