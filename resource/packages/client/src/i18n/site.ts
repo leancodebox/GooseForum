@@ -52,6 +52,7 @@ interface SiteMessages {
     principles: { healthy: string; relevant: string; stable: string };
   };
   sponsors: {
+    tiers: Record<"diamond" | "gold" | "silver" | "supporter", string>;
     defaultMessage: string;
     emptyTitle: string;
     emptyDescription: string;

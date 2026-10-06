@@ -26,7 +26,7 @@ export function SponsorsPageView({ page }: { page: SponsorsPageProps }) {
                       section.tone === 'gold' && 'bg-warning/10 text-warning',
                     )}
                   >
-                    {section.label}
+                    {t(`tiers.${section.key}`, { defaultValue: section.label })}
                   </Badge>
                 </h2>
                 <Badge variant="secondary">{section.sponsors.length}</Badge>

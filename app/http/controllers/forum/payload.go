@@ -2068,13 +2068,13 @@ func buildLinksMeta(c *gin.Context) PageMeta {
 	}
 }
 
-func buildSponsorsPageProps(config pageConfig.SponsorsConfig) SponsorsPageProps {
+func buildSponsorsPageProps(config pageConfig.SponsorsConfig, lang string) SponsorsPageProps {
 	defaultConfig := defaultconfig.GetDefaultSponsorsConfig()
 	sections := []SponsorSectionPayload{
-		{Key: "diamond", Label: "Diamond Partners", Tone: "diamond", Sponsors: buildSponsorPayloads(config.Sponsors.Level0)},
-		{Key: "gold", Label: "Gold Sponsors", Tone: "gold", Sponsors: buildSponsorPayloads(config.Sponsors.Level1)},
-		{Key: "silver", Label: "Silver Sponsors", Tone: "silver", Sponsors: buildSponsorPayloads(config.Sponsors.Level2)},
-		{Key: "supporter", Label: "Supporters", Tone: "supporter", Sponsors: buildSponsorPayloads(config.Sponsors.Level3)},
+		{Key: "diamond", Label: i18n.T(lang, "sponsors.tiers.diamond"), Tone: "diamond", Sponsors: buildSponsorPayloads(config.Sponsors.Level0)},
+		{Key: "gold", Label: i18n.T(lang, "sponsors.tiers.gold"), Tone: "gold", Sponsors: buildSponsorPayloads(config.Sponsors.Level1)},
+		{Key: "silver", Label: i18n.T(lang, "sponsors.tiers.silver"), Tone: "silver", Sponsors: buildSponsorPayloads(config.Sponsors.Level2)},
+		{Key: "supporter", Label: i18n.T(lang, "sponsors.tiers.supporter"), Tone: "supporter", Sponsors: buildSponsorPayloads(config.Sponsors.Level3)},
 	}
 	visibleSections := make([]SponsorSectionPayload, 0, len(sections))
 	total := 0
