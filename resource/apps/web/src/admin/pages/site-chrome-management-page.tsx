@@ -48,6 +48,7 @@ import {
   FieldLabel,
 } from "@gooseforum/ui/components/field";
 import { Input } from "@gooseforum/ui/components/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@gooseforum/ui/components/popover";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Switch } from "@gooseforum/ui/components/switch";
 import {
@@ -57,20 +58,23 @@ import {
 import {
   Bell,
   FileText,
-  Flame,
+  EllipsisVertical,
   Eye,
   EyeOff,
   Heart,
   Inbox,
   Link,
+  LayoutGrid,
+  KeyRound,
   MessageCircle,
   MenuIcon,
   Pencil,
+  Palette,
   Plus,
   Save,
   Scale,
   Trash2,
-  TrendingUp,
+  UsersRound,
   Upload,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -78,16 +82,20 @@ import type { SettingsTextKey } from "../settings-i18n";
 type Text = (k: SettingsTextKey) => string;
 const fixedMain = [
   [MessageCircle, "topics"],
-  [Flame, "hot"],
-  [TrendingUp, "popular"],
+  [LayoutGrid, "categories"],
+  [UsersRound, "members"],
   [Inbox, "messages"],
   [Bell, "notifications"],
+] as const;
+const fixedSecondary = [
   [FileText, "drafts"],
+  [KeyRound, "accessGroups"],
   [Scale, "moderation"],
 ] as const;
 const fixedResources = [
   [Link, "links"],
   [Heart, "sponsors"],
+  [Palette, "themePreview"],
 ] as const;
 type Key = "header" | "mainMenu" | "resources";
 type ChromeScope =
@@ -302,51 +310,69 @@ export function SiteChromeManagementPage({
                 onDragEnd={moveSidebarItem}
               >
                 <div className="flex flex-col">
-                  <PreviewSection
-                    title={text("mainMenu")}
-                    addLabel={text("add")}
-                    hideTitle
-                    scope={{ key: "mainMenu" }}
-                    fixed={fixedMain.map(([icon, key]) => ({
-                      icon,
-                      label: text(key),
-                    }))}
-                    items={config.mainMenu}
-                    onChange={(items) =>
-                      update((n) => {
-                        n.mainMenu = items;
-                      })
-                    }
-                    onEdit={(index) => setDialog({ key: "mainMenu", index })}
-                    onDelete={(index) =>
-                      update((n) => {
-                        n.mainMenu.splice(index, 1);
-                      })
-                    }
-                    onAdd={() => setDialog({ key: "mainMenu", index: null })}
-                  />
-                  <PreviewSection
-                    title={text("resources")}
-                    addLabel={text("add")}
-                    fixed={fixedResources.map(([icon, key]) => ({
-                      icon,
-                      label: text(key),
-                    }))}
-                    scope={{ key: "resources" }}
-                    items={config.resources}
-                    onChange={(items) =>
-                      update((n) => {
-                        n.resources = items;
-                      })
-                    }
-                    onEdit={(index) => setDialog({ key: "resources", index })}
-                    onDelete={(index) =>
-                      update((n) => {
-                        n.resources.splice(index, 1);
-                      })
-                    }
-                    onAdd={() => setDialog({ key: "resources", index: null })}
-                  />
+                  <div className="flex flex-col gap-0.5">
+                    {fixedMain.map(([Icon, key], index) => (
+                      <div key={key} className={`flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium ${index === 0 ? "bg-primary/10 text-primary" : "text-foreground/75"}`}>
+                        <Icon className="size-4 shrink-0" />
+                        <span className="truncate">{text(key)}</span>
+                      </div>
+                    ))}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-full justify-start gap-2 text-[13px] text-foreground/75 data-[state=open]:text-foreground">
+                          <EllipsisVertical data-icon="inline-start" />
+                          {text("more")}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" sideOffset={2} className="max-h-[min(70dvh,32rem)] w-64 max-w-[calc(100vw-2rem)] gap-0.5 overflow-y-auto rounded-md p-1">
+                        <PreviewSection
+                          title={text("mainMenu")}
+                          hideTitle
+                          addLabel={text("add")}
+                          scope={{ key: "mainMenu" }}
+                          fixed={fixedSecondary.map(([icon, key]) => ({
+                            icon,
+                            label: text(key),
+                          }))}
+                          items={config.mainMenu}
+                          onChange={(items) =>
+                            update((n) => {
+                              n.mainMenu = items;
+                            })
+                          }
+                          onEdit={(index) => setDialog({ key: "mainMenu", index })}
+                          onDelete={(index) =>
+                            update((n) => {
+                              n.mainMenu.splice(index, 1);
+                            })
+                          }
+                        />
+                        <PreviewSection
+                          title={text("resources")}
+                          hideTitle
+                          addLabel={text("add")}
+                          fixed={fixedResources.map(([icon, key]) => ({
+                            icon,
+                            label: text(key),
+                          }))}
+                          scope={{ key: "resources" }}
+                          items={config.resources}
+                          onChange={(items) =>
+                            update((n) => {
+                              n.resources = items;
+                            })
+                          }
+                          onEdit={(index) => setDialog({ key: "resources", index })}
+                          onDelete={(index) =>
+                            update((n) => {
+                              n.resources.splice(index, 1);
+                            })
+                          }
+                          onAdd={() => setDialog({ key: "resources", index: null })}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                   {config.sidebarGroups.map((group, groupIndex) => (
                     <PreviewSection
                       key={group.id}
@@ -541,7 +567,7 @@ function PreviewSection({
   onChange(v: SiteChromeItem[]): void;
   onEdit(i: number): void;
   onDelete(i: number): void;
-  onAdd(): void;
+  onAdd?: () => void;
   fixed?: Array<{ icon: typeof Link; label: string }>;
   hideTitle?: boolean;
   scope: ChromeScope;
@@ -553,13 +579,9 @@ function PreviewSection({
     data: { type: "chrome-container", scope } satisfies ChromeDragData,
   });
   return (
-    <section ref={drop.setNodeRef} className={hideTitle ? "pb-2" : "mt-2"}>
-      <div
-        className={
-          hideTitle
-            ? "hidden"
-            : "mb-1 flex h-5 items-center justify-between px-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground"
-        }
+    <section ref={drop.setNodeRef} className={hideTitle ? undefined : "mt-2"}>
+      {!hideTitle ? <div
+        className="mb-1 flex h-5 items-center justify-between px-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground"
       >
         <span>{title}</span>
         <span>
@@ -574,11 +596,11 @@ function PreviewSection({
             </>
           ) : null}
         </span>
-      </div>
-      {fixed.map(({ icon: Icon, label }, index) => (
+      </div> : null}
+      {fixed.map(({ icon: Icon, label }) => (
         <div
           key={label}
-          className={`flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium ${hideTitle && index === 0 ? "bg-primary/10 text-primary" : "text-foreground/75"}`}
+          className="flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium text-foreground/75"
         >
           <Icon className="size-4" />
           <span className="truncate">{label}</span>
@@ -592,7 +614,7 @@ function PreviewSection({
         onEdit={onEdit}
         onDelete={onDelete}
       />
-      <Button
+      {onAdd ? <Button
         variant="ghost"
         size="sm"
         className="mt-1 h-7 w-full justify-start rounded-md border border-dashed border-border/70 bg-background/40 px-2 text-[13px] font-medium text-muted-foreground hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
@@ -600,7 +622,7 @@ function PreviewSection({
       >
         <Plus data-icon="inline-start" />
         {addLabel}
-      </Button>
+      </Button> : null}
     </section>
   );
 }
@@ -767,14 +789,21 @@ function ItemEditor({
         </DialogHeader>
         <FieldGroup>
           <Field>
-            <FieldLabel>{text("type")}</FieldLabel>
             <ToggleGroup
               type="single"
+              aria-label={text("type")}
               value={form.type}
               onValueChange={(v) => v && setForm({ ...form, type: v })}
             >
-              <ToggleGroupItem value="link">{text("link")}</ToggleGroupItem>
-              <ToggleGroupItem value="text">{text("text")}</ToggleGroupItem>
+              {(["link", "text"] as const).map((type) => (
+                <ToggleGroupItem
+                  key={type}
+                  value={type}
+                  className="bg-secondary px-4 text-secondary-foreground aria-pressed:bg-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:bg-primary/80 data-[state=on]:hover:text-primary-foreground"
+                >
+                  {text(type)}
+                </ToggleGroupItem>
+              ))}
             </ToggleGroup>
           </Field>
           <Field>

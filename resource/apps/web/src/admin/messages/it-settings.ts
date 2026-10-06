@@ -4,4 +4,8 @@ export default {
   ...en,
   site: "Informazioni sito",
   chrome: "Aspetto sito",
+  more: "Altro",
+  members: "Membri",
+  accessGroups: "Gruppi di accesso",
+  themePreview: "Anteprima tema",
 } as const;
