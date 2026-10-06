@@ -20,6 +20,7 @@ export default {
   slug: "スラッグ",
   description: "説明",
   sort: "並び順",
+  categorySortHint: "数値が大きいほど先に表示されます。同じ数値の場合はカテゴリー ID の昇順です。",
   color: "色",
   icon: "アイコン",
   actions: "操作",

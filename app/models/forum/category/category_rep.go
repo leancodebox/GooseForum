@@ -38,7 +38,7 @@ func AllExist(ids []uint64) bool {
 }
 
 func All() (entities []*Entity) {
-	builder().Order(queryopt.Asc("sort")).Order(queryopt.Asc("id")).Find(&entities)
+	builder().Order(queryopt.Desc("sort")).Order(queryopt.Asc("id")).Find(&entities)
 	return
 }
 

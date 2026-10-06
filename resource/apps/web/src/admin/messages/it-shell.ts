@@ -20,6 +20,7 @@ export default {
   slug: "Slug",
   description: "Descrizione",
   sort: "Ordine",
+  categorySortHint: "I valori più alti vengono mostrati prima; a parità di valore, le categorie sono ordinate per ID crescente.",
   color: "Colore",
   icon: "Icona",
   actions: "Azioni",

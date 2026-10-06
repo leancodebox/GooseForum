@@ -30,6 +30,7 @@ export default {
   slug: "标识",
   description: "描述",
   sort: "排序",
+  categorySortHint: "数值越大越靠前；数值相同时按分类 ID 升序排列。",
   color: "颜色",
   icon: "图标",
   actions: "操作",

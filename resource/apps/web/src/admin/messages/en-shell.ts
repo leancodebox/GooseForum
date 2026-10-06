@@ -30,6 +30,7 @@ export default {
   slug: "Slug",
   description: "Description",
   sort: "Sort",
+  categorySortHint: "Higher values appear first; ties are ordered by category ID ascending.",
   color: "Color",
   icon: "Icon",
   actions: "Actions",
