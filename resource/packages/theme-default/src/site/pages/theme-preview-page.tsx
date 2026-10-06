@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import type { ReactNode } from "react";
 import {
   cloneSiteThemeTokens,
@@ -32,6 +33,7 @@ import { Tabs, TabsList, TabsTrigger } from "@gooseforum/ui/components/tabs";
 import { Textarea } from "@gooseforum/ui/components/textarea";
 import { cn } from "@gooseforum/ui/lib/utils";
 import { useGooseRuntime } from "@gooseforum/runtime";
+import { createThemeTransition } from "@gooseforum/runtime/browser-host";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { themePresets } from "../theme/theme-presets";
 
@@ -109,6 +111,8 @@ export function ThemePreviewPageView({
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const originalTheme = useRef(runtime.theme);
+  const requestedTheme = useRef(themeName);
+  const themeTransition = useMemo(createThemeTransition, []);
   const canManage = layout.viewer.adminPermissions.includes(managerPermission);
   const active = theme(draft, themeName, page.defaults);
   const defaults = theme(page.defaults, themeName, page.defaults);
@@ -116,8 +120,11 @@ export function ThemePreviewPageView({
   const dirty = editSignature(draft) !== editSignature(fromPrepublish(saved));
   useLayoutEffect(() => {
     applyPreview(active, themeName);
-    return () => clearPreview(originalTheme.current);
   }, [active, themeName]);
+  useLayoutEffect(() => () => {
+    themeTransition.cancel();
+    clearPreview(originalTheme.current);
+  }, [themeTransition]);
   useEffect(() => {
     function beforeUnload(event: BeforeUnloadEvent) {
       if (dirty) {
@@ -244,7 +251,13 @@ export function ThemePreviewPageView({
           </div>
           <Tabs
             value={themeName}
-            onValueChange={(value) => setThemeName(value as ThemeName)}
+            onValueChange={(value) => {
+              if (value === requestedTheme.current) return;
+              requestedTheme.current = value as ThemeName;
+              themeTransition.apply(() => {
+                flushSync(() => setThemeName(value as ThemeName));
+              }, value !== themeName);
+            }}
             className="mt-3 gap-0"
           >
             <TabsList className="grid w-full grid-cols-2">

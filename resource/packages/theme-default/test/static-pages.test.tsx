@@ -1624,6 +1624,30 @@ describe("AppShell and static pages", () => {
     expect(
       await screen.findByRole("heading", { level: 1, name: "主题预览设置" }),
     ).toBeTruthy();
+    const descriptor = Object.getOwnPropertyDescriptor(document, "startViewTransition");
+    const snapshots: string[] = [];
+    const start = vi.fn((update: () => void) => {
+      snapshots.push(document.documentElement.dataset.theme || "");
+      const updated = new Promise<void>(resolve => setTimeout(() => {
+        update();
+        resolve();
+      }, 10));
+      return { updateCallbackDone: updated, finished: updated, skipTransition: vi.fn() };
+    });
+    Object.defineProperty(document, "startViewTransition", { configurable: true, value: start });
+    try {
+      await user.click(screen.getByRole("tab", { name: "暗色" }));
+      await waitFor(() => expect(document.documentElement.dataset.theme).toBe("gf-dark"));
+      expect(document.documentElement.style.getPropertyValue("--gf-color-base-100")).toBe("#111111");
+      await user.click(screen.getByRole("tab", { name: "明亮" }));
+      await waitFor(() => expect(document.documentElement.dataset.theme).toBe("gf-light"));
+      expect(snapshots).toEqual(["gf-light", "gf-dark"]);
+      expect(start).toHaveBeenCalledTimes(2);
+      expect(save).not.toHaveBeenCalled();
+    } finally {
+      if (descriptor) Object.defineProperty(document, "startViewTransition", descriptor);
+      else Reflect.deleteProperty(document, "startViewTransition");
+    }
     await user.click(screen.getByRole("button", { name: /Warm/ }));
     await user.click(screen.getByRole('button', { name: 'Canvas color' }));
     await user.click(screen.getByRole('button', { name: '#ffffff' }));

@@ -804,7 +804,7 @@ function NavList({
                 compact ? "h-7" : "h-8",
                 "focus-visible:ring-2",
                 item.active
-                  ? "bg-primary/10 text-foreground hover:bg-primary/15 hover:text-foreground [&>svg]:text-primary"
+                  ? "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary [&>svg]:text-primary"
                   : "text-foreground/75 hover:bg-accent hover:text-foreground",
               )}
             >
