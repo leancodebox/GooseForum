@@ -28,7 +28,7 @@
     outline: 1px solid color-mix(in oklab, var(--primary) 75%, transparent);
   }
 
-  .gf-prose-post img { cursor: zoom-in; }
+  .gf-prose-post img { display: block; margin-inline: auto; cursor: zoom-in; }
   .announcement-unread-bell { transform-origin: 50% 15%; animation: announcement-bell-ring 2s ease-in-out infinite; }
   .markdown-composer-content { color: var(--foreground); font-family: var(--typeset-font-body) !important; font-size: var(--typeset-size) !important; font-weight: 400; line-height: var(--typeset-leading) !important; }
   /* Keep mobile editable text at 16px to avoid iOS focus zoom. */
