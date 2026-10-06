@@ -231,12 +231,16 @@
     }
 
     &:where(li) {
-      margin-block-start: 0.5em;
+      margin-block-start: 0;
       padding-inline-start: 0.4em;
     }
 
-    &:where(li > p, li > ul, li > ol) {
-      margin-block-start: 0.5em;
+    &:where(li + li, li > ul, li > ol) {
+      margin-block-start: min(0.25em, calc(var(--typeset-flow) / 2));
+    }
+
+    &:where(li > p) {
+      margin-block-start: var(--typeset-flow);
     }
 
     &:where(ul > li)::marker,

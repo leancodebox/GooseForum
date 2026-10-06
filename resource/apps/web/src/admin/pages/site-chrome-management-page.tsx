@@ -28,6 +28,7 @@ import type {
   SiteChromeItem,
 } from "@gooseforum/client";
 import { Button } from "@gooseforum/ui/components/button";
+import { DefaultBrand } from "@gooseforum/ui/components/default-brand";
 import {
   Dialog,
   DialogContent,
@@ -1147,10 +1148,7 @@ function BrandPreview({
           {label}
         </span>
       ) : (
-        <span className="block h-11 w-[134px] shrink-0" role="img" aria-label="GooseForum">
-          <img src="/static/brand/gooseforum-light.svg" alt="" width={1898} height={625} className="h-full w-full object-contain dark:hidden" />
-          <img src="/static/brand/gooseforum-dark.svg" alt="" width={1898} height={625} className="hidden h-full w-full object-contain dark:block" />
-        </span>
+        <DefaultBrand />
       )}
       <span className="pointer-events-none absolute right-1 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-sm bg-background p-0.5 text-muted-foreground opacity-0 shadow-sm ring-1 ring-border transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
         <span className="inline-flex size-5 items-center justify-center">
