@@ -4,7 +4,46 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gorilla/sessions"
 )
+
+func TestStartFlowReplacesCookieSignedWithOldKey(t *testing.T) {
+	oldRequest := httptest.NewRequest(http.MethodGet, "https://forum.example.com/api/auth/github", nil)
+	oldResponse := httptest.NewRecorder()
+	oldStore := sessions.NewCookieStore([]byte("old-key-before-rotation"))
+	oldSession, err := oldStore.New(oldRequest, oauthFlowSessionName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldSession.Values["github"] = "invalid old flow"
+	if err := oldSession.Save(oldRequest, oldResponse); err != nil {
+		t.Fatal(err)
+	}
+
+	startRequest := httptest.NewRequest(http.MethodGet, "https://forum.example.com/api/auth/github", nil)
+	for _, cookie := range oldResponse.Result().Cookies() {
+		startRequest.AddCookie(cookie)
+	}
+	if _, err := ConsumeFlow(httptest.NewRecorder(), startRequest, "github"); err == nil {
+		t.Fatal("callback accepted cookie signed with old key")
+	}
+	startResponse := httptest.NewRecorder()
+	if err := StartFlow(startResponse, startRequest, "github", 0, "login", "/topics"); err != nil {
+		t.Fatalf("restart login with old cookie: %v", err)
+	}
+	callbackRequest := httptest.NewRequest(http.MethodGet, "https://forum.example.com/api/auth/github/callback", nil)
+	for _, cookie := range startResponse.Result().Cookies() {
+		callbackRequest.AddCookie(cookie)
+	}
+	flow, err := ConsumeFlow(httptest.NewRecorder(), callbackRequest, "github")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if flow.Mode != "login" || flow.Redirect != "/topics" || flow.UserID != 0 {
+		t.Fatalf("unexpected replacement flow: %#v", flow)
+	}
+}
 
 func TestOAuthFlowRoundTrip(t *testing.T) {
 	startRequest := httptest.NewRequest(http.MethodGet, "https://forum.example.com/api/auth/github", nil)

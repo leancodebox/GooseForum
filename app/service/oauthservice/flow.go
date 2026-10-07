@@ -3,6 +3,7 @@ package oauthservice
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -57,7 +58,9 @@ func StartFlow(res http.ResponseWriter, req *http.Request, provider string, user
 	}
 	session, err := sessionstore.GetSession().Get(req, oauthFlowSessionName)
 	if err != nil {
-		return err
+		// A new login can replace cookies signed before a key change.
+		slog.Warn("OAuth start discarded invalid flow cookie", "provider", provider, "error", err)
+		session.Values = make(map[interface{}]interface{})
 	}
 	session.Values[provider] = string(encoded)
 	return session.Save(req, res)

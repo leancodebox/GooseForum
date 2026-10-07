@@ -22,6 +22,7 @@ import (
 func ProviderLogin(c *gin.Context) {
 	provider := c.Param("provider")
 	if !oauthservice.IsProviderEnabled(provider) {
+		slog.Warn("OAuth start provider unavailable", "provider", provider)
 		oauthStartFailure(c, http.StatusNotFound, component.MessageOAuthCallbackFailed)
 		return
 	}
@@ -42,6 +43,7 @@ func ProviderLogin(c *gin.Context) {
 	q.Set("provider", provider)
 	c.Request.URL.RawQuery = q.Encode()
 	if err := oauthservice.StartFlow(c.Writer, c.Request, provider, component.LoginUserId(c), c.Query("mode"), c.Query("redirect"), authority); err != nil {
+		slog.Error("OAuth start flow failed", "provider", provider, "error", err)
 		oauthStartFailure(c, http.StatusBadRequest, component.MessageOAuthCallbackFailed)
 		return
 	}
@@ -111,7 +113,7 @@ func ProviderCallback(c *gin.Context) {
 	// 完成 OAuth 流程
 	gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
-		slog.Error("OAuth callback failed", "error", err)
+		slog.Error("OAuth callback failed", "provider", provider, "error", err)
 		forum.RenderInternalOAuthErrorPage(c, component.MessageOAuthCallbackFailed)
 		return
 	}
