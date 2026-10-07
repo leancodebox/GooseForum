@@ -60,6 +60,7 @@ import { cn } from "@gooseforum/ui/lib/utils";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { RenderedContent } from "../content/rendered-content";
+import { readImageMetadata } from "../content/image-metadata";
 import { emptyShellHeader, useShellHeader } from "../layout/shell-header";
 import { TopicTable } from "../topics/topic-list";
 import { ReplyReference } from "../topics/reply-reference";
@@ -165,7 +166,7 @@ export function TopicPageView({
     viewport.scrollLeft = imageActualSize ? (viewport.scrollWidth - viewport.clientWidth) / 2 : 0;
     viewport.scrollTop = imageActualSize ? (viewport.scrollHeight - viewport.clientHeight) / 2 : 0;
   }, [imageActualSize, imageIndex]);
-  const [images, setImages] = useState<Array<{ src: string; alt: string }>>([]);
+  const [images, setImages] = useState<Array<{ src: string; alt: string } & ReturnType<typeof readImageMetadata>>>([]);
   const [activePostNo, setActivePostNo] = useState(
     firstNo(page.postStream.posts) || 1,
   );
@@ -702,6 +703,7 @@ export function TopicPageView({
     ).map((item) => ({
       src: item.currentSrc || item.src,
       alt: item.alt || "",
+      ...readImageMetadata(item),
     }));
     setImages(all);
     setImageActualSize(false);
@@ -1125,10 +1127,14 @@ export function TopicPageView({
                 }}
                 draggable={false}
                 style={imageActualSize ? { maxWidth: 'none', width: 'auto', height: 'auto', flexShrink: 0 } : undefined}
-                className={imageActualSize ? 'm-auto cursor-grab select-none active:cursor-grabbing' : 'max-h-[calc(100dvh-5rem)] max-w-full cursor-zoom-in object-contain'}
+                className={imageActualSize ? 'm-auto cursor-grab select-none active:cursor-grabbing' : 'max-h-[calc(100dvh-7rem)] max-w-full cursor-zoom-in object-contain'}
                 onClick={() => setImageActualSize((value) => !value)}
               />
             </div>
+          </div>
+          <div className="flex shrink-0 items-center justify-center gap-3 px-4 pb-3 text-xs text-white/75">
+            <span className="min-w-0 truncate" title={images[imageIndex]?.name}>{images[imageIndex]?.name || images[imageIndex]?.alt}</span>
+            <span className="shrink-0 tabular-nums">{[images[imageIndex]?.dimensions, images[imageIndex]?.size].filter(Boolean).join(" · ")}</span>
           </div>
           <Button
             variant="secondary"

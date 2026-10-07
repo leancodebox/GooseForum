@@ -1349,17 +1349,22 @@ describe("AppShell and static pages", () => {
       await screen.findByRole("button", { name: "Topic detail" }),
     ).toBeTruthy();
     const renderedPost = screen.getByText("Original body").closest(".gf-prose-post");
-    await user.click(screen.getByAltText("First attachment"));
+    const firstImage = screen.getByAltText("First attachment");
+    Object.defineProperties(firstImage, { naturalWidth: { value: 540 }, naturalHeight: { value: 804 } });
+    await user.click(within(firstImage.closest(".gf-content-image") as HTMLElement).getByRole("button", { name: "图片预览" }));
     const imageDialog = screen.getByRole("dialog", { name: "图片预览" });
     expect(imageDialog.classList.contains("sm:max-w-none")).toBe(true);
     expect(imageDialog.classList.contains("bg-black/90")).toBe(true);
     expect(imageDialog.classList.contains("bg-background/95")).toBe(false);
     expect(imageDialog.classList.contains("ring-0")).toBe(true);
     expect(within(imageDialog).getByText("1 / 2")).toBeTruthy();
+    expect(within(imageDialog).getByText("first.webp")).toBeTruthy();
+    expect(within(imageDialog).getByText("540 × 804")).toBeTruthy();
     await user.click(within(imageDialog).getByRole("button", { name: "原始尺寸" }));
     expect(within(imageDialog).getByAltText("First attachment").getAttribute("style")).toContain("max-width: none");
     await user.click(within(imageDialog).getByRole("button", { name: "上一张图片" }));
     expect(within(imageDialog).getByAltText("Second attachment")).toBeTruthy();
+    expect(within(imageDialog).getByText("second.webp")).toBeTruthy();
     await user.keyboard("{ArrowRight}");
     expect(within(imageDialog).getByAltText("First attachment")).toBeTruthy();
     await user.click(within(imageDialog).getByRole("button", { name: "关闭" }));
