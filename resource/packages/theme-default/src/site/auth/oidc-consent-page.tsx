@@ -111,7 +111,7 @@ export function OIDCConsentPageView({
                           {details.scopes.map((scope) => (
                             <li key={scope} className="flex items-center gap-3 px-4 py-3 text-sm">
                               <CheckIcon className="shrink-0 text-primary" aria-hidden="true" />
-                              <span>{t(`scopes.${scope}`, { defaultValue: scope })}</span>
+                              <span>{t(`scopes.${scope}`, { defaultValue: scope, nsSeparator: false })}</span>
                             </li>
                           ))}
                         </ul>

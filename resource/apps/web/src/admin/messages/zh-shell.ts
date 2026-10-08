@@ -1,4 +1,5 @@
 export default {
+  agent: "Agent 接入",
   console: "管理后台",
   dashboard: "仪表盘",
   users: "用户",

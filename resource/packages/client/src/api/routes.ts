@@ -3,6 +3,11 @@
  * test reads this catalog, so server and SDK routing cannot drift silently.
  */
 export const siteApiRoutes = {
+  userAgentTokens: ['GET', '/api/agent-tokens'],
+  userCreateAgentToken: ['POST', '/api/agent-tokens/create'],
+  userRevokeAgentToken: ['POST', '/api/agent-tokens/revoke'],
+  userDeleteAgentToken: ['POST', '/api/agent-tokens/delete'],
+  userRevokeAllAgentTokens: ['POST', '/api/agent-tokens/revoke-all'],
   accessGroupsList: ['GET', '/api/forum/access-groups'],
   accessGroupsApply: ['POST', '/api/forum/access-groups/apply'],
   accessGroupsManaged: ['GET', '/api/forum/access-groups/managed'],

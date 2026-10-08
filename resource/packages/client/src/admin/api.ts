@@ -28,6 +28,8 @@ export function createAdminApi(http: GooseHttpClient): GooseAdminApi {
       security: () => http.request('/api/admin/security-settings'),
       saveSecurity: (settings) => post(http, '/api/admin/save-security-settings', { settings }),
       posting: () => http.request('/api/admin/posting-settings'),
+      agent: () => http.request('/api/admin/agent-settings'),
+      saveAgent: (settings) => post(http, '/api/admin/save-agent-settings', { settings }),
       savePosting: (settings) => post(http, '/api/admin/save-posting-settings', { settings }),
       announcement: () => http.request('/api/admin/announcement'),
       saveAnnouncement: (settings) => post(http, '/api/admin/save-announcement', { settings }),

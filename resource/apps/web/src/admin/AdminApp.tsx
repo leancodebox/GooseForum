@@ -24,6 +24,7 @@ import { createIdentityText } from './identity-settings-i18n'
 import { createDashboardText } from './dashboard-i18n'
 import { adminNavGroups } from './nav'
 import { AuthLogsPage } from './page-registry'
+import { AgentSettingsPage } from './page-registry'
 import { normalizeAdminPath } from './navigation'
 import { prepareAdminTranslations, adminPageNamespaces, loadedAdminNamespaces } from './translation-loader'
 
@@ -186,6 +187,8 @@ export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi 
         ? <SecuritySettingsPage api={api} text={systemSettingsText} />
       : pathname === '/admin/settings/posting'
         ? <PostingSettingsPage api={api} text={contentSettingsText} />
+      : pathname === '/admin/settings/agent'
+        ? <AgentSettingsPage api={api} text={systemSettingsText} />
       : pathname === '/admin/settings/announcement'
         ? <AnnouncementSettingsPage api={api} text={contentSettingsText} />
       : pathname === '/admin/settings/http-notify'

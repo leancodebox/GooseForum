@@ -43,7 +43,7 @@ import { OIDCGrantsDialog } from './oidc-grants-dialog';
 import { toast } from "sonner";
 import type { IdentityTextKey } from "../identity-settings-i18n";
 type Text = (k: IdentityTextKey) => string;
-const scopes = ["openid", "profile", "email", "offline_access"];
+const scopes = ["openid", "profile", "email", "offline_access", "forum:read", "topics:create", "posts:create"];
 type Form = {
   clientId: string;
   name: string;
@@ -665,7 +665,8 @@ function fromClient(c: OIDCClient): Form {
   return { ...c, redirectUris: c.redirectUris.join("\n") };
 }
 function toInput(f: Form): OIDCClientInput {
-  const scopes = [...new Set(["openid", ...f.scopes])];
+  const forumAccess = f.scopes.some((scope) => ["forum:read", "topics:create", "posts:create"].includes(scope));
+  const scopes = [...new Set(["openid", ...(forumAccess ? ["forum:read"] : []), ...f.scopes])];
   return {
     name: f.name.trim(),
     redirectUris: [
@@ -681,7 +682,7 @@ function toInput(f: Form): OIDCClientInput {
       ? ["authorization_code", "refresh_token"]
       : ["authorization_code"],
     tokenEndpointAuthMethod: f.public ? "none" : f.tokenEndpointAuthMethod,
-    requirePkce: f.public || f.requirePkce,
+    requirePkce: f.public || f.requirePkce || forumAccess,
     public: f.public,
     enabled: f.enabled,
   };

@@ -28,11 +28,14 @@ var (
 )
 
 type CreateInput struct {
-	SourceVersion uint8
-	UserID        uint64
-	TopicID       uint64
-	Content       string
-	ReplyToPostID uint64
+	AgentSource        *string
+	ClientRequestID    *string
+	RequestFingerprint string
+	SourceVersion      uint8
+	UserID             uint64
+	TopicID            uint64
+	Content            string
+	ReplyToPostID      uint64
 }
 
 func Create(input CreateInput) (posts.Entity, error) {
@@ -46,6 +49,9 @@ func Create(input CreateInput) (posts.Entity, error) {
 		if parent.Id == 0 || parent.TopicId != input.TopicID {
 			return posts.Entity{}, ErrParentPostMissing
 		}
+		if input.AgentSource != nil && (parent.ProcessStatus != 0 || parent.DeletedAt.Valid) {
+			return posts.Entity{}, ErrParentPostMissing
+		}
 	}
 
 	content, err := mentionservice.Normalize(input.Content, input.SourceVersion, true)
@@ -55,6 +61,7 @@ func Create(input CreateInput) (posts.Entity, error) {
 	input.Content = content
 	analysis := markdown2html.AnalyzePostContentVersion(input.Content, input.SourceVersion)
 	post := posts.Entity{
+		AgentSource: input.AgentSource, ClientRequestID: input.ClientRequestID, RequestFingerprint: input.RequestFingerprint,
 		TopicId: input.TopicID, Content: input.Content, RenderedHTML: analysis.RenderedHTML,
 		RenderedVersion: markdown2html.GetPostVersion(), UserId: input.UserID, ReplyToPostId: input.ReplyToPostID,
 		SourceVersion: input.SourceVersion,

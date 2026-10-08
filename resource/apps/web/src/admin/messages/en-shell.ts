@@ -1,4 +1,5 @@
 export default {
+  agent: "Agent access",
   console: "Admin Console",
   dashboard: "Dashboard",
   users: "Users",

@@ -12,6 +12,24 @@ import type { GooseApiResult } from '../http/client.js'
 
 export type ToggleAction = 1 | 2
 
+export interface AgentTokenPayload {
+  id: string
+  name: string
+  prefix: string
+  scopes: string[]
+  createdAt: string
+  expiresAt: string
+  revokedAt: string | null
+}
+
+export interface CreateAgentTokenInput {
+  name: string
+  scopes: string[]
+  days: number
+  password: string
+  mfaCode?: string
+}
+
 export interface CreatePostInput {
   sourceVersion?: 0 | 1
   topicId: number
@@ -233,6 +251,11 @@ export interface GooseSiteApi {
     prepareOAuthBind(provider: string, mfaCode?: string): Promise<{ redirect: string }>
     unbindOAuth(provider: string, mfaCode?: string): Promise<void>
     oidcGrants(): Promise<OIDCGrantPayload[]>
+    agentTokens(): Promise<AgentTokenPayload[]>
+    createAgentToken(input: CreateAgentTokenInput): Promise<{ token: string; entry: AgentTokenPayload }>
+    revokeAgentToken(id: string): Promise<boolean>
+    deleteAgentToken(id: string): Promise<boolean>
+    revokeAllAgentTokens(): Promise<boolean>
     revokeOIDCGrant(clientId: string): Promise<boolean>
   }
   chat: {

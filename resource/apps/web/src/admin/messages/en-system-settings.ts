@@ -1,4 +1,6 @@
 export default {
+  agentRetry: "Retry",
+  agent: "Agent access", agentEnabled: "Enable Agent API", agentManualTokens: "Allow manual tokens", agentLimits: "Requests per minute", agentRead: "Per authorization", agentUserRead: "Per account", agentWrite: "Writes per account", agentAnonymousRead: "Anonymous reads per IP", agentIP: "All requests per IP",
   mail: "Mail",
   mailHint: "Configure SMTP delivery and sender identity.",
   security: "Security",

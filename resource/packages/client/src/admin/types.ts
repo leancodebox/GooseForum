@@ -7,6 +7,16 @@ export interface PageResult<T> {
   size?: number
 }
 
+export interface AgentSettings {
+  enabled: boolean
+  manualTokens: boolean
+  readPerMinute: number
+  userReadPerMinute: number
+  writePerMinute: number
+  anonymousReadPerMinute: number
+  ipPerMinute: number
+}
+
 export interface AdminCategoryModerator {
   id: number
   userId: number
@@ -267,6 +277,8 @@ export interface GooseAdminApi {
     testMail(settings: MailSettings, testEmail: string): Promise<unknown>
     security(): Promise<SecuritySettings>
     saveSecurity(settings: SecuritySettings): Promise<unknown>
+    agent(): Promise<AgentSettings>
+    saveAgent(settings: AgentSettings): Promise<unknown>
     posting(): Promise<PostingSettings>
     savePosting(settings: PostingSettings): Promise<unknown>
     announcement(): Promise<AnnouncementConfig>

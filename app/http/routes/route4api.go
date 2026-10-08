@@ -136,6 +136,11 @@ func apiRoute(ginApp *gin.Engine) {
 	loginApi.POST("auth/:provider/unbind", UpJsonReq(api.UnbindOAuth))
 	loginApi.GET("oauth/bindings", UpButterReq(api.GetOAuthBindings))
 	loginApi.GET("oidc/grants", UpButterReq(api.ListMyOIDCGrants))
+	loginApi.GET("agent-tokens", UpButterReq(api.ListAgentTokens))
+	loginApi.POST("agent-tokens/create", middleware.AgentTokenManagement, middleware.CheckWritableAccount, UpJsonReq(api.CreateAgentToken))
+	loginApi.POST("agent-tokens/revoke", middleware.AgentTokenManagement, UpJsonReq(api.RevokeAgentToken))
+	loginApi.POST("agent-tokens/delete", middleware.AgentTokenManagement, UpJsonReq(api.DeleteAgentToken))
+	loginApi.POST("agent-tokens/revoke-all", middleware.AgentTokenManagement, UpJsonReq(api.RevokeAllAgentTokens))
 	loginApi.POST("oidc/grants/revoke", UpJsonReq(api.RevokeMyOIDCGrant))
 
 	forumApi := baseApi.Group("forum")
@@ -264,6 +269,8 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("sensitive-word-save", UpButterReq(api.SaveSensitiveWord)).
 		POST("sensitive-word-delete", UpButterReq(api.DeleteSensitiveWord)).
 		GET("posting-settings", UpButterReq(api.GetPostingSettings)).
+		GET("agent-settings", UpButterReq(api.GetAgentSettings)).
+		POST("save-agent-settings", UpJsonReq(api.SaveAgentSettings)).
 		POST("save-posting-settings", UpButterReq(api.SavePostingSettings)).
 		GET("http-notify-settings", UpButterReq(api.GetHttpNotifySettings)).
 		POST("save-http-notify-settings", UpButterReq(api.SaveHttpNotifySettings)).

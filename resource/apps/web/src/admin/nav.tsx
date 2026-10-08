@@ -31,6 +31,7 @@ export const adminNavGroups: { label?: AdminTextKey; items: AdminNavItem[] }[] =
     { label: 'mail', url: '/admin/settings/mail', icon: <Mail />, permission: AdminPermission.SiteManager },
     { label: 'oauth', url: '/admin/settings/oauth', icon: <KeyRound />, permission: AdminPermission.SiteManager },
     { label: 'oidc', url: '/admin/settings/oidc-provider', icon: <KeyRound />, permission: AdminPermission.SiteManager },
+    { label: 'agent', url: '/admin/settings/agent', icon: <KeyRound />, permission: AdminPermission.SiteManager },
     { label: 'security', url: '/admin/settings/security', icon: <ShieldCheck />, permission: AdminPermission.SiteManager },
     { label: 'posting', url: '/admin/settings/posting', icon: <FileText />, permission: AdminPermission.SiteManager },
     { label: 'announcement', url: '/admin/settings/announcement', icon: <Megaphone />, permission: AdminPermission.PageManager },

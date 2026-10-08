@@ -19,7 +19,7 @@ export interface OIDCConsentMessages {
   deny: string;
   approve: string;
   loading: string;
-  scopes: Record<"openid" | "profile" | "email" | "offline_access", string>;
+  scopes: Record<"openid" | "profile" | "email" | "offline_access" | "forum:read" | "topics:create" | "posts:create", string>;
 }
 
 export const oidcConsentResources: Record<Locale, OIDCConsentMessages> = {

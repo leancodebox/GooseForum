@@ -15,6 +15,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroupMembers"
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 	"github.com/leancodebox/GooseForum/app/models/forum/accountrestrictions"
+	"github.com/leancodebox/GooseForum/app/models/forum/agenttokens"
 	"github.com/leancodebox/GooseForum/app/models/forum/authsessions"
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
@@ -90,6 +91,7 @@ func migrateSchema() error {
 func defaultSchemaModels() []any {
 	return append([]any{
 		&accessGroups.Entity{},
+		&agenttokens.Entity{},
 		&accessGroupMembers.Entity{},
 		&categoryGroupPermissions.Entity{},
 		&badges.Entity{},

@@ -249,6 +249,7 @@ func newDefaultService() (*Service, error) {
 		SiteURL:             siteURL,
 		KeyEncryptionSecret: []byte(preferences.SecretKey()),
 		AllowInsecureIssuer: setting.IsLocal(),
+		SupportedScopes:     []string{"openid", "profile", "email", "offline_access", core.ScopeForumRead, core.ScopeTopicsCreate, core.ScopePostsCreate},
 	})
 }
 
@@ -443,6 +444,7 @@ func (r *userResolver) ResolveUser(ctx context.Context, subject string) (*core.U
 	}
 	picture := absoluteURL(r.siteBase, entity.GetWebAvatarUrl())
 	return &core.User{
+		Version:           entity.TokenVersion,
 		Subject:           strconv.FormatUint(entity.Id, 10),
 		Name:              name,
 		PreferredUsername: entity.Username,

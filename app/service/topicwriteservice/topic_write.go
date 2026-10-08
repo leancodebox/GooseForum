@@ -31,14 +31,17 @@ var (
 )
 
 type WriteInput struct {
-	SourceVersion uint8
-	UserID        uint64
-	TopicID       uint64
-	Title         string
-	Content       string
-	CategoryIDs   []uint64
-	Status        int8
-	DailyLimit    int
+	AgentSource        *string
+	ClientRequestID    *string
+	RequestFingerprint string
+	SourceVersion      uint8
+	UserID             uint64
+	TopicID            uint64
+	Title              string
+	Content            string
+	CategoryIDs        []uint64
+	Status             int8
+	DailyLimit         int
 }
 
 type WriteResult struct {
@@ -132,6 +135,7 @@ func prepareWrite(state *writeState, input WriteInput) ([]uint64, error) {
 	if state.isNew {
 		state.topic.Posters = []topics.Poster{{UserID: input.UserID}}
 		state.firstPost = posts.Entity{
+			AgentSource: input.AgentSource, ClientRequestID: input.ClientRequestID, RequestFingerprint: input.RequestFingerprint,
 			UserId: input.UserID, Content: input.Content,
 			RenderedVersion: markdown2html.GetPostVersion(),
 		}

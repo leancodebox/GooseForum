@@ -585,11 +585,11 @@ func (entity ClientEntity) client() *core.Client {
 }
 
 func codeToEntity(code *core.AuthorizationCode) AuthorizationCodeEntity {
-	return AuthorizationCodeEntity{Hash: code.Hash, GrantID: code.GrantID, UserID: code.UserID, ClientID: code.ClientID, RedirectURI: code.RedirectURI, Scopes: cloneStrings(code.Scopes), Nonce: code.Nonce, CodeChallenge: code.CodeChallenge, CodeChallengeMethod: code.CodeChallengeMethod, ExpiresAt: code.ExpiresAt, AuthTime: code.AuthTime, Used: code.Used}
+	return AuthorizationCodeEntity{UserVersion: code.UserVersion, Hash: code.Hash, GrantID: code.GrantID, UserID: code.UserID, ClientID: code.ClientID, RedirectURI: code.RedirectURI, Scopes: cloneStrings(code.Scopes), Nonce: code.Nonce, CodeChallenge: code.CodeChallenge, CodeChallengeMethod: code.CodeChallengeMethod, ExpiresAt: code.ExpiresAt, AuthTime: code.AuthTime, Used: code.Used}
 }
 
 func (entity AuthorizationCodeEntity) code() *core.AuthorizationCode {
-	return &core.AuthorizationCode{Hash: entity.Hash, GrantID: entity.GrantID, UserID: entity.UserID, ClientID: entity.ClientID, RedirectURI: entity.RedirectURI, Scopes: cloneStrings(entity.Scopes), Nonce: entity.Nonce, CodeChallenge: entity.CodeChallenge, CodeChallengeMethod: entity.CodeChallengeMethod, ExpiresAt: entity.ExpiresAt, AuthTime: entity.AuthTime, Used: entity.Used}
+	return &core.AuthorizationCode{UserVersion: entity.UserVersion, Hash: entity.Hash, GrantID: entity.GrantID, UserID: entity.UserID, ClientID: entity.ClientID, RedirectURI: entity.RedirectURI, Scopes: cloneStrings(entity.Scopes), Nonce: entity.Nonce, CodeChallenge: entity.CodeChallenge, CodeChallengeMethod: entity.CodeChallengeMethod, ExpiresAt: entity.ExpiresAt, AuthTime: entity.AuthTime, Used: entity.Used}
 }
 
 func tokenToEntity(tokenType string, token *core.Token) TokenEntity {
@@ -598,7 +598,7 @@ func tokenToEntity(tokenType string, token *core.Token) TokenEntity {
 		value := token.FamilyExpiresAt
 		familyExpiry = &value
 	}
-	return TokenEntity{Hash: token.Hash, Type: tokenType, GrantID: token.GrantID, FamilyID: token.FamilyID, UserID: token.UserID, ClientID: token.ClientID, Scopes: cloneStrings(token.Scopes), ExpiresAt: token.ExpiresAt, FamilyExpiresAt: familyExpiry, RevokedAt: cloneTime(token.RevokedAt), AuthTime: token.AuthTime}
+	return TokenEntity{UserVersion: token.UserVersion, Hash: token.Hash, Type: tokenType, GrantID: token.GrantID, FamilyID: token.FamilyID, UserID: token.UserID, ClientID: token.ClientID, Scopes: cloneStrings(token.Scopes), ExpiresAt: token.ExpiresAt, FamilyExpiresAt: familyExpiry, RevokedAt: cloneTime(token.RevokedAt), AuthTime: token.AuthTime}
 }
 
 func (entity TokenEntity) token() *core.Token {
@@ -606,7 +606,7 @@ func (entity TokenEntity) token() *core.Token {
 	if entity.FamilyExpiresAt != nil {
 		familyExpiry = *entity.FamilyExpiresAt
 	}
-	return &core.Token{Hash: entity.Hash, GrantID: entity.GrantID, FamilyID: entity.FamilyID, UserID: entity.UserID, ClientID: entity.ClientID, Scopes: cloneStrings(entity.Scopes), ExpiresAt: entity.ExpiresAt, FamilyExpiresAt: familyExpiry, RevokedAt: cloneTime(entity.RevokedAt), AuthTime: entity.AuthTime}
+	return &core.Token{UserVersion: entity.UserVersion, Hash: entity.Hash, GrantID: entity.GrantID, FamilyID: entity.FamilyID, UserID: entity.UserID, ClientID: entity.ClientID, Scopes: cloneStrings(entity.Scopes), ExpiresAt: entity.ExpiresAt, FamilyExpiresAt: familyExpiry, RevokedAt: cloneTime(entity.RevokedAt), AuthTime: entity.AuthTime}
 }
 
 func cloneStrings(values []string) []string { return append([]string(nil), values...) }

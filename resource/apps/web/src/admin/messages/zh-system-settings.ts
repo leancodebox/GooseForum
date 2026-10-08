@@ -1,4 +1,6 @@
 export default {
+  agentRetry: "重试",
+  agent: "Agent 接入", agentEnabled: "启用 Agent API", agentManualTokens: "允许手动 Token", agentLimits: "每分钟请求次数", agentRead: "每个授权身份", agentUserRead: "每个账号", agentWrite: "每个账号写入", agentAnonymousRead: "每个 IP 匿名读取", agentIP: "每个 IP 全部请求",
   registrationLimits: "注册请求限制",
   registrationLimitsHint: "每小时允许的请求次数，0 表示不限制。",
   registrationIPLimit: "每个 IP 地址",

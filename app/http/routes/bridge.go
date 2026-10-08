@@ -18,6 +18,7 @@ func RegisterByGin(ginApp *gin.Engine) {
 	registerDefaultOIDCProvider(ginApp)
 	// 接口
 	apiRoute(ginApp)
+	agentRoute(ginApp)
 	// 文件
 	fileServer(ginApp)
 	// view

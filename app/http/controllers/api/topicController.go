@@ -12,6 +12,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/mentionservice"
+	"github.com/leancodebox/GooseForum/app/service/postingpolicy"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/postwriteservice"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
@@ -102,7 +103,7 @@ func validateTextLength(value string, minLength, maxLength int, tooShort, tooLon
 	if len(value) < minLength {
 		return component.FailResponseCode(tooShort, component.MessageParams{"minLength": minLength}), true
 	}
-	if len(value) > maxLength {
+	if !postingpolicy.ValidLength(value, minLength, maxLength) {
 		return component.FailResponseCode(tooLong, component.MessageParams{"maxLength": maxLength}), true
 	}
 	return component.Response{}, false
@@ -112,7 +113,7 @@ func newUserCooldownResponse(createdAt time.Time, minutes int, code component.Me
 	if minutes <= 0 {
 		return component.Response{}, false
 	}
-	availableAt := createdAt.Add(time.Duration(minutes) * time.Minute)
+	availableAt := postingpolicy.AvailableAt(createdAt, minutes)
 	if !time.Now().Before(availableAt) {
 		return component.Response{}, false
 	}

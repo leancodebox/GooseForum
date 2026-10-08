@@ -21,6 +21,7 @@ const oidcClientIDPrefix = "gf_"
 
 var managedOIDCScopes = map[string]struct{}{
 	"openid": {}, "profile": {}, "email": {}, "offline_access": {},
+	core.ScopeForumRead: {}, core.ScopeTopicsCreate: {}, core.ScopePostsCreate: {},
 }
 
 type oidcClientStore interface {
@@ -213,6 +214,9 @@ func createOIDCClient(ctx context.Context, store oidcClientStore, req CreateOIDC
 	if req.Enabled != nil {
 		client.Enabled = *req.Enabled
 	}
+	if core.HasForumScope(client.Scopes) {
+		client.RequirePKCE = true
+	}
 	if client.Public {
 		client.TokenEndpointAuthMethod = core.ClientAuthNone
 		client.RequirePKCE = true
@@ -259,6 +263,9 @@ func updateOIDCClient(ctx context.Context, store oidcClientStore, req UpdateOIDC
 	client.Scopes = normalizeStrings(req.Scopes)
 	client.GrantTypes = normalizeStrings(req.GrantTypes)
 	client.RequirePKCE = req.RequirePKCE
+	if core.HasForumScope(client.Scopes) {
+		client.RequirePKCE = true
+	}
 	if req.Enabled != nil {
 		client.Enabled = *req.Enabled
 	}

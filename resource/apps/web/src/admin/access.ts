@@ -37,6 +37,7 @@ const pathPermissions: Record<string, AdminPermission | AdminPermission[]> = {
   '/admin/settings/oidc-provider': AdminPermission.SiteManager,
   '/admin/settings/security': AdminPermission.SiteManager,
   '/admin/settings/posting': AdminPermission.SiteManager,
+  '/admin/settings/agent': AdminPermission.SiteManager,
   '/admin/settings/announcement': AdminPermission.PageManager,
   '/admin/settings/http-notify': AdminPermission.SiteManager,
   '/admin/settings/sensitive-words': AdminPermission.SiteManager,

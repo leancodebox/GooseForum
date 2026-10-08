@@ -81,6 +81,11 @@ export function createSiteApi(http: GooseHttpClient): GooseSiteApi {
       prepareOAuthBind: (provider, mfaCode) => post(http, route('userPrepareOauthBind').replace(':provider', encodeURIComponent(provider)) + '?mode=bind', { mfaCode }),
       unbindOAuth: (provider, mfaCode) => post(http, route('userUnbindOauth').replace(':provider', encodeURIComponent(provider)), { mfaCode }),
       oidcGrants: () => http.request(route('userOidcGrants')),
+      agentTokens: () => http.request(route('userAgentTokens')),
+      createAgentToken: (input) => post(http, route('userCreateAgentToken'), input),
+      revokeAgentToken: (id) => post(http, route('userRevokeAgentToken'), { id }),
+      deleteAgentToken: (id) => post(http, route('userDeleteAgentToken'), { id }),
+      revokeAllAgentTokens: () => post(http, route('userRevokeAllAgentTokens')),
       revokeOIDCGrant: (clientId) => post(http, route('userRevokeOidcGrant'), { clientId }),
     },
     chat: {

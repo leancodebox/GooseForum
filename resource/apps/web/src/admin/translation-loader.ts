@@ -61,6 +61,7 @@ export function adminPageNamespaces(path: string) {
     "/admin/settings/mail": ["system-settings"],
     "/admin/settings/security": ["system-settings"],
     "/admin/settings/posting": ["content-settings"],
+    "/admin/settings/agent": ["system-settings"],
     "/admin/settings/announcement": ["content-settings"],
     "/admin/settings/http-notify": ["moderation-settings"],
     "/admin/settings/sensitive-words": ["moderation-settings"],

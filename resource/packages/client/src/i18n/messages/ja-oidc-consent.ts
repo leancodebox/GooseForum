@@ -17,6 +17,9 @@ export default {
   approve: "許可して続行",
   loading: "処理中…",
   scopes: {
+    "forum:read": "アクセス可能なフォーラムの内容を読む",
+    "topics:create": "あなたの名前でトピックを投稿する",
+    "posts:create": "あなたの名前で返信する",
     openid: "本人確認を行う",
     profile: "名前、ユーザー名、アバターを読み取る",
     email: "メールアドレスと確認状態を読み取る",

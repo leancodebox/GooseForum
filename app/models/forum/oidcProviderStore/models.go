@@ -43,6 +43,7 @@ type ConsentEntity struct {
 func (ConsentEntity) TableName() string { return consentTable }
 
 type AuthorizationCodeEntity struct {
+	UserVersion         uint64    `gorm:"column:user_version;not null;default:0"`
 	Hash                string    `gorm:"primaryKey;column:code_hash;type:varchar(64);not null"`
 	GrantID             string    `gorm:"column:grant_id;type:varchar(64);not null;default:'';index:idx_oidc_codes_grant"`
 	UserID              string    `gorm:"column:user_id;type:varchar(255);not null;index:idx_oidc_codes_grant_owner,priority:1"`
@@ -61,6 +62,7 @@ type AuthorizationCodeEntity struct {
 func (AuthorizationCodeEntity) TableName() string { return codeTable }
 
 type TokenEntity struct {
+	UserVersion     uint64     `gorm:"column:user_version;not null;default:0"`
 	Hash            string     `gorm:"primaryKey;column:token_hash;type:varchar(64);not null"`
 	Type            string     `gorm:"column:token_type;type:varchar(8);not null;index:idx_oidc_tokens_type_expiry,priority:1"`
 	GrantID         string     `gorm:"column:grant_id;type:varchar(64);not null;default:'';index:idx_oidc_tokens_grant"`

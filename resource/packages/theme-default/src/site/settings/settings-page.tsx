@@ -38,6 +38,7 @@ import { SessionSettings } from "./settings-sessions";
 import { AccountSettings } from "./settings-account";
 import { MFASettings } from "./settings-mfa";
 import { ConnectionsSettings } from "./settings-connections";
+import { AgentTokenSettings } from "./settings-agent-tokens";
 import { PrivacySettings } from "./settings-privacy";
 import { ProfileSettings } from "./settings-profile";
 import { AvatarCropDialog } from "./avatar-crop-dialog";
@@ -54,6 +55,7 @@ const tabKeys = [
   "privacy",
   "binding",
   "applications",
+  "agent-tokens",
 ] as const;
 type TabKey = (typeof tabKeys)[number];
 const presetAvatars = Array.from(
@@ -442,6 +444,7 @@ export function SettingsPageView({
                 showError={showError}
               />
             </TabsContent>
+            <TabsContent value="agent-tokens"><AgentTokenSettings /></TabsContent>
           </div>
         </Tabs>
       </SitePanel>
@@ -572,6 +575,7 @@ function tabLabel(
   t: ReturnType<typeof useTranslation>["t"],
 ) {
   if (key === "mfa") return t("mfa.title");
+  if (key === "agent-tokens") return t("agentTokens.title");
   return key === "applications"
     ? t("tabs.applications")
     : t(`tabs.${key}`, { defaultValue: fallback || key });

@@ -1,6 +1,10 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 import mfa from './en-mfa.js';
 export default {
+  agentTokens: {
+    delete: "Delete", confirmDelete: "Delete this token? Access will stop immediately.",
+    title: "Agent Tokens", name: "Name", permissions: "Permissions", expiry: "Validity", days: "{count} days", password: "Current password", create: "Create token", revokeAll: "Revoke all", confirmRevoke: "Revoke access?", revoked: "Revoked", expires: "Expires: {date}", empty: "No tokens", failed: "Token operation failed", secret: "Token", secretOnce: "This token is shown only once. Store it securely.", copy: "Copy", copied: "Copied", dismiss: "Dismiss", scopes: { "forum:read": "Read forum", "topics:create": "Publish topics", "posts:create": "Reply to topics" },
+  },
   authLogActions: {
     "email_change": "Email changed",
     "role_change": "Role changed",

@@ -16,6 +16,9 @@ export default {
   approve: "Consenti e continua",
   loading: "Elaborazione…",
   scopes: {
+    "forum:read": "Leggere i contenuti del forum a cui puoi accedere",
+    "topics:create": "Pubblicare discussioni per tuo conto",
+    "posts:create": "Rispondere alle discussioni per tuo conto",
     openid: "Confermare la tua identità",
     profile: "Leggere nome, nome utente e avatar",
     email: "Leggere email e stato di verifica",

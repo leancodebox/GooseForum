@@ -2321,6 +2321,7 @@ func buildSettingsPageProps(user users.EntityComplete) SettingsPageProps {
 			{Key: "privacy", URL: "/settings?tab=privacy"},
 			{Key: "binding", URL: "/settings?tab=binding"},
 			{Key: "applications", URL: "/settings?tab=applications"},
+			{Key: "agent-tokens", URL: "/settings?tab=agent-tokens"},
 		},
 	}
 }

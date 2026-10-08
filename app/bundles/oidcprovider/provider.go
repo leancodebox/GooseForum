@@ -144,6 +144,7 @@ const (
 )
 
 type User struct {
+	Version           uint64
 	Subject           string
 	Name              string
 	PreferredUsername string
@@ -282,6 +283,7 @@ type Consent struct {
 }
 
 type AuthorizationCode struct {
+	UserVersion         uint64
 	Hash                string
 	GrantID             string
 	UserID              string
@@ -330,6 +332,7 @@ type PurgeResult struct {
 }
 
 type Token struct {
+	UserVersion     uint64
 	Hash            string
 	GrantID         string
 	FamilyID        string
@@ -532,6 +535,13 @@ func (p *Provider) Authorize(ctx context.Context, req AuthorizeRequest, auth Aut
 	}
 	codeHash := hash(raw)
 	code := &AuthorizationCode{Hash: codeHash, GrantID: codeHash, UserID: auth.UserID, ClientID: client.ID, RedirectURI: req.RedirectURI, Scopes: scopes, Nonce: req.Nonce, CodeChallenge: req.CodeChallenge, CodeChallengeMethod: req.CodeChallengeMethod, ExpiresAt: now.Add(p.cfg.AuthorizationCodeTTL), AuthTime: auth.AuthTime}
+	if HasForumScope(scopes) {
+		user, err := p.resolveUser(ctx, auth.UserID)
+		if err != nil {
+			return nil, protocolError("access_denied", "account is unavailable", err)
+		}
+		code.UserVersion = user.Version
+	}
 	if err := p.cfg.Store.SaveAuthorizationCode(ctx, code); err != nil {
 		return nil, authorizationError(req, "server_error", "authorization code store failed", errors.Join(ErrServer, err))
 	}
@@ -579,6 +589,9 @@ func (p *Provider) validateAuthorizationRequest(ctx context.Context, req Authori
 	if !validScopeSet(req.Scope) || !contains(req.Scope, "openid") || !allAllowed(req.Scope, client.Scopes) || !allAllowed(req.Scope, p.cfg.SupportedScopes) {
 		return nil, nil, authorizationError(req, "invalid_scope", "scope must contain openid and be allowed for the client", ErrInvalidScope)
 	}
+	if !ValidForumScopes(req.Scope) {
+		return nil, nil, authorizationError(req, "invalid_scope", "forum writes require forum:read", ErrInvalidScope)
+	}
 	if req.CodeChallenge == "" {
 		if req.CodeChallengeMethod != "" || client.Public || client.RequirePKCE {
 			return nil, nil, authorizationError(req, "invalid_request", "this client requires an S256 PKCE challenge", ErrInvalidRequest)
@@ -624,7 +637,7 @@ func (p *Provider) ExchangeCode(ctx context.Context, req TokenRequest) (*TokenRe
 	if code.CodeChallenge != "" && !verifyPKCE(req.CodeVerifier, code.CodeChallenge) {
 		return nil, protocolError("invalid_grant", "PKCE verification failed", ErrInvalidGrant)
 	}
-	return p.issueAuthorizationCodeTokens(ctx, codeHash, code.UserID, client.ID, code.RedirectURI, code.Scopes, code.Nonce, code.AuthTime, req.CodeVerifier)
+	return p.issueAuthorizationCodeTokens(ctx, codeHash, code.UserID, client.ID, code.RedirectURI, code.Scopes, code.Nonce, code.AuthTime, req.CodeVerifier, code.UserVersion)
 }
 
 func (p *Provider) Refresh(ctx context.Context, req TokenRequest) (*TokenResponse, error) {
@@ -686,6 +699,13 @@ func (p *Provider) Refresh(ctx context.Context, req TokenRequest) (*TokenRespons
 		}
 		return nil, protocolError("server_error", "user resolution failed", err)
 	}
+	if HasForumScope(old.Scopes) && user.Version != old.UserVersion {
+		return nil, protocolError("invalid_grant", "account credentials changed", ErrInvalidGrant)
+	}
+	if !ValidForumScopes(scopes) || !allAllowed(scopes, client.Scopes) {
+		return nil, protocolError("invalid_scope", "scopes are no longer allowed", ErrInvalidScope)
+	}
+	access.UserVersion, newToken.UserVersion = user.Version, user.Version
 	id, err := p.signIDToken(ctx, user, old.ClientID, "", old.AuthTime, now)
 	if err != nil {
 		return nil, protocolError("server_error", "ID token signing failed", errors.Join(ErrServer, err))
@@ -741,6 +761,9 @@ func (p *Provider) ValidateAccessToken(ctx context.Context, raw string) (*Token,
 	}
 	if client == nil || !client.Enabled {
 		return nil, protocolError("invalid_token", "access token client is disabled", ErrTokenRevoked)
+	}
+	if HasForumScope(token.Scopes) && (!ValidForumScopes(token.Scopes) || !allAllowed(token.Scopes, client.Scopes) || !client.RequirePKCE) {
+		return nil, protocolError("invalid_token", "forum access is no longer allowed for this client", ErrTokenRevoked)
 	}
 	return token, nil
 }
@@ -809,7 +832,7 @@ func (p *Provider) Purge(ctx context.Context, revokedRetention time.Duration) (P
 	return result, nil
 }
 
-func (p *Provider) issueAuthorizationCodeTokens(ctx context.Context, codeHash, userID, clientID, redirectURI string, scopes []string, nonce string, authTime time.Time, verifier string) (*TokenResponse, error) {
+func (p *Provider) issueAuthorizationCodeTokens(ctx context.Context, codeHash, userID, clientID, redirectURI string, scopes []string, nonce string, authTime time.Time, verifier string, userVersion uint64) (*TokenResponse, error) {
 	now := p.cfg.Now()
 	var refreshRaw string
 	var refresh *Token
@@ -841,6 +864,13 @@ func (p *Provider) issueAuthorizationCodeTokens(ctx context.Context, codeHash, u
 			return nil, protocolError("invalid_grant", "authorization code subject is unavailable", ErrInvalidGrant)
 		}
 		return nil, protocolError("server_error", "user resolution failed", err)
+	}
+	if HasForumScope(scopes) && user.Version != userVersion {
+		return nil, protocolError("invalid_grant", "account credentials changed", ErrInvalidGrant)
+	}
+	access.UserVersion = user.Version
+	if refresh != nil {
+		refresh.UserVersion = user.Version
 	}
 	id, err := p.signIDToken(ctx, user, clientID, nonce, authTime, now)
 	if err != nil {
@@ -935,6 +965,9 @@ func validSubject(subject string) bool {
 // ValidateClient checks the persistent registration independently of a
 // request, allowing administrative code to reject invalid clients up front.
 func ValidateClient(client Client) error {
+	if !ValidForumScopes(client.Scopes) || HasForumScope(client.Scopes) && !client.RequirePKCE {
+		return errors.New("forum clients require forum:read and PKCE")
+	}
 	if client.ID == "" {
 		return errors.New("client ID is required")
 	}

@@ -3,7 +3,9 @@ package middleware
 import (
 	_ "embed"
 	"net/http"
+	"strings"
 
+	"github.com/google/uuid"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +19,17 @@ func SiteMaintenance(c *gin.Context) {
 	// 从配置文件中读取维护模式状态
 	maintenance := preferences.GetBool("app.maintenance")
 	if maintenance {
+		if strings.HasPrefix(c.Request.URL.Path, "/api/agent/") {
+			if c.Request.URL.Path == "/api/agent/SKILL.md" || c.Request.URL.Path == "/api/agent/v1/openapi.json" || c.Request.URL.Path == "/api/agent/v1/API.md" || c.Request.URL.Path == "/api/agent/v1/site" {
+				c.Next()
+				return
+			}
+			id := uuid.NewString()
+			c.Header("X-Request-ID", id)
+			c.Header("Cache-Control", "no-store")
+			c.AbortWithStatusJSON(http.StatusServiceUnavailable, gin.H{"error": gin.H{"code": "maintenance", "message": "Forum is under maintenance", "details": gin.H{}}, "requestId": id})
+			return
+		}
 		// 设置HTTP状态码为503 Service Unavailable
 		c.Writer.WriteHeader(http.StatusServiceUnavailable)
 
