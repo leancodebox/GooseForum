@@ -874,6 +874,7 @@ export interface PublishCategoryPayload {
 
 export interface SearchPageProps {
   query: string
+  sort: 'relevance' | 'new' | 'updated'
   topics: TopicPayload[]
   total: number
   totalPages: number

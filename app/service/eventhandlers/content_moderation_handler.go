@@ -83,6 +83,7 @@ func reviewPostContent(event *ContentReviewRequestedEvent) error {
 		PublishVisiblePost(topic, post)
 	} else {
 		mentionservice.Notify(topic, post)
+		eventbus.Publish(context.Background(), &PostUpdatedEvent{TopicID: topic.Id})
 	}
 	return nil
 }

@@ -30,7 +30,7 @@ All authenticated reads require `forum:read`.
 | GET | `/topics/{topicId}` | none | Topic + firstPost |
 | GET | `/topics/{topicId}/posts` | cursor?, limit? | Post[] + CursorPagination |
 | GET | `/posts/{postId}` | none | Post |
-| GET | `/search` | q, page?=1, limit? | Topic[] + SearchPagination |
+| GET | `/search` | q, page?=1, limit?, sort?=relevance | Topic[] + SearchPagination |
 | POST | `/topics` | title, content, categoryIds, clientRequestId | Submission; scope `topics:create` |
 | POST | `/topics/{topicId}/posts` | content, replyToPostId?, clientRequestId | Submission; scope `posts:create` |
 | POST | `/images` | multipart `file` (one image) | Image; scope `images:upload` |
@@ -40,7 +40,9 @@ All authenticated reads require `forum:read`.
 
 `limit`: default 20, range 1..50. `page`: 1..1000.
 Copy nextCursor unchanged and keep the original filters; stop when hasMore=false.
-Search uses page numbers, not cursors. Its results are rechecked for visibility,
+Search supports `sort=relevance` (default), `sort=new` (newest publication), and
+`sort=updated` (most recently updated). Search uses page numbers, not cursors.
+Its results are rechecked for visibility,
 so a page may be short; use hasMore rather than result count. No total is exposed.
 GET requests do not mark content read or increment views.
 

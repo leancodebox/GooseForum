@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"strings"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
@@ -22,22 +23,30 @@ type IndexBuildResult struct {
 	IndexName      string `json:"indexName"`
 }
 
-// convertTopicToSearchDocument maps a topic and its first post to a search document.
-func convertTopicToSearchDocument(topic *topics.Entity, firstPost *posts.Entity) TopicSearchDocument {
-	searchContent := ""
+// convertTopicToSearchDocument includes the first post and visible replies.
+func convertTopicToSearchDocument(topic *topics.Entity, firstPost *posts.Entity, replies []posts.SearchReply) TopicSearchDocument {
+	var content strings.Builder
+	updatedAt := topic.UpdatedAt
 	if firstPost != nil {
-		searchContent = markdown2html.ExtractSearchContent(firstPost.Content)
+		content.WriteString(markdown2html.ExtractSearchContent(firstPost.Content))
+	}
+	for _, reply := range replies {
+		content.WriteString("\n\n")
+		content.WriteString(markdown2html.ExtractSearchContent(reply.Content))
+		if reply.UpdatedAt.After(updatedAt) {
+			updatedAt = reply.UpdatedAt
+		}
 	}
 	return TopicSearchDocument{
 		ID:            topic.Id,
 		Title:         topic.Title,
-		SearchContent: searchContent,
+		SearchContent: content.String(),
 		Category:      topic.CategoryIds,
 		MainCategory:  topic.MainCategoryId,
 		TopicStatus:   topic.Status,
 		ProcessStatus: topic.ProcessStatus,
 		CreatedAt:     topic.CreatedAt.Unix(),
-		UpdatedAt:     topic.UpdatedAt.Unix(),
+		UpdatedAt:     updatedAt.Unix(),
 	}
 }
 
@@ -55,7 +64,11 @@ func BuildSingleTopicSearchDocument(topic *topics.Entity, firstPost *posts.Entit
 	var err error
 	pk := "id"
 	if topic.Status == 1 && topic.ProcessStatus == 0 {
-		doc := convertTopicToSearchDocument(topic, firstPost)
+		replies, err := posts.GetSearchReplies(topic.Id)
+		if err != nil {
+			return nil, fmt.Errorf("read search replies: %w", err)
+		}
+		doc := convertTopicToSearchDocument(topic, firstPost, replies)
 		task, err = index.AddDocuments(doc, &meilisearch.DocumentOptions{PrimaryKey: &pk})
 		if err != nil {
 			slog.Warn(fmt.Sprintf("Meilisearch 处理主题 ID:%v 失败: %v\n", doc.ID, err))

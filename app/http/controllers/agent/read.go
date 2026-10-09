@@ -271,6 +271,11 @@ func (h *Handler) search(c *gin.Context) {
 		return
 	}
 	query := strings.TrimSpace(c.Query("q"))
+	sort := c.DefaultQuery("sort", "relevance")
+	if sort != "relevance" && sort != "new" && sort != "updated" {
+		fail(c, 400, "invalid_request", "sort must be relevance, new or updated")
+		return
+	}
 	p, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil || p < 1 || p > 1000 || query == "" || len(query) > 500 {
 		fail(c, 400, "invalid_request", "q and a page between 1 and 1000 are required")
@@ -281,7 +286,7 @@ func (h *Handler) search(c *gin.Context) {
 		return
 	}
 	a := current(c)
-	result, err := searchservice.SearchTopics(searchservice.SearchRequest{Query: query, Categories: a.Access.ReadableCategoryIDs(), FilterByCategories: !a.Access.HasGlobalManage(), Limit: n, Offset: (p - 1) * n})
+	result, err := searchservice.SearchTopics(searchservice.SearchRequest{Query: query, Sort: sort, Categories: a.Access.ReadableCategoryIDs(), FilterByCategories: !a.Access.HasGlobalManage(), Limit: n, Offset: (p - 1) * n})
 	if err != nil || result == nil {
 		fail(c, 503, "search_unavailable", "Search is unavailable")
 		return

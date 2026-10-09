@@ -1,16 +1,19 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"strings"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
+	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/mentionservice"
 	"github.com/leancodebox/GooseForum/app/service/postingpolicy"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
@@ -280,6 +283,7 @@ func DeletePost(req component.BetterRequest[DeletePostReq]) component.Response {
 		return component.SuccessResponse(true)
 	}
 	posts.DeleteEntity(&postEntity)
+	eventbus.Publish(context.Background(), &eventhandlers.PostUpdatedEvent{TopicID: topicEntity.Id})
 	if topicEntity.Id > 0 && postEntity.ProcessStatus == 0 {
 		postservice.SyncTopicPostStats(topicEntity, postEntity, true)
 		hotdataserve.ClearTopicWriteCaches(false)

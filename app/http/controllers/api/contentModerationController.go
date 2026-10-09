@@ -168,6 +168,7 @@ func ReviewAdminPost(req component.BetterRequest[ReviewContentReq]) component.Re
 		eventhandlers.PublishVisiblePost(topic, post)
 	} else {
 		mentionservice.Notify(topic, post)
+		eventbus.Publish(context.Background(), &eventhandlers.PostUpdatedEvent{TopicID: topic.Id})
 	}
 	logContentReview(req, "post", topic.Id)
 	enqueueContentReview(false, post.Id, post.ModerationVersion, post.ModerationStatus)

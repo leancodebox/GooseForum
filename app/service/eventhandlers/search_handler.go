@@ -8,6 +8,34 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
 )
 
+type PostUpdatedEvent struct {
+	TopicID uint64
+}
+
+func handlePostUpdated(_ context.Context, event *PostUpdatedEvent) error {
+	if event == nil {
+		return nil
+	}
+	return updateReplySearchDocument(event.TopicID)
+}
+
+func handleCommentSearch(_ context.Context, event *CommentCreatedEvent) error {
+	if event == nil {
+		return nil
+	}
+	return updateReplySearchDocument(event.TopicId)
+}
+
+func updateReplySearchDocument(topicID uint64) error {
+	topic := topics.Get(topicID)
+	if topic.Id == 0 {
+		return nil
+	}
+	post := posts.Get(topic.FirstPostId)
+	_, err := searchservice.BuildSingleTopicSearchDocument(&topic, &post)
+	return err
+}
+
 // TopicPublishedEvent 主题发布事件
 type TopicPublishedEvent struct {
 	Topic     *topics.Entity

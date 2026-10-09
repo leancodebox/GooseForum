@@ -23,7 +23,7 @@ afterEach(cleanup);
 describe("topic list keep-alive state", () => {
   it("uses unique search input IDs across cached page instances", () => {
     const page: SearchPageProps = {
-      query: "", topics: [], total: 0, totalPages: 0,
+      query: "", sort: "relevance", topics: [], total: 0, totalPages: 0,
       pagination: { page: 1, nextPage: 2, hasNext: false, nextUrl: "" },
     };
     render(<GooseI18nProvider locale="zh"><GooseRuntimeProvider runtime={createRuntime()}>
@@ -135,6 +135,7 @@ describe("topic list keep-alive state", () => {
   it("keeps an unfinished search query when an Activity is shown again", async () => {
     const page: SearchPageProps = {
       query: "initial",
+      sort: "relevance",
       topics: [],
       total: 0,
       totalPages: 0,

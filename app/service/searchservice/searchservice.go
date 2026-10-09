@@ -13,6 +13,7 @@ import (
 // SearchRequest is a topic search request.
 type SearchRequest struct {
 	Query              string   `json:"query"`
+	Sort               string   `json:"sort"`
 	Categories         []uint64 `json:"categories"`
 	FilterByCategories bool     `json:"filterByCategories"`
 	Limit              int      `json:"limit"`
@@ -61,6 +62,12 @@ func SearchTopics(req SearchRequest) (*SearchResponse, error) {
 	}
 
 	searchReq.AttributesToRetrieve = []string{"id", "title"}
+	switch req.Sort {
+	case "new":
+		searchReq.Sort = []string{"createdAt:desc"}
+	case "updated":
+		searchReq.Sort = []string{"updatedAt:desc"}
+	}
 
 	searchResp, err := index.Search(req.Query, searchReq)
 	if err != nil {

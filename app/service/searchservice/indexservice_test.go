@@ -25,7 +25,7 @@ func TestConvertTopicToSearchDocument(t *testing.T) {
 	}
 	firstPost := &posts.Entity{Content: "# Heading\n\nVisible text with [link](https://example.com).\n\n```go\nhidden()\n```"}
 
-	got := convertTopicToSearchDocument(topic, firstPost)
+	got := convertTopicToSearchDocument(topic, firstPost, nil)
 
 	if got.ID != topic.Id || got.Title != topic.Title {
 		t.Fatalf("unexpected identity fields: %#v", got)
@@ -53,6 +53,25 @@ func TestConvertTopicToSearchDocument(t *testing.T) {
 func TestTopicIndexUsesTopicName(t *testing.T) {
 	if TopicIndex != "topics" {
 		t.Fatalf("TopicIndex = %q, want topics", TopicIndex)
+	}
+}
+
+func TestConvertTopicToSearchDocumentIncludesReplies(t *testing.T) {
+	topic := &topics.Entity{Id: 42, UpdatedAt: time.Unix(100, 0)}
+	first := &posts.Entity{Content: "Topic body"}
+	replies := []posts.SearchReply{
+		{Content: "Reply with [unique keyword](https://example.com)", UpdatedAt: time.Unix(200, 0)},
+		{Content: "Another reply\n\n```go\nhidden()\n```", UpdatedAt: time.Unix(150, 0)},
+	}
+	got := convertTopicToSearchDocument(topic, first, replies)
+	searchContent := strings.Join(strings.Fields(got.SearchContent), " ")
+	for _, text := range []string{"Topic body", "unique keyword", "Another reply"} {
+		if !strings.Contains(searchContent, text) {
+			t.Fatalf("search content missing %q: %q", text, got.SearchContent)
+		}
+	}
+	if strings.Contains(got.SearchContent, "hidden") || got.UpdatedAt != 200 {
+		t.Fatalf("unexpected reply document: %#v", got)
 	}
 }
 

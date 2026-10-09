@@ -13,6 +13,8 @@ func Handlers() []cqrs.EventHandler {
 		cqrs.NewEventHandler("UserFollowedHandler", handleUserFollowed),
 		cqrs.NewEventHandler("TopicPublishedHandler", handleTopicPublished),
 		cqrs.NewEventHandler("TopicUpdatedHandler", handleTopicUpdated),
+		cqrs.NewEventHandler("PostUpdatedHandler", handlePostUpdated),
+		cqrs.NewEventHandler("CommentSearchHandler", handleCommentSearch),
 		cqrs.NewEventHandler("PointTopicPublishedHandler", handlePointTopicPublished),
 		cqrs.NewEventHandler("PointCommentCreatedHandler", handlePointCommentCreated),
 		cqrs.NewEventHandler("UserLastActiveUpdatedHandler", handleUserLastActiveUpdated),

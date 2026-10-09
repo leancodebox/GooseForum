@@ -37,6 +37,16 @@ import (
 
 type testAccessStore struct{}
 
+func TestSearchRejectsInvalidSort(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(recorder)
+	c.Request = httptest.NewRequest("GET", "/search?q=go&sort=invalid", nil)
+	New().search(c)
+	if recorder.Code != 400 || !strings.Contains(recorder.Body.String(), "sort must be") {
+		t.Fatalf("response = %d %s", recorder.Code, recorder.Body.String())
+	}
+}
+
 func (testAccessStore) SystemGroupIDs() (map[string]uint64, error) {
 	return map[string]uint64{"everyone": 1, "registered": 2}, nil
 }

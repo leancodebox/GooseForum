@@ -132,6 +132,7 @@ func Update(input UpdateInput) (posts.Entity, error) {
 	}
 	enqueueReview(post.Id, post.ModerationVersion, post.ModerationStatus)
 	mentionservice.Notify(topic, post)
+	eventbus.Publish(context.Background(), &eventhandlers.PostUpdatedEvent{TopicID: topic.Id})
 	return post, nil
 }
 

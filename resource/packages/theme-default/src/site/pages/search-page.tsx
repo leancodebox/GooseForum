@@ -12,10 +12,11 @@ import {
   EmptyTitle,
 } from "@gooseforum/ui/components/empty";
 import { Input } from "@gooseforum/ui/components/input";
+import { ListFilter, ListFilterItem } from "@gooseforum/ui/components/list-filter";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
 import { PageHeader } from "../layout/page-header";
 import { SiteListPanel } from "../layout/site-panel";
-import { compactNumber, TopicTable } from "../topics/topic-list";
+import { compactNumber, TopicListToolbar, TopicTable } from "../topics/topic-list";
 
 export function SearchPageView({ page }: { page: SearchPageProps }) {
   const queryInputId = useId();
@@ -25,6 +26,15 @@ export function SearchPageView({ page }: { page: SearchPageProps }) {
   const [query, setQuery] = useState(page.query);
   const payloadQuery = useRef(page.query);
   const hasQuery = Boolean(page.query.trim());
+  const sort = page.sort;
+
+  function searchUrl(query: string, sort: string, page = 1) {
+    const params = new URLSearchParams();
+    if (query.trim()) params.set("q", query.trim());
+    if (sort !== "relevance") params.set("sort", sort);
+    if (page > 1) params.set("page", String(page));
+    return `/search${params.size ? `?${params}` : ""}`;
+  }
 
   useEffect(() => {
     if (payloadQuery.current === page.query) return;
@@ -34,9 +44,7 @@ export function SearchPageView({ page }: { page: SearchPageProps }) {
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const params = new URLSearchParams();
-    if (query.trim()) params.set("q", query.trim());
-    void runtime.navigate(`/search${params.size ? `?${params}` : ""}`);
+    void runtime.navigate(searchUrl(query, sort));
   }
 
   const description = hasQuery
@@ -61,6 +69,7 @@ export function SearchPageView({ page }: { page: SearchPageProps }) {
             className="w-full lg:w-96"
             onSubmit={submit}
           >
+            <input type="hidden" name="sort" value={sort} />
             <div className="flex h-10 items-center gap-2 rounded-md border bg-background px-3 text-sm text-muted-foreground transition focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/20">
               <Search className="size-4 shrink-0" />
               <label htmlFor={queryInputId} className="sr-only">
@@ -87,6 +96,22 @@ export function SearchPageView({ page }: { page: SearchPageProps }) {
         }
       />
       <SiteListPanel>
+        <TopicListToolbar>
+          <ListFilter asChild>
+            <nav aria-label={searchT("sort")}>
+              {(["relevance", "new", "updated"] as const).map((key) => (
+                <ListFilterItem key={key} asChild>
+                  <GooseLink
+                    href={searchUrl(page.query, key)}
+                    aria-current={sort === key ? "page" : undefined}
+                  >
+                    {searchT(key)}
+                  </GooseLink>
+                </ListFilterItem>
+              ))}
+            </nav>
+          </ListFilter>
+        </TopicListToolbar>
         {page.topics.length ? (
           <>
             <TopicTable topics={page.topics} t={topicT} />
@@ -102,7 +127,7 @@ export function SearchPageView({ page }: { page: SearchPageProps }) {
                   {page.pagination.page > 1 ? (
                     <Button asChild variant="outline" size="sm">
                       <GooseLink
-                        href={`/search?q=${encodeURIComponent(page.query)}&page=${page.pagination.page - 1}`}
+                        href={searchUrl(page.query, sort, page.pagination.page - 1)}
                         rel="prev"
                       >
                         {topicT("previous")}

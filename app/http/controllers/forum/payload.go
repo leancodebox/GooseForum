@@ -619,6 +619,7 @@ type PublishTopicPayload struct {
 
 type SearchPageProps struct {
 	Query      string            `json:"query"`
+	Sort       string            `json:"sort"`
 	Topics     []TopicPayload    `json:"topics"`
 	Total      int64             `json:"total"`
 	TotalPages int               `json:"totalPages"`
@@ -2388,10 +2389,11 @@ func buildPublishCategories(actor accesscontrol.Snapshot, everyone accesscontrol
 	return res
 }
 
-func buildSearchPageProps(c *gin.Context, query string, page int) SearchPageProps {
+func buildSearchPageProps(c *gin.Context, query string, page int, sort string) SearchPageProps {
 	const pageSize = 10
 	props := SearchPageProps{
 		Query:  query,
+		Sort:   sort,
 		Topics: []TopicPayload{},
 		Pagination: PaginationPayload{
 			Page: page,
@@ -2410,6 +2412,7 @@ func buildSearchPageProps(c *gin.Context, query string, page int) SearchPageProp
 	}
 	result, err := searchservice.SearchTopics(searchservice.SearchRequest{
 		Query:              query,
+		Sort:               sort,
 		Categories:         snapshot.ReadableCategoryIDs(),
 		FilterByCategories: !snapshot.HasGlobalManage(),
 		Limit:              pageSize,
@@ -2440,7 +2443,7 @@ func buildSearchPageProps(c *gin.Context, query string, page int) SearchPageProp
 		Page:     page,
 		NextPage: nextPage,
 		HasNext:  nextPage > 0,
-		NextURL:  buildSearchURL(query, nextPage),
+		NextURL:  buildSearchURL(query, nextPage, sort),
 	}
 	return props
 }
@@ -2460,8 +2463,11 @@ func filterCurrentSearchTopics(ids []uint64, topicMap map[uint64]*topics.Entity,
 	})
 }
 
-func buildSearchURL(query string, page int) string {
+func buildSearchURL(query string, page int, sort string) string {
 	values := url.Values{}
+	if sort == "new" || sort == "updated" {
+		values.Set("sort", sort)
+	}
 	if query != "" {
 		values.Set("q", query)
 	}

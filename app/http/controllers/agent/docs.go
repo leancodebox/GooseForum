@@ -131,7 +131,7 @@ func openAPIDocument(base string) gin.H {
 		{path: "/topics/{topicId}", method: "get", name: "getTopic", scope: "forum:read", anonymous: true, response: "TopicDetail"},
 		{path: "/topics/{topicId}/posts", method: "get", name: "listPosts", scope: "forum:read", anonymous: true, list: true, response: "Post", params: listParams},
 		{path: "/posts/{postId}", method: "get", name: "getPost", scope: "forum:read", anonymous: true, response: "Post"},
-		{path: "/search", method: "get", name: "searchTopics", scope: "forum:read", anonymous: true, list: true, response: "Topic", params: []gin.H{param("q", "query", gin.H{"type": "string", "maxLength": 500}, true), param("page", "query", gin.H{"type": "integer", "minimum": 1, "maximum": 1000, "default": 1}, false), listParams[0]}},
+		{path: "/search", method: "get", name: "searchTopics", scope: "forum:read", anonymous: true, list: true, response: "Topic", params: []gin.H{param("q", "query", gin.H{"type": "string", "maxLength": 500}, true), param("page", "query", gin.H{"type": "integer", "minimum": 1, "maximum": 1000, "default": 1}, false), listParams[0], param("sort", "query", gin.H{"type": "string", "enum": []string{"relevance", "new", "updated"}, "default": "relevance"}, false)}},
 		{path: "/topics", method: "post", name: "createTopic", scope: "topics:create", response: "Submission", body: "CreateTopic"},
 		{path: "/topics/{topicId}/posts", method: "post", name: "createPost", scope: "posts:create", response: "Submission", body: "CreatePost"},
 		{path: "/images", method: "post", name: "uploadImage", scope: "images:upload", response: "Image", body: "UploadImage"},

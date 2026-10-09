@@ -1,10 +1,30 @@
 package forum
 
 import (
+	"net/url"
 	"testing"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 )
+
+func TestBuildSearchURL(t *testing.T) {
+	for _, sort := range []string{"relevance", "new", "updated", "invalid"} {
+		got, err := url.Parse(buildSearchURL("Go & React", 3, sort))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got.Path != "/search" || got.Query().Get("q") != "Go & React" || got.Query().Get("page") != "3" {
+			t.Fatalf("search URL = %s", got)
+		}
+		wantSort := ""
+		if sort == "new" || sort == "updated" {
+			wantSort = sort
+		}
+		if got.Query().Get("sort") != wantSort {
+			t.Fatalf("sort = %q, want %q", got.Query().Get("sort"), wantSort)
+		}
+	}
+}
 
 func TestFilterCurrentSearchTopicsRejectsStaleDocuments(t *testing.T) {
 	readableCategoryIDs := map[uint64]struct{}{10: {}}

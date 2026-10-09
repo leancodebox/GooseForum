@@ -1725,6 +1725,7 @@ describe("AppShell and static pages", () => {
     const { navigate, user } = renderPage(
       payload("search.index", {
         query: "react",
+        sort: "relevance",
         total: 1,
         totalPages: 2,
         topics: [
@@ -1761,6 +1762,26 @@ describe("AppShell and static pages", () => {
     await user.type(input, "goose forum");
     await user.click(screen.getByRole("button", { name: "搜索" }));
     expect(navigate).toHaveBeenCalledWith("/search?q=goose+forum");
+  });
+
+  it("preserves search order when switching order and submitting new queries", async () => {
+    const { navigate, user } = renderPage(
+      payload("search.index", {
+        query: "react",
+        sort: "updated",
+        total: 0,
+        totalPages: 0,
+        topics: [],
+        pagination: { page: 1, nextPage: 0, hasNext: false, nextUrl: "" },
+      }),
+    );
+    expect(screen.getByRole("link", { name: "最近更新" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("link", { name: "最新发布" }).getAttribute("href")).toBe("/search?q=react&sort=new");
+    const input = screen.getByRole("textbox", { name: "搜索主题..." });
+    await user.clear(input);
+    await user.type(input, "go & forum");
+    await user.click(screen.getByRole("button", { name: "搜索" }));
+    expect(navigate).toHaveBeenCalledWith("/search?q=go+%26+forum&sort=updated");
   });
 
   it("renders the Links information hierarchy and safe external links", () => {

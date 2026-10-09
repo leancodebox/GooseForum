@@ -12,7 +12,11 @@ import (
 func Search(c *gin.Context) {
 	query := strings.TrimSpace(c.Query("q"))
 	page := parsePositiveInt(c.DefaultQuery("page", "1"), 1)
-	props := buildSearchPageProps(c, query, page)
+	sort := c.Query("sort")
+	if sort != "new" && sort != "updated" {
+		sort = "relevance"
+	}
+	props := buildSearchPageProps(c, query, page, sort)
 	payload := PagePayload{
 		Component: PageComponentSearch,
 		Props:     props,
@@ -33,7 +37,7 @@ func buildSearchMeta(c *gin.Context, query string) PageMeta {
 	return PageMeta{
 		Title:       pageTitle(title),
 		Description: i18n.T(lang, "meta.searchDesc", "site", siteTitle()),
-		Canonical:   component.GetBaseUri(c) + buildSearchURL(query, 1),
+		Canonical:   component.GetBaseUri(c) + buildSearchURL(query, 1, "relevance"),
 		Robots:      "noindex,follow",
 	}
 }
