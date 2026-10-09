@@ -249,7 +249,7 @@ func newDefaultService() (*Service, error) {
 		SiteURL:             siteURL,
 		KeyEncryptionSecret: []byte(preferences.SecretKey()),
 		AllowInsecureIssuer: setting.IsLocal(),
-		SupportedScopes:     []string{"openid", "profile", "email", "offline_access", core.ScopeForumRead, core.ScopeTopicsCreate, core.ScopePostsCreate},
+		SupportedScopes:     []string{"openid", "profile", "email", "offline_access", core.ScopeForumRead, core.ScopeTopicsCreate, core.ScopePostsCreate, core.ScopeImagesUpload},
 	})
 }
 

@@ -183,6 +183,7 @@ test("creates and revokes a fallback token without retaining its secret", async 
   await page
     .getByRole("checkbox", { name: "Reply to topics", exact: true })
     .check();
+  await page.getByRole("checkbox", { name: "Upload images", exact: true }).check();
   await page.getByRole("button", { name: "Create token", exact: true }).click();
   await expect(page.getByLabel("Token", { exact: true })).toHaveValue(
     "gf_agent_example_secret_only_once",
@@ -196,7 +197,7 @@ test("creates and revokes a fallback token without retaining its secret", async 
   expect(request).toMatchObject({
     name: "Research agent",
     days: 30,
-    scopes: ["forum:read", "posts:create"],
+    scopes: ["forum:read", "posts:create", "images:upload"],
   });
   await page.screenshot({
     path: `/tmp/gooseforum-agent-token-${testInfo.project.name}.png`,
@@ -247,6 +248,7 @@ test("explains forum permissions in browser consent and returns to the client", 
           "forum:read",
           "topics:create",
           "posts:create",
+          "images:upload",
           "offline_access",
         ],
         expires_at: "2099-01-01T00:00:00Z",

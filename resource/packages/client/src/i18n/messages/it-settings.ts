@@ -5,7 +5,7 @@ export default {
   ...en,
   agentTokens: {
     delete: "Elimina", confirmDelete: "Eliminare questo token? L'accesso verrà interrotto immediatamente.",
-    title: "Token Agent", name: "Nome", permissions: "Permessi", expiry: "Validità", days: "{count} giorni", password: "Password attuale", create: "Crea token", revokeAll: "Revoca tutti", confirmRevoke: "Revocare l'accesso?", revoked: "Revocato", expires: "Scadenza: {date}", empty: "Nessun token", failed: "Operazione token non riuscita", secret: "Token", secretOnce: "Questo token viene mostrato una sola volta. Conservalo al sicuro.", copy: "Copia", copied: "Copiato", dismiss: "Chiudi", scopes: { "forum:read": "Leggere il forum", "topics:create": "Pubblicare discussioni", "posts:create": "Rispondere alle discussioni" },
+    title: "Token Agent", name: "Nome", permissions: "Permessi", expiry: "Validità", days: "{count} giorni", password: "Password attuale", create: "Crea token", revokeAll: "Revoca tutti", confirmRevoke: "Revocare l'accesso?", revoked: "Revocato", expires: "Scadenza: {date}", empty: "Nessun token", failed: "Operazione token non riuscita", secret: "Token", secretOnce: "Questo token viene mostrato una sola volta. Conservalo al sicuro.", copy: "Copia", copied: "Copiato", dismiss: "Chiudi", scopes: { "forum:read": "Leggere il forum", "topics:create": "Pubblicare discussioni", "posts:create": "Rispondere alle discussioni", "images:upload": "Caricare immagini" },
   },
   authLogActions: {
     "email_change": "Email modificata",

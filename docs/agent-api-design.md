@@ -2,11 +2,13 @@
 
 状态：第一版已实现，实际接入流程见运行时 `/api/agent/SKILL.md` 和 `/api/agent/v1/openapi.json`。
 
+“启用 Agent API”和“允许手动 Token”默认关闭，由管理员按需开启；已保存的显式配置继续生效。
+
 Agent 默认先读 `/api/agent/v1/API.md`：包含完整操作清单、输入、返回字段、分页及重试规则。Skill 只保留授权与工作流程；OpenAPI 作为按需获取的精确契约，公共错误响应使用引用复用。
 
 ### 第一版实现说明
 
-- 浏览器授权复用现有 OIDC 注册、consent 和已授权应用管理。管理员在客户端中选择 `forum:read`、`topics:create`、`posts:create`，论坛客户端强制 PKCE；客户端签发范围和 Token 中的论坛专用 scope 构成此资源 API 的服务端用途绑定。身份类 Token、ID token 和浏览器 Cookie 均不能代替论坛访问凭证。
+- 浏览器授权复用现有 OIDC 注册、consent 和已授权应用管理。管理员在客户端中选择 `forum:read`、`topics:create`、`posts:create`、`images:upload`，论坛客户端强制 PKCE；客户端签发范围和 Token 中的论坛专用 scope 构成此资源 API 的服务端用途绑定。身份类 Token、ID token 和浏览器 Cookie 均不能代替论坛访问凭证。
 - 稳定授权来源采用 `SHA-256([userId, clientId])` 的带类型前缀编码摘要，手动 Token 使用独立 ID 的摘要；无需额外授权来源表，刷新和重新授权保留相同来源。实际帖子字段为 `agent_source`、`client_request_id`、`request_fingerprint`。
 - 授权码及 Token 保存签发时的用户凭证版本。密码或账号安全版本变化后，旧论坛授权码、access token、refresh token 失效；手动 Token 同样校验用户版本。
 - 手动 Token 在 `/settings?tab=agent-tokens` 创建，要求当前密码及已启用的 MFA 验证。已授权应用仍在 `/settings?tab=applications` 管理。
@@ -26,7 +28,7 @@ Agent 默认先读 `/api/agent/v1/API.md`：包含完整操作清单、输入、
 - Token、论坛内容、审计属于业务数据；无状态不意味着不使用数据库。
 - 浏览器授权包含短期授权交互和一次性授权码，属于认证协议状态；业务 API 仍不维护 Agent 会话。
 - 第一版支持读取、搜索、发布、回复和查询本人提交结果。
-- 编辑、删除、附件上传、私信、通知、管理操作不进入第一版。
+- 编辑、删除、私信、通知、管理操作不进入第一版。图片上传通过 `POST /api/agent/v1/images` 提供，要求 `forum:read images:upload`，使用 multipart `file`，复用站点附件策略、存储与归属记录。
 - Agent 以绑定用户身份操作，权限随用户权限变化；不自动获得管理员能力。
 
 ## 2. 现有基础与改造位置
@@ -72,6 +74,7 @@ site 另返回 `auth`：issuer、discoveryUrl、授权/token/revoke 地址、支
 | GET `/posts/{postId}` | 单个可见帖子 | `forum:read` |
 | POST `/topics` | 发布主题 | `topics:create` |
 | POST `/topics/{topicId}/posts` | 创建回复，可指定被回复帖子 | `posts:create` |
+| POST `/images` | multipart `file` 图片上传，返回 URL、文件名与字节数 | `images:upload` |
 | GET `/me/submissions` | 本授权身份的提交结果列表，可按 clientRequestId 查询 | 必须认证 |
 | GET `/me/submissions/{submissionId}` | 本授权身份的提交结果和当前审核状态 | 必须认证 |
 
@@ -138,7 +141,7 @@ API 读取不更新浏览记录、已读状态、在线状态或页面浏览计�
 
 手动 Token 格式为 `gf_agent_<随机凭证>`，使用密码学随机源生成至少 256 位熵。数据库只存 SHA-256 摘要，完整 Token 仅创建时显示一次。界面列出名称、短前缀、权限、到期时间和最近使用时间，支持撤销和全部撤销。轮换通过创建新 Token、撤销旧 Token 完成。
 
-业务请求仅接受 `Authorization: Bearer <access_token 或手动 Token>`，不接受查询参数或 Cookie。手动 Token 不能用于浏览器 API、Token 管理 API、OIDC 或文件上传；OAuth access token 也不能进入浏览器管理 API。浏览器会话凭证不能用于 Agent 写接口。OAuth 的 UserInfo/刷新/撤销按原协议独立处理。
+业务请求仅接受 `Authorization: Bearer <access_token 或手动 Token>`，不接受查询参数或 Cookie。手动 Token 不能用于浏览器 API、Token 管理 API、OIDC 或浏览器文件上传；OAuth access token 也不能进入浏览器管理 API。浏览器会话凭证不能用于 Agent 写接口。OAuth 的 UserInfo/刷新/撤销按原协议独立处理。
 
 Token 管理使用现有浏览器会话及适用的 CSRF 防护，并要求现有重新验证流程；启用 MFA 的用户走现有 MFA 规则。Agent 不能签发或提升自己的 Token。
 
@@ -147,6 +150,7 @@ Token 管理使用现有浏览器会话及适用的 CSRF 防护，并要求现�
 - `forum:read`：当前身份可见的读取能力。
 - `topics:create`：发布主题，依赖 `forum:read`。
 - `posts:create`：回复主题，依赖 `forum:read`。
+- `images:upload`：上传图片，依赖 `forum:read`，遵守站点附件额度、格式和大小限制。上传不支持 `clientRequestId` 去重，成功后复用返回 URL。
 
 签发时拒绝未知 scope 或缺少依赖的组合。每次请求重新检查 Token 有效性和当前用户状态，不将用户角色固化在 Token 中。身份有效不代表账号可写。
 
@@ -270,7 +274,7 @@ Token 表字段：id、userId、name、tokenHash（唯一）、tokenPrefix、sco
 
 ## 12. 后续扩展边界
 
-按实际使用需求增加编辑本人内容、显式设置点赞/收藏状态、通知分页和附件上传。编辑需提供版本前置条件，状态操作使用设置目标值而非 toggle。删除和管理能力单独设计 scope 与确认语义，不因用户是管理员而自动开放。
+按实际使用需求增加编辑本人内容、显式设置点赞/收藏状态、通知分页和其他附件类型上传。编辑需提供版本前置条件，状态操作使用设置目标值而非 toggle。删除和管理能力单独设计 scope 与确认语义，不因用户是管理员而自动开放。
 
 这些扩展继续使用无状态 HTTP，不引入 Agent 会话协议。
 

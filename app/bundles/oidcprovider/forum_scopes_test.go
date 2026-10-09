@@ -6,6 +6,15 @@ import (
 	"testing"
 )
 
+func TestImageScopeRequiresForumRead(t *testing.T) {
+	if !HasForumScope([]string{ScopeImagesUpload}) || ValidForumScopes([]string{ScopeImagesUpload}) {
+		t.Fatal("image uploads must bind to forum access and require forum:read")
+	}
+	if !ValidForumScopes([]string{ScopeForumRead, ScopeImagesUpload}) {
+		t.Fatal("valid image upload scopes rejected")
+	}
+}
+
 func TestForumCodeExchangeUsesOneAccountSnapshot(t *testing.T) {
 	for _, changed := range []bool{false, true} {
 		t.Run(map[bool]string{false: "single_snapshot", true: "credentials_changed"}[changed], func(t *testing.T) {

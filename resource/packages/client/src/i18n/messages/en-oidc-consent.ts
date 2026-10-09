@@ -19,6 +19,7 @@ export default {
     "forum:read": "Read forum content you can access",
     "topics:create": "Publish topics on your behalf",
     "posts:create": "Reply to topics on your behalf",
+    "images:upload": "Upload images on your behalf",
     openid: "Confirm your identity",
     profile: "Read your name, username, and avatar",
     email: "Read your email and verification status",

@@ -3,7 +3,7 @@ import mfa from './zh-mfa.js';
 export default {
   agentTokens: {
     delete: "删除", confirmDelete: "确认删除此 Token？删除后将立即失效。",
-    title: "Agent Token", name: "名称", permissions: "权限", expiry: "有效期", days: "{count} 天", password: "当前密码", create: "创建 Token", revokeAll: "撤销全部", confirmRevoke: "确认撤销访问权限？", revoked: "已撤销", expires: "到期时间：{date}", empty: "暂无 Token", failed: "Token 操作失败", secret: "Token", secretOnce: "此 Token 仅显示一次，请妥善保管。", copy: "复制", copied: "已复制", dismiss: "关闭", scopes: { "forum:read": "读取论坛", "topics:create": "发布主题", "posts:create": "回复主题" },
+    title: "Agent Token", name: "名称", permissions: "权限", expiry: "有效期", days: "{count} 天", password: "当前密码", create: "创建 Token", revokeAll: "撤销全部", confirmRevoke: "确认撤销访问权限？", revoked: "已撤销", expires: "到期时间：{date}", empty: "暂无 Token", failed: "Token 操作失败", secret: "Token", secretOnce: "此 Token 仅显示一次，请妥善保管。", copy: "复制", copied: "已复制", dismiss: "关闭", scopes: { "forum:read": "读取论坛", "topics:create": "发布主题", "posts:create": "回复主题", "images:upload": "上传图片" },
   },
   authLogActions: {
     "email_change": "修改邮箱",

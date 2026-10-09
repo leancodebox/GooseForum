@@ -20,22 +20,8 @@ import (
 	"gorm.io/gorm"
 )
 
-type categoryRow struct {
-	Id               uint64
-	Name, Desc, Slug string
-}
-type topicRow struct {
-	Id                                  uint64
-	Title                               string
-	UserId, MainCategoryId, FirstPostId uint64
-	CreatedAt, UpdatedAt                time.Time
-}
-type postRow struct {
-	Id, TopicId, UserId, PostNo, ReplyToPostId uint64
-	Content                                    string
-	SourceVersion                              uint8
-	CreatedAt, UpdatedAt                       time.Time
-}
+type topicRow = topics.AgentTopic
+type postRow = posts.AgentPost
 type cursor struct {
 	Kind, Filter string
 	ID           uint64
@@ -99,12 +85,8 @@ func (a *actor) canWrite() bool {
 
 func (h *Handler) categories(c *gin.Context) {
 	a := current(c)
-	q := h.DB().Model(&category.Entity{}).Order("sort ASC, id ASC")
-	if !a.Access.HasGlobalManage() {
-		q = q.Where("id IN ?", a.Access.ReadableCategoryIDs())
-	}
-	var rows []categoryRow
-	if q.Find(&rows).Error != nil {
+	rows, err := category.ListAgentCategories(a.Access.ReadableCategoryIDs(), a.Access.HasGlobalManage())
+	if err != nil {
 		fail(c, 500, "internal_error", "Unable to read categories")
 		return
 	}
@@ -125,12 +107,8 @@ func hasScope(a *actor, scope string) bool {
 	return false
 }
 
-func (h *Handler) visibleTopics(a *actor) *gorm.DB {
-	q := h.DB().Model(&topics.Entity{}).Where("status = 1 AND process_status = 0").Where("EXISTS (SELECT 1 FROM posts WHERE posts.id = topics.first_post_id AND posts.deleted_at IS NULL AND posts.process_status = 0)")
-	if !a.Access.HasGlobalManage() {
-		q = q.Where("main_category_id IN ?", a.Access.ReadableCategoryIDs())
-	}
-	return q
+func (a *actor) topicQuery() topics.AgentTopicQuery {
+	return topics.AgentTopicQuery{ReadableCategoryIDs: a.Access.ReadableCategoryIDs(), GlobalManage: a.Access.HasGlobalManage()}
 }
 
 func (h *Handler) loadTopic(c *gin.Context, value string) (topicRow, bool) {
@@ -139,13 +117,12 @@ func (h *Handler) loadTopic(c *gin.Context, value string) (topicRow, bool) {
 		fail(c, 400, "invalid_request", "Invalid topic ID")
 		return topicRow{}, false
 	}
-	var row topicRow
-	result := h.visibleTopics(current(c)).Where("id = ?", topicID).Limit(1).Find(&row)
-	if result.Error != nil {
+	row, found, err := topics.GetAgentTopic(current(c).topicQuery(), topicID)
+	if err != nil {
 		fail(c, 500, "internal_error", "Unable to read topic")
 		return row, false
 	}
-	if result.RowsAffected == 0 {
+	if !found {
 		fail(c, 404, "not_found", "Topic is unavailable")
 		return row, false
 	}
@@ -168,24 +145,22 @@ func (h *Handler) topics(c *gin.Context) {
 		return
 	}
 	filter := c.Query("categoryId")
-	q := h.visibleTopics(current(c))
+	query := current(c).topicQuery()
 	if filter != "" {
 		categoryID, valid := id(filter)
 		if !valid {
 			fail(c, 400, "invalid_request", "Invalid category ID")
 			return
 		}
-		q = q.Where("main_category_id = ?", categoryID)
+		query.CategoryID = categoryID
 	}
 	before, ok := readCursor(c, "topics", filter)
 	if !ok {
 		return
 	}
-	if before > 0 {
-		q = q.Where("id < ?", before)
-	}
-	var rows []topicRow
-	if q.Order("id DESC").Limit(n+1).Find(&rows).Error != nil {
+	query.BeforeID = before
+	rows, err := topics.ListAgentTopics(query, n+1)
+	if err != nil {
 		fail(c, 500, "internal_error", "Unable to read topics")
 		return
 	}
@@ -209,13 +184,12 @@ func (h *Handler) topic(c *gin.Context) {
 	if !ok {
 		return
 	}
-	var first postRow
-	result := h.DB().Model(&posts.Entity{}).Where("id = ? AND process_status = 0", row.FirstPostId).Limit(1).Find(&first)
-	if result.Error != nil {
+	first, found, err := posts.GetAgentPost(row.FirstPostId)
+	if err != nil {
 		fail(c, 500, "internal_error", "Unable to read first post")
 		return
 	}
-	if result.RowsAffected == 0 {
+	if !found {
 		fail(c, 404, "not_found", "Topic is unavailable")
 		return
 	}
@@ -242,8 +216,8 @@ func (h *Handler) posts(c *gin.Context) {
 	if !ok {
 		return
 	}
-	var rows []postRow
-	if h.DB().Model(&posts.Entity{}).Where("topic_id = ? AND process_status = 0 AND post_no > ?", topic.Id, after).Order("post_no ASC").Limit(n+1).Find(&rows).Error != nil {
+	rows, err := posts.ListAgentPosts(topic.Id, after, n+1)
+	if err != nil {
 		fail(c, 500, "internal_error", "Unable to read posts")
 		return
 	}
@@ -271,13 +245,12 @@ func (h *Handler) post(c *gin.Context) {
 		fail(c, 400, "invalid_request", "Invalid post ID")
 		return
 	}
-	var row postRow
-	result := h.DB().Model(&posts.Entity{}).Where("id = ? AND process_status = 0", postID).Limit(1).Find(&row)
-	if result.Error != nil {
+	row, found, err := posts.GetAgentPost(postID)
+	if err != nil {
 		fail(c, 500, "internal_error", "Unable to read post")
 		return
 	}
-	if result.RowsAffected == 0 {
+	if !found {
 		fail(c, 404, "not_found", "Post is unavailable")
 		return
 	}
@@ -317,8 +290,8 @@ func (h *Handler) search(c *gin.Context) {
 	for _, hit := range result.Results {
 		ids = append(ids, hit.ID)
 	}
-	var rows []topicRow
-	if len(ids) > 0 && h.visibleTopics(a).Where("id IN ?", ids).Find(&rows).Error != nil {
+	rows, err := topics.GetAgentTopicsByIDs(a.topicQuery(), ids)
+	if err != nil {
 		fail(c, 500, "internal_error", "Unable to read results")
 		return
 	}
@@ -348,8 +321,8 @@ func (h *Handler) filterReplyTargets(c *gin.Context, rows []postRow) bool {
 	if len(ids) == 0 {
 		return true
 	}
-	var parents []struct{ Id, TopicId uint64 }
-	if h.DB().Model(&posts.Entity{}).Where("id IN ? AND process_status = 0", ids).Find(&parents).Error != nil {
+	parents, err := posts.GetAgentReplyTargets(ids)
+	if err != nil {
 		fail(c, 500, "internal_error", "Unable to read reply targets")
 		return false
 	}

@@ -9,7 +9,9 @@ Resolve paths against the forum installation's trusted base URL, preserving its 
 
 ## Browser authorization (preferred)
 
-Ask the forum administrator for a registered OIDC client_id and exact redirect_uri. A CLI or desktop agent is a public client with no client secret. The registration must allow `openid forum:read`, require S256 PKCE, and optionally allow `topics:create`, `posts:create`, and `offline_access`. Never share a confidential client's secret with an installed agent.
+Ask the forum administrator for a registered OIDC client_id and exact redirect_uri. A CLI or desktop agent is a public client with no client secret. The registration must allow `openid forum:read`, require S256 PKCE, and optionally allow `topics:create`, `posts:create`, `images:upload`, and `offline_access`. Never share a confidential client's secret with an installed agent.
+
+For images, POST one multipart `file` to `/api/agent/v1/images` with `images:upload`, then use data.url in post Markdown. Respect site upload limits. Upload retries can create duplicate files; retain and reuse successful URLs. Never forward forum credentials to external image URLs.
 
 1. Generate fresh random state, nonce and a PKCE code_verifier. Retain them locally for this authorization attempt; send only the S256 code_challenge to the authorization endpoint discovered from site metadata. Validate the discovery issuer against the trusted forum issuer.
 2. Open the user's external browser at the authorization endpoint with response_type=code, client_id, the exact redirect_uri, scope, state, nonce, code_challenge, code_challenge_method=S256 and prompt=consent. Request only needed permissions. The user signs in and approves or denies access in the browser.

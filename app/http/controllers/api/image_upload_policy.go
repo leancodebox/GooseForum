@@ -1,104 +1,56 @@
 package api
 
 import (
-	"mime"
 	"net/http"
-	"path/filepath"
-	"strings"
-	"time"
 
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
+	"github.com/leancodebox/GooseForum/app/service/imageuploadservice"
 )
 
-type imageUploadPolicy struct {
-	MaxSize     int64
-	AllowedExts []string
-}
+type imageUploadPolicy imageuploadservice.Policy
 
 type imageUploadFailure struct {
 	Status int
 	Data   component.ResultStruct
 }
 
-func resolveImageUploadPolicy(userId uint64) (*imageUploadPolicy, *imageUploadFailure) {
-	return resolveImageUploadPolicyFor(userId, false)
+func resolveImageUploadPolicy(userID uint64) (*imageUploadPolicy, *imageUploadFailure) {
+	return resolveImageUploadPolicyFor(userID, false)
 }
 
-func resolveAdminImageUploadPolicy(userId uint64) (*imageUploadPolicy, *imageUploadFailure) {
-	return resolveImageUploadPolicyFor(userId, true)
+func resolveAdminImageUploadPolicy(userID uint64) (*imageUploadPolicy, *imageUploadFailure) {
+	return resolveImageUploadPolicyFor(userID, true)
 }
 
-func resolveImageUploadPolicyFor(userId uint64, adminUpload bool) (*imageUploadPolicy, *imageUploadFailure) {
-	if userId == 0 {
+func resolveImageUploadPolicyFor(userID uint64, adminUpload bool) (*imageUploadPolicy, *imageUploadFailure) {
+	if userID == 0 {
 		return nil, uploadFailure(http.StatusUnauthorized, component.MessageAuthRequired, nil)
 	}
 	if adminUpload {
-		return &imageUploadPolicy{
-			MaxSize:     int64(filestorage.MaxFileSize),
-			AllowedExts: []string{".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"},
-		}, nil
+		return &imageUploadPolicy{MaxSize: int64(filestorage.MaxFileSize), AllowedExts: []string{".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"}}, nil
 	}
-	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
-	userEntity, _ := users.Get(userId)
-	isRoleUser := userEntity.RoleId > 0
-	if !isRoleUser && !postingConfig.UploadControl.AllowAttachments {
-		return nil, uploadFailure(http.StatusForbidden, component.MessageUploadAttachmentDisabled, nil)
+	user, err := users.Get(userID)
+	if err != nil {
+		return nil, uploadFailure(http.StatusForbidden, component.MessagePermissionResolveFailed, nil)
 	}
-	if status, err := component.CheckUserPermission(&userEntity, component.PermissionActionUploadAttachment); err != nil {
+	if status, err := component.CheckUserPermission(&user, component.PermissionActionUploadAttachment); err != nil {
 		return nil, &imageUploadFailure{Status: status, Data: component.FailDataError(err)}
 	}
-	if !isRoleUser && postingConfig.UploadControl.NewUserUploadCooldownMinutes > 0 {
-		cooldownTime := userEntity.CreatedAt.Add(time.Duration(postingConfig.UploadControl.NewUserUploadCooldownMinutes) * time.Minute)
-		if time.Now().Before(cooldownTime) {
-			return nil, uploadFailure(http.StatusBadRequest, component.MessageUploadCooldown, component.MessageParams{
-				"minutes":     postingConfig.UploadControl.NewUserUploadCooldownMinutes,
-				"availableAt": cooldownTime.Format("2006-01-02 15:04:05"),
-			})
-		}
+	policy, failure := imageuploadservice.ResolvePolicy(user)
+	if failure != nil {
+		return nil, uploadFailure(failure.Status, component.MessageCode(failure.Code), component.MessageParams(failure.Params))
 	}
-	if !isRoleUser && postingConfig.UploadControl.MaxDailyUploadsPerUser > 0 {
-		count := filedata.CountDailyUploads(userId)
-		if count >= int64(postingConfig.UploadControl.MaxDailyUploadsPerUser) {
-			return nil, uploadFailure(http.StatusBadRequest, component.MessageUploadDailyLimit, component.MessageParams{"count": count})
-		}
-	}
-	maxSize := int64(filestorage.MaxFileSize)
-	configMaxSize := int64(postingConfig.UploadControl.MaxAttachmentSizeKb) * 1024
-	if !isRoleUser && configMaxSize > 0 && configMaxSize < maxSize {
-		maxSize = configMaxSize
-	}
-	return &imageUploadPolicy{MaxSize: maxSize, AllowedExts: postingConfig.UploadControl.AuthorizedExtensions}, nil
+	return (*imageUploadPolicy)(policy), nil
 }
 
-func (policy imageUploadPolicy) Validate(filename string, size int64, reportedContentType string) (string, *imageUploadFailure) {
-	if strings.TrimSpace(filename) == "" {
-		return "", uploadFailure(http.StatusBadRequest, component.MessageUploadFilenameRequired, nil)
+func (p imageUploadPolicy) Validate(filename string, size int64, contentType string) (string, *imageUploadFailure) {
+	value, failure := imageuploadservice.Policy(p).Validate(filename, size, contentType)
+	if failure != nil {
+		return "", uploadFailure(failure.Status, component.MessageCode(failure.Code), component.MessageParams(failure.Params))
 	}
-	if size <= 0 {
-		return "", uploadFailure(http.StatusBadRequest, component.MessageUploadInvalidImage, nil)
-	}
-	if size > policy.MaxSize {
-		return "", uploadFailure(http.StatusBadRequest, component.MessageUploadFileTooLarge, component.MessageParams{"maxSizeKb": policy.MaxSize / 1024})
-	}
-	ext := strings.ToLower(filepath.Ext(filename))
-	if len(policy.AllowedExts) > 0 && !isAllowedExtension(ext, policy.AllowedExts) {
-		return "", uploadFailure(http.StatusBadRequest, component.MessageUploadUnsupportedExt, component.MessageParams{"extensions": strings.Join(policy.AllowedExts, ", ")})
-	}
-	contentType, err := filedata.CheckImageType(filename)
-	if err != nil {
-		return "", uploadFailure(http.StatusBadRequest, component.MessageUploadUnsupportedImage, nil)
-	}
-	if reportedContentType != "" {
-		reported, _, err := mime.ParseMediaType(reportedContentType)
-		if err != nil || !strings.EqualFold(reported, contentType) {
-			return "", uploadFailure(http.StatusBadRequest, component.MessageUploadInvalidImage, nil)
-		}
-	}
-	return contentType, nil
+	return value, nil
 }
 
 func uploadFailure(status int, code component.MessageCode, params component.MessageParams) *imageUploadFailure {

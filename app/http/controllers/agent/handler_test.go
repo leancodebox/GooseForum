@@ -15,12 +15,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	core "github.com/leancodebox/GooseForum/app/bundles/oidcprovider"
+	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 	"github.com/leancodebox/GooseForum/app/models/forum/agenttokens"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
+	"github.com/leancodebox/GooseForum/app/models/forum/fileUsage"
 	"github.com/leancodebox/GooseForum/app/models/forum/oidcProviderStore"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
@@ -48,10 +51,15 @@ func (testAccessStore) EnabledCategoryGrants(groupID uint64) ([]accesscontrol.Ca
 func TestAuthorizationForumWritesAndIsolation(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	db := dbconnect.Connect()
-	models := append(oidcProviderStore.Models(), &users.EntityComplete{}, &agenttokens.Entity{}, &pageConfig.Entity{}, &posts.Entity{}, &topics.Entity{}, &category.Entity{}, &accessGroups.Entity{}, &categoryGroupPermissions.Entity{}, &topicCategoryIndex.Entity{}, &topicUserStat.Entity{})
+	fileDB := db4fileconnect.Connect()
+	if err := fileDB.AutoMigrate(&filedata.Entity{}); err != nil {
+		t.Fatal(err)
+	}
+	models := append(oidcProviderStore.Models(), &users.EntityComplete{}, &agenttokens.Entity{}, &pageConfig.Entity{}, &posts.Entity{}, &topics.Entity{}, &category.Entity{}, &accessGroups.Entity{}, &categoryGroupPermissions.Entity{}, &topicCategoryIndex.Entity{}, &topicUserStat.Entity{}, &filedata.Entity{}, &fileUsage.Entity{})
 	if err := db.AutoMigrate(models...); err != nil {
 		t.Fatal(err)
 	}
+	enableAgentSettings(t)
 	user := users.EntityComplete{Id: 99001, Username: "agent-test", UsernameLower: "agent-test", IsActivated: 1, CreatedAt: time.Now().Add(-365 * 24 * time.Hour)}
 	if err := db.Create(&user).Error; err != nil {
 		t.Fatal(err)
@@ -67,6 +75,8 @@ func TestAuthorizationForumWritesAndIsolation(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
+		db.Where("user_id = ?", user.Id).Delete(&fileUsage.Entity{})
+		fileDB.Where("user_id = ?", user.Id).Delete(&filedata.Entity{})
 		db.Unscoped().Where("user_id = ?", user.Id).Delete(&posts.Entity{})
 		db.Unscoped().Where("user_id = ?", user.Id).Delete(&topics.Entity{})
 		db.Where("user_id = ?", user.Id).Delete(&agenttokens.Entity{})
@@ -83,12 +93,12 @@ func TestAuthorizationForumWritesAndIsolation(t *testing.T) {
 	resolver := accesscontrol.NewResolver(testAccessStore{}, nil, nil)
 	accesscontrol.Default = resolver
 	t.Cleanup(func() { accesscontrol.Default = previous })
-	service, err := oidcproviderservice.New(context.Background(), oidcproviderservice.Options{DB: db, SiteURL: "https://forum.example", KeyEncryptionSecret: []byte(strings.Repeat("k", 32)), SupportedScopes: []string{"openid", "offline_access", core.ScopeForumRead, core.ScopeTopicsCreate, core.ScopePostsCreate}})
+	service, err := oidcproviderservice.New(context.Background(), oidcproviderservice.Options{DB: db, SiteURL: "https://forum.example", KeyEncryptionSecret: []byte(strings.Repeat("k", 32)), SupportedScopes: []string{"openid", "offline_access", core.ScopeForumRead, core.ScopeTopicsCreate, core.ScopePostsCreate, core.ScopeImagesUpload}})
 	if err != nil {
 		t.Fatal(err)
 	}
 	provider := service.Provider()
-	client := &core.Client{ID: "agent-integration", Name: "Agent", RedirectURIs: []string{"http://127.0.0.1:9876/callback"}, Scopes: []string{"openid", "offline_access", core.ScopeForumRead, core.ScopeTopicsCreate, core.ScopePostsCreate}, GrantTypes: []string{"authorization_code", "refresh_token"}, TokenEndpointAuthMethod: core.ClientAuthNone, Public: true, RequirePKCE: true, Enabled: true}
+	client := &core.Client{ID: "agent-integration", Name: "Agent", RedirectURIs: []string{"http://127.0.0.1:9876/callback"}, Scopes: []string{"openid", "offline_access", core.ScopeForumRead, core.ScopeTopicsCreate, core.ScopePostsCreate, core.ScopeImagesUpload}, GrantTypes: []string{"authorization_code", "refresh_token"}, TokenEndpointAuthMethod: core.ClientAuthNone, Public: true, RequirePKCE: true, Enabled: true}
 	if err := service.InteractionStore().CreateClient(context.Background(), client); err != nil {
 		t.Fatal(err)
 	}
@@ -133,8 +143,13 @@ func TestAuthorizationForumWritesAndIsolation(t *testing.T) {
 	if status, _ := call("GET", "/api/agent/v1/me", tokens.AccessToken, nil); status != 200 {
 		t.Fatalf("me status %d", status)
 	}
+	uploadStatus, uploaded := uploadRequest(t, router, tokens.AccessToken, "agent.png", pngImage(t))
+	if uploadStatus != 201 {
+		t.Fatalf("OAuth image upload: %d %#v", uploadStatus, uploaded)
+	}
+	imageURL := uploaded["data"].(map[string]any)["url"].(string)
 	key := uuid.NewString()
-	body := map[string]any{"title": "Agent integration topic", "content": "A sufficiently long integration test message.", "categoryIds": []string{"99001"}, "clientRequestId": key}
+	body := map[string]any{"title": "Agent integration topic", "content": "A sufficiently long integration test message.\n\n![Agent image](" + imageURL + ")", "categoryIds": []string{"99001"}, "clientRequestId": key}
 	status, result := call("POST", "/api/agent/v1/topics", tokens.AccessToken, body)
 	if status != 201 {
 		t.Fatalf("create: %d %#v", status, result)
@@ -310,7 +325,7 @@ func TestOpenAPIAndSkillRoutes(t *testing.T) {
 			t.Errorf("missing operation %s %s", route.Method, path)
 		}
 	}
-	if len(paths) != 10 {
+	if len(paths) != 11 {
 		t.Fatalf("unexpected path count %d", len(paths))
 	}
 	if !bytes.Contains(skillDocument, []byte("code_verifier")) || !bytes.Contains(skillDocument, []byte("clientRequestId")) {

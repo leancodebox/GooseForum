@@ -5,7 +5,7 @@ export default {
   ...en,
   agentTokens: {
     delete: "削除", confirmDelete: "この Token を削除しますか？アクセスは直ちに無効になります。",
-    title: "Agent Token", name: "名前", permissions: "権限", expiry: "有効期間", days: "{count} 日", password: "現在のパスワード", create: "Token を作成", revokeAll: "すべて取り消す", confirmRevoke: "アクセス権を取り消しますか？", revoked: "取り消し済み", expires: "有効期限：{date}", empty: "Token はありません", failed: "Token の操作に失敗しました", secret: "Token", secretOnce: "この Token は一度だけ表示されます。安全に保管してください。", copy: "コピー", copied: "コピー済み", dismiss: "閉じる", scopes: { "forum:read": "フォーラムを読む", "topics:create": "トピックを投稿", "posts:create": "トピックに返信" },
+    title: "Agent Token", name: "名前", permissions: "権限", expiry: "有効期間", days: "{count} 日", password: "現在のパスワード", create: "Token を作成", revokeAll: "すべて取り消す", confirmRevoke: "アクセス権を取り消しますか？", revoked: "取り消し済み", expires: "有効期限：{date}", empty: "Token はありません", failed: "Token の操作に失敗しました", secret: "Token", secretOnce: "この Token は一度だけ表示されます。安全に保管してください。", copy: "コピー", copied: "コピー済み", dismiss: "閉じる", scopes: { "forum:read": "フォーラムを読む", "topics:create": "トピックを投稿", "posts:create": "トピックに返信", "images:upload": "画像をアップロード" },
   },
   authLogActions: {
     "email_change": "メールアドレス変更",

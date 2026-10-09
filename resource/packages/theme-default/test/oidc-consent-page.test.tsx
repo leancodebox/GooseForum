@@ -20,7 +20,7 @@ function renderConsent(options: { interaction?: string, detailsError?: Error } =
     ? vi.fn().mockRejectedValue(options.detailsError)
     : vi.fn().mockResolvedValue({
         client: { id: 'wiki-client', name: 'Goose Wiki', public: true },
-        scopes: ['openid', 'profile', 'forum:read', 'topics:create', 'posts:create', 'custom_scope'],
+        scopes: ['openid', 'profile', 'forum:read', 'topics:create', 'posts:create', 'images:upload', 'custom_scope'],
         expires_at: '2026-09-14T12:00:00Z',
       })
   const decision = vi.fn().mockResolvedValue({ redirect_url: 'https://client.example/callback' })
@@ -52,6 +52,7 @@ describe('OIDCConsentPageView', () => {
     expect(screen.getByText('读取你有权访问的论坛内容')).toBeTruthy()
     expect(screen.getByText('以你的身份发布主题')).toBeTruthy()
     expect(screen.getByText('以你的身份回复主题')).toBeTruthy()
+    expect(screen.getByText('以你的身份上传图片')).toBeTruthy()
     expect(screen.getByText('custom_scope')).toBeTruthy()
     expect(details).toHaveBeenCalledWith('interaction-id')
   })

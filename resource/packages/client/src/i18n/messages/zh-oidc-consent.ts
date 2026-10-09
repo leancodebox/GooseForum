@@ -18,6 +18,7 @@ export default {
     "forum:read": "读取你有权访问的论坛内容",
     "topics:create": "以你的身份发布主题",
     "posts:create": "以你的身份回复主题",
+    "images:upload": "以你的身份上传图片",
     openid: "确认你的身份",
     profile: "读取名称、用户名和头像",
     email: "读取邮箱和验证状态",

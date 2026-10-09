@@ -42,7 +42,7 @@ func ValidScopes(scopes []string) bool {
 	}
 	seen := map[string]bool{}
 	for _, scope := range scopes {
-		if seen[scope] || scope != core.ScopeForumRead && scope != core.ScopeTopicsCreate && scope != core.ScopePostsCreate {
+		if seen[scope] || scope != core.ScopeForumRead && scope != core.ScopeTopicsCreate && scope != core.ScopePostsCreate && scope != core.ScopeImagesUpload {
 			return false
 		}
 		seen[scope] = true

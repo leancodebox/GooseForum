@@ -14,7 +14,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	core "github.com/leancodebox/GooseForum/app/bundles/oidcprovider"
 	"github.com/leancodebox/GooseForum/app/models/forum/agenttokens"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -25,7 +24,6 @@ import (
 )
 
 type Handler struct {
-	DB       func() *gorm.DB
 	Provider func() (*core.Provider, error)
 	Resolve  func(uint64) (accesscontrol.Snapshot, error)
 	limits   limiter
@@ -41,7 +39,7 @@ type actor struct {
 }
 
 func New() *Handler {
-	return &Handler{DB: dbconnect.Connect, Provider: oidcproviderservice.DefaultProvider, Resolve: accesscontrol.Resolve}
+	return &Handler{Provider: oidcproviderservice.DefaultProvider, Resolve: accesscontrol.Resolve}
 }
 
 func (h *Handler) Register(engine *gin.Engine) {
@@ -60,6 +58,7 @@ func (h *Handler) Register(engine *gin.Engine) {
 	g.GET("/posts/:postId", h.post)
 	g.POST("/topics", h.require(core.ScopeTopicsCreate), h.createTopic)
 	g.POST("/topics/:topicId/posts", h.require(core.ScopePostsCreate), h.createPost)
+	g.POST("/images", h.require(core.ScopeImagesUpload), h.uploadImage)
 	g.GET("/me/submissions", h.require(core.ScopeForumRead), h.submissions)
 	g.GET("/me/submissions/:submissionId", h.require(core.ScopeForumRead), h.submission)
 }
@@ -117,8 +116,7 @@ func (h *Handler) authenticate(c *gin.Context) {
 				fail(c, 401, "invalid_token", "Manual tokens are disabled")
 				return
 			}
-			var token agenttokens.Entity
-			err := h.DB().Where("hash = ?", agenttokens.Digest(parts[1])).Take(&token).Error
+			token, err := agenttokens.GetByDigest(agenttokens.Digest(parts[1]))
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 				fail(c, 503, "auth_unavailable", "Credential validation is unavailable")
 				return
@@ -159,7 +157,8 @@ func (h *Handler) authenticate(c *gin.Context) {
 			identity, _ := json.Marshal([]string{token.UserID, token.ClientID})
 			a.Source = agenttokens.Digest("oauth:" + string(identity))
 		}
-		err := h.DB().Where("id = ?", userID).Take(&a.User).Error
+		var err error
+		a.User, err = users.Get(userID)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			fail(c, 503, "auth_unavailable", "Account lookup is unavailable")
 			return

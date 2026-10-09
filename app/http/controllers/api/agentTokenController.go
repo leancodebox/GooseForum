@@ -1,10 +1,7 @@
 package api
 
 import (
-	"time"
-
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
-	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/agenttokens"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
@@ -26,8 +23,8 @@ func ListAgentTokens(req component.BetterRequest[component.Null]) component.Resp
 	if req.GinContext != nil {
 		req.GinContext.Header("Cache-Control", "private, no-store")
 	}
-	rows := []agenttokens.Entity{}
-	if err := dbconnect.Connect().Where("user_id = ?", req.UserId).Order("created_at DESC").Find(&rows).Error; err != nil {
+	rows, err := agenttokens.List(req.UserId)
+	if err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 	return component.SuccessResponse(rows)
@@ -54,7 +51,7 @@ func CreateAgentToken(req component.BetterRequest[CreateAgentTokenReq]) componen
 	if req.Params.Name == "" || len(req.Params.Name) > 100 || !agenttokens.ValidScopes(req.Params.Scopes) || req.Params.Days != 7 && req.Params.Days != 30 && req.Params.Days != 90 {
 		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
 	}
-	entity, raw, err := agenttokens.Create(dbconnect.Connect(), user.Id, user.TokenVersion, req.Params.Name, req.Params.Scopes, req.Params.Days)
+	entity, raw, err := agenttokens.CreateToken(user.Id, user.TokenVersion, req.Params.Name, req.Params.Scopes, req.Params.Days)
 	if err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
@@ -68,7 +65,7 @@ func RevokeAgentToken(req component.BetterRequest[RevokeAgentTokenReq]) componen
 	if req.Params.ID == "" {
 		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
 	}
-	err := dbconnect.Connect().Model(&agenttokens.Entity{}).Where("id = ? AND user_id = ? AND revoked_at IS NULL", req.Params.ID, req.UserId).Update("revoked_at", time.Now()).Error
+	err := agenttokens.Revoke(req.UserId, req.Params.ID)
 	if err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
@@ -76,7 +73,7 @@ func RevokeAgentToken(req component.BetterRequest[RevokeAgentTokenReq]) componen
 }
 
 func RevokeAllAgentTokens(req component.BetterRequest[component.Null]) component.Response {
-	err := dbconnect.Connect().Model(&agenttokens.Entity{}).Where("user_id = ? AND revoked_at IS NULL", req.UserId).Update("revoked_at", time.Now()).Error
+	err := agenttokens.RevokeAll(req.UserId)
 	if err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
@@ -88,7 +85,7 @@ func DeleteAgentToken(req component.BetterRequest[RevokeAgentTokenReq]) componen
 		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
 	}
 	// Soft deletion invalidates authentication while retaining the source identity.
-	err := dbconnect.Connect().Where("id = ? AND user_id = ?", req.Params.ID, req.UserId).Delete(&agenttokens.Entity{}).Error
+	err := agenttokens.Delete(req.UserId, req.Params.ID)
 	if err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}

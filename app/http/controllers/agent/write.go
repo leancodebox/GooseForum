@@ -83,14 +83,13 @@ func validateContent(c *gin.Context, content string, title *string) bool {
 }
 
 func (h *Handler) existingSubmission(c *gin.Context, key, hash string) bool {
-	var row posts.Entity
-	result := h.DB().Unscoped().Where("agent_source = ? AND client_request_id = ? AND user_id = ?", current(c).Source, key, current(c).User.Id).Limit(1).Find(&row)
-	if result.Error != nil {
+	row, err := posts.GetAgentSubmission(current(c).Source, current(c).User.Id, 0, key)
+	if notFound(err) {
+		return false
+	}
+	if err != nil {
 		fail(c, 500, "internal_error", "Unable to check submission")
 		return true
-	}
-	if result.RowsAffected == 0 {
-		return false
 	}
 	if row.RequestFingerprint != hash {
 		fail(c, 409, "client_request_conflict", "clientRequestId was already used with different parameters")
@@ -140,8 +139,8 @@ func (h *Handler) createTopic(c *gin.Context) {
 		writeError(c, err)
 		return
 	}
-	var row posts.Entity
-	if h.DB().Where("topic_id = ? AND post_no = 1", result.ID).Take(&row).Error != nil {
+	row, err := posts.GetTopicSubmission(result.ID)
+	if err != nil {
 		fail(c, 500, "submission_lookup_failed", "Query the submission using the same clientRequestId")
 		return
 	}
@@ -168,13 +167,12 @@ func (h *Handler) createPost(c *gin.Context) {
 			fail(c, 400, "invalid_request", "Invalid replyToPostId")
 			return
 		}
-		var parent struct{ Id uint64 }
-		result := h.DB().Model(&posts.Entity{}).Where("id = ? AND topic_id = ? AND process_status = 0", parentID, topic.Id).Limit(1).Find(&parent)
-		if result.Error != nil {
+		found, err := posts.AgentPostExists(parentID, topic.Id)
+		if err != nil {
 			fail(c, 500, "internal_error", "Unable to read reply target")
 			return
 		}
-		if result.RowsAffected == 0 {
+		if !found {
 			fail(c, 404, "not_found", "Reply target is unavailable")
 			return
 		}
@@ -217,8 +215,7 @@ func writeError(c *gin.Context, err error) {
 }
 
 func (h *Handler) submissionResult(c *gin.Context, row posts.Entity, status int, reused bool) {
-	var topic topics.Entity
-	err := h.DB().Unscoped().Where("id = ?", row.TopicId).Take(&topic).Error
+	topic, err := topics.GetSubmissionTopic(row.TopicId)
 	if err != nil {
 		if notFound(err) {
 			fail(c, 410, "submission_gone", "Submission is no longer available")
@@ -237,13 +234,12 @@ func (h *Handler) submissionResult(c *gin.Context, row posts.Entity, status int,
 	}
 	visible := topic.Status == 1 && topic.ProcessStatus == 0 && row.ProcessStatus == 0
 	if visible && row.PostNo > 1 {
-		var first struct{ Id uint64 }
-		result := h.DB().Model(&posts.Entity{}).Where("id = ? AND process_status = 0", topic.FirstPostId).Limit(1).Find(&first)
-		if result.Error != nil {
+		found, err := posts.AgentPostExists(topic.FirstPostId, 0)
+		if err != nil {
 			fail(c, 500, "internal_error", "Unable to read publication state")
 			return
 		}
-		visible = result.RowsAffected > 0
+		visible = found
 	}
 	moderation := row.ModerationStatus
 	if row.PostNo == 1 {
@@ -261,8 +257,7 @@ func (h *Handler) submission(c *gin.Context) {
 		fail(c, 400, "invalid_request", "Invalid submission ID")
 		return
 	}
-	var row posts.Entity
-	err := h.DB().Unscoped().Where("id = ? AND agent_source = ? AND user_id = ?", value, current(c).Source, current(c).User.Id).Take(&row).Error
+	row, err := posts.GetAgentSubmission(current(c).Source, current(c).User.Id, value, "")
 	if err != nil {
 		if notFound(err) {
 			fail(c, 404, "not_found", "Submission is unavailable")
@@ -280,8 +275,7 @@ func (h *Handler) submissions(c *gin.Context) {
 		if !requestKey(c, key) {
 			return
 		}
-		var row posts.Entity
-		err := h.DB().Unscoped().Where("agent_source = ? AND user_id = ? AND client_request_id = ?", current(c).Source, current(c).User.Id, key).Take(&row).Error
+		row, err := posts.GetAgentSubmission(current(c).Source, current(c).User.Id, 0, key)
 		if err != nil {
 			if notFound(err) {
 				fail(c, 404, "not_found", "No committed submission found")
@@ -301,19 +295,9 @@ func (h *Handler) submissions(c *gin.Context) {
 	if !ok {
 		return
 	}
-	q := h.DB().Unscoped().Model(&posts.Entity{}).Where("agent_source = ? AND user_id = ?", current(c).Source, current(c).User.Id)
-	if before > 0 {
-		q = q.Where("posts.id < ?", before)
-	}
-	// Filter current category permissions in SQL before pagination.
-	if !current(c).Access.HasGlobalManage() {
-		q = q.Where("EXISTS (SELECT 1 FROM topics WHERE topics.id = posts.topic_id AND topics.main_category_id IN ?)", current(c).Access.ReadableCategoryIDs())
-	}
-	var rows []struct {
-		Id, TopicId     uint64
-		ClientRequestID *string
-	}
-	if q.Order("posts.id DESC").Limit(n+1).Find(&rows).Error != nil {
+	a := current(c)
+	rows, err := posts.ListAgentSubmissions(a.Source, a.User.Id, before, a.Access.ReadableCategoryIDs(), a.Access.HasGlobalManage(), n+1)
+	if err != nil {
 		fail(c, 500, "internal_error", "Unable to read submissions")
 		return
 	}

@@ -14,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/usermfa"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 )
 
 func TestManualTokenManagementVerifiesPasswordAndOwnership(t *testing.T) {
@@ -21,6 +22,22 @@ func TestManualTokenManagementVerifiesPasswordAndOwnership(t *testing.T) {
 	if err := db.AutoMigrate(&users.EntityComplete{}, &agenttokens.Entity{}, &pageConfig.Entity{}, &usermfa.Factor{}, &usermfa.RecoveryCode{}); err != nil {
 		t.Fatal(err)
 	}
+	old := pageConfig.GetByPageType(pageConfig.AgentSettings)
+	settings := pageConfig.DefaultAgentSettings()
+	settings.Enabled, settings.ManualTokens = true, true
+	settingsJSON, _ := json.Marshal(settings)
+	if err := pageConfig.SaveConfig(pageConfig.AgentSettings, string(settingsJSON)); err != nil {
+		t.Fatal(err)
+	}
+	hotdataserve.ClearAgentSettingsConfigCache()
+	t.Cleanup(func() {
+		if old.Id == 0 {
+			db.Where("page_type = ?", pageConfig.AgentSettings).Delete(&pageConfig.Entity{})
+		} else {
+			_ = pageConfig.SaveConfig(pageConfig.AgentSettings, old.Config)
+		}
+		hotdataserve.ClearAgentSettingsConfigCache()
+	})
 	hash, err := algorithm.MakePassword("Password123")
 	if err != nil {
 		t.Fatal(err)

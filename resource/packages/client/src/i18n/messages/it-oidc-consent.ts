@@ -19,6 +19,7 @@ export default {
     "forum:read": "Leggere i contenuti del forum a cui puoi accedere",
     "topics:create": "Pubblicare discussioni per tuo conto",
     "posts:create": "Rispondere alle discussioni per tuo conto",
+    "images:upload": "Caricare immagini per tuo conto",
     openid: "Confermare la tua identità",
     profile: "Leggere nome, nome utente e avatar",
     email: "Leggere email e stato di verifica",

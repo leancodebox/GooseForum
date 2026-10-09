@@ -224,7 +224,7 @@ export function AgentTokenSettings() {
             <FieldSet>
               <FieldLegend>{t("agentTokens.permissions")}</FieldLegend>
               <FieldGroup>
-                {["forum:read", "topics:create", "posts:create"].map(
+                {["forum:read", "topics:create", "posts:create", "images:upload"].map(
                   (scope) => (
                     <Field key={scope} orientation="horizontal">
                       <Checkbox

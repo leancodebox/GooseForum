@@ -18,7 +18,7 @@ type AgentSettingsConfig struct {
 }
 
 func DefaultAgentSettings() AgentSettingsConfig {
-	return AgentSettingsConfig{Enabled: true, ManualTokens: true, ReadPerMinute: 60, UserReadPerMinute: 120, WritePerMinute: 10, AnonymousReadPerMinute: 30, IPPerMinute: 120}
+	return AgentSettingsConfig{Enabled: false, ManualTokens: false, ReadPerMinute: 60, UserReadPerMinute: 120, WritePerMinute: 10, AnonymousReadPerMinute: 30, IPPerMinute: 120}
 }
 
 func GetAgentSettings() (AgentSettingsConfig, error) {

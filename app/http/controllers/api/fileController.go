@@ -2,19 +2,16 @@ package api
 
 import (
 	"bytes"
-	"context"
 	"io"
-	"log/slog"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/httputil"
 	"github.com/leancodebox/GooseForum/app/service/fileaccessservice"
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
-	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
+	"github.com/leancodebox/GooseForum/app/service/imageuploadservice"
 )
 
 func GetFileByFileName(c *gin.Context) {
@@ -119,26 +116,12 @@ func saveImgByGinContext(c *gin.Context, adminUpload bool) {
 		return
 	}
 
-	folderName := time.Now().Format("2006/01/02")
-
-	entity, err := filestorage.SaveFileFromUpload(c.Request.Context(), userId, fileData, file.Filename, folderName)
+	entity, err := imageuploadservice.Save(c.Request.Context(), userId, fileData, file.Filename, adminUpload)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, component.FailDataCode(
 			component.MessageUploadSaveFailed,
 
 			component.MessageParams{"error": err.Error()}))
-		return
-	}
-	if adminUpload {
-		fileusageservice.AddAdminUpload(userId, entity.Name)
-	} else if err := fileusageservice.AddUploadOwner(userId, entity.Name); err != nil {
-		cleanupCtx, cleanupCancel := context.WithTimeout(context.WithoutCancel(c.Request.Context()), 5*time.Second)
-		cleanupErr := filestorage.Delete(cleanupCtx, entity.Name)
-		cleanupCancel()
-		if cleanupErr != nil {
-			slog.Error("delete upload after owner usage failure", "fileName", entity.Name, "err", cleanupErr)
-		}
-		c.JSON(http.StatusInternalServerError, component.FailDataCode(component.MessageUploadSaveFailed, nil))
 		return
 	}
 
