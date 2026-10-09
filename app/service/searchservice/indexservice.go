@@ -28,7 +28,7 @@ func convertTopicToSearchDocument(topic *topics.Entity, firstPost *posts.Entity,
 	var content strings.Builder
 	searchPosts := make([]SearchPost, 0, len(replies)+1)
 	updatedAt := topic.UpdatedAt
-	if firstPost != nil {
+	if firstPost != nil && firstPost.ProcessStatus == 0 && !firstPost.DeletedAt.Valid {
 		content.WriteString(markdown2html.ExtractSearchContent(firstPost.Content))
 		searchPosts = append(searchPosts, SearchPost{PostID: firstPost.Id, PostNo: firstPost.PostNo, Version: firstPost.ModerationVersion, UpdatedAt: firstPost.UpdatedAt.UnixMilli(), Length: content.Len()})
 	}

@@ -256,6 +256,7 @@ func UpdateModerationPostStatus(req component.BetterRequest[ModerationPostStatus
 	if err := posts.UpdateProcessStatus(post.Id, nextStatus); err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
+	eventbus.Publish(context.Background(), &eventhandlers.PostUpdatedEvent{TopicID: topic.Id})
 	userMap := users.GetMapByIds([]uint64{post.UserId})
 	author := userPayload(post.UserId, userMap)
 	moderationservice.PostStatusChanged(req.UserId, moderationservice.PostSnapshot{

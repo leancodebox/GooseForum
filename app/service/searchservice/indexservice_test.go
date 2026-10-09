@@ -8,6 +8,7 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
+	"gorm.io/gorm"
 )
 
 func TestConvertTopicToSearchDocument(t *testing.T) {
@@ -53,6 +54,27 @@ func TestConvertTopicToSearchDocument(t *testing.T) {
 func TestTopicIndexUsesTopicName(t *testing.T) {
 	if TopicIndex != "topics" {
 		t.Fatalf("TopicIndex = %q, want topics", TopicIndex)
+	}
+}
+
+func TestConvertTopicToSearchDocumentExcludesHiddenFirstPost(t *testing.T) {
+	for _, firstPost := range []*posts.Entity{
+		nil,
+		{Id: 1, PostNo: 1, Content: "hidden first post", ProcessStatus: 1},
+		{Id: 1, PostNo: 1, Content: "deleted first post", DeletedAt: gorm.DeletedAt{Time: time.Now(), Valid: true}},
+	} {
+		topic := &topics.Entity{Id: 42, Title: "Visible topic"}
+		replies := []posts.SearchSource{{Id: 2, PostNo: 2, Content: "Visible reply"}}
+		got := convertTopicToSearchDocument(topic, firstPost, replies)
+		if strings.Contains(got.SearchContent, "first post") || !strings.Contains(got.SearchContent, "Visible") {
+			t.Fatalf("unexpected search content: %q", got.SearchContent)
+		}
+		if len(got.SearchPosts) != 1 || got.SearchPosts[0].PostID != 2 {
+			t.Fatalf("unexpected search sources: %#v", got.SearchPosts)
+		}
+		if got.Title != topic.Title {
+			t.Fatalf("title = %q, want %q", got.Title, topic.Title)
+		}
 	}
 }
 
