@@ -6,8 +6,11 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/topicrankservice"
 	"log/slog"
 
+	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
+	paniclog "github.com/leancodebox/GooseForum/app/bundles/recovery"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/service/datamigration"
+	"github.com/leancodebox/GooseForum/app/service/searchservice"
 )
 
 func runVersionedDataMigrations() error {
@@ -303,8 +306,33 @@ func runVersionedDataMigrations() error {
 		}
 		currentVersion = 23
 	}
+	if currentVersion < 24 {
+		if err := syncMigrationVersion(24); err != nil {
+			return err
+		}
+		currentVersion = 24
+		// Search is optional. Attempt the rebuild without delaying startup;
+		// operators can rebuild manually if this attempt fails or is interrupted.
+		if meiliconnect.IsConfigured() {
+			go rebuildReplySearchIndex()
+		}
+	}
 	slog.Info("app migration end", "version", currentVersion)
 	return nil
+}
+
+func rebuildReplySearchIndex() {
+	defer paniclog.Recover("reply_search_index_migration")
+	result, err := searchservice.BuildMeilisearchIndex()
+	if err != nil {
+		slog.Warn("app migration reply search index rebuild skipped failure", "err", err)
+		return
+	}
+	if result.FailedCount > 0 {
+		slog.Warn("app migration reply search index partially rebuilt", "processed", result.ProcessedCount, "failedCount", result.FailedCount)
+		return
+	}
+	slog.Info("app migration reply search index done", "processed", result.ProcessedCount)
 }
 
 func syncMigrationVersion(version uint32) error {
