@@ -10,6 +10,8 @@ export default {
   relevance: "Rilevanza",
   new: "Più recenti",
   updated: "Aggiornati di recente",
+  matchedReply: "Risposta #{no}",
+  matchedTopic: "Testo dell'argomento",
   page: "Pagina {page} di {total}",
   noResultsTitle: "Nessun risultato",
   noResultsDescription: "Prova un'altra parola chiave o una ricerca più breve.",

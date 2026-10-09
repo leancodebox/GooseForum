@@ -10,6 +10,8 @@ export default {
   relevance: "関連度",
   new: "新着",
   updated: "更新順",
+  matchedReply: "返信 #{no}",
+  matchedTopic: "トピック本文",
   page: "{page} / {total} ページ",
   noResultsTitle: "結果がありません",
   noResultsDescription: "別のキーワードまたは短い検索語をお試しください。",

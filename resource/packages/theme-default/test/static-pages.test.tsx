@@ -1726,6 +1726,13 @@ describe("AppShell and static pages", () => {
       payload("search.index", {
         query: "react",
         sort: "relevance",
+        matches: {
+          11: { postId: 22, postNo: 3, excerpt: [
+            { text: "A reply mentioning ", matched: false },
+            { text: "react", matched: true },
+            { text: " and <script>alert(1)</script>", matched: false },
+          ] },
+        },
         total: 1,
         totalPages: 2,
         topics: [
@@ -1733,7 +1740,7 @@ describe("AppShell and static pages", () => {
             id: 11,
             title: "Search result",
             description: "Found topic",
-            url: "/p/search-result/11",
+            url: "/p/post/11/3#post-22",
             author: { id: 7, username: "alice", avatarUrl: "" },
             participants: [{ id: 7, username: "alice", avatarUrl: "" }],
             categories: [],
@@ -1756,6 +1763,10 @@ describe("AppShell and static pages", () => {
     );
 
     expect(screen.getByRole("link", { name: "Search result" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Search result" }).getAttribute("href")).toBe("/p/post/11/3#post-22");
+    expect(screen.getByText("回复 #3")).toBeTruthy();
+    expect(screen.getByText("react", { selector: "mark" })).toBeTruthy();
+    expect(document.querySelector("script")).toBeNull();
     expect(screen.getByText("react · 1 个结果")).toBeTruthy();
     const input = screen.getByRole("textbox", { name: "搜索主题..." });
     await user.clear(input);
@@ -1769,6 +1780,7 @@ describe("AppShell and static pages", () => {
       payload("search.index", {
         query: "react",
         sort: "updated",
+        matches: {},
         total: 0,
         totalPages: 0,
         topics: [],

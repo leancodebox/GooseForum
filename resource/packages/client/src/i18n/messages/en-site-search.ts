@@ -10,6 +10,8 @@ export default {
   relevance: "Relevance",
   new: "Newest",
   updated: "Recently updated",
+  matchedReply: "Reply #{no}",
+  matchedTopic: "Topic body",
   page: "Page {page} of {total}",
   noResultsTitle: "No results",
   noResultsDescription: "Try another keyword or shorten your query.",

@@ -10,6 +10,8 @@ export default {
   relevance: "相关度",
   new: "最新发布",
   updated: "最近更新",
+  matchedReply: "回复 #{no}",
+  matchedTopic: "主题正文",
   page: "第 {page} / {total} 页",
   noResultsTitle: "没有找到结果",
   noResultsDescription: "换个关键词，或者缩短搜索词再试试。",

@@ -24,15 +24,19 @@ type IndexBuildResult struct {
 }
 
 // convertTopicToSearchDocument includes the first post and visible replies.
-func convertTopicToSearchDocument(topic *topics.Entity, firstPost *posts.Entity, replies []posts.SearchReply) TopicSearchDocument {
+func convertTopicToSearchDocument(topic *topics.Entity, firstPost *posts.Entity, replies []posts.SearchSource) TopicSearchDocument {
 	var content strings.Builder
+	searchPosts := make([]SearchPost, 0, len(replies)+1)
 	updatedAt := topic.UpdatedAt
 	if firstPost != nil {
 		content.WriteString(markdown2html.ExtractSearchContent(firstPost.Content))
+		searchPosts = append(searchPosts, SearchPost{PostID: firstPost.Id, PostNo: firstPost.PostNo, Version: firstPost.ModerationVersion, UpdatedAt: firstPost.UpdatedAt.UnixMilli(), Length: content.Len()})
 	}
 	for _, reply := range replies {
 		content.WriteString("\n\n")
+		start := content.Len()
 		content.WriteString(markdown2html.ExtractSearchContent(reply.Content))
+		searchPosts = append(searchPosts, SearchPost{PostID: reply.Id, PostNo: reply.PostNo, Version: reply.ModerationVersion, UpdatedAt: reply.UpdatedAt.UnixMilli(), Start: start, Length: content.Len() - start})
 		if reply.UpdatedAt.After(updatedAt) {
 			updatedAt = reply.UpdatedAt
 		}
@@ -41,6 +45,7 @@ func convertTopicToSearchDocument(topic *topics.Entity, firstPost *posts.Entity,
 		ID:            topic.Id,
 		Title:         topic.Title,
 		SearchContent: content.String(),
+		SearchPosts:   searchPosts,
 		Category:      topic.CategoryIds,
 		MainCategory:  topic.MainCategoryId,
 		TopicStatus:   topic.Status,
@@ -180,7 +185,7 @@ func configureIndex(index meilisearch.IndexManager) error {
 		return fmt.Errorf("设置可排序字段失败: %w", err)
 	}
 
-	displayedAttributes := []string{"id", "title"}
+	displayedAttributes := []string{"id", "title", "searchContent", "searchPosts"}
 	_, err = index.UpdateDisplayedAttributes(&displayedAttributes)
 	if err != nil {
 		return fmt.Errorf("设置显示字段失败: %w", err)

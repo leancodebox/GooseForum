@@ -618,12 +618,13 @@ type PublishTopicPayload struct {
 }
 
 type SearchPageProps struct {
-	Query      string            `json:"query"`
-	Sort       string            `json:"sort"`
-	Topics     []TopicPayload    `json:"topics"`
-	Total      int64             `json:"total"`
-	TotalPages int               `json:"totalPages"`
-	Pagination PaginationPayload `json:"pagination"`
+	Query      string                                `json:"query"`
+	Sort       string                                `json:"sort"`
+	Matches    map[uint64]*searchservice.SearchMatch `json:"matches"`
+	Topics     []TopicPayload                        `json:"topics"`
+	Total      int64                                 `json:"total"`
+	TotalPages int                                   `json:"totalPages"`
+	Pagination PaginationPayload                     `json:"pagination"`
 }
 
 func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
@@ -2392,9 +2393,10 @@ func buildPublishCategories(actor accesscontrol.Snapshot, everyone accesscontrol
 func buildSearchPageProps(c *gin.Context, query string, page int, sort string) SearchPageProps {
 	const pageSize = 10
 	props := SearchPageProps{
-		Query:  query,
-		Sort:   sort,
-		Topics: []TopicPayload{},
+		Matches: map[uint64]*searchservice.SearchMatch{},
+		Query:   query,
+		Sort:    sort,
+		Topics:  []TopicPayload{},
 		Pagination: PaginationPayload{
 			Page: page,
 		},
@@ -2413,6 +2415,7 @@ func buildSearchPageProps(c *gin.Context, query string, page int, sort string) S
 	result, err := searchservice.SearchTopics(searchservice.SearchRequest{
 		Query:              query,
 		Sort:               sort,
+		IncludeMatches:     true,
 		Categories:         snapshot.ReadableCategoryIDs(),
 		FilterByCategories: !snapshot.HasGlobalManage(),
 		Limit:              pageSize,
@@ -2437,6 +2440,19 @@ func buildSearchPageProps(c *gin.Context, query string, page int, sort string) S
 	}
 
 	props.Topics = buildTopicPayloads(transform.Topics2Vo(orderedTopics, hotdataserve.CategoryMap()))
+	searchMatches := make(map[uint64]*searchservice.SearchMatch, len(result.Results))
+	for _, hit := range result.Results {
+		if hit.Match != nil {
+			searchMatches[hit.ID] = hit.Match
+		}
+	}
+	for i := range props.Topics {
+		topic := &props.Topics[i]
+		if match := searchMatches[topic.ID]; match != nil {
+			props.Matches[topic.ID] = match
+			topic.URL = urlconfig.PostDetailAt(topic.ID, match.PostNo) + "#post-" + strconv.FormatUint(match.PostID, 10)
+		}
+	}
 	props.Total = result.Total
 	props.TotalPages = totalPageCount
 	props.Pagination = PaginationPayload{

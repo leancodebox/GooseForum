@@ -213,12 +213,14 @@ export const TopicTable = memo(function TopicTable({
   showPinned = false,
   showCategories = true,
   showHot = true,
+  renderDescription,
   t,
 }: {
   topics: TopicPayload[];
   showPinned?: boolean;
   showCategories?: boolean;
   showHot?: boolean;
+  renderDescription?: (topic: TopicPayload) => ReactNode;
   t: TFunction;
 }) {
   return (
@@ -240,6 +242,7 @@ export const TopicTable = memo(function TopicTable({
           showPinned={showPinned}
           showCategories={showCategories}
           showHot={showHot}
+          renderDescription={renderDescription}
           t={t}
         />
       ))}
@@ -252,12 +255,14 @@ const TopicRow = memo(function TopicRow({
   showPinned,
   showCategories,
   showHot,
+  renderDescription,
   t,
 }: {
   topic: TopicPayload;
   showPinned: boolean;
   showCategories: boolean;
   showHot: boolean;
+  renderDescription?: (topic: TopicPayload) => ReactNode;
   t: TFunction;
 }) {
   const isHot = showHot && topic.viewCount > 500;
@@ -329,9 +334,11 @@ const TopicRow = memo(function TopicRow({
             </span>
           ) : null}
         </div>
-        <p className="mt-1 hidden min-h-5 truncate text-[13px] text-muted-foreground lg:block">
-          {topicDescription(topic)}
-        </p>
+        {renderDescription ? renderDescription(topic) : (
+          <p className="mt-1 hidden min-h-5 truncate text-[13px] text-muted-foreground lg:block">
+            {topicDescription(topic)}
+          </p>
+        )}
       </div>
       <div
         role="cell"

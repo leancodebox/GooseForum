@@ -114,7 +114,31 @@ export function SearchPageView({ page }: { page: SearchPageProps }) {
         </TopicListToolbar>
         {page.topics.length ? (
           <>
-            <TopicTable topics={page.topics} t={topicT} />
+            <TopicTable
+              topics={page.topics}
+              t={topicT}
+              renderDescription={(topic) => {
+                const match = page.matches[topic.id];
+                if (!match) return null;
+                return (
+                  <GooseLink
+                    href={topic.url}
+                    className="mt-1 block text-[13px] leading-5 text-muted-foreground hover:text-foreground"
+                  >
+                    <span className="mr-2 text-xs font-medium">
+                      {searchT(match.postNo > 1 ? "matchedReply" : "matchedTopic", { no: match.postNo })}
+                    </span>
+                    <span className="line-clamp-3 break-words lg:line-clamp-2">
+                      {match.excerpt.map((part, index) => part.matched ? (
+                        <mark key={index} className="bg-accent text-accent-foreground font-medium">
+                          {part.text}
+                        </mark>
+                      ) : part.text)}
+                    </span>
+                  </GooseLink>
+                );
+              }}
+            />
             {page.totalPages > 1 ? (
               <footer className="flex flex-col gap-3 border-t bg-muted/50 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
                 <div className="text-sm text-muted-foreground">

@@ -59,7 +59,7 @@ func TestTopicIndexUsesTopicName(t *testing.T) {
 func TestConvertTopicToSearchDocumentIncludesReplies(t *testing.T) {
 	topic := &topics.Entity{Id: 42, UpdatedAt: time.Unix(100, 0)}
 	first := &posts.Entity{Content: "Topic body"}
-	replies := []posts.SearchReply{
+	replies := []posts.SearchSource{
 		{Content: "Reply with [unique keyword](https://example.com)", UpdatedAt: time.Unix(200, 0)},
 		{Content: "Another reply\n\n```go\nhidden()\n```", UpdatedAt: time.Unix(150, 0)},
 	}

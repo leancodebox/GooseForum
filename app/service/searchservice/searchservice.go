@@ -18,12 +18,14 @@ type SearchRequest struct {
 	FilterByCategories bool     `json:"filterByCategories"`
 	Limit              int      `json:"limit"`
 	Offset             int      `json:"offset"`
+	IncludeMatches     bool     `json:"-"`
 }
 
 // SearchResult is one search hit.
 type SearchResult struct {
-	ID    uint64 `json:"id"`
-	Title string `json:"title"`
+	ID    uint64       `json:"id"`
+	Title string       `json:"title"`
+	Match *SearchMatch `json:"match,omitempty"`
 }
 
 // SearchResponse is the topic search response.
@@ -62,6 +64,10 @@ func SearchTopics(req SearchRequest) (*SearchResponse, error) {
 	}
 
 	searchReq.AttributesToRetrieve = []string{"id", "title"}
+	if req.IncludeMatches {
+		searchReq.AttributesToRetrieve = append(searchReq.AttributesToRetrieve, "searchContent", "searchPosts")
+		searchReq.ShowMatchesPosition = true
+	}
 	switch req.Sort {
 	case "new":
 		searchReq.Sort = []string{"createdAt:desc"}
@@ -74,14 +80,18 @@ func SearchTopics(req SearchRequest) (*SearchResponse, error) {
 		return nil, fmt.Errorf("搜索失败: %w", err)
 	}
 
-	results := lo.FilterMap(searchResp.Hits, func(hit meilisearch.Hit, _ int) (SearchResult, bool) {
-		itemResult := SearchResult{}
+	hits := lo.FilterMap(searchResp.Hits, func(hit meilisearch.Hit, _ int) (searchHit, bool) {
+		itemResult := searchHit{}
 		if err := hit.Decode(&itemResult); err != nil {
 			slog.Error("failed to decode search hit", "err", err)
-			return SearchResult{}, false
+			return searchHit{}, false
 		}
 		return itemResult, itemResult.ID > 0
 	})
+	results, err := buildSearchResults(hits, req.IncludeMatches)
+	if err != nil {
+		return nil, err
+	}
 
 	return &SearchResponse{
 		Results: results,

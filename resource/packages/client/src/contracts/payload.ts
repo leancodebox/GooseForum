@@ -875,6 +875,11 @@ export interface PublishCategoryPayload {
 export interface SearchPageProps {
   query: string
   sort: 'relevance' | 'new' | 'updated'
+  matches: Record<number, {
+    postId: number
+    postNo: number
+    excerpt: Array<{ text: string; matched: boolean }>
+  }>
   topics: TopicPayload[]
   total: number
   totalPages: number
