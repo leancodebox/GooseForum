@@ -415,8 +415,8 @@ export function OIDCProviderSettingsPage({
           setCopied(false);
         }}
         onCopy={async () => {
-          if (secret?.value) {
-            await navigator.clipboard.writeText(secret.value);
+          if (secret) {
+            await navigator.clipboard.writeText(secret.value || secret.clientId);
             setCopied(true);
           }
         }}
@@ -638,24 +638,27 @@ function Secret({
   onClose(): void;
   onCopy(): void;
 }) {
+  const hasSecret = Boolean(value?.value);
   return (
     <Dialog open={Boolean(value)} onOpenChange={(o) => !o && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{text("secretTitle")}</DialogTitle>
-          <DialogDescription>{text("secretHint")}</DialogDescription>
+          <DialogTitle>{text(hasSecret ? "secretTitle" : "clientId")}</DialogTitle>
+          <DialogDescription>{text(hasSecret ? "secretHint" : "publicClientIdHint")}</DialogDescription>
         </DialogHeader>
-        <code className="rounded-md border bg-muted p-3 text-xs">
-          {value?.clientId}
-        </code>
-        <div className="flex gap-2">
-          <Input readOnly value={value?.value || ""} className="font-mono" />
-          <Button variant="outline" size="icon" onClick={onCopy}>
+        {hasSecret ? (
+          <code className="rounded-md border bg-muted p-3 text-xs break-all">
+            {value?.clientId}
+          </code>
+        ) : null}
+        <div className="flex min-w-0 gap-2">
+          <Input aria-label={hasSecret ? "Client Secret" : "Client ID"} readOnly value={hasSecret ? value?.value : value?.clientId || ""} className="min-w-0 font-mono" />
+          <Button variant="outline" size="icon" className="shrink-0" onClick={onCopy} aria-label={text(copied ? "copied" : "copy")} title={text(copied ? "copied" : "copy")}>
             {copied ? <Check /> : <Copy />}
           </Button>
         </div>
         <DialogFooter>
-          <Button onClick={onClose}>{text("stored")}</Button>
+          <Button onClick={onClose}>{text(hasSecret ? "stored" : "close")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
