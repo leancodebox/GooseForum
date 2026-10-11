@@ -46,6 +46,8 @@ func Get(id uint64) (entity Entity) {
 	return
 }
 
+var ErrVersionConflict = errors.New("content changed; reload before reviewing")
+
 // SaveReviewed compares the version before changing content or an admin decision.
 func SaveReviewed(entity *Entity, version uint64) error {
 	result := builder().Where("id = ? AND moderation_version = ?", entity.Id, version).
@@ -54,7 +56,7 @@ func SaveReviewed(entity *Entity, version uint64) error {
 		return result.Error
 	}
 	if result.RowsAffected == 0 {
-		return errors.New("content changed; reload before reviewing")
+		return ErrVersionConflict
 	}
 	topicrank.Notify(entity.TopicId)
 	return nil

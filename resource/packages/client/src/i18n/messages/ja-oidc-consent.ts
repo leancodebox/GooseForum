@@ -18,7 +18,7 @@ export default {
   loading: "処理中…",
   scopes: {
     "forum:read": "アクセス可能なフォーラムの内容を読む",
-    "topics:create": "あなたの名前でトピックを投稿する",
+    "topics:create": "あなたの名前でトピックを投稿する", "topics:edit": "自分のトピックを編集", "posts:edit": "自分の返信を編集",
     "posts:create": "あなたの名前で返信する",
     "images:upload": "あなたの名前で画像をアップロードする",
     openid: "本人確認を行う",

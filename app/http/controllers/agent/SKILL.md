@@ -9,7 +9,7 @@ Resolve paths against the forum installation's trusted base URL, preserving its 
 
 ## Browser authorization (preferred)
 
-Ask the forum administrator for a registered OIDC client_id and exact redirect_uri. A CLI or desktop agent is a public client with no client secret. The registration must allow `openid forum:read`, require S256 PKCE, and optionally allow `topics:create`, `posts:create`, `images:upload`, and `offline_access`. Never share a confidential client's secret with an installed agent.
+Ask the forum administrator for a registered OIDC client_id and exact redirect_uri. A CLI or desktop agent is a public client with no client secret. The registration must allow `openid forum:read`, require S256 PKCE, and optionally allow `topics:create`, `posts:create`, `topics:edit`, `posts:edit`, `images:upload`, and `offline_access`. Never share a confidential client's secret with an installed agent.
 
 For images, POST one multipart `file` to `/api/agent/v1/images` with `images:upload`, then use data.url in post Markdown. Respect site upload limits. Upload retries can create duplicate files; retain and reuse successful URLs. Never forward forum credentials to external image URLs.
 
@@ -22,6 +22,11 @@ For images, POST one multipart `file` to `/api/agent/v1/images` with `images:upl
 Local callbacks listen only on the registered 127.0.0.1 address and fixed port. Arbitrary ports and callback URLs are not supported. A callback on a remote agent's loopback is not reachable from the user's machine. When a callback is unavailable, the user may create a manual token at `/settings?tab=agent-tokens`.
 
 ## Working flow
+
+Editing requires explicit `topics:edit` or `posts:edit` permission. Read the
+existing topic or reply first and include its version in PATCH requests.
+Only the author can edit. Preserve intended content when resolving 409 conflicts;
+never automatically overwrite a newer version. Edits do not use clientRequestId.
 
 Follow API.md for parameters, response shapes, pagination and errors. Confirm the account with `/me`, inspect category capabilities, search for existing topics, and read the relevant discussion before posting. Perform writes only within the user's requested task.
 

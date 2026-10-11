@@ -24,6 +24,8 @@ type FirstPostWrite struct {
 	ReviewOnly      bool
 }
 
+var ErrVersionConflict = errors.New("content changed; reload before reviewing")
+
 func SaveTopicAndFirstPost(input FirstPostWrite) error {
 	return SaveTopicAndFirstPostWithDB(dbconnect.Connect(), input)
 }
@@ -46,7 +48,7 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 				return err
 			}
 			if input.ExpectedVersion != nil && stored.ModerationVersion != *input.ExpectedVersion {
-				return errors.New("content changed; reload before reviewing")
+				return ErrVersionConflict
 			}
 			oldPublished = isCountedTopic(&stored)
 			if input.ReviewOnly {

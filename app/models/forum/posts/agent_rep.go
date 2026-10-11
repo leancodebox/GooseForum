@@ -3,6 +3,7 @@ package posts
 import "time"
 
 type AgentPost struct {
+	ModerationVersion                          uint64
 	Id, TopicId, UserId, PostNo, ReplyToPostId uint64
 	Content                                    string
 	SourceVersion                              uint8

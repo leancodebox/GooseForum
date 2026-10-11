@@ -28,9 +28,11 @@ var (
 	ErrOwnerMismatch    = errors.New("topic owner mismatch")
 	ErrDailyLimit       = errors.New("daily topic limit reached")
 	ErrPermissionDenied = errors.New("topic write permission denied")
+	ErrVersionConflict  = errors.New("topic version conflict")
 )
 
 type WriteInput struct {
+	ExpectedVersion    *uint64
 	AgentSource        *string
 	ClientRequestID    *string
 	RequestFingerprint string
@@ -45,6 +47,7 @@ type WriteInput struct {
 }
 
 type WriteResult struct {
+	Version          uint64
 	Content          string
 	SourceVersion    uint8
 	ID               uint64
@@ -78,6 +81,7 @@ func Write(input WriteInput) (WriteResult, error) {
 	}
 	runWriteSideEffects(state, input.UserID)
 	return WriteResult{
+		Version: state.topic.ModerationVersion,
 		Content: state.firstPost.Content, SourceVersion: state.firstPost.SourceVersion,
 		ID: state.topic.Id, ModerationStatus: state.topic.ModerationStatus, TopicStatus: state.topic.Status,
 	}, nil
@@ -95,6 +99,9 @@ func loadWriteState(input WriteInput) (*writeState, error) {
 		}
 		state.firstPublication = state.topic.PublishedAt == nil
 		state.expectedVersion = state.topic.ModerationVersion
+		if input.ExpectedVersion != nil && *input.ExpectedVersion != state.expectedVersion {
+			return nil, ErrVersionConflict
+		}
 		state.wasPublished = state.topic.Status == 1 && state.topic.ProcessStatus == 0
 		state.wasCounted = state.wasPublished
 		state.previousCategoryIDs = append([]uint64(nil), state.topic.CategoryIds...)

@@ -57,7 +57,7 @@ func postURL(topicID, postNo uint64) string {
 }
 
 func postData(p postRow) gin.H {
-	return gin.H{"id": fmt.Sprint(p.Id), "topicId": fmt.Sprint(p.TopicId), "author": gin.H{"id": fmt.Sprint(p.UserId)}, "postNo": p.PostNo, "replyToPostId": optionalID(p.ReplyToPostId), "content": p.Content, "contentFormat": "markdown", "sourceVersion": p.SourceVersion, "createdAt": p.CreatedAt.UTC(), "updatedAt": p.UpdatedAt.UTC(), "url": postURL(p.TopicId, p.PostNo)}
+	return gin.H{"id": fmt.Sprint(p.Id), "topicId": fmt.Sprint(p.TopicId), "author": gin.H{"id": fmt.Sprint(p.UserId)}, "postNo": p.PostNo, "replyToPostId": optionalID(p.ReplyToPostId), "content": p.Content, "contentFormat": "markdown", "sourceVersion": p.SourceVersion, "version": p.ModerationVersion, "createdAt": p.CreatedAt.UTC(), "updatedAt": p.UpdatedAt.UTC(), "url": postURL(p.TopicId, p.PostNo)}
 }
 func optionalID(value uint64) any {
 	if value == 0 {
@@ -131,7 +131,7 @@ func (h *Handler) loadTopic(c *gin.Context, value string) (topicRow, bool) {
 
 func (h *Handler) topicData(c *gin.Context, row topicRow) gin.H {
 	a := current(c)
-	return gin.H{"id": fmt.Sprint(row.Id), "title": row.Title, "author": gin.H{"id": fmt.Sprint(row.UserId)}, "categoryIds": []string{fmt.Sprint(row.MainCategoryId)}, "createdAt": row.CreatedAt.UTC(), "updatedAt": row.UpdatedAt.UTC(), "url": postURL(row.Id, 1), "capabilities": gin.H{"reply": a.canWrite() && hasScope(a, "posts:create") && a.Access.CanReplyCategory(row.MainCategoryId)}}
+	return gin.H{"id": fmt.Sprint(row.Id), "title": row.Title, "version": row.ModerationVersion, "author": gin.H{"id": fmt.Sprint(row.UserId)}, "categoryIds": []string{fmt.Sprint(row.MainCategoryId)}, "createdAt": row.CreatedAt.UTC(), "updatedAt": row.UpdatedAt.UTC(), "url": postURL(row.Id, 1), "capabilities": gin.H{"reply": a.canWrite() && hasScope(a, "posts:create") && a.Access.CanReplyCategory(row.MainCategoryId)}}
 }
 
 func (h *Handler) topics(c *gin.Context) {

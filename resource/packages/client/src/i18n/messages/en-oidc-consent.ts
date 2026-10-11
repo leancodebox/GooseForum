@@ -17,7 +17,7 @@ export default {
   loading: "Working…",
   scopes: {
     "forum:read": "Read forum content you can access",
-    "topics:create": "Publish topics on your behalf",
+    "topics:create": "Publish topics on your behalf", "topics:edit": "Edit your topics", "posts:edit": "Edit your replies",
     "posts:create": "Reply to topics on your behalf",
     "images:upload": "Upload images on your behalf",
     openid: "Confirm your identity",

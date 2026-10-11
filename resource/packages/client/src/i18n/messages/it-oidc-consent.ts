@@ -17,7 +17,7 @@ export default {
   loading: "Elaborazione…",
   scopes: {
     "forum:read": "Leggere i contenuti del forum a cui puoi accedere",
-    "topics:create": "Pubblicare discussioni per tuo conto",
+    "topics:create": "Pubblicare discussioni per tuo conto", "topics:edit": "Modificare le proprie discussioni", "posts:edit": "Modificare le proprie risposte",
     "posts:create": "Rispondere alle discussioni per tuo conto",
     "images:upload": "Caricare immagini per tuo conto",
     openid: "Confermare la tua identità",

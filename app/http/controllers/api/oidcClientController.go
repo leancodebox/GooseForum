@@ -21,7 +21,7 @@ const oidcClientIDPrefix = "gf_"
 
 var managedOIDCScopes = map[string]struct{}{
 	"openid": {}, "profile": {}, "email": {}, "offline_access": {},
-	core.ScopeForumRead: {}, core.ScopeTopicsCreate: {}, core.ScopePostsCreate: {}, core.ScopeImagesUpload: {},
+	core.ScopeForumRead: {}, core.ScopeTopicsCreate: {}, core.ScopePostsCreate: {}, core.ScopeTopicsEdit: {}, core.ScopePostsEdit: {}, core.ScopeImagesUpload: {},
 }
 
 type oidcClientStore interface {

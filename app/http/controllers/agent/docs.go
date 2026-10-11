@@ -44,7 +44,7 @@ func (h *Handler) site(c *gin.Context) {
 	success(c, 200, gin.H{
 		"name":       hotdataserve.GetSiteSettingsConfigCache().SiteName,
 		"apiVersion": "v1", "enabled": enabled(), "contentFormat": "markdown",
-		"capabilities": []string{"read", "search", "createTopic", "createPost", "uploadImage", "submissions"},
+		"capabilities": []string{"read", "search", "createTopic", "createPost", "editTopic", "editPost", "uploadImage", "submissions"},
 		"limits": gin.H{
 			"lengthUnit": "utf8_bytes", "minTitleLength": config.MinTitleLength, "maxTitleLength": config.MaxTitleLength,
 			"minContentLength": config.MinPostLength, "maxContentLength": config.MaxPostLength,
@@ -60,7 +60,7 @@ func (h *Handler) site(c *gin.Context) {
 			"registration":           "Ask a site administrator to register an OIDC client with forum:read and S256 PKCE",
 			"manualTokensEnabled":    hotdataserve.GetAgentSettingsConfigCache().ManualTokens,
 			"manualTokenSettingsUrl": baseURL() + "/settings?tab=agent-tokens",
-			"scopes":                 []string{"openid", "forum:read", "topics:create", "posts:create", "images:upload", "offline_access"},
+			"scopes":                 []string{"openid", "forum:read", "topics:create", "posts:create", "topics:edit", "posts:edit", "images:upload", "offline_access"},
 		},
 	})
 }
@@ -92,6 +92,9 @@ func openAPIDocument(base string) gin.H {
 	id := schemaRef("ID")
 	requestID := gin.H{"type": "string", "format": "uuid"}
 	schemas := gin.H{
+		"EditTopic":   objectSchema(gin.H{"title": stringSchema(), "content": stringSchema(), "version": gin.H{"type": "integer", "minimum": 0}}, "title", "content", "version"),
+		"EditPost":    objectSchema(gin.H{"content": stringSchema(), "version": gin.H{"type": "integer", "minimum": 0}}, "content", "version"),
+		"EditResult":  objectSchema(gin.H{"topicId": id, "postId": id, "version": gin.H{"type": "integer", "minimum": 0}, "content": stringSchema(), "sourceVersion": gin.H{"type": "integer"}, "moderationStatus": stringSchema(), "url": stringSchema()}, "topicId", "version", "content", "sourceVersion", "moderationStatus", "url"),
 		"ID":          gin.H{"type": "string", "pattern": "^[1-9][0-9]*$", "description": "Positive uint64 decimal string"},
 		"CreateTopic": objectSchema(gin.H{"title": stringSchema(), "content": stringSchema(), "categoryIds": gin.H{"type": "array", "items": id, "minItems": 1, "maxItems": 3, "uniqueItems": true}, "clientRequestId": requestID}, "title", "content", "categoryIds", "clientRequestId"),
 		"CreatePost":  objectSchema(gin.H{"content": stringSchema(), "replyToPostId": id, "clientRequestId": requestID}, "content", "clientRequestId"),
@@ -100,8 +103,8 @@ func openAPIDocument(base string) gin.H {
 	}
 	author := objectSchema(gin.H{"id": id}, "id")
 	stamp := gin.H{"type": "string", "format": "date-time"}
-	schemas["Post"] = objectSchema(gin.H{"id": id, "topicId": id, "author": author, "postNo": gin.H{"type": "integer"}, "replyToPostId": gin.H{"type": "string", "nullable": true}, "content": stringSchema(), "contentFormat": gin.H{"type": "string", "enum": []string{"markdown"}}, "sourceVersion": gin.H{"type": "integer"}, "createdAt": stamp, "updatedAt": stamp, "url": stringSchema()}, "id", "topicId", "author", "postNo", "content", "contentFormat", "sourceVersion", "replyToPostId", "createdAt", "updatedAt", "url")
-	schemas["Topic"] = objectSchema(gin.H{"id": id, "title": stringSchema(), "author": author, "categoryIds": arraySchema(id), "createdAt": stamp, "updatedAt": stamp, "url": stringSchema(), "capabilities": objectSchema(gin.H{"reply": gin.H{"type": "boolean"}}, "reply"), "firstPost": schemaRef("Post")}, "id", "title", "author", "categoryIds", "createdAt", "updatedAt", "url", "capabilities")
+	schemas["Post"] = objectSchema(gin.H{"id": id, "topicId": id, "author": author, "postNo": gin.H{"type": "integer"}, "replyToPostId": gin.H{"type": "string", "nullable": true}, "content": stringSchema(), "contentFormat": gin.H{"type": "string", "enum": []string{"markdown"}}, "sourceVersion": gin.H{"type": "integer"}, "version": gin.H{"type": "integer", "minimum": 0}, "createdAt": stamp, "updatedAt": stamp, "url": stringSchema()}, "id", "topicId", "author", "postNo", "content", "contentFormat", "sourceVersion", "replyToPostId", "createdAt", "updatedAt", "url")
+	schemas["Topic"] = objectSchema(gin.H{"id": id, "title": stringSchema(), "version": gin.H{"type": "integer", "minimum": 0}, "author": author, "categoryIds": arraySchema(id), "createdAt": stamp, "updatedAt": stamp, "url": stringSchema(), "capabilities": objectSchema(gin.H{"reply": gin.H{"type": "boolean"}}, "reply"), "firstPost": schemaRef("Post")}, "id", "title", "author", "categoryIds", "createdAt", "updatedAt", "url", "capabilities")
 	schemas["Category"] = objectSchema(gin.H{"id": id, "name": stringSchema(), "description": stringSchema(), "slug": stringSchema(), "capabilities": objectSchema(gin.H{"createTopic": gin.H{"type": "boolean"}, "reply": gin.H{"type": "boolean"}}, "createTopic", "reply")}, "id", "name", "description", "slug", "capabilities")
 	schemas["Me"] = objectSchema(gin.H{"id": id, "username": stringSchema(), "clientId": stringSchema(), "scopes": arraySchema(stringSchema()), "canWrite": gin.H{"type": "boolean"}, "restriction": stringSchema()}, "id", "username", "clientId", "scopes", "canWrite", "restriction")
 	schemas["SubmissionSummary"] = objectSchema(gin.H{"submissionId": id, "topicId": id, "clientRequestId": requestID}, "submissionId", "topicId", "clientRequestId")
@@ -124,6 +127,8 @@ func openAPIDocument(base string) gin.H {
 	}
 	listParams := []gin.H{param("limit", "query", gin.H{"type": "integer", "minimum": 1, "maximum": 50, "default": 20}, false), param("cursor", "query", stringSchema(), false)}
 	ops := []operation{
+		{path: "/topics/{topicId}", method: "patch", name: "editTopic", scope: "topics:edit", response: "EditResult", body: "EditTopic"},
+		{path: "/posts/{postId}", method: "patch", name: "editPost", scope: "posts:edit", response: "EditResult", body: "EditPost"},
 		{path: "/site", method: "get", name: "getSite", anonymous: true, response: "Site"},
 		{path: "/me", method: "get", name: "getMe", scope: "forum:read", response: "Me"},
 		{path: "/categories", method: "get", name: "listCategories", scope: "forum:read", anonymous: true, list: true, response: "Category"},
@@ -147,7 +152,7 @@ func openAPIDocument(base string) gin.H {
 		authFields[key] = stringSchema()
 	}
 	schemas["Site"] = objectSchema(gin.H{"name": stringSchema(), "apiVersion": stringSchema(), "enabled": gin.H{"type": "boolean"}, "contentFormat": stringSchema(), "capabilities": arraySchema(stringSchema()), "auth": objectSchema(authFields, "browserAuthorizationAvailable", "manualTokensEnabled", "issuer", "discoveryUrl", "authorizationEndpoint", "tokenEndpoint", "revocationEndpoint", "registration", "manualTokenSettingsUrl", "scopes"), "limits": objectSchema(limitFields, "lengthUnit", "minTitleLength", "maxTitleLength", "minContentLength", "maxContentLength", "maxCategories", "maxPageSize", "maxRequestBytes", "maxDailyTopicsPerUser", "newUserPostCooldownMinutes")}, "name", "apiVersion", "enabled", "contentFormat", "capabilities", "auth", "limits")
-	errorDescriptions := map[string]string{"400": "Invalid request", "401": "Authentication required or invalid token", "403": "Insufficient scope or permission", "404": "Resource unavailable", "409": "clientRequestId conflict", "410": "Submission deleted", "413": "Request or image exceeds its size limit", "422": "Invalid content, image or categories", "429": "Rate limit, quota or cooldown", "500": "Internal error", "503": "Service unavailable"}
+	errorDescriptions := map[string]string{"400": "Invalid request", "401": "Authentication required or invalid token", "403": "Insufficient scope or permission", "404": "Resource unavailable", "409": "clientRequestId or content version conflict", "410": "Submission deleted", "413": "Request or image exceeds its size limit", "422": "Invalid content, image or categories", "429": "Rate limit, quota or cooldown", "500": "Internal error", "503": "Service unavailable"}
 	sharedResponses := gin.H{}
 	for status, description := range errorDescriptions {
 		response := gin.H{"description": description, "content": gin.H{"application/json": gin.H{"schema": schemaRef("Error")}}}
@@ -157,6 +162,7 @@ func openAPIDocument(base string) gin.H {
 		sharedResponses["Error"+status] = response
 	}
 	operationErrors := map[string][]string{
+		"editTopic": {"400", "404", "409", "413", "422", "500"}, "editPost": {"400", "404", "409", "413", "422", "500"},
 		"listCategories": {"500"}, "listTopics": {"400", "500"}, "getTopic": {"400", "404", "500"},
 		"listPosts": {"400", "404", "500"}, "getPost": {"400", "404", "500"}, "searchTopics": {"400", "500"},
 		"createTopic": {"400", "404", "409", "410", "413", "422", "500"}, "createPost": {"400", "404", "409", "410", "413", "422", "500"},
@@ -186,7 +192,7 @@ func openAPIDocument(base string) gin.H {
 		}
 		response := gin.H{"description": "Success", "content": gin.H{"application/json": gin.H{"schema": result}}}
 		responses := gin.H{"200": response}
-		if op.body != "" {
+		if op.method == "post" {
 			responses["201"] = response
 		}
 		if op.name != "getSite" {
@@ -220,7 +226,7 @@ func openAPIDocument(base string) gin.H {
 		}
 		paths[op.path].(gin.H)[op.method] = entry
 	}
-	return gin.H{"openapi": "3.0.3", "info": gin.H{"title": "GooseForum Agent API", "version": "1.0.0", "description": "Quick reference: API.md. OAuth uses S256 PKCE. Operation scopes also apply to manual tokens; ID tokens and cookies are not API credentials."}, "externalDocs": gin.H{"url": base + "/api/agent/v1/API.md"}, "servers": []gin.H{{"url": base + "/api/agent/v1"}}, "paths": paths, "components": gin.H{"schemas": schemas, "responses": sharedResponses, "securitySchemes": gin.H{"oauth": gin.H{"type": "oauth2", "flows": gin.H{"authorizationCode": gin.H{"authorizationUrl": base + "/oauth2/authorize", "tokenUrl": base + "/oauth2/token", "scopes": gin.H{"openid": "Confirm identity", "forum:read": "Read accessible forum content", "topics:create": "Publish topics", "posts:create": "Reply to topics", "images:upload": "Upload images", "offline_access": "Refresh access after expiry"}}}}, "manualToken": gin.H{"type": "http", "scheme": "bearer"}}}}
+	return gin.H{"openapi": "3.0.3", "info": gin.H{"title": "GooseForum Agent API", "version": "1.0.0", "description": "Quick reference: API.md. OAuth uses S256 PKCE. Operation scopes also apply to manual tokens; ID tokens and cookies are not API credentials."}, "externalDocs": gin.H{"url": base + "/api/agent/v1/API.md"}, "servers": []gin.H{{"url": base + "/api/agent/v1"}}, "paths": paths, "components": gin.H{"schemas": schemas, "responses": sharedResponses, "securitySchemes": gin.H{"oauth": gin.H{"type": "oauth2", "flows": gin.H{"authorizationCode": gin.H{"authorizationUrl": base + "/oauth2/authorize", "tokenUrl": base + "/oauth2/token", "scopes": gin.H{"openid": "Confirm identity", "forum:read": "Read accessible forum content", "topics:create": "Publish topics", "topics:edit": "Edit own topics", "posts:edit": "Edit own replies", "posts:create": "Reply to topics", "images:upload": "Upload images", "offline_access": "Refresh access after expiry"}}}}, "manualToken": gin.H{"type": "http", "scheme": "bearer"}}}}
 }
 
 func containsPathParam(path, name string) bool {

@@ -20,6 +20,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/mentionservice"
 	"github.com/leancodebox/GooseForum/app/service/postingpolicy"
 	"github.com/leancodebox/GooseForum/app/service/postwriteservice"
+	"github.com/leancodebox/GooseForum/app/service/topicservice"
 	"github.com/leancodebox/GooseForum/app/service/topicwriteservice"
 )
 
@@ -59,6 +60,10 @@ func fingerprint(operation string, body any) string {
 }
 
 func validateContent(c *gin.Context, content string, title *string) bool {
+	return validateWriteContent(c, content, title, true)
+}
+
+func validateWriteContent(c *gin.Context, content string, title *string, creating bool) bool {
 	if strings.TrimSpace(content) == "" || title != nil && strings.TrimSpace(*title) == "" {
 		fail(c, 422, "empty_content", "Title and content must not be empty")
 		return false
@@ -73,7 +78,7 @@ func validateContent(c *gin.Context, content string, title *string) bool {
 		return false
 	}
 	available := postingpolicy.AvailableAt(current(c).User.CreatedAt, config.NewUserPostCooldownMinutes)
-	if available.After(time.Now()) {
+	if creating && available.After(time.Now()) {
 		seconds := int(math.Ceil(time.Until(available).Seconds()))
 		c.Header("Retry-After", strconv.Itoa(seconds))
 		fail(c, 429, "posting_cooldown", "Posting is available at "+available.UTC().Format(time.RFC3339))
@@ -199,6 +204,12 @@ func (h *Handler) createPost(c *gin.Context) {
 
 func writeError(c *gin.Context, err error) {
 	switch {
+	case errors.Is(err, topicwriteservice.ErrVersionConflict), errors.Is(err, postwriteservice.ErrVersionConflict), errors.Is(err, posts.ErrVersionConflict), errors.Is(err, topicservice.ErrVersionConflict):
+		fail(c, 409, "version_conflict", "Content changed; read the latest version before editing")
+	case errors.Is(err, topicwriteservice.ErrOwnerMismatch), errors.Is(err, postwriteservice.ErrOwnerMismatch):
+		fail(c, 403, "permission_denied", "Only the author can edit content")
+	case errors.Is(err, topicwriteservice.ErrTopicNotFound), errors.Is(err, postwriteservice.ErrPostNotFound):
+		fail(c, 404, "not_found", "Content is unavailable")
 	case errors.Is(err, topicwriteservice.ErrDailyLimit):
 		fail(c, 429, "daily_topic_limit", "Daily topic limit reached")
 	case errors.Is(err, mentionservice.ErrInvalid):

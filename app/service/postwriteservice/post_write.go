@@ -25,6 +25,7 @@ var (
 	ErrTopicUnavailable  = errors.New("topic unavailable")
 	ErrParentPostMissing = errors.New("parent post missing")
 	ErrOwnerMismatch     = errors.New("post owner mismatch")
+	ErrVersionConflict   = errors.New("post version conflict")
 )
 
 type CreateInput struct {
@@ -83,10 +84,11 @@ func Create(input CreateInput) (posts.Entity, error) {
 }
 
 type UpdateInput struct {
-	SourceVersion uint8
-	UserID        uint64
-	PostID        uint64
-	Content       string
+	ExpectedVersion *uint64
+	SourceVersion   uint8
+	UserID          uint64
+	PostID          uint64
+	Content         string
 }
 
 func Update(input UpdateInput) (posts.Entity, error) {
@@ -103,6 +105,9 @@ func Update(input UpdateInput) (posts.Entity, error) {
 	}
 
 	expectedVersion := post.ModerationVersion
+	if input.ExpectedVersion != nil && *input.ExpectedVersion != expectedVersion {
+		return posts.Entity{}, ErrVersionConflict
+	}
 	content, err := mentionservice.Normalize(input.Content, input.SourceVersion, true)
 	if err != nil {
 		return posts.Entity{}, err

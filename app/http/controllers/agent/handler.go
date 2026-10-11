@@ -57,6 +57,8 @@ func (h *Handler) Register(engine *gin.Engine) {
 	g.GET("/topics/:topicId/posts", h.posts)
 	g.GET("/posts/:postId", h.post)
 	g.POST("/topics", h.require(core.ScopeTopicsCreate), h.createTopic)
+	g.PATCH("/topics/:topicId", h.require(core.ScopeTopicsEdit), h.editTopic)
+	g.PATCH("/posts/:postId", h.require(core.ScopePostsEdit), h.editPost)
 	g.POST("/topics/:topicId/posts", h.require(core.ScopePostsCreate), h.createPost)
 	g.POST("/images", h.require(core.ScopeImagesUpload), h.uploadImage)
 	g.GET("/me/submissions", h.require(core.ScopeForumRead), h.submissions)
@@ -182,7 +184,7 @@ func (h *Handler) authenticate(c *gin.Context) {
 		fail(c, 429, "rate_limited", "Account request limit reached")
 		return
 	}
-	if c.Request.Method == http.MethodPost && a.User.Id != 0 && !h.limits.allow("write:"+strconv.FormatUint(a.User.Id, 10), config.WritePerMinute) {
+	if (c.Request.Method == http.MethodPost || c.Request.Method == http.MethodPatch) && a.User.Id != 0 && !h.limits.allow("write:"+strconv.FormatUint(a.User.Id, 10), config.WritePerMinute) {
 		c.Header("Retry-After", "60")
 		fail(c, 429, "rate_limited", "Write limit reached")
 		return

@@ -7,6 +7,7 @@ import (
 )
 
 type AgentTopic struct {
+	ModerationVersion                   uint64
 	Id                                  uint64
 	Title                               string
 	UserId, MainCategoryId, FirstPostId uint64

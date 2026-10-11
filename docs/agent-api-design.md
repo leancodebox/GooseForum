@@ -28,7 +28,7 @@ Agent 默认先读 `/api/agent/v1/API.md`：包含完整操作清单、输入、
 - Token、论坛内容、审计属于业务数据；无状态不意味着不使用数据库。
 - 浏览器授权包含短期授权交互和一次性授权码，属于认证协议状态；业务 API 仍不维护 Agent 会话。
 - 第一版支持读取、搜索、发布、回复和查询本人提交结果。
-- 编辑、删除、私信、通知、管理操作不进入第一版。图片上传通过 `POST /api/agent/v1/images` 提供，要求 `forum:read images:upload`，使用 multipart `file`，复用站点附件策略、存储与归属记录。
+- 编辑本人已发布且可读的主题和回复通过 PATCH 提供，支持网页发布的旧内容，要求独立编辑 scope 和读取时的 version。删除、私信、通知、管理操作暂不开放。图片上传通过 `POST /api/agent/v1/images` 提供，要求 `forum:read images:upload`，使用 multipart `file`，复用站点附件策略、存储与归属记录。
 - Agent 以绑定用户身份操作，权限随用户权限变化；不自动获得管理员能力。
 
 ## 2. 现有基础与改造位置
@@ -73,6 +73,8 @@ site 另返回 `auth`：issuer、discoveryUrl、授权/token/revoke 地址、支
 | GET `/topics/{topicId}/posts` | 可见回复流 | `forum:read` |
 | GET `/posts/{postId}` | 单个可见帖子 | `forum:read` |
 | POST `/topics` | 发布主题 | `topics:create` |
+| PATCH `/topics/{topicId}` | 编辑本人主题的标题及正文，保留分类 | `topics:edit` |
+| PATCH `/posts/{postId}` | 编辑本人回复，首帖使用主题接口 | `posts:edit` |
 | POST `/topics/{topicId}/posts` | 创建回复，可指定被回复帖子 | `posts:create` |
 | POST `/images` | multipart `file` 图片上传，返回 URL、文件名与字节数 | `images:upload` |
 | GET `/me/submissions` | 本授权身份的提交结果列表，可按 clientRequestId 查询 | 必须认证 |
@@ -88,7 +90,7 @@ site 另返回 `auth`：issuer、discoveryUrl、授权/token/revoke 地址、支
 - 时间使用带时区的 RFC 3339 UTC；可选字段的 null/省略规则在契约中固定。
 - 创建主题：`title`、`content`、`categoryIds`、`clientRequestId`。
 - 创建回复：`content`、可选 `replyToPostId`、`clientRequestId`。
-- 第一版仅发布，不支持通过参数隐式切换编辑、草稿或删除。
+- 创建与编辑使用独立路由，不支持通过参数隐式切换编辑、草稿或删除。编辑携带必填 version，过期返回 409 version_conflict。
 - 正文使用项目现有 Markdown 格式；服务端固定当前 sourceVersion，不让 Agent 选择遗留格式。Skill 说明现有 mention 语法；无法确定用户 ID 时不猜测 mention。
 - 不引入当前项目没有的标签能力。板块数量等限制由 site 返回，服务端继续强制校验。
 - 长度单位须与现有实现一致：当前校验使用 Go `len(string)`，即 UTF-8 字节数。契约明确标注；若调整为字符数，须统一修改全部入口并另行验证。
@@ -150,6 +152,8 @@ Token 管理使用现有浏览器会话及适用的 CSRF 防护，并要求现�
 - `forum:read`：当前身份可见的读取能力。
 - `topics:create`：发布主题，依赖 `forum:read`。
 - `posts:create`：回复主题，依赖 `forum:read`。
+- `topics:edit`：编辑自己的主题，依赖 `forum:read`。
+- `posts:edit`：编辑自己的回复，依赖 `forum:read`。
 - `images:upload`：上传图片，依赖 `forum:read`，遵守站点附件额度、格式和大小限制。上传不支持 `clientRequestId` 去重，成功后复用返回 URL。
 
 签发时拒绝未知 scope 或缺少依赖的组合。每次请求重新检查 Token 有效性和当前用户状态，不将用户角色固化在 Token 中。身份有效不代表账号可写。
@@ -274,7 +278,7 @@ Token 表字段：id、userId、name、tokenHash（唯一）、tokenPrefix、sco
 
 ## 12. 后续扩展边界
 
-按实际使用需求增加编辑本人内容、显式设置点赞/收藏状态、通知分页和其他附件类型上传。编辑需提供版本前置条件，状态操作使用设置目标值而非 toggle。删除和管理能力单独设计 scope 与确认语义，不因用户是管理员而自动开放。
+按实际使用需求增加显式设置点赞/收藏状态、通知分页和其他附件类型上传。编辑已提供版本前置条件，状态操作使用设置目标值而非 toggle。删除和管理能力单独设计 scope 与确认语义，不因用户是管理员而自动开放。
 
 这些扩展继续使用无状态 HTTP，不引入 Agent 会话协议。
 

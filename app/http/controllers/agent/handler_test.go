@@ -103,12 +103,12 @@ func TestAuthorizationForumWritesAndIsolation(t *testing.T) {
 	resolver := accesscontrol.NewResolver(testAccessStore{}, nil, nil)
 	accesscontrol.Default = resolver
 	t.Cleanup(func() { accesscontrol.Default = previous })
-	service, err := oidcproviderservice.New(context.Background(), oidcproviderservice.Options{DB: db, SiteURL: "https://forum.example", KeyEncryptionSecret: []byte(strings.Repeat("k", 32)), SupportedScopes: []string{"openid", "offline_access", core.ScopeForumRead, core.ScopeTopicsCreate, core.ScopePostsCreate, core.ScopeImagesUpload}})
+	service, err := oidcproviderservice.New(context.Background(), oidcproviderservice.Options{DB: db, SiteURL: "https://forum.example", KeyEncryptionSecret: []byte(strings.Repeat("k", 32)), SupportedScopes: []string{"openid", "offline_access", core.ScopeForumRead, core.ScopeTopicsCreate, core.ScopePostsCreate, core.ScopeTopicsEdit, core.ScopePostsEdit, core.ScopeImagesUpload}})
 	if err != nil {
 		t.Fatal(err)
 	}
 	provider := service.Provider()
-	client := &core.Client{ID: "agent-integration", Name: "Agent", RedirectURIs: []string{"http://127.0.0.1:9876/callback"}, Scopes: []string{"openid", "offline_access", core.ScopeForumRead, core.ScopeTopicsCreate, core.ScopePostsCreate, core.ScopeImagesUpload}, GrantTypes: []string{"authorization_code", "refresh_token"}, TokenEndpointAuthMethod: core.ClientAuthNone, Public: true, RequirePKCE: true, Enabled: true}
+	client := &core.Client{ID: "agent-integration", Name: "Agent", RedirectURIs: []string{"http://127.0.0.1:9876/callback"}, Scopes: []string{"openid", "offline_access", core.ScopeForumRead, core.ScopeTopicsCreate, core.ScopePostsCreate, core.ScopeTopicsEdit, core.ScopePostsEdit, core.ScopeImagesUpload}, GrantTypes: []string{"authorization_code", "refresh_token"}, TokenEndpointAuthMethod: core.ClientAuthNone, Public: true, RequirePKCE: true, Enabled: true}
 	if err := service.InteractionStore().CreateClient(context.Background(), client); err != nil {
 		t.Fatal(err)
 	}
@@ -194,6 +194,69 @@ func TestAuthorizationForumWritesAndIsolation(t *testing.T) {
 	if status, _ := call("POST", "/api/agent/v1/topics/"+topicID+"/posts", refreshed.AccessToken, reply); status != 200 {
 		t.Fatalf("duplicate reply: %d", status)
 	}
+	replyID := result["data"].(map[string]any)["postId"].(string)
+	h.limits = limiter{}
+	originalSource := posts.Get(mustID(t, created["postId"].(string))).AgentSource
+	// Website-created legacy content has no Agent source or request key.
+	if err := db.Model(&posts.Entity{}).Where("topic_id = ?", topicID).Updates(map[string]any{"agent_source": nil, "client_request_id": nil, "source_version": 0, "moderation_version": 0}).Error; err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Model(&topics.Entity{}).Where("id = ?", topicID).Update("moderation_version", 0).Error; err != nil {
+		t.Fatal(err)
+	}
+	status, result = call("GET", "/api/agent/v1/topics/"+topicID, refreshed.AccessToken, nil)
+	if status != 200 || result["data"].(map[string]any)["version"] != float64(0) {
+		t.Fatalf("legacy version: %d %#v", status, result)
+	}
+	editTopic := map[string]any{"title": "Edited old article", "content": "Updated content of a website-created old article.", "version": 0}
+	status, result = call("PATCH", "/api/agent/v1/topics/"+topicID, refreshed.AccessToken, editTopic)
+	if status != 200 || result["data"].(map[string]any)["version"] != float64(1) {
+		t.Fatalf("edit legacy topic: %d %#v", status, result)
+	}
+	if status, result := call("PATCH", "/api/agent/v1/topics/"+topicID, refreshed.AccessToken, editTopic); status != 409 || result["error"].(map[string]any)["code"] != "version_conflict" {
+		t.Fatalf("stale topic edit: %d %#v", status, result)
+	}
+	storedTopic := topics.Get(mustID(t, topicID))
+	if storedTopic.Title != editTopic["title"] || len(storedTopic.CategoryIds) != 1 || storedTopic.CategoryIds[0] != 99001 {
+		t.Fatalf("topic edit lost title or categories: %#v", storedTopic)
+	}
+	editReply := map[string]any{"content": "Updated content of a website-created old reply.", "version": 0}
+	status, result = call("PATCH", "/api/agent/v1/posts/"+replyID, refreshed.AccessToken, editReply)
+	if status != 200 || result["data"].(map[string]any)["version"] != float64(1) || posts.Get(mustID(t, replyID)).Content != editReply["content"] {
+		t.Fatalf("edit legacy reply: %d %#v", status, result)
+	}
+	if status, _ := call("PATCH", "/api/agent/v1/posts/"+replyID, refreshed.AccessToken, editReply); status != 409 {
+		t.Fatalf("stale reply edit: %d", status)
+	}
+	if status, _ := call("PATCH", "/api/agent/v1/posts/"+created["postId"].(string), refreshed.AccessToken, editReply); status != 422 {
+		t.Fatalf("first post edit allowed: %d", status)
+	}
+	if status, _ := call("PATCH", "/api/agent/v1/posts/"+replyID, refreshed.AccessToken, map[string]any{"content": editReply["content"]}); status != 400 {
+		t.Fatalf("missing edit version accepted: %d", status)
+	}
+	if err := db.Model(&posts.Entity{}).Where("id = ?", replyID).Update("user_id", user.Id+1).Error; err != nil {
+		t.Fatal(err)
+	}
+	if status, _ := call("PATCH", "/api/agent/v1/posts/"+replyID, refreshed.AccessToken, editReply); status != 403 {
+		t.Fatalf("non-author edit allowed: %d", status)
+	}
+	if err := db.Model(&posts.Entity{}).Where("id = ?", replyID).Update("user_id", user.Id).Error; err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Model(&topics.Entity{}).Where("id = ?", topicID).Update("user_id", user.Id+1).Error; err != nil {
+		t.Fatal(err)
+	}
+	if status, _ := call("PATCH", "/api/agent/v1/topics/"+topicID, refreshed.AccessToken, editTopic); status != 403 {
+		t.Fatalf("non-author topic edit allowed: %d", status)
+	}
+	if err := db.Model(&topics.Entity{}).Where("id = ?", topicID).Update("user_id", user.Id).Error; err != nil {
+		t.Fatal(err)
+	}
+	// Restore submission provenance for the remaining submission tests.
+	if err := db.Model(&posts.Entity{}).Where("id = ?", created["postId"]).Updates(map[string]any{"agent_source": originalSource, "client_request_id": key}).Error; err != nil {
+		t.Fatal(err)
+	}
+	h.limits = limiter{}
 	manual, raw, err := agenttokens.Create(db, user.Id, user.TokenVersion, "Read only", []string{core.ScopeForumRead}, 30)
 	if err != nil {
 		t.Fatal(err)
@@ -201,6 +264,32 @@ func TestAuthorizationForumWritesAndIsolation(t *testing.T) {
 	if status, _ := call("POST", "/api/agent/v1/topics", raw, body); status != 403 {
 		t.Fatalf("scope escalated: %d", status)
 	}
+	if status, _ := call("PATCH", "/api/agent/v1/topics/"+topicID, raw, editTopic); status != 403 {
+		t.Fatalf("topic edit scope escalated: %d", status)
+	}
+	if status, _ := call("PATCH", "/api/agent/v1/posts/"+replyID, raw, editReply); status != 403 {
+		t.Fatalf("reply edit scope escalated: %d", status)
+	}
+	_, createOnly, err := agenttokens.Create(db, user.Id, user.TokenVersion, "Create only", []string{core.ScopeForumRead, core.ScopeTopicsCreate, core.ScopePostsCreate}, 30)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if status, _ := call("PATCH", "/api/agent/v1/topics/"+topicID, createOnly, editTopic); status != 403 {
+		t.Fatalf("create permission granted topic editing: %d", status)
+	}
+	if status, _ := call("PATCH", "/api/agent/v1/posts/"+replyID, createOnly, editReply); status != 403 {
+		t.Fatalf("create permission granted reply editing: %d", status)
+	}
+	_, editToken, err := agenttokens.Create(db, user.Id, user.TokenVersion, "Edit only", []string{core.ScopeForumRead, core.ScopeTopicsEdit, core.ScopePostsEdit}, 30)
+	if err != nil {
+		t.Fatal(err)
+	}
+	editReply["version"] = 1
+	status, result = call("PATCH", "/api/agent/v1/posts/"+replyID, editToken, editReply)
+	if status != 200 || result["data"].(map[string]any)["version"] != float64(2) {
+		t.Fatalf("manual token editing: %d %#v", status, result)
+	}
+	h.limits = limiter{}
 	if status, _ := call("GET", "/api/agent/v1/me/submissions?clientRequestId="+key, raw, nil); status != 404 {
 		t.Fatalf("cross credential submission leak: %d", status)
 	}
@@ -249,6 +338,12 @@ func TestAuthorizationForumWritesAndIsolation(t *testing.T) {
 	}
 	if status, _ := call("GET", "/api/agent/v1/topics/"+topicID, "", nil); status != 404 {
 		t.Fatalf("pending topic leak: %d", status)
+	}
+	if status, _ := call("PATCH", "/api/agent/v1/topics/"+topicID, refreshed.AccessToken, editTopic); status != 404 {
+		t.Fatalf("pending topic edit allowed: %d", status)
+	}
+	if status, _ := call("PATCH", "/api/agent/v1/posts/"+replyID, refreshed.AccessToken, editReply); status != 404 {
+		t.Fatalf("reply edit in pending topic allowed: %d", status)
 	}
 	if err := db.Model(&topics.Entity{}).Where("id = ?", topicID).Updates(map[string]any{"status": 1, "moderation_status": "approved"}).Error; err != nil {
 		t.Fatal(err)
