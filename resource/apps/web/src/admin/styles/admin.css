@@ -3,3 +3,19 @@
 @source "../**/*.{ts,tsx}";
 @source "../../host/**/*.{ts,tsx}";
 @source "../../../../../packages/ui/src/**/*.{ts,tsx}";
+
+.admin-navigation-progress > div {
+  animation: admin-navigation-progress 1.1s ease-in-out infinite;
+}
+
+@keyframes admin-navigation-progress {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(400%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-navigation-progress > div {
+    animation: none;
+    width: 100%;
+  }
+}

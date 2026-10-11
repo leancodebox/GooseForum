@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { flushSync } from 'react-dom'
 import { applyBrowserTheme, createThemeTransition, detectBrowserTheme, detectBrowserThemePreference, resolveBrowserTheme, saveBrowserThemePreference, type BrowserThemePreference } from '@gooseforum/runtime/browser-host'
 import type { GooseAdminApi, PagePayload } from '@gooseforum/client'
@@ -27,6 +27,7 @@ import { AuthLogsPage } from './page-registry'
 import { AgentSettingsPage } from './page-registry'
 import { normalizeAdminPath } from './navigation'
 import { prepareAdminTranslations, adminPageNamespaces, loadedAdminNamespaces } from './translation-loader'
+import { prepareAdminListData, type AdminListData } from './list-data'
 
 import { DashboardPage, CategoriesManagementPage, AccessGroupsManagementPage, RolesManagementPage, UsersManagementPage, PostsManagementPage, LinksManagementPage, SponsorsManagementPage, BadgesManagementPage, FileResourcesManagementPage, OptRecordsManagementPage, SiteInfoManagementPage, SiteChromeManagementPage, MailSettingsPage, SecuritySettingsPage, PostingSettingsPage, AnnouncementSettingsPage, HttpNotifySettingsPage, SensitiveWordsSettingsPage, OAuthSettingsPage, OIDCProviderSettingsPage, prepareAdminPage } from './page-registry'
 
@@ -35,8 +36,24 @@ const shellVariables = {
   '--header-height': 'calc(var(--spacing) * 12)',
 } as CSSProperties
 
-export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi }) {
+const historyIndexKey = 'gooseAdminIndex'
+function readHistoryIndex() {
+  const state: unknown = window.history.state
+  if (!state || typeof state !== 'object') return 0
+  const index = (state as Record<string, unknown>)[historyIndexKey]
+  return typeof index === 'number' && Number.isSafeInteger(index) && index >= 0 ? index : 0
+}
+
+export function AdminApp({ page, api, initialListData }: { page: PagePayload; api: GooseAdminApi; initialListData?: AdminListData }) {
   const [pathname, setPathname] = useState(() => normalizeAdminPath(window.location.pathname))
+  const [routeKey, setRouteKey] = useState(() => `${readHistoryIndex()}:${window.location.pathname}${window.location.search}`)
+  const [listData, setListData] = useState(initialListData)
+  const rememberedUrls = useRef(new Map<string, string>())
+  const scrollPositions = useRef(new Map<number, number>())
+  const activeHistoryIndex = useRef(readHistoryIndex())
+  const restoringHistory = useRef(false)
+  const committedUrl = useRef(window.location.pathname + window.location.search)
+  const pendingScroll = useRef<number | undefined>(undefined)
   const requestVersion = useRef(0)
   const [isNavigating, setIsNavigating] = useState(false)
   const [navigationError, setNavigationError] = useState('')
@@ -65,6 +82,7 @@ export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi 
   const identityText = useMemo(() => createIdentityText(locale), [locale])
   const dashboardText = useMemo(() => createDashboardText(locale), [locale])
   const titleKey = adminNavGroups.flatMap((group) => group.items).find((item) => item.url === pathname)?.label || 'console'
+  const rememberQueryUrl = useCallback((url: string) => { committedUrl.current = url }, [])
 
   useEffect(() => {
     document.documentElement.lang = locale
@@ -74,31 +92,80 @@ export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi 
     document.title = `${text(titleKey)} - ${page.layout.site.name || 'GooseForum'}`
   }, [page.layout.site.name, text, titleKey])
 
-  const navigate = useCallback(async (path: string, updateHistory = true) => {
+  const navigate = useCallback(async (path: string, updateHistory = true, targetHistoryIndex = readHistoryIndex()) => {
     const version = ++requestVersion.current
-    const nextPath = normalizeAdminPath(path)
+    const requestedUrl = new URL(path, window.location.href)
+    const nextPath = normalizeAdminPath(requestedUrl.pathname)
+    // A popstate already changed the address; remember the page being left separately.
+    const leavingUrl = committedUrl.current
+    rememberedUrls.current.set(pathname, leavingUrl)
+    scrollPositions.current.set(activeHistoryIndex.current, window.scrollY)
+    const nextUrl = updateHistory && !requestedUrl.search
+      ? new URL(rememberedUrls.current.get(nextPath) || requestedUrl.href, window.location.href)
+      : requestedUrl
+    nextUrl.pathname = nextPath
+    const nextKey = nextUrl.pathname + nextUrl.search
     setNavigationError('')
-    if (nextPath === pathname) { setIsNavigating(false); return }
+    function restoreHistory() {
+      const delta = activeHistoryIndex.current - readHistoryIndex()
+      if (delta) {
+        restoringHistory.current = true
+        window.history.go(delta)
+      } else if (window.location.pathname + window.location.search !== committedUrl.current) {
+        window.history.replaceState(window.history.state, '', committedUrl.current)
+      }
+    }
+    if (updateHistory && nextKey === leavingUrl) { restoreHistory(); setIsNavigating(false); return }
     setIsNavigating(true)
     try {
       const language = localeRef.current
-      await Promise.all([prepareAdminPage(nextPath), prepareAdminTranslations(language, adminPageNamespaces(nextPath))])
+      const [, , nextData] = await Promise.all([prepareAdminPage(nextPath), prepareAdminTranslations(language, adminPageNamespaces(nextPath)), prepareAdminListData(api, nextUrl)])
       if (language !== localeRef.current) await prepareAdminTranslations(localeRef.current, adminPageNamespaces(nextPath))
       if (version !== requestVersion.current) return
-      if (updateHistory) window.history.pushState(null, '', nextPath)
+      const nextHistoryIndex = updateHistory ? readHistoryIndex() + 1 : targetHistoryIndex
+      if (updateHistory) window.history.pushState({ ...window.history.state, [historyIndexKey]: nextHistoryIndex }, '', nextKey)
+      committedUrl.current = nextKey
+      pendingScroll.current = updateHistory ? 0 : scrollPositions.current.get(nextHistoryIndex) || 0
+      activeHistoryIndex.current = nextHistoryIndex
       pathnameRef.current = nextPath
+      setListData(nextData)
+      setRouteKey(`${nextHistoryIndex}:${nextKey}`)
       setPathname(nextPath)
     } catch (error) {
-      if (version === requestVersion.current) setNavigationError(error instanceof Error ? error.message : String(error))
+      if (version === requestVersion.current) {
+        restoreHistory()
+        setNavigationError(error instanceof Error ? error.message : String(error))
+      }
     } finally {
       if (version === requestVersion.current) setIsNavigating(false)
     }
-  }, [pathname])
+  }, [api, pathname])
+
+  useLayoutEffect(() => {
+    if (pendingScroll.current === undefined) return
+    window.scrollTo({ top: pendingScroll.current, behavior: 'instant' })
+    pendingScroll.current = undefined
+  }, [routeKey])
 
   useEffect(() => {
-    const handlePopState = () => { void navigate(window.location.pathname, false) }
+    window.history.replaceState({ ...window.history.state, [historyIndexKey]: activeHistoryIndex.current }, '', window.location.href)
+  }, [])
+
+  useEffect(() => {
+    const previousRestoration = window.history.scrollRestoration
+    window.history.scrollRestoration = 'manual'
+    const handlePopState = () => {
+      if (restoringHistory.current) {
+        restoringHistory.current = false
+        if (readHistoryIndex() === activeHistoryIndex.current) return
+      }
+      void navigate(window.location.pathname + window.location.search, false, readHistoryIndex())
+    }
     window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+      window.history.scrollRestoration = previousRestoration
+    }
   }, [navigate])
 
   useEffect(() => () => { requestVersion.current++; localeVersion.current++ }, [])
@@ -162,9 +229,9 @@ export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi 
       : pathname === '/admin/roles'
         ? <RolesManagementPage api={api} text={roleText} />
       : pathname === '/admin/users'
-        ? <UsersManagementPage api={api} text={userText} locale={locale} canResetMFA={page.layout.viewer?.adminPermissions?.includes(0)} currentUserId={page.layout.viewer?.id} />
+        ? <UsersManagementPage key={routeKey} api={api} initialData={listData?.kind === 'users' ? listData.data : undefined} onUrlChange={rememberQueryUrl} text={userText} locale={locale} canResetMFA={page.layout.viewer?.adminPermissions?.includes(0)} currentUserId={page.layout.viewer?.id} />
       : pathname === '/admin/posts'
-        ? <PostsManagementPage api={api} text={postText} />
+        ? <PostsManagementPage key={routeKey} api={api} initialData={listData?.kind === 'posts' ? listData.data : undefined} onUrlChange={rememberQueryUrl} text={postText} />
       : pathname === '/admin/links'
         ? <LinksManagementPage api={api} text={pageConfigText} />
       : pathname === '/admin/sponsors'
@@ -203,5 +270,5 @@ export function AdminApp({ page, api }: { page: PagePayload; api: GooseAdminApi 
                         ? <DashboardPage api={api} text={dashboardText} locale={locale} />
                         : <div className="flex flex-1 items-center justify-center p-6"><div className="max-w-md rounded-xl border bg-card p-6 text-center"><h2 className="text-lg font-semibold">{text(titleKey)}</h2><p className="mt-2 text-sm text-muted-foreground">{text('notAvailable')}</p></div></div>
 
-  return <TooltipProvider><SidebarProvider style={shellVariables}><AppSidebar layout={page.layout} pathname={pathname} text={text} onNavigate={navigate} onPrefetch={prefetch} variant="inset" /><SidebarInset className="overflow-clip" aria-busy={isNavigating}><SiteHeader title={text(titleKey)} locale={locale} themePreference={themePreference} onLocaleChange={changeLocale} onThemeChange={changeTheme} /><div className="flex flex-1 flex-col">{navigationError ? <p role="alert" className="px-4 py-2 text-sm text-destructive">{navigationError}</p> : null}<Suspense fallback={<div className="flex min-h-48 items-center justify-center text-sm text-muted-foreground">{text('loading')}</div>}>{content}</Suspense></div></SidebarInset></SidebarProvider><Toaster position="bottom-right" /></TooltipProvider>
+  return <TooltipProvider><SidebarProvider style={shellVariables}>{isNavigating ? <div role="progressbar" aria-label={text('loading')} className="admin-navigation-progress fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden bg-primary/15"><div className="h-full w-1/3 bg-primary" /></div> : null}<AppSidebar layout={page.layout} pathname={pathname} text={text} onNavigate={navigate} onPrefetch={prefetch} variant="inset" /><SidebarInset className="overflow-clip" aria-busy={isNavigating}><SiteHeader title={text(titleKey)} locale={locale} themePreference={themePreference} onLocaleChange={changeLocale} onThemeChange={changeTheme} /><div className="flex flex-1 flex-col">{navigationError ? <p role="alert" className="px-4 py-2 text-sm text-destructive">{navigationError}</p> : null}<Suspense fallback={<div className="flex min-h-48 items-center justify-center text-sm text-muted-foreground">{text('loading')}</div>}>{content}</Suspense></div></SidebarInset></SidebarProvider><Toaster position="bottom-right" /></TooltipProvider>
 }

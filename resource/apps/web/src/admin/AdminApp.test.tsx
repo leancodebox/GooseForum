@@ -4,6 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { AdminApp } from './AdminApp'
 import { prepareAdminPage } from './page-registry'
+import { prepareAdminListData } from './list-data'
+
+vi.mock('./list-data', () => ({ prepareAdminListData: vi.fn() }))
 
 vi.mock('./page-registry', () => ({
   prepareAdminPage: vi.fn(),
@@ -40,10 +43,34 @@ const prepare = vi.mocked(prepareAdminPage)
 const page = { layout: { site: { name: 'GooseForum' }, theme: { colors: {} } } } as PagePayload
 function mount() { render(<AdminApp page={page} api={{} as GooseAdminApi} />) }
 function deferred() { let resolve!: () => void; const promise = new Promise<void>(done => { resolve = done }); return { promise, resolve } }
-beforeEach(() => { window.history.replaceState(null, '', '/admin'); prepare.mockReset() })
+beforeEach(() => { window.history.replaceState(null, '', '/admin'); prepare.mockReset(); vi.mocked(prepareAdminListData).mockReset(); vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined) })
 afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
 describe('prepared admin navigation', () => {
+  it('keeps the current page until fresh list data is ready and shows navigation progress', async () => {
+    const data = deferred()
+    vi.mocked(prepareAdminListData).mockImplementation(async () => { await data.promise; return undefined })
+    prepare.mockResolvedValue(undefined)
+    mount()
+    fireEvent.click(screen.getByText('Users'))
+    await act(async () => { await Promise.resolve() })
+    expect(screen.getByText('DashboardPage')).toBeTruthy()
+    expect(screen.getByRole('progressbar')).toBeTruthy()
+    expect(window.location.pathname).toBe('/admin')
+    await act(async () => { data.resolve(); await data.promise })
+    expect(screen.getByText('UsersManagementPage')).toBeTruthy()
+    expect(screen.queryByRole('progressbar')).toBeNull()
+  })
+  it('preserves the current page when the target data request fails', async () => {
+    prepare.mockResolvedValue(undefined)
+    vi.mocked(prepareAdminListData).mockRejectedValueOnce(new Error('List unavailable'))
+    mount()
+    fireEvent.click(screen.getByText('Users'))
+    expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'List unavailable')
+    expect(screen.getByText('DashboardPage')).toBeTruthy()
+    expect(window.location.pathname).toBe('/admin')
+    expect(screen.queryByRole('progressbar')).toBeNull()
+  })
   it('retains the current page and URL until the target module is ready', async () => {
     const load = deferred(); prepare.mockReturnValue(load.promise); mount()
     fireEvent.click(screen.getByText('Users'))
@@ -80,6 +107,27 @@ describe('prepared admin navigation', () => {
     await act(async () => { load.resolve(); await load.promise })
     expect(screen.getByText('UsersManagementPage')).toBeTruthy()
     expect(prepare).toHaveBeenCalledWith('/admin/users')
+  })
+  it('cancels a pending history navigation when selecting the still-rendered page', async () => {
+    prepare.mockResolvedValue(undefined)
+    mount()
+    fireEvent.click(screen.getByText('Users'))
+    await screen.findByText('UsersManagementPage')
+    fireEvent.click(screen.getByText('Sponsors'))
+    await screen.findByText('SponsorsManagementPage')
+    const users = deferred()
+    prepare.mockReturnValueOnce(users.promise)
+    act(() => window.history.back())
+    await screen.findByRole('progressbar')
+    expect(window.location.pathname).toBe('/admin/users')
+    fireEvent.click(screen.getByText('Sponsors'))
+    await waitFor(() => expect(window.location.pathname).toBe('/admin/sponsors'))
+    await act(async () => { users.resolve(); await users.promise })
+    expect(screen.getByText('SponsorsManagementPage')).toBeTruthy()
+    expect(screen.queryByRole('progressbar')).toBeNull()
+    fireEvent.click(screen.getByText('Users'))
+    await screen.findByText('UsersManagementPage')
+    expect(window.location.pathname).toBe('/admin/users')
   })
 })
 

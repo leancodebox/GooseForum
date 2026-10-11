@@ -7,6 +7,7 @@ import { AdminApp } from './AdminApp'
 import { canVisitAdminPath, firstAdminPath } from './access'
 import { prepareAdminPage } from './page-registry'
 import { adminPageNamespaces, prepareAdminTranslations } from './translation-loader'
+import { prepareAdminListData } from './list-data'
 
 const rootElement = document.querySelector<HTMLDivElement>('#goose-admin-app')
 
@@ -24,11 +25,11 @@ try {
   } else if (!canVisitAdminPath(page.layout.viewer.adminPermissions, pathname)) {
     window.location.replace(firstAdminPath(page.layout.viewer.adminPermissions))
   } else {
-    await Promise.all([prepareAdminPage(pathname), prepareAdminTranslations(detectBrowserLocale(), adminPageNamespaces(pathname))])
+    const [, , initialListData] = await Promise.all([prepareAdminPage(pathname), prepareAdminTranslations(detectBrowserLocale(), adminPageNamespaces(pathname)), prepareAdminListData(adminPageSource.admin, new URL(window.location.href))])
     prepareDocument(page)
     root.render(
       <StrictMode>
-        <AdminApp page={page} api={adminPageSource.admin} />
+        <AdminApp page={page} api={adminPageSource.admin} initialListData={initialListData} />
       </StrictMode>,
     )
   }

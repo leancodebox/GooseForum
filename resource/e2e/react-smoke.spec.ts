@@ -724,6 +724,72 @@ test('loads, responds to a primary control, and meets automated WCAG checks', as
   })
 })
 
+test('prepares fresh admin lists before switching and restores their query on return', async ({ page, isMobile }, testInfo) => {
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  let requests = 0
+  let failUsers = false
+  let releaseUsers!: () => void
+  const usersReady = new Promise<void>(resolve => { releaseUsers = resolve })
+  await page.route('**/api/admin/user-list', async route => {
+    requests++
+    if (requests === 1) await usersReady
+    if (failUsers) {
+      await route.fulfill({ json: { code: 1, message: 'User list unavailable' } })
+      return
+    }
+    const input = route.request().postDataJSON()
+    await route.fulfill({ json: { code: 0, result: {
+      list: Array.from({ length: 20 }, (_, index) => ({ userId: index + 7, username: index ? `user-${index}` : `alice-${requests}`, roleList: [], restrictionStatus: 'normal', createTime: '2026-10-01', lastActiveTime: '2026-10-11' })),
+      total: 35, page: input.page, pageSize: input.pageSize,
+    } } })
+  })
+  await page.route('**/api/admin/topics/list', route => route.fulfill({ json: { code: 0, result: { list: [], total: 0, page: 1, hasNext: false } } }))
+  await page.route('**/api/admin/category-list', route => route.fulfill({ json: { code: 0, result: [] } }))
+  async function selectPage(path: string) {
+    if (isMobile) await page.getByRole('button', { name: 'Toggle Sidebar', exact: true }).click()
+    await page.locator(`[data-slot="sidebar"] a[href="${path}"]`).click()
+  }
+  await page.goto('/admin?lang=en')
+  await expect(page.getByRole('heading', { level: 2, name: 'Dashboard' })).toBeVisible()
+  await selectPage('/admin/users')
+  await expect(page.getByRole('progressbar')).toBeVisible()
+  await expect(page.getByRole('heading', { level: 2, name: 'Dashboard' })).toBeVisible()
+  expect(new URL(page.url()).pathname).toBe('/admin')
+  await page.screenshot({ path: testInfo.outputPath('admin-navigation-pending.png') })
+  releaseUsers()
+  await expect(page.getByRole('heading', { level: 2, name: 'Users' })).toBeVisible()
+  await expect(page.getByRole('progressbar')).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'alice-1', exact: true })).toBeVisible()
+  expect(requests).toBe(1)
+  await page.getByPlaceholder('Search username…').fill('alice')
+  await page.getByRole('button', { name: 'Search', exact: true }).click()
+  await expect.poll(() => requests).toBe(2)
+  await expect(page.getByRole('button', { name: 'Next', exact: true })).toBeEnabled()
+  await page.getByRole('button', { name: 'Next', exact: true }).click()
+  await expect.poll(() => new URL(page.url()).searchParams.get('page')).toBe('2')
+  await expect.poll(() => requests).toBe(3)
+  await page.evaluate(() => window.scrollTo(0, 300))
+  const returnScroll = await page.evaluate(() => window.scrollY)
+  await selectPage('/admin/posts')
+  await expect.poll(() => new URL(page.url()).pathname).toBe('/admin/posts')
+  failUsers = true
+  await page.goBack()
+  await expect(page.getByRole('alert')).toContainText('User list unavailable')
+  await expect.poll(() => new URL(page.url()).pathname).toBe('/admin/posts')
+  expect(requests).toBe(4)
+  failUsers = false
+  await page.goBack()
+  await expect(page.getByRole('heading', { level: 2, name: 'Users' })).toHaveCount(1)
+  await expect(page.getByPlaceholder('Search username…')).toHaveValue('alice')
+  expect(new URL(page.url()).searchParams.get('page')).toBe('2')
+  await expect(page.getByRole('link', { name: 'alice-5', exact: true })).toHaveCount(1)
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(returnScroll)
+  expect(requests).toBe(5)
+  await page.screenshot({ path: testInfo.outputPath('admin-navigation-restored.png') })
+  expect(errors).toEqual([])
+})
+
 test('loads the admin dashboard shell and deferred chart without accessibility regressions', async ({ page }, testInfo) => {
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))

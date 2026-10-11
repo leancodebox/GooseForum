@@ -22,17 +22,19 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@goose
 import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, RefreshCw, Search, ShieldOff, UserCog } from 'lucide-react'
 import { toast } from 'sonner'
 import type { UserTextKey } from '../users-i18n'
+import { loadUsers, useAdminListQuery, usersQuery, type UsersPageData } from '../list-data'
 
 type Text = (key: UserTextKey) => string
 
-export function UsersManagementPage({ api, text, locale = 'en', canResetMFA = false, currentUserId }: { api: GooseAdminApi; text: Text; locale?: string; canResetMFA?: boolean; currentUserId?: number }) {
-  const [users, setUsers] = useState<AdminUser[]>([])
-  const [total, setTotal] = useState(0)
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const [search, setSearch] = useState('')
-  const [appliedSearch, setAppliedSearch] = useState('')
-  const [loading, setLoading] = useState(true)
+export function UsersManagementPage({ api, text, locale = 'en', canResetMFA = false, currentUserId, initialData, onUrlChange }: { api: GooseAdminApi; text: Text; locale?: string; canResetMFA?: boolean; currentUserId?: number; initialData?: UsersPageData; onUrlChange?: (url: string) => void }) {
+  const [query, updateQuery] = useAdminListQuery('/admin/users', initialData?.query || usersQuery(window.location.search), onUrlChange)
+  const { page, pageSize, search: appliedSearch } = query
+  const [users, setUsers] = useState<AdminUser[]>(initialData?.result.list || [])
+  const [total, setTotal] = useState(initialData?.result.total || 0)
+  const [search, setSearch] = useState(appliedSearch)
+  const [loading, setLoading] = useState(!initialData)
+  const preparedQuery = useRef(initialData ? query : undefined)
+  const resultQuery = useRef(query)
   const [error, setError] = useState('')
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null)
 
@@ -46,8 +48,9 @@ export function UsersManagementPage({ api, text, locale = 'en', canResetMFA = fa
     setLoading(true)
     setError('')
     try {
-      const result = await api.users.list({ page, pageSize, username: appliedSearch || undefined })
+      const result = await loadUsers(api, query)
       if (!isCurrent()) return;
+      resultQuery.current = query
       setUsers(result.list || [])
       setTotal(result.total || 0)
     } catch (reason) {
@@ -56,15 +59,18 @@ export function UsersManagementPage({ api, text, locale = 'en', canResetMFA = fa
     } finally {
       if (isCurrent()) setLoading(false)
     }
-  }, [beginRequest, api, appliedSearch, page, pageSize, text])
+  }, [beginRequest, api, query, text])
 
-  useEffect(() => { void load() }, [load])
-  useEffect(() => { if (!loading && !error && page > totalPages) setPage(totalPages) }, [page, totalPages, loading, error])
+  useEffect(() => {
+    if (preparedQuery.current === query) return
+    preparedQuery.current = undefined
+    void load()
+  }, [load, query])
+  useEffect(() => { if (resultQuery.current === query && !loading && !error && page > totalPages) updateQuery({ page: totalPages }) }, [query, page, totalPages, loading, error, updateQuery])
 
   function applySearch(event?: React.FormEvent) {
     event?.preventDefault()
-    setAppliedSearch(search.trim())
-    setPage(1)
+    updateQuery({ search: search.trim() })
   }
 
   return <AdminPage>
@@ -77,7 +83,7 @@ export function UsersManagementPage({ api, text, locale = 'en', canResetMFA = fa
           <Input aria-label={text('search')} value={search} onChange={(event) => setSearch(event.target.value)} className="h-9 pl-9" placeholder={text('search')} />
         </div>
         <Button variant="outline" size="sm" type="submit" className="h-9">{text('searchAction')}</Button>
-        {search || appliedSearch ? <Button variant="ghost" size="sm" type="button" onClick={() => { setSearch(''); setAppliedSearch(''); setPage(1) }}>{text('clear')}</Button> : null}
+        {search || appliedSearch ? <Button variant="ghost" size="sm" type="button" onClick={() => { setSearch(''); updateQuery({ search: '' }) }}>{text('clear')}</Button> : null}
       </form>
       <UserIconButton label={text('refresh')} disabled={loading} onClick={() => void load()}><RefreshCw className={loading ? 'animate-spin motion-reduce:animate-none' : undefined} /></UserIconButton>
     </div>
@@ -90,15 +96,15 @@ export function UsersManagementPage({ api, text, locale = 'en', canResetMFA = fa
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
           <label htmlFor="users-page-size" className="text-muted-foreground">{text('perPage')}</label>
-          <Select value={String(pageSize)} onValueChange={(value) => { setPageSize(Number(value)); setPage(1) }}>
+          <Select value={String(pageSize)} onValueChange={(value) => updateQuery({ pageSize: Number(value) })}>
             <SelectTrigger id="users-page-size" size="sm" className="w-18"><SelectValue /></SelectTrigger>
             <SelectContent><SelectGroup>{[10, 20, 30, 50].map((size) => <SelectItem key={size} value={String(size)}>{size}</SelectItem>)}</SelectGroup></SelectContent>
           </Select>
         </div>
         <nav aria-label={text('page')} className="flex items-center gap-2">
           <span className="min-w-12 text-center tabular-nums">{page} / {totalPages}</span>
-          <UserIconButton label={text('previous')} disabled={page <= 1 || loading} onClick={() => setPage(page - 1)}><ChevronLeft /></UserIconButton>
-          <UserIconButton label={text('next')} disabled={page >= totalPages || loading} onClick={() => setPage(page + 1)}><ChevronRight /></UserIconButton>
+          <UserIconButton label={text('previous')} disabled={page <= 1 || loading} onClick={() => updateQuery({ page: page - 1 })}><ChevronLeft /></UserIconButton>
+          <UserIconButton label={text('next')} disabled={page >= totalPages || loading} onClick={() => updateQuery({ page: page + 1 })}><ChevronRight /></UserIconButton>
         </nav>
       </div>
     </footer>

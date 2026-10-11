@@ -15,23 +15,27 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Ban, FileText, MoreHorizontal, Pin, RefreshCw, Search, Tags, Trash2, Undo2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { PostTextKey } from '../posts-i18n'
+import { loadPosts, postsQuery, useAdminListQuery, type PostsPageData } from '../list-data'
 
 type Text = (key: PostTextKey) => string
 type ReviewAction = 'approve' | 'reject' | 'recheck'
 
-export function PostsManagementPage({ api, text }: { api: GooseAdminApi; text: Text }) {
-  const [kind, setKind] = useState<'topic' | 'post'>('topic')
-  const [moderationStatus, setModerationStatus] = useState('all')
-  const [categoryId, setCategoryId] = useState('all')
-  const [topics, setTopics] = useState<AdminTopic[]>([])
-  const [replies, setReplies] = useState<ReviewPost[]>([])
-  const [categories, setCategories] = useState<AdminCategory[]>([])
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const [hasNext, setHasNext] = useState(false)
-  const [search, setSearch] = useState('')
-  const [appliedSearch, setAppliedSearch] = useState('')
-  const [loading, setLoading] = useState(true)
+export function PostsManagementPage({ api, text, initialData, onUrlChange }: { api: GooseAdminApi; text: Text; initialData?: PostsPageData; onUrlChange?: (url: string) => void }) {
+  const [query, updateQuery] = useAdminListQuery('/admin/posts', initialData?.query || postsQuery(window.location.search), onUrlChange)
+  const { kind, moderationStatus, categoryId, page, pageSize, search: appliedSearch } = query
+  const setKind = (value: 'topic' | 'post') => updateQuery({ kind: value })
+  const setModerationStatus = (value: string) => updateQuery({ moderationStatus: value })
+  const setCategoryId = (value: string) => updateQuery({ categoryId: value })
+  const setPage = (value: number) => updateQuery({ page: value })
+  const setPageSize = (value: number) => updateQuery({ pageSize: value })
+  const setAppliedSearch = (value: string) => updateQuery({ search: value })
+  const [topics, setTopics] = useState<AdminTopic[]>(initialData?.query.kind === 'topic' ? initialData.result.list as AdminTopic[] || [] : [])
+  const [replies, setReplies] = useState<ReviewPost[]>(initialData?.query.kind === 'post' ? initialData.result.list as ReviewPost[] || [] : [])
+  const [categories, setCategories] = useState<AdminCategory[]>(initialData?.categories || [])
+  const [hasNext, setHasNext] = useState(Boolean(initialData?.result.hasNext))
+  const [search, setSearch] = useState(appliedSearch)
+  const [loading, setLoading] = useState(!initialData)
+  const preparedQuery = useRef(initialData ? query : undefined)
   const [error, setError] = useState('')
   const [categoryTopic, setCategoryTopic] = useState<AdminTopic | null>(null)
   const [pinTopic, setPinTopic] = useState<AdminTopic | null>(null)
@@ -43,32 +47,35 @@ export function PostsManagementPage({ api, text }: { api: GooseAdminApi; text: T
   useEffect(() => () => { requestVersion.current++ }, [])
 
   useEffect(() => {
+    if (initialData) return
     let active = true
     void api.categories.list().then((items) => { if (active) setCategories(items) }).catch(() => undefined)
     return () => { active = false }
-  }, [api])
+  }, [api, initialData])
 
   const load = useCallback(async () => {
     const version = ++requestVersion.current
     setLoading(true); setError('')
     try {
+      const result = await loadPosts(api, query)
+      if (version !== requestVersion.current) return
       if (kind === 'post') {
-        const result = await api.topics.reviewPosts({ page, pageSize, moderationStatus: moderationStatus === 'all' ? undefined : moderationStatus, search: appliedSearch || undefined })
-        if (version !== requestVersion.current) return
-        setReplies(result.list || []); setHasNext(Boolean(result.hasNext))
+        setReplies(result.list as ReviewPost[] || []); setHasNext(Boolean(result.hasNext))
       } else {
-        const result = await api.topics.list({ page, pageSize, search: appliedSearch || undefined, moderationStatus: moderationStatus === 'all' ? undefined : moderationStatus, categoryId: categoryId === 'all' ? undefined : Number(categoryId) })
-        if (version !== requestVersion.current) return
-        setTopics(result.list || []); setHasNext(Boolean(result.hasNext))
+        setTopics(result.list as AdminTopic[] || []); setHasNext(Boolean(result.hasNext))
       }
     } catch (reason) {
       if (version === requestVersion.current) setError(errorMessage(reason, text('loadFailed')))
     } finally {
       if (version === requestVersion.current) setLoading(false)
     }
-  }, [api, appliedSearch, categoryId, kind, moderationStatus, page, pageSize, text])
+  }, [api, query, kind, text])
 
-  useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    if (preparedQuery.current === query) return
+    preparedQuery.current = undefined
+    void load()
+  }, [load, query])
   const visibleCount = kind === 'topic' ? topics.length : replies.length
   const rangeStart = visibleCount ? (page - 1) * pageSize + 1 : 0
   const rangeEnd = visibleCount ? rangeStart + visibleCount - 1 : 0
