@@ -137,9 +137,13 @@ users 通用资料保存、用户自己提交的 JSON、OAuth 更新不能写这
 
 上传与附件使用 pageConfig 新增 TrustSettings，配置允许的系统/自定义访问组，默认沿用当前行为；不在控制器中写 trust_level == 200。读取附件仍按所属内容可读性校验，上传权限不能替代下载 ACL。
 
-若第一期需要实际新人限制，默认建议：新用户禁止非图片附件、每篇内容最多 2 个外链和 2 个有效用户提及；成员及以上解除这三项。图片大小、类型和全站上传政策照旧。是否启用这些限制是独立站点设置，迁移默认关闭，避免升级后突然拒绝原有工作流。
+若第一期需要实际新人限制，默认建议：新用户禁止非图片附件、每篇内容最多 1 张图片、2 个外链和 2 个有效用户提及；成员及以上解除这些等级限制。图片大小、类型和全站上传政策照旧。是否启用这些限制是独立站点设置，迁移默认关闭，避免升级后突然拒绝原有工作流。
 
-新增内容限制必须在 topicwriteservice/postwriteservice 以及最终发布/编辑路径统一校验，不能只在 HTTP 控制器校验；外链和提及复用 Markdown 结构解析结果与实际识别的用户，不能用正文正则计数。草稿可保存，在发布时校验。编辑也校验最终内容，失败返回具体限制。
+新增内容限制必须在 topicwriteservice/postwriteservice 以及最终发布/编辑路径统一校验，不能只在 HTTP 控制器校验；图片、外链和提及复用 Markdown 结构解析结果与实际识别的用户，不能用正文正则计数。草稿可保存，在发布时校验。编辑也校验最终内容，失败返回具体限制。
+
+图片数量按单篇最终发布内容中实际可渲染的图片节点计数，主题首帖和每条回复分别计算，不按整个主题累计。本地上传和远程图片均计入，同一地址出现多次按出现次数计；代码块、行内代码、纯文本 URL 不计。若允许 HTML 图片或其他可生成图片的扩展，须在统一规范化后的渲染结构中一并计数，不能绕过限制。头像、站点图标等正文以外图片不计。
+
+maxImagesPerPost 是发布内容限制，allowImageUpload 是上传权限，两者独立：禁止上传不代表可以绕过正文远程图片数量限制。上传接口不检查单篇图片数，因为上传时尚未确定最终内容；前端可提前提示，后端发布/编辑校验为准。无需新增图片计数表、抓取远程图片或持久化计数。
 
 不把高频配额强行放入等级统计。现有全站发帖限制继续有效；按等级每日发帖/点赞配额、编辑期限属于后续独立实现，需要自己的精确计数和并发设计，本期不宣称已覆盖。
 
@@ -161,16 +165,16 @@ TrustSettings 通过 pageConfig 存储和 hotdataserve 缓存，沿用后台配�
   ],
   "restrictionsEnabled": false,
   "levelLimits": [
-    { "level": 0, "allowImageUpload": true, "allowAttachmentUpload": false, "maxExternalLinksPerPost": 2, "maxMentionsPerPost": 2 },
-    { "level": 100, "allowImageUpload": true, "allowAttachmentUpload": true, "maxExternalLinksPerPost": null, "maxMentionsPerPost": null },
-    { "level": 200, "allowImageUpload": true, "allowAttachmentUpload": true, "maxExternalLinksPerPost": null, "maxMentionsPerPost": null },
-    { "level": 1000, "allowImageUpload": true, "allowAttachmentUpload": true, "maxExternalLinksPerPost": null, "maxMentionsPerPost": null }
+    { "level": 0, "allowImageUpload": true, "allowAttachmentUpload": false, "maxImagesPerPost": 1, "maxExternalLinksPerPost": 2, "maxMentionsPerPost": 2 },
+    { "level": 100, "allowImageUpload": true, "allowAttachmentUpload": true, "maxImagesPerPost": null, "maxExternalLinksPerPost": null, "maxMentionsPerPost": null },
+    { "level": 200, "allowImageUpload": true, "allowAttachmentUpload": true, "maxImagesPerPost": null, "maxExternalLinksPerPost": null, "maxMentionsPerPost": null },
+    { "level": 1000, "allowImageUpload": true, "allowAttachmentUpload": true, "maxImagesPerPost": null, "maxExternalLinksPerPost": null, "maxMentionsPerPost": null }
   ],
   "allowedUploadGroupIds": null
 }
 ```
 
-promotionRules 的每条规则中三个条件同时满足才晋级，0 表示不要求该项。levelLimits 按当前精确等级匹配，必须覆盖所有已定义等级，不做隐式逐级合并；这样管理员可直接看出每级的完整限制。整数上限 null 表示本系统不追加限制，0 表示不允许任何外链/提及；Go 使用可空整数，不能把 0 和未配置混为一谈。
+promotionRules 的每条规则中三个条件同时满足才晋级，0 表示不要求该项。levelLimits 按当前精确等级匹配，必须覆盖所有已定义等级，不做隐式逐级合并；这样管理员可直接看出每级的完整限制。整数上限 null 表示本系统不追加限制，0 表示不允许任何对应的图片/外链/提及；Go 使用可空整数，不能把 0 和未配置混为一谈。
 
 autoPromotionEnabled=false：保留当前等级、进度和人工调整能力，停止自动晋级。规则 enabled=false：停止向该目标自动晋级；更高目标仍可独立满足并直接晋级，不要求先取得禁用的中间等级。社区骨干不接受自动规则，不开放按数量自动成为骨干。
 
@@ -183,7 +187,7 @@ allowedUploadGroupIds=null：不追加组条件；[]：所有普通社区上传�
 - 自动规则目标仅限 100/200，每个目标恰好一条；等级限制每个已定义等级恰好一条。拒绝未知值、重复、缺失、未知 JSON 字段和超出类型范围的数值。
 - 注册年龄为 0～87600 小时，访问日为 0～7，主题数为 0～20。固定采集预算显示在后台输入旁；超过预算明确报错，不静默截断。
 - 两个目标的条件逐项非递减，即稳定成员不能比成员要求更低；每条启用规则至少一个条件大于 0，避免误配置后全员直接晋级。
-- 外链、提及上限为 null 或 0～100；限制配置可按等级独立设置，不假设高等级一定更宽松。异常的收紧在保存预览中提示，合法配置仍可保存。
+- 图片、外链、提及上限为 null 或 0～100；限制配置可按等级独立设置，不假设高等级一定更宽松。异常的收紧在保存预览中提示，合法配置仍可保存。
 - 允许组必须存在且启用；不支持匿名 everyone 作为上传条件，必须已登录。删除/禁用被引用的自定义组时拒绝操作，要求先从配置移除；系统等级组原本就不可删除。
 - 全量校验成功后一次保存 JSON；不先写部分字段。已存在的配置解析失败或版本不支持时返回配置错误，禁止悄悄回退默认值放宽权限。只有完全不存在配置时才使用初始化默认值。
 
@@ -201,11 +205,11 @@ allowedUploadGroupIds=null：不追加组条件；[]：所有普通社区上传�
 
 最终可执行操作 = 账号安全检查通过 AND 分类能力满足 AND 现有全站政策满足 AND 新信任政策满足。新配置只能追加限制，不能绕过现有文件类型、大小、频率或全站禁用设置；多个数量上限共同适用时取有效上限的最小值。已有管理员/版主分类管理授权照旧，但浏览器社区发布与上传不隐式豁免等级内容限制。
 
-后台“信任等级”页分为“晋级条件”“等级限制”两个视图。条件视图逐目标编辑启用开关、注册小时数、访问日和主题数，骨干显示人工授予。限制视图按四个等级列出上传开关、每篇外链/提及上限，明确“继承全站限制”的 null 语义；另有允许上传组选择。页面同时显示现有分类授权入口，不在此复制一套分类权限编辑器。
+后台“信任等级”页分为“晋级条件”“等级限制”两个视图。条件视图逐目标编辑启用开关、注册小时数、访问日和主题数，骨干显示人工授予。限制视图按四个等级列出上传开关、每篇图片/外链/提及上限，明确“继承全站限制”的 null 语义；另有允许上传组选择。页面同时显示现有分类授权入口，不在此复制一套分类权限编辑器。
 
 保存前展示具体差异，尤其是自动晋级关闭、条件降低、上传禁用和限制收紧；不计算全站受影响人数，避免每次修改触发全表扫描。本人进度接口和前端能力展示统一读取同一份配置，不保留硬编码的 24 小时/2 天/5 主题。
 
-第一期配置能力包含上述条件、上传、外链和提及限制。按等级每日发帖/回复/点赞数、上传次数和编辑期限不提供空壳设置，仍以已有全站规则为准；增加这些能力时需要补充具体计数和并发方案。
+第一期配置能力包含上述条件、上传、正文图片数、外链和提及限制。图片数需验证本地/远程、重复地址、代码内伪图片、HTML/扩展图片、首帖/回复分别计数，以及编辑超限场景。按等级每日发帖/回复/点赞数、上传次数和编辑期限不提供空壳设置，仍以已有全站规则为准；增加这些能力时需要补充具体计数和并发方案。
 
 ## 9. 接口与界面
 
