@@ -4,6 +4,11 @@
 @source "../../host/**/*.{ts,tsx}";
 @source "../../../../../packages/ui/src/**/*.{ts,tsx}";
 
+/* Keep the desktop sidebar in place while the content expands over it. */
+.admin-shell [data-slot="sidebar"][data-side="left"] > [data-slot="sidebar-container"][data-side="left"] {
+  left: max(0px, calc((100% - 1600px) / 2));
+}
+
 .admin-navigation-progress > div {
   animation: admin-navigation-progress 1.1s ease-in-out infinite;
 }

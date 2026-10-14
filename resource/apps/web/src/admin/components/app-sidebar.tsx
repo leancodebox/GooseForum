@@ -18,7 +18,7 @@ export function AppSidebar({ layout, pathname, text, onNavigate, onPrefetch, ...
   onNavigate(path: string): void
   onPrefetch(path: string): void
 }) {
-  const { setOpenMobile } = useSidebar()
+  const { open, isMobile, setOpenMobile } = useSidebar()
   const logo = layout.site.logo || layout.site.brandImage || layout.site.favicon
   const initials = (layout.viewer.username || 'A').slice(0, 2).toUpperCase()
   const groups = adminNavGroups.map((group) => ({
@@ -26,7 +26,7 @@ export function AppSidebar({ layout, pathname, text, onNavigate, onPrefetch, ...
     items: group.items.filter((item) => hasAnyAdminPermission(layout.viewer.adminPermissions, item.permission)),
   })).filter((group) => group.items.length)
 
-  return <Sidebar collapsible="offcanvas" {...props}>
+  return <Sidebar collapsible="offcanvas" inert={!isMobile && !open} {...props}>
     <SidebarHeader className="px-2 pt-2"><SidebarMenu><SidebarMenuItem><SidebarMenuButton asChild size="lg" className="h-10 px-2"><a href="/" target="_blank" rel="noreferrer" title={text('openSite')}>
       <div className="flex size-8 items-center justify-center overflow-hidden rounded-full border bg-background shadow-xs">{logo ? <img src={logo} alt={layout.site.name || 'GooseForum'} className="size-full object-cover" /> : <GalleryVerticalEnd className="size-4.5" />}</div>
       <div className="grid flex-1 text-left leading-tight"><span className="truncate text-base font-semibold tracking-tight">{layout.site.name || 'GooseForum'}</span><span className="truncate text-[11px] text-muted-foreground">{text('console')}</span></div>
