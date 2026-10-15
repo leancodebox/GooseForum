@@ -20,6 +20,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/mentionservice"
 	"github.com/leancodebox/GooseForum/app/service/topicservice"
 	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
+	"github.com/leancodebox/GooseForum/app/service/trustlevelservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
 
@@ -113,8 +114,11 @@ func loadWriteState(input WriteInput) (*writeState, error) {
 			return nil, ErrTopicNotFound
 		}
 	} else {
-		if input.DailyLimit > 0 && topics.CantWriteNew(input.UserID, int64(input.DailyLimit)) {
-			return nil, ErrDailyLimit
+		if err := trustlevelservice.ValidateNewTopic(input.UserID, input.DailyLimit); err != nil {
+			if errors.Is(err, trustlevelservice.ErrGlobalDailyTopics) {
+				return nil, ErrDailyLimit
+			}
+			return nil, err
 		}
 		state.topic.UserId = input.UserID
 	}
@@ -127,6 +131,11 @@ func prepareWrite(state *writeState, input WriteInput) ([]uint64, error) {
 		return nil, normalizeErr
 	}
 	input.Content = content
+	if input.Status == 1 {
+		if err := trustlevelservice.ValidateContent(input.UserID, content, input.SourceVersion); err != nil {
+			return nil, err
+		}
+	}
 	categoryIDs, err := authorizeCategories(input.UserID, &state.topic, input.CategoryIDs, state.isNew, !state.wasPublished && input.Status == 1)
 	if err != nil {
 		return nil, errors.Join(ErrPermissionDenied, err)
@@ -207,6 +216,11 @@ func UpdateStatus(userID, topicID uint64, nextStatus int8) error {
 		return ErrTopicNotFound
 	}
 	firstPublication := topic.PublishedAt == nil
+	if nextStatus == 1 {
+		if err := trustlevelservice.ValidateContent(userID, firstPost.Content, firstPost.SourceVersion); err != nil {
+			return err
+		}
+	}
 	wasCounted := topic.Status == 1 && topic.ProcessStatus == 0
 	expectedVersion := topic.ModerationVersion
 	topic.Status = nextStatus

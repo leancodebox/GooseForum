@@ -168,6 +168,7 @@ type SitePayload struct {
 }
 
 type ViewerPayload struct {
+	TrustLevel                int16      `json:"trustLevel"`
 	RestrictionStatus         string     `json:"restrictionStatus"`
 	RestrictionUntil          *time.Time `json:"restrictionUntil"`
 	RestrictionReason         string     `json:"restrictionReason"`
@@ -634,6 +635,7 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 	viewer := ViewerPayload{}
 	if currentUser != nil {
 		viewer = ViewerPayload{
+			TrustLevel:                currentUser.TrustLevel,
 			ID:                        currentUser.UserId,
 			Username:                  currentUser.Username,
 			Nickname:                  currentUser.Nickname,
@@ -647,6 +649,7 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 		}
 		if currentUser.UserId > 0 {
 			if state, err := users.GetAccountState(currentUser.UserId); err == nil {
+				viewer.TrustLevel = int16(state.TrustLevel)
 				viewer.RestrictionStatus = state.EffectiveRestriction(time.Now())
 				viewer.RestrictionUntil = state.RestrictionUntil
 				viewer.RestrictionReason = state.RestrictionReason

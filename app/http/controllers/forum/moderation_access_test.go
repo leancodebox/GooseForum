@@ -12,6 +12,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/datamigration"
 )
@@ -34,6 +35,7 @@ func TestAccessGroupManageGrantCanModerateCategoryContent(t *testing.T) {
 	if err := conn.AutoMigrate(
 		&accessGroups.Entity{}, &accessGroupMembers.Entity{}, &categoryGroupPermissions.Entity{},
 		&category.Entity{}, &topics.Entity{}, &moderationLog.Entity{},
+		&users.EntityComplete{},
 	); err != nil {
 		t.Fatalf("migrate moderation access tables: %v", err)
 	}
@@ -43,6 +45,9 @@ func TestAccessGroupManageGrantCanModerateCategoryContent(t *testing.T) {
 	const topicID uint64 = 975004
 	const otherCategoryID uint64 = 975006
 	const otherTopicID uint64 = 975007
+	if err := conn.FirstOrCreate(&users.EntityComplete{Id: userID, Username: "trust-category-manager", UsernameLower: "trust-category-manager"}, "id = ?", userID).Error; err != nil {
+		t.Fatal(err)
+	}
 	conn.Unscoped().Delete(&topics.Entity{}, []uint64{topicID, otherTopicID})
 	conn.Unscoped().Delete(&category.Entity{}, []uint64{categoryID, otherCategoryID})
 	conn.Unscoped().Delete(&accessGroups.Entity{}, groupID)

@@ -7,6 +7,13 @@ const post = <T>(http: GooseHttpClient, path: string, json: unknown = {}) =>
 
 export function createAdminApi(http: GooseHttpClient): GooseAdminApi {
   return {
+	trust: {
+		settings: () => http.request('/api/admin/get-trust-settings'),
+		saveSettings: (settings) => post(http, '/api/admin/save-trust-settings', { settings }),
+		user: (userId) => http.request('/api/admin/user-trust-level', { query: { userId } }),
+		setUser: (input) => post(http, '/api/admin/set-user-trust-level', input),
+		history: (userId, after) => http.request('/api/admin/user-trust-level-history', { query: { userId, after } }),
+	},
     dashboard: {
       statistics: () => http.request('/api/forum/get-site-statistics'),
       traffic: (startDate, endDate) => post(http, '/api/admin/traffic-overview', { startDate, endDate }),

@@ -2,7 +2,7 @@ import type { GooseAdminApi } from '@gooseforum/client'
 import { useCallback, useEffect, useState } from 'react'
 import { normalizeAdminPath } from './navigation'
 
-export interface UsersQuery { page: number; pageSize: number; search: string }
+export interface UsersQuery { page: number; pageSize: number; search: string; trustLevel?: string }
 export interface PostsQuery extends UsersQuery { kind: 'topic' | 'post'; moderationStatus: string; categoryId: string }
 export interface UsersPageData { query: UsersQuery; result: Awaited<ReturnType<GooseAdminApi['users']['list']>> }
 export interface PostsPageData { query: PostsQuery; result: Awaited<ReturnType<GooseAdminApi['topics']['list']>> | Awaited<ReturnType<GooseAdminApi['topics']['reviewPosts']>>; categories: Awaited<ReturnType<GooseAdminApi['categories']['list']>> }
@@ -16,7 +16,8 @@ function positiveInteger(value: string | null, fallback: number) {
 export function usersQuery(search: string): UsersQuery {
   const params = new URLSearchParams(search)
   const size = positiveInteger(params.get('pageSize'), 10)
-  return { page: positiveInteger(params.get('page'), 1), pageSize: [10, 20, 30, 50].includes(size) ? size : 10, search: params.get('search') || '' }
+  const trustLevel = params.get('trustLevel')
+  return { page: positiveInteger(params.get('page'), 1), pageSize: [10, 20, 30, 50].includes(size) ? size : 10, search: params.get('search') || '', ...(trustLevel !== null && ['0', '100', '200', '1000'].includes(trustLevel) ? { trustLevel } : {}) }
 }
 
 export function postsQuery(search: string): PostsQuery {
@@ -27,7 +28,7 @@ export function postsQuery(search: string): PostsQuery {
 }
 
 export function loadUsers(api: GooseAdminApi, query: UsersQuery) {
-  return api.users.list({ page: query.page, pageSize: query.pageSize, username: query.search || undefined })
+  return api.users.list({ page: query.page, pageSize: query.pageSize, username: query.search || undefined, ...(query.trustLevel && query.trustLevel !== 'all' ? { trustLevel: Number(query.trustLevel) } : {}) })
 }
 
 export function loadPosts(api: GooseAdminApi, query: PostsQuery) {
@@ -54,7 +55,7 @@ export function useAdminListQuery<Query extends UsersQuery>(path: string, initia
     if (normalizeAdminPath(window.location.pathname) !== path) return
     const url = new URL(window.location.href)
     url.pathname = path
-    const defaults: Record<string, string | number> = { page: 1, pageSize: 10, search: '', kind: 'topic', moderationStatus: 'all', categoryId: 'all' }
+    const defaults: Record<string, string | number> = { page: 1, pageSize: 10, search: '', kind: 'topic', moderationStatus: 'all', categoryId: 'all', trustLevel: 'all' }
     for (const [key, value] of Object.entries(query)) {
       if (value === defaults[key]) url.searchParams.delete(key)
       else url.searchParams.set(key, String(value))

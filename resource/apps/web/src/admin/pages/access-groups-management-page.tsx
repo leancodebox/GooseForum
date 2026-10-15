@@ -179,5 +179,5 @@ function activeMemberCount(group: AccessGroup) { return group.members.filter((me
 function grantLevel(group: AccessGroup, categoryId: number) { return group.grants.find((grant) => grant.categoryId === categoryId)?.level || 0 }
 function levelLabel(level: number, text: Text) { return text((['none', 'read', 'reply', 'createTopics', 'manage'][level] || 'none') as AccessGroupTextKey) }
 function memberInitial(member: AccessGroupMember) { return (member.username || String(member.userId)).slice(0, 1).toUpperCase() }
-function groupTypeLabel(group: AccessGroup, text: Text) { if (group.systemKey === 'everyone') return text('systemEveryone'); if (group.systemKey === 'registered') return text('systemRegistered'); return group.joinMode === 'application' ? text('application') : text('inviteOnly') }
+function groupTypeLabel(group: AccessGroup, text: Text) { if (group.systemKey === 'everyone') return text('systemEveryone'); if (group.systemKey === 'registered') return text('systemRegistered'); if (group.systemKey) return text('systemGroup'); return group.joinMode === 'application' ? text('application') : text('inviteOnly') }
 function errorMessage(reason: unknown, fallback: string) { return reason instanceof Error && reason.message ? reason.message : fallback }

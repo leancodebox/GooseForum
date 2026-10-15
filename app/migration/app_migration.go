@@ -3,8 +3,9 @@ package migration
 import (
 	"context"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/service/topicrankservice"
 	"log/slog"
+
+	"github.com/leancodebox/GooseForum/app/service/topicrankservice"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
 	paniclog "github.com/leancodebox/GooseForum/app/bundles/recovery"
@@ -316,6 +317,15 @@ func runVersionedDataMigrations() error {
 		if meiliconnect.IsConfigured() {
 			go rebuildReplySearchIndex()
 		}
+	}
+	if currentVersion < 25 {
+		if err := datamigration.InitializeTrustLevels(); err != nil {
+			return err
+		}
+		if err := syncMigrationVersion(25); err != nil {
+			return err
+		}
+		currentVersion = 25
 	}
 	slog.Info("app migration end", "version", currentVersion)
 	return nil

@@ -19,6 +19,9 @@ describe('React admin access', () => {
   })
 
   it('selects the first route available to a limited administrator', () => {
+    expect(firstAdminPath([AdminPermission.Admin])).toBe('/admin')
+    expect(canVisitAdminPath([AdminPermission.SiteManager], '/admin/settings/trust')).toBe(false)
+    expect(canVisitAdminPath([AdminPermission.Admin], '/admin/settings/trust')).toBe(true)
     expect(firstAdminPath([AdminPermission.RoleManager])).toBe('/admin/roles')
     expect(firstAdminPath([AdminPermission.TopicsManager])).toBe('/admin/categories')
   })

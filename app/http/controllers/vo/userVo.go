@@ -9,6 +9,8 @@ import (
 
 // UserInfoShow is the authenticated user summary exposed to pages and APIs.
 type UserInfoShow struct {
+	TrustLevel                int16                     `json:"trustLevel"`
+	TrustLevelLocked          bool                      `json:"trustLevelLocked"`
 	UserId                    uint64                    `json:"userId,omitempty"`
 	Username                  string                    `json:"username"`
 	Email                     string                    `json:"email"`
@@ -27,6 +29,7 @@ type UserInfoShow struct {
 
 // UserDetailedVo is the editable profile payload used by account settings.
 type UserDetailedVo struct {
+	TrustLevel          int16                     `json:"trustLevel"`
 	Id                  uint64                    `json:"id"`
 	Username            string                    `json:"username"`
 	Email               string                    `json:"email"`

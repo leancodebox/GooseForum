@@ -58,6 +58,7 @@ export function createSiteApi(http: GooseHttpClient): GooseSiteApi {
       unread: () => http.request(route('notificationsUnread')),
     },
     users: {
+		trustLevel: () => http.request('/api/trust-level'),
       mentions: (query) => http.request(route('mentionUsers'), { query: { query } }),
       card: (userId) => http.request(route('userCard'), { query: { userId } }),
       follow: (userId, following) => post(http, route('userFollow'), { id: userId, action: following ? 2 : 1 }),

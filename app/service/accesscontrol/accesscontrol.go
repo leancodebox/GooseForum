@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/trustlevel"
+
 	"github.com/leancodebox/GooseForum/app/bundles/sharedcache"
 	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroupMembers"
@@ -63,6 +65,10 @@ type Store interface {
 
 type batchReadableStore interface {
 	ActiveUserIDsWithCategoryCapability(userIDs []uint64, categoryID uint64, required Capability) ([]uint64, error)
+}
+
+type trustStore interface {
+	TrustLevels(userIDs []uint64) ([]users.TrustIdentity, error)
 }
 
 type Snapshot struct {
@@ -300,6 +306,30 @@ func (resolver *Resolver) FilterReadableUserIDs(userIDs []uint64, categoryID uin
 	for _, userID := range readableUserIDs {
 		readable[userID] = struct{}{}
 	}
+	if store, ok := resolver.store.(trustStore); ok {
+		identities, err := store.TrustLevels(userIDs)
+		if err != nil {
+			return nil, err
+		}
+		for _, d := range trustlevel.Definitions() {
+			if d.SystemKey == "" || systemGroupIDs[d.SystemKey] == 0 {
+				continue
+			}
+			grants, err := resolver.loadGroupGrants(systemGroupIDs[d.SystemKey])
+			if err != nil {
+				return nil, err
+			}
+			for _, g := range grants {
+				if g.CategoryID == categoryID && g.Capability >= CapabilityRead {
+					for _, u := range identities {
+						if trustlevel.Valid(u.TrustLevel) && u.TrustLevel >= d.Level {
+							readable[u.Id] = struct{}{}
+						}
+					}
+				}
+			}
+		}
+	}
 	if resolver.batchContentManagers != nil {
 		for _, userID := range resolver.batchContentManagers(userIDs) {
 			readable[userID] = struct{}{}
@@ -406,6 +436,22 @@ func (resolver *Resolver) Resolve(userID uint64) (Snapshot, error) {
 	if userID != 0 {
 		listCacheAudience = "registered"
 		groupIDs = append(groupIDs, registeredID)
+		if store, ok := resolver.store.(trustStore); ok {
+			identities, err := store.TrustLevels([]uint64{userID})
+			if err != nil {
+				return Snapshot{}, err
+			}
+			if len(identities) != 1 || !trustlevel.Valid(identities[0].TrustLevel) {
+				return Snapshot{}, errors.New("invalid user trust level")
+			}
+			level := identities[0].TrustLevel
+			listCacheAudience = fmt.Sprintf("registered:trust:%d", level)
+			for _, d := range trustlevel.Definitions() {
+				if d.SystemKey != "" && level >= d.Level && systemGroupIDs[d.SystemKey] > 0 {
+					groupIDs = append(groupIDs, systemGroupIDs[d.SystemKey])
+				}
+			}
+		}
 		customGroupIDs, err := resolver.membershipCache.GetOrLoadE(
 			strconv.FormatUint(userID, 10),
 			func() ([]uint64, error) { return resolver.store.ActiveCustomGroupIDs(userID) },
@@ -517,10 +563,15 @@ func uniqueNonZeroPreservingOrder(values []uint64) []uint64 {
 
 type modelStore struct{}
 
+func (modelStore) TrustLevels(userIDs []uint64) ([]users.TrustIdentity, error) {
+	return users.TrustIdentities(userIDs)
+}
+
 func (modelStore) SystemGroupIDs() (map[string]uint64, error) {
 	groups, err := accessGroups.GetBySystemKeys([]string{
 		accessGroups.SystemKeyEveryone,
 		accessGroups.SystemKeyRegistered,
+		"trust:100", "trust:200", "trust:1000",
 	})
 	if err != nil {
 		return nil, err

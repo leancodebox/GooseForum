@@ -1,9 +1,12 @@
 package component
 
 const (
-	MessageMentionInvalid MessageCode = "markdown.mention.invalid" // 提及语法错误或超过20个不同收件人。
-	MessageMFAInvalid     MessageCode = "mfa.invalid"
-	MessageMFAUnavailable MessageCode = "mfa.unavailable"
+	MessageTrustDailyTopics  MessageCode = "trust.dailyTopics"
+	MessageTrustContentLimit MessageCode = "trust.contentLimit"
+	MessageTrustAdjustment   MessageCode = "trust.adjustmentFailed"
+	MessageMentionInvalid    MessageCode = "markdown.mention.invalid" // 提及语法错误或超过20个不同收件人。
+	MessageMFAInvalid        MessageCode = "mfa.invalid"
+	MessageMFAUnavailable    MessageCode = "mfa.unavailable"
 )
 
 // MessageCode is a stable, frontend-facing identifier for i18n messages.

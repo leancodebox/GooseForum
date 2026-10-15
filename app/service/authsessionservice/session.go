@@ -36,6 +36,7 @@ type LoginDetails struct {
 }
 
 type Authenticated struct {
+	Account users.AccountState
 	Session authsessions.Token
 	Renewed bool
 }
@@ -173,7 +174,7 @@ func Authenticate(c *gin.Context, raw string, fromCookie bool) (Authenticated, e
 		cachedSessions.InvalidateUser(session.UserId)
 		return Authenticated{}, ErrInvalidSession
 	}
-	result := Authenticated{Session: session}
+	result := Authenticated{Session: session, Account: state}
 	needsRenewal := session.ExpiresAt.Sub(now) < renewalWindow()
 	if needsRenewal {
 		newExpiry := now.Add(lifetime())

@@ -2128,7 +2128,7 @@ it("keeps privacy saves locked across tab switches and preserves successful valu
     .mockRejectedValueOnce(new Error("save failed"));
   try {
     const { user } = renderPage(payload("settings.index", settingsProps()), {
-      users: { savePrivacy } as unknown as GooseSiteApi["users"],
+      users: { savePrivacy, trustLevel: vi.fn().mockResolvedValue({ level: 100, locked: false, autoPromotionEnabled: true, next: null, visitDays: 2, topicsVisited: 5 }) } as unknown as GooseSiteApi["users"],
     });
     await user.click(screen.getByRole("checkbox", { name: "展示我的主题" }));
     await user.click(screen.getByRole("tab", { name: "账号" }));

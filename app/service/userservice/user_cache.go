@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/trustlevel"
+
 	"github.com/leancodebox/GooseForum/app/bundles/sharedcache"
 	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
@@ -27,6 +29,8 @@ var errUserNotFound = errors.New("user not found")
 // UserInfo is the sanitized user snapshot cached by userservice.
 // It intentionally excludes password hashes and model-only deletion metadata.
 type UserInfo struct {
+	TrustLevel                trustlevel.Level
+	TrustLevelLocked          bool
 	RestrictionStatus         string
 	RestrictionUntil          *time.Time
 	HideActivity              bool
@@ -57,6 +61,7 @@ type UserInfo struct {
 
 // UserPublicInfo contains only fields needed by public display surfaces.
 type UserPublicInfo struct {
+	TrustLevel          trustlevel.Level
 	RestrictionStatus   string
 	RestrictionUntil    *time.Time
 	Id                  uint64
@@ -207,6 +212,7 @@ func refreshUserInfo(user users.EntityComplete) {
 
 func userInfoFromEntity(user users.EntityComplete) UserInfo {
 	return UserInfo{
+		TrustLevel: user.TrustLevel, TrustLevelLocked: user.TrustLevelLocked,
 		RestrictionStatus:         user.RestrictionStatus,
 		RestrictionUntil:          user.RestrictionUntil,
 		Id:                        user.Id,
@@ -238,6 +244,7 @@ func userInfoFromEntity(user users.EntityComplete) UserInfo {
 
 func (user UserInfo) toPublicInfo() UserPublicInfo {
 	return UserPublicInfo{
+		TrustLevel:          user.TrustLevel,
 		RestrictionStatus:   user.RestrictionStatus,
 		RestrictionUntil:    user.RestrictionUntil,
 		Id:                  user.Id,
@@ -259,6 +266,7 @@ func (user UserInfo) toPublicInfo() UserPublicInfo {
 
 func (user UserInfo) toEntity() users.EntityComplete {
 	return users.EntityComplete{
+		TrustLevel: user.TrustLevel, TrustLevelLocked: user.TrustLevelLocked,
 		RestrictionStatus:         user.RestrictionStatus,
 		RestrictionUntil:          user.RestrictionUntil,
 		Id:                        user.Id,
@@ -305,6 +313,7 @@ func buildUserCard(profile UserPublicProfile) vo.UserCard {
 	stats := profile.Stats
 	lastActiveTime := effectiveLastActiveTime(user.Id, stats.LastActiveTime)
 	return vo.UserCard{
+		TrustLevel:        int16(user.TrustLevel),
 		UserId:            user.Id,
 		Username:          user.Username,
 		Nickname:          user.Nickname,

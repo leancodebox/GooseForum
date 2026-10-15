@@ -4,7 +4,7 @@ import type {
   UserBadgePayload,
   UserCardPayload,
 } from "@gooseforum/client";
-import { formatCompactNumber } from "@gooseforum/client";
+import { formatCompactNumber, trustLevelName } from "@gooseforum/client";
 import { CalendarDays, Radio, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@gooseforum/ui/components/badge";
@@ -118,6 +118,7 @@ export function UserCardPopover({
                     Admin
                   </Badge>
                 ) : null}
+                {card?.trustLevel !== undefined ? <Badge variant="outline">{trustLevelName(card.trustLevel, locale)}</Badge> : null}
               </div>
               <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
                 <span className="truncate">@{username}</span>

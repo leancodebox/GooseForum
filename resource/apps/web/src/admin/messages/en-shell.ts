@@ -1,4 +1,5 @@
 export default {
+  trust: "Trust levels",
   agent: "Agent access",
   console: "Admin Console",
   dashboard: "Dashboard",

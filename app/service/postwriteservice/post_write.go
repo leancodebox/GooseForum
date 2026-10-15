@@ -18,6 +18,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/mentionservice"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
+	"github.com/leancodebox/GooseForum/app/service/trustlevelservice"
 )
 
 var (
@@ -60,6 +61,9 @@ func Create(input CreateInput) (posts.Entity, error) {
 		return posts.Entity{}, err
 	}
 	input.Content = content
+	if err := trustlevelservice.ValidateContent(input.UserID, content, input.SourceVersion); err != nil {
+		return posts.Entity{}, err
+	}
 	analysis := markdown2html.AnalyzePostContentVersion(input.Content, input.SourceVersion)
 	post := posts.Entity{
 		AgentSource: input.AgentSource, ClientRequestID: input.ClientRequestID, RequestFingerprint: input.RequestFingerprint,
@@ -114,6 +118,9 @@ func Update(input UpdateInput) (posts.Entity, error) {
 	}
 	input.Content = content
 	if err := mentionservice.PreserveLegacyMentions(&post, input.SourceVersion, post.WasPublished()); err != nil {
+		return posts.Entity{}, err
+	}
+	if err := trustlevelservice.ValidateContent(input.UserID, content, input.SourceVersion); err != nil {
 		return posts.Entity{}, err
 	}
 	post.SourceVersion = input.SourceVersion

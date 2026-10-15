@@ -4,6 +4,9 @@ import en from "./en-server-messages.js";
 import mfa from './ja-mfa.js';
 export default {
   ...en,
+  "trust.contentLimit": "投稿の {kind} の上限は {limit} です。",
+  "trust.adjustmentFailed": "レベル変更に失敗しました: {error}",
+  "trust.dailyTopics": "このレベルでは下書きを含め1日 {limit} 件までトピックを作成できます。",
   "auth.registration.rateLimited": "リクエストが多すぎます。しばらくしてから再試行してください。",
   "mfa.invalid": mfa.failed,
   "mfa.unavailable": mfa.unavailable,

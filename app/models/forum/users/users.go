@@ -4,6 +4,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/trustlevel"
 	"gorm.io/gorm"
 
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
@@ -71,7 +72,13 @@ type ExternalInformation struct {
 }
 
 type EntityComplete struct {
-	OAuthRegistrationKey *string `gorm:"column:oauth_registration_key;type:varchar(64);uniqueIndex" json:"-"`
+	TrustLevel           trustlevel.Level `gorm:"type:smallint;not null;default:0;index" json:"trustLevel"`
+	TrustLevelLocked     bool             `gorm:"not null;default:false" json:"-"`
+	TrustVisitDays       uint32           `gorm:"not null;default:0" json:"-"`
+	TrustLastVisitDay    string           `gorm:"type:varchar(10);not null;default:''" json:"-"`
+	TrustTopicIds        []uint64         `gorm:"type:text;serializer:json" json:"-"`
+	TrustVersion         uint64           `gorm:"not null;default:0" json:"-"`
+	OAuthRegistrationKey *string          `gorm:"column:oauth_registration_key;type:varchar(64);uniqueIndex" json:"-"`
 	// base
 	Id                        uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"` //
 	Username                  string     `gorm:"column:username;type:varchar(64);not null;" json:"username"`

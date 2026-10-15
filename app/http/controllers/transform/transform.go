@@ -10,6 +10,7 @@ import (
 // User2userShow maps a user entity to the authenticated user summary payload.
 func User2userShow(user users.EntityComplete) *vo.UserInfoShow {
 	return &vo.UserInfoShow{
+		TrustLevel: int16(user.TrustLevel), TrustLevelLocked: user.TrustLevelLocked,
 		UserId:                    user.Id,
 		Username:                  user.Username,
 		Email:                     user.Email,
@@ -30,6 +31,7 @@ func User2userShow(user users.EntityComplete) *vo.UserInfoShow {
 func User2UserDetailedVo(user users.EntityComplete) *vo.UserDetailedVo {
 	userBadges := badgeservice.GetUserBadges(user.Id)
 	return &vo.UserDetailedVo{
+		TrustLevel:          int16(user.TrustLevel),
 		Id:                  user.Id,
 		Username:            user.Username,
 		Email:               user.Email,

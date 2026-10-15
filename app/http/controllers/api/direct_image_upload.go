@@ -93,6 +93,12 @@ func completeDirectImageUpload(c *gin.Context, adminUpload bool) {
 		return
 	}
 	userId := c.GetUint64("userId")
+	if !adminUpload {
+		if _, failure := resolveImageUploadPolicy(userId); failure != nil {
+			c.JSON(failure.Status, failure.Data)
+			return
+		}
+	}
 	metadata, err := filestorage.CompleteDirectUpload(c.Request.Context(), filestorage.CompleteDirectUploadRequest{
 		Name: request.Name, UserId: userId,
 		Validator: func(reader io.Reader, contentType string) error {

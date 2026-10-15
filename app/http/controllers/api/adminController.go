@@ -127,14 +127,16 @@ func GetTrafficOverview(req component.BetterRequest[TrafficOverviewReq]) compone
 }
 
 type UserListReq struct {
-	Username string `json:"username"`
-	UserId   uint64 `json:"userId"`
-	Email    string `json:"email"`
-	Page     int    `json:"page"`
-	PageSize int    `json:"pageSize"`
+	TrustLevel *int16 `json:"trustLevel"`
+	Username   string `json:"username"`
+	UserId     uint64 `json:"userId"`
+	Email      string `json:"email"`
+	Page       int    `json:"page"`
+	PageSize   int    `json:"pageSize"`
 }
 
 type UserItem struct {
+	TrustLevel        int16                               `json:"trustLevel"`
 	RestrictionStatus string                              `json:"restrictionStatus"`
 	RestrictionUntil  *time.Time                          `json:"restrictionUntil"`
 	RestrictionReason string                              `json:"restrictionReason"`
@@ -153,11 +155,12 @@ type UserItem struct {
 
 func UserList(req component.BetterRequest[UserListReq]) component.Response {
 	var pageData = users.Page(users.PageQuery{
-		Page:     req.Params.Page,
-		PageSize: req.Params.PageSize,
-		Username: req.Params.Username,
-		UserId:   req.Params.UserId,
-		Email:    req.Params.Email,
+		TrustLevel: req.Params.TrustLevel,
+		Page:       req.Params.Page,
+		PageSize:   req.Params.PageSize,
+		Username:   req.Params.Username,
+		UserId:     req.Params.UserId,
+		Email:      req.Params.Email,
 	})
 
 	userIds := lo.Map(pageData.Data, func(item users.EntityComplete, _ int) uint64 {
@@ -184,6 +187,7 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 			LastActiveTime = usItem.LastActiveTime.Format(time.DateTime)
 		}
 		return UserItem{
+			TrustLevel:        int16(t.TrustLevel),
 			RestrictionStatus: t.EffectiveRestriction(time.Now()),
 			RestrictionUntil:  t.RestrictionUntil,
 			RestrictionReason: t.RestrictionReason,

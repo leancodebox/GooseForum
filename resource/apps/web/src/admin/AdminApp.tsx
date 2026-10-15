@@ -25,6 +25,7 @@ import { createDashboardText } from './dashboard-i18n'
 import { adminNavGroups } from './nav'
 import { AuthLogsPage } from './page-registry'
 import { AgentSettingsPage } from './page-registry'
+import { TrustSettingsPage } from './page-registry'
 import { normalizeAdminPath } from './navigation'
 import { prepareAdminTranslations, adminPageNamespaces, loadedAdminNamespaces } from './translation-loader'
 import { prepareAdminListData, type AdminListData } from './list-data'
@@ -256,6 +257,8 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
         ? <PostingSettingsPage api={api} text={contentSettingsText} />
       : pathname === '/admin/settings/agent'
         ? <AgentSettingsPage api={api} text={systemSettingsText} />
+      : pathname === '/admin/settings/trust'
+        ? <TrustSettingsPage api={api} locale={locale} />
       : pathname === '/admin/settings/announcement'
         ? <AnnouncementSettingsPage api={api} text={contentSettingsText} />
       : pathname === '/admin/settings/http-notify'

@@ -3,6 +3,7 @@ package forum
 import (
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
 	"github.com/leancodebox/GooseForum/app/service/topicviewservice"
+	"github.com/leancodebox/GooseForum/app/service/trustlevelservice"
 	"github.com/spf13/cast"
 )
 
@@ -56,10 +58,23 @@ func TopicDetail(c *gin.Context) {
 		firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
 	}
 	postservice.EnsureRenderedHTML(&firstPost)
+	if loginUser.UserId > 0 && topic.UserId != loginUser.UserId && topic.Status == 1 && topic.ProcessStatus == 0 && firstPost.Id > 0 && c.Request.Method == http.MethodGet && !strings.Contains(c.GetHeader("Purpose"), "prefetch") && !strings.Contains(c.GetHeader("Sec-Purpose"), "prefetch") {
+		state, exists := c.Get("authenticatedAccount")
+		account, valid := state.(users.AccountState)
+		if !exists || !valid {
+			account, _ = users.GetAccountState(loginUser.UserId)
+		}
+		if err := trustlevelservice.ReviewWithState(account, topic.Id, time.Now()); err != nil {
+			slog.Warn("record trust visit failed", "userId", loginUser.UserId, "error", err)
+		}
+	}
 	if loginUser.UserId > 0 {
 		if err := topicunseenservice.MarkVisited(loginUser.UserId, topic.Id, topic.LastPostId, time.Now()); err != nil {
 			slog.Warn("mark topic visited failed", "userId", loginUser.UserId, "topicId", topic.Id, "error", err)
 		}
+	}
+	if current := component.GetUserShowByUserId(loginUser.UserId); current.TrustLevel != loginUser.TrustLevel {
+		c.Set(accessSnapshotContextKey, nil)
 	}
 	props := buildTopicDetailProps(c, &topic, &firstPost, postNo)
 	payload := PagePayload{

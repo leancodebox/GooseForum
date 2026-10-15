@@ -228,7 +228,7 @@ func TestCategoryLifecycleKeepsDefaultGrantsTransactional(t *testing.T) {
 func TestDisablingGroupImmediatelyRevokesCachedMembership(t *testing.T) {
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(
-		&accessGroups.Entity{}, &accessGroupMembers.Entity{}, &categoryGroupPermissions.Entity{}, &category.Entity{},
+		&accessGroups.Entity{}, &accessGroupMembers.Entity{}, &categoryGroupPermissions.Entity{}, &category.Entity{}, &users.EntityComplete{},
 	); err != nil {
 		t.Fatalf("migrate group revocation tables: %v", err)
 	}
@@ -241,6 +241,9 @@ func TestDisablingGroupImmediatelyRevokesCachedMembership(t *testing.T) {
 		t.Fatalf("create group: %v", err)
 	}
 	const userID uint64 = 963010
+	if err := conn.FirstOrCreate(&users.EntityComplete{Id: userID, Username: "trust-group-member", UsernameLower: "trust-group-member"}, "id = ?", userID).Error; err != nil {
+		t.Fatal(err)
+	}
 	member := accessGroupMembers.Entity{AccessGroupId: group.Id, UserId: userID, MemberRole: accessGroupMembers.MemberRoleMember, Status: accessGroupMembers.StatusEnabled}
 	if err := conn.Create(&member).Error; err != nil {
 		t.Fatalf("create member: %v", err)

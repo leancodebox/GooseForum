@@ -2,6 +2,8 @@ package users
 
 import (
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/bundles/trustlevel"
 )
 
 const (
@@ -12,6 +14,9 @@ const (
 
 // AccountState is read directly for authorization, independently of display caches.
 type AccountState struct {
+	TrustLevel                trustlevel.Level
+	TrustLevelLocked          bool
+	CreatedAt                 time.Time
 	Id                        uint64
 	RoleId                    uint64
 	TokenVersion              uint64

@@ -1,5 +1,7 @@
 import { AdminPage } from '../components/admin-page'
 import { UserMFAReset } from '../components/user-mfa-reset'
+import { UserTrust } from '../components/user-trust'
+import { trustLevelName, trustLevels } from '@gooseforum/client'
 import { RestrictionFields, RestrictionHistory } from '../components/user-restriction'
 import { type RestrictionForm, restrictionForm } from '../components/user-restriction-form'
 import { useLatestRequest } from '../use-latest-request'
@@ -86,10 +88,11 @@ export function UsersManagementPage({ api, text, locale = 'en', canResetMFA = fa
         {search || appliedSearch ? <Button variant="ghost" size="sm" type="button" onClick={() => { setSearch(''); updateQuery({ search: '' }) }}>{text('clear')}</Button> : null}
       </form>
       <UserIconButton label={text('refresh')} disabled={loading} onClick={() => void load()}><RefreshCw className={loading ? 'animate-spin motion-reduce:animate-none' : undefined} /></UserIconButton>
+      <Select value={query.trustLevel || 'all'} onValueChange={value => updateQuery({ trustLevel: value })}><SelectTrigger aria-label={locale.startsWith('zh') ? '信任等级' : 'Trust level'} className="w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">{locale.startsWith('zh') ? '所有等级' : 'All levels'}</SelectItem>{trustLevels.map(level => <SelectItem key={level} value={String(level)}>{trustLevelName(level, locale)}</SelectItem>)}</SelectContent></Select>
     </div>
     <section aria-label={text('title')} aria-busy={loading} className="relative overflow-hidden rounded-md border bg-background">
       {loading && users.length ? <div role="status" className="absolute inset-x-0 top-0 z-10 flex h-8 items-center justify-center gap-2 bg-background/95 text-xs text-muted-foreground"><Spinner />{text('loading')}</div> : null}
-      {loading && !users.length ? <UserEmpty icon={<Spinner />} title={text('loading')} /> : !users.length ? <UserEmpty icon={<Search />} title={text('empty')} /> : <><div className="hidden md:block"><Table className="min-w-220 table-fixed"><TableHeader className="bg-muted/30"><TableRow><TableHead className="h-8">{text('user')}</TableHead><TableHead className="h-8 w-48">{text('roles')}</TableHead><TableHead className="h-8 w-28">{text('status')}</TableHead><TableHead className="h-8 w-40">{text('createdAt')}</TableHead><TableHead className="h-8 w-40">{text('lastActive')}</TableHead><TableHead className="h-8 w-16 text-right">{text('actions')}</TableHead></TableRow></TableHeader><TableBody>{users.map((user) => <TableRow key={user.userId}><TableCell className="py-2"><UserIdentity user={user} text={text} /></TableCell><TableCell className="py-2"><div className="flex flex-wrap gap-1">{user.roleList?.length ? user.roleList.map((role) => <Badge key={role.value} variant="secondary">{role.name}</Badge>) : <span className="text-xs text-muted-foreground">{text('noRole')}</span>}</div></TableCell><TableCell className="py-2"><Badge variant={(user.restrictionStatus || 'normal') === 'normal' ? 'outline' : 'destructive'}>{(user.restrictionStatus || 'normal') === 'normal' ? <CheckCircle2 data-icon="inline-start" /> : <ShieldOff data-icon="inline-start" />}{(user.restrictionStatus || 'normal') === 'normal' ? text('enabled') : user.restrictionStatus === 'banned' ? text('banned') : text('suspended')}</Badge></TableCell><TableCell className="truncate py-2 text-xs text-muted-foreground">{user.createTime || '—'}</TableCell><TableCell className="truncate py-2 text-xs text-muted-foreground">{user.lastActiveTime || text('never')}</TableCell><TableCell className="py-2 text-right"><UserIconButton variant="ghost" label={text('edit')} onClick={() => setEditingUser(user)}><UserCog /></UserIconButton></TableCell></TableRow>)}</TableBody></Table></div><div className="divide-y md:hidden">{users.map((user) => <article key={user.userId} className="flex items-start gap-2.5 px-3 py-2.5"><UserIdentity user={user} text={text} compact /><UserIconButton variant="ghost" label={text('edit')} onClick={() => setEditingUser(user)}><UserCog /></UserIconButton></article>)}</div></>}
+      {loading && !users.length ? <UserEmpty icon={<Spinner />} title={text('loading')} /> : !users.length ? <UserEmpty icon={<Search />} title={text('empty')} /> : <><div className="hidden md:block"><Table className="min-w-220 table-fixed"><TableHeader className="bg-muted/30"><TableRow><TableHead className="h-8">{text('user')}</TableHead><TableHead className="h-8 w-48">{text('roles')}</TableHead><TableHead className="h-8 w-28">{text('status')}</TableHead><TableHead className="h-8 w-40">{text('createdAt')}</TableHead><TableHead className="h-8 w-40">{text('lastActive')}</TableHead><TableHead className="h-8 w-16 text-right">{text('actions')}</TableHead></TableRow></TableHeader><TableBody>{users.map((user) => <TableRow key={user.userId}><TableCell className="py-2"><UserIdentity user={user} text={text} locale={locale} /></TableCell><TableCell className="py-2"><div className="flex flex-wrap gap-1">{user.roleList?.length ? user.roleList.map((role) => <Badge key={role.value} variant="secondary">{role.name}</Badge>) : <span className="text-xs text-muted-foreground">{text('noRole')}</span>}</div></TableCell><TableCell className="py-2"><Badge variant={(user.restrictionStatus || 'normal') === 'normal' ? 'outline' : 'destructive'}>{(user.restrictionStatus || 'normal') === 'normal' ? <CheckCircle2 data-icon="inline-start" /> : <ShieldOff data-icon="inline-start" />}{(user.restrictionStatus || 'normal') === 'normal' ? text('enabled') : user.restrictionStatus === 'banned' ? text('banned') : text('suspended')}</Badge></TableCell><TableCell className="truncate py-2 text-xs text-muted-foreground">{user.createTime || '—'}</TableCell><TableCell className="truncate py-2 text-xs text-muted-foreground">{user.lastActiveTime || text('never')}</TableCell><TableCell className="py-2 text-right"><UserIconButton variant="ghost" label={text('edit')} onClick={() => setEditingUser(user)}><UserCog /></UserIconButton></TableCell></TableRow>)}</TableBody></Table></div><div className="divide-y md:hidden">{users.map((user) => <article key={user.userId} className="flex items-start gap-2.5 px-3 py-2.5"><UserIdentity user={user} text={text} locale={locale} compact /><UserIconButton variant="ghost" label={text('edit')} onClick={() => setEditingUser(user)}><UserCog /></UserIconButton></article>)}</div></>}
     </section>
     <footer className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 text-xs">
       <span className="text-muted-foreground" aria-live="polite">{rangeStart}-{rangeEnd} / {total}</span>
@@ -116,11 +119,12 @@ function UserIconButton({ label, children, variant = 'outline', ...props }: Omit
   return <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant={variant} size="icon-sm" aria-label={label} {...props}>{children}</Button></TooltipTrigger><TooltipContent>{label}</TooltipContent></Tooltip></TooltipProvider>
 }
 
-function UserIdentity({ user, text, compact = false }: { user: AdminUser; text: Text; compact?: boolean }) {
+function UserIdentity({ user, text, compact = false, locale = 'en' }: { user: AdminUser; text: Text; compact?: boolean; locale?: string }) {
   return <div className="flex min-w-0 flex-1 items-start gap-2.5">
     <a href={`/u/${user.userId}`} target="_blank" rel="noreferrer" className="shrink-0"><Avatar className={compact ? 'size-10' : 'size-9'}><AvatarImage src={user.avatarUrl || undefined} alt={user.username} /><AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar></a>
     <div className="min-w-0 flex-1">
       <a href={`/u/${user.userId}`} target="_blank" rel="noreferrer" className="block truncate font-semibold hover:text-primary hover:underline">{user.username}</a>
+      {user.trustLevel !== undefined ? <span className="text-xs text-muted-foreground">{trustLevelName(user.trustLevel, locale)}</span> : null}
       <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground"><span className="truncate" title={user.email}>{user.email || '—'}</span><Badge variant="outline" className="shrink-0">{user.validate === 1 ? text('verified') : text('unverified')}</Badge></div>
       {compact ? <>
         <div className="mt-2 flex flex-wrap gap-1"><Badge variant={(user.restrictionStatus || 'normal') === 'normal' ? 'outline' : 'destructive'}>{(user.restrictionStatus || 'normal') === 'normal' ? text('enabled') : user.restrictionStatus === 'banned' ? text('banned') : text('suspended')}</Badge>{user.roleList?.map((role) => <Badge key={role.value} variant="secondary">{role.name}</Badge>)}</div>
@@ -195,7 +199,7 @@ function UserEditor({ user, api, text, locale, canResetMFA, onClose, onSaved }: 
   function toggleBadge(code: string) { setSelectedBadgeCodes((current) => current.includes(code) ? current.filter((item) => item !== code) : [...current, code]) }
   async function save(event: React.FormEvent) {
     event.preventDefault()
-    if (!user || saving) return
+    if (!user || saving || editorTab === 'trust') return
     if ((restriction.status !== 'normal' || restrictionForm(user).status !== 'normal') && !restriction.reason.trim()) {
       setEditorTab('account')
       setValidationError(text('reasonRequired'))
@@ -227,10 +231,11 @@ function UserEditor({ user, api, text, locale, canResetMFA, onClose, onSaved }: 
           </div>
         </DialogHeader>
         <Tabs value={editorTab} onValueChange={setEditorTab} className="min-h-0 flex-1 gap-0">
-          <TabsList variant="line" className="mx-4 mt-2 grid w-auto shrink-0 grid-cols-3">
+          <TabsList variant="line" className="mx-4 mt-2 flex w-auto shrink-0 flex-wrap">
             <TabsTrigger type="button" value="account">{text('account')}</TabsTrigger>
             <TabsTrigger type="button" value="badges">{text('badges')}</TabsTrigger>
             <TabsTrigger type="button" value="history">{text('historyTab')}</TabsTrigger>
+            {canResetMFA ? <TabsTrigger type="button" value="trust">{locale.startsWith('zh') ? '信任等级' : 'Trust level'}</TabsTrigger> : null}
           </TabsList>
           <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:min-h-[min(20rem,calc(100dvh-13rem))]">
             <TabsContent value="account">
@@ -278,11 +283,12 @@ function UserEditor({ user, api, text, locale, canResetMFA, onClose, onSaved }: 
             <TabsContent value="history">
               <RestrictionHistory userId={user?.userId} api={api} text={text} className="mt-0 min-w-0 border-t-0 pt-0" />
             </TabsContent>
+            {user && canResetMFA ? <TabsContent value="trust"><UserTrust api={api} userId={user.userId} locale={locale} /></TabsContent> : null}
           </div>
         </Tabs>
         <DialogFooter className="mx-0 mb-0 rounded-b-none">
-          <Button variant="outline" type="button" disabled={saving} onClick={onClose}>{text('cancel')}</Button>
-          <Button type="submit" disabled={saving}>{saving ? <Spinner data-icon="inline-start" /> : null}{saving ? text('saving') : text('save')}</Button>
+          <Button variant="outline" type="button" disabled={saving} onClick={onClose}>{editorTab === 'trust' ? (locale.startsWith('zh') ? '关闭' : 'Close') : text('cancel')}</Button>
+          {editorTab !== 'trust' ? <Button type="submit" disabled={saving}>{saving ? <Spinner data-icon="inline-start" /> : null}{saving ? text('saving') : text('save')}</Button> : null}
         </DialogFooter>
       </form>
     </DialogContent>

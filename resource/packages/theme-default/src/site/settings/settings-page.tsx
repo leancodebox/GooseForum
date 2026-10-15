@@ -39,6 +39,7 @@ import { AccountSettings } from "./settings-account";
 import { MFASettings } from "./settings-mfa";
 import { ConnectionsSettings } from "./settings-connections";
 import { AgentTokenSettings } from "./settings-agent-tokens";
+import { TrustProgressSection } from './settings-trust';
 import { PrivacySettings } from "./settings-privacy";
 import { ProfileSettings } from "./settings-profile";
 import { AvatarCropDialog } from "./avatar-crop-dialog";
@@ -419,6 +420,7 @@ export function SettingsPageView({
               />
             </TabsContent>
             <TabsContent value="account">
+              <TrustProgressSection />
               <AccountSettings showError={showError} />
             </TabsContent>
             <TabsContent value="mfa">

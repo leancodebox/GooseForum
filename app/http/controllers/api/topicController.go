@@ -76,6 +76,9 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		DailyLimit: postingConfig.TextControl.MaxDailyTopicsPerUser,
 	})
 	if err != nil {
+		if response, ok := trustWriteFailure(err); ok {
+			return response
+		}
 		if errors.Is(err, mentionservice.ErrInvalid) {
 			return component.FailResponseCode(component.MessageMentionInvalid, nil)
 		}
@@ -132,6 +135,9 @@ type TopicStatusReq struct {
 
 func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Response {
 	if err := topicwriteservice.UpdateStatus(req.UserId, req.Params.TopicId, req.Params.TopicStatus); err != nil {
+		if response, ok := trustWriteFailure(err); ok {
+			return response
+		}
 		if errors.Is(err, topicwriteservice.ErrTopicNotFound) {
 			return component.FailResponseCode(component.MessageTopicNotFound, nil)
 		}
@@ -185,6 +191,9 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 		UserID:        req.UserId, TopicID: req.Params.TopicId, Content: content, ReplyToPostID: req.Params.ReplyToPostId,
 	})
 	if err != nil {
+		if response, ok := trustWriteFailure(err); ok {
+			return response
+		}
 		if errors.Is(err, mentionservice.ErrInvalid) {
 			return component.FailResponseCode(component.MessageMentionInvalid, nil)
 		}
@@ -229,6 +238,9 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 
 	postEntity, err := postwriteservice.Update(postwriteservice.UpdateInput{UserID: req.UserId, PostID: req.Params.PostId, Content: content, SourceVersion: req.Params.SourceVersion})
 	if err != nil {
+		if response, ok := trustWriteFailure(err); ok {
+			return response
+		}
 		if errors.Is(err, mentionservice.ErrInvalid) {
 			return component.FailResponseCode(component.MessageMentionInvalid, nil)
 		}

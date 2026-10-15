@@ -2,14 +2,18 @@ package middleware
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/authsessionservice"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
+	"github.com/leancodebox/GooseForum/app/service/trustlevelservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
 
@@ -23,6 +27,7 @@ func SessionAuthCheck(c *gin.Context) {
 		return
 	}
 	c.Set("userId", userId)
+	reviewTrust(c, userId)
 	c.Next()
 	if !c.GetBool(SkipUpdateUserActivity) {
 		eventbus.Publish(context.Background(), &eventhandlers.UserLastActiveUpdatedEvent{
@@ -36,6 +41,7 @@ func SessionAuth(c *gin.Context) {
 	userId := SessionAuthGetUserId(c)
 	if userId != 0 {
 		c.Set("userId", userId)
+		reviewTrust(c, userId)
 	}
 	c.Next()
 	if userId != 0 && !c.GetBool(SkipUpdateUserActivity) {
@@ -69,6 +75,7 @@ func SessionAuthGetUserId(c *gin.Context) uint64 {
 		return 0
 	}
 	c.Set("sessionId", auth.Session.Id)
+	c.Set("authenticatedAccount", auth.Account)
 	c.Set("authTime", auth.Session.AuthTime.Unix())
 	// Old and federated sessions do not prove fresh credential verification.
 	if auth.Session.Reauthenticated {
@@ -80,6 +87,25 @@ func SessionAuthGetUserId(c *gin.Context) uint64 {
 func NoUpdateUserActivity(c *gin.Context) {
 	c.Set(SkipUpdateUserActivity, true)
 	c.Next()
+}
+
+func reviewTrust(c *gin.Context, id uint64) {
+	path := c.Request.URL.Path
+	if strings.HasPrefix(path, "/p/post/") || strings.HasPrefix(path, "/file/") || strings.HasPrefix(path, "/api/forum/unread-status") || strings.HasPrefix(path, "/api/forum/notifications") || strings.HasPrefix(path, "/api/forum/posts/window") || strings.HasPrefix(path, "/api/forum/chat/") {
+		return
+	}
+	if c.GetBool("trustReviewed") || strings.Contains(c.Request.URL.Path, "/admin/") || c.Request.Method == "HEAD" || strings.Contains(c.GetHeader("Purpose"), "prefetch") || strings.Contains(c.GetHeader("Sec-Purpose"), "prefetch") {
+		return
+	}
+	c.Set("trustReviewed", true)
+	state, ok := c.Get("authenticatedAccount")
+	account, valid := state.(users.AccountState)
+	if !ok || !valid || account.Id != id {
+		return
+	}
+	if err := trustlevelservice.ReviewAuthenticated(account, time.Now()); err != nil {
+		slog.Warn("review trust failed", "userId", id, "error", err)
+	}
 }
 
 func CheckLogin(c *gin.Context) {

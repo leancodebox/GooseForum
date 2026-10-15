@@ -8,9 +8,50 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
 )
+
+func TestCompleteDirectUploadRechecksTrustPolicyBeforeStorage(t *testing.T) {
+	db := dbconnect.Connect()
+	if err := db.AutoMigrate(&users.EntityComplete{}, &pageConfig.Entity{}); err != nil {
+		t.Fatal(err)
+	}
+	u := users.EntityComplete{Username: "direct-policy-trust", UsernameLower: "direct-policy-trust", IsActivated: 1}
+	if err := db.Create(&u).Error; err != nil {
+		t.Fatal(err)
+	}
+	previous := pageConfig.GetByPageType(pageConfig.TrustSettings)
+	t.Cleanup(func() {
+		if previous.Id > 0 {
+			_ = pageConfig.SaveConfig(pageConfig.TrustSettings, previous.Config)
+		} else {
+			db.Where("page_type = ?", pageConfig.TrustSettings).Delete(&pageConfig.Entity{})
+		}
+		hotdataserve.ClearTrustSettingsCache()
+	})
+	c := pageConfig.DefaultTrustSettings()
+	c.RestrictionsEnabled = true
+	c.LevelLimits[0].AllowImageUpload = false
+	raw, _ := json.Marshal(c)
+	if err := pageConfig.SaveConfig(pageConfig.TrustSettings, string(raw)); err != nil {
+		t.Fatal(err)
+	}
+	hotdataserve.ClearTrustSettingsCache()
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Request = httptest.NewRequest(http.MethodPost, "/file/img-upload/complete", bytes.NewBufferString(`{"name":"pending-before-policy-change"}`))
+	ctx.Request.Header.Set("Content-Type", "application/json")
+	ctx.Set("userId", u.Id)
+	CompleteDirectImageUpload(ctx)
+	if w.Code != http.StatusForbidden || !bytes.Contains(w.Body.Bytes(), []byte("permission.denied")) {
+		t.Fatalf("completion bypassed policy: %d %s", w.Code, w.Body.String())
+	}
+}
 
 func TestInitDirectImageUploadReturnsProxyModeForDatabaseStorage(t *testing.T) {
 	gin.SetMode(gin.TestMode)

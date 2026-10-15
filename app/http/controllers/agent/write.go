@@ -22,6 +22,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/postwriteservice"
 	"github.com/leancodebox/GooseForum/app/service/topicservice"
 	"github.com/leancodebox/GooseForum/app/service/topicwriteservice"
+	"github.com/leancodebox/GooseForum/app/service/trustlevelservice"
 )
 
 type createTopicRequest struct {
@@ -203,6 +204,15 @@ func (h *Handler) createPost(c *gin.Context) {
 }
 
 func writeError(c *gin.Context, err error) {
+	var limit *trustlevelservice.LimitError
+	if errors.As(err, &limit) {
+		if limit.Kind == trustlevelservice.DailyTopicsKind {
+			fail(c, 429, "trust_daily_topics", limit.Error())
+			return
+		}
+		fail(c, 422, "trust_content_limit", limit.Error())
+		return
+	}
 	switch {
 	case errors.Is(err, topicwriteservice.ErrVersionConflict), errors.Is(err, postwriteservice.ErrVersionConflict), errors.Is(err, posts.ErrVersionConflict), errors.Is(err, topicservice.ErrVersionConflict):
 		fail(c, 409, "version_conflict", "Content changed; read the latest version before editing")

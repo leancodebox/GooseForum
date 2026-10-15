@@ -41,6 +41,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserStat"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
+	"github.com/leancodebox/GooseForum/app/models/forum/trusthistory"
 	"github.com/leancodebox/GooseForum/app/models/forum/userActivities"
 	"github.com/leancodebox/GooseForum/app/models/forum/userBadges"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
@@ -120,6 +121,7 @@ func defaultSchemaModels() []any {
 		&userOAuth.Entity{},
 		&userPoints.Entity{},
 		&users.EntityComplete{},
+		&trusthistory.History{},
 		&authsessions.Token{},
 		&authsessions.Log{},
 		&accountrestrictions.History{},

@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import type { TopicPayload, UserProfileProps } from "@gooseforum/client";
-import { formatCompactNumber } from "@gooseforum/client";
+import { formatCompactNumber, trustLevelName } from "@gooseforum/client";
 import {
   Award,
   Bird,
@@ -103,6 +103,7 @@ export function UserProfilePageView({ page }: { page: UserProfileProps }) {
                 description={page.user.bio || page.user.signature || t("emptyBio")}
                 badges={
                   <>
+                    {page.user.trustLevel !== undefined ? <Badge variant="outline">{trustLevelName(page.user.trustLevel, runtime.locale)}</Badge> : null}
                     {page.user.isAdmin ? (
                       <Badge variant="secondary" className="text-warning">
                         Admin

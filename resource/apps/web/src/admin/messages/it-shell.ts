@@ -2,6 +2,7 @@
 import en from "./en-shell";
 export default {
   ...en,
+  trust: "Livelli di fiducia",
   console: "Console amministrativa",
   dashboard: "Dashboard",
   users: "Utenti",

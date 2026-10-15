@@ -115,6 +115,7 @@ func apiRoute(ginApp *gin.Engine) {
 	baseApi.GET("auth/:provider/callback", middleware.SessionAuth, api.ProviderCallback)
 
 	loginApi := ginApp.Group("api").Use(middleware.SessionAuthCheck)
+	loginApi.GET("trust-level", UpButterReq(api.MyTrustLevel))
 	loginApi.GET("mention-users", middleware.NoUpdateUserActivity, UpQueryReq(api.MentionUsers))
 	loginApi.POST("set-user-privacy", middleware.CheckWritableAccount, UpButterReq(api.EditUserPrivacy))
 	loginApi.POST("set-user-info", middleware.CheckWritableAccount, UpButterReq(api.EditUserInfo))
@@ -178,6 +179,12 @@ func apiRoute(ginApp *gin.Engine) {
 	chatApi.POST("mark-read", middleware.CheckWritableAccount, UpButterReq(api.MarkChatRead))
 
 	adminApi := baseApi.Group("admin", middleware.SessionAuthCheck, middleware.CheckWritableAccount)
+	trustAdmin := adminApi.Group("", middleware.CheckPermission(permission.Admin))
+	trustAdmin.GET("get-trust-settings", UpButterReq(api.GetTrustSettings))
+	trustAdmin.POST("save-trust-settings", UpJsonReq(api.SaveTrustSettings))
+	trustAdmin.GET("user-trust-level", UpQueryReq(api.UserTrustLevel))
+	trustAdmin.POST("set-user-trust-level", UpJsonReq(api.SetUserTrustLevel))
+	trustAdmin.GET("user-trust-level-history", UpQueryReq(api.UserTrustHistory))
 
 	adminApi.POST("traffic-overview", middleware.CheckPermission(permission.Admin), UpButterReq(api.GetTrafficOverview))
 	adminApi.POST("user-mfa-status", middleware.CheckPermission(permission.Admin), UpButterReq(api.AdminMFAStatus))

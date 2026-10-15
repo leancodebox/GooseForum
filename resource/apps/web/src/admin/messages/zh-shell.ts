@@ -1,4 +1,5 @@
 export default {
+  trust: "信任等级",
   agent: "Agent 接入",
   console: "管理后台",
   dashboard: "仪表盘",

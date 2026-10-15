@@ -74,6 +74,7 @@ export interface AccessControlOverview {
 }
 
 export interface AdminUser {
+	trustLevel?: number
 	 restrictionStatus?: 'normal' | 'suspended' | 'banned'
 	 restrictionUntil?: string | null
 	 restrictionReason?: string
@@ -261,6 +262,13 @@ export interface AdminRole {
 }
 
 export interface GooseAdminApi {
+	trust: {
+		settings(): Promise<import('../trust.js').TrustConfig>
+		saveSettings(settings: import('../trust.js').TrustConfig): Promise<unknown>
+		user(userId: number): Promise<import('../trust.js').TrustProgress>
+		setUser(input: { userId: number; level: number; locked: boolean; expectedVersion: number; reason: string }): Promise<import('../trust.js').TrustProgress>
+		history(userId: number, after?: number): Promise<import('../trust.js').TrustHistory[]>
+	}
   dashboard: {
     statistics(): Promise<SiteStatistics>
     traffic(startDate?: string, endDate?: string): Promise<DailyTraffic[]>
@@ -334,7 +342,7 @@ export interface GooseAdminApi {
   users: {
     mfaStatus(userId: number): Promise<{ enabled: boolean }>
     resetMFA(userId: number, reason: string): Promise<unknown>
-    list(input: { page?: number; pageSize?: number; username?: string; userId?: number; email?: string }): Promise<PageResult<AdminUser>>
+    list(input: { page?: number; pageSize?: number; username?: string; userId?: number; email?: string; trustLevel?: number }): Promise<PageResult<AdminUser>>
     edit(input: { userId: number; validate: number; roleId: number; restrictionStatus?: 'normal' | 'suspended' | 'banned'; restrictionUntil?: string | null; restrictionReason?: string }): Promise<unknown>
     restrictionHistory(input: { userId: number; page?: number; pageSize?: number }): Promise<PageResult<UserRestrictionHistory>>
     roles(): Promise<{ name: string; value: number }[]>

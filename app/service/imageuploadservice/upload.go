@@ -14,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
+	"github.com/leancodebox/GooseForum/app/service/trustlevelservice"
 )
 
 type Policy struct {
@@ -33,6 +34,13 @@ func failure(status int, code string, params map[string]any) *Failure {
 
 // ResolvePolicy assumes the caller has checked current account write permissions.
 func ResolvePolicy(user users.EntityComplete) (*Policy, *Failure) {
+	limits, enabled, err := trustlevelservice.Limits(user.Id)
+	if err != nil {
+		return nil, failure(503, "common.operation.failed", nil)
+	}
+	if enabled && !limits.AllowImageUpload {
+		return nil, failure(403, "permission.denied", nil)
+	}
 	config := hotdataserve.GetPostingSettingsConfigCache().UploadControl
 	isRoleUser := user.RoleId > 0
 	if !isRoleUser && !config.AllowAttachments {

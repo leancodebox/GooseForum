@@ -71,7 +71,7 @@ func Create(entity *EntityComplete) error {
 }
 
 func Save(entity *EntityComplete) error {
-	result := builder().Omit("username", "username_lower", "email", "email_normalized", "is_activated", "activated_at", "requires_email_verification", "password", "token_version", "role_id", "restriction_status", "restriction_until", "restriction_reason").Save(entity)
+	result := builder().Omit("trust_level", "trust_level_locked", "trust_visit_days", "trust_last_visit_day", "trust_topic_ids", "trust_version", "username", "username_lower", "email", "email_normalized", "is_activated", "activated_at", "requires_email_verification", "password", "token_version", "role_id", "restriction_status", "restriction_until", "restriction_reason").Save(entity)
 	return result.Error
 }
 
@@ -101,6 +101,7 @@ func GetMaxId() uint64 {
 }
 
 type PageQuery struct {
+	TrustLevel     *int16
 	Page, PageSize int
 	Username       string
 	UserId         uint64
@@ -126,11 +127,15 @@ func Page(q PageQuery) struct {
 		b.Where(queryopt.Like(fieldEmail, q.Email))
 		cB.Where(queryopt.Like(fieldEmail, q.Email))
 	}
+	if q.TrustLevel != nil {
+		b.Where("trust_level = ?", *q.TrustLevel)
+		cB.Where("trust_level = ?", *q.TrustLevel)
+	}
 	if q.UserId != 0 {
 		b.Where(queryopt.Eq(pid, q.UserId))
 		cB.Where(queryopt.Eq(pid, q.UserId))
 	}
-	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order(queryopt.Desc(pid)).Find(&list)
+	b.Omit("trust_topic_ids").Limit(q.PageSize).Offset(q.PageSize * q.Page).Order(queryopt.Desc(pid)).Find(&list)
 
 	var total int64
 	cB.Count(&total)

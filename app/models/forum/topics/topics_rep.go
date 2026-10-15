@@ -220,9 +220,14 @@ func GetDraftsByUserId(userId uint64, limit int) ([]*Entity, error) {
 }
 
 func CantWriteNew(userId uint64, maxCount int64) bool {
+	count, err := DailyCreatedCount(userId)
+	return err != nil || count >= maxCount
+}
+
+func DailyCreatedCount(userId uint64) (int64, error) {
 	var count int64
-	builder().Where(queryopt.Eq("user_id", userId)).Where(queryopt.Gt("created_at", time.Now().Format("2006-01-02"))).Count(&count)
-	return count >= maxCount
+	err := builder().Where(queryopt.Eq("user_id", userId)).Where(queryopt.Gt("created_at", time.Now().Format("2006-01-02"))).Count(&count).Error
+	return count, err
 }
 
 type PageQuery struct {

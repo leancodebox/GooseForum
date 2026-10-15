@@ -129,6 +129,9 @@ func TestAdminTopicSourceReadsFirstPost(t *testing.T) {
 
 func TestAdminEditTopicMutatesTopic(t *testing.T) {
 	conn := setupAdminTopicTestDB(t)
+	if err := conn.FirstOrCreate(&users.EntityComplete{Id: 1, Username: "admin-topic-actor", UsernameLower: "admin-topic-actor"}, "id = ?", 1).Error; err != nil {
+		t.Fatal(err)
+	}
 	_, categoryID := seedAdminTopic(t, conn, 922001)
 	if err := conn.Create(&category.Entity{Id: 922999, Name: "Second", Slug: "second"}).Error; err != nil {
 		t.Fatalf("create second category: %v", err)

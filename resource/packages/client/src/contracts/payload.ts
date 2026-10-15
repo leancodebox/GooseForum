@@ -228,6 +228,7 @@ export interface SitePayload {
 }
 
 export interface ViewerPayload {
+	trustLevel?: number
 	 restrictionStatus?: 'normal' | 'suspended' | 'banned'
 	 restrictionUntil?: string | null
 	 restrictionReason?: string
@@ -480,6 +481,7 @@ export interface ModerationReportListResponse {
 }
 
 export interface UserCardPayload {
+	trustLevel?: number
   userId: number
   username: string
   nickname: string
@@ -829,6 +831,7 @@ export interface SettingsPageProps {
 }
 
 export interface SettingsUserPayload {
+	trustLevel?: number
   id: number
   username: string
   email: string

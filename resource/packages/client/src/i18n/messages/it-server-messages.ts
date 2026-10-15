@@ -4,6 +4,9 @@ import en from "./en-server-messages.js";
 import mfa from './it-mfa.js';
 export default {
   ...en,
+  "trust.contentLimit": "Il limite di {kind} per messaggio è {limit}.",
+  "trust.adjustmentFailed": "Modifica del livello non riuscita: {error}",
+  "trust.dailyTopics": "Il tuo livello consente fino a {limit} nuovi argomenti al giorno, incluse le bozze.",
   "auth.registration.rateLimited": "Troppe richieste. Riprova più tardi.",
   "mfa.invalid": mfa.failed,
   "mfa.unavailable": mfa.unavailable,

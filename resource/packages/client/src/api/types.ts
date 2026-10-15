@@ -228,6 +228,7 @@ export interface GooseSiteApi {
     unread(): Promise<UnreadStatusPayload>
   }
   users: {
+	trustLevel(): Promise<import('../trust.js').TrustProgress>
     mentions(query: string): Promise<Array<{ id: string; username: string }>>
     card(userId: number): Promise<UserCardPayload>
     follow(userId: number, following: boolean): Promise<boolean>
