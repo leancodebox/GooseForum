@@ -61,13 +61,10 @@ func Create(input CreateInput) (posts.Entity, error) {
 		return posts.Entity{}, err
 	}
 	input.Content = content
-	if err := trustlevelservice.ValidateNewReply(input.UserID); err != nil {
+	analysis, err := trustlevelservice.AnalyzePost(input.UserID, content, input.SourceVersion, true)
+	if err != nil {
 		return posts.Entity{}, err
 	}
-	if err := trustlevelservice.ValidateContent(input.UserID, content, input.SourceVersion); err != nil {
-		return posts.Entity{}, err
-	}
-	analysis := markdown2html.AnalyzePostContentVersion(input.Content, input.SourceVersion)
 	post := posts.Entity{
 		AgentSource: input.AgentSource, ClientRequestID: input.ClientRequestID, RequestFingerprint: input.RequestFingerprint,
 		TopicId: input.TopicID, Content: input.Content, RenderedHTML: analysis.RenderedHTML,
@@ -123,13 +120,13 @@ func Update(input UpdateInput) (posts.Entity, error) {
 	if err := mentionservice.PreserveLegacyMentions(&post, input.SourceVersion, post.WasPublished()); err != nil {
 		return posts.Entity{}, err
 	}
-	if err := trustlevelservice.ValidateContent(input.UserID, content, input.SourceVersion); err != nil {
+	analysis, err := trustlevelservice.AnalyzePost(input.UserID, content, input.SourceVersion, false)
+	if err != nil {
 		return posts.Entity{}, err
 	}
 	post.SourceVersion = input.SourceVersion
 	wasPublished := post.WasPublished()
 	wasVisible := post.ProcessStatus == 0
-	analysis := markdown2html.AnalyzePostContentVersion(input.Content, input.SourceVersion)
 	post.Content = input.Content
 	post.RenderedHTML = analysis.RenderedHTML
 	post.RenderedVersion = markdown2html.GetPostVersion()

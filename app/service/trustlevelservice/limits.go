@@ -26,8 +26,15 @@ const DailyRepliesKind = "每日新建回复数"
 
 func ValidateNewReply(id uint64) error {
 	l, enabled, err := Limits(id)
-	if err != nil || !enabled || l.MaxDailyReplies == nil {
+	if err != nil {
 		return err
+	}
+	return validateReplyLimit(id, l, enabled)
+}
+
+func validateReplyLimit(id uint64, l pageConfig.TrustLimits, enabled bool) error {
+	if !enabled || l.MaxDailyReplies == nil {
+		return nil
 	}
 	if *l.MaxDailyReplies == 0 {
 		return &LimitError{DailyRepliesKind, 0}
@@ -111,6 +118,10 @@ type Counts struct {
 func CountContent(content string, version uint8) Counts {
 	// Count the same normalized HTML that the forum renders, including extensions.
 	raw := markdown2html.PostMarkdownToHTMLVersion(content, version)
+	return countHTML(raw)
+}
+
+func countHTML(raw string) Counts {
 	root, err := nethtml.Parse(strings.NewReader(raw))
 	if err != nil {
 		return Counts{}
@@ -153,7 +164,37 @@ func ValidateContent(id uint64, content string, version uint8) error {
 	if err != nil || !enabled {
 		return err
 	}
-	n := CountContent(content, version)
+	if !hasContentLimits(l) {
+		return nil
+	}
+	return validateCounts(l, CountContent(content, version))
+}
+
+func hasContentLimits(l pageConfig.TrustLimits) bool {
+	return l.MaxImagesPerPost != nil || l.MaxExternalLinksPerPost != nil || l.MaxMentionsPerPost != nil
+}
+
+// AnalyzePost loads policy once and reuses the HTML needed by the write itself.
+func AnalyzePost(id uint64, content string, version uint8, creating bool) (markdown2html.ContentAnalysis, error) {
+	l, enabled, err := Limits(id)
+	if err != nil {
+		return markdown2html.ContentAnalysis{}, err
+	}
+	if creating {
+		if err := validateReplyLimit(id, l, enabled); err != nil {
+			return markdown2html.ContentAnalysis{}, err
+		}
+	}
+	analysis := markdown2html.AnalyzePostContentVersion(content, version)
+	if enabled && hasContentLimits(l) {
+		if err := validateCounts(l, countHTML(analysis.RenderedHTML)); err != nil {
+			return markdown2html.ContentAnalysis{}, err
+		}
+	}
+	return analysis, nil
+}
+
+func validateCounts(l pageConfig.TrustLimits, n Counts) error {
 	if l.MaxMentionsPerPost != nil && len(n.mentionIDs) > 0 {
 		identities, err := users.MentionIdentities(n.mentionIDs, nil)
 		if err != nil {
