@@ -6,6 +6,7 @@ export default {
   ...en,
   "trust.contentLimit": "投稿の {kind} の上限は {limit} です。",
   "trust.adjustmentFailed": "レベル変更に失敗しました: {error}",
+  "trust.dailyReplies": "このレベルでは1日 {limit} 件まで返信できます。",
   "trust.dailyTopics": "このレベルでは下書きを含め1日 {limit} 件までトピックを作成できます。",
   "auth.registration.rateLimited": "リクエストが多すぎます。しばらくしてから再試行してください。",
   "mfa.invalid": mfa.failed,

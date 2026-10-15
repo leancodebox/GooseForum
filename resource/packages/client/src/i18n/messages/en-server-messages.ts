@@ -3,6 +3,7 @@ import mfa from './en-mfa.js';
 export default {
   "trust.contentLimit": "The {kind} limit per post is {limit}.",
   "trust.adjustmentFailed": "Level adjustment failed: {error}",
+  "trust.dailyReplies": "Your level allows up to {limit} new replies per day.",
   "trust.dailyTopics": "Your level allows up to {limit} new topics per day, including drafts.",
   "auth.registration.rateLimited": "Too many requests. Please try again later.",
   "markdown.mention.invalid": "Mention syntax is invalid or exceeds 20 recipients. Check the body.",

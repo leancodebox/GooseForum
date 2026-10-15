@@ -145,7 +145,7 @@ users 通用资料保存、用户自己提交的 JSON、OAuth 更新不能写这
 
 maxImagesPerPost 是发布内容限制，allowImageUpload 是上传权限，两者独立：禁止上传不代表可以绕过正文远程图片数量限制。上传接口不检查单篇图片数，因为上传时尚未确定最终内容；前端可提前提示，后端发布/编辑校验为准。无需新增图片计数表、抓取远程图片或持久化计数。
 
-不把高频配额强行放入等级统计。现有全站发帖限制继续有效；按等级每日回复/点赞配额、编辑期限属于后续独立实现，需要自己的精确计数和并发设计，本期不宣称已覆盖。
+不把高频配额强行放入等级统计。现有全站发帖限制继续有效；按等级每日点赞配额、编辑期限属于后续独立实现，需要自己的精确计数和并发设计，本期不宣称已覆盖。
 
 TrustSettings 通过 pageConfig 存储和 hotdataserve 缓存，沿用后台配置保存/失效模式；Admin 才能修改配置。系统整数等级定义和采集上限第一期不开放编辑；晋级阈值和等级限制按下面结构配置。
 
@@ -165,10 +165,10 @@ TrustSettings 通过 pageConfig 存储和 hotdataserve 缓存，沿用后台配�
   ],
   "restrictionsEnabled": false,
   "levelLimits": [
-    { "level": 0, "allowImageUpload": true, "maxDailyTopics": 3, "maxImagesPerPost": 1, "maxExternalLinksPerPost": 2, "maxMentionsPerPost": 2 },
-    { "level": 100, "allowImageUpload": true, "maxDailyTopics": null, "maxImagesPerPost": null, "maxExternalLinksPerPost": null, "maxMentionsPerPost": null },
-    { "level": 200, "allowImageUpload": true, "maxDailyTopics": null, "maxImagesPerPost": null, "maxExternalLinksPerPost": null, "maxMentionsPerPost": null },
-    { "level": 1000, "allowImageUpload": true, "maxDailyTopics": null, "maxImagesPerPost": null, "maxExternalLinksPerPost": null, "maxMentionsPerPost": null }
+    { "level": 0, "allowImageUpload": true, "maxDailyTopics": 3, "maxDailyReplies": 10, "maxImagesPerPost": 1, "maxExternalLinksPerPost": 2, "maxMentionsPerPost": 2 },
+    { "level": 100, "allowImageUpload": true, "maxDailyTopics": null, "maxDailyReplies": null, "maxImagesPerPost": null, "maxExternalLinksPerPost": null, "maxMentionsPerPost": null },
+    { "level": 200, "allowImageUpload": true, "maxDailyTopics": null, "maxDailyReplies": null, "maxImagesPerPost": null, "maxExternalLinksPerPost": null, "maxMentionsPerPost": null },
+    { "level": 1000, "allowImageUpload": true, "maxDailyTopics": null, "maxDailyReplies": null, "maxImagesPerPost": null, "maxExternalLinksPerPost": null, "maxMentionsPerPost": null }
   ]
 }
 ```
@@ -208,7 +208,7 @@ restrictionsEnabled=false：不应用 levelLimits，继续使用现有发布和�
 
 后台显示每个等级的完整现值，保存时全量提交并显示成功/失败结果；不计算全站受影响人数，避免每次修改触发全表扫描。第一期没有独立的变更预览对话框。本人进度接口和前端能力展示统一读取同一份配置，不保留硬编码的 24 小时/2 天/5 主题。
 
-第一期配置能力包含上述条件、每日新建主题数、上传、正文图片数、外链和提及限制。图片数需验证本地/远程、重复地址、代码内伪图片、HTML/扩展图片、首帖/回复分别计数，以及编辑超限场景。按等级每日回复/点赞数、上传次数和编辑期限不提供空壳设置，仍以已有全站规则为准；增加这些能力时需要补充具体计数和并发方案。
+第一期配置能力包含上述条件、每日新建主题数、每日新建回复数、上传、正文图片数、外链和提及限制。图片数需验证本地/远程、重复地址、代码内伪图片、HTML/扩展图片、首帖/回复分别计数，以及编辑超限场景。按等级每日点赞数、上传次数和编辑期限不提供空壳设置，仍以已有全站规则为准；增加这些能力时需要补充具体计数和并发方案。
 
 ## 9. 接口与界面
 
@@ -306,6 +306,8 @@ restrictionsEnabled=false：不应用 levelLimits，继续使用现有发布和�
 - 页面入口：`/admin/settings/trust`；本人进度位于 `/settings?tab=account`；用户管理中等级操作仅 Admin 可用。
 
 ## 14. 等级每日主题配额补充
+
+主题和回复使用独立额度：maxDailyTopics / maxDailyReplies。新增回复上限默认新用户 10，其他等级 null；旧配置缺失字段按 null 处理。null 不追加等级限制，0 禁止新建回复，正整数最多 100000。回复按服务器日期统计 posts 中 post_no > 1 的记录，排除首帖，删除/审核中的回复仍计入；仅创建时检查，编辑不计次。浏览器与 Agent 共用 postwriteservice 校验，Agent 超限返回 429。沿用主题配额的尽力并发语义，不增加计数表或事务。
 
 直传完成接口在读取待上传对象前重新解析当前社区上传策略，包括等级上传开关；禁止使用修改权限前申请的直传凭据完成发布。管理后台素材上传保持独立管理授权。策略校验失败不消费待上传对象，可在权限恢复后按现有有效期重试。
 

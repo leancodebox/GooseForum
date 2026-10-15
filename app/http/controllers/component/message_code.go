@@ -1,6 +1,7 @@
 package component
 
 const (
+	MessageTrustDailyReplies MessageCode = "trust.dailyReplies"
 	MessageTrustDailyTopics  MessageCode = "trust.dailyTopics"
 	MessageTrustContentLimit MessageCode = "trust.contentLimit"
 	MessageTrustAdjustment   MessageCode = "trust.adjustmentFailed"

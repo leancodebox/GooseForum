@@ -26,7 +26,6 @@ export const adminNavGroups: { label?: AdminTextKey; items: AdminNavItem[] }[] =
     { label: 'records', url: '/admin/opt-records', icon: <ListChecks />, permission: AdminPermission.Admin },
   ] },
   { label: 'settings', items: [
-    { label: 'trust', url: '/admin/settings/trust', icon: <ShieldCheck />, permission: AdminPermission.Admin },
     { label: 'siteInfo', url: '/admin/settings/site-info', icon: <PanelsTopLeft />, permission: AdminPermission.SiteManager },
     { label: 'siteChrome', url: '/admin/settings/site-chrome', icon: <PanelLeft />, permission: AdminPermission.SiteManager },
     { label: 'mail', url: '/admin/settings/mail', icon: <Mail />, permission: AdminPermission.SiteManager },
@@ -34,6 +33,7 @@ export const adminNavGroups: { label?: AdminTextKey; items: AdminNavItem[] }[] =
     { label: 'oidc', url: '/admin/settings/oidc-provider', icon: <KeyRound />, permission: AdminPermission.SiteManager },
     { label: 'agent', url: '/admin/settings/agent', icon: <KeyRound />, permission: AdminPermission.SiteManager },
     { label: 'security', url: '/admin/settings/security', icon: <ShieldCheck />, permission: AdminPermission.SiteManager },
+    { label: 'trust', url: '/admin/settings/trust', icon: <ShieldCheck />, permission: AdminPermission.Admin },
     { label: 'posting', url: '/admin/settings/posting', icon: <FileText />, permission: AdminPermission.SiteManager },
     { label: 'announcement', url: '/admin/settings/announcement', icon: <Megaphone />, permission: AdminPermission.PageManager },
     { label: 'httpNotify', url: '/admin/settings/http-notify', icon: <Webhook />, permission: AdminPermission.SiteManager },

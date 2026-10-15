@@ -3,6 +3,7 @@ import mfa from './zh-mfa.js';
 export default {
   "trust.contentLimit": "每篇内容的{kind}不能超过 {limit}。",
   "trust.adjustmentFailed": "等级调整失败：{error}",
+  "trust.dailyReplies": "当前等级每天最多新建 {limit} 条回复。",
   "trust.dailyTopics": "当前等级每天最多新建 {limit} 个主题（含草稿）。",
   "auth.registration.rateLimited": "请求过于频繁，请稍后重试。",
   "markdown.mention.invalid": "提及语法不正确，或提及用户超过 20 人。请检查正文。",

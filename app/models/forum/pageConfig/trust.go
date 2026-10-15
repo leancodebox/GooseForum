@@ -21,6 +21,7 @@ type PromotionRule struct {
 }
 
 type TrustLimits struct {
+	MaxDailyReplies         *int             `json:"maxDailyReplies"`
 	MaxDailyTopics          *int             `json:"maxDailyTopics"`
 	Level                   trustlevel.Level `json:"level"`
 	AllowImageUpload        bool             `json:"allowImageUpload"`
@@ -43,6 +44,7 @@ func DefaultTrustSettings() TrustConfig {
 		l := TrustLimits{Level: d.Level, AllowImageUpload: true}
 		if d.Level == trustlevel.Newcomer {
 			l.MaxDailyTopics = new(3)
+			l.MaxDailyReplies = new(10)
 			l.MaxImagesPerPost = new(1)
 			l.MaxExternalLinksPerPost = new(2)
 			l.MaxMentionsPerPost = new(2)
@@ -75,6 +77,9 @@ func (c TrustConfig) Valid() bool {
 	}
 	seen := map[trustlevel.Level]bool{}
 	for _, l := range c.LevelLimits {
+		if l.MaxDailyReplies != nil && (*l.MaxDailyReplies < 0 || *l.MaxDailyReplies > 100000) {
+			return false
+		}
 		if l.MaxDailyTopics != nil && (*l.MaxDailyTopics < 0 || *l.MaxDailyTopics > 100000) {
 			return false
 		}

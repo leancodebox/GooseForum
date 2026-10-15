@@ -82,6 +82,9 @@ func SetUserTrustLevel(req component.BetterRequest[SetTrustReq]) component.Respo
 func trustWriteFailure(err error) (component.Response, bool) {
 	var limit *trustlevelservice.LimitError
 	if errors.As(err, &limit) {
+		if limit.Kind == trustlevelservice.DailyRepliesKind {
+			return component.FailResponseCode(component.MessageTrustDailyReplies, component.MessageParams{"limit": limit.Limit}), true
+		}
 		if limit.Kind == trustlevelservice.DailyTopicsKind {
 			return component.FailResponseCode(component.MessageTrustDailyTopics, component.MessageParams{"limit": limit.Limit}), true
 		}

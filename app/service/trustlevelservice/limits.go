@@ -9,6 +9,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/trustlevel"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
@@ -21,6 +22,25 @@ type LimitError struct {
 }
 
 const DailyTopicsKind = "每日新建主题数"
+const DailyRepliesKind = "每日新建回复数"
+
+func ValidateNewReply(id uint64) error {
+	l, enabled, err := Limits(id)
+	if err != nil || !enabled || l.MaxDailyReplies == nil {
+		return err
+	}
+	if *l.MaxDailyReplies == 0 {
+		return &LimitError{DailyRepliesKind, 0}
+	}
+	count, err := posts.DailyReplyCount(id)
+	if err != nil {
+		return err
+	}
+	if count >= int64(*l.MaxDailyReplies) {
+		return &LimitError{DailyRepliesKind, *l.MaxDailyReplies}
+	}
+	return nil
+}
 
 var ErrGlobalDailyTopics = errors.New("global daily topic limit reached")
 

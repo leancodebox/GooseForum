@@ -15,7 +15,7 @@ test('trust conditions and image limits save and survive reload', async ({ page 
   let settings = {
     schemaVersion: 1, autoPromotionEnabled: true, restrictionsEnabled: false,
     promotionRules: [{ level: 100, enabled: true, minAccountAgeHours: 24, minVisitDays: 2, minTopicsVisited: 5 }, { level: 200, enabled: true, minAccountAgeHours: 336, minVisitDays: 7, minTopicsVisited: 20 }],
-    levelLimits: [0, 100, 200, 1000].map(level => ({ level, allowImageUpload: true, maxDailyTopics: level === 0 ? 3 : null, maxImagesPerPost: level === 0 ? 1 : null, maxExternalLinksPerPost: level === 0 ? 2 : null, maxMentionsPerPost: level === 0 ? 2 : null })),
+    levelLimits: [0, 100, 200, 1000].map(level => ({ level, allowImageUpload: true, maxDailyTopics: level === 0 ? 3 : null, maxDailyReplies: level === 0 ? 10 : null, maxImagesPerPost: level === 0 ? 1 : null, maxExternalLinksPerPost: level === 0 ? 2 : null, maxMentionsPerPost: level === 0 ? 2 : null })),
   }
   await page.route('**/__goose_page/**', route => route.fulfill({ json: { component: 'admin.shell', props: {}, layout, meta: { title: 'Trust levels' }, url: '/admin/settings/trust?lang=en', version: '1.0' } }))
   await page.route('**/api/admin/get-trust-settings', route => route.fulfill({ json: { code: 0, result: settings } }))
@@ -28,10 +28,12 @@ test('trust conditions and image limits save and survive reload', async ({ page 
   await page.getByRole('switch', { name: 'Apply level limits' }).check()
   await page.getByLabel('Images per post', { exact: true }).first().fill('3')
   await page.getByLabel('Daily new topics (including drafts)', { exact: true }).first().fill('5')
+  await page.getByLabel('Daily new replies', { exact: true }).first().fill('12')
   await page.getByRole('button', { name: 'Save', exact: true }).click()
   await expect.poll(() => settings.levelLimits[0].maxImagesPerPost).toBe(3)
   expect(settings.promotionRules[0].minAccountAgeHours).toBe(48)
   expect(settings.levelLimits[0].maxDailyTopics).toBe(5)
+  expect(settings.levelLimits[0].maxDailyReplies).toBe(12)
   await page.reload()
   await page.getByRole('tab', { name: 'Limits', exact: true }).click()
   await expect(page.getByLabel('Images per post', { exact: true }).first()).toHaveValue('3')

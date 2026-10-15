@@ -206,6 +206,10 @@ func (h *Handler) createPost(c *gin.Context) {
 func writeError(c *gin.Context, err error) {
 	var limit *trustlevelservice.LimitError
 	if errors.As(err, &limit) {
+		if limit.Kind == trustlevelservice.DailyRepliesKind {
+			fail(c, 429, "trust_daily_replies", limit.Error())
+			return
+		}
 		if limit.Kind == trustlevelservice.DailyTopicsKind {
 			fail(c, 429, "trust_daily_topics", limit.Error())
 			return

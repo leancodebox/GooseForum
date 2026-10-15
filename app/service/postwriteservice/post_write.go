@@ -61,6 +61,9 @@ func Create(input CreateInput) (posts.Entity, error) {
 		return posts.Entity{}, err
 	}
 	input.Content = content
+	if err := trustlevelservice.ValidateNewReply(input.UserID); err != nil {
+		return posts.Entity{}, err
+	}
 	if err := trustlevelservice.ValidateContent(input.UserID, content, input.SourceVersion); err != nil {
 		return posts.Entity{}, err
 	}

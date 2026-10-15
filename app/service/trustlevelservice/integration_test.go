@@ -9,6 +9,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/trustlevel"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/trusthistory"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -17,7 +18,7 @@ import (
 
 func TestReviewManualLockAndContentLimits(t *testing.T) {
 	db := dbconnect.Connect()
-	if err := db.AutoMigrate(&users.EntityComplete{}, &pageConfig.Entity{}, &trusthistory.History{}, &topics.Entity{}); err != nil {
+	if err := db.AutoMigrate(&users.EntityComplete{}, &pageConfig.Entity{}, &trusthistory.History{}, &topics.Entity{}, &posts.Entity{}); err != nil {
 		t.Fatal(err)
 	}
 	config := pageConfig.DefaultTrustSettings()
@@ -42,6 +43,21 @@ func TestReviewManualLockAndContentLimits(t *testing.T) {
 	}
 	if err := ValidateNewTopic(u.Id, 0); err != nil {
 		t.Fatal(err)
+	}
+	if err := db.Create(&posts.Entity{UserId: u.Id, PostNo: 1}).Error; err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidateNewReply(u.Id); err != nil {
+		t.Fatal("first post counted as reply", err)
+	}
+	for i := 0; i < 10; i++ {
+		if err := db.Create(&posts.Entity{UserId: u.Id, PostNo: uint64(i + 2)}).Error; err != nil {
+			t.Fatal(err)
+		}
+	}
+	var replyQuota *LimitError
+	if err := ValidateNewReply(u.Id); !errors.As(err, &replyQuota) || replyQuota.Limit != 10 {
+		t.Fatalf("reply quota=%v", err)
 	}
 	for i := 0; i < 3; i++ {
 		if err := db.Create(&topics.Entity{UserId: u.Id, Title: "daily quota draft", Status: 0}).Error; err != nil {
