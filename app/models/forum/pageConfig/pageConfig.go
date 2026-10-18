@@ -223,19 +223,15 @@ type PostingContent struct {
 		Whitelist []string `json:"whitelist"`
 	} `json:"externalLinks"`
 	TextControl struct {
-		MinPostLength              int `json:"minPostLength"`
-		MaxPostLength              int `json:"maxPostLength"`
-		MinTitleLength             int `json:"minTitleLength"`
-		MaxTitleLength             int `json:"maxTitleLength"`
-		NewUserPostCooldownMinutes int `json:"newUserPostCooldownMinutes"`
-		MaxDailyTopicsPerUser      int `json:"maxDailyTopicsPerUser"`
+		MinPostLength  int `json:"minPostLength"`
+		MaxPostLength  int `json:"maxPostLength"`
+		MinTitleLength int `json:"minTitleLength"`
+		MaxTitleLength int `json:"maxTitleLength"`
 	} `json:"textControl"`
 	UploadControl struct {
-		AllowAttachments             bool     `json:"allowAttachments"`
-		AuthorizedExtensions         []string `json:"authorizedExtensions"`
-		MaxAttachmentSizeKb          int      `json:"maxAttachmentSizeKb"`
-		MaxDailyUploadsPerUser       int      `json:"maxDailyUploadsPerUser"`
-		NewUserUploadCooldownMinutes int      `json:"newUserUploadCooldownMinutes"`
+		AllowAttachments     bool     `json:"allowAttachments"`
+		AuthorizedExtensions []string `json:"authorizedExtensions"`
+		MaxAttachmentSizeKb  int      `json:"maxAttachmentSizeKb"`
 	} `json:"uploadControl"`
 }
 

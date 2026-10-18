@@ -17,6 +17,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
+	"github.com/leancodebox/GooseForum/app/service/trustlevelservice"
 	"gorm.io/gorm"
 )
 
@@ -68,7 +69,12 @@ func optionalID(value uint64) any {
 
 func (h *Handler) me(c *gin.Context) {
 	a := current(c)
-	success(c, 200, gin.H{"id": fmt.Sprint(a.User.Id), "username": a.User.Username, "clientId": a.ClientID, "scopes": a.Scopes, "canWrite": a.canWrite(), "restriction": a.User.EffectiveRestriction(time.Now())})
+	policy, err := trustlevelservice.ResolvePolicy(a.User.Id)
+	if err != nil {
+		fail(c, 503, "policy_unavailable", "Unable to read participation policy")
+		return
+	}
+	success(c, 200, gin.H{"id": fmt.Sprint(a.User.Id), "username": a.User.Username, "clientId": a.ClientID, "scopes": a.Scopes, "canWrite": a.canWrite(), "restriction": a.User.EffectiveRestriction(time.Now()), "limits": policy.Limits, "communityUploadRoleExempt": policy.Account.RoleId > 0})
 }
 
 func (a *actor) canWrite() bool {

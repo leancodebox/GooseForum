@@ -1,4 +1,8 @@
 export default {
+  oauthOidc: "OAuth / OIDC",
+  oauthLogin: "OAuth login",
+  oidcProvider: "OIDC provider",
+  communityRules: "Community rules",
   trust: "Trust levels",
   agent: "Agent access",
   console: "Admin Console",

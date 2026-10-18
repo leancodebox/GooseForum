@@ -452,7 +452,7 @@ test.beforeEach(async ({ page }) => {
 
 test('presents the OAuth callback as explained copyable segments', async ({ page }, testInfo) => {
   await page.goto('/admin/settings/oauth?lang=zh')
-  await expect(page.getByRole('heading', { name: 'OAuth 登录' })).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'OAuth / OIDC', exact: true }).getByRole('link', { name: 'OAuth 第三方登录', exact: true })).toHaveAttribute('aria-current', 'page')
 
   const callback = page.getByLabel('回调地址', { exact: true })
   await expect(callback).toHaveText('https://forum.example/base/api/auth/company-sso/callback')

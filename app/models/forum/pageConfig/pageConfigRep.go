@@ -1,7 +1,6 @@
 package pageConfig
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
@@ -16,14 +15,6 @@ func GetPostingSettingsConfig(defaultValue PostingContent) PostingContent {
 	}
 
 	config := jsonopt.Decode[PostingContent](entity.Config)
-	var raw struct {
-		TextControl map[string]json.RawMessage `json:"textControl"`
-	}
-	if err := json.Unmarshal([]byte(entity.Config), &raw); err == nil {
-		if _, exists := raw.TextControl["maxDailyTopicsPerUser"]; !exists {
-			config.TextControl.MaxDailyTopicsPerUser = defaultValue.TextControl.MaxDailyTopicsPerUser
-		}
-	}
 	return config
 }
 
@@ -85,7 +76,7 @@ func GetConfigByPageType[T any](pageType string, defaultValue T) T {
 	return defaultValue
 }
 
-const AppMigrationVersion uint32 = 25
+const AppMigrationVersion uint32 = 26
 
 func GetMigrationVersion() uint32 {
 	configEntity := GetByPageType(Migration)

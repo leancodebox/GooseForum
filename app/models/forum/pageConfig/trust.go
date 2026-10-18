@@ -21,27 +21,29 @@ type PromotionRule struct {
 }
 
 type TrustLimits struct {
-	MaxDailyReplies         *int             `json:"maxDailyReplies"`
-	MaxDailyTopics          *int             `json:"maxDailyTopics"`
-	Level                   trustlevel.Level `json:"level"`
-	AllowImageUpload        bool             `json:"allowImageUpload"`
-	MaxImagesPerPost        *int             `json:"maxImagesPerPost"`
-	MaxExternalLinksPerPost *int             `json:"maxExternalLinksPerPost"`
-	MaxMentionsPerPost      *int             `json:"maxMentionsPerPost"`
+	MaxDailyUploads            *int             `json:"maxDailyUploads"`
+	MinPostAccountAgeMinutes   int              `json:"minPostAccountAgeMinutes"`
+	MinUploadAccountAgeMinutes int              `json:"minUploadAccountAgeMinutes"`
+	MaxDailyReplies            *int             `json:"maxDailyReplies"`
+	MaxDailyTopics             *int             `json:"maxDailyTopics"`
+	Level                      trustlevel.Level `json:"level"`
+	AllowImageUpload           bool             `json:"allowImageUpload"`
+	MaxImagesPerPost           *int             `json:"maxImagesPerPost"`
+	MaxExternalLinksPerPost    *int             `json:"maxExternalLinksPerPost"`
+	MaxMentionsPerPost         *int             `json:"maxMentionsPerPost"`
 }
 
 type TrustConfig struct {
 	SchemaVersion        int             `json:"schemaVersion"`
 	AutoPromotionEnabled bool            `json:"autoPromotionEnabled"`
 	PromotionRules       []PromotionRule `json:"promotionRules"`
-	RestrictionsEnabled  bool            `json:"restrictionsEnabled"`
 	LevelLimits          []TrustLimits   `json:"levelLimits"`
 }
 
 func DefaultTrustSettings() TrustConfig {
-	c := TrustConfig{SchemaVersion: 1, AutoPromotionEnabled: true, PromotionRules: []PromotionRule{{trustlevel.Member, true, 24, 2, 5}, {trustlevel.Regular, true, 336, 7, 20}}}
+	c := TrustConfig{SchemaVersion: 2, AutoPromotionEnabled: true, PromotionRules: []PromotionRule{{trustlevel.Member, true, 24, 2, 5}, {trustlevel.Regular, true, 336, 7, 20}}}
 	for _, d := range trustlevel.Definitions() {
-		l := TrustLimits{Level: d.Level, AllowImageUpload: true}
+		l := TrustLimits{Level: d.Level, AllowImageUpload: true, MaxDailyTopics: new(10), MaxDailyUploads: new(10), MinUploadAccountAgeMinutes: 1440}
 		if d.Level == trustlevel.Newcomer {
 			l.MaxDailyTopics = new(3)
 			l.MaxDailyReplies = new(10)
@@ -55,7 +57,7 @@ func DefaultTrustSettings() TrustConfig {
 }
 
 func (c TrustConfig) Valid() bool {
-	if c.SchemaVersion != 1 || len(c.PromotionRules) != 2 || len(c.LevelLimits) != 4 {
+	if c.SchemaVersion != 2 || len(c.PromotionRules) != 2 || len(c.LevelLimits) != 4 {
 		return false
 	}
 	rules := map[trustlevel.Level]PromotionRule{}
@@ -77,6 +79,12 @@ func (c TrustConfig) Valid() bool {
 	}
 	seen := map[trustlevel.Level]bool{}
 	for _, l := range c.LevelLimits {
+		if l.MinPostAccountAgeMinutes < 0 || l.MinPostAccountAgeMinutes > 5256000 || l.MinUploadAccountAgeMinutes < 0 || l.MinUploadAccountAgeMinutes > 5256000 {
+			return false
+		}
+		if l.MaxDailyUploads != nil && (*l.MaxDailyUploads < 0 || *l.MaxDailyUploads > 100000) {
+			return false
+		}
 		if l.MaxDailyReplies != nil && (*l.MaxDailyReplies < 0 || *l.MaxDailyReplies > 100000) {
 			return false
 		}

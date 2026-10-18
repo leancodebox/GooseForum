@@ -94,7 +94,7 @@ func completeDirectImageUpload(c *gin.Context, adminUpload bool) {
 	}
 	userId := c.GetUint64("userId")
 	if !adminUpload {
-		if _, failure := resolveImageUploadPolicy(userId); failure != nil {
+		if _, failure := resolveImageUploadPolicyStage(userId, false, true); failure != nil {
 			c.JSON(failure.Status, failure.Data)
 			return
 		}

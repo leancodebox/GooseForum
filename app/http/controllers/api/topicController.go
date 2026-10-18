@@ -53,7 +53,6 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	if _, err := component.CheckUserPermission(&userEntity, component.PermissionActionPost); err != nil {
 		return component.FailResponseError(err)
 	}
-	isNew := req.Params.TopicId == 0
 
 	if response, invalid := validateTextLength(req.Params.Title, postingConfig.TextControl.MinTitleLength, postingConfig.TextControl.MaxTitleLength, component.MessageTopicTitleTooShort, component.MessageTopicTitleTooLong); invalid {
 		return response
@@ -62,18 +61,10 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		return response
 	}
 
-	// 检查新用户冷却时间
-	if isNew {
-		if response, coolingDown := newUserCooldownResponse(userEntity.CreatedAt, postingConfig.TextControl.NewUserPostCooldownMinutes, component.MessageTopicPostCooldown); coolingDown {
-			return response
-		}
-	}
-
 	result, err := topicwriteservice.Write(topicwriteservice.WriteInput{
 		SourceVersion: req.Params.SourceVersion,
 		UserID:        req.UserId, TopicID: req.Params.TopicId, Title: req.Params.Title,
 		Content: req.Params.Content, CategoryIDs: req.Params.CategoryId, Status: req.Params.TopicStatus,
-		DailyLimit: postingConfig.TextControl.MaxDailyTopicsPerUser,
 	})
 	if err != nil {
 		if response, ok := trustWriteFailure(err); ok {
@@ -87,9 +78,6 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		}
 		if errors.Is(err, topicwriteservice.ErrOwnerMismatch) {
 			return component.FailResponseCode(component.MessageTopicOwnerMismatch, nil)
-		}
-		if errors.Is(err, topicwriteservice.ErrDailyLimit) {
-			return component.FailResponseCode(component.MessageTopicDailyLimit, nil)
 		}
 		if errors.Is(err, accesscontrol.ErrRestrictedCategorySingle) {
 			return component.FailResponseCode(component.MessageTopicRestrictedSingle, nil)
@@ -113,19 +101,6 @@ func validateTextLength(value string, minLength, maxLength int, tooShort, tooLon
 		return component.FailResponseCode(tooLong, component.MessageParams{"maxLength": maxLength}), true
 	}
 	return component.Response{}, false
-}
-
-func newUserCooldownResponse(createdAt time.Time, minutes int, code component.MessageCode) (component.Response, bool) {
-	if minutes <= 0 {
-		return component.Response{}, false
-	}
-	availableAt := postingpolicy.AvailableAt(createdAt, minutes)
-	if !time.Now().Before(availableAt) {
-		return component.Response{}, false
-	}
-	return component.FailResponseCode(code, component.MessageParams{
-		"minutes": minutes, "availableAt": availableAt.Format("2006-01-02 15:04:05"),
-	}), true
 }
 
 type TopicStatusReq struct {
@@ -178,11 +153,6 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 
 	content := strings.TrimSpace(req.Params.Content)
 	if response, invalid := validateTextLength(content, postingConfig.TextControl.MinPostLength, postingConfig.TextControl.MaxPostLength, component.MessageCommentContentTooShort, component.MessageCommentContentTooLong); invalid {
-		return response
-	}
-
-	// 评论也受发帖冷却限制
-	if response, coolingDown := newUserCooldownResponse(userEntity.CreatedAt, postingConfig.TextControl.NewUserPostCooldownMinutes, component.MessageCommentPostCooldown); coolingDown {
 		return response
 	}
 

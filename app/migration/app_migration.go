@@ -327,6 +327,15 @@ func runVersionedDataMigrations() error {
 		}
 		currentVersion = 25
 	}
+	if currentVersion < 26 {
+		if err := datamigration.MigrateParticipationSettings(); err != nil {
+			return err
+		}
+		if err := syncMigrationVersion(26); err != nil {
+			return err
+		}
+		currentVersion = 26
+	}
 	slog.Info("app migration end", "version", currentVersion)
 	return nil
 }

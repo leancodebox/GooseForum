@@ -2,6 +2,10 @@
 import en from "./en-shell";
 export default {
   ...en,
+  oauthOidc: "OAuth / OIDC",
+  oauthLogin: "OAuth 外部ログイン",
+  oidcProvider: "OIDC プロバイダー",
+  communityRules: "コミュニティルール",
   trust: "信頼レベル",
   console: "管理コンソール",
   dashboard: "ダッシュボード",

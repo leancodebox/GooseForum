@@ -98,7 +98,14 @@ func TestManualImageUploadPermissionsValidationAndQuota(t *testing.T) {
 		t.Fatal(err)
 	}
 	old := pageConfig.GetByPageType(pageConfig.PostingSettings)
+	oldTrust := pageConfig.GetByPageType(pageConfig.TrustSettings)
 	t.Cleanup(func() {
+		if oldTrust.Id == 0 {
+			db.Where("page_type = ?", pageConfig.TrustSettings).Delete(&pageConfig.Entity{})
+		} else {
+			_ = pageConfig.SaveConfig(pageConfig.TrustSettings, oldTrust.Config)
+		}
+		hotdataserve.ClearTrustSettingsCache()
 		db.Unscoped().Where("user_id = ?", user.Id).Delete(&agenttokens.Entity{})
 		db.Where("user_id = ?", user.Id).Delete(&fileUsage.Entity{})
 		fileDB.Where("user_id = ?", user.Id).Delete(&filedata.Entity{})
@@ -114,9 +121,17 @@ func TestManualImageUploadPermissionsValidationAndQuota(t *testing.T) {
 	config.UploadControl.AllowAttachments = true
 	config.UploadControl.AuthorizedExtensions = []string{".png"}
 	config.UploadControl.MaxAttachmentSizeKb = 1
-	config.UploadControl.MaxDailyUploadsPerUser = 1
-	config.UploadControl.NewUserUploadCooldownMinutes = 60
+	trust := pageConfig.DefaultTrustSettings()
+	for i := range trust.LevelLimits {
+		trust.LevelLimits[i].MaxDailyUploads = new(1)
+		trust.LevelLimits[i].MinUploadAccountAgeMinutes = 60
+	}
 	saveConfig := func() {
+		trustJSON, _ := json.Marshal(trust)
+		if err := pageConfig.SaveConfig(pageConfig.TrustSettings, string(trustJSON)); err != nil {
+			t.Fatal(err)
+		}
+		hotdataserve.ClearTrustSettingsCache()
 		data, _ := json.Marshal(config)
 		if err := pageConfig.SaveConfig(pageConfig.PostingSettings, string(data)); err != nil {
 			t.Fatal(err)

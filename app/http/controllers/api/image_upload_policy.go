@@ -25,6 +25,10 @@ func resolveAdminImageUploadPolicy(userID uint64) (*imageUploadPolicy, *imageUpl
 }
 
 func resolveImageUploadPolicyFor(userID uint64, adminUpload bool) (*imageUploadPolicy, *imageUploadFailure) {
+	return resolveImageUploadPolicyStage(userID, adminUpload, false)
+}
+
+func resolveImageUploadPolicyStage(userID uint64, adminUpload, completing bool) (*imageUploadPolicy, *imageUploadFailure) {
 	if userID == 0 {
 		return nil, uploadFailure(http.StatusUnauthorized, component.MessageAuthRequired, nil)
 	}
@@ -38,7 +42,13 @@ func resolveImageUploadPolicyFor(userID uint64, adminUpload bool) (*imageUploadP
 	if status, err := component.CheckUserPermission(&user, component.PermissionActionUploadAttachment); err != nil {
 		return nil, &imageUploadFailure{Status: status, Data: component.FailDataError(err)}
 	}
-	policy, failure := imageuploadservice.ResolvePolicy(user)
+	var policy *imageuploadservice.Policy
+	var failure *imageuploadservice.Failure
+	if completing {
+		policy, failure = imageuploadservice.ResolveCompletionPolicy(user)
+	} else {
+		policy, failure = imageuploadservice.ResolvePolicy(user)
+	}
 	if failure != nil {
 		return nil, uploadFailure(failure.Status, component.MessageCode(failure.Code), component.MessageParams(failure.Params))
 	}

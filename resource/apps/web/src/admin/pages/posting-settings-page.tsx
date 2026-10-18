@@ -24,15 +24,11 @@ const defaults: PostingSettings = {
     maxPostLength: 50000,
     minTitleLength: 5,
     maxTitleLength: 100,
-    newUserPostCooldownMinutes: 0,
-    maxDailyTopicsPerUser: 10,
   },
   uploadControl: {
     allowAttachments: true,
     authorizedExtensions: [".jpg", ".jpeg", ".png", ".gif", ".webp"],
     maxAttachmentSizeKb: 5120,
-    maxDailyUploadsPerUser: 10,
-    newUserUploadCooldownMinutes: 0,
   },
 };
 export function PostingSettingsPage({
@@ -119,73 +115,105 @@ export function PostingSettingsPage({
   }
   return (
     <main className="flex flex-1 flex-col gap-5 px-3 py-3 lg:px-4">
-      <header className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">{text("posting")}</h2>
-          <p className="text-xs text-muted-foreground">{text("postingHint")}</p>
+
+      <div className="grid items-start gap-10 lg:grid-cols-2">
+        <div className="flex min-w-0 flex-col gap-8">
+          <FieldSet>
+            <FieldLegend className="flex items-center gap-2 border-b pb-2">
+              <FileText className="size-5 text-muted-foreground" />
+              {text("text")}
+            </FieldLegend>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <N
+                label={text("minTitle")}
+                value={form.textControl.minTitleLength}
+                disabled={loading}
+                onChange={(v) => number("textControl", "minTitleLength", v)}
+              />
+              <N
+                label={text("maxTitle")}
+                value={form.textControl.maxTitleLength}
+                disabled={loading}
+                onChange={(v) => number("textControl", "maxTitleLength", v)}
+              />
+              <N
+                label={text("minPost")}
+                value={form.textControl.minPostLength}
+                disabled={loading}
+                onChange={(v) => number("textControl", "minPostLength", v)}
+              />
+              <N
+                label={text("maxPost")}
+                value={form.textControl.maxPostLength}
+                disabled={loading}
+                onChange={(v) => number("textControl", "maxPostLength", v)}
+              />
+
+
+            </div>
+          </FieldSet>
+          <FieldSet>
+            <FieldLegend>{text("externalLinks")}</FieldLegend>
+            <FieldGroup>
+              <Field orientation="horizontal">
+                <FieldLabel htmlFor="external-links-enabled">
+                  {text("externalLinksEnabled")}
+                </FieldLabel>
+                <Switch
+                  id="external-links-enabled"
+                  disabled={loading || saving}
+                  checked={form.externalLinks?.enabled ?? false}
+                  onCheckedChange={(enabled) => setForm(current => ({
+                    ...current,
+                    externalLinks: { enabled, whitelist: current.externalLinks?.whitelist ?? [] },
+                  }))}
+                />
+              </Field>
+              <FieldDescription>{text("externalLinksHint")}</FieldDescription>
+              <Field>
+                <FieldLabel>
+                  {text("externalLinksWhitelist")}
+                </FieldLabel>
+                {(form.externalLinks?.whitelist ?? []).map((domain, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Input
+                      aria-label={`${text("externalLinksWhitelist")} ${index + 1}`}
+                      placeholder="example.com"
+                      autoCapitalize="none"
+                      spellCheck={false}
+                      disabled={loading || saving}
+                      value={domain}
+                      onChange={event => {
+                        const value = event.target.value;
+                        setForm(current => ({ ...current, externalLinks: {
+                          enabled: current.externalLinks?.enabled ?? false,
+                          whitelist: (current.externalLinks?.whitelist ?? []).map((item, i) => i === index ? value : item),
+                        } }));
+                      }}
+                    />
+                    <Button variant="ghost" size="icon" disabled={loading || saving}
+                      aria-label={`${text("remove")} ${index + 1}`}
+                      onClick={() => setForm(current => ({ ...current, externalLinks: {
+                        enabled: current.externalLinks?.enabled ?? false,
+                        whitelist: (current.externalLinks?.whitelist ?? []).filter((_, i) => i !== index),
+                      } }))}>
+                      <Trash2 />
+                    </Button>
+                  </div>
+                ))}
+                <Button variant="outline" className="w-fit" disabled={loading || saving}
+                  onClick={() => setForm(current => ({ ...current, externalLinks: {
+                    enabled: current.externalLinks?.enabled ?? false,
+                    whitelist: [...(current.externalLinks?.whitelist ?? []), ""],
+                  } }))}>
+                  <Plus data-icon="inline-start" />
+                  {text("add")}
+                </Button>
+                <FieldDescription>{text("externalLinksWhitelistHint")}</FieldDescription>
+              </Field>
+            </FieldGroup>
+          </FieldSet>
         </div>
-        <Button
-          size="sm"
-          disabled={loading || saving}
-          onClick={() => void save()}
-        >
-          {saving ? (
-            <Spinner data-icon="inline-start" />
-          ) : (
-            <Save data-icon="inline-start" />
-          )}
-          {text("save")}
-        </Button>
-      </header>
-      <div className="grid gap-10 lg:grid-cols-2">
-        <FieldSet>
-          <FieldLegend className="flex items-center gap-2 border-b pb-2">
-            <FileText className="size-5 text-muted-foreground" />
-            {text("text")}
-          </FieldLegend>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <N
-              label={text("minTitle")}
-              value={form.textControl.minTitleLength}
-              disabled={loading}
-              onChange={(v) => number("textControl", "minTitleLength", v)}
-            />
-            <N
-              label={text("maxTitle")}
-              value={form.textControl.maxTitleLength}
-              disabled={loading}
-              onChange={(v) => number("textControl", "maxTitleLength", v)}
-            />
-            <N
-              label={text("minPost")}
-              value={form.textControl.minPostLength}
-              disabled={loading}
-              onChange={(v) => number("textControl", "minPostLength", v)}
-            />
-            <N
-              label={text("maxPost")}
-              value={form.textControl.maxPostLength}
-              disabled={loading}
-              onChange={(v) => number("textControl", "maxPostLength", v)}
-            />
-            <N
-              label={text("postCooldown")}
-              value={form.textControl.newUserPostCooldownMinutes}
-              disabled={loading}
-              onChange={(v) =>
-                number("textControl", "newUserPostCooldownMinutes", v)
-              }
-            />
-            <N
-              label={text("dailyTopics")}
-              value={form.textControl.maxDailyTopicsPerUser}
-              disabled={loading}
-              onChange={(v) =>
-                number("textControl", "maxDailyTopicsPerUser", v)
-              }
-            />
-          </div>
-        </FieldSet>
         <FieldSet>
           <FieldLegend className="flex items-center gap-2 border-b pb-2">
             <Upload className="size-5 text-muted-foreground" />
@@ -211,14 +239,7 @@ export function PostingSettingsPage({
               />
             </Field>
             <div className="grid gap-5 sm:grid-cols-2">
-              <N
-                label={text("dailyUploads")}
-                value={form.uploadControl.maxDailyUploadsPerUser}
-                disabled={!form.uploadControl.allowAttachments}
-                onChange={(v) =>
-                  number("uploadControl", "maxDailyUploadsPerUser", v)
-                }
-              />
+
               <N
                 label={text("maxSize")}
                 value={form.uploadControl.maxAttachmentSizeKb}
@@ -227,14 +248,7 @@ export function PostingSettingsPage({
                   number("uploadControl", "maxAttachmentSizeKb", v)
                 }
               />
-              <N
-                label={text("uploadCooldown")}
-                value={form.uploadControl.newUserUploadCooldownMinutes}
-                disabled={!form.uploadControl.allowAttachments}
-                onChange={(v) =>
-                  number("uploadControl", "newUserUploadCooldownMinutes", v)
-                }
-              />
+
             </div>
             <Field>
               <FieldLabel>{text("extensions")}</FieldLabel>
@@ -283,68 +297,21 @@ export function PostingSettingsPage({
             </Field>
           </FieldGroup>
         </FieldSet>
-        <FieldSet>
-          <FieldLegend>{text("externalLinks")}</FieldLegend>
-          <FieldGroup>
-            <Field orientation="horizontal">
-              <FieldLabel htmlFor="external-links-enabled">
-                {text("externalLinksEnabled")}
-              </FieldLabel>
-              <Switch
-                id="external-links-enabled"
-                disabled={loading || saving}
-                checked={form.externalLinks?.enabled ?? false}
-                onCheckedChange={(enabled) => setForm(current => ({
-                  ...current,
-                  externalLinks: { enabled, whitelist: current.externalLinks?.whitelist ?? [] },
-                }))}
-              />
-            </Field>
-            <FieldDescription>{text("externalLinksHint")}</FieldDescription>
-            <Field>
-              <FieldLabel>
-                {text("externalLinksWhitelist")}
-              </FieldLabel>
-              {(form.externalLinks?.whitelist ?? []).map((domain, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <Input
-                    aria-label={`${text("externalLinksWhitelist")} ${index + 1}`}
-                    placeholder="example.com"
-                    autoCapitalize="none"
-                    spellCheck={false}
-                    disabled={loading || saving}
-                    value={domain}
-                    onChange={event => {
-                      const value = event.target.value;
-                      setForm(current => ({ ...current, externalLinks: {
-                        enabled: current.externalLinks?.enabled ?? false,
-                        whitelist: (current.externalLinks?.whitelist ?? []).map((item, i) => i === index ? value : item),
-                      } }));
-                    }}
-                  />
-                  <Button variant="ghost" size="icon" disabled={loading || saving}
-                    aria-label={`${text("remove")} ${index + 1}`}
-                    onClick={() => setForm(current => ({ ...current, externalLinks: {
-                      enabled: current.externalLinks?.enabled ?? false,
-                      whitelist: (current.externalLinks?.whitelist ?? []).filter((_, i) => i !== index),
-                    } }))}>
-                    <Trash2 />
-                  </Button>
-                </div>
-              ))}
-              <Button variant="outline" className="w-fit" disabled={loading || saving}
-                onClick={() => setForm(current => ({ ...current, externalLinks: {
-                  enabled: current.externalLinks?.enabled ?? false,
-                  whitelist: [...(current.externalLinks?.whitelist ?? []), ""],
-                } }))}>
-                <Plus data-icon="inline-start" />
-                {text("add")}
-              </Button>
-              <FieldDescription>{text("externalLinksWhitelistHint")}</FieldDescription>
-            </Field>
-          </FieldGroup>
-        </FieldSet>
       </div>
+      <footer className="flex justify-end border-t pt-4">
+        <Button
+          size="sm"
+          disabled={loading || saving}
+          onClick={() => void save()}
+        >
+          {saving ? (
+            <Spinner data-icon="inline-start" />
+          ) : (
+            <Save data-icon="inline-start" />
+          )}
+          {text("save")}
+        </Button>
+      </footer>
     </main>
   );
 }

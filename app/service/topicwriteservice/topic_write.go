@@ -27,7 +27,6 @@ import (
 var (
 	ErrTopicNotFound    = errors.New("topic not found")
 	ErrOwnerMismatch    = errors.New("topic owner mismatch")
-	ErrDailyLimit       = errors.New("daily topic limit reached")
 	ErrPermissionDenied = errors.New("topic write permission denied")
 	ErrVersionConflict  = errors.New("topic version conflict")
 )
@@ -44,7 +43,6 @@ type WriteInput struct {
 	Content            string
 	CategoryIDs        []uint64
 	Status             int8
-	DailyLimit         int
 }
 
 type WriteResult struct {
@@ -114,10 +112,7 @@ func loadWriteState(input WriteInput) (*writeState, error) {
 			return nil, ErrTopicNotFound
 		}
 	} else {
-		if err := trustlevelservice.ValidateNewTopic(input.UserID, input.DailyLimit); err != nil {
-			if errors.Is(err, trustlevelservice.ErrGlobalDailyTopics) {
-				return nil, ErrDailyLimit
-			}
+		if err := trustlevelservice.ValidateNewTopic(input.UserID); err != nil {
 			return nil, err
 		}
 		state.topic.UserId = input.UserID

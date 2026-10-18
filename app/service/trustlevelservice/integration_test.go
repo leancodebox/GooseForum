@@ -22,7 +22,6 @@ func TestReviewManualLockAndContentLimits(t *testing.T) {
 		t.Fatal(err)
 	}
 	config := pageConfig.DefaultTrustSettings()
-	config.RestrictionsEnabled = true
 	raw, _ := json.Marshal(config)
 	previous := pageConfig.GetByPageType(pageConfig.TrustSettings)
 	if err := pageConfig.SaveConfig(pageConfig.TrustSettings, string(raw)); err != nil {
@@ -41,7 +40,7 @@ func TestReviewManualLockAndContentLimits(t *testing.T) {
 	if err := db.Create(&u).Error; err != nil {
 		t.Fatal(err)
 	}
-	if err := ValidateNewTopic(u.Id, 0); err != nil {
+	if err := ValidateNewTopic(u.Id); err != nil {
 		t.Fatal(err)
 	}
 	if err := db.Create(&posts.Entity{UserId: u.Id, PostNo: 1}).Error; err != nil {
@@ -64,11 +63,8 @@ func TestReviewManualLockAndContentLimits(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if err := ValidateNewTopic(u.Id, 1); !errors.Is(err, ErrGlobalDailyTopics) {
-		t.Fatalf("global quota=%v", err)
-	}
 	var quota *LimitError
-	if err := ValidateNewTopic(u.Id, 0); !errors.As(err, &quota) || quota.Limit != 3 {
+	if err := ValidateNewTopic(u.Id); !errors.As(err, &quota) || quota.Limit != 3 {
 		t.Fatalf("daily limit=%v", err)
 	}
 	config.LevelLimits[0].MaxDailyTopics = new(0)
@@ -77,7 +73,7 @@ func TestReviewManualLockAndContentLimits(t *testing.T) {
 		t.Fatal(err)
 	}
 	hotdataserve.ClearTrustSettingsCache()
-	if err := ValidateNewTopic(u.Id, 0); !errors.As(err, &quota) || quota.Limit != 0 {
+	if err := ValidateNewTopic(u.Id); !errors.As(err, &quota) || quota.Limit != 0 {
 		t.Fatalf("zero daily limit=%v", err)
 	}
 	config.LevelLimits[0].MaxDailyTopics = nil
@@ -86,7 +82,7 @@ func TestReviewManualLockAndContentLimits(t *testing.T) {
 		t.Fatal(err)
 	}
 	hotdataserve.ClearTrustSettingsCache()
-	if err := ValidateNewTopic(u.Id, 0); err != nil {
+	if err := ValidateNewTopic(u.Id); err != nil {
 		t.Fatalf("null daily limit=%v", err)
 	}
 	if err := ValidateContent(u.Id, "![a](/a.png) ![b](/b.png)", 0); err == nil {

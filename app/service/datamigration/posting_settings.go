@@ -3,7 +3,6 @@ package datamigration
 import (
 	"encoding/json"
 
-	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 )
 
@@ -22,7 +21,8 @@ func EnsurePostingSettingsTopicLimit() PostingSettingsMigrationResult {
 		return result
 	}
 
-	defaultLimit := defaultconfig.GetDefaultPostingSettingsConfig().TextControl.MaxDailyTopicsPerUser
+	// Freeze the historical migration default; current policy lives in trust settings.
+	defaultLimit := 10
 	config, changed, err := addDefaultTopicLimit(entity.Config, defaultLimit)
 	if err != nil {
 		result.Failed = 1

@@ -39,6 +39,11 @@ func TestPrepareWritePreservesMentionsFromPreviouslyPublishedLegacyTopics(t *tes
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { db.Unscoped().Delete(&group) })
+	writer := users.EntityComplete{Id: 98731301, Username: "legacy-topic-writer", UsernameLower: "legacy-topic-writer"}
+	if err := db.Create(&writer).Error; err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { db.Unscoped().Delete(&writer) })
 	previous := accesscontrol.Default
 	accesscontrol.Default = accesscontrol.NewResolver(legacyTopicAccessStore{group.Id}, nil, nil)
 	t.Cleanup(func() { accesscontrol.Default = previous })

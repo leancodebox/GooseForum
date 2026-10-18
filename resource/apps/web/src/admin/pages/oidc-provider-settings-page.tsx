@@ -186,16 +186,6 @@ export function OIDCProviderSettingsPage({
   }
   return (
     <AdminPage spacing="relaxed">
-      <header className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-        <div className="min-w-0">
-          <h2 className="text-lg font-semibold">{text("oidc")}</h2>
-          <p className="text-xs text-muted-foreground">{text("oidcHint")}</p>
-        </div>
-        <Button className="shrink-0" size="sm" onClick={() => setEditor(blank())}>
-          <Plus data-icon="inline-start" />
-          {text("create")}
-        </Button>
-      </header>
       <section className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2 font-semibold">
@@ -249,21 +239,26 @@ export function OIDCProviderSettingsPage({
         </CollapsibleContent>
       </Collapsible> : null}
       <section className="overflow-hidden rounded-lg border">
-        <div className="flex items-center justify-between border-b p-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b p-3">
           <div>
             <h3 className="font-semibold">{text("apps")}</h3>
             <p className="text-xs text-muted-foreground">{clients.length}</p>
           </div>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={text('refresh')}
-            title={text('refresh')}
-            disabled={loading}
-            onClick={() => void load()}
-          >
-            <RefreshCw className={loading ? "animate-spin" : undefined} />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" onClick={() => setEditor(blank())}>
+              <Plus data-icon="inline-start" />{text("create")}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={text('refresh')}
+              title={text('refresh')}
+              disabled={loading}
+              onClick={() => void load()}
+            >
+              <RefreshCw className={loading ? "animate-spin" : undefined} />
+            </Button>
+          </div>
         </div>
         {loading && !clients.length ? (
           <div className="grid h-28 place-items-center">

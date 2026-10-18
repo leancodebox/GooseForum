@@ -23,6 +23,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/mfaservice"
 	"github.com/leancodebox/GooseForum/app/service/registrationservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
+	"github.com/leancodebox/GooseForum/app/service/trustlevelservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 
@@ -319,17 +320,13 @@ func UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	if postingConfig.UploadControl.NewUserUploadCooldownMinutes > 0 {
-		cooldownTime := userEntity.CreatedAt.Add(time.Duration(postingConfig.UploadControl.NewUserUploadCooldownMinutes) * time.Minute)
-		if time.Now().Before(cooldownTime) {
-			minutes := postingConfig.UploadControl.NewUserUploadCooldownMinutes
-			availableAt := cooldownTime.Format("2006-01-02 15:04:05")
-			c.JSON(200, component.FailDataCode(
-				component.MessageUploadCooldown,
-
-				component.MessageParams{"minutes": minutes, "availableAt": availableAt}))
-			return
-		}
+	uploadPolicy, err := trustlevelservice.ResolvePolicy(userId)
+	if err == nil {
+		err = uploadPolicy.ValidateUpload(0, true)
+	}
+	if err != nil {
+		writeAvatarPolicyError(c, err)
+		return
 	}
 
 	files, err := avatarFormFiles(c)
@@ -340,15 +337,9 @@ func UploadAvatar(c *gin.Context) {
 	}
 
 	fileCount := files.Count()
-	if postingConfig.UploadControl.MaxDailyUploadsPerUser > 0 {
-		count := filedata.CountDailyUploads(userId)
-		if count+int64(fileCount) > int64(postingConfig.UploadControl.MaxDailyUploadsPerUser) {
-			c.JSON(200, component.FailDataCode(
-				component.MessageUploadDailyLimitAvatar,
-
-				component.MessageParams{"count": count, "fileCount": fileCount}))
-			return
-		}
+	if err := uploadPolicy.ValidateUpload(fileCount, true); err != nil {
+		writeAvatarPolicyError(c, err)
+		return
 	}
 
 	maxSize := avatarUploadMaxSize()
@@ -664,4 +655,13 @@ func EditUserPrivacy(req component.BetterRequest[EditUserPrivacyReq]) component.
 	}
 	userservice.RefreshUserCaches(&user)
 	return component.SuccessResponseCode("更新成功", component.MessageUserUpdateSuccess, nil)
+}
+
+func writeAvatarPolicyError(c *gin.Context, err error) {
+	var policy *trustlevelservice.PolicyError
+	if errors.As(err, &policy) {
+		c.JSON(200, component.FailDataCode(component.MessageCode(policy.Code), component.MessageParams(policy.Params)))
+		return
+	}
+	c.JSON(500, component.FailDataCode(component.MessageOperationFailed, nil))
 }

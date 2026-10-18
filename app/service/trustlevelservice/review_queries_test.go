@@ -22,7 +22,6 @@ func TestReplyAnalysisLoadsAccountOnce(t *testing.T) {
 		t.Fatal(err)
 	}
 	c := pageConfig.DefaultTrustSettings()
-	c.RestrictionsEnabled = true
 	raw, _ := json.Marshal(c)
 	previous := pageConfig.GetByPageType(pageConfig.TrustSettings)
 	if err := pageConfig.SaveConfig(pageConfig.TrustSettings, string(raw)); err != nil {

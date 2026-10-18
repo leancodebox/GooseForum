@@ -186,37 +186,19 @@ export function OAuthSettingsPage({
     setActive(String(Math.max(0, deletingIndex - 1)));
     setDeletingIndex(null);
   }
+  const addProviderAction = (
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={loading || Boolean(loadError)}
+      onClick={add}
+    >
+      <Plus data-icon="inline-start" />
+      {text("addProvider")}
+    </Button>
+  );
   return (
     <AdminPage spacing="relaxed">
-      <header className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">{text("oauth")}</h2>
-          <p className="text-xs text-muted-foreground">{text("oauthHint")}</p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={loading || Boolean(loadError)}
-            onClick={add}
-          >
-            <Plus data-icon="inline-start" />
-            {text("addProvider")}
-          </Button>
-          <Button
-            size="sm"
-            disabled={saving || loading || Boolean(loadError) || !items.length}
-            onClick={() => void save()}
-          >
-            {saving ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <Save data-icon="inline-start" />
-            )}
-            {text("save")}
-          </Button>
-        </div>
-      </header>
       {loading ? (
         <div className="grid min-h-64 place-items-center">
           <Spinner />
@@ -238,7 +220,8 @@ export function OAuthSettingsPage({
         </Empty>
       ) : current ? (
         <Tabs value={String(index)} onValueChange={setActive}>
-          <TabsList>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+          <TabsList className="h-auto min-w-0 max-w-full flex-wrap">
             {items.map((p, i) => (
               <TabsTrigger key={`${p.kind}-${p.key}-${i}`} value={String(i)}>
                 <KeyRound />
@@ -249,6 +232,8 @@ export function OAuthSettingsPage({
               </TabsTrigger>
             ))}
           </TabsList>
+          {addProviderAction}
+          </div>
           <TabsContent value={String(index)} className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
               <div>
@@ -445,7 +430,21 @@ export function OAuthSettingsPage({
             />
           </TabsContent>
         </Tabs>
-      ) : null}
+      ) : <div className="flex justify-end">{addProviderAction}</div>}
+      <footer className="flex justify-end border-t pt-4">
+          <Button
+            size="sm"
+            disabled={saving || loading || Boolean(loadError) || !items.length}
+            onClick={() => void save()}
+          >
+            {saving ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <Save data-icon="inline-start" />
+            )}
+            {text("save")}
+          </Button>
+      </footer>
       <Dialog
         open={deletingIndex != null}
         onOpenChange={(open) => !open && setDeletingIndex(null)}

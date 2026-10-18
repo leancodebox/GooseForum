@@ -76,26 +76,7 @@ export function SecuritySettingsPage({
   }
   return (
     <main className="flex flex-1 flex-col gap-6 px-3 py-3 lg:px-4">
-      <header className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">{text("security")}</h2>
-          <p className="text-xs text-muted-foreground">
-            {text("securityHint")}
-          </p>
-        </div>
-        <Button
-          size="sm"
-          disabled={saving || loading}
-          onClick={() => void save()}
-        >
-          {saving ? (
-            <Spinner data-icon="inline-start" />
-          ) : (
-            <Save data-icon="inline-start" />
-          )}
-          {text("save")}
-        </Button>
-      </header>
+
       <div className="flex max-w-2xl flex-col gap-7">
         <Field orientation="horizontal">
           <div className="flex-1">
@@ -205,6 +186,20 @@ export function SecuritySettingsPage({
           ))}
         </section>
       </div>
+      <footer className="flex justify-end border-t pt-4">
+        <Button
+          size="sm"
+          disabled={saving || loading}
+          onClick={() => void save()}
+        >
+          {saving ? (
+            <Spinner data-icon="inline-start" />
+          ) : (
+            <Save data-icon="inline-start" />
+          )}
+          {text("save")}
+        </Button>
+      </footer>
     </main>
   );
 }

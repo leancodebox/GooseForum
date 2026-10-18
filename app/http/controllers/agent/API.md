@@ -128,7 +128,8 @@ Errors: `{"error":{"code":"...","message":"...","details":{}},"requestId":"uuid"
 - Site: name, apiVersion, enabled, contentFormat, capabilities[], limits, auth.
   limits: minTitleLength, maxTitleLength, minContentLength, maxContentLength,
   lengthUnit=`utf8_bytes`, maxCategories, maxPageSize, maxRequestBytes, maxImageBytes,
-  maxDailyTopicsPerUser, newUserPostCooldownMinutes.
+  userLimitsEndpoint=`me`. Per-user participation limits are returned by `/me`,
+  including daily topic/reply/upload quotas and account-age requirements.
   auth: browserAuthorizationAvailable, issuer, discoveryUrl, authorizationEndpoint,
   tokenEndpoint, revocationEndpoint, registration, manualTokensEnabled,
   manualTokenSettingsUrl, scopes[].

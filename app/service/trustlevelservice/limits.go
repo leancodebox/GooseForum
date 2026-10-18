@@ -1,10 +1,12 @@
 package trustlevelservice
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 
 	"github.com/leancodebox/GooseForum/app/bundles/trustlevel"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
@@ -25,11 +27,14 @@ const DailyTopicsKind = "每日新建主题数"
 const DailyRepliesKind = "每日新建回复数"
 
 func ValidateNewReply(id uint64) error {
-	l, enabled, err := Limits(id)
+	p, err := ResolvePolicy(id)
 	if err != nil {
 		return err
 	}
-	return validateReplyLimit(id, l, enabled)
+	if err := p.ValidatePostAge(); err != nil {
+		return err
+	}
+	return validateReplyLimit(id, p.Limits, true)
 }
 
 func validateReplyLimit(id uint64, l pageConfig.TrustLimits, enabled bool) error {
@@ -49,36 +54,27 @@ func validateReplyLimit(id uint64, l pageConfig.TrustLimits, enabled bool) error
 	return nil
 }
 
-var ErrGlobalDailyTopics = errors.New("global daily topic limit reached")
-
-func ValidateNewTopic(id uint64, globalLimit int) error {
-	l, enabled, err := Limits(id)
+func ValidateNewTopic(id uint64) error {
+	p, err := ResolvePolicy(id)
 	if err != nil {
 		return err
 	}
-	var levelLimit *int
-	if enabled {
-		levelLimit = l.MaxDailyTopics
+	if err := p.ValidatePostAge(); err != nil {
+		return err
 	}
-	if levelLimit != nil && *levelLimit == 0 {
-		return &LimitError{DailyTopicsKind, 0}
-	}
-	effective := globalLimit
-	if levelLimit != nil && (effective <= 0 || *levelLimit < effective) {
-		effective = *levelLimit
-	}
-	if effective <= 0 {
+	limit := p.Limits.MaxDailyTopics
+	if limit == nil {
 		return nil
+	}
+	if *limit == 0 {
+		return &LimitError{DailyTopicsKind, 0}
 	}
 	count, err := topics.DailyCreatedCount(id)
 	if err != nil {
 		return err
 	}
-	if count >= int64(effective) {
-		if levelLimit != nil && (globalLimit <= 0 || *levelLimit <= globalLimit) {
-			return &LimitError{DailyTopicsKind, *levelLimit}
-		}
-		return ErrGlobalDailyTopics
+	if count >= int64(*limit) {
+		return &LimitError{DailyTopicsKind, *limit}
 	}
 	return nil
 }
@@ -87,27 +83,91 @@ func (e *LimitError) Error() string {
 	return fmt.Sprintf("当前等级的%s上限为 %d", e.Kind, e.Limit)
 }
 
-func Limits(id uint64) (pageConfig.TrustLimits, bool, error) {
+type UserPolicy struct {
+	Account users.AccountState
+	Limits  pageConfig.TrustLimits
+}
+
+type PolicyError struct {
+	Status int
+	Code   string
+	Params map[string]any
+}
+
+func (e *PolicyError) Error() string { return e.Code }
+
+func ResolvePolicy(id uint64) (UserPolicy, error) {
 	c, err := hotdataserve.GetTrustSettings()
 	if err != nil {
-		return pageConfig.TrustLimits{}, false, err
+		return UserPolicy{}, err
 	}
-	if !c.RestrictionsEnabled {
-		return pageConfig.TrustLimits{}, false, nil
-	}
-	s, err := users.GetAccountState(id)
+	account, err := users.GetAccountState(id)
 	if err != nil {
-		return pageConfig.TrustLimits{}, false, err
+		return UserPolicy{}, err
 	}
-	if !trustlevel.Valid(s.TrustLevel) {
-		return pageConfig.TrustLimits{}, false, ErrInvalid
+	if !trustlevel.Valid(account.TrustLevel) {
+		return UserPolicy{}, ErrInvalid
 	}
 	for _, l := range c.LevelLimits {
-		if l.Level == s.TrustLevel {
-			return l, true, nil
+		if l.Level == account.TrustLevel {
+			return UserPolicy{account, l}, nil
 		}
 	}
-	return pageConfig.TrustLimits{}, false, ErrInvalid
+	return UserPolicy{}, ErrInvalid
+}
+func Limits(id uint64) (pageConfig.TrustLimits, bool, error) {
+	p, err := ResolvePolicy(id)
+	return p.Limits, err == nil, err
+}
+
+func (p UserPolicy) ValidatePostAge() error {
+	minutes := p.Limits.MinPostAccountAgeMinutes
+	available := p.Account.CreatedAt.Add(time.Duration(minutes) * time.Minute)
+	if minutes > 0 && time.Now().Before(available) {
+		return &PolicyError{429, "topic.post.cooldown", map[string]any{"minutes": minutes, "availableAt": available.Format(time.DateTime)}}
+	}
+	return nil
+}
+
+func (p UserPolicy) ValidateUpload(fileCount int, avatar bool) error {
+	return p.validateUpload(fileCount, avatar, fileCount > 0)
+}
+
+// Pending direct uploads are already included in the daily file count.
+func (p UserPolicy) ValidateExistingUpload() error { return p.validateUpload(0, false, true) }
+
+func (p UserPolicy) validateUpload(fileCount int, avatar bool, checkQuota bool) error {
+	if !avatar && !p.Limits.AllowImageUpload {
+		return &PolicyError{403, "permission.denied", nil}
+	}
+	// Existing role exemptions apply to community uploads, not avatars.
+	if !avatar && p.Account.RoleId > 0 {
+		return nil
+	}
+	minutes := p.Limits.MinUploadAccountAgeMinutes
+	available := p.Account.CreatedAt.Add(time.Duration(minutes) * time.Minute)
+	if minutes > 0 && time.Now().Before(available) {
+		return &PolicyError{400, "upload.cooldown", map[string]any{"minutes": minutes, "availableAt": available.Format(time.DateTime)}}
+	}
+	if !checkQuota || p.Limits.MaxDailyUploads == nil {
+		return nil
+	}
+	count := int64(0)
+	if *p.Limits.MaxDailyUploads > 0 {
+		var err error
+		count, err = filedata.DailyUploadCount(p.Account.Id)
+		if err != nil {
+			return err
+		}
+	}
+	if *p.Limits.MaxDailyUploads == 0 || count+int64(fileCount) > int64(*p.Limits.MaxDailyUploads) {
+		code := "upload.dailyLimit"
+		if avatar {
+			code = "upload.dailyLimit.avatar"
+		}
+		return &PolicyError{400, code, map[string]any{"count": count, "fileCount": fileCount}}
+	}
+	return nil
 }
 
 type Counts struct {
@@ -176,11 +236,15 @@ func hasContentLimits(l pageConfig.TrustLimits) bool {
 
 // AnalyzePost loads policy once and reuses the HTML needed by the write itself.
 func AnalyzePost(id uint64, content string, version uint8, creating bool) (markdown2html.ContentAnalysis, error) {
-	l, enabled, err := Limits(id)
+	p, err := ResolvePolicy(id)
 	if err != nil {
 		return markdown2html.ContentAnalysis{}, err
 	}
+	l, enabled := p.Limits, true
 	if creating {
+		if err := p.ValidatePostAge(); err != nil {
+			return markdown2html.ContentAnalysis{}, err
+		}
 		if err := validateReplyLimit(id, l, enabled); err != nil {
 			return markdown2html.ContentAnalysis{}, err
 		}

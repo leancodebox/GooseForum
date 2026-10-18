@@ -2,6 +2,9 @@ export function normalizeAdminPath(pathname: string) {
   return pathname.replace(/\/+$/, '') || '/admin'
 }
 
+export const communityRulePaths = ['/admin/settings/security', '/admin/settings/posting', '/admin/settings/trust'] as const
+export const identitySettingPaths = ['/admin/settings/oauth', '/admin/settings/oidc-provider'] as const
+
 export interface AdminNavigationClick {
   button: number
   defaultPrevented: boolean

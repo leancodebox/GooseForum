@@ -78,13 +78,6 @@ func validateWriteContent(c *gin.Context, content string, title *string, creatin
 		fail(c, 422, "invalid_title_length", "Title length is outside the site's UTF-8 byte limits")
 		return false
 	}
-	available := postingpolicy.AvailableAt(current(c).User.CreatedAt, config.NewUserPostCooldownMinutes)
-	if creating && available.After(time.Now()) {
-		seconds := int(math.Ceil(time.Until(available).Seconds()))
-		c.Header("Retry-After", strconv.Itoa(seconds))
-		fail(c, 429, "posting_cooldown", "Posting is available at "+available.UTC().Format(time.RFC3339))
-		return false
-	}
 	return true
 }
 
@@ -137,7 +130,7 @@ func (h *Handler) createTopic(c *gin.Context) {
 		return
 	}
 	source := current(c).Source
-	result, err := topicwriteservice.Write(topicwriteservice.WriteInput{AgentSource: &source, ClientRequestID: &req.ClientRequestID, RequestFingerprint: hash, SourceVersion: 1, UserID: current(c).User.Id, Title: req.Title, Content: req.Content, CategoryIDs: ids, Status: 1, DailyLimit: hotdataserve.GetPostingSettingsConfigCache().TextControl.MaxDailyTopicsPerUser})
+	result, err := topicwriteservice.Write(topicwriteservice.WriteInput{AgentSource: &source, ClientRequestID: &req.ClientRequestID, RequestFingerprint: hash, SourceVersion: 1, UserID: current(c).User.Id, Title: req.Title, Content: req.Content, CategoryIDs: ids, Status: 1})
 	if err != nil {
 		if h.existingSubmission(c, req.ClientRequestID, hash) {
 			return
@@ -204,6 +197,15 @@ func (h *Handler) createPost(c *gin.Context) {
 }
 
 func writeError(c *gin.Context, err error) {
+	var policy *trustlevelservice.PolicyError
+	if errors.As(err, &policy) {
+		available, _ := policy.Params["availableAt"].(string)
+		if at, parseErr := time.ParseInLocation(time.DateTime, available, time.Local); parseErr == nil {
+			c.Header("Retry-After", strconv.Itoa(max(1, int(math.Ceil(time.Until(at).Seconds())))))
+		}
+		fail(c, policy.Status, "posting_cooldown", "Posting is available at "+available)
+		return
+	}
 	var limit *trustlevelservice.LimitError
 	if errors.As(err, &limit) {
 		if limit.Kind == trustlevelservice.DailyRepliesKind {
@@ -224,8 +226,6 @@ func writeError(c *gin.Context, err error) {
 		fail(c, 403, "permission_denied", "Only the author can edit content")
 	case errors.Is(err, topicwriteservice.ErrTopicNotFound), errors.Is(err, postwriteservice.ErrPostNotFound):
 		fail(c, 404, "not_found", "Content is unavailable")
-	case errors.Is(err, topicwriteservice.ErrDailyLimit):
-		fail(c, 429, "daily_topic_limit", "Daily topic limit reached")
 	case errors.Is(err, mentionservice.ErrInvalid):
 		fail(c, 422, "invalid_mention", "Invalid mention")
 	case errors.Is(err, accesscontrol.ErrRestrictedCategorySingle), errors.Is(err, accesscontrol.ErrCategoryRequired), errors.Is(err, accesscontrol.ErrTooManyCategories):

@@ -1,13 +1,13 @@
-import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { flushSync } from 'react-dom'
 import { applyBrowserTheme, createThemeTransition, detectBrowserTheme, detectBrowserThemePreference, resolveBrowserTheme, saveBrowserThemePreference, type BrowserThemePreference } from '@gooseforum/runtime/browser-host'
 import type { GooseAdminApi, PagePayload } from '@gooseforum/client'
-import { Toaster } from '@gooseforum/ui/components/sonner'
 import { SidebarInset, SidebarProvider } from '@gooseforum/ui/components/sidebar'
 import { TooltipProvider } from '@gooseforum/ui/components/tooltip'
 import { applyBrowserLocale, detectBrowserLocale } from '../host/browser-runtime'
 import { AppSidebar } from './components/app-sidebar'
 import { SiteHeader } from './components/site-header'
+import { SettingsSectionLayout } from './components/settings-section-layout'
 import { createAdminText } from './i18n'
 import { createAccessGroupText } from './access-groups-i18n'
 import { createRoleText } from './roles-i18n'
@@ -26,11 +26,13 @@ import { adminNavGroups } from './nav'
 import { AuthLogsPage } from './page-registry'
 import { AgentSettingsPage } from './page-registry'
 import { TrustSettingsPage } from './page-registry'
-import { normalizeAdminPath } from './navigation'
+import { normalizeAdminPath, communityRulePaths, identitySettingPaths } from './navigation'
 import { prepareAdminTranslations, adminPageNamespaces, loadedAdminNamespaces } from './translation-loader'
 import { prepareAdminListData, type AdminListData } from './list-data'
 
 import { DashboardPage, CategoriesManagementPage, AccessGroupsManagementPage, RolesManagementPage, UsersManagementPage, PostsManagementPage, LinksManagementPage, SponsorsManagementPage, BadgesManagementPage, FileResourcesManagementPage, OptRecordsManagementPage, SiteInfoManagementPage, SiteChromeManagementPage, MailSettingsPage, SecuritySettingsPage, PostingSettingsPage, AnnouncementSettingsPage, HttpNotifySettingsPage, SensitiveWordsSettingsPage, OAuthSettingsPage, OIDCProviderSettingsPage, prepareAdminPage } from './page-registry'
+
+const Toaster = lazy(() => import('@gooseforum/ui/components/sonner').then(module => ({ default: module.Toaster })))
 
 const shellVariables = {
   '--sidebar-width': 'calc(var(--spacing) * 72)',
@@ -82,7 +84,9 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
   const moderationSettingsText = useMemo(() => createModerationSettingsText(locale), [locale])
   const identityText = useMemo(() => createIdentityText(locale), [locale])
   const dashboardText = useMemo(() => createDashboardText(locale), [locale])
-  const titleKey = adminNavGroups.flatMap((group) => group.items).find((item) => item.url === pathname)?.label || 'console'
+  const isCommunityRules = communityRulePaths.some(path => path === pathname)
+  const isIdentitySettings = identitySettingPaths.some(path => path === pathname)
+  const titleKey = isCommunityRules ? 'communityRules' : isIdentitySettings ? 'oauthOidc' : adminNavGroups.flatMap((group) => group.items).find((item) => item.url === pathname)?.label || 'console'
   const rememberQueryUrl = useCallback((url: string) => { committedUrl.current = url }, [])
 
   useEffect(() => {
@@ -273,5 +277,5 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
                         ? <DashboardPage api={api} text={dashboardText} locale={locale} />
                         : <div className="flex flex-1 items-center justify-center p-6"><div className="max-w-md rounded-xl border bg-card p-6 text-center"><h2 className="text-lg font-semibold">{text(titleKey)}</h2><p className="mt-2 text-sm text-muted-foreground">{text('notAvailable')}</p></div></div>
 
-  return <TooltipProvider><SidebarProvider className="admin-shell mx-auto max-w-[1600px]" style={shellVariables}>{isNavigating ? <div role="progressbar" aria-label={text('loading')} className="admin-navigation-progress fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden bg-primary/15"><div className="h-full w-1/3 bg-primary" /></div> : null}<AppSidebar layout={page.layout} pathname={pathname} text={text} onNavigate={navigate} onPrefetch={prefetch} variant="inset" /><SidebarInset className="z-20 min-w-0 overflow-clip" aria-busy={isNavigating}><SiteHeader title={text(titleKey)} locale={locale} themePreference={themePreference} onLocaleChange={changeLocale} onThemeChange={changeTheme} /><div className="flex min-w-0 flex-1 flex-col">{navigationError ? <p role="alert" className="px-4 py-2 text-sm text-destructive">{navigationError}</p> : null}<Suspense fallback={<div className="flex min-h-48 items-center justify-center text-sm text-muted-foreground">{text('loading')}</div>}>{content}</Suspense></div></SidebarInset></SidebarProvider><Toaster position="bottom-right" /></TooltipProvider>
+  return <TooltipProvider><SidebarProvider className="admin-shell mx-auto max-w-[1600px]" style={shellVariables}>{isNavigating ? <div role="progressbar" aria-label={text('loading')} className="admin-navigation-progress fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden bg-primary/15"><div className="h-full w-1/3 bg-primary" /></div> : null}<AppSidebar layout={page.layout} pathname={isCommunityRules ? '/admin/settings/security' : isIdentitySettings ? '/admin/settings/oauth' : pathname} text={text} onNavigate={navigate} onPrefetch={prefetch} variant="inset" /><SidebarInset className="z-20 min-w-0 overflow-clip" aria-busy={isNavigating}><SiteHeader title={text(titleKey)} locale={locale} themePreference={themePreference} onLocaleChange={changeLocale} onThemeChange={changeTheme} /><div className="flex min-w-0 flex-1 flex-col">{navigationError ? <p role="alert" className="px-4 py-2 text-sm text-destructive">{navigationError}</p> : null}<Suspense fallback={<div className="flex min-h-48 items-center justify-center text-sm text-muted-foreground">{text('loading')}</div>}>{isCommunityRules || isIdentitySettings ? <SettingsSectionLayout section={isIdentitySettings ? 'identity' : 'community'} pathname={pathname} permissions={page.layout.viewer.adminPermissions} text={text} navigate={navigate}>{content}</SettingsSectionLayout> : content}</Suspense></div></SidebarInset></SidebarProvider><Suspense fallback={null}><Toaster position="bottom-right" /></Suspense></TooltipProvider>
 }

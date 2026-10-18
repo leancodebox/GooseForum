@@ -1,4 +1,8 @@
 export default {
+  oauthOidc: "OAuth / OIDC",
+  oauthLogin: "OAuth 第三方登录",
+  oidcProvider: "OIDC 身份提供方",
+  communityRules: "社区规则",
   trust: "信任等级",
   agent: "Agent 接入",
   console: "管理后台",

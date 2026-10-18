@@ -2,6 +2,7 @@ package imageuploadservice
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"mime"
 	"net/http"
@@ -34,29 +35,33 @@ func failure(status int, code string, params map[string]any) *Failure {
 
 // ResolvePolicy assumes the caller has checked current account write permissions.
 func ResolvePolicy(user users.EntityComplete) (*Policy, *Failure) {
-	limits, enabled, err := trustlevelservice.Limits(user.Id)
-	if err != nil {
-		return nil, failure(503, "common.operation.failed", nil)
-	}
-	if enabled && !limits.AllowImageUpload {
-		return nil, failure(403, "permission.denied", nil)
-	}
+	return resolvePolicy(user, false)
+}
+
+func ResolveCompletionPolicy(user users.EntityComplete) (*Policy, *Failure) {
+	return resolvePolicy(user, true)
+}
+
+func resolvePolicy(user users.EntityComplete, completing bool) (*Policy, *Failure) {
 	config := hotdataserve.GetPostingSettingsConfigCache().UploadControl
 	isRoleUser := user.RoleId > 0
 	if !isRoleUser && !config.AllowAttachments {
 		return nil, failure(http.StatusForbidden, "upload.attachment.disabled", nil)
 	}
-	if !isRoleUser && config.NewUserUploadCooldownMinutes > 0 {
-		available := user.CreatedAt.Add(time.Duration(config.NewUserUploadCooldownMinutes) * time.Minute)
-		if time.Now().Before(available) {
-			return nil, failure(http.StatusBadRequest, "upload.cooldown", map[string]any{"minutes": config.NewUserUploadCooldownMinutes, "availableAt": available.Format("2006-01-02 15:04:05")})
+	policy, err := trustlevelservice.ResolvePolicy(user.Id)
+	if err == nil {
+		if completing {
+			err = policy.ValidateExistingUpload()
+		} else {
+			err = policy.ValidateUpload(1, false)
 		}
 	}
-	if !isRoleUser && config.MaxDailyUploadsPerUser > 0 {
-		count := filedata.CountDailyUploads(user.Id)
-		if count >= int64(config.MaxDailyUploadsPerUser) {
-			return nil, failure(http.StatusBadRequest, "upload.dailyLimit", map[string]any{"count": count})
+	if err != nil {
+		var rejected *trustlevelservice.PolicyError
+		if errors.As(err, &rejected) {
+			return nil, failure(rejected.Status, rejected.Code, rejected.Params)
 		}
+		return nil, failure(503, "common.operation.failed", nil)
 	}
 	maxSize := int64(filestorage.MaxFileSize)
 	configMax := int64(config.MaxAttachmentSizeKb) * 1024

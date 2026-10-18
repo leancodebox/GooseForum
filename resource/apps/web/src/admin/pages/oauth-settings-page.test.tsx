@@ -78,7 +78,7 @@ it("renders a retryable error state when settings fail to load", async () => {
 
   expect(await screen.findByText("设置加载失败")).toBeTruthy();
   expect(screen.queryByText("internal error")).toBeNull();
-  expect(screen.getByRole("button", { name: "添加提供方" })).toHaveProperty("disabled", true);
+  expect(screen.queryByRole("button", { name: "添加提供方" })).toBeNull();
   expect(screen.getByRole("button", { name: "保存" })).toHaveProperty("disabled", true);
   await user.click(screen.getByRole("button", { name: "重试" }));
   await waitFor(() => expect(oauth).toHaveBeenCalledTimes(2));

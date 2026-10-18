@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Award, FileText, Files, Heart, KeyRound, Link, ListChecks, Mail, Megaphone, Monitor, PanelLeft, PanelsTopLeft, ShieldAlert, ShieldCheck, Tags, UserCog, UsersRound, Webhook } from 'lucide-react'
+import { Bot, Award, FileText, Files, Heart, KeyRound, Link, ListChecks, Mail, Megaphone, Monitor, PanelLeft, PanelsTopLeft, ShieldAlert, ShieldCheck, Tags, UserCog, UsersRound, Webhook } from 'lucide-react'
 import { AdminPermission } from './access'
 import type { AdminTextKey } from './i18n'
 
@@ -29,12 +29,9 @@ export const adminNavGroups: { label?: AdminTextKey; items: AdminNavItem[] }[] =
     { label: 'siteInfo', url: '/admin/settings/site-info', icon: <PanelsTopLeft />, permission: AdminPermission.SiteManager },
     { label: 'siteChrome', url: '/admin/settings/site-chrome', icon: <PanelLeft />, permission: AdminPermission.SiteManager },
     { label: 'mail', url: '/admin/settings/mail', icon: <Mail />, permission: AdminPermission.SiteManager },
-    { label: 'oauth', url: '/admin/settings/oauth', icon: <KeyRound />, permission: AdminPermission.SiteManager },
-    { label: 'oidc', url: '/admin/settings/oidc-provider', icon: <KeyRound />, permission: AdminPermission.SiteManager },
-    { label: 'agent', url: '/admin/settings/agent', icon: <KeyRound />, permission: AdminPermission.SiteManager },
-    { label: 'security', url: '/admin/settings/security', icon: <ShieldCheck />, permission: AdminPermission.SiteManager },
-    { label: 'trust', url: '/admin/settings/trust', icon: <ShieldCheck />, permission: AdminPermission.Admin },
-    { label: 'posting', url: '/admin/settings/posting', icon: <FileText />, permission: AdminPermission.SiteManager },
+    { label: 'oauthOidc', url: '/admin/settings/oauth', icon: <KeyRound />, permission: AdminPermission.SiteManager },
+    { label: 'agent', url: '/admin/settings/agent', icon: <Bot />, permission: AdminPermission.SiteManager },
+    { label: 'communityRules', url: '/admin/settings/security', icon: <ShieldCheck />, permission: AdminPermission.SiteManager },
     { label: 'announcement', url: '/admin/settings/announcement', icon: <Megaphone />, permission: AdminPermission.PageManager },
     { label: 'httpNotify', url: '/admin/settings/http-notify', icon: <Webhook />, permission: AdminPermission.SiteManager },
     { label: 'sensitive', url: '/admin/settings/sensitive-words', icon: <ShieldAlert />, permission: AdminPermission.SiteManager },

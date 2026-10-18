@@ -49,8 +49,8 @@ func (h *Handler) site(c *gin.Context) {
 			"lengthUnit": "utf8_bytes", "minTitleLength": config.MinTitleLength, "maxTitleLength": config.MaxTitleLength,
 			"minContentLength": config.MinPostLength, "maxContentLength": config.MaxPostLength,
 			"maxCategories": 3, "maxPageSize": 50, "maxRequestBytes": 1 << 20,
-			"maxImageBytes":         filestorage.MaxFileSize,
-			"maxDailyTopicsPerUser": config.MaxDailyTopicsPerUser, "newUserPostCooldownMinutes": config.NewUserPostCooldownMinutes,
+			"maxImageBytes":      filestorage.MaxFileSize,
+			"userLimitsEndpoint": "me",
 		},
 		"auth": gin.H{
 			"browserAuthorizationAvailable": status.Available, "issuer": status.Issuer,
@@ -106,7 +106,7 @@ func openAPIDocument(base string) gin.H {
 	schemas["Post"] = objectSchema(gin.H{"id": id, "topicId": id, "author": author, "postNo": gin.H{"type": "integer"}, "replyToPostId": gin.H{"type": "string", "nullable": true}, "content": stringSchema(), "contentFormat": gin.H{"type": "string", "enum": []string{"markdown"}}, "sourceVersion": gin.H{"type": "integer"}, "version": gin.H{"type": "integer", "minimum": 0}, "createdAt": stamp, "updatedAt": stamp, "url": stringSchema()}, "id", "topicId", "author", "postNo", "content", "contentFormat", "sourceVersion", "replyToPostId", "createdAt", "updatedAt", "url")
 	schemas["Topic"] = objectSchema(gin.H{"id": id, "title": stringSchema(), "version": gin.H{"type": "integer", "minimum": 0}, "author": author, "categoryIds": arraySchema(id), "createdAt": stamp, "updatedAt": stamp, "url": stringSchema(), "capabilities": objectSchema(gin.H{"reply": gin.H{"type": "boolean"}}, "reply"), "firstPost": schemaRef("Post")}, "id", "title", "author", "categoryIds", "createdAt", "updatedAt", "url", "capabilities")
 	schemas["Category"] = objectSchema(gin.H{"id": id, "name": stringSchema(), "description": stringSchema(), "slug": stringSchema(), "capabilities": objectSchema(gin.H{"createTopic": gin.H{"type": "boolean"}, "reply": gin.H{"type": "boolean"}}, "createTopic", "reply")}, "id", "name", "description", "slug", "capabilities")
-	schemas["Me"] = objectSchema(gin.H{"id": id, "username": stringSchema(), "clientId": stringSchema(), "scopes": arraySchema(stringSchema()), "canWrite": gin.H{"type": "boolean"}, "restriction": stringSchema()}, "id", "username", "clientId", "scopes", "canWrite", "restriction")
+	schemas["Me"] = objectSchema(gin.H{"id": id, "username": stringSchema(), "clientId": stringSchema(), "scopes": arraySchema(stringSchema()), "canWrite": gin.H{"type": "boolean"}, "restriction": stringSchema(), "limits": gin.H{"type": "object", "additionalProperties": true}, "communityUploadRoleExempt": gin.H{"type": "boolean"}}, "id", "username", "clientId", "scopes", "canWrite", "restriction", "limits", "communityUploadRoleExempt")
 	schemas["SubmissionSummary"] = objectSchema(gin.H{"submissionId": id, "topicId": id, "clientRequestId": requestID}, "submissionId", "topicId", "clientRequestId")
 	schemas["UploadImage"] = objectSchema(gin.H{"file": gin.H{"type": "string", "format": "binary"}}, "file")
 	schemas["Image"] = objectSchema(gin.H{"url": stringSchema(), "filename": stringSchema(), "size": gin.H{"type": "integer", "minimum": 1}}, "url", "filename", "size")
@@ -143,15 +143,15 @@ func openAPIDocument(base string) gin.H {
 		{path: "/me/submissions", method: "get", name: "listSubmissions", scope: "forum:read", list: true, response: "SubmissionSummary", params: append(append([]gin.H{}, listParams...), param("clientRequestId", "query", requestID, false))},
 		{path: "/me/submissions/{submissionId}", method: "get", name: "getSubmission", scope: "forum:read", response: "Submission"},
 	}
-	limitFields := gin.H{"lengthUnit": gin.H{"type": "string", "enum": []string{"utf8_bytes"}}}
-	for _, key := range []string{"minTitleLength", "maxTitleLength", "minContentLength", "maxContentLength", "maxCategories", "maxPageSize", "maxRequestBytes", "maxImageBytes", "maxDailyTopicsPerUser", "newUserPostCooldownMinutes"} {
+	limitFields := gin.H{"lengthUnit": gin.H{"type": "string", "enum": []string{"utf8_bytes"}}, "userLimitsEndpoint": stringSchema()}
+	for _, key := range []string{"minTitleLength", "maxTitleLength", "minContentLength", "maxContentLength", "maxCategories", "maxPageSize", "maxRequestBytes", "maxImageBytes"} {
 		limitFields[key] = gin.H{"type": "integer", "minimum": 0}
 	}
 	authFields := gin.H{"browserAuthorizationAvailable": gin.H{"type": "boolean"}, "manualTokensEnabled": gin.H{"type": "boolean"}, "scopes": arraySchema(stringSchema())}
 	for _, key := range []string{"issuer", "discoveryUrl", "authorizationEndpoint", "tokenEndpoint", "revocationEndpoint", "registration", "manualTokenSettingsUrl"} {
 		authFields[key] = stringSchema()
 	}
-	schemas["Site"] = objectSchema(gin.H{"name": stringSchema(), "apiVersion": stringSchema(), "enabled": gin.H{"type": "boolean"}, "contentFormat": stringSchema(), "capabilities": arraySchema(stringSchema()), "auth": objectSchema(authFields, "browserAuthorizationAvailable", "manualTokensEnabled", "issuer", "discoveryUrl", "authorizationEndpoint", "tokenEndpoint", "revocationEndpoint", "registration", "manualTokenSettingsUrl", "scopes"), "limits": objectSchema(limitFields, "lengthUnit", "minTitleLength", "maxTitleLength", "minContentLength", "maxContentLength", "maxCategories", "maxPageSize", "maxRequestBytes", "maxDailyTopicsPerUser", "newUserPostCooldownMinutes")}, "name", "apiVersion", "enabled", "contentFormat", "capabilities", "auth", "limits")
+	schemas["Site"] = objectSchema(gin.H{"name": stringSchema(), "apiVersion": stringSchema(), "enabled": gin.H{"type": "boolean"}, "contentFormat": stringSchema(), "capabilities": arraySchema(stringSchema()), "auth": objectSchema(authFields, "browserAuthorizationAvailable", "manualTokensEnabled", "issuer", "discoveryUrl", "authorizationEndpoint", "tokenEndpoint", "revocationEndpoint", "registration", "manualTokenSettingsUrl", "scopes"), "limits": objectSchema(limitFields, "lengthUnit", "minTitleLength", "maxTitleLength", "minContentLength", "maxContentLength", "maxCategories", "maxPageSize", "maxRequestBytes", "maxImageBytes", "userLimitsEndpoint")}, "name", "apiVersion", "enabled", "contentFormat", "capabilities", "auth", "limits")
 	errorDescriptions := map[string]string{"400": "Invalid request", "401": "Authentication required or invalid token", "403": "Insufficient scope or permission", "404": "Resource unavailable", "409": "clientRequestId or content version conflict", "410": "Submission deleted", "413": "Request or image exceeds its size limit", "422": "Invalid content, image or categories", "429": "Rate limit, quota or cooldown", "500": "Internal error", "503": "Service unavailable"}
 	sharedResponses := gin.H{}
 	for status, description := range errorDescriptions {

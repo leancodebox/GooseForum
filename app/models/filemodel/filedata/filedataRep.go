@@ -214,12 +214,17 @@ func (itself FileResource) GetAccessPath() string {
 
 // CountDailyUploads returns the number of files uploaded by a user today.
 func CountDailyUploads(userId uint64) int64 {
+	count, _ := DailyUploadCount(userId)
+	return count
+}
+
+func DailyUploadCount(userId uint64) (int64, error) {
 	now := time.Now()
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour).Add(-time.Nanosecond)
 	var count int64
-	builder().Where("user_id = ? AND created_at >= ? AND created_at <= ?", userId, startOfDay, endOfDay).Count(&count)
-	return count
+	err := builder().Where("user_id = ? AND created_at >= ? AND created_at <= ?", userId, startOfDay, endOfDay).Count(&count).Error
+	return count, err
 }
 
 // CountUserUploadsInTimeRange counts uploads for a user within a time range.

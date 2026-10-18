@@ -414,6 +414,17 @@ func mustID(t *testing.T, value string) uint64 {
 
 func TestOpenAPIAndSkillRoutes(t *testing.T) {
 	doc := openAPIDocument("https://forum.example/prefix")
+	site := doc["components"].(gin.H)["schemas"].(gin.H)["Site"].(gin.H)
+	limits := site["properties"].(gin.H)["limits"].(gin.H)
+	properties := limits["properties"].(gin.H)
+	if properties["userLimitsEndpoint"] == nil || properties["maxDailyTopicsPerUser"] != nil || properties["newUserPostCooldownMinutes"] != nil {
+		t.Fatal("site schema must direct clients to user limits without legacy quotas")
+	}
+	for _, field := range limits["required"].([]string) {
+		if properties[field] == nil {
+			t.Fatalf("required limit missing from properties: %s", field)
+		}
+	}
 	paths := doc["paths"].(gin.H)
 	router := gin.New()
 	New().Register(router)

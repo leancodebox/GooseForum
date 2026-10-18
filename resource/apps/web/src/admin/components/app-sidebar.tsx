@@ -33,8 +33,9 @@ export function AppSidebar({ layout, pathname, text, onNavigate, onPrefetch, ...
     </a></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarHeader>
     <SidebarContent className="gap-1 px-1 py-1.5">{groups.map((group, index) => <SidebarGroup key={group.label || 'main'} className="px-1.5 py-0.5">
       {index > 0 && group.label && <SidebarGroupLabel className="h-7 px-2 text-xs font-medium">{text(group.label)}</SidebarGroupLabel>}
-      <SidebarMenu className="gap-0.5">{group.items.map((item) => <SidebarMenuItem key={item.url}><SidebarMenuButton asChild isActive={pathname === item.url} size="sm" tooltip={text(item.label)} className="h-7.5 rounded-md px-2 text-[13px] font-medium text-sidebar-foreground/75 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-primary"><a
+      <SidebarMenu className="gap-0.5">{group.items.map((item) => <SidebarMenuItem key={item.url}><SidebarMenuButton asChild isActive={pathname === item.url} size="sm" tooltip={text(item.label)} className="h-7.5 rounded-md px-2 text-[13px] font-medium text-foreground/75 hover:bg-accent hover:text-foreground data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:hover:bg-primary/15 data-[active=true]:hover:text-primary data-[active=true]:[&>svg]:text-primary"><a
         href={item.url}
+        aria-current={pathname === item.url ? 'page' : undefined}
         onMouseEnter={() => onPrefetch(item.url)}
         onFocus={() => onPrefetch(item.url)}
         onClick={(event) => {

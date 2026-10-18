@@ -35,7 +35,6 @@ func TestCompleteDirectUploadRechecksTrustPolicyBeforeStorage(t *testing.T) {
 		hotdataserve.ClearTrustSettingsCache()
 	})
 	c := pageConfig.DefaultTrustSettings()
-	c.RestrictionsEnabled = true
 	c.LevelLimits[0].AllowImageUpload = false
 	raw, _ := json.Marshal(c)
 	if err := pageConfig.SaveConfig(pageConfig.TrustSettings, string(raw)); err != nil {
