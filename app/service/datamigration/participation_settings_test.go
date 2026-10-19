@@ -45,7 +45,7 @@ func TestParticipationMigrationPreservesEffectivePolicy(t *testing.T) {
 				t.Fatal(err)
 			}
 			for _, l := range migrated.LevelLimits {
-				if l.MaxDailyTopics == nil || *l.MaxDailyTopics != 2 || l.MaxDailyUploads == nil || *l.MaxDailyUploads != 8 || l.MinPostAccountAgeMinutes != 30 || l.MinUploadAccountAgeMinutes != 1440 {
+				if l.MaxDailyTopics == nil || *l.MaxDailyTopics != 2 || l.MaxDailyUploads == nil || *l.MaxDailyUploads != 8 || migrated.RegistrationCooldown.MinPostAccountAgeMinutes != 30 || migrated.RegistrationCooldown.MinUploadAccountAgeMinutes != 1440 {
 					t.Fatalf("lost quotas: %+v", l)
 				}
 				if !enabled && (!l.AllowImageUpload || l.MaxImagesPerPost != nil || l.MaxDailyReplies != nil) {

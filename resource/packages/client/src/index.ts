@@ -17,6 +17,7 @@ export * from './i18n/index.js'
 export * from './format.js'
 export * from './admin/index.js'
 export * from './trust.js'
+export type { TrustLimitField } from './trust-limits.js'
 
 export interface CreateGooseClientOptions extends GooseClientOptions {
   pages?: PageClientOptions

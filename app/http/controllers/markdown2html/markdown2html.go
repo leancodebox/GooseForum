@@ -100,6 +100,11 @@ func AnalyzeContent(content string, maxDescriptionLength int) ContentAnalysis {
 }
 
 func AnalyzeContentVersion(content string, maxDescriptionLength int, version uint8) ContentAnalysis {
+	return AnalyzeTopicContentVersion(content, maxDescriptionLength, version, false)
+}
+
+// AnalyzeTopicContentVersion reuses one AST for metadata and optional rendered HTML.
+func AnalyzeTopicContentVersion(content string, maxDescriptionLength int, version uint8, render bool) ContentAnalysis {
 	var source []byte
 	var doc ast.Node
 	if version > 0 {
@@ -107,7 +112,11 @@ func AnalyzeContentVersion(content string, maxDescriptionLength int, version uin
 	} else {
 		source, doc = parseMarkdown(content)
 	}
-	return analyzeDocument(source, doc, maxDescriptionLength, false)
+	result := analyzeDocument(source, doc, maxDescriptionLength, render && version == 0)
+	if render && version > 0 {
+		result.RenderedHTML = renderExtended(source, doc)
+	}
+	return result
 }
 
 // AnalyzePostContent renders a post and extracts its file references from the same AST.
@@ -116,14 +125,7 @@ func AnalyzePostContent(content string) ContentAnalysis {
 }
 
 func AnalyzePostContentVersion(content string, version uint8) ContentAnalysis {
-	if version == 0 {
-		source, doc := parseMarkdown(content)
-		return analyzeDocument(source, doc, 0, true)
-	}
-	source, doc := ParseExtended(content)
-	result := analyzeDocument(source, doc, 0, false)
-	result.RenderedHTML = renderExtended(source, doc)
-	return result
+	return AnalyzeTopicContentVersion(content, 0, version, true)
 }
 
 func analyzeDocument(source []byte, doc ast.Node, maxDescriptionLength int, render bool) ContentAnalysis {

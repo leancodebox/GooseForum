@@ -8,6 +8,7 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/trustlevel"
+	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
@@ -18,7 +19,7 @@ import (
 
 func TestReviewManualLockAndContentLimits(t *testing.T) {
 	db := dbconnect.Connect()
-	if err := db.AutoMigrate(&users.EntityComplete{}, &pageConfig.Entity{}, &trusthistory.History{}, &topics.Entity{}, &posts.Entity{}); err != nil {
+	if err := db.AutoMigrate(&users.EntityComplete{}, &pageConfig.Entity{}, &trusthistory.History{}, &eventNotification.Entity{}, &topics.Entity{}, &posts.Entity{}); err != nil {
 		t.Fatal(err)
 	}
 	config := pageConfig.DefaultTrustSettings()

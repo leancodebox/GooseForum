@@ -39,7 +39,7 @@ func TestPendingDirectUploadAndAvatarFileCount(t *testing.T) {
 }
 
 func TestRoleExemptionAndRegistrationAgeSemantics(t *testing.T) {
-	p := UserPolicy{Account: users.AccountState{RoleId: 1, CreatedAt: time.Now()}, Limits: pageConfig.TrustLimits{AllowImageUpload: true, MinUploadAccountAgeMinutes: 60, MaxDailyUploads: new(0), MinPostAccountAgeMinutes: 60}}
+	p := UserPolicy{Account: users.AccountState{RoleId: 1, CreatedAt: time.Now()}, Limits: pageConfig.TrustLimits{AllowImageUpload: true, MaxDailyUploads: new(0)}, RegistrationCooldown: pageConfig.RegistrationCooldown{MinUploadAccountAgeMinutes: 60, MinPostAccountAgeMinutes: 60}}
 	if err := p.ValidateUpload(1, false); err != nil {
 		t.Fatalf("community role exemption lost: %v", err)
 	}

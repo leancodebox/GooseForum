@@ -10,6 +10,14 @@
     "dist"
   ],
   "exports": {
+    "./trust-limits": {
+      "types": "./dist/trust-limits.d.ts",
+      "import": "./dist/trust-limits.js"
+    },
+    "./trust-validation": {
+      "types": "./dist/trust-validation.d.ts",
+      "import": "./dist/trust-validation.js"
+    },
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"

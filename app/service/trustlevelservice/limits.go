@@ -59,6 +59,10 @@ func ValidateNewTopic(id uint64) error {
 	if err != nil {
 		return err
 	}
+	return p.ValidateNewTopic()
+}
+
+func (p UserPolicy) ValidateNewTopic() error {
 	if err := p.ValidatePostAge(); err != nil {
 		return err
 	}
@@ -69,7 +73,7 @@ func ValidateNewTopic(id uint64) error {
 	if *limit == 0 {
 		return &LimitError{DailyTopicsKind, 0}
 	}
-	count, err := topics.DailyCreatedCount(id)
+	count, err := topics.DailyCreatedCount(p.Account.Id)
 	if err != nil {
 		return err
 	}
@@ -84,8 +88,9 @@ func (e *LimitError) Error() string {
 }
 
 type UserPolicy struct {
-	Account users.AccountState
-	Limits  pageConfig.TrustLimits
+	Account              users.AccountState
+	Limits               pageConfig.TrustLimits
+	RegistrationCooldown pageConfig.RegistrationCooldown
 }
 
 type PolicyError struct {
@@ -110,7 +115,7 @@ func ResolvePolicy(id uint64) (UserPolicy, error) {
 	}
 	for _, l := range c.LevelLimits {
 		if l.Level == account.TrustLevel {
-			return UserPolicy{account, l}, nil
+			return UserPolicy{Account: account, Limits: l, RegistrationCooldown: c.RegistrationCooldown}, nil
 		}
 	}
 	return UserPolicy{}, ErrInvalid
@@ -121,7 +126,7 @@ func Limits(id uint64) (pageConfig.TrustLimits, bool, error) {
 }
 
 func (p UserPolicy) ValidatePostAge() error {
-	minutes := p.Limits.MinPostAccountAgeMinutes
+	minutes := p.RegistrationCooldown.MinPostAccountAgeMinutes
 	available := p.Account.CreatedAt.Add(time.Duration(minutes) * time.Minute)
 	if minutes > 0 && time.Now().Before(available) {
 		return &PolicyError{429, "topic.post.cooldown", map[string]any{"minutes": minutes, "availableAt": available.Format(time.DateTime)}}
@@ -144,7 +149,7 @@ func (p UserPolicy) validateUpload(fileCount int, avatar bool, checkQuota bool) 
 	if !avatar && p.Account.RoleId > 0 {
 		return nil
 	}
-	minutes := p.Limits.MinUploadAccountAgeMinutes
+	minutes := p.RegistrationCooldown.MinUploadAccountAgeMinutes
 	available := p.Account.CreatedAt.Add(time.Duration(minutes) * time.Minute)
 	if minutes > 0 && time.Now().Before(available) {
 		return &PolicyError{400, "upload.cooldown", map[string]any{"minutes": minutes, "availableAt": available.Format(time.DateTime)}}
@@ -220,14 +225,28 @@ func countHTML(raw string) Counts {
 }
 
 func ValidateContent(id uint64, content string, version uint8) error {
-	l, enabled, err := Limits(id)
-	if err != nil || !enabled {
+	p, err := ResolvePolicy(id)
+	if err != nil {
 		return err
 	}
-	if !hasContentLimits(l) {
+	return p.ValidateContent(content, version)
+}
+
+func (p UserPolicy) ValidateContent(content string, version uint8) error {
+	if !hasContentLimits(p.Limits) {
 		return nil
 	}
-	return validateCounts(l, CountContent(content, version))
+	return validateCounts(p.Limits, CountContent(content, version))
+}
+
+func (p UserPolicy) AnalyzeTopic(content string, version uint8, publishing bool) (markdown2html.ContentAnalysis, error) {
+	analysis := markdown2html.AnalyzeTopicContentVersion(content, 200, version, true)
+	if publishing && hasContentLimits(p.Limits) {
+		if err := validateCounts(p.Limits, countHTML(analysis.RenderedHTML)); err != nil {
+			return markdown2html.ContentAnalysis{}, err
+		}
+	}
+	return analysis, nil
 }
 
 func hasContentLimits(l pageConfig.TrustLimits) bool {

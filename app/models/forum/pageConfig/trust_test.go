@@ -1,6 +1,7 @@
 package pageConfig
 
 import (
+	"bytes"
 	"encoding/json"
 	"testing"
 )
@@ -41,5 +42,28 @@ func TestTrustConfigValidation(t *testing.T) {
 	c.PromotionRules[1] = c.PromotionRules[0]
 	if c.Valid() {
 		t.Fatal("duplicate target accepted")
+	}
+}
+
+func TestRetiredPromotionSwitchIsIgnoredAndNotReturned(t *testing.T) {
+	for _, enabled := range []bool{false, true} {
+		raw, _ := json.Marshal(DefaultTrustSettings())
+		var fields map[string]any
+		if err := json.Unmarshal(raw, &fields); err != nil {
+			t.Fatal(err)
+		}
+		fields["autoPromotionEnabled"] = enabled
+		raw, _ = json.Marshal(fields)
+		config, err := DecodeTrustSettings(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !config.PromotionRules[0].Enabled || !config.PromotionRules[1].Enabled {
+			t.Fatal("retired switch changed target rules")
+		}
+		encoded, _ := json.Marshal(config)
+		if bytes.Contains(encoded, []byte("autoPromotionEnabled")) {
+			t.Fatal("retired switch returned")
+		}
 	}
 }

@@ -28,14 +28,14 @@ func TestPromotionAndBoundedProgress(t *testing.T) {
 	if s.TrustVisitDays != old.TrustVisitDays || s.TrustLastVisitDay != old.TrustLastVisitDay {
 		t.Fatal("out of order visit counted")
 	}
-	c.AutoPromotionEnabled = false
+	c.PromotionRules[1].Enabled = false
 	for i := 0; i < 35; i++ {
 		s = Next(s, c, now.Add(time.Duration(i+2)*24*time.Hour), uint64(i+6))
 	}
 	if s.TrustVisitDays <= 7 || len(s.TrustTopicIds) != 20 || s.TrustLevel != trustlevel.Member {
 		t.Fatalf("bounded collection: %+v", s)
 	}
-	c.AutoPromotionEnabled = true
+	c.PromotionRules[1].Enabled = true
 	s = Next(s, c, now.Add(40*24*time.Hour), 0)
 	if s.TrustLevel != trustlevel.Regular {
 		t.Fatal("time-only review did not promote")

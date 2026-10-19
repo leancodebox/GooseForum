@@ -21,29 +21,36 @@ type PromotionRule struct {
 }
 
 type TrustLimits struct {
-	MaxDailyUploads            *int             `json:"maxDailyUploads"`
-	MinPostAccountAgeMinutes   int              `json:"minPostAccountAgeMinutes"`
-	MinUploadAccountAgeMinutes int              `json:"minUploadAccountAgeMinutes"`
-	MaxDailyReplies            *int             `json:"maxDailyReplies"`
-	MaxDailyTopics             *int             `json:"maxDailyTopics"`
-	Level                      trustlevel.Level `json:"level"`
-	AllowImageUpload           bool             `json:"allowImageUpload"`
-	MaxImagesPerPost           *int             `json:"maxImagesPerPost"`
-	MaxExternalLinksPerPost    *int             `json:"maxExternalLinksPerPost"`
-	MaxMentionsPerPost         *int             `json:"maxMentionsPerPost"`
+	MaxDailyUploads         *int             `json:"maxDailyUploads"`
+	MaxDailyReplies         *int             `json:"maxDailyReplies"`
+	MaxDailyTopics          *int             `json:"maxDailyTopics"`
+	Level                   trustlevel.Level `json:"level"`
+	AllowImageUpload        bool             `json:"allowImageUpload"`
+	MaxImagesPerPost        *int             `json:"maxImagesPerPost"`
+	MaxExternalLinksPerPost *int             `json:"maxExternalLinksPerPost"`
+	MaxMentionsPerPost      *int             `json:"maxMentionsPerPost"`
+}
+
+type RegistrationCooldown struct {
+	MinPostAccountAgeMinutes   int `json:"minPostAccountAgeMinutes"`
+	MinUploadAccountAgeMinutes int `json:"minUploadAccountAgeMinutes"`
+}
+
+func (c RegistrationCooldown) Valid() bool {
+	return c.MinPostAccountAgeMinutes >= 0 && c.MinPostAccountAgeMinutes <= 5256000 && c.MinUploadAccountAgeMinutes >= 0 && c.MinUploadAccountAgeMinutes <= 5256000
 }
 
 type TrustConfig struct {
-	SchemaVersion        int             `json:"schemaVersion"`
-	AutoPromotionEnabled bool            `json:"autoPromotionEnabled"`
-	PromotionRules       []PromotionRule `json:"promotionRules"`
-	LevelLimits          []TrustLimits   `json:"levelLimits"`
+	RegistrationCooldown RegistrationCooldown `json:"registrationCooldown"`
+	SchemaVersion        int                  `json:"schemaVersion"`
+	PromotionRules       []PromotionRule      `json:"promotionRules"`
+	LevelLimits          []TrustLimits        `json:"levelLimits"`
 }
 
 func DefaultTrustSettings() TrustConfig {
-	c := TrustConfig{SchemaVersion: 2, AutoPromotionEnabled: true, PromotionRules: []PromotionRule{{trustlevel.Member, true, 24, 2, 5}, {trustlevel.Regular, true, 336, 7, 20}}}
+	c := TrustConfig{SchemaVersion: 3, RegistrationCooldown: RegistrationCooldown{MinUploadAccountAgeMinutes: 1440}, PromotionRules: []PromotionRule{{trustlevel.Member, true, 24, 2, 5}, {trustlevel.Regular, true, 336, 7, 20}}}
 	for _, d := range trustlevel.Definitions() {
-		l := TrustLimits{Level: d.Level, AllowImageUpload: true, MaxDailyTopics: new(10), MaxDailyUploads: new(10), MinUploadAccountAgeMinutes: 1440}
+		l := TrustLimits{Level: d.Level, AllowImageUpload: true, MaxDailyTopics: new(10), MaxDailyUploads: new(10)}
 		if d.Level == trustlevel.Newcomer {
 			l.MaxDailyTopics = new(3)
 			l.MaxDailyReplies = new(10)
@@ -57,7 +64,7 @@ func DefaultTrustSettings() TrustConfig {
 }
 
 func (c TrustConfig) Valid() bool {
-	if c.SchemaVersion != 2 || len(c.PromotionRules) != 2 || len(c.LevelLimits) != 4 {
+	if c.SchemaVersion != 3 || !c.RegistrationCooldown.Valid() || len(c.PromotionRules) != 2 || len(c.LevelLimits) != 4 {
 		return false
 	}
 	rules := map[trustlevel.Level]PromotionRule{}
@@ -79,9 +86,6 @@ func (c TrustConfig) Valid() bool {
 	}
 	seen := map[trustlevel.Level]bool{}
 	for _, l := range c.LevelLimits {
-		if l.MinPostAccountAgeMinutes < 0 || l.MinPostAccountAgeMinutes > 5256000 || l.MinUploadAccountAgeMinutes < 0 || l.MinUploadAccountAgeMinutes > 5256000 {
-			return false
-		}
 		if l.MaxDailyUploads != nil && (*l.MaxDailyUploads < 0 || *l.MaxDailyUploads > 100000) {
 			return false
 		}
@@ -104,13 +108,98 @@ func (c TrustConfig) Valid() bool {
 	return true
 }
 
+type TrustLimitOrderError struct {
+	Field       string
+	LowerLevel  trustlevel.Level
+	HigherLevel trustlevel.Level
+}
+
+func (e *TrustLimitOrderError) Error() string {
+	return "higher trust level has a stricter limit: " + e.Field
+}
+
+// Validate on save, so older policies remain readable and can be corrected.
+func (c TrustConfig) ValidateLimitOrder() *TrustLimitOrderError {
+	limits := make(map[trustlevel.Level]TrustLimits, len(c.LevelLimits))
+	for _, limit := range c.LevelLimits {
+		limits[limit.Level] = limit
+	}
+	definitions := trustlevel.Definitions()
+	for i := 1; i < len(definitions); i++ {
+		lower, lowerOK := limits[definitions[i-1].Level]
+		higher, higherOK := limits[definitions[i].Level]
+		if !lowerOK || !higherOK {
+			continue
+		}
+		if lower.AllowImageUpload && !higher.AllowImageUpload {
+			return &TrustLimitOrderError{"allowImageUpload", lower.Level, higher.Level}
+		}
+		for _, pair := range []struct {
+			field         string
+			lower, higher *int
+		}{
+			{"maxDailyTopics", lower.MaxDailyTopics, higher.MaxDailyTopics},
+			{"maxDailyReplies", lower.MaxDailyReplies, higher.MaxDailyReplies},
+			{"maxDailyUploads", lower.MaxDailyUploads, higher.MaxDailyUploads},
+			{"maxImagesPerPost", lower.MaxImagesPerPost, higher.MaxImagesPerPost},
+			{"maxExternalLinksPerPost", lower.MaxExternalLinksPerPost, higher.MaxExternalLinksPerPost},
+			{"maxMentionsPerPost", lower.MaxMentionsPerPost, higher.MaxMentionsPerPost},
+		} {
+			if pair.higher != nil && (pair.lower == nil || *pair.higher < *pair.lower) {
+				return &TrustLimitOrderError{pair.field, lower.Level, higher.Level}
+			}
+		}
+	}
+	return nil
+}
+
 func DecodeTrustSettings(raw []byte) (TrustConfig, error) {
-	var c TrustConfig
+	var header struct {
+		SchemaVersion int `json:"schemaVersion"`
+	}
+	if err := json.Unmarshal(raw, &header); err != nil {
+		return TrustConfig{}, err
+	}
+	if header.SchemaVersion == 2 {
+		var root map[string]json.RawMessage
+		if err := json.Unmarshal(raw, &root); err != nil {
+			return TrustConfig{}, err
+		}
+		var limits []map[string]json.RawMessage
+		if err := json.Unmarshal(root["levelLimits"], &limits); err != nil {
+			return TrustConfig{}, err
+		}
+		cooldown := RegistrationCooldown{}
+		for _, limit := range limits {
+			var old RegistrationCooldown
+			encoded, _ := json.Marshal(limit)
+			if err := json.Unmarshal(encoded, &old); err != nil {
+				return TrustConfig{}, err
+			}
+			if !old.Valid() {
+				return TrustConfig{}, errors.New("invalid legacy registration cooldown")
+			}
+			cooldown.MinPostAccountAgeMinutes = max(cooldown.MinPostAccountAgeMinutes, old.MinPostAccountAgeMinutes)
+			cooldown.MinUploadAccountAgeMinutes = max(cooldown.MinUploadAccountAgeMinutes, old.MinUploadAccountAgeMinutes)
+			delete(limit, "minPostAccountAgeMinutes")
+			delete(limit, "minUploadAccountAgeMinutes")
+		}
+		root["schemaVersion"] = json.RawMessage(`3`)
+		root["levelLimits"], _ = json.Marshal(limits)
+		root["registrationCooldown"], _ = json.Marshal(cooldown)
+		raw, _ = json.Marshal(root)
+	}
+	// Accept the retired switch in stored configurations without returning it.
+	var legacy struct {
+		TrustConfig
+		AutoPromotionEnabled *bool `json:"autoPromotionEnabled"`
+	}
 	d := json.NewDecoder(bytes.NewReader(raw))
 	d.DisallowUnknownFields()
-	if err := d.Decode(&c); err != nil {
-		return c, err
+	if err := d.Decode(&legacy); err != nil {
+		return legacy.TrustConfig, err
 	}
+	c := legacy.TrustConfig
 	var extra any
 	if err := d.Decode(&extra); err != io.EOF {
 		return c, errors.New("invalid trust settings JSON")

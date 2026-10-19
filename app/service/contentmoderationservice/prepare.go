@@ -13,6 +13,12 @@ import (
 // PrepareTopic records publication intent before saving. Only published content
 // enters the queue; changing a topic to a draft invalidates older review jobs.
 func PrepareTopic(topic *topics.Entity, post *posts.Entity) {
+	analysis := markdown2html.AnalyzeTopicContentVersion(post.Content, 200, post.SourceVersion, true)
+	PrepareTopicWithAnalysis(topic, post, analysis)
+}
+
+// PrepareTopicWithAnalysis accepts the projection of the exact post content being saved.
+func PrepareTopicWithAnalysis(topic *topics.Entity, post *posts.Entity, analysis markdown2html.ContentAnalysis) {
 	config := sensitivewordservice.Config()
 	previouslyHidden := post.ModerationStatus == "pending" || post.ModerationStatus == "rejected" || post.ModerationStatus == "denied"
 	topic.ModerationVersion++
@@ -28,9 +34,9 @@ func PrepareTopic(topic *topics.Entity, post *posts.Entity) {
 	if previouslyHidden {
 		post.ProcessStatus = 0
 	}
-	topic.Excerpt = markdown2html.ExtractDescriptionVersion(post.Content, 200, post.SourceVersion)
-	topic.FirstImageURL = markdown2html.ExtractFirstImageURLVersion(post.Content, post.SourceVersion)
-	post.RenderedHTML = markdown2html.PostMarkdownToHTMLVersion(post.Content, post.SourceVersion)
+	topic.Excerpt = analysis.Description
+	topic.FirstImageURL = analysis.FirstImageURL
+	post.RenderedHTML = analysis.RenderedHTML
 	post.RenderedVersion = markdown2html.GetPostVersion()
 }
 

@@ -7,6 +7,20 @@ import (
 	"github.com/spf13/cast"
 )
 
+func SendTrustPromotionNotification(userID uint64, level int16) error {
+	key := fmt.Sprintf("trust:%d:%d", userID, level)
+	notification := eventNotification.Entity{UserId: userID, EventType: eventNotification.EventTypeSystem, DedupeKey: &key, Payload: eventNotification.NotificationPayload{
+		TemplateKey:    eventNotification.TemplateTrustPromotion,
+		TemplateParams: eventNotification.NotificationTemplateParams{TrustLevel: level},
+		Extra:          eventNotification.Extra{ProfileURL: "/settings?tab=account"},
+	}}
+	if err := eventNotification.Create(&notification); err != nil {
+		return err
+	}
+	unreadservice.Invalidate(userID)
+	return nil
+}
+
 // SendCommentNotification 发送评论通知
 func SendCommentNotification(userId uint64, topicId uint64, commentContent string, commenterId uint64, postId uint64, postNo uint64) error {
 	payload := eventNotification.NotificationPayload{

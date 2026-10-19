@@ -1,5 +1,6 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  trustLevel: "Trust level",
   title: "Notifications",
   unread: "{count} unread",
   summary:
@@ -27,6 +28,7 @@ export default {
   badgeEarned: "Earned the “{badge}” badge",
   viewProfile: "View profile",
   templates: {
+    trustPromotion: "Promoted to {level}. View your permissions and limits",
     comment: "commented on your topic",
     postReply: "replied to you",
     mention: "mentioned you",

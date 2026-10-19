@@ -1,5 +1,6 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  trustLevel: "信任等级",
   title: "通知",
   unread: "{count} 未读",
   summary: "已加载 {total} 条，回复、点赞、关注和系统消息会集中展示在这里。",
@@ -26,6 +27,7 @@ export default {
   badgeEarned: "获得了「{badge}」徽章",
   viewProfile: "查看主页",
   templates: {
+    trustPromotion: "你已晋升为「{level}」，查看当前权限与额度",
     comment: "评论了你的主题",
     postReply: "回复了你",
     mention: "提及了你",

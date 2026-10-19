@@ -309,6 +309,34 @@ function settingsProps(): SettingsPageProps {
   };
 }
 
+it('links a localized trust promotion notification to personal level details', async () => {
+  const props = notificationsProps()
+  props.notifications = [{ id: 101, eventType: 'system', isRead: false, createdAt: '2026-10-20T00:00:00Z', title: '', content: '', actor: { id: 0, username: '' }, payload: { actorId: 0, templateKey: 'notifications.templates.trustPromotion', templateParams: { trustLevel: 200 } } }]
+  const markRead = vi.fn().mockResolvedValue(true)
+  const { user, navigate } = renderPage(payload('notifications.index', props), { notifications: { markRead } as unknown as GooseSiteApi['notifications'] })
+  const link = await screen.findByRole('link', { name: '你已晋升为「稳定成员」，查看当前权限与额度' })
+  expect(link.getAttribute('href')).toBe('/settings?tab=account')
+  await user.click(link)
+  expect(markRead).toHaveBeenCalledWith(101)
+  expect(navigate).toHaveBeenCalled()
+})
+
+it('shows current level limits and the next level changes without usage polling', async () => {
+  const originalURL = window.location.href
+  window.history.replaceState(null, '', '/settings?tab=account')
+  try {
+    const limits = { level: 0, allowImageUpload: true, maxDailyTopics: 3, maxDailyReplies: 10, maxDailyUploads: 10, maxImagesPerPost: 1, maxExternalLinksPerPost: 2, maxMentionsPerPost: 2 }
+    const trustLevel = vi.fn().mockResolvedValue({ level: 0, locked: false, visitDays: 1, topicsVisited: 3, createdAt: '2026-01-01T00:00:00Z', next: { level: 100, minVisitDays: 2, minTopicsVisited: 5, minAccountAgeHours: 24 }, limits, nextLimits: { ...limits, level: 100, maxDailyTopics: 10, maxDailyReplies: null, maxImagesPerPost: null }, registrationCooldown: { minPostAccountAgeMinutes: 0, minUploadAccountAgeMinutes: 1440 }, communityUploadsEnabled: true, communityUploadRoleExempt: true })
+    renderPage(payload('settings.index', settingsProps()), { users: { trustLevel } as unknown as GooseSiteApi['users'] })
+    const table = await screen.findByRole('table')
+    const row = within(table).getByRole('row', { name: /每日回复/ })
+    expect(row.textContent).toContain('10')
+    expect(row.textContent).toContain('不限')
+    expect(screen.getByText('角色账号的社区图片上传豁免每日上传额度和上传冷静期；头像仍受限制。')).toBeTruthy()
+    expect(trustLevel).toHaveBeenCalledOnce()
+  } finally { window.history.replaceState(null, '', originalURL) }
+})
+
 function notificationsProps(): NotificationsPageProps {
   return {
     total: 1,
@@ -2128,7 +2156,7 @@ it("keeps privacy saves locked across tab switches and preserves successful valu
     .mockRejectedValueOnce(new Error("save failed"));
   try {
     const { user } = renderPage(payload("settings.index", settingsProps()), {
-      users: { savePrivacy, trustLevel: vi.fn().mockResolvedValue({ level: 100, locked: false, autoPromotionEnabled: true, next: null, visitDays: 2, topicsVisited: 5 }) } as unknown as GooseSiteApi["users"],
+      users: { savePrivacy, trustLevel: vi.fn().mockResolvedValue({ level: 100, locked: false, next: null, visitDays: 2, topicsVisited: 5 }) } as unknown as GooseSiteApi["users"],
     });
     await user.click(screen.getByRole("checkbox", { name: "展示我的主题" }));
     await user.click(screen.getByRole("tab", { name: "账号" }));

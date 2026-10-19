@@ -57,7 +57,8 @@ func MigrateParticipationSettingsWithDB(db *gorm.DB) error {
 	}
 	if trust.Id == 0 || legacy.SchemaVersion == 1 {
 		c := legacy.TrustConfig
-		c.SchemaVersion = 2
+		c.SchemaVersion = 3
+		c.RegistrationCooldown = pageConfig.RegistrationCooldown{MinPostAccountAgeMinutes: max(0, old.TextControl.Age), MinUploadAccountAgeMinutes: max(0, old.UploadControl.Age)}
 		for i := range c.LevelLimits {
 			l := &c.LevelLimits[i]
 			if !legacy.RestrictionsEnabled {
@@ -71,8 +72,6 @@ func MigrateParticipationSettingsWithDB(db *gorm.DB) error {
 			if old.TextControl.Daily != nil && *old.TextControl.Daily > 0 && (l.MaxDailyTopics == nil || *old.TextControl.Daily < *l.MaxDailyTopics) {
 				l.MaxDailyTopics = new(*old.TextControl.Daily)
 			}
-			l.MinPostAccountAgeMinutes = max(0, old.TextControl.Age)
-			l.MinUploadAccountAgeMinutes = max(0, old.UploadControl.Age)
 			l.MaxDailyUploads = nil
 			if old.UploadControl.Daily > 0 {
 				l.MaxDailyUploads = new(old.UploadControl.Daily)

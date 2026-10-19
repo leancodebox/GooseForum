@@ -29,6 +29,9 @@ func SaveTrustSettings(req component.BetterRequest[SaveTrustSettingsReq]) compon
 	if err != nil {
 		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
 	}
+	if issue := settings.ValidateLimitOrder(); issue != nil {
+		return component.FailResponseCode(component.MessageRequestInvalidParams, component.MessageParams{"field": issue.Field, "lowerLevel": issue.LowerLevel, "higherLevel": issue.HigherLevel})
+	}
 	return savePageConfig(pageConfig.TrustSettings, settings, func() { hotdataserve.ClearTrustSettingsCache(); trustlevelservice.ClearReviewCache() })
 }
 func MyTrustLevel(req component.BetterRequest[component.Null]) component.Response {

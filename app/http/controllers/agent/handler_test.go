@@ -31,6 +31,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserStat"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/oidcproviderservice"
 )
@@ -166,6 +167,58 @@ func TestAuthorizationForumWritesAndIsolation(t *testing.T) {
 	}
 	created := result["data"].(map[string]any)
 	topicID := created["topicId"].(string)
+	// Check actual OAuth write endpoints against the same participation policy.
+	previousTrust := pageConfig.GetByPageType(pageConfig.TrustSettings)
+	t.Cleanup(func() {
+		if previousTrust.Id == 0 {
+			db.Where("page_type = ?", pageConfig.TrustSettings).Delete(&pageConfig.Entity{})
+		} else {
+			_ = pageConfig.SaveConfig(pageConfig.TrustSettings, previousTrust.Config)
+		}
+		hotdataserve.ClearTrustSettingsCache()
+	})
+	policy := pageConfig.DefaultTrustSettings()
+	applyPolicy := func() {
+		t.Helper()
+		raw, _ := json.Marshal(policy)
+		if err := pageConfig.SaveConfig(pageConfig.TrustSettings, string(raw)); err != nil {
+			t.Fatal(err)
+		}
+		hotdataserve.ClearTrustSettingsCache()
+	}
+	for _, tc := range []struct {
+		name      string
+		configure func()
+		path      string
+		content   string
+		status    int
+		code      string
+	}{
+		{"topic quota", func() { policy.LevelLimits[0].MaxDailyTopics = new(0) }, "/topics", "Quota test content", 429, "trust_daily_topics"},
+		{"reply quota", func() { policy.LevelLimits[0].MaxDailyTopics = nil; policy.LevelLimits[0].MaxDailyReplies = new(0) }, "/topics/" + topicID + "/posts", "Quota test reply", 429, "trust_daily_replies"},
+		{"registration age", func() {
+			policy.LevelLimits[0].MaxDailyReplies = nil
+			policy.RegistrationCooldown.MinPostAccountAgeMinutes = 5256000
+		}, "/topics/" + topicID + "/posts", "Age test reply", 429, "posting_cooldown"},
+		{"image count", func() {
+			policy.RegistrationCooldown.MinPostAccountAgeMinutes = 0
+			policy.LevelLimits[0].MaxImagesPerPost = new(0)
+		}, "/topics", "![image](/test.png)", 422, "trust_content_limit"},
+	} {
+		tc.configure()
+		applyPolicy()
+		payload := map[string]any{"content": tc.content, "clientRequestId": uuid.NewString()}
+		if tc.path == "/topics" {
+			payload["title"] = "Policy test topic"
+			payload["categoryIds"] = []string{"99001"}
+		}
+		status, response := call("POST", "/api/agent/v1"+tc.path, tokens.AccessToken, payload)
+		if status != tc.status || response["error"].(map[string]any)["code"] != tc.code {
+			t.Fatalf("%s: %d %#v", tc.name, status, response)
+		}
+	}
+	policy = pageConfig.DefaultTrustSettings()
+	applyPolicy()
 	if status, _ := call("GET", "/api/agent/v1/topics/"+topicID, "", nil); status != 200 {
 		t.Fatalf("public topic: %d", status)
 	}

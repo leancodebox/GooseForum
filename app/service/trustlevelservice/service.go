@@ -16,6 +16,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/trusthistory"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
 
@@ -52,11 +53,9 @@ func Next(s users.TrustState, c pageConfig.TrustConfig, now time.Time, topicID u
 			n.TrustTopicIds = append(slices.Clone(n.TrustTopicIds), topicID)
 		}
 	}
-	if c.AutoPromotionEnabled {
-		for _, r := range c.PromotionRules {
-			if r.Enabled && r.Level > n.TrustLevel && r.Level <= trustlevel.Regular && !now.Before(s.CreatedAt.Add(time.Duration(r.MinAccountAgeHours)*time.Hour)) && n.TrustVisitDays >= r.MinVisitDays && len(n.TrustTopicIds) >= r.MinTopicsVisited {
-				n.TrustLevel = r.Level
-			}
+	for _, r := range c.PromotionRules {
+		if r.Enabled && r.Level > n.TrustLevel && r.Level <= trustlevel.Regular && !now.Before(s.CreatedAt.Add(time.Duration(r.MinAccountAgeHours)*time.Hour)) && n.TrustVisitDays >= r.MinVisitDays && len(n.TrustTopicIds) >= r.MinTopicsVisited {
+			n.TrustLevel = r.Level
 		}
 	}
 	return n
@@ -81,9 +80,6 @@ func ReviewWithState(state users.AccountState, topicID uint64, now time.Time) er
 	c, err := hotdataserve.GetTrustSettings()
 	if err != nil {
 		return err
-	}
-	if topicID == 0 && !c.AutoPromotionEnabled {
-		return nil
 	}
 	if topicID == 0 {
 		possible := false
@@ -121,10 +117,20 @@ func ReviewWithState(state users.AccountState, topicID uint64, now time.Time) er
 			if err := record(s, n, "auto", 0, ""); err != nil {
 				slog.Warn("trust promotion history failed", "userId", userID, "error", err)
 			}
+			notifyPromotion(s, n)
 		}
 		return nil
 	}
 	return ErrConflict
+}
+
+func notifyPromotion(old, next users.TrustState) {
+	if next.TrustLevel <= old.TrustLevel {
+		return
+	}
+	if err := notificationservice.SendTrustPromotionNotification(next.Id, int16(next.TrustLevel)); err != nil {
+		slog.Warn("trust promotion notification failed", "userId", next.Id, "level", next.TrustLevel, "error", err)
+	}
 }
 
 func record(old, next users.TrustState, source string, actor uint64, reason string) error {
@@ -160,6 +166,7 @@ func SetLevel(actor, userID uint64, level trustlevel.Level, locked bool, version
 	}
 	userservice.InvalidateUserCaches(userID)
 	reviewCache.Delete(strconv.FormatUint(userID, 10))
+	notifyPromotion(s, n)
 	if err := record(s, n, "admin", actor, strings.TrimSpace(reason)); err != nil {
 		return errors.New("等级已更新，但历史记录写入失败")
 	}
@@ -167,16 +174,21 @@ func SetLevel(actor, userID uint64, level trustlevel.Level, locked bool, version
 }
 
 type Progress struct {
-	Level                trustlevel.Level          `json:"level"`
-	Name                 string                    `json:"name"`
-	Locked               bool                      `json:"locked"`
-	Version              uint64                    `json:"version"`
-	VisitDays            uint32                    `json:"visitDays"`
-	TopicsVisited        int                       `json:"topicsVisited"`
-	CreatedAt            time.Time                 `json:"createdAt"`
-	Next                 *pageConfig.PromotionRule `json:"next"`
-	AutoPromotionEnabled bool                      `json:"autoPromotionEnabled"`
-	Definitions          []trustlevel.Definition   `json:"definitions"`
+	Limits                    pageConfig.TrustLimits          `json:"limits"`
+	NextLimits                *pageConfig.TrustLimits         `json:"nextLimits"`
+	RegistrationCooldown      pageConfig.RegistrationCooldown `json:"registrationCooldown"`
+	CommunityUploadRoleExempt bool                            `json:"communityUploadRoleExempt"`
+	CommunityUploadsEnabled   bool                            `json:"communityUploadsEnabled"`
+	RestrictionStatus         string                          `json:"restrictionStatus"`
+	Level                     trustlevel.Level                `json:"level"`
+	Name                      string                          `json:"name"`
+	Locked                    bool                            `json:"locked"`
+	Version                   uint64                          `json:"version"`
+	VisitDays                 uint32                          `json:"visitDays"`
+	TopicsVisited             int                             `json:"topicsVisited"`
+	CreatedAt                 time.Time                       `json:"createdAt"`
+	Next                      *pageConfig.PromotionRule       `json:"next"`
+	Definitions               []trustlevel.Definition         `json:"definitions"`
 }
 
 func GetProgress(id uint64) (Progress, error) {
@@ -184,14 +196,30 @@ func GetProgress(id uint64) (Progress, error) {
 	if err != nil {
 		return Progress{}, err
 	}
+	if !trustlevel.Valid(s.TrustLevel) {
+		return Progress{}, ErrInvalid
+	}
 	c, err := hotdataserve.GetTrustSettings()
 	if err != nil {
 		return Progress{}, err
 	}
-	p := Progress{Level: s.TrustLevel, Name: trustlevel.Name(s.TrustLevel), Locked: s.TrustLevelLocked, Version: s.TrustVersion, VisitDays: s.TrustVisitDays, TopicsVisited: len(s.TrustTopicIds), CreatedAt: s.CreatedAt, AutoPromotionEnabled: c.AutoPromotionEnabled, Definitions: trustlevel.Definitions()}
+	p := Progress{Level: s.TrustLevel, Name: trustlevel.Name(s.TrustLevel), Locked: s.TrustLevelLocked, Version: s.TrustVersion, VisitDays: s.TrustVisitDays, TopicsVisited: len(s.TrustTopicIds), CreatedAt: s.CreatedAt, Definitions: trustlevel.Definitions()}
 	for _, r := range c.PromotionRules {
 		if r.Enabled && r.Level > s.TrustLevel && (p.Next == nil || r.Level < p.Next.Level) {
 			p.Next = &r
+		}
+	}
+	p.RegistrationCooldown = c.RegistrationCooldown
+	p.CommunityUploadRoleExempt = s.RoleId > 0
+	p.CommunityUploadsEnabled = hotdataserve.GetPostingSettingsConfigCache().UploadControl.AllowAttachments || p.CommunityUploadRoleExempt
+	p.RestrictionStatus = s.EffectiveRestriction(time.Now())
+	for _, limits := range c.LevelLimits {
+		if limits.Level == s.TrustLevel {
+			p.Limits = limits
+		}
+		if p.Next != nil && limits.Level == p.Next.Level {
+			next := limits
+			p.NextLimits = &next
 		}
 	}
 	return p, nil

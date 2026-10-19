@@ -4,6 +4,7 @@ import type {
   NotificationPayload,
   NotificationsPageProps,
 } from "@gooseforum/client";
+import { trustLevelName } from '@gooseforum/client'
 import {
   Award,
   Bell,
@@ -311,7 +312,7 @@ function NotificationRow({
         : item.eventType === "system"
           ? Info
           : MessageCircle;
-  const actor = actorName(item, t);
+  const actor = actorName(item, t, locale);
   const actorUrl = item.actor.id ? `/u/${item.actor.id}` : "";
   const target = targetUrl(item, actorUrl);
   return (
@@ -352,7 +353,7 @@ function NotificationRow({
           )}
           {item.actor.id || item.eventType === "follow" ? (
             <span className="shrink-0 text-muted-foreground">
-              {verb(item, t)}
+              {verb(item, t, locale)}
             </span>
           ) : null}
           {target ? (
@@ -361,18 +362,18 @@ function NotificationRow({
               className="min-w-0 truncate font-semibold text-primary"
               onClick={onRead}
             >
-              {notificationText(item, t)}
+              {notificationText(item, t, locale)}
             </GooseLink>
           ) : (
             <span className="min-w-0 truncate font-medium">
-              {notificationText(item, t)}
+              {notificationText(item, t, locale)}
             </span>
           )}
           {!item.isRead ? (
             <span className="size-1.5 rounded-full bg-primary" />
           ) : null}
         </div>
-        {item.content && item.content !== notificationText(item, t) ? (
+        {item.content && item.content !== notificationText(item, t, locale) ? (
           <p className="line-clamp-1 text-xs text-muted-foreground">
             {item.content}
           </p>
@@ -462,6 +463,7 @@ function initialCursor(page: NotificationsPageProps) {
 function template(
   item: NotificationPayload,
   t: ReturnType<typeof useTranslation>["t"],
+  locale = 'en',
 ) {
   const key = item.payload.templateKey?.replace("notifications.templates.", "");
   return key
@@ -470,15 +472,17 @@ function template(
           item.payload.templateParams?.badgeName ||
           item.payload.metadata?.badgeName ||
           "",
+        level: trustLevelName(item.payload.templateParams?.trustLevel ?? 0, locale),
       })
     : "";
 }
 function actorName(
   item: NotificationPayload,
   t: ReturnType<typeof useTranslation>["t"],
+  locale = 'en',
 ) {
   return item.eventType === "badge"
-    ? template(item, t) || item.title || t("actorFallback")
+    ? template(item, t, locale) || item.title || t("actorFallback")
     : item.actor.username ||
         item.payload.actorName ||
         item.payload.metadata?.followerName ||
@@ -488,13 +492,15 @@ function titleText(
   item: NotificationPayload,
   t: ReturnType<typeof useTranslation>["t"],
 ) {
+  if (item.payload.templateKey === 'notifications.templates.trustPromotion') return t('trustLevel');
   return item.title || t("fallback");
 }
 function notificationText(
   item: NotificationPayload,
   t: ReturnType<typeof useTranslation>["t"],
+  locale = 'en',
 ) {
-  const translated = template(item, t);
+  const translated = template(item, t, locale);
   if (item.eventType === "badge")
     return (
       translated ||
@@ -507,7 +513,7 @@ function notificationText(
       translated ||
       item.content ||
       item.payload.content ||
-      t("followDescription", { actor: actorName(item, t) })
+      t("followDescription", { actor: actorName(item, t, locale) })
     );
   return (
     item.topic?.title ||
@@ -520,8 +526,9 @@ function notificationText(
 function verb(
   item: NotificationPayload,
   t: ReturnType<typeof useTranslation>["t"],
+  locale = 'en',
 ) {
-  const translated = template(item, t);
+  const translated = template(item, t, locale);
   if (translated && item.eventType !== "badge") return translated;
   if (item.eventType === "follow") return t("verb.follow");
   if (item.eventType === "post_reply") return t("verb.reply");
@@ -530,6 +537,7 @@ function verb(
   return titleText(item, t);
 }
 function targetUrl(item: NotificationPayload, actorUrl: string) {
+  if (item.payload.templateKey === 'notifications.templates.trustPromotion') return '/settings?tab=account';
   if (item.topic) return item.topic.url;
   if (item.eventType === "badge")
     return item.payload.metadata?.profileUrl || actorUrl;

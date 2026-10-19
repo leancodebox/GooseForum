@@ -55,6 +55,7 @@ type WriteResult struct {
 }
 
 type writeState struct {
+	policy              *trustlevelservice.UserPolicy
 	topic               topics.Entity
 	firstPost           posts.Entity
 	isNew               bool
@@ -112,7 +113,12 @@ func loadWriteState(input WriteInput) (*writeState, error) {
 			return nil, ErrTopicNotFound
 		}
 	} else {
-		if err := trustlevelservice.ValidateNewTopic(input.UserID); err != nil {
+		policy, err := trustlevelservice.ResolvePolicy(input.UserID)
+		if err != nil {
+			return nil, err
+		}
+		state.policy = &policy
+		if err := policy.ValidateNewTopic(); err != nil {
 			return nil, err
 		}
 		state.topic.UserId = input.UserID
@@ -121,21 +127,36 @@ func loadWriteState(input WriteInput) (*writeState, error) {
 }
 
 func prepareWrite(state *writeState, input WriteInput) ([]uint64, error) {
+	if state.policy == nil && input.Status == 1 {
+		policy, err := trustlevelservice.ResolvePolicy(input.UserID)
+		if err != nil {
+			return nil, err
+		}
+		state.policy = &policy
+	}
+	if !state.isNew && !state.wasPublished && input.Status == 1 {
+		if err := state.policy.ValidatePostAge(); err != nil {
+			return nil, err
+		}
+	}
 	content, normalizeErr := mentionservice.Normalize(input.Content, input.SourceVersion, input.Status == 1)
 	if normalizeErr != nil {
 		return nil, normalizeErr
 	}
 	input.Content = content
-	if input.Status == 1 {
-		if err := trustlevelservice.ValidateContent(input.UserID, content, input.SourceVersion); err != nil {
-			return nil, err
-		}
-	}
 	categoryIDs, err := authorizeCategories(input.UserID, &state.topic, input.CategoryIDs, state.isNew, !state.wasPublished && input.Status == 1)
 	if err != nil {
 		return nil, errors.Join(ErrPermissionDenied, err)
 	}
-	analysis := markdown2html.AnalyzeContentVersion(input.Content, 200, input.SourceVersion)
+	var analysis markdown2html.ContentAnalysis
+	if state.policy != nil {
+		analysis, err = state.policy.AnalyzeTopic(input.Content, input.SourceVersion, input.Status == 1)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		analysis = markdown2html.AnalyzeTopicContentVersion(input.Content, 200, input.SourceVersion, true)
+	}
 	state.imageURLs = analysis.ImageURLs
 	state.topic.CategoryIds = categoryIDs
 	state.topic.Status = input.Status
@@ -149,6 +170,7 @@ func prepareWrite(state *writeState, input WriteInput) ([]uint64, error) {
 			AgentSource: input.AgentSource, ClientRequestID: input.ClientRequestID, RequestFingerprint: input.RequestFingerprint,
 			UserId: input.UserID, Content: input.Content,
 			RenderedVersion: markdown2html.GetPostVersion(),
+			RenderedHTML:    analysis.RenderedHTML,
 		}
 	} else {
 		wasEverPublished := state.topic.PublishedAt != nil || state.wasPublished
@@ -156,11 +178,11 @@ func prepareWrite(state *writeState, input WriteInput) ([]uint64, error) {
 			return nil, err
 		}
 		state.firstPost.Content = input.Content
-		state.firstPost.RenderedHTML = ""
+		state.firstPost.RenderedHTML = analysis.RenderedHTML
 		state.firstPost.RenderedVersion = markdown2html.GetPostVersion()
 	}
 	state.firstPost.SourceVersion = input.SourceVersion
-	contentmoderationservice.PrepareTopic(&state.topic, &state.firstPost)
+	contentmoderationservice.PrepareTopicWithAnalysis(&state.topic, &state.firstPost, analysis)
 	return categoryIDs, nil
 }
 
@@ -211,15 +233,28 @@ func UpdateStatus(userID, topicID uint64, nextStatus int8) error {
 		return ErrTopicNotFound
 	}
 	firstPublication := topic.PublishedAt == nil
+	var analysis markdown2html.ContentAnalysis
 	if nextStatus == 1 {
-		if err := trustlevelservice.ValidateContent(userID, firstPost.Content, firstPost.SourceVersion); err != nil {
+		policy, err := trustlevelservice.ResolvePolicy(userID)
+		if err != nil {
 			return err
 		}
+		if publishing {
+			if err := policy.ValidatePostAge(); err != nil {
+				return err
+			}
+		}
+		analysis, err = policy.AnalyzeTopic(firstPost.Content, firstPost.SourceVersion, true)
+		if err != nil {
+			return err
+		}
+	} else {
+		analysis = markdown2html.AnalyzeTopicContentVersion(firstPost.Content, 200, firstPost.SourceVersion, true)
 	}
 	wasCounted := topic.Status == 1 && topic.ProcessStatus == 0
 	expectedVersion := topic.ModerationVersion
 	topic.Status = nextStatus
-	contentmoderationservice.PrepareTopic(&topic, &firstPost)
+	contentmoderationservice.PrepareTopicWithAnalysis(&topic, &firstPost, analysis)
 	if err := topicservice.SaveTopicAndFirstPost(topicservice.FirstPostWrite{
 		Topic: &topic, FirstPost: &firstPost, CategoryIDs: topic.CategoryIds, ExpectedVersion: &expectedVersion,
 	}); err != nil {

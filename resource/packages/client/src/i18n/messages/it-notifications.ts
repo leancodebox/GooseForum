@@ -2,6 +2,8 @@
 import en from "./en-notifications.js";
 export default {
   ...en,
+  trustLevel: "Livello di fiducia",
+  templates: { ...en.templates, trustPromotion: "Promozione a {level}. Visualizza permessi e limiti" },
   title: "Notifiche",
   tabs: { all: "Tutte", unread: "Non lette" },
   markAllRead: "Segna tutte come lette",

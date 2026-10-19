@@ -96,3 +96,32 @@ func TestAuthenticatedReviewQueryBudget(t *testing.T) {
 		t.Fatal("repeat no-progress review performed queries")
 	}
 }
+
+func TestProgressCapabilitiesUseOneUserReadAndNoQuotaScans(t *testing.T) {
+	db := dbconnect.Connect()
+	if err := db.AutoMigrate(&users.EntityComplete{}, &pageConfig.Entity{}); err != nil {
+		t.Fatal(err)
+	}
+	u := users.EntityComplete{Username: "trust-progress-query-budget", UsernameLower: "trust-progress-query-budget", TrustLevel: trustlevel.Member, CreatedAt: time.Now().Add(-48 * time.Hour)}
+	if err := db.Create(&u).Error; err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { db.Unscoped().Delete(&u) })
+	if _, err := hotdataserve.GetTrustSettings(); err != nil {
+		t.Fatal(err)
+	}
+	_ = hotdataserve.GetPostingSettingsConfigCache()
+	reads := map[string]int{}
+	name := "trust-progress-no-quota-scans"
+	if err := db.Callback().Query().Before("gorm:query").Register(name, func(tx *gorm.DB) { reads[tx.Statement.Table]++ }); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { db.Callback().Query().Remove(name) })
+	p, err := GetProgress(u.Id)
+	if err != nil || p.Limits.Level != trustlevel.Member || p.NextLimits == nil || p.NextLimits.Level != trustlevel.Regular {
+		t.Fatalf("progress=%+v err=%v", p, err)
+	}
+	if reads["users"] != 1 || len(reads) != 1 {
+		t.Fatalf("progress queries=%v; want users only", reads)
+	}
+}

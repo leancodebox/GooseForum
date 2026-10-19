@@ -715,6 +715,7 @@ export interface NotificationListResponse {
 }
 
 export type NotificationTemplateKey =
+  | 'notifications.templates.trustPromotion'
   | 'notifications.templates.mention'
   | 'notifications.templates.comment'
   | 'notifications.templates.postReply'
@@ -785,6 +786,7 @@ export interface NotificationPayload {
 }
 
 export interface NotificationTemplateParams {
+  trustLevel?: number
   preview?: string
   followerName?: string
   badgeCode?: string

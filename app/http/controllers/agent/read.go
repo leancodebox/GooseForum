@@ -74,7 +74,7 @@ func (h *Handler) me(c *gin.Context) {
 		fail(c, 503, "policy_unavailable", "Unable to read participation policy")
 		return
 	}
-	success(c, 200, gin.H{"id": fmt.Sprint(a.User.Id), "username": a.User.Username, "clientId": a.ClientID, "scopes": a.Scopes, "canWrite": a.canWrite(), "restriction": a.User.EffectiveRestriction(time.Now()), "limits": policy.Limits, "communityUploadRoleExempt": policy.Account.RoleId > 0})
+	success(c, 200, gin.H{"id": fmt.Sprint(a.User.Id), "username": a.User.Username, "clientId": a.ClientID, "scopes": a.Scopes, "canWrite": a.canWrite(), "restriction": a.User.EffectiveRestriction(time.Now()), "limits": policy.Limits, "registrationCooldown": policy.RegistrationCooldown, "communityUploadRoleExempt": policy.Account.RoleId > 0})
 }
 
 func (a *actor) canWrite() bool {

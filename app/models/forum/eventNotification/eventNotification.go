@@ -18,12 +18,13 @@ const (
 )
 
 const (
-	TemplateComment   = "notifications.templates.comment"
-	TemplatePostReply = "notifications.templates.postReply"
-	TemplateTopicPost = "notifications.templates.topicPost"
-	TemplateFollow    = "notifications.templates.follow"
-	TemplateBadge     = "notifications.templates.badge"
-	TemplateMention   = "notifications.templates.mention"
+	TemplateComment        = "notifications.templates.comment"
+	TemplatePostReply      = "notifications.templates.postReply"
+	TemplateTopicPost      = "notifications.templates.topicPost"
+	TemplateFollow         = "notifications.templates.follow"
+	TemplateBadge          = "notifications.templates.badge"
+	TemplateMention        = "notifications.templates.mention"
+	TemplateTrustPromotion = "notifications.templates.trustPromotion"
 )
 
 // Future unread-scope design:
@@ -67,6 +68,7 @@ type NotificationPayload struct {
 }
 
 type NotificationTemplateParams struct {
+	TrustLevel   int16  `json:"trustLevel,omitempty"`
 	Preview      string `json:"preview,omitempty"`
 	FollowerName string `json:"followerName,omitempty"`
 	BadgeCode    string `json:"badgeCode,omitempty"`

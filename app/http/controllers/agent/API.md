@@ -133,7 +133,9 @@ Errors: `{"error":{"code":"...","message":"...","details":{}},"requestId":"uuid"
   auth: browserAuthorizationAvailable, issuer, discoveryUrl, authorizationEndpoint,
   tokenEndpoint, revocationEndpoint, registration, manualTokensEnabled,
   manualTokenSettingsUrl, scopes[].
-- Me: id, username, clientId (empty for manual tokens), scopes[], canWrite, restriction.
+- Me: id, username, clientId (empty for manual tokens), scopes[], canWrite, restriction,
+  limits (per-level quotas), registrationCooldown (shared minPostAccountAgeMinutes
+  and minUploadAccountAgeMinutes), communityUploadRoleExempt.
 - Category: id, name, description, slug, capabilities {createTopic, reply}.
 - Topic: id, title, version, author {id}, categoryIds[], createdAt, updatedAt, url,
   capabilities {reply}. Detail includes firstPost (a Post).

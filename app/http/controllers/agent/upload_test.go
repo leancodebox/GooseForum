@@ -124,7 +124,7 @@ func TestManualImageUploadPermissionsValidationAndQuota(t *testing.T) {
 	trust := pageConfig.DefaultTrustSettings()
 	for i := range trust.LevelLimits {
 		trust.LevelLimits[i].MaxDailyUploads = new(1)
-		trust.LevelLimits[i].MinUploadAccountAgeMinutes = 60
+		trust.RegistrationCooldown.MinUploadAccountAgeMinutes = 60
 	}
 	saveConfig := func() {
 		trustJSON, _ := json.Marshal(trust)
