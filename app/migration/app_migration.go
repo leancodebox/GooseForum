@@ -14,6 +14,9 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
 )
 
+// Allocate migration versions for release upgrades, not each development edit.
+// Unreleased steps may be consolidated only after confirming none were deployed.
+// Once deployed, preserve their numbers and behavior; append new migrations instead.
 func runVersionedDataMigrations() error {
 	currentVersion := pageConfig.GetMigrationVersion()
 	if currentVersion >= pageConfig.AppMigrationVersion {
