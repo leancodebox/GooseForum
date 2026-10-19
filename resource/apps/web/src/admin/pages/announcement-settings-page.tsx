@@ -117,7 +117,7 @@ export function AnnouncementSettingsPage({ api, text }: { api: GooseAdminApi; te
               {form.items.map((item, index) => <SortableAnnouncement key={item.id} id={item.id} disabled={disabled} text={text}>
                   <button type="button" disabled={disabled} aria-pressed={item.id === selectedId}
                     onClick={() => setSelectedId(item.id)}
-                    className={`flex min-w-0 flex-1 items-center gap-1.5 rounded-md px-1 py-1.5 text-left text-sm focus-visible:outline-2 focus-visible:outline-ring ${item.id === selectedId ? "bg-primary/10 text-primary" : "hover:bg-muted"}`}>
+                    className={`flex min-w-0 flex-1 items-center gap-1.5 rounded-md px-1 py-1.5 text-left text-sm hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring ${item.id === selectedId ? "text-primary" : ""}`}>
                     <span className="shrink-0 text-xs tabular-nums">{index + 1}.</span>
                     <span className="truncate font-medium">{item.title || text("announcementUntitled")}</span>
                   </button>
