@@ -123,8 +123,10 @@ function UserIdentity({ user, text, compact = false, locale = 'en' }: { user: Ad
   return <div className="flex min-w-0 flex-1 items-start gap-2.5">
     <a href={`/u/${user.userId}`} target="_blank" rel="noreferrer" className="shrink-0"><Avatar className={compact ? 'size-10' : 'size-9'}><AvatarImage src={user.avatarUrl || undefined} alt={user.username} /><AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar></a>
     <div className="min-w-0 flex-1">
-      <a href={`/u/${user.userId}`} target="_blank" rel="noreferrer" className="block truncate font-semibold hover:text-primary hover:underline">{user.username}</a>
-      {user.trustLevel !== undefined ? <span className="text-xs text-muted-foreground">{trustLevelName(user.trustLevel, locale)}</span> : null}
+      <div className="flex min-w-0 items-center gap-2">
+        <a href={`/u/${user.userId}`} target="_blank" rel="noreferrer" className="truncate font-semibold hover:text-primary hover:underline">{user.username}</a>
+        {user.trustLevel !== undefined ? <span className="shrink-0 text-xs text-muted-foreground">{trustLevelName(user.trustLevel, locale)}</span> : null}
+      </div>
       <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground"><span className="truncate" title={user.email}>{user.email || '—'}</span><Badge variant="outline" className="shrink-0">{user.validate === 1 ? text('verified') : text('unverified')}</Badge></div>
       {compact ? <>
         <div className="mt-2 flex flex-wrap gap-1"><Badge variant={(user.restrictionStatus || 'normal') === 'normal' ? 'outline' : 'destructive'}>{(user.restrictionStatus || 'normal') === 'normal' ? text('enabled') : user.restrictionStatus === 'banned' ? text('banned') : text('suspended')}</Badge>{user.roleList?.map((role) => <Badge key={role.value} variant="secondary">{role.name}</Badge>)}</div>
