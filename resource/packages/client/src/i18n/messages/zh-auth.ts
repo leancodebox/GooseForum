@@ -28,7 +28,7 @@ export default {
   createAccount: "创建账号",
   sendResetEmail: "发送重置邮件",
   backToLogin: "返回登录",
-  continueWith: "或继续使用",
+  continueWith: "其他登录方式",
   resetPasswordTitle: "重置密码",
   resetPasswordSubtitle:
     "设置一个新的登录密码。提交后即可返回登录页使用新密码登录。",

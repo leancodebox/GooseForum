@@ -28,7 +28,7 @@ export default {
   createAccount: "アカウント作成",
   sendResetEmail: "再設定メールを送信",
   backToLogin: "ログインへ戻る",
-  continueWith: "または次で続行",
+  continueWith: "その他のログイン方法",
   resetPasswordTitle: "パスワード再設定",
   resetPasswordSubtitle:
     "新しいログインパスワードを設定します。送信後、新しいパスワードでログインできます。",

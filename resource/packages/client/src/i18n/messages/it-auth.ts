@@ -30,7 +30,7 @@ export default {
   createAccount: "Crea account",
   sendResetEmail: "Invia email di reimpostazione",
   backToLogin: "Torna all’accesso",
-  continueWith: "Oppure continua con",
+  continueWith: "Altri metodi di accesso",
   resetPasswordTitle: "Reimposta password",
   resetPasswordSubtitle:
     "Imposta una nuova password di accesso. Dopo l’invio, torna ad accedere con essa.",

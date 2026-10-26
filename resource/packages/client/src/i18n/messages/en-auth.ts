@@ -28,7 +28,7 @@ export default {
   createAccount: "Create account",
   sendResetEmail: "Send reset email",
   backToLogin: "Back to login",
-  continueWith: "Or continue with",
+  continueWith: "Other sign-in options",
   resetPasswordTitle: "Reset password",
   resetPasswordSubtitle:
     "Set a new login password. After submitting, return to log in with it.",

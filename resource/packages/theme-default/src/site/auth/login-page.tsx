@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useId,
   useState,
   type ComponentProps,
   type FormEvent,
@@ -397,13 +398,13 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
 
         {showOAuth
           ? (
-              <aside aria-labelledby="auth-other-methods" className="flex min-w-0 flex-col justify-center border-t bg-muted/50 px-6 py-6 md:border-t-0 md:border-l sm:px-10">
-                <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-4 text-center">
-                <CommunityIllustration />
-                <h2 id="auth-other-methods" className="text-lg font-semibold tracking-tight">{t('continueWith')}</h2>
-                <div className="grid w-full max-w-xs gap-2">
+              <aside aria-labelledby="auth-other-methods" className="flex min-w-0 flex-col justify-center overflow-hidden bg-background pt-0 pb-5 md:bg-[#f1f5fc] md:py-6 text-foreground md:border-l dark:md:bg-[#141e32] dark:md:text-[#e4eef6]">
+                <div className="mx-auto flex w-full flex-col items-center gap-4 text-center">
+                <GlassCommonsIllustration compact={page.oauthProviders.length > 2} />
+                <h2 id="auth-other-methods" className="flex w-full max-w-sm items-center gap-3 px-6 text-xs font-medium text-muted-foreground before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border"><span className="shrink-0">{t('continueWith')}</span></h2>
+                <div className="grid w-full max-w-sm grid-cols-1 gap-2 px-6">
                   {page.oauthProviders.map((provider) => (
-                    <Button key={provider.key} asChild variant="outline" className="h-auto min-h-9 w-full justify-center gap-2 whitespace-normal bg-background px-3 py-2">
+                    <Button key={provider.key} asChild variant="outline" className="h-auto min-h-9 w-full justify-center gap-2 whitespace-normal border-slate-200/80 bg-white/80 px-3 py-2 backdrop-blur-sm hover:bg-white/85 dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10">
                       <a href={provider.loginUrl}>
                         {provider.key === 'github'
                           ? <GithubMark />
@@ -492,28 +493,38 @@ function SubmitButton({ pending, children }: { pending: boolean, children: strin
   )
 }
 
-function CommunityIllustration() {
+function GlassCommonsIllustration({ compact }: { compact: boolean }) {
+  const id = useId()
+  const orb = `${id}-orb`
+  const pane = `${id}-pane`
+  const shadow = `${id}-shadow`
+
   return (
-    <svg viewBox="20 12 240 160" fill="none" className="h-auto w-full max-w-56 text-primary md:max-w-none" aria-hidden="true" focusable="false">
-      <circle cx="140" cy="90" r="78" stroke="currentColor" strokeOpacity="0.08" />
-      <circle cx="140" cy="90" r="96" stroke="currentColor" strokeOpacity="0.06" />
-      <ellipse cx="140" cy="92" rx="104" ry="76" fill="currentColor" opacity="0.06" />
-      <ellipse cx="140" cy="161" rx="76" ry="6" fill="currentColor" opacity="0.08" />
-      <path d="M37 91C22 49 70 18 105 30M187 143c42 5 70-31 54-59" stroke="currentColor" strokeOpacity="0.22" strokeWidth="1.5" strokeDasharray="4 6" />
-      <g className="fill-background" stroke="currentColor" strokeWidth="1.5">
-        <path d="M63 38h112a12 12 0 0 1 12 12v57a12 12 0 0 1-12 12h-63l-23 17v-17H63a12 12 0 0 1-12-12V50a12 12 0 0 1 12-12Z" strokeOpacity="0.3" />
-        <path d="M149 88h64a12 12 0 0 1 12 12v33a12 12 0 0 1-12 12h-9v13l-18-13h-37a12 12 0 0 1-12-12v-33a12 12 0 0 1 12-12Z" strokeOpacity="0.5" />
+    <svg viewBox="0 0 420 340" fill="none" className={`hidden h-auto w-full md:block ${compact ? 'md:max-w-xs' : 'md:max-w-none'}`} aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id={orb} x2="1" y2="1">
+          <stop stopColor="#b8d0fa" /><stop offset="1" stopColor="#7198e8" />
+        </linearGradient>
+        <linearGradient id={pane} x2=".8" y2="1">
+          <stop stopColor="#fff" stopOpacity=".88" /><stop offset="1" stopColor="#fff" stopOpacity=".28" />
+        </linearGradient>
+        <filter id={shadow} x="-35%" y="-40%" width="180%" height="200%">
+          <feDropShadow dx="0" dy="14" stdDeviation="12" floodColor="#4869a5" floodOpacity=".16" />
+        </filter>
+      </defs>
+      <circle cx="276" cy="169" r="148" fill={`url(#${orb})`} />
+      <circle cx="276" cy="169" r="169" stroke="#adc2e5" strokeOpacity=".25" />
+      <g transform="translate(20 86) rotate(-7 159 79.5)" filter={`url(#${shadow})`}>
+        <rect width="318" height="159" rx="22" fill={`url(#${pane})`} stroke="#fff" strokeOpacity=".95" />
+        <circle cx="36" cy="35" r="14" fill="#7392c4" opacity=".4" />
+        <path d="M62 29h96M62 41h55M26 77h184M26 93h154M26 109h102" stroke="#7392c4" opacity=".4" strokeWidth="6" strokeLinecap="round" />
+        <path d="M235 32h53M235 44h32" stroke="#7392c4" strokeOpacity=".25" strokeWidth="5" strokeLinecap="round" />
       </g>
-      <circle cx="79" cy="65" r="10" fill="currentColor" opacity="0.14" />
-      <path d="M101 61h59M101 70h38M70 91h86M70 100h49" stroke="currentColor" strokeOpacity="0.3" strokeWidth="4" strokeLinecap="round" />
-      <g fill="currentColor">
-        <circle cx="162" cy="117" r="4" opacity="0.4" />
-        <circle cx="181" cy="117" r="4" opacity="0.6" />
-        <circle cx="200" cy="117" r="4" opacity="0.8" />
-        <circle cx="218" cy="48" r="5" opacity="0.2" />
-        <circle cx="49" cy="137" r="3" opacity="0.3" />
+      <g transform="translate(165 229) rotate(6 119 34.5)" filter={`url(#${shadow})`}>
+        <rect width="238" height="69" rx="22" fill={`url(#${pane})`} stroke="#fff" strokeOpacity=".95" />
+        <g fill="#6482b6"><circle cx="32" cy="32" r="4" /><circle cx="48" cy="32" r="4" /><circle cx="64" cy="32" r="4" /></g>
+        <path d="M88 32h74" stroke="#6482b6" strokeOpacity=".35" strokeWidth="5" strokeLinecap="round" />
       </g>
-      <path d="M215 61v12m-6-6h12M40 60v8m-4-4h8" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" strokeLinecap="round" />
     </svg>
   )
 }
