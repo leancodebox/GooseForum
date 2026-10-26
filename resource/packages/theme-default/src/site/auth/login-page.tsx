@@ -10,7 +10,7 @@ import {
 import {
   CircleAlertIcon,
   CircleCheckIcon,
-  KeyRoundIcon,
+  LogInIcon,
 } from 'lucide-react'
 import {
   loginWithPassword,
@@ -21,7 +21,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { Alert, AlertDescription } from '@gooseforum/ui/components/alert'
 import { Button } from '@gooseforum/ui/components/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@gooseforum/ui/components/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@gooseforum/ui/components/card'
 import { Checkbox } from '@gooseforum/ui/components/checkbox'
 import { Field, FieldGroup, FieldLabel } from '@gooseforum/ui/components/field'
 import { Input } from '@gooseforum/ui/components/input'
@@ -221,19 +221,20 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
   const showOAuth = !mfa && mode !== 'forgot' && page.oauthProviders.length > 0
 
   return (
-    <main className="relative flex min-h-svh items-center justify-center bg-muted px-4 py-16 sm:px-6">
+    <main className="relative flex min-h-svh items-center justify-center bg-muted px-4 py-12 sm:px-6">
       <AuthLocaleSwitcher />
 
-      <Card className="w-full max-w-md">
+      <Card className={`w-full overflow-hidden py-0 ${showOAuth ? 'max-w-4xl gap-0 md:grid md:grid-cols-2' : 'max-w-md gap-0'}`}>
+        <div className="min-w-0 space-y-4 py-5 sm:py-6 [&>[data-slot=card-header]]:px-6 [&>[data-slot=card-content]]:px-6 sm:[&>[data-slot=card-header]]:px-10 sm:[&>[data-slot=card-content]]:px-10">
         <CardHeader>
           <AuthBrand layout={layout} />
           <CardTitle className="text-2xl">
             <h1>{mfa ? t('mfa.title') : title}</h1>
           </CardTitle>
-          {!mfa && <p className="text-sm leading-6 text-muted-foreground">{subtitle}</p>}
+          {!mfa && <p className="text-sm leading-5 text-muted-foreground">{subtitle}</p>}
         </CardHeader>
 
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-3">
           {!mfa && mode !== 'forgot'
             ? (
                 <Tabs value={mode} onValueChange={(value) => switchMode(value as Mode)}>
@@ -263,7 +264,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
 
           {mfa ? (
             <form onSubmit={handleMfa}>
-              <FieldGroup className="gap-3">
+              <FieldGroup className="gap-2.5">
                 <TextField id="mfa-code" label={t('mfa.code')} value={mfaCode} autoComplete="one-time-code" autoFocus required maxLength={64} onChange={(event) => setMfaCode(event.target.value)} />
                 <Button type="submit" variant="outline" className="w-full" disabled={pending === 'login'}>{pending === 'login' && <Spinner />}{t('mfa.verify')}</Button>
                 <Button type="button" variant="link" disabled={pending === 'login'} onClick={() => { setMfa(false); setMfaCode(''); setError('') }}>{t('backToLogin')}</Button>
@@ -272,7 +273,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
           ) : mode === 'login'
             ? (
                 <form onSubmit={handleLogin} noValidate>
-                  <FieldGroup className="gap-3">
+                  <FieldGroup className="gap-2.5">
                     <TextField
                       id="login-username"
                       label={t('usernameOrEmail')}
@@ -298,7 +299,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
                       refreshLabel={t('refreshCaptcha')}
                       onRefresh={() => void refreshCaptcha()}
                     />
-                    <Button type="button" variant="link" className="self-end px-0" onClick={() => switchMode('forgot')}>
+                    <Button type="button" variant="link" className="h-6 self-end px-0 text-xs" onClick={() => switchMode('forgot')}>
                       {t('forgotPassword')}
                     </Button>
                     <SubmitButton pending={pending === 'login'}>{t('login')}</SubmitButton>
@@ -308,7 +309,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
             : mode === 'register'
               ? (
                   <form onSubmit={handleRegister} noValidate>
-                    <FieldGroup className="gap-3">
+                    <FieldGroup className="gap-2.5">
                       <TextField
                         id="register-username"
                         label={t('username')}
@@ -326,6 +327,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
                       />
                       <TextField
                         id="register-password"
+                        hint={t('passwordRequirements')}
                         label={t('password')}
                         type="password"
                         autoComplete="new-password"
@@ -364,7 +366,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
                 )
               : (
                   <form onSubmit={handleForgot} noValidate>
-                    <FieldGroup className="gap-3">
+                    <FieldGroup className="gap-2.5">
                       <TextField
                         id="forgot-email"
                         label={t('registeredEmail')}
@@ -391,24 +393,28 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
                   </form>
                 )}
         </CardContent>
+        </div>
 
         {showOAuth
           ? (
-              <CardFooter className="flex-col items-stretch gap-3">
-                <p className="text-center text-xs font-medium text-muted-foreground">{t('continueWith')}</p>
-                <div className="grid gap-2 sm:grid-cols-2">
+              <aside aria-labelledby="auth-other-methods" className="flex min-w-0 flex-col justify-center border-t bg-muted/50 px-6 py-6 md:border-t-0 md:border-l sm:px-10">
+                <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-4 text-center">
+                <CommunityIllustration />
+                <h2 id="auth-other-methods" className="text-lg font-semibold tracking-tight">{t('continueWith')}</h2>
+                <div className="grid w-full max-w-xs gap-2">
                   {page.oauthProviders.map((provider) => (
-                    <Button key={provider.key} asChild variant="outline">
+                    <Button key={provider.key} asChild variant="outline" className="h-auto min-h-9 w-full justify-center gap-2 whitespace-normal bg-background px-3 py-2">
                       <a href={provider.loginUrl}>
                         {provider.key === 'github'
                           ? <GithubMark />
-                          : <KeyRoundIcon data-icon="inline-start" />}
-                        {provider.displayName}
+                          : <LogInIcon data-icon="inline-start" />}
+                        <span className="min-w-0 [overflow-wrap:anywhere]">{provider.displayName}</span>
                       </a>
                     </Button>
                   ))}
                 </div>
-              </CardFooter>
+                </div>
+              </aside>
             )
           : null}
       </Card>
@@ -416,14 +422,16 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
   )
 }
 
-function TextField({ id, label, ...props }: Omit<ComponentProps<typeof Input>, 'id' | 'className'> & {
+function TextField({ id, label, hint, ...props }: Omit<ComponentProps<typeof Input>, 'id' | 'className'> & {
   id: string
   label: string
+  hint?: string
 }) {
   return (
-    <Field>
+    <Field className="gap-1.5">
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      <Input {...props} id={id} className="h-10" />
+      <Input {...props} id={id} className="h-8" aria-describedby={hint ? `${id}-hint` : undefined} />
+      {hint && <p id={`${id}-hint`} className="text-xs leading-4 text-muted-foreground">{hint}</p>}
     </Field>
   )
 }
@@ -448,12 +456,12 @@ function CaptchaField({
   onRefresh(): void
 }) {
   return (
-    <Field>
+    <Field className="gap-1.5">
       <FieldLabel htmlFor="auth-captcha">{label}</FieldLabel>
       <div className="flex gap-3">
         <Input
           id="auth-captcha"
-          className="h-10"
+          className="h-8"
           value={value}
           onChange={(event) => onChange(event.target.value)}
           autoComplete="off"
@@ -461,14 +469,14 @@ function CaptchaField({
         <Button
           type="button"
           variant="outline"
-          className="h-10 w-28 overflow-hidden p-0"
+          className="h-8 w-24 shrink-0 overflow-hidden p-0"
           onClick={onRefresh}
           aria-label={refreshLabel}
           title={refreshLabel}
         >
           {loading || !image
             ? <Spinner />
-            : <img src={image} alt={imageAlt} className="h-full w-full object-cover" />}
+            : <img src={image} alt={imageAlt} className="h-full w-full object-contain" />}
         </Button>
       </div>
     </Field>
@@ -477,10 +485,36 @@ function CaptchaField({
 
 function SubmitButton({ pending, children }: { pending: boolean, children: string }) {
   return (
-    <Button type="submit" size="lg" className="w-full" disabled={pending}>
+    <Button type="submit" className="h-9 w-full" disabled={pending}>
       {pending ? <Spinner data-icon="inline-start" /> : null}
       {children}
     </Button>
+  )
+}
+
+function CommunityIllustration() {
+  return (
+    <svg viewBox="20 12 240 160" fill="none" className="h-auto w-full max-w-56 text-primary md:max-w-none" aria-hidden="true" focusable="false">
+      <circle cx="140" cy="90" r="78" stroke="currentColor" strokeOpacity="0.08" />
+      <circle cx="140" cy="90" r="96" stroke="currentColor" strokeOpacity="0.06" />
+      <ellipse cx="140" cy="92" rx="104" ry="76" fill="currentColor" opacity="0.06" />
+      <ellipse cx="140" cy="161" rx="76" ry="6" fill="currentColor" opacity="0.08" />
+      <path d="M37 91C22 49 70 18 105 30M187 143c42 5 70-31 54-59" stroke="currentColor" strokeOpacity="0.22" strokeWidth="1.5" strokeDasharray="4 6" />
+      <g className="fill-background" stroke="currentColor" strokeWidth="1.5">
+        <path d="M63 38h112a12 12 0 0 1 12 12v57a12 12 0 0 1-12 12h-63l-23 17v-17H63a12 12 0 0 1-12-12V50a12 12 0 0 1 12-12Z" strokeOpacity="0.3" />
+        <path d="M149 88h64a12 12 0 0 1 12 12v33a12 12 0 0 1-12 12h-9v13l-18-13h-37a12 12 0 0 1-12-12v-33a12 12 0 0 1 12-12Z" strokeOpacity="0.5" />
+      </g>
+      <circle cx="79" cy="65" r="10" fill="currentColor" opacity="0.14" />
+      <path d="M101 61h59M101 70h38M70 91h86M70 100h49" stroke="currentColor" strokeOpacity="0.3" strokeWidth="4" strokeLinecap="round" />
+      <g fill="currentColor">
+        <circle cx="162" cy="117" r="4" opacity="0.4" />
+        <circle cx="181" cy="117" r="4" opacity="0.6" />
+        <circle cx="200" cy="117" r="4" opacity="0.8" />
+        <circle cx="218" cy="48" r="5" opacity="0.2" />
+        <circle cx="49" cy="137" r="3" opacity="0.3" />
+      </g>
+      <path d="M215 61v12m-6-6h12M40 60v8m-4-4h8" stroke="currentColor" strokeOpacity="0.5" strokeWidth="2" strokeLinecap="round" />
+    </svg>
   )
 }
 

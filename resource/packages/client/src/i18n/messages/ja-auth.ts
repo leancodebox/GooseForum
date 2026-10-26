@@ -17,6 +17,7 @@ export default {
   email: "メール",
   registeredEmail: "登録メール",
   password: "パスワード",
+  passwordRequirements: "英字（大文字または小文字）と数字を含む、6〜64バイトのパスワード。",
   newPassword: "新しいパスワード",
   confirmPassword: "パスワード確認",
   captcha: "認証コード",

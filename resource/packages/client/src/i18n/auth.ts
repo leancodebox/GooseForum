@@ -22,6 +22,7 @@ export interface AuthMessages {
   email: string;
   registeredEmail: string;
   password: string;
+  passwordRequirements: string;
   newPassword: string;
   confirmPassword: string;
   captcha: string;

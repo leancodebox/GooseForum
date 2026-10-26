@@ -17,6 +17,7 @@ export default {
   email: "邮箱",
   registeredEmail: "注册邮箱",
   password: "密码",
+  passwordRequirements: "需包含英文字母（大写或小写）和数字，长度为 6–64 字节。",
   newPassword: "新密码",
   confirmPassword: "确认密码",
   captcha: "验证码",

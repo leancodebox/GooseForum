@@ -17,6 +17,7 @@ export default {
   email: "Email",
   registeredEmail: "Registered email",
   password: "Password",
+  passwordRequirements: "Use letters (A–Z or a–z) and numbers (0–9), with a length of 6–64 bytes.",
   newPassword: "New password",
   confirmPassword: "Confirm password",
   captcha: "Captcha",
