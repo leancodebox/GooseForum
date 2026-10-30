@@ -210,6 +210,9 @@ func reverseMessages(msgs []messages.Entity) {
 
 // MarkRead clears unread state for a conversation.
 func MarkRead(userId, convId uint64) error {
+	if !imUserChatConfigs.CanAccessConversation(userId, convId) {
+		return errors.New("conversation not found")
+	}
 	imUserChatConfigs.ClearUnread(convId, userId)
 	messages.MarkMessagesRead(convId, userId)
 	unreadservice.Invalidate(userId)
