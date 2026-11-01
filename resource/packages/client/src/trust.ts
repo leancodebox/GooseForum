@@ -5,7 +5,7 @@ export function trustLevelName(level: number, locale = 'en') {
 }
 export interface TrustRule { level: number; enabled: boolean; minAccountAgeHours: number; minVisitDays: number; minTopicsVisited: number }
 export interface RegistrationCooldown { minPostAccountAgeMinutes: number; minUploadAccountAgeMinutes: number }
-export interface TrustLimits { level: number; allowImageUpload: boolean; maxDailyUploads: number | null; maxDailyTopics: number | null; maxDailyReplies: number | null; maxImagesPerPost: number | null; maxExternalLinksPerPost: number | null; maxMentionsPerPost: number | null }
+export interface TrustLimits { level: number; allowImageUpload: boolean; allowProfileCover?: boolean; maxDailyUploads: number | null; maxDailyTopics: number | null; maxDailyReplies: number | null; maxImagesPerPost: number | null; maxExternalLinksPerPost: number | null; maxMentionsPerPost: number | null }
 export interface TrustConfig { schemaVersion: number; registrationCooldown: RegistrationCooldown; promotionRules: TrustRule[]; levelLimits: TrustLimits[] }
 
 

@@ -7,21 +7,28 @@ import { Spinner } from '@gooseforum/ui/components/spinner'
 import { RefreshCw } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@gooseforum/ui/components/table'
 
-export function TrustProgressSection() {
-  const { api, locale } = useGooseRuntime()
-  const zh = locale.startsWith('zh')
+export function useTrustProgress() {
+  const { api } = useGooseRuntime()
   const [data, setData] = useState<TrustProgress>()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [reload, setReload] = useState(0)
   useEffect(() => {
     let active = true
+    if (!api.users.trustLevel) { setLoading(false); return () => { active = false } }
     void api.users.trustLevel().then(p => { if (active) setData(p) }).catch(e => { if (active) setError(String(e)) }).finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [api, reload])
+  return { data, error, loading, retry: () => { setError(''); setLoading(true); setReload(v => v + 1) } }
+}
+
+export function TrustProgressSection({ progress }: { progress: ReturnType<typeof useTrustProgress> }) {
+  const { locale } = useGooseRuntime()
+  const zh = locale.startsWith('zh')
+  const { data, error, loading, retry } = progress
   return <section className="space-y-3 border-t p-4">
     <h3 className="text-sm font-semibold">{zh ? '信任等级' : 'Trust level'}</h3>
-    {loading ? <Spinner /> : error ? <div role="alert" className="flex items-center gap-2 text-sm">{error}<Button type="button" size="icon-sm" variant="outline" aria-label={zh ? '重试' : 'Retry'} title={zh ? '重试' : 'Retry'} onClick={() => { setError(''); setLoading(true); setReload(v => v + 1) }}><RefreshCw /></Button></div> : data ? <>
+    {loading ? <Spinner /> : error ? <div role="alert" className="flex items-center gap-2 text-sm">{error}<Button type="button" size="icon-sm" variant="outline" aria-label={zh ? '重试' : 'Retry'} title={zh ? '重试' : 'Retry'} onClick={retry}><RefreshCw /></Button></div> : data ? <>
       <div className="text-sm font-medium">{trustLevelName(data.level, locale)}</div>
       {data.locked ? <p className="text-xs text-muted-foreground">{zh ? '自动晋级已锁定' : 'Automatic promotion locked'}</p> : data.next ? <dl className="grid gap-3 text-sm sm:grid-cols-3">
         <div><dt className="text-xs text-muted-foreground">{zh ? '下一等级' : 'Next level'}</dt><dd>{trustLevelName(data.next.level, locale)}</dd></div>
@@ -59,11 +66,12 @@ function TrustCapabilities({ data, limits, locale }: { data: TrustProgress; limi
     <Table className="w-full table-fixed text-xs">
       <TableHeader><TableRow><TableHead className="w-1/2 whitespace-normal">{zh ? '项目' : 'Capability'}</TableHead><TableHead className="whitespace-normal">{trustLevelName(data.level, locale)}</TableHead>{next ? <TableHead className="whitespace-normal">{trustLevelName(next.level, locale)}</TableHead> : null}</TableRow></TableHeader>
       <TableBody>
-        <TableRow><TableCell className="whitespace-normal">{zh ? '社区图片上传' : 'Community image uploads'}</TableCell><TableCell>{upload(limits)}</TableCell>{next ? <TableCell>{upload(next) === upload(limits) ? (zh ? '不变' : 'No change') : upload(next)}</TableCell> : null}</TableRow>
+        <TableRow><TableCell className="whitespace-normal">{zh ? '社区图片上传' : 'Community image uploads'}</TableCell><TableCell>{upload(limits)}</TableCell>{next ? <TableCell>{upload(next) === upload(limits) && next.allowProfileCover === limits.allowProfileCover ? (zh ? '不变' : 'No change') : upload(next)}</TableCell> : null}</TableRow>
+        <TableRow><TableCell className="whitespace-normal">{zh ? '个人背景' : 'Profile background'}</TableCell><TableCell>{limits.allowProfileCover ? (zh ? '允许' : 'Allowed') : (zh ? '禁止' : 'Not allowed')}</TableCell>{next ? <TableCell>{next.allowProfileCover === limits.allowProfileCover ? (zh ? '不变' : 'No change') : next.allowProfileCover ? (zh ? '允许' : 'Allowed') : (zh ? '禁止' : 'Not allowed')}</TableCell> : null}</TableRow>
         {trustQuotaFields.map(field => <TableRow key={field}><TableCell className="whitespace-normal">{labels[field]}</TableCell><TableCell>{quota(limits[field])}</TableCell>{next ? <TableCell>{next[field] === limits[field] ? (zh ? '不变' : 'No change') : quota(next[field])}</TableCell> : null}</TableRow>)}
       </TableBody>
     </Table>
-    {next && trustQuotaFields.every(field => next[field] === limits[field]) && upload(next) === upload(limits) ? <p className="text-xs text-muted-foreground">{zh ? '下一等级的以上额度相同。' : 'The next level has the same limits shown above.'}</p> : null}
+    {next && trustQuotaFields.every(field => next[field] === limits[field]) && upload(next) === upload(limits) && next.allowProfileCover === limits.allowProfileCover ? <p className="text-xs text-muted-foreground">{zh ? '下一等级的以上额度相同。' : 'The next level has the same limits shown above.'}</p> : null}
     {data.registrationCooldown ? <dl className="grid gap-3 text-xs sm:grid-cols-2"><div><dt className="text-muted-foreground">{zh ? '发言冷静期' : 'Posting cooldown'}</dt><dd>{cooldown(data.registrationCooldown.minPostAccountAgeMinutes)}</dd></div><div><dt className="text-muted-foreground">{zh ? '上传冷静期' : 'Upload cooldown'}</dt><dd>{cooldown(data.registrationCooldown.minUploadAccountAgeMinutes)}</dd></div></dl> : null}
     {data.communityUploadRoleExempt ? <p className="text-xs text-muted-foreground">{zh ? '角色账号的社区图片上传豁免每日上传额度和上传冷静期；头像仍受限制。' : 'Your role exempts community image uploads from the daily upload limit and upload cooldown. Avatars remain subject to both.'}</p> : null}
     <p className="text-xs text-muted-foreground">{zh ? '以上为额度上限，不是今日剩余次数；分类访问和账号状态仍独立决定可执行操作。' : 'These are limits, not remaining daily allowances. Category access and account status still apply.'}</p>

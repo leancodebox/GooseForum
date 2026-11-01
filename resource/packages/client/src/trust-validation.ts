@@ -7,6 +7,7 @@ export function trustLimitOrderIssue(limits: readonly TrustLimits[]): { field: T
     const lower = byLevel.get(trustLevels[i - 1])
     const higher = byLevel.get(trustLevels[i])
     if (!lower || !higher) continue
+    if (lower.allowProfileCover && !higher.allowProfileCover) return { field: 'allowProfileCover', lowerLevel: lower.level, higherLevel: higher.level }
     if (lower.allowImageUpload && !higher.allowImageUpload) return { field: 'allowImageUpload', lowerLevel: lower.level, higherLevel: higher.level }
     for (const field of trustQuotaFields) {
       const lowerValue = lower[field], higherValue = higher[field]

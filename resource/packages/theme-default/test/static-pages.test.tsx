@@ -612,7 +612,7 @@ describe("AppShell and static pages", () => {
     const saveInfo = vi.fn().mockResolvedValue(undefined);
     const saveCover = vi.fn().mockResolvedValue(undefined);
     const { user } = renderPage(payload("settings.index", settingsProps()), {
-      users: { saveInfo, saveCover } as unknown as GooseSiteApi["users"],
+      users: { saveInfo, saveCover, trustLevel: vi.fn().mockResolvedValue({ limits: { allowProfileCover: true } }) } as unknown as GooseSiteApi["users"],
     });
 
     expect(
@@ -624,7 +624,7 @@ describe("AppShell and static pages", () => {
     const cover = document.querySelector('[data-slot="profile-cover"]');
     expect(cover?.getAttribute("style")).toContain('url("/cover.webp")');
     expect(
-      cover?.contains(screen.getByRole("button", { name: "设置封面" })),
+      cover?.contains(await screen.findByRole("button", { name: "设置封面" })),
     ).toBe(true);
     expect(screen.getAllByRole("button", { name: "更换头像" })).toHaveLength(
       1,
@@ -642,6 +642,15 @@ describe("AppShell and static pages", () => {
       expect.objectContaining({ nickname: "Builder", locale: "zh" }),
     );
     expect(await screen.findByText("资料已保存。")).toBeTruthy();
+  });
+
+  it("hides the cover editor when the trust level does not permit it", async () => {
+    const trustLevel = vi.fn().mockResolvedValue({ limits: { allowProfileCover: false } });
+    renderPage(payload("settings.index", settingsProps()), {
+      users: { saveCover: vi.fn(), trustLevel } as unknown as GooseSiteApi["users"],
+    });
+    await vi.waitFor(() => expect(trustLevel).toHaveBeenCalled());
+    expect(screen.queryByRole("button", { name: "设置封面" })).toBeNull();
   });
 
   it("loads bindings and authorized apps only when their settings surface is opened", async () => {
@@ -823,6 +832,9 @@ describe("AppShell and static pages", () => {
     await user.click(avatar as Element);
     expect(await screen.findByLabelText("Hover User")).toBeTruthy();
     expect(screen.getByText("@hover-user")).toBeTruthy();
+    await vi.waitFor(() => expect(screen.getByLabelText("Hover User").getAttribute("style")).toContain("/cover.webp"));
+    expect(screen.getByLabelText("Hover User").getAttribute("style")).toContain("var(--popover)");
+    expect(document.querySelector('[data-slot="user-card-cover"]')).toBeNull();
     expect(card).toHaveBeenCalledOnce();
     expect(navigate).not.toHaveBeenCalled();
     expect(screen.getByText("查看主页")).toBeTruthy();

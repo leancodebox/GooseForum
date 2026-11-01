@@ -17,13 +17,6 @@ import { toast } from "@gooseforum/ui/components/sonner";
 import { Alert, AlertDescription } from "@gooseforum/ui/components/alert";
 import { Badge } from "@gooseforum/ui/components/badge";
 import { Button } from "@gooseforum/ui/components/button";
-import { Field, FieldLabel } from "@gooseforum/ui/components/field";
-import { Input } from "@gooseforum/ui/components/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@gooseforum/ui/components/popover";
 import {
   Tabs,
   TabsContent,
@@ -31,6 +24,7 @@ import {
   TabsTrigger,
 } from "@gooseforum/ui/components/tabs";
 import { ProfileAvatar } from "../users/profile-avatar";
+import { invalidateUserCard } from "../users/user-card-cache";
 import { SitePanel } from "../layout/site-panel";
 import { ProfileBadge } from "../users/profile-badge";
 import { ProfileIdentity } from "../users/profile-identity";
@@ -39,7 +33,7 @@ import { AccountSettings } from "./settings-account";
 import { MFASettings } from "./settings-mfa";
 import { ConnectionsSettings } from "./settings-connections";
 import { AgentTokenSettings } from "./settings-agent-tokens";
-import { TrustProgressSection } from './settings-trust';
+import { TrustProgressSection, useTrustProgress } from './settings-trust';
 import { PrivacySettings } from "./settings-privacy";
 import { ProfileSettings } from "./settings-profile";
 import { AvatarCropDialog } from "./avatar-crop-dialog";
@@ -81,6 +75,10 @@ export function SettingsPageView({
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [cover, setCover] = useState(page.user.profileCoverUrl || "");
+  const [removingCover, setRemovingCover] = useState(false);
+  const trustProgress = useTrustProgress();
+  const canSetCover = trustProgress.data?.limits?.allowProfileCover === true &&
+    (!trustProgress.data.restrictionStatus || trustProgress.data.restrictionStatus === "normal");
   const [profile, setProfile] = useState<SaveUserInfoInput>(() => ({
     nickname: page.user.nickname || "",
     locale: page.user.locale || runtime.locale,
@@ -119,6 +117,21 @@ export function SettingsPageView({
       showStatus(t("status.avatarSaved"));
     },
     onError: showError,
+  });
+
+  const coverCrop = useAvatarCrop({
+    initialUrl: cover,
+    onSuccess(url) {
+      setCover(url);
+      invalidateUserCard(layout.viewer.id);
+      showStatus(t("status.coverSaved"));
+    },
+    onError: showError,
+    async coverUpload(file) {
+      const url = await runtime.api.uploads.image(file);
+      await runtime.api.users.saveCover(url);
+      return url;
+    },
   });
 
   function changeTab(tab: TabKey) {
@@ -182,30 +195,30 @@ export function SettingsPageView({
       <SitePanel clip>
         <div
           data-slot="profile-cover"
-          className="relative h-20 border-b bg-muted bg-cover bg-center lg:h-24"
+          className="relative h-36 border-b bg-muted bg-cover bg-center lg:h-48"
           style={{
             backgroundImage: cover
               ? `url(${JSON.stringify(cover)}), ${defaultCover}`
               : defaultCover,
           }}
         >
-          {runtime.api.users.saveCover ? (
+          {canSetCover && runtime.api.users.saveCover ? (
             <div className="absolute right-2 top-2">
-              <CoverEditor
-                value={cover}
-                text={t}
-                onSave={async (value) => {
+              <div className="flex gap-2">
+                {cover ? <Button type="button" variant="secondary" size="sm" disabled={removingCover} onClick={async () => {
+                  setRemovingCover(true);
                   try {
-                    await runtime.api.users.saveCover(value);
-                    setCover(value.trim());
+                    await runtime.api.users.saveCover("");
+                    setCover("");
+                    invalidateUserCard(layout.viewer.id);
                     showStatus(t("status.coverSaved"));
-                    return true;
-                  } catch (reason) {
-                    showError(serverError(reason, t("errors.cover")));
-                    return false;
-                  }
-                }}
-              />
+                  } catch (reason) { showError(serverError(reason, t("errors.cover"))); } finally { setRemovingCover(false); }
+                }}>{t("coverRemove")}</Button> : null}
+                <Button type="button" variant="secondary" size="sm" className="border border-background/40 bg-background/80 shadow-sm backdrop-blur-sm hover:bg-background/95" disabled={removingCover} onClick={coverCrop.choose}>
+                  <Image data-icon="inline-start" />{t("cover")}
+                </Button>
+                <input ref={coverCrop.inputRef} type="file" accept="image/*" className="hidden" onChange={(event) => coverCrop.selectFile(event.target.files?.[0])} />
+              </div>
             </div>
           ) : null}
         </div>
@@ -420,7 +433,7 @@ export function SettingsPageView({
               />
             </TabsContent>
             <TabsContent value="account">
-              <TrustProgressSection />
+              <TrustProgressSection progress={trustProgress} />
               <AccountSettings showError={showError} />
             </TabsContent>
             <TabsContent value="mfa">
@@ -451,6 +464,7 @@ export function SettingsPageView({
         </Tabs>
       </SitePanel>
       <AvatarCropDialog crop={crop} />
+      <AvatarCropDialog crop={coverCrop} cover />
     </main>
   );
 }
@@ -479,79 +493,6 @@ function Stats({ page }: { page: SettingsPageProps }) {
         </div>
       ))}
     </div>
-  );
-}
-
-function CoverEditor({
-  value,
-  text,
-  onSave,
-}: {
-  value: string;
-  text: ReturnType<typeof useTranslation>["t"];
-  onSave(value: string): Promise<boolean>;
-}) {
-  const [draft, setDraft] = useState(value);
-  const [saving, setSaving] = useState(false);
-  const [open, setOpen] = useState(false);
-  return (
-    <Popover
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next);
-        if (next) setDraft(value);
-      }}
-    >
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          className="border border-background/40 bg-background/80 shadow-sm backdrop-blur-sm hover:bg-background/95"
-        >
-          <Image data-icon="inline-start" />
-          {text("cover")}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 max-w-[calc(100vw-2rem)]">
-        <form
-          className="flex flex-col gap-3"
-          onSubmit={async (event) => {
-            event.preventDefault();
-            setSaving(true);
-            try {
-              if (await onSave(draft)) setOpen(false);
-            } finally {
-              setSaving(false);
-            }
-          }}
-        >
-          <Field>
-            <FieldLabel htmlFor="settings-cover">{text("coverUrl")}</FieldLabel>
-            <Input
-              id="settings-cover"
-              type="url"
-              value={draft}
-              placeholder="https://example.com/cover.webp"
-              onChange={(event) => setDraft(event.target.value)}
-            />
-          </Field>
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => setOpen(false)}
-            >
-              {text("cancel")}
-            </Button>
-            <Button type="submit" size="sm" disabled={saving}>
-              {saving ? text("savingShort") : text("save")}
-            </Button>
-          </div>
-        </form>
-      </PopoverContent>
-    </Popover>
   );
 }
 

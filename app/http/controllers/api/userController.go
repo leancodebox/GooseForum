@@ -236,11 +236,18 @@ func EditUserProfileCover(req component.BetterRequest[EditUserProfileCoverReq]) 
 	if err != nil {
 		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
 	}
-	if userEntity.RoleId == 0 {
-		return component.FailResponseCode(component.MessagePermissionDenied, nil)
+	cover := strings.TrimSpace(req.Params.ProfileCoverUrl)
+	if cover != "" && cover != userEntity.ProfileCoverUrl {
+		policy, err := trustlevelservice.ResolvePolicy(userEntity.Id)
+		if err != nil {
+			return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
+		}
+		if !policy.Limits.AllowProfileCover {
+			return component.FailResponseCode(component.MessagePermissionDenied, nil)
+		}
 	}
 
-	userEntity.ProfileCoverUrl = strings.TrimSpace(req.Params.ProfileCoverUrl)
+	userEntity.ProfileCoverUrl = cover
 	err = userservice.SaveUser(&userEntity)
 	if err != nil {
 		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)

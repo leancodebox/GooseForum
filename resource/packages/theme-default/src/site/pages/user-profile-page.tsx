@@ -81,7 +81,7 @@ export function UserProfilePageView({ page }: { page: UserProfileProps }) {
       <SitePanel clip>
         <div
           data-slot="profile-cover"
-          className="h-20 border-b bg-muted bg-cover bg-center lg:h-24"
+          className="h-36 border-b bg-muted bg-cover bg-center lg:h-48"
           style={{
             backgroundImage: cover
               ? `url(${JSON.stringify(cover)}), ${defaultCover}`

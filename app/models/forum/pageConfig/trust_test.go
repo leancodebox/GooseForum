@@ -67,3 +67,42 @@ func TestRetiredPromotionSwitchIsIgnoredAndNotReturned(t *testing.T) {
 		}
 	}
 }
+
+func TestLegacyTrustSettingsDefaultProfileCover(t *testing.T) {
+	raw, _ := json.Marshal(DefaultTrustSettings())
+	var root map[string]any
+	if err := json.Unmarshal(raw, &root); err != nil {
+		t.Fatal(err)
+	}
+	for _, item := range root["levelLimits"].([]any) {
+		delete(item.(map[string]any), "allowProfileCover")
+	}
+	raw, _ = json.Marshal(root)
+	config, err := DecodeTrustSettings(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, limit := range config.LevelLimits {
+		if limit.AllowProfileCover != (i > 0) {
+			t.Fatalf("level %d: unexpected permission", limit.Level)
+		}
+	}
+	config.LevelLimits[0].AllowProfileCover = true
+	config.LevelLimits[1].AllowProfileCover = false
+	if issue := config.ValidateLimitOrder(); issue == nil || issue.Field != "allowProfileCover" {
+		t.Fatalf("expected permission ordering error: %+v", issue)
+	}
+}
+
+func TestTrustSettingsRejectNullLimit(t *testing.T) {
+	raw, _ := json.Marshal(DefaultTrustSettings())
+	var root map[string]any
+	if err := json.Unmarshal(raw, &root); err != nil {
+		t.Fatal(err)
+	}
+	root["levelLimits"].([]any)[0] = nil
+	raw, _ = json.Marshal(root)
+	if _, err := DecodeTrustSettings(raw); err == nil {
+		t.Fatal("null limit accepted")
+	}
+}

@@ -13,8 +13,10 @@ import type { useAvatarCrop } from "./use-avatar-crop";
 
 export function AvatarCropDialog({
   crop,
+  cover = false,
 }: {
   crop: ReturnType<typeof useAvatarCrop>;
+  cover?: boolean;
 }) {
   const { t } = useTranslation("settings");
   return (
@@ -29,29 +31,30 @@ export function AvatarCropDialog({
         className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[760px]"
       >
         <DialogHeader className="shrink-0 border-b px-5 py-3 text-left">
-          <DialogTitle>{t("avatar.cropTitle")}</DialogTitle>
-          <DialogDescription>{t("avatar.cropDescription")}</DialogDescription>
+          <DialogTitle>{t(cover ? "coverCropTitle" : "avatar.cropTitle")}</DialogTitle>
+          <DialogDescription>{t(cover ? "coverCropDescription" : "avatar.cropDescription")}</DialogDescription>
         </DialogHeader>
         <div className="grid min-h-0 flex-1 gap-4 overflow-y-auto p-4 md:grid-cols-[minmax(0,420px)_180px] md:items-start md:justify-center">
           <div className="avatar-crop-workspace aspect-square w-full max-w-[420px] justify-self-center overflow-hidden rounded-lg border bg-muted">
             <img
               ref={crop.imageRef}
               src={crop.sourceUrl}
-              alt={t("avatar.cropAlt")}
+              alt={t(cover ? "coverCropTitle" : "avatar.cropAlt")}
               className="block"
             />
           </div>
           <aside className="flex flex-col gap-3">
             <h3 className="text-sm font-semibold">{t("avatar.preview")}</h3>
-            <div className="size-32 overflow-hidden rounded-full border bg-muted">
+            <div className={cover ? "w-full overflow-hidden rounded-md border bg-muted" : "size-32 overflow-hidden rounded-full border bg-muted"}
+              style={cover ? { aspectRatio: crop.previewAspectRatio } : undefined}>
               <img
                 src={crop.previewUrl || crop.sourceUrl}
-                alt={t("avatar.previewAlt")}
+                alt={t(cover ? "coverCropTitle" : "avatar.previewAlt")}
                 className="size-full object-cover"
               />
             </div>
             <p className="rounded-lg bg-muted p-3 text-sm leading-6 text-muted-foreground">
-              {t("avatar.cropTip")}
+              {t(cover ? "coverCropTip" : "avatar.cropTip")}
             </p>
           </aside>
         </div>

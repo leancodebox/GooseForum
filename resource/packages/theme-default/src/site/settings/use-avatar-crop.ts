@@ -6,12 +6,17 @@ export function useAvatarCrop({
   initialUrl,
   onSuccess,
   onError,
+  coverUpload,
 }: {
   initialUrl: string;
   onSuccess(url: string): void;
   onError(message: string): void;
+  coverUpload?(file: File): Promise<string>;
 }) {
   const runtime = useGooseRuntime();
+  const isCover = Boolean(coverUpload);
+  const aspectRatio = isCover ? 4 / 3 : 1;
+  const [previewAspectRatio, setPreviewAspectRatio] = useState(aspectRatio);
   const serverError = useServerErrorMessage();
   const inputRef = useRef<HTMLInputElement>(null);
   const [imageElement, imageRef] = useState<HTMLImageElement | null>(null);
@@ -35,41 +40,55 @@ export function useAvatarCrop({
       .then(async ({ default: Cropper }) => {
         if (!active || !imageElement.isConnected) return;
         const cropper = new Cropper(imageElement, {
-        template: `<cropper-canvas background><cropper-image translatable scalable rotatable></cropper-image><cropper-shade hidden></cropper-shade><cropper-handle action="select" plain></cropper-handle><cropper-selection aspect-ratio="1" movable resizable zoomable outlined><cropper-grid role="grid" bordered covered></cropper-grid><cropper-crosshair centered></cropper-crosshair><cropper-handle action="move" theme-color="rgba(37,99,235,.35)"></cropper-handle><cropper-handle action="n-resize"></cropper-handle><cropper-handle action="e-resize"></cropper-handle><cropper-handle action="s-resize"></cropper-handle><cropper-handle action="w-resize"></cropper-handle><cropper-handle action="ne-resize"></cropper-handle><cropper-handle action="nw-resize"></cropper-handle><cropper-handle action="se-resize"></cropper-handle><cropper-handle action="sw-resize"></cropper-handle></cropper-selection></cropper-canvas>`,
+        template: `<cropper-canvas background><cropper-image translatable scalable rotatable></cropper-image><cropper-shade hidden></cropper-shade><cropper-handle action="select" plain></cropper-handle><cropper-selection ${isCover ? `initial-aspect-ratio="${aspectRatio}"` : `aspect-ratio="${aspectRatio}"`} movable resizable zoomable outlined><cropper-grid role="grid" bordered covered></cropper-grid><cropper-crosshair centered></cropper-crosshair><cropper-handle action="move" theme-color="rgba(37,99,235,.35)"></cropper-handle><cropper-handle action="n-resize"></cropper-handle><cropper-handle action="e-resize"></cropper-handle><cropper-handle action="s-resize"></cropper-handle><cropper-handle action="w-resize"></cropper-handle><cropper-handle action="ne-resize"></cropper-handle><cropper-handle action="nw-resize"></cropper-handle><cropper-handle action="se-resize"></cropper-handle><cropper-handle action="sw-resize"></cropper-handle></cropper-selection></cropper-canvas>`,
       });
         cropperRef.current = cropper;
         const container = cropper.container as HTMLElement;
         const schedulePreview = () => {
           cancelAnimationFrame(previewFrame.current);
           previewFrame.current = requestAnimationFrame(() => {
+            const currentSelection = cropper.getCropperSelection();
+            if (isCover && currentSelection && currentSelection.height > 0) {
+              setPreviewAspectRatio(currentSelection.width / currentSelection.height);
+            }
             void cropPreview(cropper).then((url) => {
               if (active) setPreviewUrl(url);
             });
           });
         };
+        const selection = cropper.getCropperSelection();
+        const onSelectionChange = (event: Event) => {
+          if (!isCover) return;
+          const { width, height } = (event as CustomEvent<{ width: number; height: number }>).detail;
+          const ratio = width / height;
+          if (!Number.isFinite(ratio) || ratio < 1 || ratio > 2) {
+            event.preventDefault();
+            return;
+          }
+        };
+        selection?.addEventListener("change", onSelectionChange);
         container.addEventListener("pointerup", schedulePreview);
         container.addEventListener("wheel", schedulePreview, { passive: true });
         container.addEventListener("keyup", schedulePreview);
         cleanupCropper = () => {
           cancelAnimationFrame(previewFrame.current);
+          selection?.removeEventListener("change", onSelectionChange);
           container.removeEventListener("pointerup", schedulePreview);
           container.removeEventListener("wheel", schedulePreview);
           container.removeEventListener("keyup", schedulePreview);
           cropper.destroy();
           if (cropperRef.current === cropper) cropperRef.current = undefined;
         };
-        await centerSelection(cropper, () => active);
+        await centerSelection(cropper, () => active, aspectRatio);
         if (active) {
           setReady(true);
           schedulePreview();
         }
       })
-      .catch((reason) => {
+      .catch(() => {
         if (active)
           setCropError(
-            reason instanceof Error
-              ? reason.message
-              : "无法加载图片，请重新选择。",
+            "裁剪组件加载失败，请刷新页面后重试。",
           );
       });
     return () => {
@@ -81,7 +100,7 @@ export function useAvatarCrop({
         cropperRef.current = undefined;
       }
     };
-  }, [open, sourceUrl, imageElement]);
+  }, [open, sourceUrl, imageElement, aspectRatio, isCover]);
 
   useEffect(
     () => () => {
@@ -102,6 +121,7 @@ export function useAvatarCrop({
     sourceFile.current = file;
     setSourceUrl(URL.createObjectURL(file));
     setPreviewUrl("");
+    setPreviewAspectRatio(aspectRatio);
     setCropError("");
     setReady(false);
     setOpen(true);
@@ -128,18 +148,19 @@ export function useAvatarCrop({
     setCropError("");
     try {
       const large = await selection.$toCanvas({
-        width: 300,
-        height: 300,
+        width: isCover ? 1200 : 300,
+        ...(isCover ? {} : { height: 300 }),
         beforeDraw(context) {
           context.imageSmoothingEnabled = true;
           context.imageSmoothingQuality = "high";
         },
       });
-      const medium = resizeCanvas(large, 96);
-      const result = await runtime.api.uploads.avatar([
-        await canvasFile(large, file.name, 0.86),
-        await canvasFile(medium, "avatar_medium.webp", 0.9),
-      ]);
+      const result = coverUpload
+        ? await coverUpload(await canvasFile(large, file.name, 0.86))
+        : await runtime.api.uploads.avatar([
+            await canvasFile(large, file.name, 0.86),
+            await canvasFile(resizeCanvas(large, 96), "avatar_medium.webp", 0.9),
+          ]);
       setAvatarUrl(result);
       onSuccess(result);
       setOpen(false);
@@ -151,7 +172,7 @@ export function useAvatarCrop({
       setPreviewUrl("");
       setReady(false);
     } catch (reason) {
-      const message = serverError(reason, "头像上传失败。");
+      const message = serverError(reason, isCover ? "背景上传失败。" : "头像上传失败。");
       setCropError(message);
       onError(message);
     } finally {
@@ -166,6 +187,7 @@ export function useAvatarCrop({
     imageRef,
     sourceUrl,
     previewUrl,
+    previewAspectRatio,
     open,
     uploading,
     ready,
@@ -180,13 +202,14 @@ export function useAvatarCrop({
 async function centerSelection(
   cropper: import("cropperjs").default,
   isActive: () => boolean,
+  aspectRatio: number,
 ) {
   const image = cropper.getCropperImage();
   const canvas = cropper.getCropperCanvas();
   const selection = cropper.getCropperSelection();
   if (!image || !canvas || !selection) throw new Error("无法初始化头像裁切，请重新选择图片。");
   await image.$ready();
-  // Wait for portal layout before centering the image and creating the default square.
+  // Wait for portal layout before centering the image and creating the selection.
   for (let attempt = 0; attempt < 20 && isActive(); attempt++) {
     await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     if (!isActive()) return;
@@ -194,14 +217,15 @@ async function centerSelection(
     image.$center("contain");
     const canvasRect = canvas.getBoundingClientRect();
     const imageRect = image.getBoundingClientRect();
-    const side = Math.min(imageRect.width, imageRect.height);
-    if (side <= 0) continue;
+    const width = Math.min(imageRect.width, imageRect.height * aspectRatio);
+    const height = width / aspectRatio;
+    if (width <= 0 || height <= 0) continue;
     selection.$change(
-      imageRect.left - canvasRect.left + (imageRect.width - side) / 2,
-      imageRect.top - canvasRect.top + (imageRect.height - side) / 2,
-      side,
-      side,
-      1,
+      imageRect.left - canvasRect.left + (imageRect.width - width) / 2,
+      imageRect.top - canvasRect.top + (imageRect.height - height) / 2,
+      width,
+      height,
+      aspectRatio,
       true,
     );
     return;
@@ -215,7 +239,6 @@ async function cropPreview(cropper: import("cropperjs").default) {
   try {
     const canvas = await selection.$toCanvas({
       width: 160,
-      height: 160,
       beforeDraw(context) {
         context.imageSmoothingEnabled = true;
         context.imageSmoothingQuality = "high";

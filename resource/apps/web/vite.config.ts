@@ -78,6 +78,7 @@ export default defineConfig(({ command, mode }) => {
         ] : []),
       ],
     },
+    optimizeDeps: { include: ['@gooseforum/theme-default > cropperjs'] },
     build: {
       manifest: true,
       outDir: '../../static/dist/react',

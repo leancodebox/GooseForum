@@ -176,6 +176,16 @@ func TestTrustHTTPContract(t *testing.T) {
 		}
 		return out
 	}
+	t.Run("profile-cover-permission", func(t *testing.T) {
+		request(t, "POST", "/api/set-user-profile-cover", token, map[string]any{"profileCoverUrl": "/cover.webp"}, 200, "permission.denied")
+		request(t, "POST", "/api/set-user-profile-cover", memberToken, map[string]any{"profileCoverUrl": "/cover.webp"}, 200, "")
+		cfg.LevelLimits[1].AllowProfileCover = false
+		save()
+		request(t, "POST", "/api/set-user-profile-cover", memberToken, map[string]any{"profileCoverUrl": "/other.webp"}, 200, "permission.denied")
+		request(t, "POST", "/api/set-user-profile-cover", memberToken, map[string]any{"profileCoverUrl": ""}, 200, "")
+		cfg.LevelLimits[1].AllowProfileCover = true
+		save()
+	})
 	t.Run("authentication-and-admin-boundary", func(t *testing.T) {
 		request(t, "GET", "/api/trust-level", "", nil, 401, "auth.required")
 		for _, route := range []struct{ method, path string }{{"GET", "get-trust-settings"}, {"POST", "save-trust-settings"}, {"GET", "user-trust-level"}, {"POST", "set-user-trust-level"}, {"GET", "user-trust-level-history"}} {

@@ -25,6 +25,7 @@ type TrustLimits struct {
 	MaxDailyReplies         *int             `json:"maxDailyReplies"`
 	MaxDailyTopics          *int             `json:"maxDailyTopics"`
 	Level                   trustlevel.Level `json:"level"`
+	AllowProfileCover       bool             `json:"allowProfileCover"`
 	AllowImageUpload        bool             `json:"allowImageUpload"`
 	MaxImagesPerPost        *int             `json:"maxImagesPerPost"`
 	MaxExternalLinksPerPost *int             `json:"maxExternalLinksPerPost"`
@@ -50,7 +51,7 @@ type TrustConfig struct {
 func DefaultTrustSettings() TrustConfig {
 	c := TrustConfig{SchemaVersion: 3, RegistrationCooldown: RegistrationCooldown{MinUploadAccountAgeMinutes: 1440}, PromotionRules: []PromotionRule{{trustlevel.Member, true, 24, 2, 5}, {trustlevel.Regular, true, 336, 7, 20}}}
 	for _, d := range trustlevel.Definitions() {
-		l := TrustLimits{Level: d.Level, AllowImageUpload: true, MaxDailyTopics: new(10), MaxDailyUploads: new(10)}
+		l := TrustLimits{Level: d.Level, AllowProfileCover: d.Level >= trustlevel.Member, AllowImageUpload: true, MaxDailyTopics: new(10), MaxDailyUploads: new(10)}
 		if d.Level == trustlevel.Newcomer {
 			l.MaxDailyTopics = new(3)
 			l.MaxDailyReplies = new(10)
@@ -131,6 +132,9 @@ func (c TrustConfig) ValidateLimitOrder() *TrustLimitOrderError {
 		if !lowerOK || !higherOK {
 			continue
 		}
+		if lower.AllowProfileCover && !higher.AllowProfileCover {
+			return &TrustLimitOrderError{"allowProfileCover", lower.Level, higher.Level}
+		}
 		if lower.AllowImageUpload && !higher.AllowImageUpload {
 			return &TrustLimitOrderError{"allowImageUpload", lower.Level, higher.Level}
 		}
@@ -189,6 +193,29 @@ func DecodeTrustSettings(raw []byte) (TrustConfig, error) {
 		root["registrationCooldown"], _ = json.Marshal(cooldown)
 		raw, _ = json.Marshal(root)
 	}
+	// Older configurations lack this permission; apply the default per level.
+	var root map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &root); err != nil {
+		return TrustConfig{}, err
+	}
+	var limits []map[string]json.RawMessage
+	if err := json.Unmarshal(root["levelLimits"], &limits); err != nil {
+		return TrustConfig{}, err
+	}
+	for _, limit := range limits {
+		if limit == nil {
+			return TrustConfig{}, errors.New("invalid trust limits")
+		}
+		if _, ok := limit["allowProfileCover"]; !ok {
+			var level trustlevel.Level
+			if err := json.Unmarshal(limit["level"], &level); err != nil {
+				return TrustConfig{}, err
+			}
+			limit["allowProfileCover"], _ = json.Marshal(level >= trustlevel.Member)
+		}
+	}
+	root["levelLimits"], _ = json.Marshal(limits)
+	raw, _ = json.Marshal(root)
 	// Accept the retired switch in stored configurations without returning it.
 	var legacy struct {
 		TrustConfig

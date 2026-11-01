@@ -1,8 +1,6 @@
 import { useRef, useState, type MouseEvent, type ReactElement } from "react";
 import type {
-  GooseSiteApi,
   UserBadgePayload,
-  UserCardPayload,
 } from "@gooseforum/client";
 import { formatCompactNumber, trustLevelName } from "@gooseforum/client";
 import { CalendarDays, Radio, UserPlus } from "lucide-react";
@@ -19,6 +17,7 @@ import { GooseLink, useGooseApi, useGooseLocale } from "@gooseforum/runtime";
 import { ProfileAvatar } from "./profile-avatar";
 import { ProfileBadge } from "./profile-badge";
 import { userDisplayName } from "./display-name";
+import { getCachedUserCard, loadUserCard } from "./user-card-cache";
 
 export interface UserCardTarget {
   id: number;
@@ -27,9 +26,6 @@ export interface UserCardTarget {
   avatarUrl?: string;
   wornBadge?: UserBadgePayload | null;
 }
-
-const cardCache = new Map<number, UserCardPayload>();
-const pendingCards = new Map<number, Promise<UserCardPayload>>();
 
 export function UserCardPopover({
   user,
@@ -43,7 +39,7 @@ export function UserCardPopover({
   const locale = useGooseLocale();
   const [open, setOpen] = useState(false);
   const [opened, setOpened] = useState(false);
-  const [card, setCard] = useState(() => cardCache.get(user.id));
+  const [card, setCard] = useState(() => getCachedUserCard(user.id));
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
   const ignoreNextOpen = useRef(false);
@@ -72,15 +68,19 @@ export function UserCardPopover({
     setOpen(next);
     if (!next) return;
     setOpened(true);
-    if (card || loading) return;
+    const cached = getCachedUserCard(user.id);
+    if (cached) { setCard(cached); return; }
+    if (loading) return;
+    setCard(undefined);
     setLoading(true);
     setFailed(false);
-    void loadCard(api, user.id)
+    void loadUserCard(api, user.id)
       .then(setCard)
       .catch(() => setFailed(true))
       .finally(() => setLoading(false));
   }
 
+  const cover = safeCoverUrl(card?.profileCoverUrl);
   const profileUrl = `/u/${card?.userId || user.id}`;
   const username = card?.username || user.username;
   const displayName = userDisplayName(card ? { username, nickname: card.nickname } : user);
@@ -95,6 +95,11 @@ export function UserCardPopover({
           sideOffset={10}
           className="max-h-[var(--radix-popover-content-available-height)] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto p-3"
           aria-label={displayName}
+          style={cover ? {
+            backgroundImage: `linear-gradient(color-mix(in srgb, var(--popover) 88%, transparent), color-mix(in srgb, var(--popover) 88%, transparent)), url(${JSON.stringify(cover)})`,
+            backgroundPosition: "center",
+            backgroundSize: "cover",
+          } : undefined}
         >
           <div className="flex items-start gap-3">
             <GooseLink href={profileUrl} className="shrink-0 rounded-full">
@@ -213,22 +218,6 @@ function UserCardSkeleton({ label }: { label: string }) {
   );
 }
 
-function loadCard(api: GooseSiteApi, userId: number) {
-  const cached = cardCache.get(userId);
-  if (cached) return Promise.resolve(cached);
-  const pending = pendingCards.get(userId);
-  if (pending) return pending;
-  const request = api.users
-    .card(userId)
-    .then((card) => {
-      cardCache.set(userId, card);
-      return card;
-    })
-    .finally(() => pendingCards.delete(userId));
-  pendingCards.set(userId, request);
-  return request;
-}
-
 function relativeTime(value: string, locale: string) {
   const time = new Date(
     value.includes("T") ? value : value.replace(" ", "T"),
@@ -242,4 +231,15 @@ function relativeTime(value: string, locale: string) {
   if (Math.abs(seconds) < 86400)
     return formatter.format(Math.round(seconds / 3600), "hour");
   return formatter.format(Math.round(seconds / 86400), "day");
+}
+
+function safeCoverUrl(value?: string) {
+  const input = value?.trim();
+  if (!input) return "";
+  try {
+    const parsed = new URL(input, window.location.origin);
+    return parsed.protocol === "http:" || parsed.protocol === "https:" ? input : "";
+  } catch {
+    return "";
+  }
 }
