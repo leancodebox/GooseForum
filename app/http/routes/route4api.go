@@ -5,13 +5,12 @@ import (
 	"net/http"
 
 	"github.com/gin-contrib/gzip"
+	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
+	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/controllers/api"
 	"github.com/leancodebox/GooseForum/app/http/controllers/forum"
-
-	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/resource"
@@ -294,6 +293,10 @@ func apiRoute(ginApp *gin.Engine) {
 
 func fileServer(ginApp *gin.Engine) {
 	r := ginApp.Group("file")
+	r.POST("/attachments", middleware.SessionAuthCheck, middleware.CheckWritableAccount, api.UploadAttachment)
+	r.GET("/attachments/policy", middleware.SessionAuthCheck, api.AttachmentPolicy)
+	r.GET("/attachments/:id", middleware.SessionAuthSilent, api.DownloadAttachment)
+	r.DELETE("/attachments/:id", middleware.SessionAuthCheck, middleware.CheckWritableAccount, api.CancelAttachment)
 	r.POST("/img-upload", middleware.SessionAuthCheck, middleware.CheckWritableAccount, api.SaveImgByGinContext)
 	r.POST("/img-upload/init", middleware.SessionAuthCheck, middleware.CheckWritableAccount, api.InitDirectImageUpload)
 	r.POST("/img-upload/complete", middleware.SessionAuthCheck, middleware.CheckWritableAccount, api.CompleteDirectImageUpload)

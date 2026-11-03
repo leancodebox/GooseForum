@@ -1,4 +1,10 @@
 {
+  "attachment.invalidFile": "文件类型不支持，或文件名、内容不合法。",
+  "attachment.tooLarge": "文件为空或超过附件大小限制。",
+  "attachment.invalidReference": "附件已失效，请移除后重新上传。",
+  "attachment.limit": "附件数量超过限制。",
+  "attachment.conflict": "内容已被修改，请刷新后重新编辑。",
+
   "search": "搜索",
   "prevPage": "上一页",
   "nextPage": "下一页",

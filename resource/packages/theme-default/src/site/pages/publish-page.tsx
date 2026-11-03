@@ -42,13 +42,16 @@ export function PublishPageView({ page, layout }: { page: PublishPageProps; layo
   const { t } = useTranslation("publish");
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
+  const [attachments, setAttachments] = useState(page.topic.attachments || []);
+  const [attachmentBusy, setAttachmentBusy] = useState(false);
+  const [version, setVersion] = useState(page.topic.version);
   const [title, setTitle] = useState(page.topic.title || "");
   const [content, setContent] = useState(page.topic.content || "");
   const [categoryIds, setCategoryIds] = useState(page.topic.categoryIds || []);
   const [topicId, setTopicId] = useState(page.topicId);
   const sourceVersion = 1 as const;
-  const [base, setBase] = useState<DraftValues>(() => ({ title: page.topic.title || "", content: page.topic.content || "", categoryIds: page.topic.categoryIds || [], replyTargetId: 0, sourceVersion: 1 }));
-  const values = useMemo(() => ({ title, content, categoryIds, replyTargetId: 0, sourceVersion }), [title, content, categoryIds, sourceVersion]);
+  const [base, setBase] = useState<DraftValues>(() => ({ attachments: page.topic.attachments || [], version: page.topic.version, title: page.topic.title || "", content: page.topic.content || "", categoryIds: page.topic.categoryIds || [], replyTargetId: 0, sourceVersion: 1 }));
+  const values = useMemo(() => ({ attachments, version, title, content, categoryIds, replyTargetId: 0, sourceVersion }), [title, content, categoryIds, sourceVersion, attachments, version]);
   const localDraft = useLocalDraft({ userId: layout?.viewer.id || 0, kind: page.isEditing ? "edit-topic" : "new-topic", objectId: page.topicId, topicId: page.topicId, base, values });
   const [submitting, setSubmitting] = useState(false);
   const [validation, setValidation] = useState(false);
@@ -62,7 +65,7 @@ export function PublishPageView({ page, layout }: { page: PublishPageProps; layo
   const initialMain = useRef(page.topic.categoryIds?.[0] || 0);
   const savedSnapshot = useRef(snapshot(title, content, categoryIds, sourceVersion));
   const currentSnapshot = snapshot(title, content, categoryIds, sourceVersion);
-  const hasChanges = currentSnapshot !== savedSnapshot.current;
+  const hasChanges = attachmentBusy || currentSnapshot !== savedSnapshot.current || JSON.stringify(attachments) !== JSON.stringify(base.attachments || []);
   const hasChangesRef = useRef(hasChanges);
   hasChangesRef.current = hasChanges;
   useEffect(() => { if (hasChanges) allowNavigation.current = false; }, [currentSnapshot, hasChanges]);
@@ -134,7 +137,7 @@ export function PublishPageView({ page, layout }: { page: PublishPageProps; layo
   }
   async function persist(status: 0 | 1, destination: string) {
     if (localDraft.recoveryPending) return false;
-    if (submitting || !validate()) return false;
+    if (submitting || attachmentBusy || !validate()) return false;
     if (status === 1 && !canPublish) {
       setError(t("noCreatePermission"));
       return false;
@@ -154,7 +157,7 @@ export function PublishPageView({ page, layout }: { page: PublishPageProps; layo
     const submission = localDraft.writer?.capture(values);
     try {
       const result = await runtime.api.topics.writeReviewed({
-        topicId,
+        topicId, attachmentIds: attachments.map((file) => file.id), version,
         title: title.trim(),
         content: content.trim(),
         categoryId: categoryIds,
@@ -163,12 +166,14 @@ export function PublishPageView({ page, layout }: { page: PublishPageProps; layo
       });
       setTopicId(result.id);
       if (status === 1 && result.moderationStatus === "rejected") {
+        setVersion(result.version);
         setError(t("moderationRejected"));
         allowNavigation.current = false;
         return false;
       }
-      const canonical = { ...values, content: result.content ?? content, sourceVersion: result.sourceVersion ?? sourceVersion };
+      const canonical = { ...values, version: result.version, content: result.content ?? content, sourceVersion: result.sourceVersion ?? sourceVersion };
       const unchanged = !submission || await localDraft.writer!.submitted(submission, canonical);
+      setVersion(result.version);
       setBase(canonical);
       savedSnapshot.current = snapshot(canonical.title, canonical.content, canonical.categoryIds, canonical.sourceVersion);
       allowNavigation.current = unchanged;
@@ -199,10 +204,11 @@ export function PublishPageView({ page, layout }: { page: PublishPageProps; layo
     return draft.categoryIds.every((id) => page.categories.some((category) => category.id === id && (category.canCreate || (page.isEditing && base.categoryIds.includes(id)))));
   }
   function restoreDraft(draft: LocalDraft) {
+    if (attachmentBusy || submitting) return false;
     if (!availableDraft(draft)) return false;
     if (hasChanges && !window.confirm(t("localDraft.confirmRestore"))) return false;
     localDraft.restore(draft);
-    setTitle(draft.title); setContent(draft.content); setCategoryIds(draft.categoryIds);
+    setAttachments(draft.attachments ?? base.attachments ?? []); setVersion(draft.version ?? page.topic.version); setTitle(draft.title); setContent(draft.content); setCategoryIds(draft.categoryIds);
     return true;
   }
   function resolveLeave(allow: boolean) {
@@ -317,7 +323,7 @@ export function PublishPageView({ page, layout }: { page: PublishPageProps; layo
             </FieldSet>
             <Field data-invalid={validation && !content.trim()}>
               <FieldLabel>{t("fields.body")}</FieldLabel>
-              <MarkdownComposer
+              <MarkdownComposer attachmentEditor={{ files: attachments, onChange: setAttachments, onBusy: setAttachmentBusy, disabled: submitting }}
                 value={content}
                 sourceVersion={sourceVersion}
                 onChange={(value) => {
@@ -349,7 +355,7 @@ export function PublishPageView({ page, layout }: { page: PublishPageProps; layo
               <Button
                 type="button"
                 variant="outline"
-                disabled={submitting || localDraft.recoveryPending}
+                disabled={attachmentBusy || submitting || localDraft.recoveryPending}
                 onClick={() => void persist(0, "/drafts")}
               >
                 {submitting ? <Spinner data-icon="inline-start" /> : null}
@@ -357,7 +363,7 @@ export function PublishPageView({ page, layout }: { page: PublishPageProps; layo
               </Button>
               <Button
                 type="button"
-                disabled={submitting || localDraft.recoveryPending || !canPublish}
+                disabled={attachmentBusy || submitting || localDraft.recoveryPending || !canPublish}
                 onClick={() => void persist(1, "/p/post/:id")}
               >
                 <Send data-icon="inline-start" />
@@ -448,7 +454,7 @@ export function PublishPageView({ page, layout }: { page: PublishPageProps; layo
               {t("leaveWithoutSaving")}
             </Button>
             <Button
-              disabled={!valid || submitting}
+              disabled={!valid || submitting || attachmentBusy || localDraft.recoveryPending}
               onClick={() => void saveBeforeLeave()}
             >
               {submitting ? <Spinner data-icon="inline-start" /> : null}

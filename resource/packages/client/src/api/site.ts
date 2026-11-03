@@ -16,6 +16,11 @@ const postWithMeta = <T>(http: GooseHttpClient, path: string, json?: unknown) =>
 
 export function createSiteApi(http: GooseHttpClient): GooseSiteApi {
   return {
+    attachments: {
+      policy: () => http.request('/file/attachments/policy'),
+      upload: (file) => { const body = new FormData(); body.append('file', file); return http.request('/file/attachments', { method: 'POST', body }); },
+      cancel: (id) => http.request(`/file/attachments/${id}`, { method: 'DELETE' }),
+    },
     accessGroups: {
       list: () => http.request(route('accessGroupsList')),
       apply: (groupId) => post(http, route('accessGroupsApply'), { groupId }),

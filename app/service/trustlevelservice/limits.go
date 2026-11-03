@@ -6,10 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
-
 	"github.com/leancodebox/GooseForum/app/bundles/trustlevel"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
+	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
@@ -145,6 +144,16 @@ func (p UserPolicy) validateUpload(fileCount int, avatar bool, checkQuota bool) 
 	if !avatar && !p.Limits.AllowImageUpload {
 		return &PolicyError{403, "permission.denied", nil}
 	}
+	return p.validateUploadQuota(fileCount, avatar, checkQuota)
+}
+
+// ValidateAttachmentUpload applies the shared upload quota without requiring
+// image upload permission. The caller must check the attachment-specific policy.
+func (p UserPolicy) ValidateAttachmentUpload(fileCount int) error {
+	return p.validateUploadQuota(fileCount, false, fileCount > 0)
+}
+
+func (p UserPolicy) validateUploadQuota(fileCount int, avatar bool, checkQuota bool) error {
 	// Existing role exemptions apply to community uploads, not avatars.
 	if !avatar && p.Account.RoleId > 0 {
 		return nil

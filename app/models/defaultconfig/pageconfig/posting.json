@@ -15,5 +15,16 @@
       ".webp"
     ],
     "maxAttachmentSizeKb": 5120
+  },
+  "attachments": {
+    "enabled": true,
+    "minTrustLevel": 100,
+    "maxFileSizeKb": 5120,
+    "maxFilesPerPost": 5,
+    "extensions": [
+      ".pdf",
+      ".txt",
+      ".zip"
+    ]
   }
 }

@@ -1,3 +1,4 @@
+import { AttachmentEditor, type AttachmentEditorProps } from "./attachment-editor";
 import {
   useRef,
   useState,
@@ -74,6 +75,7 @@ export function MarkdownComposer({
   actions,
   status,
   sourceVersion = 1,
+  attachmentEditor,
 }: {
   value: string;
   onChange(value: string): void;
@@ -82,6 +84,7 @@ export function MarkdownComposer({
   actions?: ReactNode;
   status?: ReactNode;
   sourceVersion?: 0 | 1;
+  attachmentEditor?: AttachmentEditorProps;
 }) {
   const { t } = useTranslation("publish");
   const runtime = useGooseRuntime();
@@ -619,6 +622,7 @@ export function MarkdownComposer({
         </div>
         {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
         {message ? <p className="mt-2 text-sm text-success">{message}</p> : null}
+        {attachmentEditor ? <AttachmentEditor {...attachmentEditor} /> : null}
         {status}
       </div>
       {toolbarPlacement === "bottom" ? toolbarRow : null}

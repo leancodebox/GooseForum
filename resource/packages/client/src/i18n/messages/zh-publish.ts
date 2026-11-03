@@ -1,5 +1,14 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  attachmentsTitle: "附件",
+  attachmentUpload: "上传附件",
+  attachmentUploading: "正在上传附件…",
+  attachmentRetry: "重试上传",
+  attachmentRemove: "移除",
+  attachmentLimits: "最多 {count} 个文件，每个 {size} KiB。类型：{types}",
+  attachmentUnavailable: "当前账号暂不可上传附件。",
+  attachmentFailed: "上传失败，请重试或移除失败文件后再提交。",
+
   localDraft: {
     "saving": "正在保存本地副本…",
     "saved": "本地副本已保存",

@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"github.com/leancodebox/GooseForum/app/models/forum/attachments"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
 	"gorm.io/gorm"
 )
@@ -50,13 +51,19 @@ var ErrVersionConflict = errors.New("content changed; reload before reviewing")
 
 // SaveReviewed compares the version before changing content or an admin decision.
 func SaveReviewed(entity *Entity, version uint64) error {
-	result := builder().Where("id = ? AND moderation_version = ?", entity.Id, version).
-		Select("content", "source_version", "legacy_mention_ids", "rendered_html", "rendered_version", "process_status", "moderation_status", "moderation_reason", "moderation_version", "moderated_at", "updated_at", "published_at").Updates(entity)
-	if result.Error != nil {
-		return result.Error
-	}
-	if result.RowsAffected == 0 {
-		return ErrVersionConflict
+	err := builder().Transaction(func(tx *gorm.DB) error {
+		result := tx.Model(&Entity{}).Where("id = ? AND moderation_version = ?", entity.Id, version).
+			Select("attachments", "content", "source_version", "legacy_mention_ids", "rendered_html", "rendered_version", "process_status", "moderation_status", "moderation_reason", "moderation_version", "moderated_at", "updated_at", "published_at").Updates(entity)
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected == 0 {
+			return ErrVersionConflict
+		}
+		return attachments.BindWithDB(tx, entity.UserId, entity.Id, entity.Attachments)
+	})
+	if err != nil {
+		return err
 	}
 	topicrank.Notify(entity.TopicId)
 	return nil

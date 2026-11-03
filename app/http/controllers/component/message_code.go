@@ -101,21 +101,26 @@ const (
 )
 
 const (
-	MessageUploadAttachmentDisabled MessageCode = "upload.attachment.disabled"   // 站点关闭了附件上传。
-	MessageUploadCooldown           MessageCode = "upload.cooldown"              // 新用户上传冷却中，params.minutes/availableAt。
-	MessageUploadDailyLimit         MessageCode = "upload.dailyLimit"            // 达到每日上传限制，params.count。
-	MessageUploadDailyLimitAvatar   MessageCode = "upload.dailyLimit.avatar"     // 头像上传将超过每日限制，params.count/fileCount。
-	MessageUploadFileMissing        MessageCode = "upload.file.missing"          // 未获取到上传文件。
-	MessageUploadFilenameRequired   MessageCode = "upload.filename.required"     // 文件名为空。
-	MessageUploadFileTooLarge       MessageCode = "upload.file.tooLarge"         // 文件超过大小限制，params.maxSizeKb。
-	MessageUploadUnsupportedExt     MessageCode = "upload.extension.unsupported" // 文件扩展名不允许，params.extensions。
-	MessageUploadUnsupportedImage   MessageCode = "upload.image.unsupported"     // 图片格式不支持。
-	MessageUploadReadFailed         MessageCode = "upload.readFailed"            // 文件读取失败。
-	MessageUploadOpenFailed         MessageCode = "upload.openFailed"            // 文件打开失败。
-	MessageUploadInvalidImage       MessageCode = "upload.image.invalidContent"  // 文件内容不是有效图片。
-	MessageUploadContentReadFailed  MessageCode = "upload.contentReadFailed"     // 文件内容读取失败。
-	MessageUploadSaveFailed         MessageCode = "upload.saveFailed"            // 文件保存失败，params.error 可带原始错误。
-	MessageUploadSuccess            MessageCode = "upload.success"               // 上传成功。
+	MessageAttachmentInvalidFile      MessageCode = "attachment.invalidFile"
+	MessageAttachmentTooLarge         MessageCode = "attachment.tooLarge"
+	MessageAttachmentInvalidReference MessageCode = "attachment.invalidReference"
+	MessageAttachmentLimit            MessageCode = "attachment.limit"
+	MessageAttachmentConflict         MessageCode = "attachment.conflict"
+	MessageUploadAttachmentDisabled   MessageCode = "upload.attachment.disabled"   // 站点关闭了附件上传。
+	MessageUploadCooldown             MessageCode = "upload.cooldown"              // 新用户上传冷却中，params.minutes/availableAt。
+	MessageUploadDailyLimit           MessageCode = "upload.dailyLimit"            // 达到每日上传限制，params.count。
+	MessageUploadDailyLimitAvatar     MessageCode = "upload.dailyLimit.avatar"     // 头像上传将超过每日限制，params.count/fileCount。
+	MessageUploadFileMissing          MessageCode = "upload.file.missing"          // 未获取到上传文件。
+	MessageUploadFilenameRequired     MessageCode = "upload.filename.required"     // 文件名为空。
+	MessageUploadFileTooLarge         MessageCode = "upload.file.tooLarge"         // 文件超过大小限制，params.maxSizeKb。
+	MessageUploadUnsupportedExt       MessageCode = "upload.extension.unsupported" // 文件扩展名不允许，params.extensions。
+	MessageUploadUnsupportedImage     MessageCode = "upload.image.unsupported"     // 图片格式不支持。
+	MessageUploadReadFailed           MessageCode = "upload.readFailed"            // 文件读取失败。
+	MessageUploadOpenFailed           MessageCode = "upload.openFailed"            // 文件打开失败。
+	MessageUploadInvalidImage         MessageCode = "upload.image.invalidContent"  // 文件内容不是有效图片。
+	MessageUploadContentReadFailed    MessageCode = "upload.contentReadFailed"     // 文件内容读取失败。
+	MessageUploadSaveFailed           MessageCode = "upload.saveFailed"            // 文件保存失败，params.error 可带原始错误。
+	MessageUploadSuccess              MessageCode = "upload.success"               // 上传成功。
 )
 
 const (

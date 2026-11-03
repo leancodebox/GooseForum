@@ -67,3 +67,23 @@ func TestRoleExemptionAndRegistrationAgeSemantics(t *testing.T) {
 		t.Fatal("existing upload bypassed zero quota")
 	}
 }
+
+func TestAttachmentQuotaIndependentOfImagePermission(t *testing.T) {
+	p := UserPolicy{Account: users.AccountState{CreatedAt: time.Now()}, Limits: pageConfig.TrustLimits{AllowImageUpload: false}, RegistrationCooldown: pageConfig.RegistrationCooldown{MinUploadAccountAgeMinutes: 60}}
+	var policy *PolicyError
+	if err := p.ValidateAttachmentUpload(1); !errors.As(err, &policy) || policy.Code != "upload.cooldown" {
+		t.Fatalf("attachment should obey cooldown independently of image permission: %v", err)
+	}
+	p.Account.CreatedAt = time.Now().Add(-2 * time.Hour)
+	p.Limits.MaxDailyUploads = new(0)
+	if err := p.ValidateAttachmentUpload(1); !errors.As(err, &policy) || policy.Code != "upload.dailyLimit" {
+		t.Fatalf("attachment should obey shared quota: %v", err)
+	}
+	p.Account.RoleId = 1
+	if err := p.ValidateAttachmentUpload(1); err != nil {
+		t.Fatalf("community role quota exemption lost: %v", err)
+	}
+	if err := p.ValidateUpload(1, false); !errors.As(err, &policy) || policy.Code != "permission.denied" {
+		t.Fatalf("image permission changed: %v", err)
+	}
+}

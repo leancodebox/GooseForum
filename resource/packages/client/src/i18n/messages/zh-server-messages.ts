@@ -1,6 +1,12 @@
 // 后端 MessageCode 的前端兜底翻译；完整性由 check-server-message-i18n.mjs 校验。
 import mfa from './zh-mfa.js';
 export default {
+  "attachment.invalidFile": "文件类型不支持，或文件名、内容不合法。",
+  "attachment.tooLarge": "文件为空或超过附件大小限制。",
+  "attachment.invalidReference": "附件已失效，请移除后重新上传。",
+  "attachment.limit": "附件数量超过限制。",
+  "attachment.conflict": "内容已被修改，请刷新后重新编辑。",
+
   "trust.contentLimit": "每篇内容的{kind}不能超过 {limit}。",
   "trust.adjustmentFailed": "等级调整失败：{error}",
   "trust.dailyReplies": "当前等级每天最多新建 {limit} 条回复。",

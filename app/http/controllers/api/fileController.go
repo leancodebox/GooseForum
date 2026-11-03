@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/httputil"
+	"github.com/leancodebox/GooseForum/app/service/attachmentservice"
 	"github.com/leancodebox/GooseForum/app/service/fileaccessservice"
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/leancodebox/GooseForum/app/service/imageuploadservice"
@@ -25,6 +26,10 @@ func GetFileByFileName(c *gin.Context) {
 	}
 	filename = strings.TrimPrefix(filename, "/")
 
+	if strings.HasPrefix(filename, attachmentservice.ObjectPrefix) {
+		c.Status(http.StatusNotFound)
+		return
+	}
 	metadata, err := filestorage.Stat(c.Request.Context(), filename)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{

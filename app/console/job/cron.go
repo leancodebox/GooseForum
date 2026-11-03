@@ -12,6 +12,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
+	"github.com/leancodebox/GooseForum/app/service/attachmentservice"
 	"github.com/leancodebox/GooseForum/app/service/authsessionservice"
 	"github.com/leancodebox/GooseForum/app/service/filestorage"
 	"github.com/robfig/cron/v3"
@@ -56,6 +57,9 @@ func Run() {
 	}))
 	slog.Info("reg cron", "entryID", entryID, "spec", backupSpec, "err", err)
 	entryID, err = scheduler.AddFunc("17 * * * *", upCmd(func() {
+		if err := attachmentservice.Cleanup(context.Background()); err != nil {
+			slog.Warn("attachment cleanup failed", "error", err)
+		}
 		removed, cleanupErr := filestorage.CleanupPending(context.Background(), time.Now().Add(-2*time.Hour), 500)
 		if cleanupErr != nil || removed > 0 {
 			slog.Info("cleanup pending uploads", "removed", removed, "err", cleanupErr)

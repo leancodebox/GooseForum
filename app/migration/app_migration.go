@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/leancodebox/GooseForum/app/service/topicrankservice"
-
 	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
 	paniclog "github.com/leancodebox/GooseForum/app/bundles/recovery"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/service/datamigration"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
+	"github.com/leancodebox/GooseForum/app/service/topicrankservice"
 )
 
 // Allocate migration versions for release upgrades, not each development edit.
@@ -347,6 +346,15 @@ func runVersionedDataMigrations() error {
 			return err
 		}
 		currentVersion = 27
+	}
+	if currentVersion < 28 {
+		if err := datamigration.MigrateAttachments(); err != nil {
+			return err
+		}
+		if err := syncMigrationVersion(28); err != nil {
+			return err
+		}
+		currentVersion = 28
 	}
 	slog.Info("app migration end", "version", currentVersion)
 	return nil

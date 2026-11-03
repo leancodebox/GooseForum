@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
+	"github.com/leancodebox/GooseForum/app/models/forum/attachments"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserStat"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
@@ -31,6 +32,9 @@ func CreateTopicPost(entity *posts.Entity, topicEntity topics.Entity) error {
 		}
 		entity.PostNo = postNo
 		if err := posts.CreateWithDB(tx, entity); err != nil {
+			return err
+		}
+		if err := attachments.BindWithDB(tx, entity.UserId, entity.Id, entity.Attachments); err != nil {
 			return err
 		}
 		if entity.ProcessStatus != 0 {

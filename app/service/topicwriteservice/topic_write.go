@@ -14,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
+	"github.com/leancodebox/GooseForum/app/service/attachmentservice"
 	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
@@ -32,6 +33,7 @@ var (
 )
 
 type WriteInput struct {
+	AttachmentIDs      *[]uint64
 	ExpectedVersion    *uint64
 	AgentSource        *string
 	ClientRequestID    *string
@@ -73,6 +75,10 @@ func Write(input WriteInput) (WriteResult, error) {
 		return WriteResult{}, err
 	}
 	categoryIDs, err := prepareWrite(state, input)
+	if err != nil {
+		return WriteResult{}, err
+	}
+	state.firstPost.Attachments, err = attachmentservice.Prepare(input.UserID, state.firstPost.Id, state.firstPost.Attachments, input.AttachmentIDs)
 	if err != nil {
 		return WriteResult{}, err
 	}

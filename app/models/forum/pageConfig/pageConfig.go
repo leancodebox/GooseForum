@@ -217,7 +217,16 @@ type OIDCProviderConfig struct {
 	Scopes       []string `json:"scopes"`
 }
 
+type AttachmentSettings struct {
+	Enabled         bool     `json:"enabled"`
+	MinTrustLevel   int      `json:"minTrustLevel"`
+	MaxFileSizeKb   int      `json:"maxFileSizeKb"`
+	MaxFilesPerPost int      `json:"maxFilesPerPost"`
+	Extensions      []string `json:"extensions"`
+}
+
 type PostingContent struct {
+	Attachments   AttachmentSettings `json:"attachments"`
 	ExternalLinks struct {
 		Enabled   bool     `json:"enabled"`
 		Whitelist []string `json:"whitelist"`

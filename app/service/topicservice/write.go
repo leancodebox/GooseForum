@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
+	"github.com/leancodebox/GooseForum/app/models/forum/attachments"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
@@ -110,6 +111,9 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 			if err := tx.Save(input.FirstPost).Error; err != nil {
 				return err
 			}
+		}
+		if err := attachments.BindWithDB(tx, input.FirstPost.UserId, input.FirstPost.Id, input.FirstPost.Attachments); err != nil {
+			return err
 		}
 		if input.ReviewOnly {
 			return nil

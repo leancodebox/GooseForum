@@ -89,7 +89,7 @@ function renderPage(page: AnyPagePayload, api: Partial<GooseSiteApi> = {}) {
   const setThemePreference = vi.fn();
   const navigate = vi.fn();
   const runtime: GooseRuntime = {
-    api: api as GooseSiteApi,
+    api: { attachments: { policy: vi.fn().mockResolvedValue({ enabled: true, minTrustLevel: 100, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt"] }) }, ...api } as GooseSiteApi,
     currentUrl: page.url,
     isNavigating: false,
     locale: "zh",
@@ -1548,6 +1548,7 @@ describe("AppShell and static pages", () => {
     await user.type(screen.getByPlaceholderText(/输入正文/), "Reply body");
     await user.click(publishReply);
     expect(create).toHaveBeenCalledWith({
+      attachmentIds: [],
       topicId: 60,
       content: "Reply body",
       replyToPostId: 62,

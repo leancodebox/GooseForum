@@ -1,3 +1,5 @@
+export interface AttachmentInfo { id: number; filename: string; size: number; url: string }
+export interface AttachmentPolicy { enabled: boolean; minTrustLevel: number; maxFileSizeKb: number; maxFilesPerPost: number; extensions: string[] }
 export interface PagePayload<TProps = unknown, TComponent extends string = string> {
   component: TComponent
   props: TProps
@@ -335,6 +337,8 @@ export interface TopicDetailPayload {
 }
 
 export interface PostPayload {
+  attachments?: AttachmentInfo[]
+  version?: number
   sourceVersion?: 0 | 1
   id: number
   topicId: number
@@ -859,6 +863,8 @@ export interface PublishPageProps {
   isEditing: boolean
   categories: PublishCategoryPayload[]
   topic: {
+    attachments?: AttachmentInfo[]
+    version?: number
     sourceVersion?: 0 | 1
     title: string
     content: string

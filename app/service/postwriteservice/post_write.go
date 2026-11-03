@@ -12,6 +12,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
+	"github.com/leancodebox/GooseForum/app/service/attachmentservice"
 	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
@@ -30,6 +31,7 @@ var (
 )
 
 type CreateInput struct {
+	AttachmentIDs      *[]uint64
 	AgentSource        *string
 	ClientRequestID    *string
 	RequestFingerprint string
@@ -71,6 +73,10 @@ func Create(input CreateInput) (posts.Entity, error) {
 		RenderedVersion: markdown2html.GetPostVersion(), UserId: input.UserID, ReplyToPostId: input.ReplyToPostID,
 		SourceVersion: input.SourceVersion,
 	}
+	post.Attachments, err = attachmentservice.Prepare(input.UserID, 0, nil, input.AttachmentIDs)
+	if err != nil {
+		return posts.Entity{}, err
+	}
 	if err := postservice.CreateTopicPost(&post, topic); err != nil {
 		return posts.Entity{}, err
 	}
@@ -88,6 +94,7 @@ func Create(input CreateInput) (posts.Entity, error) {
 }
 
 type UpdateInput struct {
+	AttachmentIDs   *[]uint64
 	ExpectedVersion *uint64
 	SourceVersion   uint8
 	UserID          uint64
@@ -130,6 +137,10 @@ func Update(input UpdateInput) (posts.Entity, error) {
 	post.Content = input.Content
 	post.RenderedHTML = analysis.RenderedHTML
 	post.RenderedVersion = markdown2html.GetPostVersion()
+	post.Attachments, err = attachmentservice.Prepare(input.UserID, post.Id, post.Attachments, input.AttachmentIDs)
+	if err != nil {
+		return posts.Entity{}, err
+	}
 	contentmoderationservice.PreparePost(&post)
 	if err := posts.SaveReviewed(&post, expectedVersion); err != nil {
 		return posts.Entity{}, err

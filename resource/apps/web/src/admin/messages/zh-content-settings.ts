@@ -1,4 +1,12 @@
 export default {
+  attachmentSettings: "普通文件附件",
+  attachmentEnabled: "允许上传普通附件",
+  attachmentLevel: "最低等级（0、100、200、1000）",
+  attachmentSize: "单文件上限（KiB）",
+  attachmentCount: "每篇内容附件数量上限",
+  attachmentTypes: "允许类型：.pdf、.txt、.zip（英文逗号分隔）",
+  attachmentStorage: "附件私密存储于数据库，站点图片使用 S3 时也不受影响。",
+
   announcementEditorVisual: "可视化",
   announcementEditorVisualPlaceholder: "直接编辑公告内容",
   announcementList: "公告列表",
@@ -35,8 +43,8 @@ export default {
   maxPost: "正文最大长度",
   postCooldown: "新用户发帖冷却（分钟）",
   dailyTopics: "用户每日主题上限",
-  uploads: "附件",
-  allowAttachments: "允许附件",
+  uploads: "图片",
+  allowAttachments: "允许图片",
   allowHint: "允许用户发帖时上传文件。",
   dailyUploads: "每日上传上限",
   maxSize: "附件最大大小（KB）",

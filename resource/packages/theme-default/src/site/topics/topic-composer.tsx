@@ -1,3 +1,4 @@
+import type { AttachmentEditorProps } from "../editor/attachment-editor";
 import { Maximize2, Minimize2, Minus, Send, X } from "lucide-react";
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -81,6 +82,7 @@ export function TopicComposer({
   viewer,
   topicTitle,
   busy,
+  uploadPending = false,
   submitDisabled = false,
   error,
   onContent,
@@ -90,6 +92,7 @@ export function TopicComposer({
   onExpand,
   onClearTarget,
   draftPanel,
+  attachmentEditor,
 }: {
   open: boolean;
   minimized: boolean;
@@ -101,6 +104,7 @@ export function TopicComposer({
   viewer: ViewerPayload;
   topicTitle: string;
   busy: boolean;
+  uploadPending?: boolean;
   submitDisabled?: boolean;
   error: string;
   onContent(value: string): void;
@@ -110,6 +114,7 @@ export function TopicComposer({
   onExpand(): void;
   onClearTarget(): void;
   draftPanel?: ReactNode;
+  attachmentEditor?: AttachmentEditorProps;
 }) {
   const { t } = useTranslation("topic");
   return (
@@ -146,7 +151,7 @@ export function TopicComposer({
             variant="ghost"
             size="icon-sm"
             aria-label={t("close")}
-            disabled={busy}
+            disabled={busy || uploadPending}
             onClick={onClose}
           >
             <X />
@@ -181,7 +186,7 @@ export function TopicComposer({
               variant="ghost"
               size="icon-sm"
               aria-label={t("joinDiscussion")}
-              disabled={busy}
+              disabled={busy || uploadPending}
               onClick={onMinimize}
             >
               <Minus />
@@ -198,7 +203,7 @@ export function TopicComposer({
               variant="ghost"
               size="icon-sm"
               aria-label={t("close")}
-              disabled={busy}
+              disabled={busy || uploadPending}
               onClick={onClose}
             >
               <X />
@@ -217,14 +222,14 @@ export function TopicComposer({
                 size="icon-xs"
                 aria-label={t("close")}
                 onClick={onClearTarget}
-                disabled={busy}
+                disabled={busy || uploadPending}
               >
                 <X />
               </Button>
             </div>
           ) : null}
           <div className="min-h-0 flex-1">
-            <MarkdownComposer
+            <MarkdownComposer attachmentEditor={attachmentEditor}
               value={content}
               sourceVersion={sourceVersion}
               onChange={onContent}

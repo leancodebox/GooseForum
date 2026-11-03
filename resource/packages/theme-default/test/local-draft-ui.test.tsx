@@ -2,6 +2,7 @@ import "fake-indexeddb/auto";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { GooseClientError } from "@gooseforum/client";
 import type { GooseSiteApi, LayoutPayload, PublishPageProps } from "@gooseforum/client";
 import { GooseRuntimeProvider, type GooseRuntime } from "@gooseforum/runtime";
 import { GooseI18nProvider } from "@gooseforum/runtime/i18n";
@@ -86,11 +87,15 @@ it("keeps publishing available after its own autosave notification", async () =>
 });
 
 it("restores explicitly, submits the restored source and clears only after accepted persistence", async () => {
-  await seed(); const { writeReviewed } = show();
+  const attachments = [{ id: 12, filename: "draft.txt", size: 5, url: "/file/attachments/12" }];
+  await seed({ attachments, version: 3 });
+  const writeReviewed = vi.fn().mockResolvedValue({ id: 40, version: 4, moderationStatus: "pending", content: "Canonical body", sourceVersion: 1 });
+  const { runtime } = show(writeReviewed);
   await userEvent.click(await screen.findByRole("button", { name: "恢复副本" }));
   expect(screen.getByLabelText<HTMLTextAreaElement>("Body").value).toBe("Recovered local body");
   await userEvent.click(screen.getByRole("button", { name: "保存草稿" }));
-  await waitFor(() => expect(writeReviewed).toHaveBeenCalledWith(expect.objectContaining({ title: "Recovered title", content: "Recovered local body", sourceVersion: 1 })));
+  await waitFor(() => expect(writeReviewed).toHaveBeenCalledWith(expect.objectContaining({ title: "Recovered title", content: "Recovered local body", sourceVersion: 1, attachmentIds: [12], version: 3 })));
+  await waitFor(() => expect(runtime.navigate).toHaveBeenCalledWith("/drafts"));
   await waitFor(() => expect(screen.getByLabelText<HTMLTextAreaElement>("Body").value).toBe("Canonical body"));
   expect(await listLocalDrafts(draftOwner(userId))).toHaveLength(0);
 });
@@ -105,18 +110,22 @@ it("retains the copy when publishing is rejected", async () => {
 });
 
 it("preserves new edits and the local draft after a server request fails", async () => {
-  await seed();
-  const failed = vi.fn().mockRejectedValue(new Error("offline"));
+  const attachments = [{ id: 15, filename: "conflict.txt", size: 8, url: "/file/attachments/15" }];
+  await seed({ attachments, version: 2 });
+  const failed = vi.fn().mockRejectedValue(new GooseClientError("Version conflict", { status: 409, messageCode: "attachment.conflict" }));
   show(failed);
   await userEvent.click(await screen.findByRole("button", { name: "恢复副本" }));
   await userEvent.type(screen.getByLabelText("Body"), " with newer input");
   await userEvent.click(screen.getByRole("button", { name: "保存草稿" }));
   await waitFor(() => expect(failed).toHaveBeenCalled());
+  expect(await screen.findByText("内容已被修改，请刷新后重新编辑。")).toBeTruthy();
   await waitFor(() => expect(screen.getByRole<HTMLButtonElement>("button", { name: "保存草稿" }).disabled).toBe(false));
   expect(screen.getByLabelText<HTMLTextAreaElement>("Body").value).toBe("Recovered local body with newer input");
   await waitFor(async () => {
     const drafts = await listLocalDrafts(draftOwner(userId));
     expect(drafts).toHaveLength(1);
     expect(drafts[0].content).toBe("Recovered local body with newer input");
+    expect(drafts[0].attachments).toEqual(attachments);
+    expect(drafts[0].version).toBe(2);
   });
 });

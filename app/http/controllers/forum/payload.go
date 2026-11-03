@@ -12,13 +12,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/bundles/redirectopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
+	"github.com/leancodebox/GooseForum/app/models/forum/attachments"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
@@ -324,6 +324,8 @@ type TopicDetailPayload struct {
 }
 
 type PostPayload struct {
+	Attachments     []attachments.Info `json:"attachments"`
+	Version         uint64             `json:"version"`
 	SourceVersion   uint8              `json:"sourceVersion"`
 	ID              uint64             `json:"id"`
 	TopicID         uint64             `json:"topicId"`
@@ -611,11 +613,13 @@ type ModerationPageProps struct {
 }
 
 type PublishTopicPayload struct {
-	SourceVersion uint8    `json:"sourceVersion"`
-	Title         string   `json:"title"`
-	Content       string   `json:"content"`
-	CategoryIDs   []uint64 `json:"categoryIds"`
-	TopicStatus   int8     `json:"topicStatus"`
+	Attachments   []attachments.Info `json:"attachments"`
+	Version       uint64             `json:"version"`
+	SourceVersion uint8              `json:"sourceVersion"`
+	Title         string             `json:"title"`
+	Content       string             `json:"content"`
+	CategoryIDs   []uint64           `json:"categoryIds"`
+	TopicStatus   int8               `json:"topicStatus"`
 }
 
 type SearchPageProps struct {
@@ -1232,15 +1236,18 @@ func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.E
 				replyTargets = append(replyTargets, buildReplyTargetPayload(item.TopicId, item.ReplyToPostId, postMap, userMap, wornBadges, canModerate))
 			}
 		}
+		files := item.Attachments
 		content := item.Content
 		renderedContent := item.RenderedHTML
 		isHidden := item.ProcessStatus != 0
 		if isHidden && !canModerate {
+			files = nil
 			content = ""
 			renderedContent = ""
 		}
 		res = append(res, PostPayload{
-			SourceVersion:   item.SourceVersion,
+			SourceVersion: item.SourceVersion,
+			Attachments:   files, Version: item.ModerationVersion,
 			ID:              item.Id,
 			TopicID:         item.TopicId,
 			PostNo:          item.PostNo,
@@ -2361,10 +2368,11 @@ func buildPublishPageProps(c *gin.Context, topicID uint64) (PublishPageProps, er
 	}
 	props.Topic = PublishTopicPayload{
 		SourceVersion: firstPost.SourceVersion,
-		Title:         topic.Title,
-		Content:       firstPost.Content,
-		CategoryIDs:   topic.CategoryIds,
-		TopicStatus:   topic.Status,
+		Attachments:   firstPost.Attachments, Version: topic.ModerationVersion,
+		Title:       topic.Title,
+		Content:     firstPost.Content,
+		CategoryIDs: topic.CategoryIds,
+		TopicStatus: topic.Status,
 	}
 	props.Categories = buildPublishCategories(actor, everyone, topic.CategoryIds)
 	return props, nil

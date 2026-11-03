@@ -1,5 +1,14 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  attachmentsTitle: "Attachments",
+  attachmentUpload: "Upload attachment",
+  attachmentUploading: "Uploading attachment…",
+  attachmentRetry: "Retry upload",
+  attachmentRemove: "Remove",
+  attachmentLimits: "Up to {count} files, {size} KiB each. Types: {types}",
+  attachmentUnavailable: "Attachment uploads are unavailable for this account.",
+  attachmentFailed: "Upload failed. Retry or remove the failed file before submitting.",
+
   localDraft: {
     "saving": "Saving local copy…",
     "saved": "Local copy saved",

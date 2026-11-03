@@ -1,7 +1,10 @@
+import type { AttachmentInfo } from "@gooseforum/client";
 import { openDB, type DBSchema } from "idb";
 
 export type DraftKind = "new-topic" | "edit-topic" | "new-reply" | "edit-reply";
 export interface DraftValues {
+  attachments?: AttachmentInfo[];
+  version?: number;
   title: string;
   content: string;
   categoryIds: number[];
@@ -58,8 +61,8 @@ function db() {
 
 export function draftGeneration(owner: string) { return generations.get(owner) || 0; }
 
-export function isEmptyDraft(values: Pick<DraftValues, "title" | "content">) {
-  return !values.title.trim() && !values.content.trim();
+export function isEmptyDraft(values: Pick<DraftValues, "title" | "content" | "attachments">) {
+  return !values.title.trim() && !values.content.trim() && !values.attachments?.length;
 }
 
 export function sameDraftContext(left: LocalDraft, right: LocalDraft) {

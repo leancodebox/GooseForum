@@ -1,6 +1,12 @@
 // Frontend fallbacks for backend MessageCode values; completeness is checked in CI.
 import mfa from './en-mfa.js';
 export default {
+  "attachment.invalidFile": "Unsupported file type or invalid filename/content.",
+  "attachment.tooLarge": "The file is empty or exceeds the attachment size limit.",
+  "attachment.invalidReference": "An attachment is unavailable. Remove it and upload again.",
+  "attachment.limit": "Too many attachments.",
+  "attachment.conflict": "Content changed. Reload before editing again.",
+
   "trust.contentLimit": "The {kind} limit per post is {limit}.",
   "trust.adjustmentFailed": "Level adjustment failed: {error}",
   "trust.dailyReplies": "Your level allows up to {limit} new replies per day.",

@@ -1,3 +1,4 @@
+import type { AttachmentInfo, AttachmentPolicy } from "../contracts/payload.js"
 import type {
   ModerationLogListResponse,
   ModerationReportListResponse,
@@ -31,6 +32,7 @@ export interface CreateAgentTokenInput {
 }
 
 export interface CreatePostInput {
+ attachmentIds?: number[]
   sourceVersion?: 0 | 1
   topicId: number
   content: string
@@ -38,6 +40,8 @@ export interface CreatePostInput {
 }
 
 export interface CreatePostResult {
+ attachments?: AttachmentInfo[]
+ version?: number
   content?: string
   sourceVersion?: 0 | 1
   processStatus?: number
@@ -48,12 +52,16 @@ export interface CreatePostResult {
 }
 
 export interface UpdatePostInput {
+ attachmentIds?: number[]
+ version?: number
   sourceVersion?: 0 | 1
   postId: number
   content: string
 }
 
 export interface UpdatePostResult {
+ attachments?: AttachmentInfo[]
+ version?: number
   sourceVersion?: 0 | 1
   moderationStatus?: string
   processStatus?: number
@@ -74,6 +82,8 @@ export interface PostWindowInput {
 }
 
 export interface SubmitTopicInput {
+ attachmentIds?: number[]
+ version?: number
   sourceVersion?: 0 | 1
   topicId: number
   title: string
@@ -193,6 +203,7 @@ export interface ImageUploadInitResult {
 }
 
 export interface GooseSiteApi {
+ attachments: { policy(): Promise<AttachmentPolicy>; upload(file: File): Promise<AttachmentInfo>; cancel(id: number): Promise<boolean> }
   accessGroups: {
     list(): Promise<JoinableAccessGroup[]>
     apply(groupId: number): Promise<boolean>
@@ -211,7 +222,7 @@ export interface GooseSiteApi {
     watch(topicId: number, action: ToggleAction): Promise<boolean>
     setStatus(topicId: number, topicStatus: 0 | 1): Promise<boolean>
     write(input: SubmitTopicInput): Promise<number>
-    writeReviewed(input: SubmitTopicInput): Promise<{ id: number, moderationStatus: string, topicStatus: number, content?: string, sourceVersion?: 0 | 1 }>
+    writeReviewed(input: SubmitTopicInput): Promise<{ id: number, version?: number, moderationStatus: string, topicStatus: number, content?: string, sourceVersion?: 0 | 1 }>
   }
   moderation: {
     setTopicStatus(topicId: number, action: 'ban' | 'unban'): Promise<boolean>

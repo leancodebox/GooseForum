@@ -16,6 +16,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 	"github.com/leancodebox/GooseForum/app/models/forum/accountrestrictions"
 	"github.com/leancodebox/GooseForum/app/models/forum/agenttokens"
+	"github.com/leancodebox/GooseForum/app/models/forum/attachments"
 	"github.com/leancodebox/GooseForum/app/models/forum/authsessions"
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
@@ -98,6 +99,7 @@ func defaultSchemaModels() []any {
 		&badges.Entity{},
 		&eventNotification.Entity{},
 		&fileUsage.Entity{},
+		&attachments.Entity{},
 		&moderationLog.Entity{},
 		&migrationMapping.Entity{},
 		&moderators.Entity{},

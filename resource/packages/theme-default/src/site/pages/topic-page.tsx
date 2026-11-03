@@ -1,3 +1,5 @@
+import type { AttachmentInfo } from "@gooseforum/client";
+import { AttachmentList } from "../editor/attachment-editor";
 import {
   lazy,
   Suspense,
@@ -133,13 +135,16 @@ export function TopicPageView({
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerMinimized, setComposerMinimized] = useState(false);
   const [composerExpanded, setComposerExpanded] = useState(false);
+  const [attachments, setAttachments] = useState<AttachmentInfo[]>([]);
+  const [attachmentBusy, setAttachmentBusy] = useState(false);
+  const [editVersion, setEditVersion] = useState<number>();
   const [composerContent, setComposerContent] = useState("");
   const [replyTargetId, setReplyTargetId] = useState(0);
   const [editingId, setEditingId] = useState(0);
   const sourceVersion = 1 as const;
   const [draftBranch, setDraftBranch] = useState(0);
-  const [composerBase, setComposerBase] = useState<DraftValues>({ title: "", content: "", categoryIds: [], replyTargetId: 0, sourceVersion: 1 });
-  const composerValues = useMemo(() => ({ title: "", content: composerContent, categoryIds: [], replyTargetId, sourceVersion }), [composerContent, replyTargetId, sourceVersion]);
+  const [composerBase, setComposerBase] = useState<DraftValues>({ attachments: [], version: undefined, title: "", content: "", categoryIds: [], replyTargetId: 0, sourceVersion: 1 });
+  const composerValues = useMemo(() => ({ attachments, version: editVersion, title: "", content: composerContent, categoryIds: [], replyTargetId, sourceVersion }), [composerContent, replyTargetId, sourceVersion, attachments, editVersion]);
   const localDraft = useLocalDraft({ userId: layout.viewer.id, kind: editingId ? "edit-reply" : "new-reply", objectId: editingId || page.topic.id, topicId: page.topic.id, branch: draftBranch, base: composerBase, values: composerValues, enabled: composerOpen });
   const [composerBusy, setComposerBusy] = useState(false);
   const composerSubmitting = useRef(false);
@@ -181,7 +186,7 @@ export function TopicPageView({
   );
   const draftTargets = useDraftReplyTargets({ candidates: localDraft.candidates, posts, references: replyTargets, api: runtime.api.posts, topicId: page.topic.id, context: `${layout.viewer.id}:${page.topic.id}:${draftBranch}`, enabled: composerOpen && page.permissions.canPost });
   const replyTarget = posts.find((post) => post.id === replyTargetId) || draftTargets.target(replyTargetId).post;
-  const composerDirty = JSON.stringify(composerValues) !== JSON.stringify(composerBase);
+  const composerDirty = attachmentBusy || JSON.stringify(composerValues) !== JSON.stringify(composerBase);
   const composerDirtyRef = useRef(false);
   const allowComposerLeave = useRef(false);
   composerDirtyRef.current = composerDirty;
@@ -417,7 +422,7 @@ export function TopicPageView({
     }
   }
   function openComposer(post?: PostPayload) {
-    if (composerSubmitting.current) return;
+    if (composerSubmitting.current || attachmentBusy) return;
     if (!layout.viewer.isAuthenticated || !page.permissions.canPost) {
       void runtime.navigate(loginUrl(runtime.currentUrl));
       return;
@@ -425,15 +430,15 @@ export function TopicPageView({
     if (composerDirty && !window.confirm(t("localDraft.leave", { ns: "publish" }))) return;
     setEditingId(0);
     setReplyTargetId(post?.id || 0);
-    setComposerContent("");
-    setComposerBase({ title: "", content: "", categoryIds: [], replyTargetId: post?.id || 0, sourceVersion: 1 });
+    setComposerContent(""); setAttachments([]); setEditVersion(undefined);
+    setComposerBase({ attachments: [], version: undefined, title: "", content: "", categoryIds: [], replyTargetId: post?.id || 0, sourceVersion: 1 });
     setDraftBranch((value) => value + 1);
     setComposerError("");
     setComposerMinimized(false);
     setComposerOpen(true);
   }
   function editPost(post: PostPayload) {
-    if (composerSubmitting.current) return;
+    if (composerSubmitting.current || attachmentBusy) return;
     if (post.postNo === 1) {
       void runtime.navigate(`/publish?id=${page.topic.id}`);
       return;
@@ -441,8 +446,8 @@ export function TopicPageView({
     if (composerDirty && !window.confirm(t("localDraft.leave", { ns: "publish" }))) return;
     setEditingId(post.id);
     setReplyTargetId(0);
-    setComposerContent(post.content);
-    setComposerBase({ title: "", content: post.content, categoryIds: [], replyTargetId: 0, sourceVersion: 1 });
+    setComposerContent(post.content); setAttachments(post.attachments || []); setEditVersion(post.version);
+    setComposerBase({ attachments: post.attachments || [], version: post.version, title: "", content: post.content, categoryIds: [], replyTargetId: 0, sourceVersion: 1 });
     setDraftBranch((value) => value + 1);
     setComposerError("");
     setComposerMinimized(false);
@@ -450,7 +455,7 @@ export function TopicPageView({
   }
   async function submitComposer() {
     if (localDraft.recoveryPending) return;
-    if (composerSubmitting.current) return;
+    if (composerSubmitting.current || attachmentBusy) return;
     const content = composerContent.trim();
     if (!content) {
       setComposerError(t("replyRequired"));
@@ -464,18 +469,18 @@ export function TopicPageView({
     try {
       if (editingId) {
         const updated = await runtime.api.posts.update({
-          postId: editingId,
+          postId: editingId, attachmentIds: attachments.map((file) => file.id), version: editVersion,
           content,
           sourceVersion,
         });
         if (updated.moderationStatus === "rejected") { setComposerError(t("actionFailed")); return; }
-        canonical = { ...composerValues, content: updated.content, sourceVersion: updated.sourceVersion ?? sourceVersion };
+        canonical = { ...composerValues, attachments: updated.attachments ?? attachments, version: updated.version, content: updated.content, sourceVersion: updated.sourceVersion ?? sourceVersion };
         setPosts((items) =>
           items.map((post) =>
             post.id === editingId
               ? {
                   ...post,
-                  content: updated.content,
+                  content: updated.content, attachments: updated.attachments, version: updated.version,
                   sourceVersion: updated.sourceVersion ?? sourceVersion,
                   renderedContent: updated.renderedContent,
                   updatedAt: updated.updatedAt,
@@ -487,7 +492,7 @@ export function TopicPageView({
         runtime.queueFlash(t("replyUpdated"), "success");
       } else {
         const created = await runtime.api.posts.create({
-          topicId: page.topic.id,
+          topicId: page.topic.id, attachmentIds: attachments.map((file) => file.id),
           content,
           replyToPostId: replyTargetId,
           sourceVersion,
@@ -508,7 +513,7 @@ export function TopicPageView({
             id: result.id,
             topicId: page.topic.id,
             postNo: result.postNo || maxPostNo + 1,
-            content: canonical.content,
+            content: canonical.content, attachments: result.attachments, version: result.version,
             sourceVersion: canonical.sourceVersion,
             renderedContent: result.renderedContent,
             processStatus: result.processStatus || 0,
@@ -564,15 +569,24 @@ export function TopicPageView({
         } else await runtime.refresh();
         runtime.queueFlash(t("replyPosted"), "success");
       }
+      // A retained new-reply draft cannot reuse attachments now bound to the created post.
+      if (!editingId) canonical = { ...canonical, attachments: [] };
       const unchanged = !submission || await localDraft.writer!.submitted(submission, canonical);
       setComposerBase(canonical);
-      if (!unchanged) return;
+      if (!unchanged) {
+        if (editingId) setEditVersion(canonical.version);
+        else {
+          const submittedIds = new Set(attachments.map((file) => file.id));
+          setAttachments((current) => current.filter((file) => !submittedIds.has(file.id)));
+        }
+        return;
+      }
       composerDirtyRef.current = false;
       setComposerOpen(false);
-      setComposerContent("");
+      setComposerContent(""); setAttachments([]); setEditVersion(undefined);
       setEditingId(0);
       setReplyTargetId(0);
-      setComposerBase({ title: "", content: "", categoryIds: [], replyTargetId: 0, sourceVersion: 1 });
+      setComposerBase({ attachments: [], version: undefined, title: "", content: "", categoryIds: [], replyTargetId: 0, sourceVersion: 1 });
     } catch (reason) {
       setComposerError(
         serverError(reason, t("actionFailed")),
@@ -589,10 +603,11 @@ export function TopicPageView({
     return draftTargets.target(draft.replyTargetId).status === "available";
   }
   function restoreDraft(draft: LocalDraft) {
+    if (attachmentBusy || composerSubmitting.current) return false;
     if (!availableDraft(draft)) return false;
     if (composerDirty && !window.confirm(t("localDraft.confirmRestore", { ns: "publish" }))) return false;
     localDraft.restore(draft);
-    setComposerContent(draft.content); setReplyTargetId(draft.replyTargetId);
+    setAttachments(draft.attachments ?? composerBase.attachments ?? []); setEditVersion(draft.version ?? composerBase.version); setComposerContent(draft.content); setReplyTargetId(draft.replyTargetId);
     return true;
   }
   async function deletePost() {
@@ -935,6 +950,7 @@ export function TopicPageView({
       </div>
       <Suspense fallback={null}>
         <TopicComposer
+          attachmentEditor={{ files: attachments, onChange: setAttachments, onBusy: setAttachmentBusy, disabled: composerBusy }}
           open={composerOpen}
           minimized={composerMinimized}
           expanded={composerExpanded}
@@ -945,14 +961,15 @@ export function TopicPageView({
           viewer={layout.viewer}
           topicTitle={page.topic.title}
           busy={composerBusy}
-          submitDisabled={localDraft.recoveryPending}
+          uploadPending={attachmentBusy}
+          submitDisabled={localDraft.recoveryPending || attachmentBusy}
           error={composerError}
           onContent={setComposerContent}
           onSubmit={() => void submitComposer()}
-          onClose={() => { if (!composerSubmitting.current) setComposerOpen(false); }}
-          onMinimize={() => setComposerMinimized((value) => !value)}
+          onClose={() => { if (!composerSubmitting.current && !attachmentBusy) setComposerOpen(false); }}
+          onMinimize={() => { if (!attachmentBusy) setComposerMinimized((value) => !value); }}
           onExpand={() => setComposerExpanded((value) => !value)}
-          onClearTarget={() => { if (!composerSubmitting.current) setReplyTargetId(0); }}
+          onClearTarget={() => { if (!composerSubmitting.current && !attachmentBusy) setReplyTargetId(0); }}
           draftPanel={<LocalDraftPanel compact status={localDraft.status} candidates={localDraft.candidates} onRestore={restoreDraft} onDiscard={localDraft.discard} onRetry={localDraft.retry} available={availableDraft} checking={(draft) => page.permissions.canPost && draftTargets.target(draft.replyTargetId).status === "checking"} failed={(draft) => draftTargets.target(draft.replyTargetId).status === "error"} onRetryTarget={draftTargets.retry} conflicts={(draft) => draft.sourceFingerprint !== draftFingerprint(composerBase)} />}
         />
       </Suspense>
@@ -1354,7 +1371,7 @@ function PostRow({
             {t("hiddenReplyPlaceholder")}
           </div>
         ) : (
-          <RenderedContent html={post.renderedContent} />
+          <><RenderedContent html={post.renderedContent} /><AttachmentList files={post.attachments || []} /></>
         )}
         {post.isHidden && post.canModerate ? (
           <Badge variant="secondary" className="mt-2">

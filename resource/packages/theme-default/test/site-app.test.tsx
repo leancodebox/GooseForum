@@ -72,7 +72,7 @@ describe("SiteApp system theme", () => {
     const removeListener = vi.spyOn(media, "removeEventListener");
     vi.stubGlobal("matchMedia", vi.fn(() => media));
     const initial = page("categories.index", { categories: [], total: 0 }, "/categories");
-    const source: PageSource<AnyPagePayload> = { api: {} as GooseSiteApi, load: vi.fn() };
+    const source: PageSource<AnyPagePayload> = { api: { attachments: { policy: vi.fn().mockResolvedValue({ enabled: true, minTrustLevel: 100, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt"] }) } } as unknown as GooseSiteApi, load: vi.fn() };
     const user = userEvent.setup();
     const mounted = render(<SiteApp pageSource={source} initialPage={initial} />);
     await screen.findByRole("heading", { level: 1 });
@@ -109,7 +109,7 @@ describe("SiteApp system theme", () => {
     media.matches = false;
     vi.stubGlobal("matchMedia", vi.fn(() => media));
     const initial = page("categories.index", { categories: [], total: 0 }, "/categories");
-    const source: PageSource<AnyPagePayload> = { api: {} as GooseSiteApi, load: vi.fn() };
+    const source: PageSource<AnyPagePayload> = { api: { attachments: { policy: vi.fn().mockResolvedValue({ enabled: true, minTrustLevel: 100, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt"] }) } } as unknown as GooseSiteApi, load: vi.fn() };
     const user = userEvent.setup();
     const mounted = render(<SiteApp pageSource={source} initialPage={initial} />);
     try {
@@ -142,7 +142,7 @@ describe("SiteApp system theme", () => {
     vi.stubGlobal("matchMedia", vi.fn((query: string) => query.includes("prefers-color-scheme") ? media : { matches: false }));
     localStorage.setItem("goose-site-theme", "gf-light");
     const initial = page("categories.index", { categories: [], total: 0 }, "/categories");
-    const source: PageSource<AnyPagePayload> = { api: {} as GooseSiteApi, load: vi.fn() };
+    const source: PageSource<AnyPagePayload> = { api: { attachments: { policy: vi.fn().mockResolvedValue({ enabled: true, minTrustLevel: 100, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt"] }) } } as unknown as GooseSiteApi, load: vi.fn() };
     const user = userEvent.setup();
     const mounted = render(<SiteApp pageSource={source} initialPage={initial} />);
     try {
@@ -187,7 +187,7 @@ describe("SiteApp navigation lifecycle", () => {
   it("renders an embedded initial page without fetching it again", async () => {
     const initialPage = page("categories.index", { categories: [], total: 0 }, "/categories");
     const source: PageSource<AnyPagePayload> = {
-      api: {} as GooseSiteApi,
+      api: { attachments: { policy: vi.fn().mockResolvedValue({ enabled: true, minTrustLevel: 100, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt"] }) } } as unknown as GooseSiteApi,
       load: vi.fn(),
     };
     render(<SiteApp pageSource={source} initialPage={initialPage} />);
@@ -213,7 +213,7 @@ describe("SiteApp navigation lifecycle", () => {
       resolvePage = resolve;
     });
     const source: PageSource<AnyPagePayload> = {
-      api: {} as GooseSiteApi,
+      api: { attachments: { policy: vi.fn().mockResolvedValue({ enabled: true, minTrustLevel: 100, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt"] }) } } as unknown as GooseSiteApi,
       load: vi.fn(() => pendingPage),
     };
     const user = userEvent.setup();
@@ -270,7 +270,7 @@ describe("SiteApp navigation lifecycle", () => {
       },
     } as AnyPagePayload;
     const source: PageSource<AnyPagePayload> = {
-      api: {} as GooseSiteApi,
+      api: { attachments: { policy: vi.fn().mockResolvedValue({ enabled: true, minTrustLevel: 100, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt"] }) } } as unknown as GooseSiteApi,
       load: vi.fn(async (url: URL) =>
         url.pathname === "/categories" ? categories : home,
       ),
@@ -328,7 +328,7 @@ describe("SiteApp navigation lifecycle", () => {
       url.pathname === "/publish" ? publish : home,
     );
     const source: PageSource<AnyPagePayload> = {
-      api: {} as GooseSiteApi,
+      api: { attachments: { policy: vi.fn().mockResolvedValue({ enabled: true, minTrustLevel: 100, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt"] }) } } as unknown as GooseSiteApi,
       load,
     };
     const user = userEvent.setup();

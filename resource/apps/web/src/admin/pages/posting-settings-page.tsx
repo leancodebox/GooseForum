@@ -17,7 +17,9 @@ import { FileText, Plus, Save, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import type { ContentSettingsTextKey } from "../content-settings-i18n";
 type Text = (k: ContentSettingsTextKey) => string;
+const attachmentDefaults = { enabled: true, minTrustLevel: 100, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".pdf", ".txt", ".zip"] };
 const defaults: PostingSettings = {
+  attachments: attachmentDefaults,
   externalLinks: { enabled: false, whitelist: [] },
   textControl: {
     minPostLength: 5,
@@ -51,6 +53,7 @@ export function PostingSettingsPage({
     try {
       const v = await api.settings.posting();
       setForm({
+        attachments: { ...attachmentDefaults, ...v.attachments },
         externalLinks: {
           enabled: v.externalLinks?.enabled ?? false,
           whitelist: v.externalLinks?.whitelist ?? [],
@@ -191,7 +194,7 @@ export function PostingSettingsPage({
                         } }));
                       }}
                     />
-                    <Button variant="ghost" size="icon" disabled={loading || saving}
+      <Button variant="ghost" size="icon" disabled={loading || saving}
                       aria-label={`${text("remove")} ${index + 1}`}
                       onClick={() => setForm(current => ({ ...current, externalLinks: {
                         enabled: current.externalLinks?.enabled ?? false,
@@ -298,6 +301,16 @@ export function PostingSettingsPage({
           </FieldGroup>
         </FieldSet>
       </div>
+                    <FieldSet>
+        <FieldLegend>{text("attachmentSettings")}</FieldLegend>
+        <FieldDescription>{text("attachmentStorage")}</FieldDescription>
+        <Field orientation="horizontal"><FieldLabel>{text("attachmentEnabled")}</FieldLabel><Switch aria-label={text("attachmentEnabled")} checked={form.attachments?.enabled ?? false} disabled={loading || saving} onCheckedChange={(enabled) => setForm({ ...form, attachments: { ...attachmentDefaults, ...form.attachments, enabled } })} /></Field>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {(["minTrustLevel", "maxFileSizeKb", "maxFilesPerPost"] as const).map((key, index) => <N key={key} label={text((["attachmentLevel", "attachmentSize", "attachmentCount"] as const)[index])} value={(form.attachments || attachmentDefaults)[key]} disabled={loading || saving} onChange={(value) => setForm({ ...form, attachments: { ...attachmentDefaults, ...form.attachments, [key]: value } })} />)}
+        </div>
+        <Field><FieldLabel>{text("attachmentTypes")}</FieldLabel><Input aria-label={text("attachmentTypes")} disabled={loading || saving} value={(form.attachments?.extensions || []).join(", ")} onChange={(event) => setForm({ ...form, attachments: { ...attachmentDefaults, ...form.attachments, extensions: event.target.value.split(",").map((value) => value.trim().toLowerCase()).filter(Boolean) } })} /></Field>
+      </FieldSet>
+
       <footer className="flex justify-end border-t pt-4">
         <Button
           size="sm"
@@ -331,6 +344,7 @@ function N({
       <FieldLabel>{label}</FieldLabel>
       <Input
         type="number"
+        aria-label={label}
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(Number(e.target.value))}

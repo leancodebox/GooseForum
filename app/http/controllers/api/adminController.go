@@ -35,6 +35,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"github.com/leancodebox/GooseForum/app/service/accountrestrictionservice"
 	"github.com/leancodebox/GooseForum/app/service/adminpolicyservice"
+	"github.com/leancodebox/GooseForum/app/service/attachmentservice"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"github.com/leancodebox/GooseForum/app/service/httpnotifyservice"
@@ -1424,6 +1425,9 @@ type SavePostingSettingsReq struct {
 
 // SavePostingSettings 保存发布内容设置
 func SavePostingSettings(req component.BetterRequest[SavePostingSettingsReq]) component.Response {
+	if err := attachmentservice.ValidateConfig(req.Params.Settings.Attachments); err != nil {
+		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
+	}
 	domains, err := outbound.NormalizeDomains(req.Params.Settings.ExternalLinks.Whitelist)
 	if err != nil {
 		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)

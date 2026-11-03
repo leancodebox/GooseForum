@@ -30,13 +30,15 @@ func GetSiteStatistics() component.Response {
 }
 
 type WriteTopicReq struct {
-	SourceVersion uint8    `json:"sourceVersion" validate:"oneof=0 1"`
-	ReturnReview  bool     `json:"returnReview"`
-	TopicId       uint64   `json:"topicId"`
-	Content       string   `json:"content" validate:"required"`
-	Title         string   `json:"title" validate:"required"`
-	CategoryId    []uint64 `json:"categoryId" validate:"min=1,max=3"`
-	TopicStatus   int8     `json:"topicStatus" validate:"oneof=0 1"`
+	AttachmentIDs *[]uint64 `json:"attachmentIds"`
+	Version       *uint64   `json:"version"`
+	SourceVersion uint8     `json:"sourceVersion" validate:"oneof=0 1"`
+	ReturnReview  bool      `json:"returnReview"`
+	TopicId       uint64    `json:"topicId"`
+	Content       string    `json:"content" validate:"required"`
+	Title         string    `json:"title" validate:"required"`
+	CategoryId    []uint64  `json:"categoryId" validate:"min=1,max=3"`
+	TopicStatus   int8      `json:"topicStatus" validate:"oneof=0 1"`
 }
 
 // WriteTopic creates or updates a topic and its first post.
@@ -62,6 +64,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	}
 
 	result, err := topicwriteservice.Write(topicwriteservice.WriteInput{
+		AttachmentIDs: req.Params.AttachmentIDs, ExpectedVersion: req.Params.Version,
 		SourceVersion: req.Params.SourceVersion,
 		UserID:        req.UserId, TopicID: req.Params.TopicId, Title: req.Params.Title,
 		Content: req.Params.Content, CategoryIDs: req.Params.CategoryId, Status: req.Params.TopicStatus,
@@ -69,6 +72,9 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	if err != nil {
 		if response, ok := trustWriteFailure(err); ok {
 			return response
+		}
+		if errors.Is(err, topicservice.ErrVersionConflict) || errors.Is(err, posts.ErrVersionConflict) || errors.Is(err, topicwriteservice.ErrVersionConflict) || errors.Is(err, postwriteservice.ErrVersionConflict) {
+			return component.FailResponseCode("attachment.conflict", nil)
 		}
 		if errors.Is(err, mentionservice.ErrInvalid) {
 			return component.FailResponseCode(component.MessageMentionInvalid, nil)
@@ -88,7 +94,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 	if req.Params.ReturnReview {
-		return component.SuccessResponse(map[string]any{"id": result.ID, "moderationStatus": result.ModerationStatus, "topicStatus": result.TopicStatus, "content": result.Content, "sourceVersion": result.SourceVersion})
+		return component.SuccessResponse(map[string]any{"id": result.ID, "version": result.Version, "moderationStatus": result.ModerationStatus, "topicStatus": result.TopicStatus, "content": result.Content, "sourceVersion": result.SourceVersion})
 	}
 	return component.SuccessResponse(result.ID)
 }
@@ -131,10 +137,11 @@ func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Re
 }
 
 type CreatePostReq struct {
-	SourceVersion uint8  `json:"sourceVersion" validate:"oneof=0 1"`
-	TopicId       uint64 `json:"topicId"`
-	Content       string `json:"content"`
-	ReplyToPostId uint64 `json:"replyToPostId"`
+	AttachmentIDs *[]uint64 `json:"attachmentIds"`
+	SourceVersion uint8     `json:"sourceVersion" validate:"oneof=0 1"`
+	TopicId       uint64    `json:"topicId"`
+	Content       string    `json:"content"`
+	ReplyToPostId uint64    `json:"replyToPostId"`
 }
 
 func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
@@ -157,12 +164,16 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 	}
 
 	postEntity, err := postwriteservice.Create(postwriteservice.CreateInput{
+		AttachmentIDs: req.Params.AttachmentIDs,
 		SourceVersion: req.Params.SourceVersion,
 		UserID:        req.UserId, TopicID: req.Params.TopicId, Content: content, ReplyToPostID: req.Params.ReplyToPostId,
 	})
 	if err != nil {
 		if response, ok := trustWriteFailure(err); ok {
 			return response
+		}
+		if errors.Is(err, topicservice.ErrVersionConflict) || errors.Is(err, posts.ErrVersionConflict) || errors.Is(err, topicwriteservice.ErrVersionConflict) || errors.Is(err, postwriteservice.ErrVersionConflict) {
+			return component.FailResponseCode("attachment.conflict", nil)
 		}
 		if errors.Is(err, mentionservice.ErrInvalid) {
 			return component.FailResponseCode(component.MessageMentionInvalid, nil)
@@ -180,7 +191,7 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 
 	}
 	return component.SuccessResponse(map[string]any{
-		"content": postEntity.Content, "sourceVersion": postEntity.SourceVersion,
+		"attachments": postEntity.Attachments, "version": postEntity.ModerationVersion, "content": postEntity.Content, "sourceVersion": postEntity.SourceVersion,
 		"processStatus":    postEntity.ProcessStatus,
 		"moderationStatus": postEntity.ModerationStatus,
 		"id":               postEntity.Id,
@@ -194,9 +205,11 @@ type DeletePostReq struct {
 }
 
 type UpdatePostReq struct {
-	SourceVersion uint8  `json:"sourceVersion" validate:"oneof=0 1"`
-	PostId        uint64 `json:"postId"`
-	Content       string `json:"content"`
+	AttachmentIDs *[]uint64 `json:"attachmentIds"`
+	Version       *uint64   `json:"version"`
+	SourceVersion uint8     `json:"sourceVersion" validate:"oneof=0 1"`
+	PostId        uint64    `json:"postId"`
+	Content       string    `json:"content"`
 }
 
 func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
@@ -206,10 +219,13 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 		return response
 	}
 
-	postEntity, err := postwriteservice.Update(postwriteservice.UpdateInput{UserID: req.UserId, PostID: req.Params.PostId, Content: content, SourceVersion: req.Params.SourceVersion})
+	postEntity, err := postwriteservice.Update(postwriteservice.UpdateInput{AttachmentIDs: req.Params.AttachmentIDs, ExpectedVersion: req.Params.Version, UserID: req.UserId, PostID: req.Params.PostId, Content: content, SourceVersion: req.Params.SourceVersion})
 	if err != nil {
 		if response, ok := trustWriteFailure(err); ok {
 			return response
+		}
+		if errors.Is(err, topicservice.ErrVersionConflict) || errors.Is(err, posts.ErrVersionConflict) || errors.Is(err, topicwriteservice.ErrVersionConflict) || errors.Is(err, postwriteservice.ErrVersionConflict) {
+			return component.FailResponseCode("attachment.conflict", nil)
 		}
 		if errors.Is(err, mentionservice.ErrInvalid) {
 			return component.FailResponseCode(component.MessageMentionInvalid, nil)
@@ -227,10 +243,11 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 
 	}
 	return component.SuccessResponse(map[string]any{
-		"id":               postEntity.Id,
-		"postNo":           postEntity.PostNo,
-		"content":          postEntity.Content,
-		"sourceVersion":    postEntity.SourceVersion,
+		"id":            postEntity.Id,
+		"postNo":        postEntity.PostNo,
+		"content":       postEntity.Content,
+		"sourceVersion": postEntity.SourceVersion,
+		"attachments":   postEntity.Attachments, "version": postEntity.ModerationVersion,
 		"renderedContent":  postEntity.RenderedHTML,
 		"updatedAt":        postEntity.UpdatedAt.Format(time.DateTime),
 		"moderationStatus": postEntity.ModerationStatus,
