@@ -2,6 +2,14 @@
 import en from "./en-publish.js";
 export default {
   ...en,
+  attachmentsTitle: "添付ファイル",
+  attachmentUpload: "ファイルを添付",
+  attachmentUploading: "添付ファイルをアップロード中…",
+  attachmentRetry: "再アップロード",
+  attachmentRemove: "削除",
+  attachmentLimits: "最大 {count} ファイル、各 {size} KiB。形式: {types}",
+  attachmentUnavailable: "このアカウントでは添付ファイルをアップロードできません。",
+  attachmentFailed: "アップロードに失敗しました。再試行するか、ファイルを削除してから送信してください。",
   localDraft: {
     "saving": "ローカルコピーを保存中…",
     "saved": "ローカルコピーを保存しました",

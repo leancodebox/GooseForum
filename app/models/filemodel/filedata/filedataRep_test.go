@@ -1,12 +1,42 @@
 package filedata
 
 import (
+	"bytes"
 	"context"
 	"testing"
 	"time"
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 )
+
+func TestUpdateFileContentOnlyChangesNamedBlob(t *testing.T) {
+	setupFileDataTestDB(t)
+	ctx := context.Background()
+	metadata, err := CreateFileMetadata(ctx, 7, "content-update.txt", "text/plain", 3, "database")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := SaveFile(8, "unchanged.txt", "text/plain", []byte("keep")); err != nil {
+		t.Fatal(err)
+	}
+	if err := UpdateFileContent(ctx, metadata.Name, []byte("new")); err != nil {
+		t.Fatal(err)
+	}
+	updated, err := GetFileByNameContext(ctx, metadata.Name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(updated.Data, []byte("new")) || updated.UserId != 7 || updated.Size != 3 || updated.Type != "text/plain" || updated.StorageStatus != StorageStatusPending {
+		t.Fatalf("content update changed metadata: %+v", updated)
+	}
+	if err := UpdateFileContent(ctx, "missing.txt", []byte("missing")); err == nil {
+		t.Fatal("missing file update succeeded")
+	}
+	other, err := GetFileByNameContext(ctx, "unchanged.txt")
+	if err != nil || !bytes.Equal(other.Data, []byte("keep")) {
+		t.Fatalf("other file changed: %+v, %v", other, err)
+	}
+}
 
 func setupFileDataTestDB(t *testing.T) {
 	t.Helper()

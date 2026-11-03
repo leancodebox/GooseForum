@@ -10,8 +10,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@gooseforum/ui/compone
 import { Spinner } from '@gooseforum/ui/components/spinner'
 import { Save, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
+import type { ContentSettingsTextKey } from '../content-settings-i18n'
 
-export function TrustSettingsPage({ api, locale }: { api: GooseAdminApi; locale: string }) {
+export function TrustSettingsPage({ api, locale, text }: { api: GooseAdminApi; locale: string; text: (key: ContentSettingsTextKey) => string }) {
   const zh = locale.startsWith('zh')
   const [form, setForm] = useState<TrustConfig>()
   const [error, setError] = useState('')
@@ -32,6 +33,7 @@ export function TrustSettingsPage({ api, locale }: { api: GooseAdminApi; locale:
       const labels: Record<TrustLimitField, string> = {
         allowProfileCover: zh ? '个人背景权限' : 'profile background permission',
         allowImageUpload: zh ? '图片上传权限' : 'image upload permission',
+        allowAttachmentUpload: text('attachmentUploadPermission'),
         maxDailyTopics: zh ? '每日新建主题数' : 'daily topics',
         maxDailyReplies: zh ? '每日新建回复数' : 'daily replies',
         maxDailyUploads: zh ? '每日上传次数' : 'daily uploads',
@@ -71,6 +73,7 @@ export function TrustSettingsPage({ api, locale }: { api: GooseAdminApi; locale:
           <TabsContent value="limits" className="space-y-5">
             {form.levelLimits.map((limit, index) => <section key={limit.level} className="space-y-3 border-t pt-4"><h3 className="text-sm font-semibold">{trustLevelName(limit.level, locale)}</h3>
               <div className="flex flex-wrap items-center gap-x-8 gap-y-3"><Field orientation="horizontal" className="w-fit gap-3 [&>[data-slot=field-label]]:flex-none"><FieldLabel htmlFor={`trust-upload-${limit.level}`}>{zh ? '允许上传图片' : 'Allow image uploads'}</FieldLabel><Switch id={`trust-upload-${limit.level}`} checked={limit.allowImageUpload} onCheckedChange={value => updateLimit(index, { allowImageUpload: value })} /></Field>
+              <Field orientation="horizontal" className="w-fit gap-3 [&>[data-slot=field-label]]:flex-none"><FieldLabel htmlFor={`trust-attachment-${limit.level}`}>{text('attachmentUploadPermission')}</FieldLabel><Switch id={`trust-attachment-${limit.level}`} checked={limit.allowAttachmentUpload ?? false} onCheckedChange={value => updateLimit(index, { allowAttachmentUpload: value })} /></Field>
               <Field orientation="horizontal" className="w-fit gap-3 [&>[data-slot=field-label]]:flex-none"><FieldLabel htmlFor={`trust-cover-${limit.level}`}>{zh ? '允许设置个人背景' : 'Allow profile backgrounds'}</FieldLabel><Switch id={`trust-cover-${limit.level}`} checked={limit.allowProfileCover ?? false} onCheckedChange={value => updateLimit(index, { allowProfileCover: value })} /></Field></div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{([
                 ['maxDailyTopics', zh ? '每日新建主题数（含草稿）' : 'Daily new topics (including drafts)'],

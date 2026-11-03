@@ -26,9 +26,13 @@ func (databaseStore) Put(ctx context.Context, request WriteRequest) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	data, err := io.ReadAll(io.LimitReader(request.Body, request.Size+1))
-	if err != nil {
-		return err
+	data := request.Data
+	if data == nil {
+		var err error
+		data, err = io.ReadAll(io.LimitReader(request.Body, request.Size+1))
+		if err != nil {
+			return err
+		}
 	}
 	if int64(len(data)) != request.Size {
 		return fmt.Errorf("file storage size mismatch: got %d, want %d", len(data), request.Size)

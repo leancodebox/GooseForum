@@ -4,6 +4,11 @@ import en from "./en-server-messages.js";
 import mfa from './it-mfa.js';
 export default {
   ...en,
+  "attachment.invalidFile": "Tipo di file non supportato o nome/contenuto non valido.",
+  "attachment.tooLarge": "Il file è vuoto o supera il limite di dimensione.",
+  "attachment.invalidReference": "Un allegato non è disponibile. Rimuovilo e caricalo di nuovo.",
+  "attachment.limit": "Troppi allegati.",
+  "attachment.conflict": "Il contenuto è cambiato. Ricarica prima di modificarlo.",
   "trust.contentLimit": "Il limite di {kind} per messaggio è {limit}.",
   "trust.adjustmentFailed": "Modifica del livello non riuscita: {error}",
   "trust.dailyReplies": "Il tuo livello consente fino a {limit} nuove risposte al giorno.",

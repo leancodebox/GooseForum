@@ -1,10 +1,11 @@
 export default {
   attachmentSettings: "File attachments",
   attachmentEnabled: "Allow file attachments",
-  attachmentLevel: "Minimum level (0, 100, 200, 1000)",
+  attachmentUploadPermission: "Allow attachment uploads",
   attachmentSize: "Maximum file size (KiB)",
   attachmentCount: "Maximum files per post",
-  attachmentTypes: "Allowed types: .pdf, .txt, .zip (comma separated)",
+  attachmentTypes: "Allowed file types",
+  attachmentTypesInvalid: "Enter each type separately: .pdf, .txt or .zip; duplicates are not allowed.",
   attachmentStorage: "Files are stored privately in the database, including on sites using S3 for images.",
 
   announcementEditorVisual: "Visual",

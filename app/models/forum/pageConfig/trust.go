@@ -27,6 +27,7 @@ type TrustLimits struct {
 	Level                   trustlevel.Level `json:"level"`
 	AllowProfileCover       bool             `json:"allowProfileCover"`
 	AllowImageUpload        bool             `json:"allowImageUpload"`
+	AllowAttachmentUpload   bool             `json:"allowAttachmentUpload"`
 	MaxImagesPerPost        *int             `json:"maxImagesPerPost"`
 	MaxExternalLinksPerPost *int             `json:"maxExternalLinksPerPost"`
 	MaxMentionsPerPost      *int             `json:"maxMentionsPerPost"`
@@ -51,7 +52,7 @@ type TrustConfig struct {
 func DefaultTrustSettings() TrustConfig {
 	c := TrustConfig{SchemaVersion: 3, RegistrationCooldown: RegistrationCooldown{MinUploadAccountAgeMinutes: 1440}, PromotionRules: []PromotionRule{{trustlevel.Member, true, 24, 2, 5}, {trustlevel.Regular, true, 336, 7, 20}}}
 	for _, d := range trustlevel.Definitions() {
-		l := TrustLimits{Level: d.Level, AllowProfileCover: d.Level >= trustlevel.Member, AllowImageUpload: true, MaxDailyTopics: new(10), MaxDailyUploads: new(10)}
+		l := TrustLimits{Level: d.Level, AllowProfileCover: d.Level >= trustlevel.Member, AllowImageUpload: true, AllowAttachmentUpload: d.Level >= trustlevel.Member, MaxDailyTopics: new(10), MaxDailyUploads: new(10)}
 		if d.Level == trustlevel.Newcomer {
 			l.MaxDailyTopics = new(3)
 			l.MaxDailyReplies = new(10)
@@ -138,6 +139,9 @@ func (c TrustConfig) ValidateLimitOrder() *TrustLimitOrderError {
 		if lower.AllowImageUpload && !higher.AllowImageUpload {
 			return &TrustLimitOrderError{"allowImageUpload", lower.Level, higher.Level}
 		}
+		if lower.AllowAttachmentUpload && !higher.AllowAttachmentUpload {
+			return &TrustLimitOrderError{"allowAttachmentUpload", lower.Level, higher.Level}
+		}
 		for _, pair := range []struct {
 			field         string
 			lower, higher *int
@@ -212,6 +216,13 @@ func DecodeTrustSettings(raw []byte) (TrustConfig, error) {
 				return TrustConfig{}, err
 			}
 			limit["allowProfileCover"], _ = json.Marshal(level >= trustlevel.Member)
+		}
+		if _, ok := limit["allowAttachmentUpload"]; !ok {
+			var level trustlevel.Level
+			if err := json.Unmarshal(limit["level"], &level); err != nil {
+				return TrustConfig{}, err
+			}
+			limit["allowAttachmentUpload"], _ = json.Marshal(level >= trustlevel.Member)
 		}
 	}
 	root["levelLimits"], _ = json.Marshal(limits)

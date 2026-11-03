@@ -45,7 +45,7 @@ func fail(code string) error {
 }
 
 func ValidateConfig(c pageConfig.AttachmentSettings) error {
-	if !slices.Contains([]int{0, 100, 200, 1000}, c.MinTrustLevel) || c.MaxFileSizeKb < 1 || c.MaxFileSizeKb > HardMaxSize/1024 || c.MaxFilesPerPost < 1 || c.MaxFilesPerPost > 20 {
+	if c.MaxFileSizeKb < 1 || c.MaxFileSizeKb > HardMaxSize/1024 || c.MaxFilesPerPost < 1 || c.MaxFilesPerPost > 20 {
 		return fail("common.request.invalidParams")
 	}
 	seen := map[string]bool{}
@@ -59,18 +59,23 @@ func ValidateConfig(c pageConfig.AttachmentSettings) error {
 }
 
 func Policy(userID uint64) (pageConfig.AttachmentSettings, error) {
+	c, _, err := resolvePolicy(userID)
+	return c, err
+}
+
+func resolvePolicy(userID uint64) (pageConfig.AttachmentSettings, trustlevelservice.UserPolicy, error) {
 	c := hotdataserve.GetPostingSettingsConfigCache().Attachments
 	if err := ValidateConfig(c); err != nil {
-		return c, err
+		return c, trustlevelservice.UserPolicy{}, err
 	}
 	p, err := trustlevelservice.ResolvePolicy(userID)
 	if err != nil {
-		return c, err
+		return c, p, err
 	}
-	if !c.Enabled || int(p.Account.TrustLevel) < c.MinTrustLevel {
-		return c, fail("permission.denied")
+	if !c.Enabled || !p.Limits.AllowAttachmentUpload {
+		return c, p, fail("permission.denied")
 	}
-	return c, nil
+	return c, p, nil
 }
 
 func ValidateFile(name string, data []byte, c pageConfig.AttachmentSettings) error {
@@ -100,17 +105,34 @@ func ValidateFile(name string, data []byte, c pageConfig.AttachmentSettings) err
 }
 
 func Upload(ctx context.Context, userID uint64, name string, body io.Reader) (attachments.Info, error) {
-	c, err := Policy(userID)
+	uploader, err := NewUploader(userID)
 	if err != nil {
 		return attachments.Info{}, err
 	}
-	p, err := trustlevelservice.ResolvePolicy(userID)
+	return uploader.Upload(ctx, name, body)
+}
+
+// Uploader carries one request's checked policy through multipart parsing and storage.
+type Uploader struct {
+	userID uint64
+	config pageConfig.AttachmentSettings
+}
+
+func NewUploader(userID uint64) (*Uploader, error) {
+	c, p, err := resolvePolicy(userID)
 	if err != nil {
-		return attachments.Info{}, err
+		return nil, err
 	}
 	if err = p.ValidateAttachmentUpload(1); err != nil {
-		return attachments.Info{}, err
+		return nil, err
 	}
+	return &Uploader{userID: userID, config: c}, nil
+}
+
+func (u *Uploader) MaxFileSize() int64 { return int64(u.config.MaxFileSizeKb) * 1024 }
+
+func (u *Uploader) Upload(ctx context.Context, name string, body io.Reader) (attachments.Info, error) {
+	c, userID := u.config, u.userID
 	data, err := io.ReadAll(io.LimitReader(body, int64(c.MaxFileSizeKb)*1024+1))
 	if err != nil {
 		return attachments.Info{}, err
@@ -119,7 +141,7 @@ func Upload(ctx context.Context, userID uint64, name string, body io.Reader) (at
 		return attachments.Info{}, err
 	}
 	objectName := ObjectPrefix + uuid.NewString()
-	_, err = store().Put(ctx, filestorage.PutRequest{Name: objectName, ContentType: "application/octet-stream", Size: int64(len(data)), UserId: userID, Body: bytes.NewReader(data)})
+	_, err = store().Put(ctx, filestorage.PutRequest{Name: objectName, ContentType: "application/octet-stream", Size: int64(len(data)), UserId: userID, Data: data})
 	if err != nil {
 		return attachments.Info{}, err
 	}

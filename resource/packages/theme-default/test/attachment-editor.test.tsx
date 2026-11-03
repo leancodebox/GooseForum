@@ -11,7 +11,7 @@ afterEach(cleanup);
 const attachment = { id: 9, filename: "notes.txt", size: 42, url: "/file/attachments/9" };
 function show({ enabled = true, files = [] as AttachmentInfo[], upload = vi.fn().mockResolvedValue(attachment) } = {}) {
   const runtime = {
-    api: { attachments: { policy: vi.fn().mockResolvedValue({ enabled, maxFilesPerPost: 5, maxFileSizeKb: 5120, extensions: [".txt"], minTrustLevel: 100 }), upload } } as unknown as GooseSiteApi,
+    api: { attachments: { policy: vi.fn().mockResolvedValue({ enabled, maxFilesPerPost: 5, maxFileSizeKb: 5120, extensions: [".txt"] }), upload } } as unknown as GooseSiteApi,
     currentUrl: "/publish", locale: "en", theme: "gf-light", isNavigating: false,
     navigate: vi.fn(), redirect: vi.fn(), refresh: vi.fn(), queueFlash: vi.fn(), setLocale: vi.fn(), toggleTheme: vi.fn(),
   } satisfies GooseRuntime;

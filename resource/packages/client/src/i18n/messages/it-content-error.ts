@@ -4,5 +4,4 @@ export default {
   ...en,
   notFoundTitle: "Pagina non trovata",
   back: "Indietro",
-  home: "Home",
 } as const;

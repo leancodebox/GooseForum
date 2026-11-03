@@ -14,6 +14,11 @@ export function parseTranslationKeys(source) {
   return collectMatches(source, /^\s*"([^"]+)"\s*:/gm);
 }
 
+export function inheritedTranslationKeys(englishKeys, ownKeys) {
+  const overrides = new Set(ownKeys);
+  return [...englishKeys.filter(key => !overrides.has(key)), ...ownKeys];
+}
+
 export function validateServerMessages(backendCodes, translations) {
   const errors = [];
   const expected = new Set(backendCodes);
@@ -70,7 +75,7 @@ async function main() {
       return [
         locale,
         locale !== "en" && sources[locale].includes("...en,")
-          ? [...new Set([...englishKeys, ...keys])]
+          ? inheritedTranslationKeys(englishKeys, keys)
           : keys,
       ];
     }),

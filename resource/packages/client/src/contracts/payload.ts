@@ -1,5 +1,5 @@
 export interface AttachmentInfo { id: number; filename: string; size: number; url: string }
-export interface AttachmentPolicy { enabled: boolean; minTrustLevel: number; maxFileSizeKb: number; maxFilesPerPost: number; extensions: string[] }
+export interface AttachmentPolicy { enabled: boolean; maxFileSizeKb: number; maxFilesPerPost: number; extensions: string[] }
 export interface PagePayload<TProps = unknown, TComponent extends string = string> {
   component: TComponent
   props: TProps

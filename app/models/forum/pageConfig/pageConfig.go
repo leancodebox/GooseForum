@@ -219,7 +219,6 @@ type OIDCProviderConfig struct {
 
 type AttachmentSettings struct {
 	Enabled         bool     `json:"enabled"`
-	MinTrustLevel   int      `json:"minTrustLevel"`
 	MaxFileSizeKb   int      `json:"maxFileSizeKb"`
 	MaxFilesPerPost int      `json:"maxFilesPerPost"`
 	Extensions      []string `json:"extensions"`

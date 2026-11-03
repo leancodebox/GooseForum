@@ -2,6 +2,14 @@
 import en from "./en-content-settings";
 export default {
   ...en,
+  attachmentSettings: "ファイル添付",
+  attachmentEnabled: "ファイル添付を許可",
+  attachmentUploadPermission: "添付ファイルのアップロードを許可",
+  attachmentSize: "ファイルごとの上限（KiB）",
+  attachmentCount: "投稿ごとの添付数の上限",
+  attachmentStorage: "画像に S3 を使用する場合も、添付ファイルはデータベースに非公開で保存されます。",
+  attachmentTypes: "許可するファイル形式",
+  attachmentTypesInvalid: "各欄に .pdf、.txt、.zip のいずれかを重複せず入力してください。",
   announcementEditorVisual: "ビジュアル",
   announcementEditorVisualPlaceholder: "お知らせを直接編集",
   announcementList: "お知らせ一覧",

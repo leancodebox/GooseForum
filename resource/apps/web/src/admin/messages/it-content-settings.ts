@@ -2,6 +2,14 @@
 import en from "./en-content-settings";
 export default {
   ...en,
+  attachmentSettings: "Allegati",
+  attachmentEnabled: "Consenti allegati",
+  attachmentUploadPermission: "Consenti il caricamento degli allegati",
+  attachmentSize: "Dimensione massima per file (KiB)",
+  attachmentCount: "Numero massimo di file per post",
+  attachmentStorage: "I file sono archiviati privatamente nel database, anche quando le immagini usano S3.",
+  attachmentTypes: "Tipi di file consentiti",
+  attachmentTypesInvalid: "Inserisci un tipo per campo: .pdf, .txt o .zip, senza duplicati.",
   announcementEditorVisual: "Visuale",
   announcementEditorVisualPlaceholder: "Modifica direttamente l’annuncio",
   announcementList: "Annunci",

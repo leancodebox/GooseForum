@@ -19,7 +19,7 @@ test("reply attachments retry, submit and render on desktop and mobile", async (
   const payload = structuredClone(topicPage);
   payload.props.postStream.hasAfter = false;
   await page.route("**/__goose_page/**", route => route.fulfill({ json: payload }));
-  await page.route("**/file/attachments/policy", route => route.fulfill({ json: { code: 0, result: { enabled: true, minTrustLevel: 100, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt", ".pdf", ".zip"] } } }));
+  await page.route("**/file/attachments/policy", route => route.fulfill({ json: { code: 0, result: { enabled: true, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt", ".pdf", ".zip"] } } }));
   let uploads = 0;
   const file = { id: 401, filename: "notes.txt", size: 12, url: "/file/attachments/401" };
   await page.route("**/file/attachments", async route => {
@@ -58,7 +58,7 @@ test("keeps newer reply text without resubmitting attachments already bound to t
   payload.props.postStream.hasAfter = false;
   const file = { id: 401, filename: "notes.txt", size: 12, url: "/file/attachments/401" };
   await page.route("**/__goose_page/**", route => route.fulfill({ json: payload }));
-  await page.route("**/file/attachments/policy", route => route.fulfill({ json: { code: 0, result: { enabled: true, minTrustLevel: 100, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt"] } } }));
+  await page.route("**/file/attachments/policy", route => route.fulfill({ json: { code: 0, result: { enabled: true, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt"] } } }));
   await page.route("**/file/attachments", route => route.fulfill({ json: { code: 0, result: file } }));
   let release!: () => void;
   const pending = new Promise<void>(resolve => { release = resolve; });

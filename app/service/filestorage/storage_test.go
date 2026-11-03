@@ -257,6 +257,8 @@ func TestServiceRejectsInvalidConfigurationAndPut(t *testing.T) {
 		{Name: "x", Size: 1, Body: bytes.NewReader([]byte("x"))},
 		{Name: "x", ContentType: "image/webp", Size: -1, Body: bytes.NewReader([]byte("x"))},
 		{Name: "x", ContentType: "image/webp", Size: 1},
+		{Name: "x", ContentType: "image/webp", Size: 1, Data: []byte("wrong-size")},
+		{Name: "x", ContentType: "image/webp", Size: 1, Data: []byte("x"), Body: bytes.NewReader([]byte("x"))},
 	}
 	for _, request := range tests {
 		if _, err := service.Put(context.Background(), request); err == nil {
@@ -275,5 +277,20 @@ func TestServiceRejectsInvalidConfigurationAndPut(t *testing.T) {
 	}
 	if _, err := newService(store, &fakeMetadataRepository{}, &fakeStore{driver: store.driver}); err == nil {
 		t.Fatal("duplicate driver configuration succeeded")
+	}
+}
+
+func TestBufferedPutStillSuppliesReaderToOtherStores(t *testing.T) {
+	store := &fakeStore{driver: "other"}
+	service, err := newService(store, &fakeMetadataRepository{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	data := []byte("buffered data")
+	if _, err := service.Put(context.Background(), PutRequest{Name: "buffered", ContentType: "text/plain", Size: int64(len(data)), Data: data}); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(store.putData, data) {
+		t.Fatalf("store received %q", store.putData)
 	}
 }

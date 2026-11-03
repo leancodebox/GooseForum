@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -18,7 +19,20 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/attachments"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 )
+
+type countedAttachmentBody struct {
+	io.Reader
+	read int
+}
+
+func (b *countedAttachmentBody) Read(p []byte) (int, error) {
+	n, err := b.Reader.Read(p)
+	b.read += n
+	return n, err
+}
+func (b *countedAttachmentBody) Close() error { return nil }
 
 func TestAttachmentHTTPDownloadHeadersAndRawRouteIsolation(t *testing.T) {
 	db := dbconnect.Connect()
@@ -42,6 +56,58 @@ func TestAttachmentHTTPDownloadHeadersAndRawRouteIsolation(t *testing.T) {
 	router.POST("/attachments", UploadAttachment)
 	router.GET("/attachments/:id", DownloadAttachment)
 	router.GET("/img/*filename", GetFileByFileName)
+	t.Run("rejects permission and cooldown before reading body", func(t *testing.T) {
+		for _, tc := range []struct {
+			level   trustlevel.Level
+			created time.Time
+			code    string
+		}{
+			{trustlevel.Newcomer, user.CreatedAt, "permission.denied"},
+			{trustlevel.Member, time.Now(), "upload.cooldown"},
+		} {
+			if err := db.Table("users").Where("id = ?", user.Id).Updates(map[string]any{"trust_level": tc.level, "created_at": tc.created}).Error; err != nil {
+				t.Fatal(err)
+			}
+			body := &countedAttachmentBody{Reader: bytes.NewBufferString("must not be read")}
+			req := httptest.NewRequest(http.MethodPost, "/attachments", body)
+			req.Header.Set("X-Test-Owner", "yes")
+			rec := httptest.NewRecorder()
+			router.ServeHTTP(rec, req)
+			if rec.Code < 400 || !bytes.Contains(rec.Body.Bytes(), []byte(tc.code)) || body.read != 0 {
+				t.Fatalf("preflight failed: status=%d read=%d body=%s", rec.Code, body.read, rec.Body.String())
+			}
+		}
+		if err := db.Table("users").Where("id = ?", user.Id).Updates(map[string]any{"trust_level": trustlevel.Member, "created_at": time.Now().Add(-72 * time.Hour)}).Error; err != nil {
+			t.Fatal(err)
+		}
+	})
+	t.Run("bounds streamed file reads by configured size", func(t *testing.T) {
+		maximum := hotdataserve.GetPostingSettingsConfigCache().Attachments.MaxFileSizeKb * 1024
+		var form bytes.Buffer
+		writer := multipart.NewWriter(&form)
+		part, err := writer.CreateFormFile("file", "large.txt")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := part.Write(bytes.Repeat([]byte("x"), maximum+128*1024)); err != nil {
+			t.Fatal(err)
+		}
+		if err := writer.Close(); err != nil {
+			t.Fatal(err)
+		}
+		body := &countedAttachmentBody{Reader: &form}
+		req := httptest.NewRequest(http.MethodPost, "/attachments", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("X-Test-Owner", "yes")
+		rec := httptest.NewRecorder()
+		router.ServeHTTP(rec, req)
+		if rec.Code != 400 || !bytes.Contains(rec.Body.Bytes(), []byte("attachment.tooLarge")) || body.read > maximum+64*1024 {
+			t.Fatalf("unbounded read: status=%d read=%d body=%s", rec.Code, body.read, rec.Body.String())
+		}
+		if req.MultipartForm != nil && (len(req.MultipartForm.File) != 0 || len(req.MultipartForm.Value) != 0) {
+			t.Fatal("streamed upload populated a buffered multipart form")
+		}
+	})
 	for _, filename := range []string{"../secret.txt", "folder/secret.txt", `folder\secret.txt`} {
 		t.Run(filename, func(t *testing.T) {
 			body := new(bytes.Buffer)

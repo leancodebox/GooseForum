@@ -1,6 +1,7 @@
 package filestorage
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -34,6 +35,8 @@ type PutRequest struct {
 	Size        int64
 	UserId      uint64
 	Body        io.Reader
+	// Data supplies an existing buffer instead of Body; keep it unchanged until Put returns.
+	Data []byte
 }
 
 type WriteRequest struct {
@@ -41,6 +44,7 @@ type WriteRequest struct {
 	ContentType string
 	Size        int64
 	Body        io.Reader
+	Data        []byte
 }
 
 type StoredObject struct {
@@ -117,6 +121,9 @@ func (service *Service) Put(ctx context.Context, request PutRequest) (*Metadata,
 	if err := validatePutRequest(request); err != nil {
 		return nil, err
 	}
+	if request.Data != nil {
+		request.Body = bytes.NewReader(request.Data)
+	}
 
 	metadata, err := service.repository.Create(ctx, Metadata{
 		Name:          request.Name,
@@ -128,7 +135,7 @@ func (service *Service) Put(ctx context.Context, request PutRequest) (*Metadata,
 	if err != nil {
 		return nil, err
 	}
-	writeRequest := WriteRequest{Name: request.Name, ContentType: request.ContentType, Size: request.Size, Body: request.Body}
+	writeRequest := WriteRequest{Name: request.Name, ContentType: request.ContentType, Size: request.Size, Body: request.Body, Data: request.Data}
 	if err := service.writeStore.Put(ctx, writeRequest); err != nil {
 		return nil, service.rollbackPut(ctx, request.Name, err)
 	}
@@ -143,7 +150,11 @@ func validatePutRequest(request PutRequest) error {
 	if err := validateMetadataRequest(request.Name, request.ContentType, request.Size); err != nil {
 		return err
 	}
-	if request.Body == nil {
+	if request.Data != nil {
+		if request.Body != nil || int64(len(request.Data)) != request.Size {
+			return errors.New("file storage requires either a body or size-matched data")
+		}
+	} else if request.Body == nil {
 		return errors.New("file storage body is required")
 	}
 	return nil

@@ -11,7 +11,6 @@ export default {
   callbackSiteHint: "サイト情報で設定されたサイト URL です。",
   callbackRouteHint: "GooseForum 固定の OAuth コールバックパスです。",
   callbackProviderHint: "現在のプロバイダーキーから生成されます。",
-  callbackProviderPlaceholder: "provider-key/callback",
   copyCallback: "完全なコールバック URL をコピー",
   callbackCopied: "コールバック URL をコピーしました",
   copyFailed: "コピーに失敗しました",

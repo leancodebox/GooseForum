@@ -1,6 +1,8 @@
 # 按需词典
 
 - C 端词典的源数据位于 client 的 `src/i18n/messages/`，后台词典位于 admin 的 `messages/`。英文继承由显式 import/spread 保留，不复制继承词条。
+- API 仅返回 `messageCode` 和参数，错误翻译归前端 `*-server-messages.ts`；Go 的 `app/bundles/i18n/locales/` 只保留服务端模板、邮件和元数据使用的词条。
+- `pnpm check:i18n` 检查四语种消息码覆盖、词典重复键、重复英文回退值及误放在 Go 词典中的 API 消息。`legacy-site-pages-*` 仍被按需加载器合并和 SDK 兼容导出使用，不能仅凭文件名删除。
 - SDK 的原有 `*Resources` 导出保留兼容用途。React 运行时代码不要静态导入整套资源；语言元数据使用 `@gooseforum/client/i18n/locale`。
 - 首屏和路由切换并行准备页面模块与所需词典，再显示目标页面。新增页面时同步更新 `goosePageNamespaces` 或 `adminPageNamespaces`。
 - C 端公共 namespace 常驻，其他 namespace 按页面准备；中文回退随对应 namespace 准备。语言切换先准备已使用的 namespace，再修改语言及 cookie。

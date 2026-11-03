@@ -57,6 +57,11 @@ func TestTrustLimitOrder(t *testing.T) {
 		}
 	}
 	c := DefaultTrustSettings()
+	c.LevelLimits[2].AllowAttachmentUpload = false
+	if issue := c.ValidateLimitOrder(); issue == nil || issue.Field != "allowAttachmentUpload" {
+		t.Fatalf("attachment permission reversal accepted: %+v", issue)
+	}
+	c = DefaultTrustSettings()
 	c.LevelLimits[0].AllowImageUpload = false
 	if issue := c.ValidateLimitOrder(); issue != nil {
 		t.Fatal("permission expansion rejected", issue)

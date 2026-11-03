@@ -89,7 +89,7 @@ function renderPage(page: AnyPagePayload, api: Partial<GooseSiteApi> = {}) {
   const setThemePreference = vi.fn();
   const navigate = vi.fn();
   const runtime: GooseRuntime = {
-    api: { attachments: { policy: vi.fn().mockResolvedValue({ enabled: true, minTrustLevel: 100, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt"] }) }, ...api } as GooseSiteApi,
+    api: { attachments: { policy: vi.fn().mockResolvedValue({ enabled: true, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt"] }) }, ...api } as GooseSiteApi,
     currentUrl: page.url,
     isNavigating: false,
     locale: "zh",

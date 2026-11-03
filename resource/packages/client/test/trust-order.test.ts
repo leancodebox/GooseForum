@@ -27,4 +27,13 @@ describe('trust limit order', () => {
     const config = limits(); config[0].allowImageUpload = false
     expect(trustLimitOrderIssue(config)).toBeUndefined()
   })
+  it.each([1, 2, 3])('rejects attachment permission removal at index %i', index => {
+    const config = limits().map(limit => ({ ...limit, allowAttachmentUpload: true }))
+    config[index].allowAttachmentUpload = false
+    expect(trustLimitOrderIssue(config)).toEqual({ field: 'allowAttachmentUpload', lowerLevel: trustLevels[index - 1], higherLevel: trustLevels[index] })
+  })
+  it('accepts attachment permission expansion', () => {
+    const config = limits().map((limit, index) => ({ ...limit, allowAttachmentUpload: index > 0 }))
+    expect(trustLimitOrderIssue(config)).toBeUndefined()
+  })
 })

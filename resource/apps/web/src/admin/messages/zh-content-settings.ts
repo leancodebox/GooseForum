@@ -1,10 +1,11 @@
 export default {
   attachmentSettings: "普通文件附件",
   attachmentEnabled: "允许上传普通附件",
-  attachmentLevel: "最低等级（0、100、200、1000）",
+  attachmentUploadPermission: "允许上传附件",
   attachmentSize: "单文件上限（KiB）",
   attachmentCount: "每篇内容附件数量上限",
-  attachmentTypes: "允许类型：.pdf、.txt、.zip（英文逗号分隔）",
+  attachmentTypes: "允许的附件类型",
+  attachmentTypesInvalid: "每项填写 .pdf、.txt 或 .zip，不可重复。",
   attachmentStorage: "附件私密存储于数据库，站点图片使用 S3 时也不受影响。",
 
   announcementEditorVisual: "可视化",

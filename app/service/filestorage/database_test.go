@@ -8,6 +8,7 @@ import (
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
+	"gorm.io/gorm"
 )
 
 func setupDatabaseStoreTest(t *testing.T) {
@@ -17,6 +18,44 @@ func setupDatabaseStoreTest(t *testing.T) {
 		t.Fatalf("migrate file data: %v", err)
 	}
 	conn.Where("1 = 1").Delete(&filedata.Entity{})
+}
+
+func TestDatabaseStoreReusesBufferedData(t *testing.T) {
+	setupDatabaseStoreTest(t)
+	conn := db.Connect()
+	data := []byte("already validated attachment")
+	reused := false
+	callback := "buffered-data-alias"
+	if err := conn.Callback().Update().Before("gorm:update").Register(callback, func(tx *gorm.DB) {
+		if values, ok := tx.Statement.Dest.(map[string]any); ok {
+			if content, ok := values["content"].([]byte); ok && len(content) > 0 {
+				reused = &content[0] == &data[0]
+			}
+		}
+	}); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { conn.Callback().Update().Remove(callback) })
+	service, err := New(NewDatabaseStore())
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = service.Put(context.Background(), PutRequest{Name: "buffered.txt", ContentType: "application/octet-stream", Size: int64(len(data)), UserId: 42, Data: data})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reused {
+		t.Fatal("database store copied the buffered content")
+	}
+	object, err := service.Open(context.Background(), "buffered.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer object.Body.Close()
+	stored, err := io.ReadAll(object.Body)
+	if err != nil || !bytes.Equal(stored, data) {
+		t.Fatalf("stored=%q error=%v", stored, err)
+	}
 }
 
 func TestDatabaseStoreRoundTrip(t *testing.T) {

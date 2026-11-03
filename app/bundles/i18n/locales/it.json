@@ -1,10 +1,4 @@
 {
-  "attachment.invalidFile": "Unsupported file type or invalid filename/content.",
-  "attachment.tooLarge": "The file is empty or exceeds the attachment size limit.",
-  "attachment.invalidReference": "An attachment is unavailable. Remove it and upload again.",
-  "attachment.limit": "Too many attachments.",
-  "attachment.conflict": "Content changed. Reload before editing again.",
-
   "search": "Cerca",
   "prevPage": "Precedente",
   "nextPage": "Successivo",
@@ -46,7 +40,6 @@
   "incomplete": "Non completato",
   "login_now": "Accedi ora",
   "contact_support": "Contatta l'assistenza",
-  "account_activation": "Attivazione account",
   "activationTitleSuccess": "Account attivato",
   "activationTitleFail": "Attivazione non riuscita",
   "activationDescSuccess": "Il tuo account è stato attivato. Ora puoi usare tutte le funzioni del forum, inclusi la pubblicazione, le risposte e il tuo profilo.",

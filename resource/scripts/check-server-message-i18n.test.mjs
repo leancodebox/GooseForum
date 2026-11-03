@@ -4,6 +4,7 @@ import {
   parseBackendMessageCodes,
   parseTranslationKeys,
   validateServerMessages,
+  inheritedTranslationKeys,
 } from "./check-server-message-i18n.mjs";
 
 test("extracts Go MessageCode constants and TypeScript dictionary keys", () => {
@@ -15,6 +16,12 @@ test("extracts Go MessageCode constants and TypeScript dictionary keys", () => {
     parseTranslationKeys('export default {\n  "auth.email.exists": "used",\n}'),
     ["auth.email.exists"],
   );
+});
+
+test("English fallback keeps local duplicate declarations visible to validation", () => {
+  const keys = inheritedTranslationKeys(["a", "b"], ["a", "a"]);
+  assert.deepEqual(validateServerMessages(["a", "b"], { ja: keys }), ["ja 存在重复 key: a"]);
+  assert.deepEqual(validateServerMessages(["a", "b"], { ja: inheritedTranslationKeys(["a", "b"], ["a"]) }), []);
 });
 
 test("reports missing, stale, and duplicate translations", () => {

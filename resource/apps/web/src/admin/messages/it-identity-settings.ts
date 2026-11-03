@@ -11,7 +11,6 @@ export default {
   callbackSiteHint: "Proviene dall'URL configurato nelle informazioni del sito.",
   callbackRouteHint: "Percorso di callback OAuth fisso di GooseForum.",
   callbackProviderHint: "Generato dalla chiave del provider corrente.",
-  callbackProviderPlaceholder: "provider-key/callback",
   copyCallback: "Copia l'URL di callback completo",
   callbackCopied: "URL di callback copiato",
   copyFailed: "Copia non riuscita",

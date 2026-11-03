@@ -1,10 +1,4 @@
 {
-  "attachment.invalidFile": "文件类型不支持，或文件名、内容不合法。",
-  "attachment.tooLarge": "文件为空或超过附件大小限制。",
-  "attachment.invalidReference": "附件已失效，请移除后重新上传。",
-  "attachment.limit": "附件数量超过限制。",
-  "attachment.conflict": "内容已被修改，请刷新后重新编辑。",
-
   "search": "搜索",
   "prevPage": "上一页",
   "nextPage": "下一页",
@@ -46,7 +40,6 @@
   "incomplete": "未完成",
   "login_now": "立即登录",
   "contact_support": "联系支持",
-  "account_activation": "账号激活",
   "activationTitleSuccess": "账号激活成功",
   "activationTitleFail": "账号激活失败",
   "activationDescSuccess": "您的账号已成功激活！现在您可以使用完整的论坛功能，包括发帖、回复、个人中心等服务。",

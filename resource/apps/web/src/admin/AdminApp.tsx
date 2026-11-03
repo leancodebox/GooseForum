@@ -262,7 +262,7 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
       : pathname === '/admin/settings/agent'
         ? <AgentSettingsPage api={api} text={systemSettingsText} />
       : pathname === '/admin/settings/trust'
-        ? <TrustSettingsPage api={api} locale={locale} />
+        ? <TrustSettingsPage api={api} locale={locale} text={contentSettingsText} />
       : pathname === '/admin/settings/announcement'
         ? <AnnouncementSettingsPage api={api} text={contentSettingsText} />
       : pathname === '/admin/settings/http-notify'

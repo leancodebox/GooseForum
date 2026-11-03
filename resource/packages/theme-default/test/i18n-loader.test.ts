@@ -4,6 +4,21 @@ beforeEach(() => {
   vi.resetModules();
 });
 describe("on-demand C translations", () => {
+  it.each(["zh", "en", "ja", "it"] as const)("loads attachment errors and publishing labels in %s", async locale => {
+    const loader = await import("@gooseforum/runtime/i18n/loader");
+    await loader.prepareGooseTranslations(locale, ["publish"]);
+    const resources = loader.cachedGooseResources()[locale];
+    expect(resources.serverMessages).toHaveProperty("attachment.invalidFile");
+    expect(resources.publish).toHaveProperty("attachmentUpload");
+    const expected = {
+      zh: { invalidFile: "文件类型不支持，或文件名、内容不合法。", upload: "上传附件" },
+      en: { invalidFile: "Unsupported file type or invalid filename/content.", upload: "Upload attachment" },
+      ja: { invalidFile: "未対応のファイル形式、または無効なファイル名・内容です。", upload: "ファイルを添付" },
+      it: { invalidFile: "Tipo di file non supportato o nome/contenuto non valido.", upload: "Carica allegato" },
+    }[locale];
+    expect(resources.serverMessages).toMatchObject({ "attachment.invalidFile": expected.invalidFile });
+    expect(resources.publish).toMatchObject({ attachmentUpload: expected.upload });
+  });
   it.each(["zh", "en", "ja", "it"] as const)("preserves moderation action dictionaries in %s", async (locale) => {
     const loader = await import("@gooseforum/runtime/i18n/loader");
     const { resourceLoaders } = await import("@gooseforum/runtime/i18n/resource-loaders");

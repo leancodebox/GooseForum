@@ -41,7 +41,27 @@ it("edits independent attachment limits without changing image settings", async 
   await user.type(limit, "3");
   await user.click(screen.getByRole("button", { name: "保存" }));
   await waitFor(() => expect(savePosting).toHaveBeenCalledWith(expect.objectContaining({
-    attachments: expect.objectContaining({ minTrustLevel: 100, maxFilesPerPost: 3, extensions: [".pdf", ".txt", ".zip"] }),
+    attachments: expect.objectContaining({ maxFilesPerPost: 3, extensions: [".pdf", ".txt", ".zip"] }),
     uploadControl: expect.objectContaining({ allowAttachments: false, maxAttachmentSizeKb: 123 }),
   })));
+});
+
+it("edits attachment types as separate inputs and normalizes them on save", async () => {
+  const savePosting = vi.fn().mockResolvedValue(undefined);
+  const api = { settings: { posting: vi.fn().mockResolvedValue({}), savePosting } } as unknown as GooseAdminApi;
+  const user = userEvent.setup();
+  render(<PostingSettingsPage api={api} text={key => messages[key]} />);
+  const section = screen.getByText("普通文件附件").closest("fieldset")!;
+  const input = within(section).getByRole("textbox", { name: "允许的附件类型 1" });
+  await waitFor(() => expect(input.hasAttribute("disabled")).toBe(false));
+  await user.clear(input);
+  await user.type(input, " .PDF ");
+  await user.click(within(section).getByRole("button", { name: "删除 .zip" }));
+  await user.click(within(section).getByRole("button", { name: "添加" }));
+  await user.type(within(section).getByRole("textbox", { name: "允许的附件类型 3" }), ".zip");
+  await user.click(screen.getByRole("button", { name: "保存" }));
+  await waitFor(() => expect(savePosting).toHaveBeenCalledWith(expect.objectContaining({
+    attachments: expect.objectContaining({ extensions: [".pdf", ".txt", ".zip"] }),
+  })));
+  expect(within(section).queryByRole("spinbutton", { name: /最低等级/ })).toBeNull();
 });

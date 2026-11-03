@@ -144,7 +144,7 @@ func CreateFileMetadata(ctx context.Context, userId uint64, name string, fileTyp
 }
 
 func UpdateFileContent(ctx context.Context, name string, data []byte) error {
-	result := builder().WithContext(ctx).Where(queryopt.Eq(fieldName, name)).UpdateColumn("content", data)
+	result := builder().Model(&Entity{}).WithContext(ctx).Where(queryopt.Eq(fieldName, name)).UpdateColumn("content", data)
 	if result.Error != nil {
 		return result.Error
 	}

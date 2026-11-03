@@ -4,7 +4,7 @@
 // resource/packages/client/src/i18n; this package covers only what the Go side renders.
 //
 // Supported locales mirror the frontend (resource/packages/client/src/i18n/locale.ts):
-// zh (source / fallback), en and ja.
+// zh (source / fallback), en, ja and it.
 package i18n
 
 import (

@@ -3,6 +3,7 @@ package attachmentservice
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 	"testing"
 	"time"
@@ -17,6 +18,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"gorm.io/gorm"
 )
@@ -83,13 +85,62 @@ func TestUploadBindingVisibilityAndLegacyEdits(t *testing.T) {
 	accesscontrol.Default = accesscontrol.NewResolver(accessStore{}, func(id uint64) bool { return id == 99 }, nil)
 	t.Cleanup(func() { accesscontrol.Default = old })
 	ctx := context.Background()
+	previous := pageConfig.GetByPageType(pageConfig.TrustSettings)
+	config := pageConfig.DefaultTrustSettings()
+	config.LevelLimits[1].AllowAttachmentUpload = false
+	raw, _ := json.Marshal(config)
+	if err := pageConfig.SaveConfig(pageConfig.TrustSettings, string(raw)); err != nil {
+		t.Fatal(err)
+	}
+	hotdataserve.ClearTrustSettingsCache()
+	t.Cleanup(func() {
+		if previous.Id != 0 {
+			_ = pageConfig.SaveConfig(pageConfig.TrustSettings, previous.Config)
+		} else {
+			db.Where("page_type = ?", pageConfig.TrustSettings).Delete(&pageConfig.Entity{})
+		}
+		hotdataserve.ClearTrustSettingsCache()
+	})
+	if _, err := Policy(11); err == nil {
+		t.Fatal("disabled member attachment permission ignored")
+	}
+	config.LevelLimits[1].AllowAttachmentUpload = true
+	config.LevelLimits[0].AllowAttachmentUpload = true
+	raw, _ = json.Marshal(config)
+	if err := pageConfig.SaveConfig(pageConfig.TrustSettings, string(raw)); err != nil {
+		t.Fatal(err)
+	}
+	hotdataserve.ClearTrustSettingsCache()
+	if _, err := Policy(12); err != nil {
+		t.Fatalf("enabled newcomer permission ignored: %v", err)
+	}
+	config.LevelLimits[0].AllowAttachmentUpload = false
+	raw, _ = json.Marshal(config)
+	if err := pageConfig.SaveConfig(pageConfig.TrustSettings, string(raw)); err != nil {
+		t.Fatal(err)
+	}
+	hotdataserve.ClearTrustSettingsCache()
 	if _, err := Upload(ctx, 12, "no.txt", bytes.NewBufferString("no")); err == nil {
 		t.Fatal("newcomer uploaded")
 	}
+	accountReads := 0
+	callback := "attachment-policy-query-budget"
+	if err := db.Callback().Query().Before("gorm:query").Register(callback, func(tx *gorm.DB) {
+		if tx.Statement.Table == "users" {
+			accountReads++
+		}
+	}); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { db.Callback().Query().Remove(callback) })
 	f, err := Upload(ctx, 11, "hello.txt", bytes.NewBufferString("hello world"))
 	if err != nil {
 		t.Fatal(err)
 	}
+	if accountReads != 1 {
+		t.Fatalf("account reads=%d, want 1", accountReads)
+	}
+	db.Callback().Query().Remove(callback)
 	e, err := attachments.Get(f.ID)
 	if err != nil {
 		t.Fatal(err)

@@ -28,7 +28,7 @@ func TestAttachmentSettingsMigrationPreservesImagePolicy(t *testing.T) {
 	if err := json.Unmarshal([]byte(row.Config), &c); err != nil {
 		t.Fatal(err)
 	}
-	if c.UploadControl.AllowAttachments || c.UploadControl.MaxAttachmentSizeKb != 123 || !c.Attachments.Enabled || c.Attachments.MinTrustLevel != 100 {
+	if c.UploadControl.AllowAttachments || c.UploadControl.MaxAttachmentSizeKb != 123 || !c.Attachments.Enabled {
 		t.Fatalf("bad migration: %+v", c)
 	}
 	before := row.Config

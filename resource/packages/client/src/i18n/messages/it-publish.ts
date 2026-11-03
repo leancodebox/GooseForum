@@ -2,6 +2,14 @@
 import en from "./en-publish.js";
 export default {
   ...en,
+  attachmentsTitle: "Allegati",
+  attachmentUpload: "Carica allegato",
+  attachmentUploading: "Caricamento allegato…",
+  attachmentRetry: "Riprova caricamento",
+  attachmentRemove: "Rimuovi",
+  attachmentLimits: "Fino a {count} file, {size} KiB ciascuno. Tipi: {types}",
+  attachmentUnavailable: "Il caricamento degli allegati non è disponibile per questo account.",
+  attachmentFailed: "Caricamento non riuscito. Riprova o rimuovi il file prima di inviare.",
   localDraft: {
     "saving": "Salvataggio copia locale…",
     "saved": "Copia locale salvata",

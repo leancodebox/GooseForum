@@ -17,7 +17,7 @@ import { FileText, Plus, Save, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import type { ContentSettingsTextKey } from "../content-settings-i18n";
 type Text = (k: ContentSettingsTextKey) => string;
-const attachmentDefaults = { enabled: true, minTrustLevel: 100, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".pdf", ".txt", ".zip"] };
+const attachmentDefaults = { enabled: true, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".pdf", ".txt", ".zip"] };
 const defaults: PostingSettings = {
   attachments: attachmentDefaults,
   externalLinks: { enabled: false, whitelist: [] },
@@ -106,9 +106,14 @@ export function PostingSettingsPage({
     setExtension("");
   }
   async function save() {
+    const extensions = (form.attachments?.extensions ?? []).map(value => value.trim().toLowerCase());
+    if (extensions.some(value => !attachmentDefaults.extensions.includes(value)) || new Set(extensions).size !== extensions.length) {
+      toast.warning(text("attachmentTypesInvalid"));
+      return;
+    }
     setSaving(true);
     try {
-      await api.settings.savePosting(form);
+      await api.settings.savePosting({ ...form, attachments: { ...attachmentDefaults, ...form.attachments, extensions } });
       toast.success(text("saved"));
     } catch (r) {
       toast.error(r instanceof Error ? r.message : text("saveFailed"));
@@ -301,14 +306,23 @@ export function PostingSettingsPage({
           </FieldGroup>
         </FieldSet>
       </div>
-                    <FieldSet>
+      <FieldSet>
         <FieldLegend>{text("attachmentSettings")}</FieldLegend>
         <FieldDescription>{text("attachmentStorage")}</FieldDescription>
         <Field orientation="horizontal"><FieldLabel>{text("attachmentEnabled")}</FieldLabel><Switch aria-label={text("attachmentEnabled")} checked={form.attachments?.enabled ?? false} disabled={loading || saving} onCheckedChange={(enabled) => setForm({ ...form, attachments: { ...attachmentDefaults, ...form.attachments, enabled } })} /></Field>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {(["minTrustLevel", "maxFileSizeKb", "maxFilesPerPost"] as const).map((key, index) => <N key={key} label={text((["attachmentLevel", "attachmentSize", "attachmentCount"] as const)[index])} value={(form.attachments || attachmentDefaults)[key]} disabled={loading || saving} onChange={(value) => setForm({ ...form, attachments: { ...attachmentDefaults, ...form.attachments, [key]: value } })} />)}
+        <div className="grid gap-4 sm:grid-cols-2">
+          {(["maxFileSizeKb", "maxFilesPerPost"] as const).map((key, index) => <N key={key} label={text((["attachmentSize", "attachmentCount"] as const)[index])} value={(form.attachments || attachmentDefaults)[key]} disabled={loading || saving} onChange={(value) => setForm({ ...form, attachments: { ...attachmentDefaults, ...form.attachments, [key]: value } })} />)}
         </div>
-        <Field><FieldLabel>{text("attachmentTypes")}</FieldLabel><Input aria-label={text("attachmentTypes")} disabled={loading || saving} value={(form.attachments?.extensions || []).join(", ")} onChange={(event) => setForm({ ...form, attachments: { ...attachmentDefaults, ...form.attachments, extensions: event.target.value.split(",").map((value) => value.trim().toLowerCase()).filter(Boolean) } })} /></Field>
+        <Field>
+          <FieldLabel>{text("attachmentTypes")}</FieldLabel>
+          <div className="space-y-2">
+            {(form.attachments?.extensions ?? []).map((value, index) => <div key={index} className="flex items-center gap-2">
+              <Input aria-label={`${text("attachmentTypes")} ${index + 1}`} value={value} disabled={loading || saving} onChange={event => setForm(current => ({ ...current, attachments: { ...attachmentDefaults, ...current.attachments, extensions: (current.attachments?.extensions ?? []).map((item, i) => i === index ? event.target.value : item) } }))} />
+              <Button type="button" variant="ghost" size="icon" aria-label={`${text("remove")} ${value || index + 1}`} title={text("remove")} disabled={loading || saving} onClick={() => setForm(current => ({ ...current, attachments: { ...attachmentDefaults, ...current.attachments, extensions: (current.attachments?.extensions ?? []).filter((_, i) => i !== index) } }))}><Trash2 /></Button>
+            </div>)}
+            <Button type="button" variant="outline" size="sm" disabled={loading || saving} onClick={() => setForm(current => ({ ...current, attachments: { ...attachmentDefaults, ...current.attachments, extensions: [...(current.attachments?.extensions ?? []), ""] } }))}><Plus />{text("add")}</Button>
+          </div>
+        </Field>
       </FieldSet>
 
       <footer className="flex justify-end border-t pt-4">

@@ -4,6 +4,11 @@ import en from "./en-server-messages.js";
 import mfa from './ja-mfa.js';
 export default {
   ...en,
+  "attachment.invalidFile": "未対応のファイル形式、または無効なファイル名・内容です。",
+  "attachment.tooLarge": "ファイルが空か、サイズ上限を超えています。",
+  "attachment.invalidReference": "利用できない添付ファイルがあります。削除して再アップロードしてください。",
+  "attachment.limit": "添付ファイル数が上限を超えています。",
+  "attachment.conflict": "内容が変更されました。再読み込みしてから編集してください。",
   "trust.contentLimit": "投稿の {kind} の上限は {limit} です。",
   "trust.adjustmentFailed": "レベル変更に失敗しました: {error}",
   "trust.dailyReplies": "このレベルでは1日 {limit} 件まで返信できます。",
@@ -14,9 +19,9 @@ export default {
   "page.notFound": "ページが存在しないか、削除されています。",
   "route.notFound":
     "ルートが見つかりません。URL とリクエストメソッドを確認してください。",
-  "admin.moderator.userRequired": "Please enter a moderator user.",
-  "admin.moderator.userNotFound": "Moderator user not found.",
-  "admin.moderator.notFound": "Moderator record not found.",
+  "admin.moderator.userRequired": "モデレーターのユーザーを指定してください。",
+  "admin.moderator.userNotFound": "モデレーターのユーザーが見つかりません。",
+  "admin.moderator.notFound": "モデレーターの登録が見つかりません。",
   "report.targetInvalid": "通報対象が存在しないか、通報できません。",
   "report.ownContent": "自分のコンテンツは通報できません。",
   "report.duplicate": "すでに通報済みで、処理待ちです。",

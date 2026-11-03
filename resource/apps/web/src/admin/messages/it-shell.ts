@@ -2,13 +2,11 @@
 import en from "./en-shell";
 export default {
   ...en,
-  oauthOidc: "OAuth / OIDC",
   oauthLogin: "Accesso OAuth",
   oidcProvider: "Provider OIDC",
   communityRules: "Regole della comunità",
   trust: "Livelli di fiducia",
   console: "Console amministrativa",
-  dashboard: "Dashboard",
   users: "Utenti",
   authLogs: "Log di accesso",
   roles: "Ruoli",
@@ -22,7 +20,6 @@ export default {
   loading: "Caricamento…",
   empty: "Nessuna categoria trovata",
   name: "Nome",
-  slug: "Slug",
   description: "Descrizione",
   sort: "Ordine",
   categorySortHint: "I valori più alti vengono mostrati prima; a parità di valore, le categorie sono ordinate per ID crescente.",
