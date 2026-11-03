@@ -92,6 +92,17 @@ test("keeps newer reply text without resubmitting attachments already bound to t
   expect(submissions[1]).toMatchObject({ content: "Newer reply text", attachmentIds: [] });
 });
 
+test("new topics hide the attachment upload input when permission is denied", async ({ page }) => {
+  await page.route("**/__goose_page/**", route => route.fulfill({ json: {
+    component: "publish.index", version: "1.0", url: "/publish?lang=en", meta: { title: "New topic" }, layout,
+    props: { topicId: 0, isEditing: false, categories: [{ id: 4, name: "Coding", color: "#8241d6", isRestricted: false, canCreate: true }], topic: { title: "", content: "", categoryIds: [], topicStatus: 1, sourceVersion: 1, attachments: [], version: 0 } },
+  } }));
+  await page.route("**/file/attachments/policy", route => route.fulfill({ status: 403, json: { code: 1, messageCode: "permission.denied" } }));
+  await page.goto("/publish?lang=en");
+  await expect(page.getByText("Attachment uploads are unavailable for this account.")).toBeVisible();
+  await expect(page.getByLabel("Upload attachment", { exact: true })).toHaveCount(0);
+});
+
 test("editing a topic removes attachments explicitly and preserves input on conflict", async ({ page }, testInfo) => {
   const file = { id: 401, filename: "original.txt", size: 12, url: "/file/attachments/401" };
   await page.route("**/__goose_page/**", route => route.fulfill({ json: {

@@ -8,13 +8,17 @@ describe("on-demand admin translations", () => {
   it.each(["zh", "en", "ja", "it"] as const)("prepares attachment permission labels on the trust route in %s", async locale => {
     const loader = await import("./translation-loader");
     await loader.prepareAdminTranslations(locale, loader.adminPageNamespaces("/admin/settings/trust"));
-    const dictionary = loader.getAdminDictionary<{ attachmentUploadPermission: string }>("content-settings", locale);
-    expect(dictionary.attachmentUploadPermission).toBe({
-      zh: "允许上传附件",
-      en: "Allow attachment uploads",
-      ja: "添付ファイルのアップロードを許可",
-      it: "Consenti il caricamento degli allegati",
+    const dictionary = loader.getAdminDictionary<Record<string, string>>("trust-settings", locale);
+    const english = await import("./messages/en-trust-settings");
+    expect(Object.keys(dictionary).sort()).toEqual(Object.keys(english.default).sort());
+    expect(dictionary.allowAttachmentUpload).toBe({
+      zh: "附件上传",
+      en: "Attachments",
+      ja: "ファイル添付",
+      it: "Allegati",
     }[locale]);
+    const { createTrustSettingsText } = await import("./trust-settings-i18n");
+    expect(createTrustSettingsText(locale)("orderInvalid", { higher: "H", lower: "L", field: "F" })).not.toMatch(/\{\w+\}/);
   });
   it("loads only shell and dashboard for the home page and keeps other locales unloaded", async () => {
     const loader = await import("./translation-loader");

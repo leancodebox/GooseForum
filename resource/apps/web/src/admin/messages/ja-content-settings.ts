@@ -4,7 +4,6 @@ export default {
   ...en,
   attachmentSettings: "ファイル添付",
   attachmentEnabled: "ファイル添付を許可",
-  attachmentUploadPermission: "添付ファイルのアップロードを許可",
   attachmentSize: "ファイルごとの上限（KiB）",
   attachmentCount: "投稿ごとの添付数の上限",
   attachmentStorage: "画像に S3 を使用する場合も、添付ファイルはデータベースに非公開で保存されます。",

@@ -2,6 +2,10 @@ export const translationLoaders: Record<
   string,
   () => Promise<{ default: unknown }>
 > = {
+  "en/trust-settings": () => import("./messages/en-trust-settings"),
+  "zh/trust-settings": () => import("./messages/zh-trust-settings"),
+  "ja/trust-settings": () => import("./messages/ja-trust-settings"),
+  "it/trust-settings": () => import("./messages/it-trust-settings"),
   "zh/shell": () => import("./messages/zh-shell"),
   "zh/access-groups": () => import("./messages/zh-access-groups"),
   "zh/roles": () => import("./messages/zh-roles"),

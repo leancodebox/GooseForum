@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { trustLevelName, type GooseAdminApi, type TrustConfig, type TrustLimits, type TrustLimitField } from '@gooseforum/client'
+import { trustLevelName, type GooseAdminApi, type TrustConfig, type TrustLimits } from '@gooseforum/client'
+import { trustQuotaFields } from '@gooseforum/client/trust-limits'
 import { trustLimitOrderIssue } from '@gooseforum/client/trust-validation'
 import { Button } from '@gooseforum/ui/components/button'
-import { Field, FieldLabel } from '@gooseforum/ui/components/field'
+import { Field, FieldLabel, FieldLegend, FieldSet } from '@gooseforum/ui/components/field'
 import { Input } from '@gooseforum/ui/components/input'
 import { Switch } from '@gooseforum/ui/components/switch'
 import { Checkbox } from '@gooseforum/ui/components/checkbox'
@@ -10,19 +11,19 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@gooseforum/ui/compone
 import { Spinner } from '@gooseforum/ui/components/spinner'
 import { Save, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
-import type { ContentSettingsTextKey } from '../content-settings-i18n'
+import type { TrustSettingsText } from '../trust-settings-i18n'
 
-export function TrustSettingsPage({ api, locale, text }: { api: GooseAdminApi; locale: string; text: (key: ContentSettingsTextKey) => string }) {
-  const zh = locale.startsWith('zh')
+export function TrustSettingsPage({ api, locale, text }: { api: GooseAdminApi; locale: string; text: TrustSettingsText }) {
   const [form, setForm] = useState<TrustConfig>()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [reload, setReload] = useState(0)
   const busy = useRef(false)
+  const finiteLimits = useRef(new Map<string, number>())
   useEffect(() => {
     let active = true
-    void api.trust.settings().then(value => { if (active) setForm(value) }).catch(reason => { if (active) setError(String(reason)) }).finally(() => { if (active) setLoading(false) })
+    void api.trust.settings().then(value => { if (active) { finiteLimits.current.clear(); setForm(value) } }).catch(reason => { if (active) setError(String(reason)) }).finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [api, reload])
   async function save(event: React.FormEvent) {
@@ -30,23 +31,12 @@ export function TrustSettingsPage({ api, locale, text }: { api: GooseAdminApi; l
     if (!form || busy.current) return
     const issue = trustLimitOrderIssue(form.levelLimits)
     if (issue) {
-      const labels: Record<TrustLimitField, string> = {
-        allowProfileCover: zh ? '个人背景权限' : 'profile background permission',
-        allowImageUpload: zh ? '图片上传权限' : 'image upload permission',
-        allowAttachmentUpload: text('attachmentUploadPermission'),
-        maxDailyTopics: zh ? '每日新建主题数' : 'daily topics',
-        maxDailyReplies: zh ? '每日新建回复数' : 'daily replies',
-        maxDailyUploads: zh ? '每日上传次数' : 'daily uploads',
-        maxImagesPerPost: zh ? '每篇图片数' : 'images per post',
-        maxExternalLinksPerPost: zh ? '每篇外链数' : 'external links per post',
-        maxMentionsPerPost: zh ? '每篇提及人数' : 'mentions per post',
-      }
       const lower = trustLevelName(issue.lowerLevel, locale), higher = trustLevelName(issue.higherLevel, locale)
-      setError(zh ? `${higher}的${labels[issue.field]}不能比${lower}更严格` : `${higher}: ${labels[issue.field]} cannot be stricter than ${lower}.`)
+      setError(text('orderInvalid', { higher, field: text(issue.field), lower }))
       return
     }
     busy.current = true; setSaving(true); setError('')
-    try { await api.trust.saveSettings(form); toast.success(zh ? '已保存' : 'Saved') }
+    try { await api.trust.saveSettings(form); toast.success(text('saved')) }
     catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)) }
     finally { busy.current = false; setSaving(false) }
   }
@@ -55,44 +45,55 @@ export function TrustSettingsPage({ api, locale, text }: { api: GooseAdminApi; l
   }
   return <main className="flex flex-1 flex-col gap-5 px-3 py-3 lg:px-4">
     <form onSubmit={event => void save(event)} className="w-full max-w-6xl space-y-5">
-      {error ? <div role="alert" className="flex flex-wrap items-center gap-2 text-sm text-destructive">{error}<Button type="button" size="sm" variant="outline" disabled={saving} onClick={() => { setLoading(true); setError(''); setReload(value => value + 1) }}><RefreshCw />{zh ? '重新加载' : 'Reload'}</Button></div> : null}
+      {error ? <div role="alert" className="flex flex-wrap items-center gap-2 text-sm text-destructive">{error}<Button type="button" size="sm" variant="outline" disabled={saving} onClick={() => { setLoading(true); setError(''); setReload(value => value + 1) }}><RefreshCw />{text('reload')}</Button></div> : null}
       {loading ? <Spinner /> : form ? <fieldset disabled={saving} className="min-w-0 space-y-5">
         <Tabs defaultValue="promotion">
-          <TabsList><TabsTrigger value="promotion">{zh ? '晋级条件' : 'Promotion'}</TabsTrigger><TabsTrigger value="limits">{zh ? '等级限制' : 'Limits'}</TabsTrigger><TabsTrigger value="cooldown">{zh ? '注册冷静期' : 'Registration cooldown'}</TabsTrigger></TabsList>
+          <TabsList><TabsTrigger value="promotion">{text('promotion')}</TabsTrigger><TabsTrigger value="limits">{text('limits')}</TabsTrigger><TabsTrigger value="cooldown">{text('cooldown')}</TabsTrigger></TabsList>
           <TabsContent value="promotion" className="space-y-5">
             {form.promotionRules.map((rule, index) => <section key={rule.level} className="space-y-3 border-t pt-4">
               <div className="flex items-center gap-3"><h3 className="text-sm font-semibold">{trustLevelName(rule.level, locale)}</h3><Switch aria-label={trustLevelName(rule.level, locale)} checked={rule.enabled} onCheckedChange={enabled => setForm({ ...form, promotionRules: form.promotionRules.map((r, i) => i === index ? { ...r, enabled } : r) })} /></div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{([
-                ['minAccountAgeHours', zh ? '注册时长（小时）' : 'Account age (hours)', 87600],
-                ['minVisitDays', zh ? '有效访问日（UTC）' : 'Visit days (UTC)', 36500],
-                ['minTopicsVisited', zh ? '不同主题数（最多 20）' : 'Distinct topics (max 20)', 20],
-              ] as const).map(([key, label, max]) => <Field key={key} className="min-w-0"><FieldLabel htmlFor={`trust-${rule.level}-${key}`}>{label}</FieldLabel><Input id={`trust-${rule.level}-${key}`} type="number" required min={0} max={max} step={1} value={rule[key]} onChange={event => setForm({ ...form, promotionRules: form.promotionRules.map((r, i) => i === index ? { ...r, [key]: Number(event.target.value) } : r) })} /></Field>)}</div>
+                ['minAccountAgeHours', 87600],
+                ['minVisitDays', 36500],
+                ['minTopicsVisited', 20],
+              ] as const).map(([key, max]) => <Field key={key} className="min-w-0"><FieldLabel htmlFor={`trust-${rule.level}-${key}`}>{text(key)}</FieldLabel><Input id={`trust-${rule.level}-${key}`} type="number" required min={0} max={max} step={1} value={rule[key]} onChange={event => setForm({ ...form, promotionRules: form.promotionRules.map((r, i) => i === index ? { ...r, [key]: Number(event.target.value) } : r) })} /></Field>)}</div>
             </section>)}
-            <div className="flex gap-3 border-t pt-4 text-sm"><span className="font-medium">{trustLevelName(1000, locale)}</span><span className="text-muted-foreground">{zh ? '管理员授予' : 'Granted by an administrator'}</span></div>
+            <div className="flex gap-3 border-t pt-4 text-sm"><span className="font-medium">{trustLevelName(1000, locale)}</span><span className="text-muted-foreground">{text('grantedByAdmin')}</span></div>
           </TabsContent>
           <TabsContent value="limits" className="space-y-5">
             {form.levelLimits.map((limit, index) => <section key={limit.level} className="space-y-3 border-t pt-4"><h3 className="text-sm font-semibold">{trustLevelName(limit.level, locale)}</h3>
-              <div className="flex flex-wrap items-center gap-x-8 gap-y-3"><Field orientation="horizontal" className="w-fit gap-3 [&>[data-slot=field-label]]:flex-none"><FieldLabel htmlFor={`trust-upload-${limit.level}`}>{zh ? '允许上传图片' : 'Allow image uploads'}</FieldLabel><Switch id={`trust-upload-${limit.level}`} checked={limit.allowImageUpload} onCheckedChange={value => updateLimit(index, { allowImageUpload: value })} /></Field>
-              <Field orientation="horizontal" className="w-fit gap-3 [&>[data-slot=field-label]]:flex-none"><FieldLabel htmlFor={`trust-attachment-${limit.level}`}>{text('attachmentUploadPermission')}</FieldLabel><Switch id={`trust-attachment-${limit.level}`} checked={limit.allowAttachmentUpload ?? false} onCheckedChange={value => updateLimit(index, { allowAttachmentUpload: value })} /></Field>
-              <Field orientation="horizontal" className="w-fit gap-3 [&>[data-slot=field-label]]:flex-none"><FieldLabel htmlFor={`trust-cover-${limit.level}`}>{zh ? '允许设置个人背景' : 'Allow profile backgrounds'}</FieldLabel><Switch id={`trust-cover-${limit.level}`} checked={limit.allowProfileCover ?? false} onCheckedChange={value => updateLimit(index, { allowProfileCover: value })} /></Field></div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{([
-                ['maxDailyTopics', zh ? '每日新建主题数（含草稿）' : 'Daily new topics (including drafts)'],
-                ['maxDailyReplies', zh ? '每日新建回复数' : 'Daily new replies'],
-                ['maxDailyUploads', zh ? '每日上传次数' : 'Daily uploads'],
-                ['maxImagesPerPost', zh ? '每篇图片数' : 'Images per post'],
-                ['maxExternalLinksPerPost', zh ? '每篇外链数' : 'External links per post'],
-                ['maxMentionsPerPost', zh ? '每篇提及人数' : 'Mentioned users per post'],
-              ] as const).map(([key, label]) => <div key={key} className="flex min-w-0 flex-col gap-2"><Field><FieldLabel htmlFor={`trust-${limit.level}-${key}`}>{label}</FieldLabel><Input id={`trust-${limit.level}-${key}`} type="number" required min={0} max={(key === 'maxDailyTopics' || key === 'maxDailyReplies' || key === 'maxDailyUploads') ? 100000 : 100} step={1} disabled={saving || limit[key] === null} value={limit[key] ?? ''} onChange={event => updateLimit(index, { [key]: Number(event.target.value) })} /></Field><label className="flex w-fit items-center gap-2 text-xs text-foreground/80"><Checkbox aria-label={`${label} ${zh ? '不限' : 'unlimited'}`} checked={limit[key] === null} onCheckedChange={value => updateLimit(index, { [key]: value === true ? null : 0 })} />{zh ? '不限' : 'Unlimited'}</label></div>)}</div>
+              <div className="flex flex-wrap items-center gap-x-8 gap-y-3"><Field orientation="horizontal" className="w-fit max-w-full gap-3 [&>[data-slot=field-label]]:flex-none"><FieldLabel htmlFor={`trust-upload-${limit.level}`}>{text('allowImageUpload')}</FieldLabel><Switch id={`trust-upload-${limit.level}`} checked={limit.allowImageUpload} onCheckedChange={value => updateLimit(index, { allowImageUpload: value })} /></Field>
+              <Field orientation="horizontal" className="w-fit max-w-full gap-3 [&>[data-slot=field-label]]:flex-none"><FieldLabel htmlFor={`trust-attachment-${limit.level}`}>{text('allowAttachmentUpload')}</FieldLabel><Switch id={`trust-attachment-${limit.level}`} checked={limit.allowAttachmentUpload ?? false} onCheckedChange={value => updateLimit(index, { allowAttachmentUpload: value })} /></Field>
+              <Field orientation="horizontal" className="w-fit max-w-full gap-3 [&>[data-slot=field-label]]:flex-none"><FieldLabel htmlFor={`trust-cover-${limit.level}`}>{text('allowProfileCover')}</FieldLabel><Switch id={`trust-cover-${limit.level}`} checked={limit.allowProfileCover ?? false} onCheckedChange={value => updateLimit(index, { allowProfileCover: value })} /></Field></div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{trustQuotaFields.map(key => <FieldSet key={key} className="min-w-0 gap-2" data-quota-field>
+                <FieldLegend id={`trust-${limit.level}-${key}-label`} title={key === 'maxDailyTopics' ? text('dailyTopicsHint') : undefined} variant="label" className="mb-2">{text(key)}</FieldLegend>
+                <div className="mt-auto grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+                  <Field className="min-w-0">
+                    <Input id={`trust-${limit.level}-${key}`} aria-labelledby={`trust-${limit.level}-${key}-label`} type="number" required min={0} max={(key === 'maxDailyTopics' || key === 'maxDailyReplies' || key === 'maxDailyUploads') ? 100000 : 100} step={1} placeholder={text('unlimited')} disabled={saving || limit[key] === null} value={limit[key] ?? ''} onChange={event => updateLimit(index, { [key]: Number(event.target.value) })} />
+                  </Field>
+                  <label className="flex size-8 shrink-0 cursor-pointer items-center justify-center" title={text('unlimited')}>
+                    <Checkbox aria-label={`${text(key)} ${text('unlimited')}`} disabled={saving} checked={limit[key] === null} onCheckedChange={checked => {
+                      const cacheKey = `${limit.level}:${key}`
+                      if (checked === true) {
+                        const value = limit[key]
+                        if (value !== null) finiteLimits.current.set(cacheKey, value)
+                        updateLimit(index, { [key]: null })
+                      } else updateLimit(index, { [key]: finiteLimits.current.get(cacheKey) ?? 0 })
+                    }} />
+                    <span className="sr-only">{text('unlimited')}</span>
+                  </label>
+                </div>
+              </FieldSet>)}</div>
             </section>)}
           </TabsContent>
           <TabsContent value="cooldown" className="border-t pt-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              {([['minPostAccountAgeMinutes', zh ? '发言冷静期（分钟）' : 'Posting cooldown (minutes)'], ['minUploadAccountAgeMinutes', zh ? '上传冷静期（分钟）' : 'Upload cooldown (minutes)']] as const).map(([key,label]) => <Field key={key}><FieldLabel htmlFor={`trust-${key}`}>{label}</FieldLabel><Input id={`trust-${key}`} type="number" min={0} max={5256000} step={1} required value={form.registrationCooldown[key]} onChange={event => setForm({...form,registrationCooldown:{...form.registrationCooldown,[key]:Number(event.target.value)}})} /></Field>)}
+              {(['minPostAccountAgeMinutes', 'minUploadAccountAgeMinutes'] as const).map(key => <Field key={key}><FieldLabel htmlFor={`trust-${key}`}>{text(key)}</FieldLabel><Input id={`trust-${key}`} type="number" min={0} max={5256000} step={1} required value={form.registrationCooldown[key]} onChange={event => setForm({...form,registrationCooldown:{...form.registrationCooldown,[key]:Number(event.target.value)}})} /></Field>)}
             </div>
           </TabsContent>
         </Tabs>
       </fieldset> : null}
-      <footer className="flex justify-end border-t pt-4"><Button type="submit" size="sm" disabled={!form || loading || saving}>{saving ? <Spinner /> : <Save />}{zh ? '保存' : 'Save'}</Button></footer>
+      <footer className="flex justify-end border-t pt-4"><Button type="submit" size="sm" disabled={!form || loading || saving}>{saving ? <Spinner /> : <Save />}{text('save')}</Button></footer>
     </form>
   </main>
 }

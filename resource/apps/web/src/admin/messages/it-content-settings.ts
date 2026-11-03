@@ -4,7 +4,6 @@ export default {
   ...en,
   attachmentSettings: "Allegati",
   attachmentEnabled: "Consenti allegati",
-  attachmentUploadPermission: "Consenti il caricamento degli allegati",
   attachmentSize: "Dimensione massima per file (KiB)",
   attachmentCount: "Numero massimo di file per post",
   attachmentStorage: "I file sono archiviati privatamente nel database, anche quando le immagini usano S3.",

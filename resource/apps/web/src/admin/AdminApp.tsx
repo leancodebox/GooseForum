@@ -19,6 +19,7 @@ import { createAuditText } from './audit-i18n'
 import { createSettingsText } from './settings-i18n'
 import { createSystemSettingsText } from './system-settings-i18n'
 import { createContentSettingsText } from './content-settings-i18n'
+import { createTrustSettingsText } from './trust-settings-i18n'
 import { createModerationSettingsText } from './moderation-settings-i18n'
 import { createIdentityText } from './identity-settings-i18n'
 import { createDashboardText } from './dashboard-i18n'
@@ -81,6 +82,7 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
   const settingsText = useMemo(() => createSettingsText(locale), [locale])
   const systemSettingsText = useMemo(() => createSystemSettingsText(locale), [locale])
   const contentSettingsText = useMemo(() => createContentSettingsText(locale), [locale])
+  const trustSettingsText = useMemo(() => createTrustSettingsText(locale), [locale])
   const moderationSettingsText = useMemo(() => createModerationSettingsText(locale), [locale])
   const identityText = useMemo(() => createIdentityText(locale), [locale])
   const dashboardText = useMemo(() => createDashboardText(locale), [locale])
@@ -262,7 +264,7 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
       : pathname === '/admin/settings/agent'
         ? <AgentSettingsPage api={api} text={systemSettingsText} />
       : pathname === '/admin/settings/trust'
-        ? <TrustSettingsPage api={api} locale={locale} text={contentSettingsText} />
+        ? <TrustSettingsPage api={api} locale={locale} text={trustSettingsText} />
       : pathname === '/admin/settings/announcement'
         ? <AnnouncementSettingsPage api={api} text={contentSettingsText} />
       : pathname === '/admin/settings/http-notify'

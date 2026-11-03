@@ -2,6 +2,8 @@
 import en from "./en-shell";
 export default {
   ...en,
+  security: "セキュリティ",
+  posting: "投稿設定",
   oauthLogin: "OAuth 外部ログイン",
   oidcProvider: "OIDC プロバイダー",
   communityRules: "コミュニティルール",

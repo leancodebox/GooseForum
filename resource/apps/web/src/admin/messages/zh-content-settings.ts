@@ -1,7 +1,6 @@
 export default {
   attachmentSettings: "普通文件附件",
   attachmentEnabled: "允许上传普通附件",
-  attachmentUploadPermission: "允许上传附件",
   attachmentSize: "单文件上限（KiB）",
   attachmentCount: "每篇内容附件数量上限",
   attachmentTypes: "允许的附件类型",

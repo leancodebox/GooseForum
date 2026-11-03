@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 import type { TrustProgress, TrustHistory } from '@gooseforum/client'
+import jaTrust from '../apps/web/src/admin/messages/ja-trust-settings'
+import itTrust from '../apps/web/src/admin/messages/it-trust-settings'
 
 const layout = {
   site: { name: 'GooseForum', description: '', logo: '', favicon: '', brandType: 'default', brandText: '', brandImage: '' },
@@ -7,23 +9,66 @@ const layout = {
   header: [], sidebar: { activeKey: 'topics', categories: [] }, footer: { links: [], primary: [] }, unread: { notifications: false, messages: false }, theme: { enabled: false, current: 'gf-light', themeColor: '#fbfdff' },
 }
 
-for (const [locale, label] of [
-  ['ja', '添付ファイルのアップロードを許可'],
-  ['it', 'Consenti il caricamento degli allegati'],
+test('quota controls render inline in Chinese and restore their finite value', async ({ page }, info) => {
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()) })
+  await page.route('**/__goose_page/**', route => route.fulfill({ json: { component: 'admin.shell', props: {}, layout, meta: { title: '等级设置' }, url: '/admin/settings/trust?lang=zh', version: '1.0' } }))
+  await page.route('**/api/admin/get-trust-settings', route => route.fulfill({ json: { code: 0, result: {
+    schemaVersion: 3, registrationCooldown: { minPostAccountAgeMinutes: 0, minUploadAccountAgeMinutes: 1440 }, promotionRules: [],
+    levelLimits: [0, 100, 200, 1000].map(level => ({ level, allowImageUpload: true, allowAttachmentUpload: level >= 100, allowProfileCover: level >= 100, maxDailyTopics: level === 0 ? 2 : null, maxDailyUploads: level === 0 ? 1 : null, maxDailyReplies: null, maxImagesPerPost: null, maxExternalLinksPerPost: null, maxMentionsPerPost: null })),
+  } } }))
+  await page.goto('/admin/settings/trust?lang=zh')
+  await expect(page).toHaveURL(/\/admin\/settings\/trust\?lang=zh/)
+  await expect(page).toHaveTitle(/社区规则/)
+  await page.getByRole('tab', { name: '等级限制', exact: true }).click()
+  const section = page.getByRole('heading', { name: '新用户', exact: true }).locator('..')
+  const input = section.getByLabel('每日主题', { exact: true })
+  const unlimited = section.getByRole('checkbox', { name: '每日主题 不限', exact: true })
+  await unlimited.check()
+  await expect(input).toBeDisabled()
+  await unlimited.uncheck()
+  await expect(input).toHaveValue('2')
+  const offsets = await section.locator('[data-quota-field]').evaluateAll(fields => fields.map(field => {
+    const input = field.querySelector('input')!.getBoundingClientRect()
+    const checkbox = field.querySelector('[role="checkbox"]')!.getBoundingClientRect()
+    return Math.abs(input.y + input.height / 2 - checkbox.y - checkbox.height / 2)
+  }))
+  expect(offsets).toHaveLength(6)
+  expect(offsets.every(offset => offset <= 1)).toBe(true)
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true)
+  await page.screenshot({ path: `/tmp/gooseforum-inline-quota-${info.project.name}-viewport.png` })
+  await section.screenshot({ path: `/tmp/gooseforum-inline-quota-${info.project.name}.png` })
+  expect(errors).toEqual([])
+})
+
+for (const [locale, label, limitsTab] of [
+  ['ja', 'ファイル添付', 'レベル制限'],
+  ['it', 'Allegati', 'Limiti'],
 ] as const) {
   test(`localizes attachment permissions in ${locale}`, async ({ page }, info) => {
+    const dictionary = locale === 'ja' ? jaTrust : itTrust
     await page.route('**/__goose_page/**', route => route.fulfill({ json: { component: 'admin.shell', props: {}, layout, meta: { title: 'Trust levels' }, url: `/admin/settings/trust?lang=${locale}`, version: '1.0' } }))
     await page.route('**/api/admin/get-trust-settings', route => route.fulfill({ json: { code: 0, result: {
       schemaVersion: 3, registrationCooldown: { minPostAccountAgeMinutes: 0, minUploadAccountAgeMinutes: 1440 }, promotionRules: [],
       levelLimits: [0, 100, 200, 1000].map(level => ({ level, allowImageUpload: true, allowAttachmentUpload: level >= 100, maxDailyUploads: 10, maxDailyTopics: 10, maxDailyReplies: null, maxImagesPerPost: null, maxExternalLinksPerPost: null, maxMentionsPerPost: null })),
     } } }))
     await page.goto(`/admin/settings/trust?lang=${locale}`)
-    await page.getByRole('tab', { name: 'Limits', exact: true }).click()
+    await expect(page.getByRole('tab', { name: dictionary.promotion, exact: true })).toBeVisible()
+    await expect(page.getByText(dictionary.grantedByAdmin, { exact: true })).toBeVisible()
+    await expect(page.getByRole('link', { name: locale === 'ja' ? 'セキュリティ' : 'Sicurezza', exact: true })).toBeVisible()
+    await page.getByRole('tab', { name: dictionary.cooldown, exact: true }).click()
+    await expect(page.getByLabel(dictionary.minUploadAccountAgeMinutes, { exact: true })).toHaveValue('1440')
+    await page.getByRole('tab', { name: limitsTab, exact: true }).click()
     await expect(page.getByRole('switch', { name: label, exact: true })).toHaveCount(4)
     await page.getByRole('switch', { name: label, exact: true }).first().check()
     await expect(page.getByRole('switch', { name: label, exact: true }).first()).toBeChecked()
+    const section = page.getByRole('switch', { name: label, exact: true }).first().locator('xpath=ancestor::section[1]')
+    await expect(section.getByLabel(dictionary.maxDailyTopics, { exact: true })).toHaveValue('10')
+    await expect(section.locator('[data-quota-field] label').first()).toHaveAttribute('title', dictionary.unlimited)
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true)
     await page.screenshot({ path: `/tmp/gooseforum-trust-${locale}-${info.project.name}.png`, fullPage: true })
+    await section.screenshot({ path: `/tmp/gooseforum-trust-${locale}-${info.project.name}-section.png` })
   })
 }
 
@@ -61,35 +106,53 @@ test('trust conditions and image limits save and survive reload', async ({ page 
   await expect(primaryMenu.locator('svg')).toHaveCSS('color', selectedColors.color)
   if (info.project.name === 'mobile-chromium') await page.keyboard.press('Escape')
   await expect(localMenu.locator('svg')).toHaveCSS('color', selectedColors.color)
-  await page.getByLabel('Account age (hours)').first().fill('48')
+  await page.getByLabel('Account age (h)').first().fill('48')
   await page.getByRole('tab', { name: 'Limits', exact: true }).click()
-  await expect(page.getByRole('switch', { name: 'Allow attachment uploads', exact: true }).first()).not.toBeChecked()
-  await page.getByRole('switch', { name: 'Allow attachment uploads', exact: true }).first().check()
-  await page.getByLabel('Images per post', { exact: true }).first().fill('3')
-  await page.getByLabel('Daily new topics (including drafts)', { exact: true }).first().fill('5')
-  await page.getByLabel('Daily new replies', { exact: true }).first().fill('12')
-  await page.getByLabel('Daily uploads', { exact: true }).first().fill('7')
-  await page.getByLabel('Daily uploads', { exact: true }).nth(1).fill('6')
+  await expect(page.getByRole('switch', { name: 'Attachments', exact: true }).first()).not.toBeChecked()
+  await page.getByRole('switch', { name: 'Attachments', exact: true }).first().check()
+  await page.getByLabel('Images/post', { exact: true }).first().fill('3')
+  await page.getByLabel('Topics/day', { exact: true }).first().fill('5')
+  await page.getByLabel('Replies/day', { exact: true }).first().fill('12')
+  await page.getByLabel('Uploads/day', { exact: true }).first().fill('7')
+  const uploadLimit = page.getByLabel('Uploads/day', { exact: true }).first()
+  const unlimitedUploads = page.getByRole('checkbox', { name: 'Uploads/day Unlimited', exact: true }).first()
+  await unlimitedUploads.check()
+  await expect(uploadLimit).toBeDisabled()
+  await expect(uploadLimit).toHaveAttribute('placeholder', 'Unlimited')
+  await page.getByRole('tab', { name: 'Cooldown', exact: true }).click()
+  await page.getByRole('tab', { name: 'Limits', exact: true }).click()
+  await unlimitedUploads.uncheck()
+  await expect(uploadLimit).toHaveValue('7')
+  const positions = await uploadLimit.evaluate(input => {
+    const group = input.closest('[data-quota-field]')!
+    const checkbox = group.querySelector('[role="checkbox"]')!
+    return { input: input.getBoundingClientRect().y + input.getBoundingClientRect().height / 2, checkbox: checkbox.getBoundingClientRect().y + checkbox.getBoundingClientRect().height / 2 }
+  })
+  expect(Math.abs(positions.input - positions.checkbox)).toBeLessThanOrEqual(1)
+  await page.getByLabel('Uploads/day', { exact: true }).nth(1).fill('6')
   await page.getByRole('button', { name: 'Save', exact: true }).click()
-  await expect(page.getByRole('alert')).toContainText('Member: daily uploads cannot be stricter than New user.')
+  await expect(page.getByRole('alert')).toContainText('Member: Uploads/day cannot be stricter than New user.')
   expect(saves).toBe(0)
-  await page.getByLabel('Daily uploads', { exact: true }).nth(1).fill('10')
-  const unlimited = page.getByRole('checkbox', { name: 'Daily new replies unlimited', exact: true }).nth(1)
+  await page.getByLabel('Uploads/day', { exact: true }).nth(1).fill('10')
+  const unlimited = page.getByRole('checkbox', { name: 'Replies/day Unlimited', exact: true }).nth(1)
   await expect(unlimited).toBeEnabled()
   await expect(unlimited).toHaveCSS('opacity', '1')
   await unlimited.uncheck()
-  await expect(page.getByLabel('Daily new replies', { exact: true }).nth(1)).toBeEnabled()
+  await expect(page.getByLabel('Replies/day', { exact: true }).nth(1)).toBeEnabled()
   await unlimited.check()
-  await expect(page.getByLabel('Daily new replies', { exact: true }).nth(1)).toBeDisabled()
-  const titleGap = await page.getByLabel('Daily new replies', { exact: true }).first().evaluate(input => {
-    const label = document.querySelector(`label[for="${input.id}"]`)!
-    return input.getBoundingClientRect().top - label.getBoundingClientRect().bottom
+  await expect(page.getByLabel('Replies/day', { exact: true }).nth(1)).toBeDisabled()
+  const rowOffset = await page.getByLabel('Replies/day', { exact: true }).first().evaluate(input => {
+    const field = input.closest('[data-quota-field]')!
+    const top = field.getBoundingClientRect().top
+    const row = Array.from(field.parentElement!.children).filter(peer => Math.abs(peer.getBoundingClientRect().top - top) <= 1)
+    const positions = row.map(peer => peer.querySelector('input')!.getBoundingClientRect().top)
+    return Math.max(...positions) - Math.min(...positions)
   })
-  expect(titleGap).toBeLessThanOrEqual(10)
-  await page.getByRole('tab', { name: 'Registration cooldown', exact: true }).click()
-  await expect(page.getByLabel('Posting cooldown (minutes)', { exact: true })).toHaveCount(1)
-  await page.getByLabel('Posting cooldown (minutes)', { exact: true }).fill('30')
-  await page.getByLabel('Upload cooldown (minutes)', { exact: true }).fill('60')
+  expect(rowOffset).toBeLessThanOrEqual(1)
+  await page.getByRole('tab', { name: 'Cooldown', exact: true }).click()
+  await expect(page.getByLabel('Posting wait (min)', { exact: true })).toHaveCount(1)
+  await page.getByLabel('Posting wait (min)', { exact: true }).fill('30')
+  await page.getByLabel('Upload wait (min)', { exact: true }).fill('60')
   await page.getByRole('button', { name: 'Save', exact: true }).click()
   await expect.poll(() => settings.levelLimits[0].maxImagesPerPost).toBe(3)
   expect(settings.promotionRules[0].minAccountAgeHours).toBe(48)
@@ -103,12 +166,12 @@ test('trust conditions and image limits save and survive reload', async ({ page 
   expect(settings).not.toHaveProperty('autoPromotionEnabled')
   await page.reload()
   await page.getByRole('tab', { name: 'Limits', exact: true }).click()
-  await expect(page.getByLabel('Images per post', { exact: true }).first()).toHaveValue('3')
-  await expect(page.getByRole('switch', { name: 'Allow attachment uploads', exact: true }).first()).toBeChecked()
-  await expect(page.getByLabel('Daily uploads', { exact: true }).first()).toHaveValue('7')
-  await page.getByRole('tab', { name: 'Registration cooldown', exact: true }).click()
-  await expect(page.getByLabel('Posting cooldown (minutes)', { exact: true })).toHaveValue('30')
-  await expect(page.getByLabel('Upload cooldown (minutes)', { exact: true })).toHaveValue('60')
+  await expect(page.getByLabel('Images/post', { exact: true }).first()).toHaveValue('3')
+  await expect(page.getByRole('switch', { name: 'Attachments', exact: true }).first()).toBeChecked()
+  await expect(page.getByLabel('Uploads/day', { exact: true }).first()).toHaveValue('7')
+  await page.getByRole('tab', { name: 'Cooldown', exact: true }).click()
+  await expect(page.getByLabel('Posting wait (min)', { exact: true })).toHaveValue('30')
+  await expect(page.getByLabel('Upload wait (min)', { exact: true })).toHaveValue('60')
   await page.getByRole('tab', { name: 'Limits', exact: true }).click()
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false)
   await page.screenshot({ path: `/tmp/gooseforum-trust-${info.project.name}.png`, fullPage: true })

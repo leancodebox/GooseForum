@@ -2,16 +2,16 @@ import { useState } from "react";
 import { afterEach, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { AttachmentInfo, GooseSiteApi } from "@gooseforum/client";
+import { GooseClientError, type AttachmentInfo, type GooseSiteApi } from "@gooseforum/client";
 import { GooseRuntimeProvider, type GooseRuntime } from "@gooseforum/runtime";
 import { GooseI18nProvider } from "@gooseforum/runtime/i18n";
 import { AttachmentEditor } from "../src/site/editor/attachment-editor";
 
 afterEach(cleanup);
 const attachment = { id: 9, filename: "notes.txt", size: 42, url: "/file/attachments/9" };
-function show({ enabled = true, files = [] as AttachmentInfo[], upload = vi.fn().mockResolvedValue(attachment) } = {}) {
+function show({ enabled = true, files = [] as AttachmentInfo[], upload = vi.fn().mockResolvedValue(attachment), policy = vi.fn().mockResolvedValue({ enabled, maxFilesPerPost: 5, maxFileSizeKb: 5120, extensions: [".txt"] }) } = {}) {
   const runtime = {
-    api: { attachments: { policy: vi.fn().mockResolvedValue({ enabled, maxFilesPerPost: 5, maxFileSizeKb: 5120, extensions: [".txt"] }), upload } } as unknown as GooseSiteApi,
+    api: { attachments: { policy, upload } } as unknown as GooseSiteApi,
     currentUrl: "/publish", locale: "en", theme: "gf-light", isNavigating: false,
     navigate: vi.fn(), redirect: vi.fn(), refresh: vi.fn(), queueFlash: vi.fn(), setLocale: vi.fn(), toggleTheme: vi.fn(),
   } satisfies GooseRuntime;
@@ -24,6 +24,15 @@ function show({ enabled = true, files = [] as AttachmentInfo[], upload = vi.fn()
   render(<GooseI18nProvider locale="en"><GooseRuntimeProvider runtime={runtime}><Editor /></GooseRuntimeProvider></GooseI18nProvider>);
   return upload;
 }
+
+it.each([{ files: [] }, { files: [attachment] }])("does not offer uploads when the server denies attachment permission (files=$files)", async ({ files }) => {
+  const upload = show({ files, policy: vi.fn().mockRejectedValue(new GooseClientError("permission.denied", { status: 403, messageCode: "permission.denied" })) });
+  await screen.findByText("Attachment uploads are unavailable for this account.");
+  expect(screen.queryByLabelText("Upload attachment")).toBeNull();
+  expect(screen.queryAllByRole("link", { name: "notes.txt" })).toHaveLength(files.length);
+  expect(screen.getByRole<HTMLButtonElement>("button", { name: "Submit" }).disabled).toBe(false);
+  expect(upload).not.toHaveBeenCalled();
+});
 
 it("disables new uploads under a disabled policy while retaining removal of existing files", async () => {
   const upload = show({ enabled: false, files: [attachment] });

@@ -1,7 +1,6 @@
 export default {
   attachmentSettings: "File attachments",
   attachmentEnabled: "Allow file attachments",
-  attachmentUploadPermission: "Allow attachment uploads",
   attachmentSize: "Maximum file size (KiB)",
   attachmentCount: "Maximum files per post",
   attachmentTypes: "Allowed file types",
