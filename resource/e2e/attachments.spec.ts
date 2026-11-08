@@ -15,10 +15,11 @@ const topicPage = {
 };
 
 
-test("reply attachments retry, submit and render on desktop and mobile", async ({ page }, testInfo) => {
-  const payload = structuredClone(topicPage);
-  payload.props.postStream.hasAfter = false;
-  await page.route("**/__goose_page/**", route => route.fulfill({ json: payload }));
+test("topic attachments retry and submit on desktop and mobile", async ({ page }, testInfo) => {
+  await page.route("**/__goose_page/**", route => route.fulfill({ json: {
+    component: "publish.index", version: "1.0", url: "/publish?id=60&lang=en", meta: { title: "Edit topic" }, layout,
+    props: { topicId: 60, isEditing: true, categories: [{ id: 4, name: "Coding", color: "#8241d6", isRestricted: false, canCreate: true }], topic: { title: "Topic with attachment", content: "Original topic content", categoryIds: [4], topicStatus: 1, sourceVersion: 1, attachments: [], version: 7 } },
+  } }));
   await page.route("**/file/attachments/policy", route => route.fulfill({ json: { code: 0, result: { enabled: true, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt", ".pdf", ".zip"] } } }));
   let uploads = 0;
   const file = { id: 401, filename: "notes.txt", size: 12, url: "/file/attachments/401" };
@@ -28,68 +29,61 @@ test("reply attachments retry, submit and render on desktop and mobile", async (
     else await route.fulfill({ json: { code: 0, result: file } });
   });
   let submitted: Record<string, unknown> | undefined;
-  await page.route("**/api/forum/posts/create", async route => {
+  await page.route("**/api/forum/topics/write", async route => {
     submitted = route.request().postDataJSON();
-    await route.fulfill({ json: { code: 0, result: { id: 402, postNo: 2, content: "Reply with attachment", renderedContent: "<p>Reply with attachment</p>", sourceVersion: 1, attachments: [file], version: 1 } } });
+    await route.fulfill({ json: { code: 1, messageCode: "attachment.conflict" } });
   });
-  await page.route("**/api/forum/posts/window**", route => route.fulfill({ json: { code: 0, result: { ...stream, hasAfter: false } } }));
-  await page.goto("/p/post/60?localReply=1&lang=en");
-  const composer = page.locator(".goose-composer-surface").filter({ has: page.getByRole("radio", { name: "Markdown", exact: true }) });
-  await composer.getByRole("radio", { name: "Markdown", exact: true }).click();
-  await composer.locator("textarea").fill("Reply with attachment");
-  await composer.getByLabel("Upload attachment", { exact: true }).setInputFiles({ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("hello world!") });
-  await expect(composer.getByRole("button", { name: "Retry upload" })).toBeVisible();
-  const submit = composer.getByRole("button", { name: "Post reply", exact: true });
+  await page.goto("/publish?id=60&lang=en");
+  await page.getByLabel("Upload attachment", { exact: true }).setInputFiles({ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("hello world!") });
+  await expect(page.getByRole("button", { name: "Retry upload" })).toBeVisible();
+  const submit = page.getByRole("button", { name: "Update topic", exact: true });
   await expect(submit).toBeDisabled();
-  await composer.getByRole("button", { name: "Retry upload" }).click();
-  await expect(composer.getByRole("link", { name: "notes.txt" })).toBeVisible();
+  await page.getByRole("button", { name: "Retry upload" }).click();
+  await expect(page.getByRole("link", { name: "notes.txt" })).toBeVisible();
   await expect(submit).toBeEnabled();
-  await expect(composer.getByText("Up to 5 files, 5120 KiB each. Types: .txt, .pdf, .zip")).toBeVisible();
+  await expect(page.getByText("Up to 5 files, 5120 KiB each. Types: .txt, .pdf, .zip")).toBeVisible();
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath("attachment-composer.png"), fullPage: true });
   await submit.click();
   await expect.poll(() => submitted?.attachmentIds).toEqual([401]);
-  await expect(page.locator('[data-post-no="2"]').getByRole("link", { name: "notes.txt" })).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath("attachment-post.png"), fullPage: true });
+  await expect(page.getByText("Content changed. Reload before editing again.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "notes.txt" })).toBeVisible();
 });
 
-test("keeps newer reply text without resubmitting attachments already bound to the first reply", async ({ page }) => {
+test("replies have no attachment upload and keep newer text during submission", async ({ page }) => {
   const payload = structuredClone(topicPage);
   payload.props.postStream.hasAfter = false;
-  const file = { id: 401, filename: "notes.txt", size: 12, url: "/file/attachments/401" };
   await page.route("**/__goose_page/**", route => route.fulfill({ json: payload }));
   await page.route("**/file/attachments/policy", route => route.fulfill({ json: { code: 0, result: { enabled: true, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt"] } } }));
-  await page.route("**/file/attachments", route => route.fulfill({ json: { code: 0, result: file } }));
   let release!: () => void;
   const pending = new Promise<void>(resolve => { release = resolve; });
-  const submissions: Array<{ content: string; attachmentIds: number[] }> = [];
+  const submissions: Array<{ content: string; attachmentIds?: number[] }> = [];
   await page.route("**/api/forum/posts/create", async route => {
     const input = route.request().postDataJSON();
     submissions.push(input);
     const first = submissions.length === 1;
     if (first) await pending;
-    await route.fulfill({ json: { code: 0, result: { id: first ? 402 : 403, postNo: first ? 2 : 3, content: input.content, renderedContent: `<p>${input.content}</p>`, sourceVersion: 1, attachments: first ? [file] : [], version: 1 } } });
+    await route.fulfill({ json: { code: 0, result: { id: first ? 402 : 403, postNo: first ? 2 : 3, content: input.content, renderedContent: `<p>${input.content}</p>`, sourceVersion: 1, attachments: [], version: 1 } } });
   });
   await page.route("**/api/forum/posts/window**", route => route.fulfill({ json: { code: 0, result: { ...stream, hasAfter: false } } }));
   await page.goto("/p/post/60?localReply=1&lang=en");
   const composer = page.locator(".goose-composer-surface").filter({ has: page.getByRole("radio", { name: "Markdown", exact: true }) });
   await composer.getByRole("radio", { name: "Markdown", exact: true }).click();
   await composer.locator("textarea").fill("First reply");
-  await composer.getByLabel("Upload attachment", { exact: true }).setInputFiles({ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("hello world!") });
-  await expect(composer.getByRole("link", { name: "notes.txt" })).toBeVisible();
+  await expect(composer.getByLabel("Upload attachment", { exact: true })).toHaveCount(0);
   const submit = composer.getByRole("button", { name: "Post reply", exact: true });
   await submit.click();
   await expect.poll(() => submissions.length).toBe(1);
-  expect(submissions[0].attachmentIds).toEqual([401]);
+  expect(submissions[0]).not.toHaveProperty("attachmentIds");
   await composer.locator("textarea").fill("Newer reply text");
   release();
   await expect(submit).toBeEnabled();
   await expect(composer.locator("textarea")).toHaveValue("Newer reply text");
   await expect(composer.getByRole("link", { name: "notes.txt" })).toHaveCount(0);
-  await expect(page.locator('[data-post-no="2"]').getByRole("link", { name: "notes.txt" })).toBeVisible();
   await submit.click();
   await expect.poll(() => submissions.length).toBe(2);
-  expect(submissions[1]).toMatchObject({ content: "Newer reply text", attachmentIds: [] });
+  expect(submissions[1]).toMatchObject({ content: "Newer reply text" });
+  expect(submissions[1]).not.toHaveProperty("attachmentIds");
 });
 
 test("new topics hide the attachment upload input when permission is denied", async ({ page }) => {

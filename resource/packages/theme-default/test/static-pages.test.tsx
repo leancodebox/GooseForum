@@ -1548,7 +1548,6 @@ describe("AppShell and static pages", () => {
     await user.type(screen.getByPlaceholderText(/输入正文/), "Reply body");
     await user.click(publishReply);
     expect(create).toHaveBeenCalledWith({
-      attachmentIds: [],
       topicId: 60,
       content: "Reply body",
       replyToPostId: 62,

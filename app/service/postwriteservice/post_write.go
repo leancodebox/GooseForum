@@ -12,7 +12,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
-	"github.com/leancodebox/GooseForum/app/service/attachmentservice"
 	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
@@ -43,6 +42,9 @@ type CreateInput struct {
 }
 
 func Create(input CreateInput) (posts.Entity, error) {
+	if input.AttachmentIDs != nil && len(*input.AttachmentIDs) > 0 {
+		return posts.Entity{}, &trustlevelservice.PolicyError{Status: 400, Code: "common.request.invalidParams"}
+	}
 	topic := topics.GetSimple(input.TopicID)
 	if err := authorizePublishedTopic(input.UserID, topic, accesscontrol.CapabilityReply); err != nil {
 		return posts.Entity{}, ErrTopicUnavailable
@@ -73,10 +75,6 @@ func Create(input CreateInput) (posts.Entity, error) {
 		RenderedVersion: markdown2html.GetPostVersion(), UserId: input.UserID, ReplyToPostId: input.ReplyToPostID,
 		SourceVersion: input.SourceVersion,
 	}
-	post.Attachments, err = attachmentservice.Prepare(input.UserID, 0, nil, input.AttachmentIDs)
-	if err != nil {
-		return posts.Entity{}, err
-	}
 	if err := postservice.CreateTopicPost(&post, topic); err != nil {
 		return posts.Entity{}, err
 	}
@@ -103,6 +101,9 @@ type UpdateInput struct {
 }
 
 func Update(input UpdateInput) (posts.Entity, error) {
+	if input.AttachmentIDs != nil && len(*input.AttachmentIDs) > 0 {
+		return posts.Entity{}, &trustlevelservice.PolicyError{Status: 400, Code: "common.request.invalidParams"}
+	}
 	post := posts.Get(input.PostID)
 	if post.Id == 0 || post.PostNo <= 1 {
 		return posts.Entity{}, ErrPostNotFound
@@ -137,10 +138,6 @@ func Update(input UpdateInput) (posts.Entity, error) {
 	post.Content = input.Content
 	post.RenderedHTML = analysis.RenderedHTML
 	post.RenderedVersion = markdown2html.GetPostVersion()
-	post.Attachments, err = attachmentservice.Prepare(input.UserID, post.Id, post.Attachments, input.AttachmentIDs)
-	if err != nil {
-		return posts.Entity{}, err
-	}
 	contentmoderationservice.PreparePost(&post)
 	if err := posts.SaveReviewed(&post, expectedVersion); err != nil {
 		return posts.Entity{}, err

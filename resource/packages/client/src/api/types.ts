@@ -32,7 +32,6 @@ export interface CreateAgentTokenInput {
 }
 
 export interface CreatePostInput {
- attachmentIds?: number[]
   sourceVersion?: 0 | 1
   topicId: number
   content: string
@@ -52,7 +51,6 @@ export interface CreatePostResult {
 }
 
 export interface UpdatePostInput {
- attachmentIds?: number[]
  version?: number
   sourceVersion?: 0 | 1
   postId: number
