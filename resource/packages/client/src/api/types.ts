@@ -219,7 +219,10 @@ export interface ImageUploadInitResult {
   }
 }
 
+export interface SiteStatusPayload { deploymentId: string; unread?: UnreadStatusPayload }
+
 export interface GooseSiteApi {
+  status(signal?: AbortSignal): Promise<SiteStatusPayload>
  attachments: { policy(): Promise<AttachmentPolicy>; upload(file: File): Promise<AttachmentInfo>; cancel(id: number): Promise<boolean> }
   accessGroups: {
     list(): Promise<JoinableAccessGroup[]>

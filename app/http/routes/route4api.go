@@ -144,6 +144,7 @@ func apiRoute(ginApp *gin.Engine) {
 	loginApi.POST("oidc/grants/revoke", UpJsonReq(api.RevokeMyOIDCGrant))
 
 	forumApi := baseApi.Group("forum")
+	forumApi.GET("status", middleware.SessionAuth, middleware.NoUpdateUserActivity, UpButterReq(api.GetSiteStatus))
 	forumApi.GET("get-site-statistics", middleware.SessionAuthCheck, middleware.CheckPermission(permission.Admin), ginUpNP(api.GetSiteStatistics))
 	forumApi.GET("posts/window", middleware.SessionAuth, middleware.NoUpdateUserActivity, UpQueryReq(forum.PostWindow))
 	forumApi.GET("posts/revisions", middleware.SessionAuth, middleware.NoUpdateUserActivity, UpQueryReq(api.ListPostRevisions))

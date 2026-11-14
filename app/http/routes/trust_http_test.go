@@ -177,6 +177,18 @@ func TestTrustHTTPContract(t *testing.T) {
 		}
 		return out
 	}
+	t.Run("unified-status-preserves-unread", func(t *testing.T) {
+		unified := request(t, "GET", "/api/forum/status", memberToken, nil, 200, "")["result"].(map[string]any)
+		if unified["deploymentId"] == "" || unified["deploymentId"] == nil {
+			t.Fatal("missing deployment")
+		}
+		legacy := request(t, "GET", "/api/forum/unread-status", memberToken, nil, 200, "")["result"]
+		left, _ := json.Marshal(unified["unread"])
+		right, _ := json.Marshal(legacy)
+		if string(left) != string(right) {
+			t.Fatalf("unread mismatch: %s / %s", left, right)
+		}
+	})
 	t.Run("profile-cover-permission", func(t *testing.T) {
 		request(t, "POST", "/api/set-user-profile-cover", token, map[string]any{"profileCoverUrl": "/cover.webp"}, 200, "permission.denied")
 		request(t, "POST", "/api/set-user-profile-cover", memberToken, map[string]any{"profileCoverUrl": "/cover.webp"}, 200, "")

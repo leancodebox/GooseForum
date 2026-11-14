@@ -16,6 +16,7 @@ const postWithMeta = <T>(http: GooseHttpClient, path: string, json?: unknown) =>
 
 export function createSiteApi(http: GooseHttpClient): GooseSiteApi {
   return {
+    status: (signal) => http.request(route('siteStatus'), { signal, cache: 'no-store' }),
     attachments: {
       policy: () => http.request('/file/attachments/policy'),
       upload: (file) => { const body = new FormData(); body.append('file', file); return http.request('/file/attachments', { method: 'POST', body }); },

@@ -63,9 +63,9 @@ import {
 } from "@gooseforum/ui/components/sheet";
 import { authLocales, localeLabels } from "@gooseforum/runtime/i18n/auth";
 import { cn } from "@gooseforum/ui/lib/utils";
-import { GooseLink, useGooseRuntime, useLatestRequest } from "@gooseforum/runtime";
+import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
 import { RoutineIcon } from "@gooseforum/ui/components/icons/material-symbols/routine-icon";
-import { unreadStatusEvent } from "@gooseforum/runtime/unread-status";
+import { announceUnreadStatus, unreadStatusEvent } from "@gooseforum/runtime/unread-status";
 import {
   emptyShellHeader,
   ShellHeaderContext,
@@ -127,8 +127,6 @@ export function AppShell({
     language: undefined,
     user: undefined,
   });
-  const beginUnreadRequest = useLatestRequest();
-  const unreadRefreshInFlight = useRef(false);
   const activeKey = layout.sidebar.activeKey || "topics";
   const primary = [
     { ...nav("topics", t("nav.topics"), "/", MessageCircleIcon), active: ['topics', 'hot', 'popular'].includes(activeKey) },
@@ -258,48 +256,19 @@ export function AppShell({
   }
 
   useEffect(() => {
-    beginUnreadRequest();
     setUnread(layout.unread);
-  }, [beginUnreadRequest, layout.unread]);
+    announceUnreadStatus(layout.unread);
+  }, [layout.unread]);
 
   useEffect(() => {
     const updateUnread = (event: Event) => {
       const detail = (event as CustomEvent<Partial<LayoutPayload["unread"]>>)
         .detail;
-      beginUnreadRequest();
       setUnread((current) => ({ ...current, ...detail }));
     };
     window.addEventListener(unreadStatusEvent, updateUnread);
     return () => window.removeEventListener(unreadStatusEvent, updateUnread);
-  }, [beginUnreadRequest]);
-
-  useEffect(() => {
-    if (!layout.viewer.isAuthenticated) return;
-    const refreshUnread = () => {
-      if (document.visibilityState === "hidden" || unreadRefreshInFlight.current)
-        return;
-      unreadRefreshInFlight.current = true;
-      const isCurrent = beginUnreadRequest();
-      void runtime.api.notifications
-        .unread()
-        .then((nextUnread) => {
-          if (isCurrent()) setUnread(nextUnread);
-        })
-        .catch(() => undefined)
-        .finally(() => {
-          unreadRefreshInFlight.current = false;
-        });
-    };
-    const timer = window.setInterval(refreshUnread, 30_000);
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") refreshUnread();
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      window.clearInterval(timer);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [beginUnreadRequest, layout.viewer.isAuthenticated, runtime.api.notifications]);
+  }, []);
 
   useEffect(
     () => () => {

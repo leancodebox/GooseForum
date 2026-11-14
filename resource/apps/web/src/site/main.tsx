@@ -1,3 +1,4 @@
+import { startSiteStatus } from '../host/site-status'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '@gooseforum/theme-default/styles/site.css'
@@ -12,6 +13,9 @@ const rootElement = document.querySelector<HTMLDivElement>('#goose-app')
 if (!rootElement) {
   throw new Error('Missing #goose-app mount element')
 }
+
+const stopSiteStatus = startSiteStatus(sitePageSource.api, false)
+if (import.meta.hot) import.meta.hot.dispose(stopSiteStatus)
 
 const root = createRoot(rootElement)
 try {

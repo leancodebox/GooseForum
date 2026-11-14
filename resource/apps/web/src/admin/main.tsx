@@ -1,3 +1,4 @@
+import { startSiteStatus } from '../host/site-status'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/admin.css'
@@ -14,6 +15,9 @@ const rootElement = document.querySelector<HTMLDivElement>('#goose-admin-app')
 if (!rootElement) {
   throw new Error('Missing #goose-admin-app mount element')
 }
+
+const stopSiteStatus = startSiteStatus(adminPageSource.api, true)
+if (import.meta.hot) import.meta.hot.dispose(stopSiteStatus)
 
 const root = createRoot(rootElement)
 

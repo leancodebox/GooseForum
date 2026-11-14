@@ -1799,3 +1799,58 @@ test('desktop sidebar remembers its width preference and leaves mobile navigatio
   await expect.poll(async () => (await content.boundingBox())!.width).toBe(width)
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
 })
+
+test('unified site status prompts guests after deployment and offers resource recovery', async ({ page }, testInfo) => {
+  let deployment = 'old'
+  let legacyRequests = 0
+  await page.route('**/api/forum/unread-status', route => { legacyRequests++; return route.fulfill({ json: { code: 0, result: {} } }) })
+  await page.route('**/api/forum/status', route => route.fulfill({ json: { code: 0, result: { deploymentId: deployment } } }))
+  await page.goto('/?lang=en')
+  await expect(page.locator('main').first()).toBeVisible()
+  // The first request establishes the Vite-only baseline (production uses HTML meta).
+  await page.waitForFunction(() => document.querySelector('#goose-site-status'))
+  deployment = 'new'
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')))
+  const notice = page.locator('#goose-site-status').getByRole('status')
+  await expect(notice).toContainText('site has been updated')
+  const bounds = await notice.boundingBox()
+  expect(bounds!.width).toBeLessThanOrEqual(page.viewportSize()!.width)
+  await page.screenshot({ path: testInfo.outputPath('site-update.png') })
+  await notice.getByRole('button', { name: 'Later' }).click()
+  await expect(notice).toHaveCount(0)
+  await page.evaluate(() => window.dispatchEvent(new Event('vite:preloadError')))
+  await expect(notice).toContainText('resources failed to load')
+  expect(legacyRequests).toBe(0)
+})
+
+test('site update refresh respects an unfinished reply', async ({ page }) => {
+  await page.route('**/api/forum/status', route => route.fulfill({ json: { code: 0, result: { deploymentId: 'old' } } }))
+  await page.goto('/p/test/60?lang=en')
+  await page.locator('[data-slot="topic-reply-float-boundary"]').getByRole('button', { name: 'Join the discussion' }).click()
+  const panel = page.locator('.goose-composer-surface[data-state="open"] section')
+  await panel.getByRole('radio', { name: 'Markdown', exact: true }).click()
+  await panel.locator('textarea').fill('Keep my unfinished reply')
+  await page.evaluate(() => window.dispatchEvent(new Event('vite:preloadError')))
+  const dialog = page.waitForEvent('dialog').then(async warning => {
+    expect(warning.type()).toBe('beforeunload')
+    await warning.dismiss()
+  })
+  await page.locator('#goose-site-status').getByRole('button', { name: 'Refresh page' }).click()
+  await dialog
+  await expect(panel.locator('textarea')).toHaveValue('Keep my unfinished reply')
+})
+
+test('admin uses the shared update notice with a save reminder', async ({ page }) => {
+  await page.route('**/api/forum/status', route => route.fulfill({ json: { code: 0, result: { deploymentId: 'old' } } }))
+  await page.goto('/admin?lang=en')
+  await expect(page.locator('#goose-admin-app')).not.toBeEmpty()
+  await page.evaluate(() => window.dispatchEvent(new Event('vite:preloadError')))
+  const dialog = page.waitForEvent('dialog').then(async warning => {
+    expect(warning.type()).toBe('confirm')
+    expect(warning.message()).toContain('unsaved changes')
+    await warning.dismiss()
+  })
+  await page.locator('#goose-site-status').getByRole('button', { name: 'Refresh page' }).click()
+  await dialog
+  await expect(page.locator('#goose-site-status').getByRole('status')).toBeVisible()
+})

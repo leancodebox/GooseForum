@@ -115,9 +115,9 @@ func renderAppShell(c *gin.Context, payload PagePayload) {
 
 func renderPageWithStatus(c *gin.Context, status int, templateName string, payload PagePayload) {
 	c.Status(status)
+	c.Header("Cache-Control", "no-store")
 	c.Header("Vary", "X-Goose-Page, Accept")
 	if isPageRequest(c) {
-		c.Header("Cache-Control", "no-store")
 		c.JSON(status, payload)
 		return
 	}

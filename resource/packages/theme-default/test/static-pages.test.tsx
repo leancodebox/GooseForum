@@ -421,58 +421,24 @@ function messagesProps(): MessagesPageProps {
 }
 
 describe("AppShell and static pages", () => {
-  it("does not let a stale unread poll overwrite a local unread event", async () => {
+  it("receives host unread events without starting a second poll", async () => {
     vi.useFakeTimers();
-    let resolveUnread!: (value: { notifications: boolean; messages: boolean; moderationReports: boolean }) => void;
-    const unread = vi.fn(() => new Promise(resolve => { resolveUnread = resolve; }));
+    const unread = vi.fn();
     try {
       const page = payload("home.index", {
-        sort: "",
-        tabs: [],
-        topics: [],
+        sort: "", tabs: [], topics: [],
         pagination: { page: 1, nextPage: 0, hasNext: false, nextUrl: "" },
         announcement: { enabled: false, html: "", publishedAt: "" },
       });
-      page.layout = {
-        ...page.layout,
-        viewer: { ...page.layout.viewer, id: 7, isAuthenticated: true },
-      };
+      page.layout = { ...page.layout, viewer: { ...page.layout.viewer, id: 7, username: "alice", isAuthenticated: true } };
       renderPage(page, { notifications: { unread } as unknown as GooseSiteApi["notifications"] });
       await vi.advanceTimersByTimeAsync(30_000);
-      window.dispatchEvent(new CustomEvent(unreadStatusEvent, { detail: { messages: true } }));
-      await vi.advanceTimersByTimeAsync(30_000);
-      expect(unread).toHaveBeenCalledTimes(1);
-      resolveUnread({ notifications: false, messages: false, moderationReports: false });
-      await vi.advanceTimersByTimeAsync(0);
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it("refreshes unread status immediately when the page becomes visible", async () => {
-    vi.useFakeTimers();
-    const visibility = Object.getOwnPropertyDescriptor(document, "visibilityState");
-    const unread = vi.fn().mockResolvedValue({ notifications: false, messages: false, moderationReports: false });
-    try {
-      const page = payload("home.index", {
-        sort: "",
-        tabs: [],
-        topics: [],
-        pagination: { page: 1, nextPage: 0, hasNext: false, nextUrl: "" },
-        announcement: { enabled: false, html: "", publishedAt: "" },
-      });
-      page.layout = { ...page.layout, viewer: { ...page.layout.viewer, id: 7, isAuthenticated: true } };
-      renderPage(page, { notifications: { unread } as unknown as GooseSiteApi["notifications"] });
-      Object.defineProperty(document, "visibilityState", { configurable: true, value: "hidden" });
-      document.dispatchEvent(new Event("visibilitychange"));
       expect(unread).not.toHaveBeenCalled();
-      Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
-      document.dispatchEvent(new Event("visibilitychange"));
-      await Promise.resolve();
-      expect(unread).toHaveBeenCalledTimes(1);
+      fireEvent(window, new CustomEvent(unreadStatusEvent, { detail: { messages: true } }));
+      expect(screen.getByRole("button", { name: "alice", exact: true }).querySelector(".bg-destructive")).not.toBeNull();
+      fireEvent(window, new CustomEvent(unreadStatusEvent, { detail: { messages: false, notifications: false } }));
+      expect(screen.getByRole("button", { name: "alice", exact: true }).querySelector(".bg-destructive")).toBeNull();
     } finally {
-      if (visibility) Object.defineProperty(document, "visibilityState", visibility);
-      else Reflect.deleteProperty(document, "visibilityState");
       vi.useRealTimers();
     }
   });

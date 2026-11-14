@@ -8,9 +8,11 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/resource"
 )
 
 var templateFuncMap = template.FuncMap{
+	"deploymentID": resource.DeploymentID,
 	"SafeHTML": func(s string) template.HTML {
 		return template.HTML(s)
 	},

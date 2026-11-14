@@ -3,6 +3,7 @@
  * test reads this catalog, so server and SDK routing cannot drift silently.
  */
 export const siteApiRoutes = {
+  siteStatus: ['GET', '/api/forum/status'],
   userAgentTokens: ['GET', '/api/agent-tokens'],
   userCreateAgentToken: ['POST', '/api/agent-tokens/create'],
   userRevokeAgentToken: ['POST', '/api/agent-tokens/revoke'],
