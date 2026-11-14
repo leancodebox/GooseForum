@@ -1,3 +1,5 @@
+import { Button } from "@gooseforum/ui/components/button"
+import { RefreshCw } from "lucide-react"
 import { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import type { GooseSiteApi } from '@gooseforum/client'
@@ -68,13 +70,22 @@ export function SiteStatusNotice({ api, initialDeployment, admin = false }: {
     window.location.reload()
   }
   const failed = available === 'resource-load-failed'
-  return <aside role="status" aria-live="polite" style={{ position: 'fixed', bottom: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 10000, width: 'min(32rem, calc(100vw - 32px))', boxSizing: 'border-box', padding: 16, borderRadius: 12, background: '#172033', color: '#fff', boxShadow: '0 4px 24px #0004', fontSize: 14 }}>
-    <p style={{ margin: '0 0 12px' }}>{zh
-      ? (failed ? '页面资源加载失败，请保存未完成的内容后刷新重试。' : '网站已更新，请保存未完成的内容后刷新页面。')
-      : (failed ? 'Page resources failed to load. Save your work, then refresh to retry.' : 'The site has been updated. Save your work, then refresh.')}</p>
-    <div style={{ display: 'flex', gap: 16 }}>
-      <button type="button" onClick={refresh} style={{ cursor: 'pointer', textDecoration: 'underline' }}>{zh ? '刷新页面' : 'Refresh page'}</button>
-      <button type="button" onClick={() => setDismissed(available)} style={{ cursor: 'pointer' }}>{zh ? '稍后' : 'Later'}</button>
+  return <aside role="status" aria-live="polite"
+    className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 z-[10000] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-xl border bg-card p-4 text-card-foreground shadow-lg">
+    <div className="flex items-start gap-3">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary" aria-hidden="true">
+        <RefreshCw className="size-4" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold">{zh ? (failed ? '页面需要刷新' : '网站已更新') : (failed ? 'Refresh needed' : 'Update available')}</p>
+        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{zh
+          ? (failed ? '页面资源加载失败，请保存未完成的内容后刷新重试。' : '请先保存未完成的内容，再刷新页面使用最新版本。')
+          : (failed ? 'Page resources failed to load. Save your work, then refresh to retry.' : 'The site has been updated. Save your work, then refresh.')}</p>
+      </div>
+    </div>
+    <div className="mt-4 flex flex-wrap justify-end gap-2">
+      <Button type="button" variant="ghost" size="sm" className="text-muted-foreground" onClick={() => setDismissed(available)}>{zh ? '稍后' : 'Later'}</Button>
+      <Button type="button" size="sm" onClick={refresh}>{zh ? '刷新页面' : 'Refresh page'}</Button>
     </div>
   </aside>
 }
