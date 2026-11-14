@@ -2276,3 +2276,21 @@ test('empty visual editor has one insertion paragraph before and after clearing'
   await editor.click()
   await page.screenshot({ path: testInfo.outputPath('empty-editor.png') })
 })
+
+for (const canModerate of [false, true]) test(`hides another author's edit history (moderator=${canModerate})`, async ({ page }) => {
+  let requests = 0
+  await page.route('**/api/forum/posts/revisions**', route => { requests++; return route.fulfill({ json: { code: 0, result: {} } }) })
+  await page.route('**/__goose_page/**', route => route.fulfill({ json: {
+    ...topicPage,
+    layout: { ...topicPage.layout, viewer: { ...topicPage.layout.viewer, id: 99, canAccessAdmin: canModerate, isModerator: canModerate } },
+    props: {
+      ...topicPage.props,
+      permissions: { ...topicPage.props.permissions, isOwnTopic: false, canModerateTopic: canModerate },
+      postStream: { ...topicPage.props.postStream, posts: topicPage.props.postStream.posts.map(post => ({ ...post, isOwnPost: false, canModerate })) },
+    },
+  } }))
+  await page.goto('/p/test/60?lang=en')
+  await expect(page.getByRole('heading', { name: 'Topic detail' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'View edit history' })).toHaveCount(0)
+  expect(requests).toBe(0)
+})

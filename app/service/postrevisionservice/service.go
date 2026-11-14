@@ -7,7 +7,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/postRevisions"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
-	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
 	"gorm.io/gorm"
 )
 
@@ -16,31 +15,16 @@ var (
 	ErrForbidden = errors.New("post revision access forbidden")
 )
 
-// Authorize applies the current read policy to a revision resource. Authors
-// may inspect their own history, while category governance managers may
-// inspect history needed for moderation. Ordinary read access is insufficient.
+// Authorize restricts revision access to the post author. Moderation privileges
+// do not grant access to another user's edit history.
 func Authorize(userID uint64, post posts.Entity, topic topics.Entity) error {
-	return AuthorizeWithResolver(accesscontrol.Default, userID, post, topic)
-}
-
-func AuthorizeWithResolver(resolver *accesscontrol.Resolver, userID uint64, post posts.Entity, topic topics.Entity) error {
 	if post.Id == 0 || topic.Id == 0 {
 		return ErrNotFound
 	}
-	if userID != 0 && userID == post.UserId {
-		return nil
-	}
-	if resolver == nil {
+	if userID == 0 || userID != post.UserId {
 		return ErrForbidden
 	}
-	snapshot, err := resolver.Resolve(userID)
-	if err != nil {
-		return err
-	}
-	if snapshot.CanManageCategory(topic.MainCategoryId) {
-		return nil
-	}
-	return ErrForbidden
+	return nil
 }
 
 func List(userID, postID, cursor, pageSize uint64) (postRevisions.Page, error) {

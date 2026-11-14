@@ -1378,18 +1378,6 @@ function PostRow({
               </>
             ) : null}
 
-            {!post.isOwnPost && post.canModerate ? (
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                className="text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                aria-label={t("viewHistory")}
-                onClick={onHistory}
-              >
-                <Clock />
-              </Button>
-            ) : null}
-
             {!post.isOwnPost && !(first && isOwnTopic) && !post.isHidden ? (
               <Button
                 variant="ghost"
