@@ -16,6 +16,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
@@ -675,9 +676,11 @@ func InvalidateUser(userID uint64) {
 }
 
 func InvalidateGroup(groupID uint64) {
+	hotdataserve.ClearPublicTopicMaxCache()
 	Default.InvalidateGroup(groupID)
 }
 
 func InvalidateSystemGroups() {
+	hotdataserve.ClearPublicTopicMaxCache()
 	Default.InvalidateSystemGroups()
 }

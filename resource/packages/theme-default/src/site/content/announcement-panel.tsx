@@ -1,11 +1,11 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import type { HomeProps } from "@gooseforum/client";
 import { Bell, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@gooseforum/ui/components/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@gooseforum/ui/components/collapsible";
 import { useAnnouncementDisclosure } from "../pages/use-announcement-disclosure";
-import { RenderedContent } from "./rendered-content";
+const RenderedContent = lazy(() => import("./rendered-content").then(module => ({ default: module.RenderedContent })));
 
 const readKey = "goose:announcement:last-read-published-at";
 
@@ -72,7 +72,9 @@ export function AnnouncementPanel({ announcement }: { announcement: HomeProps["a
       <CollapsibleContent className="goose-announcement-content overflow-hidden" data-animate={disclosure.animate ? "true" : undefined}
         onAnimationEnd={event => { if (event.target === event.currentTarget) disclosure.finishAnimation(); }}>
         <div key={active.id}>
-          <RenderedContent html={active.html} variant="announcement" className="min-w-0 pt-1" />
+          <Suspense fallback={<div data-content-variant="announcement" className="typeset gf-prose typeset-announcement gf-prose-announcement min-w-0 pt-1" dangerouslySetInnerHTML={{ __html: active.html }} />}>
+            <RenderedContent html={active.html} variant="announcement" className="min-w-0 pt-1" />
+          </Suspense>
         </div>
       </CollapsibleContent>
     </Collapsible>

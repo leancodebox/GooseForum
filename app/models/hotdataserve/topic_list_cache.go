@@ -130,4 +130,5 @@ func topicEntitiesToPointers(data []topics.Entity) []*topics.Entity {
 
 func ClearTopicListCache() {
 	topicSimpleVoCache.Clear()
+	ClearPublicTopicMaxCache()
 }

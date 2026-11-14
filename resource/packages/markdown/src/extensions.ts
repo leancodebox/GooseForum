@@ -102,6 +102,27 @@ export function forumExtensions(md: MarkdownIt) {
     const next = pairs.get(start);
     if (!next || next > end) return false;
     if (silent) return true;
+    if (header.name === "gallery" && Object.keys(header.attributes).length === 1 && ["grid", "carousel"].includes(header.attributes.mode)) {
+      const mode = header.attributes.mode;
+      const open = state.push("gallery_open", "div", 1);
+      open.block = true;
+      open.map = [start, next];
+      open.attrSet("class", `image-gallery image-gallery--${mode}`);
+      open.attrSet("data-gallery", mode);
+      open.attrSet("tabindex", "0");
+      for (let line = start + 1; line < next - 1; line++) {
+        const content = state.getLines(line, line + 1, state.blkIndent, false).trim();
+        if (!content) continue;
+        state.push("paragraph_open", "p", 1).block = true;
+        const inline = state.push("inline", "", 0);
+        inline.content = content;
+        inline.children = [];
+        state.push("paragraph_close", "p", -1).block = true;
+      }
+      state.push("gallery_close", "div", -1).block = true;
+      state.line = next;
+      return true;
+    }
     const token = state.push("forum_opaque", "", 0);
     token.block = true;
     token.map = [start, next];

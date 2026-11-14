@@ -554,3 +554,48 @@
 
   .typeset-announcement > :first-child { margin-block-start: 0; }
 }
+
+
+/* Identical gallery layout in server HTML, preview and the visual editor. */
+.image-gallery {
+  min-width: 0;
+  max-width: 100%;
+  gap: .75rem;
+  margin-block: 1rem;
+}
+.image-gallery > p { min-width: 0; margin: 0 !important; }
+.image-gallery img[src] { display: block; width: 100%; height: 100%; max-height: 32rem; object-fit: contain; margin: 0 !important; border-radius: .5rem; }
+.image-gallery .gf-content-image { display: block; width: 100%; height: 100%; margin: 0; }
+.image-gallery--grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); }
+.image-gallery--grid > p { aspect-ratio: 4 / 3; overflow: hidden; border-radius: .5rem; background: var(--color-muted); }
+.image-gallery--grid img[src] { object-fit: cover; }
+.image-gallery--carousel { display: flex; gap: 0; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.image-gallery--carousel > p { flex: 0 0 100%; scroll-snap-align: start; }
+.image-gallery--carousel img[src] { height: clamp(12rem, 45vw, 30rem); object-position: center; }
+.image-gallery:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 3px; }
+
+.gallery-editor-block { position: relative; }
+.gallery-editor-toolbar { position: absolute; inset: .5rem .5rem auto; z-index: 2; display: flex; flex-wrap: wrap; gap: .35rem; padding: .4rem; border-radius: .5rem; background: var(--color-background); box-shadow: 0 1px 6px #0002; font-size: .75rem; opacity: 0; visibility: hidden; pointer-events: none; }
+.gallery-editor-block:hover > .gallery-editor-toolbar,
+.gallery-editor-block.is-selected > .gallery-editor-toolbar,
+.gallery-editor-block:focus-within > .gallery-editor-toolbar,
+.gallery-editor-toolbar:focus-within { opacity: 1; visibility: visible; pointer-events: auto; }
+.gallery-editor-toolbar button { padding: .3rem .5rem; border-radius: .4rem; background: var(--color-muted); cursor: pointer; }
+.gallery-editor-toolbar button[aria-pressed="true"] { background: var(--color-primary); color: var(--color-primary-foreground); }
+.gallery-editor-toolbar button:disabled { opacity: .4; cursor: default; }
+.gallery-editor-toolbar button:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 2px; }
+
+.gallery-editor-block:hover,
+.gallery-editor-block.is-selected,
+.gallery-editor-block:focus-within { outline: 1px dashed var(--color-primary); outline-offset: 5px; border-radius: .5rem; }
+.image-gallery > .gallery-image-selected { outline: 3px solid var(--color-primary); outline-offset: -3px; box-shadow: inset 0 0 0 5px var(--color-background); }
+.gallery-editor-block.is-dragging { cursor: grabbing; }
+.gallery-editor-block.is-dragging > .gallery-editor-toolbar { visibility: hidden; pointer-events: none; }
+
+.gallery-editor-block:not(:hover):not(.is-selected):not(:focus-within) .gallery-image-selected { outline: none; box-shadow: none; }
+
+.image-gallery--carousel::-webkit-scrollbar { display: none; }
+
+.gallery-editor-block.is-dragging .image-gallery--carousel { scroll-snap-type: none; }
+
+.gallery-drag-preview { margin: 0; pointer-events: none; overflow: hidden; border-radius: .5rem; box-shadow: 0 12px 32px #0004; opacity: .9; }

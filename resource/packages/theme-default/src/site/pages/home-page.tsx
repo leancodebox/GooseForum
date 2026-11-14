@@ -1,5 +1,5 @@
 import type { HomeProps, LayoutPayload } from "@gooseforum/client";
-import { Mail, Plus, UsersRound } from "lucide-react";
+import { Mail, Plus, UsersRound, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@gooseforum/ui/components/button";
 import { ListFilter, ListFilterItem } from "@gooseforum/ui/components/list-filter";
@@ -10,7 +10,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@gooseforum/ui/components/empty";
-import { GooseLink } from "@gooseforum/runtime";
+import { GooseLink, useGooseRuntime, usePublicTopicMax } from "@gooseforum/runtime";
 import { AnnouncementPanel } from "../content/announcement-panel";
 import { SiteListPanel } from "../layout/site-panel";
 import {
@@ -32,6 +32,15 @@ export function HomePageView({
 }) {
   const { t } = useTranslation("home");
   const list = useTopicList(page, pageUrl);
+  const runtime = useGooseRuntime();
+  const latestPublicID = usePublicTopicMax();
+  const hasNewTopics = page.publicMaxTopicId !== undefined && latestPublicID !== undefined && latestPublicID > page.publicMaxTopicId;
+  const refreshTopics = () => {
+    const url = new URL(pageUrl, window.location.origin);
+    url.searchParams.delete("page");
+    url.searchParams.delete("cursor");
+    void runtime.navigate(`${url.pathname}${url.search}`, { replace: true });
+  };
   return (
     <div className="pb-12">
       {layout.viewer.requiresEmailVerification ? (
@@ -88,6 +97,13 @@ export function HomePageView({
               onClick={list.switchMode}
             />
         </TopicListToolbar>
+        {hasNewTopics ? (
+          <div className="border-b px-4 py-2" role="status">
+            <Button variant="outline" className="w-full" disabled={runtime.isNavigating} onClick={refreshTopics}>
+              <RefreshCw data-icon="inline-start" />{t("newTopicsAvailable")}
+            </Button>
+          </div>
+        ) : null}
         <TopicTable
           topics={list.topics}
           showPinned={page.sort === "" || page.sort === "latest"}

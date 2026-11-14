@@ -1,5 +1,6 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  newTopicsAvailable: "新しいトピックがあります。クリックして表示",
   latest: "最新",
   latestReplies: "最新の返信",
   latestPublished: "新着投稿",

@@ -1,3 +1,5 @@
+import { RenderedContent } from "../content/rendered-content";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@gooseforum/ui/components/select";
 import { AttachmentEditor, type AttachmentEditorProps } from "./attachment-editor";
 import {
   useRef,
@@ -95,10 +97,12 @@ export function MarkdownComposer({
   );
   const mode = hasUnsupportedVisualMarkdown(value, sourceVersion) ? "markdown" : selectedMode;
   const [preview, setPreview] = useState(false);
+  const [imageLayout, setImageLayout] = useState("individual");
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<[number, number]>([
     0, 0,
   ]);
+  const internalImageDrag = useRef(false);
   const [dragging, setDragging] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -336,7 +340,9 @@ export function MarkdownComposer({
       setUploadProgress([index + 1, images.length]);
     }
     if (inserted.length) {
-      insertMarkdown(inserted.join("\n"));
+      insertMarkdown(inserted.length > 1 && imageLayout !== "individual" && sourceVersion === 1
+        ? `[gallery mode="${imageLayout}"]\n${inserted.join("\n")}\n[/gallery]`
+        : inserted.join("\n"));
       setMessage(
         t(inserted.length > 1 ? "imagesInserted" : "imageInserted", {
           count: inserted.length,
@@ -370,8 +376,12 @@ export function MarkdownComposer({
   function handlePaste(event: ReactClipboardEvent) {
     handlePasteData(event.clipboardData, () => event.preventDefault());
   }
+  function isInternalDrop(data: DataTransfer) {
+    return internalImageDrag.current || Array.from(data.types).includes("application/x-goose-editor-image");
+  }
   function handleDrop(event: ReactDragEvent) {
     setDragging(false);
+    if (event.defaultPrevented || isInternalDrop(event.dataTransfer)) return;
     const files = Array.from(event.dataTransfer.files).filter((file) =>
       file.type.startsWith("image/"),
     );
@@ -471,6 +481,23 @@ export function MarkdownComposer({
               onChange={(event) => void handleInput(event)}
             />
           </label>
+          {sourceVersion === 1 ? (
+            <Select value={imageLayout} disabled={uploading} onValueChange={setImageLayout}>
+              <SelectTrigger size="sm" aria-label={t("imageLayout")} title={t("imageLayout")}><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="individual">{t("imageIndividual")}</SelectItem>
+                <SelectItem value="grid">{t("imageGrid")}</SelectItem>
+                <SelectItem value="carousel">{t("imageCarousel")}</SelectItem>
+              </SelectContent>
+            </Select>
+          ) : null}
+          {sourceVersion === 1 && mode === "visual" && !preview ? (
+            <Button type="button" variant="ghost" size="sm" title={t("groupImagesHint")}
+              onClick={() => {
+                if (visual.current?.groupImages(imageLayout === "carousel" ? "carousel" : "grid")) setMessage("");
+                else setMessage(t("groupImagesHint"));
+              }}>{t("groupImages")}</Button>
+          ) : null}
           {uploading ? (
             <Badge variant="secondary">
               {t(
@@ -525,7 +552,16 @@ export function MarkdownComposer({
             "relative rounded-lg border bg-background px-3",
             dragging && "ring-2 ring-primary",
           )}
+          onDragStartCapture={(event) => {
+            if (!(event.target instanceof HTMLImageElement)) return;
+            internalImageDrag.current = true;
+            event.dataTransfer.setData("application/x-goose-editor-image", "1");
+          }}
+          onDragEndCapture={() => { internalImageDrag.current = false; setDragging(false); }}
+          onPointerDownCapture={() => { internalImageDrag.current = false; }}
+          onPointerUpCapture={() => { internalImageDrag.current = false; }}
           onDragOver={(event) => {
+            if (isInternalDrop(event.dataTransfer)) return;
             if (
               Array.from(event.dataTransfer.items).some((item) =>
                 item.type.startsWith("image/"),
@@ -548,11 +584,12 @@ export function MarkdownComposer({
               <div
                 data-slot="markdown-composer-preview"
                 className={cn(
-                  "markdown-composer-content markdown-composer-preview typeset typeset-forum gf-prose gf-prose-post px-1 py-4",
+                  "markdown-composer-content markdown-composer-preview px-1 py-4",
                   minHeight,
                 )}
-                dangerouslySetInnerHTML={{ __html: renderMarkdown(value,sourceVersion) }}
-              />
+              >
+                <RenderedContent html={renderMarkdown(value, sourceVersion)} previewImages />
+              </div>
             ) : (
               <p
                 data-slot="markdown-composer-preview"
@@ -566,6 +603,7 @@ export function MarkdownComposer({
             )
           ) : mode === "visual" ? (
             <VisualMarkdownEditor
+                galleryLabels={{ grid: t("imageGrid"), carousel: t("imageCarousel"), ungroup: t("ungroupImages"), moveBefore: t("moveImageBefore"), moveAfter: t("moveImageAfter"), previous: t("imagePrevious"), next: t("imageNext"), moveOut: t("moveImageOut") }}
               ref={visual}
               value={value}
               onChange={onChange}
@@ -584,7 +622,7 @@ export function MarkdownComposer({
                 const files = Array.from(event.dataTransfer?.files || []).filter(
                   (file) => file.type.startsWith("image/"),
                 );
-                if (!files.length) return;
+                if (event.defaultPrevented || !event.dataTransfer || isInternalDrop(event.dataTransfer) || !files.length) return;
                 event.preventDefault();
                 void upload(files);
               }}

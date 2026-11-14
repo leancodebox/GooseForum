@@ -222,11 +222,12 @@ type FooterPayload struct {
 }
 
 type HomeProps struct {
-	Sort         string              `json:"sort"`
-	Tabs         []TabPayload        `json:"tabs"`
-	Topics       []TopicPayload      `json:"topics"`
-	Pagination   PaginationPayload   `json:"pagination"`
-	Announcement AnnouncementPayload `json:"announcement"`
+	PublicMaxTopicID *uint64             `json:"publicMaxTopicId,omitempty"`
+	Sort             string              `json:"sort"`
+	Tabs             []TabPayload        `json:"tabs"`
+	Topics           []TopicPayload      `json:"topics"`
+	Pagination       PaginationPayload   `json:"pagination"`
+	Announcement     AnnouncementPayload `json:"announcement"`
 }
 
 type TabPayload struct {

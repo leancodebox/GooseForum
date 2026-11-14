@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/resource"
 )
 
@@ -9,6 +10,9 @@ import (
 func GetSiteStatus(req component.BetterRequest[GetUnreadCountReq]) component.Response {
 	req.GinContext.Header("Cache-Control", "private, no-store")
 	result := component.DataMap{"deploymentId": resource.DeploymentID()}
+	if id, err := hotdataserve.PublicTopicMaxID(); err == nil {
+		result["publicMaxTopicId"] = id
+	}
 	if req.UserId != 0 {
 		unread := GetUnreadStatus(req)
 		if unread.Data.Code == component.SUCCESS {

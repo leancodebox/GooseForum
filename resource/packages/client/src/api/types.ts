@@ -219,7 +219,7 @@ export interface ImageUploadInitResult {
   }
 }
 
-export interface SiteStatusPayload { deploymentId: string; unread?: UnreadStatusPayload }
+export interface SiteStatusPayload { publicMaxTopicId?: number; deploymentId: string; unread?: UnreadStatusPayload }
 
 export interface GooseSiteApi {
   status(signal?: AbortSignal): Promise<SiteStatusPayload>

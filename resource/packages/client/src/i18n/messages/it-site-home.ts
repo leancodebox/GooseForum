@@ -1,5 +1,6 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  newTopicsAvailable: "Nuovi argomenti disponibili: fai clic per visualizzarli",
   latest: "Recenti",
   latestReplies: "Ultime risposte",
   latestPublished: "Nuove pubblicazioni",

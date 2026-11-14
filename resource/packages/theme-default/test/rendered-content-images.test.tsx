@@ -42,3 +42,19 @@ it("replaces image enhancements when HTML changes and leaves announcements alone
   expect(view.container.querySelector(".gf-content-image")).toBeNull();
   expect(screen.queryByRole("button")).toBeNull();
 });
+
+it("reconnects carousel controls when the content variant replaces its DOM", () => {
+  const i18n = createGooseI18n("en");
+  const html = '<div class="image-gallery image-gallery--carousel" data-gallery="carousel"><p><img src="/one.png"></p><p><img src="/two.png"></p></div>';
+  const content = (variant: "post" | "announcement") => (
+    <I18nextProvider i18n={i18n}><RenderedContent html={html} variant={variant} /></I18nextProvider>
+  );
+  const view = render(content("post"));
+  view.rerender(content("announcement"));
+  const gallery = view.container.querySelector<HTMLElement>('[data-gallery]')!;
+  Object.defineProperties(gallery, { clientWidth: { value: 300 }, scrollLeft: { value: 300, writable: true } });
+  fireEvent.scroll(gallery);
+  expect(screen.getByText("2 / 2")).toBeTruthy();
+  expect(screen.getByRole<HTMLButtonElement>("button", { name: "Next image" }).disabled).toBe(true);
+  expect(screen.getByRole<HTMLButtonElement>("button", { name: "Previous image" }).disabled).toBe(false);
+});

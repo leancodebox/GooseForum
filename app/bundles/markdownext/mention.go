@@ -214,7 +214,14 @@ func (mentionParser) Parse(parent ast.Node, reader text.Reader, context parser.C
 		return nil
 	}
 	line, segment := reader.PeekLine()
-	if protectedByUnknown(reader.Source(), segment.Start, context) {
+	insideGallery := false
+	for node := parent; node != nil; node = node.Parent() {
+		if node.Kind() == KindGallery {
+			insideGallery = true
+			break
+		}
+	}
+	if protectedByUnknown(reader.Source(), segment.Start, context) && !insideGallery {
 		return nil
 	}
 	// Inline HTML tags do not enclose their text in the Markdown AST.

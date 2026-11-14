@@ -16,6 +16,12 @@ func Home(c *gin.Context) {
 	if !ok {
 		return
 	}
+	// Capture before loading the list: a concurrent publication can then only
+	// cause an extra refresh hint, never advance the baseline past unseen data.
+	var publicMax *uint64
+	if id, err := hotdataserve.PublicTopicMaxID(); err == nil {
+		publicMax = &id
+	}
 	audience, cacheable := snapshot.ListCacheAudience()
 	topicPage := hotdataserve.GetLatestTopicsSimpleVoPaginatedForAudience(
 		page,
@@ -25,9 +31,11 @@ func Home(c *gin.Context) {
 		!snapshot.HasGlobalManage(),
 		cacheable,
 	)
+	props := buildHomeProps(component.LoginUserId(c), page, sort, topicPage.Topics, topicPage.HasNext)
+	props.PublicMaxTopicID = publicMax
 	payload := PagePayload{
 		Component: PageComponentHome,
-		Props:     buildHomeProps(component.LoginUserId(c), page, sort, topicPage.Topics, topicPage.HasNext),
+		Props:     props,
 		Meta:      buildHomeMeta(c, page, sort, topicPage.HasNext),
 		Layout:    buildLayout(c, activeKeyForHome(sort)),
 		URL:       buildPageURL(c),

@@ -1,5 +1,18 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  moveImageBefore: "Move image earlier",
+  moveImageAfter: "Move image later",
+  imagePrevious: "Previous image",
+  imageNext: "Next image",
+  moveImageOut: "Move out of group",
+  groupImages: "Group nearby images",
+  groupImagesHint: "Click an image or place the cursor after images to group them. Text paragraphs stay separate.",
+  ungroupImages: "Ungroup images",
+  imageLayout: "Image layout (multiple uploads)",
+  imageIndividual: "Individual images",
+  imageGrid: "Image grid",
+  imageCarousel: "Image carousel",
+
   attachmentsTitle: "Attachments",
   attachmentUpload: "Upload attachment",
   attachmentUploading: "Uploading attachment…",

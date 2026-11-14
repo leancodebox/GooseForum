@@ -1,3 +1,4 @@
+import { galleryDragPlugin, galleryNodeView, groupAdjacentImages, type GalleryLabels } from "../lib/gallery-editor";
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import { mentionQuery } from "@gooseforum/markdown";
 import {
@@ -30,9 +31,10 @@ import {
   type Transaction,
 } from "prosemirror-state";
 import { goToNextCell, tableEditing } from "prosemirror-tables";
-import { EditorView } from "prosemirror-view";
+import { EditorView, Decoration, DecorationSet } from "prosemirror-view";
 import {
   isBoundaryBlock,
+  normalizeGalleryItems,
   parseEditableVisualMarkdown,
   parseVisualMarkdown,
   serializeVisualMarkdown,
@@ -40,6 +42,17 @@ import {
 } from "../lib/visual-markdown-schema";
 
 function restoreBoundaryParagraphs(transaction: Transaction) {
+  const galleries: Array<{ pos: number; node: ProseMirrorNode }> = [];
+  transaction.doc.descendants((node, pos) => {
+    if (node.type.name !== "gallery") return;
+    const normalized = normalizeGalleryItems(node);
+    if (normalized !== node) galleries.push({ pos, node: normalized });
+    return false;
+  });
+  for (const { pos, node } of galleries.reverse()) {
+    const original = transaction.doc.nodeAt(pos)!;
+    transaction.replaceWith(pos + 1, pos + original.nodeSize - 1, node.content);
+  }
   const insertionPoints: number[] = [];
   let position = 0;
   let previousBoundary = false;
@@ -53,7 +66,7 @@ function restoreBoundaryParagraphs(transaction: Transaction) {
     insertionPoints.push(0);
   if (transaction.doc.lastChild && isBoundaryBlock(transaction.doc.lastChild))
     insertionPoints.push(transaction.doc.content.size);
-  if (!insertionPoints.length) return null;
+  if (!insertionPoints.length) return transaction.docChanged ? transaction : null;
   for (const point of [...new Set(insertionPoints)].sort(
     (left, right) => right - left,
   ))
@@ -78,6 +91,7 @@ export type EditorAction =
   | "horizontalRule"
   | "hardBreak";
 export interface VisualMarkdownEditorHandle {
+  groupImages(mode: "grid" | "carousel"): boolean;
   insertMention(id: string, username: string): void;
   focus(): void;
   applyAction(action: EditorAction): void;
@@ -92,6 +106,7 @@ export interface VisualMarkdownEditorHandle {
 export const VisualMarkdownEditor = forwardRef<
   VisualMarkdownEditorHandle,
   {
+    galleryLabels?: GalleryLabels;
     value: string;
     placeholder: string;
     disabled?: boolean;
@@ -104,9 +119,11 @@ export const VisualMarkdownEditor = forwardRef<
     onDrop?(event: DragEvent): void;
   }
 >(function VisualMarkdownEditor(
-  { value, placeholder, disabled = false, editorClassName, onChange, onPaste, onDrop, sourceVersion = 1, onMentionQuery, onMentionKeyDown },
+  { value, galleryLabels, placeholder, disabled = false, editorClassName, onChange, onPaste, onDrop, sourceVersion = 1, onMentionQuery, onMentionKeyDown },
   ref,
 ) {
+  const galleryLabelsRef = useRef(galleryLabels);
+  galleryLabelsRef.current = galleryLabels;
   const root = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const valueRef = useRef(value);
@@ -170,7 +187,17 @@ export const VisualMarkdownEditor = forwardRef<
         }),
         keymap(baseKeymap),
         boundaryParagraphs,
+        galleryDragPlugin,
         tableEditing(),
+        new Plugin({ props: { decorations(state) {
+          const { $from } = state.selection;
+          for (let depth = $from.depth; depth > 0; depth--) {
+            if ($from.node(depth - 1).type.name !== "gallery") continue;
+            const start = $from.before(depth);
+            return DecorationSet.create(state.doc, [Decoration.node(start, start + $from.node(depth).nodeSize, { class: "gallery-image-selected" })]);
+          }
+          return DecorationSet.empty;
+        } } }),
       ],
     });
   }
@@ -178,6 +205,7 @@ export const VisualMarkdownEditor = forwardRef<
     if (!root.current) return;
     const view = new EditorView(root.current, {
       state: createState(valueRef.current),
+      nodeViews: { gallery: (node, editor, getPos) => galleryNodeView(node, editor, getPos, () => galleryLabelsRef.current ?? { grid: "Grid", carousel: "Carousel", ungroup: "Ungroup", moveBefore: "Move image earlier", moveAfter: "Move image later", previous: "Previous image", next: "Next image", moveOut: "Move out of group" }) },
       dispatchTransaction(transaction) {
         const next = view.state.apply(transaction);
         view.updateState(next);
@@ -237,6 +265,13 @@ export const VisualMarkdownEditor = forwardRef<
   useImperativeHandle(
     ref,
     () => ({
+      groupImages: (mode) => {
+        const view = viewRef.current;
+        if (!view || versionRef.current === 0 || !view.editable) return false;
+        const changed = groupAdjacentImages(mode)(view.state, view.dispatch, view);
+        if (changed) view.focus();
+        return changed;
+      },
       focus: () => viewRef.current?.focus(),
       applyAction,
       insertMarkdown,

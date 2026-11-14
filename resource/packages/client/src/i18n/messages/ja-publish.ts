@@ -2,6 +2,19 @@
 import en from "./en-publish.js";
 export default {
   ...en,
+  moveImageBefore: "画像を前へ",
+  moveImageAfter: "画像を後ろへ",
+  imagePrevious: "前の画像",
+  imageNext: "次の画像",
+  moveImageOut: "グループから取り出す",
+  groupImages: "隣接する画像をまとめる",
+  groupImagesHint: "画像をクリックするか画像の直後にカーソルを置いてください。文章はまとめません。",
+  ungroupImages: "グループ解除",
+  imageLayout: "画像の配置（複数アップロード）",
+  imageIndividual: "個別の画像",
+  imageGrid: "画像グリッド",
+  imageCarousel: "画像カルーセル",
+
   attachmentsTitle: "添付ファイル",
   attachmentUpload: "ファイルを添付",
   attachmentUploading: "添付ファイルをアップロード中…",

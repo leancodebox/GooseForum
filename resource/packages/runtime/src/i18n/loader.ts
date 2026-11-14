@@ -141,7 +141,7 @@ export function goosePageNamespaces(component: string) {
     "access-groups.index": ["accessGroups"],
     "error.index": ["error"],
     "moderation.index": ["moderation"],
-    "publish.index": ["publish"],
+    "publish.index": ["publish", "topic"],
     "topic.detail": ["topic", "publish"],
     "theme.preview": ["themePreview", "topic", "publish"],
     "links.index": ["links"],

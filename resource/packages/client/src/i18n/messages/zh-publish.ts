@@ -1,5 +1,18 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  moveImageBefore: "前移图片",
+  moveImageAfter: "后移图片",
+  imagePrevious: "上一张",
+  imageNext: "下一张",
+  moveImageOut: "移出图片组",
+  groupImages: "合并相邻图片",
+  groupImagesHint: "点击图片或将光标放在图片后，再合并相邻的多张图片。文字段落不会被合并。",
+  ungroupImages: "解除分组",
+  imageLayout: "图片排列（多图上传）",
+  imageIndividual: "逐张图片",
+  imageGrid: "网格图片组",
+  imageCarousel: "轮播图片组",
+
   attachmentsTitle: "附件",
   attachmentUpload: "上传附件",
   attachmentUploading: "正在上传附件…",

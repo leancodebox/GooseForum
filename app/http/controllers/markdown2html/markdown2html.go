@@ -20,7 +20,7 @@ import (
 )
 
 func GetPostVersion() uint32 {
-	return 6
+	return 7
 }
 
 var md = goldmark.New(

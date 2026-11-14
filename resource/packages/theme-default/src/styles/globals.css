@@ -50,6 +50,9 @@
   .visual-markdown-editor .ProseMirror { position: relative; white-space: pre-wrap; word-wrap: break-word; }
   .markdown-composer-content > :first-child { margin-block-start: 0; }
   .visual-markdown-editor .ProseMirror:has(> p:only-child > br.ProseMirror-trailingBreak:only-child)::before { position: absolute; top: 1rem; left: 0.25rem; color: var(--muted-foreground); content: attr(data-placeholder); pointer-events: none; }
+  .visual-markdown-editor [contenteditable="true"] img { cursor: default; }
+  .visual-markdown-editor [contenteditable="true"] .image-gallery img[src] { cursor: grab; }
+  .visual-markdown-editor .gallery-editor-block.is-dragging img[src] { cursor: grabbing; }
   .visual-markdown-editor .ProseMirror-selectednode { outline: 2px solid var(--primary); outline-offset: 2px; }
   .visual-markdown-editor :where(th, td) { position: relative; }
   .visual-markdown-editor .selectedCell::after { position: absolute; inset: 0; background: color-mix(in oklch, var(--primary) 14%, transparent); content: ""; pointer-events: none; }

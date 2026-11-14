@@ -285,6 +285,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@dnd-kit/core':
+        specifier: ^6.3.1
+        version: 6.3.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@gooseforum/markdown':
         specifier: workspace:*
         version: link:../markdown

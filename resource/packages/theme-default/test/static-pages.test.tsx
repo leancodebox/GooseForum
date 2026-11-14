@@ -435,9 +435,9 @@ describe("AppShell and static pages", () => {
       await vi.advanceTimersByTimeAsync(30_000);
       expect(unread).not.toHaveBeenCalled();
       fireEvent(window, new CustomEvent(unreadStatusEvent, { detail: { messages: true } }));
-      expect(screen.getByRole("button", { name: "alice", exact: true }).querySelector(".bg-destructive")).not.toBeNull();
+      expect(screen.getByRole("button", { name: "alice" }).querySelector(".bg-destructive")).not.toBeNull();
       fireEvent(window, new CustomEvent(unreadStatusEvent, { detail: { messages: false, notifications: false } }));
-      expect(screen.getByRole("button", { name: "alice", exact: true }).querySelector(".bg-destructive")).toBeNull();
+      expect(screen.getByRole("button", { name: "alice" }).querySelector(".bg-destructive")).toBeNull();
     } finally {
       vi.useRealTimers();
     }
@@ -1638,7 +1638,7 @@ describe("AppShell and static pages", () => {
     const preview = document.querySelector(
       '[data-slot="markdown-composer-preview"]',
     );
-    expect(preview?.classList.contains("typeset-forum")).toBe(true);
+    expect(preview?.querySelector('[data-content-variant="post"]')?.classList.contains("typeset-forum")).toBe(true);
     expect(preview?.classList.contains("markdown-composer-content")).toBe(true);
     expect(preview?.classList.contains("px-1")).toBe(true);
     expect(preview?.classList.contains("py-4")).toBe(true);

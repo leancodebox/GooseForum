@@ -1,5 +1,6 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  newTopicsAvailable: "有新帖子，点击查看",
   latest: "最新",
   latestReplies: "最新回复",
   latestPublished: "最新发布",

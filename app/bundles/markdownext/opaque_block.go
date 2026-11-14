@@ -12,15 +12,22 @@ import (
 )
 
 var KindOpaqueBlock = ast.NewNodeKind("ForumOpaqueBlock")
+var KindGallery = ast.NewNodeKind("ForumGallery")
 
 // OpaqueBlock keeps future extension syntax literal, including its contents.
 type OpaqueBlock struct {
 	ast.BaseBlock
-	stop int
+	stop        int
+	galleryMode string
 }
 
-func (node *OpaqueBlock) Kind() ast.NodeKind { return KindOpaqueBlock }
-func (node *OpaqueBlock) IsRaw() bool        { return true }
+func (node *OpaqueBlock) Kind() ast.NodeKind {
+	if node.galleryMode != "" {
+		return KindGallery
+	}
+	return KindOpaqueBlock
+}
+func (node *OpaqueBlock) IsRaw() bool { return true }
 func (node *OpaqueBlock) Dump(source []byte, level int) {
 	ast.DumpHelper(node, source, level, nil, nil)
 }
@@ -78,7 +85,7 @@ func (opaqueBlockParser) Open(parent ast.Node, reader text.Reader, context parse
 	if offset < 0 || offset >= len(line) {
 		return nil, parser.NoChildren
 	}
-	name, _, end, valid := ParseTag(string(line[offset:]))
+	name, attrs, end, valid := ParseTag(string(line[offset:]))
 	if !valid || name == "mention" || !util.IsBlank(line[offset+end:]) {
 		return nil, parser.NoChildren
 	}
@@ -106,6 +113,9 @@ func (opaqueBlockParser) Open(parent ast.Node, reader text.Reader, context parse
 		return nil, parser.NoChildren
 	}
 	node := &OpaqueBlock{stop: stop}
+	if name == "gallery" && len(attrs) == 1 && (attrs["mode"] == "grid" || attrs["mode"] == "carousel") {
+		node.galleryMode = attrs["mode"]
+	}
 	segment.Start = start
 	node.Lines().Append(segment)
 	reader.AdvanceToEOL()
@@ -122,13 +132,38 @@ func (opaqueBlockParser) Continue(block ast.Node, reader text.Reader, context pa
 	}
 	return parser.Continue | parser.NoChildren
 }
-func (opaqueBlockParser) Close(ast.Node, text.Reader, parser.Context) {}
-func (opaqueBlockParser) CanInterruptParagraph() bool                 { return false }
-func (opaqueBlockParser) CanAcceptIndentedLine() bool                 { return false }
+func (opaqueBlockParser) Close(block ast.Node, reader text.Reader, context parser.Context) {
+	node := block.(*OpaqueBlock)
+	if node.galleryMode == "" {
+		return
+	}
+	// Each nonblank line is one item; keep normal image AST nodes so attachment
+	// extraction, image limits and URL normalization still apply.
+	for i := 1; i < node.Lines().Len()-1; i++ {
+		segment := node.Lines().At(i)
+		if util.IsBlank(segment.Value(reader.Source())) {
+			continue
+		}
+		paragraph := ast.NewParagraph()
+		paragraph.Lines().Append(segment)
+		node.AppendChild(node, paragraph)
+	}
+}
+func (opaqueBlockParser) CanInterruptParagraph() bool { return false }
+func (opaqueBlockParser) CanAcceptIndentedLine() bool { return false }
 
 type opaqueBlockRenderer struct{}
 
 func (opaqueBlockRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
+	reg.Register(KindGallery, func(w util.BufWriter, source []byte, block ast.Node, entering bool) (ast.WalkStatus, error) {
+		if entering {
+			mode := block.(*OpaqueBlock).galleryMode
+			_, _ = w.WriteString("<div class=\"image-gallery image-gallery--" + mode + "\" data-gallery=\"" + mode + "\" tabindex=\"0\">\n")
+		} else {
+			_, _ = w.WriteString("</div>\n")
+		}
+		return ast.WalkContinue, nil
+	})
 	reg.Register(KindOpaqueBlock, func(w util.BufWriter, source []byte, block ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			_, _ = w.WriteString("<p>" + html.EscapeString(string(block.Text(source))) + "</p>\n")

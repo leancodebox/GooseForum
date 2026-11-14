@@ -2,6 +2,19 @@
 import en from "./en-publish.js";
 export default {
   ...en,
+  moveImageBefore: "Sposta immagine prima",
+  moveImageAfter: "Sposta immagine dopo",
+  imagePrevious: "Immagine precedente",
+  imageNext: "Immagine successiva",
+  moveImageOut: "Sposta fuori dal gruppo",
+  groupImages: "Raggruppa immagini vicine",
+  groupImagesHint: "Fai clic su un’immagine o posiziona il cursore dopo le immagini. I paragrafi di testo restano separati.",
+  ungroupImages: "Separa immagini",
+  imageLayout: "Disposizione immagini (caricamento multiplo)",
+  imageIndividual: "Immagini singole",
+  imageGrid: "Griglia immagini",
+  imageCarousel: "Carosello immagini",
+
   attachmentsTitle: "Allegati",
   attachmentUpload: "Carica allegato",
   attachmentUploading: "Caricamento allegato…",

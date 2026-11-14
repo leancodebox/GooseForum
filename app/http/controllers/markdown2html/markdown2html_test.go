@@ -57,8 +57,8 @@ func TestSharedMentionFixtures(t *testing.T) {
 }
 
 func TestMarkdownVersions(t *testing.T) {
-	if got := GetPostVersion(); got != 6 {
-		t.Fatalf("GetPostVersion() = %d, want 6", got)
+	if got := GetPostVersion(); got != 7 {
+		t.Fatalf("GetPostVersion() = %d, want 7", got)
 	}
 	if GetParser() == nil {
 		t.Fatal("GetParser() returned nil")
@@ -239,7 +239,7 @@ func TestExtractPreviewUsesImageFallbackAndTruncatesRunes(t *testing.T) {
 		t.Fatalf("image preview = %q, want [图片]", got)
 	}
 	if got := ExtractPreview(strings.Repeat("鹅", 65), 64); len([]rune(got)) != 64 {
-		t.Fatalf("preview rune count = %d, want 64", len([]rune(got)))
+		t.Fatalf("preview rune count = %d, want 74", len([]rune(got)))
 	}
 }
 

@@ -82,6 +82,7 @@ interface SiteMessages {
     emptyDescription: string;
   };
   home: {
+    newTopicsAvailable: string;
     latest: string;
     latestReplies: string;
     latestPublished: string;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import type { GooseSiteApi } from '@gooseforum/client'
-import { announceUnreadStatus, unreadStatusEvent } from '@gooseforum/runtime'
+import { announceUnreadStatus, unreadStatusEvent, announcePublicTopicMax } from '@gooseforum/runtime'
 
 export function SiteStatusNotice({ api, initialDeployment, admin = false }: {
   api: GooseSiteApi
@@ -34,6 +34,7 @@ export function SiteStatusNotice({ api, initialDeployment, admin = false }: {
       try {
         const status = await api.status(controller.signal)
         if (stopped || controller.signal.aborted) return
+        announcePublicTopicMax(status.publicMaxTopicId)
         if (status.unread && generation === unreadGeneration) announceUnreadStatus(status.unread)
         if (typeof status.deploymentId !== 'string' || !status.deploymentId) return
         baseline ??= status.deploymentId

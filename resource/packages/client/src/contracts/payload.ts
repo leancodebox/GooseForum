@@ -293,6 +293,7 @@ export interface CursorPagination {
 }
 
 export interface HomeProps {
+  publicMaxTopicId?: number
   sort: string
   tabs: Array<{ key: string; label?: string; url: string; active: boolean }>
   topics: TopicPayload[]
