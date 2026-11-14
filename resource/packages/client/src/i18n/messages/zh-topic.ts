@@ -20,7 +20,7 @@ export default {
   editedAt: "已编辑于 {time}",
   viewHistory: "查看编辑历史",
   historyTitle: "编辑历史",
-  historyDescription: "帖子 #{no} 的历史版本",
+  historyDescription: "帖子 #{no} 的正文历史，最多保留最近 10 条；时间为存档时间",
   historyRevision: "修订 {no}",
   historyLoadMore: "加载更多历史",
   historyEmpty: "暂无可查看的编辑历史。",

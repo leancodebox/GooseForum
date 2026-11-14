@@ -20,7 +20,7 @@ export default {
   editedAt: "Edited at {time}",
   viewHistory: "View edit history",
   historyTitle: "Edit history",
-  historyDescription: "Previous versions of post #{no}",
+  historyDescription: "Up to 10 previous body versions of post #{no}; timestamps show when archived",
   historyRevision: "Revision {no}",
   historyLoadMore: "Load more history",
   historyEmpty: "No edit history is available.",

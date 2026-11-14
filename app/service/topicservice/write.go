@@ -7,7 +7,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/models/forum/attachments"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
-	"github.com/leancodebox/GooseForum/app/models/forum/postRevisions"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
@@ -42,8 +41,8 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 	}
 	oldPublished := false
 	oldCategoryIDs := []uint64{}
+	var previousPost posts.Entity
 	if err := conn.Transaction(func(tx *gorm.DB) error {
-		var previousPost posts.Entity
 		if !input.Create {
 			var stored topics.Entity
 			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
@@ -112,23 +111,6 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 			if err := tx.Save(input.FirstPost).Error; err != nil {
 				return err
 			}
-			if !input.ReviewOnly && previousPost.Content != input.FirstPost.Content {
-				revisionNo, err := postRevisions.NextRevisionNoWithDB(tx, input.FirstPost.Id)
-				if err != nil {
-					return err
-				}
-				if err := postRevisions.CreateSnapshotWithDB(tx, postRevisions.SnapshotInput{
-					PostId:             previousPost.Id,
-					RevisionNo:         revisionNo,
-					AuthorId:           previousPost.UserId,
-					Content:            previousPost.Content,
-					SourceVersion:      previousPost.SourceVersion,
-					ModerationVersion:  previousPost.ModerationVersion,
-					VisibilitySnapshot: postRevisions.VisibilitySnapshot(previousPost.ProcessStatus),
-				}); err != nil {
-					return err
-				}
-			}
 		}
 		if err := attachments.BindWithDB(tx, input.FirstPost.UserId, input.FirstPost.Id, input.FirstPost.Attachments); err != nil {
 			return err
@@ -139,6 +121,9 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 		return topicCategoryIndex.ReplaceTopicCategoriesWithDB(tx, input.Topic.Id, categoryIDs)
 	}); err != nil {
 		return err
+	}
+	if !input.Create && !input.ReviewOnly {
+		posts.RecordRevisionBestEffort(conn, previousPost, *input.FirstPost)
 	}
 	topicrank.Notify(input.Topic.Id)
 	return adjustCategoryTopicCounts(conn, oldPublished, oldCategoryIDs, isCountedTopic(input.Topic), categoryIDs)

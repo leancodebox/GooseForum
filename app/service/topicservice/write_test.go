@@ -224,3 +224,27 @@ func openTopicWriteDB(t *testing.T) *gorm.DB {
 	}
 	return conn
 }
+
+func TestFirstPostEditSurvivesHistoryFailure(t *testing.T) {
+	conn := openTopicWriteDB(t)
+	topic := &topics.Entity{Title: "editable", UserId: 1, Status: 1}
+	post := &posts.Entity{UserId: 1, Content: "before"}
+	if err := SaveTopicAndFirstPostWithDB(conn, FirstPostWrite{Topic: topic, FirstPost: post, CategoryIDs: []uint64{3}, Create: true}); err != nil {
+		t.Fatal(err)
+	}
+	if err := conn.Migrator().DropTable(&postRevisions.Entity{}); err != nil {
+		t.Fatal(err)
+	}
+	expected := topic.ModerationVersion
+	post.Content = "after"
+	if err := SaveTopicAndFirstPostWithDB(conn, FirstPostWrite{Topic: topic, FirstPost: post, CategoryIDs: []uint64{3}, ExpectedVersion: &expected}); err != nil {
+		t.Fatal(err)
+	}
+	var stored posts.Entity
+	if err := conn.First(&stored, post.Id).Error; err != nil {
+		t.Fatal(err)
+	}
+	if stored.Content != "after" {
+		t.Fatalf("content=%q", stored.Content)
+	}
+}

@@ -5,7 +5,6 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 const tableName = "post_revisions"
@@ -101,24 +100,4 @@ func VisibilitySnapshot(processStatus int8) string {
 		return "visible"
 	}
 	return "hidden"
-}
-
-// NextRevisionNoWithDB must run inside the same transaction as the post edit.
-// The post row is the serialization point, so callers do not need a separate
-// per-post sequence table or a database-specific upsert expression.
-func NextRevisionNoWithDB(db *gorm.DB, postID uint64) (uint64, error) {
-	if db == nil || postID == 0 {
-		return 0, gorm.ErrInvalidData
-	}
-	var lock struct{ Id uint64 }
-	if err := db.Table("posts").Clauses(clause.Locking{Strength: "UPDATE"}).
-		Select("id").Where("id = ?", postID).First(&lock).Error; err != nil {
-		return 0, err
-	}
-	var current uint64
-	if err := db.Model(&Entity{}).Where("post_id = ?", postID).
-		Select("COALESCE(MAX(revision_no), 0)").Scan(&current).Error; err != nil {
-		return 0, err
-	}
-	return current + 1, nil
 }

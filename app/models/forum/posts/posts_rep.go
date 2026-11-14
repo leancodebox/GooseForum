@@ -6,10 +6,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/attachments"
-	"github.com/leancodebox/GooseForum/app/models/forum/postRevisions"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 func SaveOrCreateById(entity *Entity) int64 {
@@ -75,14 +73,19 @@ func SaveReviewedWithRevisionWithDB(db *gorm.DB, entity *Entity, version uint64)
 }
 
 func saveReviewedWithDB(db *gorm.DB, entity *Entity, version uint64, recordRevision bool) error {
-	err := db.Transaction(func(tx *gorm.DB) error {
-		var previous Entity
+	// A single conditional update needs no cross-step transaction. Attachment
+	// claims still require atomicity with the post that references them.
+	var previous Entity
+	write := func(conn *gorm.DB) error {
 		if recordRevision {
-			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&previous, entity.Id).Error; err != nil {
+			if err := conn.First(&previous, entity.Id).Error; err != nil {
 				return err
 			}
+			if previous.ModerationVersion != version {
+				return ErrVersionConflict
+			}
 		}
-		result := tx.Model(&Entity{}).Where("id = ? AND moderation_version = ?", entity.Id, version).
+		result := conn.Model(&Entity{}).Where("id = ? AND moderation_version = ?", entity.Id, version).
 			Select("attachments", "content", "source_version", "legacy_mention_ids", "rendered_html", "rendered_version", "process_status", "moderation_status", "moderation_reason", "moderation_version", "moderated_at", "updated_at", "published_at").Updates(entity)
 		if result.Error != nil {
 			return result.Error
@@ -90,28 +93,21 @@ func saveReviewedWithDB(db *gorm.DB, entity *Entity, version uint64, recordRevis
 		if result.RowsAffected == 0 {
 			return ErrVersionConflict
 		}
-		if recordRevision && previous.Content != entity.Content {
-			revisionNo, err := postRevisions.NextRevisionNoWithDB(tx, entity.Id)
-			if err != nil {
-				return err
-			}
-			if err := postRevisions.CreateSnapshotWithDB(tx, postRevisions.SnapshotInput{
-				PostId:             previous.Id,
-				RevisionNo:         revisionNo,
-				AuthorId:           previous.UserId,
-				Content:            previous.Content,
-				SourceVersion:      previous.SourceVersion,
-				ModerationVersion:  previous.ModerationVersion,
-				VisibilitySnapshot: postRevisions.VisibilitySnapshot(previous.ProcessStatus),
-			}); err != nil {
-				return err
-			}
-		}
-		return attachments.BindWithDB(tx, entity.UserId, entity.Id, entity.Attachments)
-	})
+		return attachments.BindWithDB(conn, entity.UserId, entity.Id, entity.Attachments)
+	}
+	var err error
+	if len(entity.Attachments) > 0 {
+		err = db.Transaction(write)
+	} else {
+		err = write(db.Session(&gorm.Session{SkipDefaultTransaction: true}))
+	}
 	if err != nil {
 		return err
 	}
+	if recordRevision {
+		RecordRevisionBestEffort(db, previous, *entity)
+	}
+
 	topicrank.Notify(entity.TopicId)
 	return nil
 }
