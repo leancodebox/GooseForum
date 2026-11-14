@@ -1040,35 +1040,37 @@ export function TopicPageView({
         open={Boolean(historyPost)}
         onOpenChange={(open) => !open && setHistoryPost(undefined)}
       >
-        <DialogContent className="max-h-[min(80dvh,48rem)] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="flex max-h-[min(85dvh,48rem)] min-w-0 flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
+          <DialogHeader className="min-w-0 shrink-0 border-b p-4 pr-12">
             <DialogTitle>{t("historyTitle")}</DialogTitle>
-            <DialogDescription>{historyPost ? t("historyDescription", { no: historyPost.postNo }) : null}</DialogDescription>
+            <DialogDescription className="whitespace-normal leading-relaxed [overflow-wrap:anywhere]">{historyPost ? t("historyDescription", { no: historyPost.postNo }) : null}</DialogDescription>
           </DialogHeader>
-          {historyError ? (
-            <Alert variant="destructive"><AlertDescription>{t("historyLoadFailed")}</AlertDescription></Alert>
-          ) : historyLoading && historyItems.length === 0 ? (
-            <div className="flex justify-center py-8"><Spinner /></div>
-          ) : historyItems.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">{t("historyEmpty")}</p>
-          ) : (
-            <div className="space-y-3">
-              {historyItems.map((revision) => (
-                <article key={`${revision.postId}-${revision.revisionNo}`} className="rounded-lg border p-3">
-                  <div className="mb-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                    <span>{t("historyRevision", { no: revision.revisionNo })}</span>
-                    <time dateTime={revision.createdAt}>{formatDate(revision.createdAt, runtime.locale)}</time>
-                  </div>
-                  <pre className="whitespace-pre-wrap break-words font-sans text-sm">{revision.content}</pre>
-                </article>
-              ))}
-              {historyHasMore ? (
-                <Button variant="outline" className="w-full" disabled={historyLoading} onClick={() => historyPost && void loadHistory(historyPost.id, historyCursor, true)}>
-                  {historyLoading ? <Spinner data-icon="inline-start" /> : null}{t("historyLoadMore")}
-                </Button>
-              ) : null}
-            </div>
-          )}
+          <div className="min-h-0 min-w-0 overflow-y-auto overscroll-contain p-4">
+            {historyError ? (
+              <Alert variant="destructive"><AlertDescription>{t("historyLoadFailed")}</AlertDescription></Alert>
+            ) : historyLoading && historyItems.length === 0 ? (
+              <div className="flex justify-center py-8"><Spinner /></div>
+            ) : historyItems.length === 0 ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">{t("historyEmpty")}</p>
+            ) : (
+              <div className="min-w-0 space-y-3">
+                {historyItems.map((revision) => (
+                  <article key={`${revision.postId}-${revision.revisionNo}`} className="min-w-0 rounded-lg border p-3">
+                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+                      <span className="shrink-0">{t("historyRevision", { no: revision.revisionNo })}</span>
+                      <time className="min-w-0 [overflow-wrap:anywhere]" dateTime={revision.createdAt}>{formatDate(revision.createdAt, runtime.locale)}</time>
+                    </div>
+                    <pre className="m-0 max-w-full whitespace-pre-wrap font-sans text-sm leading-relaxed [overflow-wrap:anywhere]">{revision.content}</pre>
+                  </article>
+                ))}
+                {historyHasMore ? (
+                  <Button variant="outline" className="w-full" disabled={historyLoading} onClick={() => historyPost && void loadHistory(historyPost.id, historyCursor, true)}>
+                    {historyLoading ? <Spinner data-icon="inline-start" /> : null}{t("historyLoadMore")}
+                  </Button>
+                ) : null}
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
       <Dialog

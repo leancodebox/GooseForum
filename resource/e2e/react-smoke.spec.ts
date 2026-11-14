@@ -1157,14 +1157,14 @@ test('reply transitions preserve the minimized draft and existing fresh-reply be
   await expect(panel.locator('[contenteditable="true"]')).toHaveText('')
 })
 
-test('loads post edit history only after the history action is opened', async ({ page }) => {
+test('loads post edit history only after the history action is opened', async ({ page }, testInfo) => {
   let historyRequests = 0
   await page.route('**/api/forum/posts/revisions**', async route => {
     historyRequests++
     await route.fulfill({ json: {
       code: 0,
       result: {
-        items: [{ postId: 61, revisionNo: 1, content: 'Original body', createdAt: '2026-09-14T08:00:00Z' }],
+        items: Array.from({ length: 10 }, (_, index) => ({ postId: 61, revisionNo: 10 - index, content: `Original body\n${'LongUnbrokenText'.repeat(30)}\n${'More content\n'.repeat(12)}`, createdAt: '2026-09-14T08:00:00Z' })),
         nextCursor: 0,
         hasMore: false,
       },
@@ -1177,6 +1177,19 @@ test('loads post edit history only after the history action is opened', async ({
   await page.getByRole('button', { name: 'View edit history' }).click()
   await expect(page.getByRole('dialog', { name: 'Edit history' })).toContainText('Original body')
   expect(historyRequests).toBe(1)
+  const dialog = page.getByRole('dialog', { name: 'Edit history' })
+  const dimensions = await dialog.locator('.overflow-y-auto').evaluate(element => ({ width: element.clientWidth, scroll: element.scrollWidth }))
+  expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.width)
+  await dialog.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+  const titleBefore = await dialog.getByRole('heading').boundingBox()
+  await dialog.locator('.overflow-y-auto').evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect(dialog.locator('article').last()).toBeInViewport()
+  expect(Math.abs((await dialog.getByRole('heading').boundingBox())!.y - titleBefore!.y)).toBeLessThan(1)
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeVisible()
+  await dialog.locator('.overflow-y-auto').evaluate(element => { element.scrollTop = 0 })
+  await page.screenshot({ path: testInfo.outputPath('edit-history.png') })
+  await dialog.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(dialog).toHaveCount(0)
 })
 
 test('settings underline follows variable-width tabs, keyboard selection and resize', async ({ page }) => {
