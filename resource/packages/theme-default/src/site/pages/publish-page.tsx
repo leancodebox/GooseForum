@@ -80,6 +80,7 @@ export function PublishPageView({ page, layout }: { page: PublishPageProps; layo
   const canPublish =
     page.topic.topicStatus === 1 ||
     selected.every((category) => category.canCreate);
+  const registerNavigationBlocker = runtime.registerNavigationBlocker;
 
   useEffect(() => {
     function beforeUnload(event: BeforeUnloadEvent) {
@@ -94,7 +95,7 @@ export function PublishPageView({ page, layout }: { page: PublishPageProps; layo
       else allowNavigation.current = true;
     };
     window.addEventListener("goose:before-logout", beforeLogout);
-    const remove = runtime.registerNavigationBlocker?.((href) => {
+    const remove = registerNavigationBlocker?.((href) => {
       if (allowNavigation.current || !hasChangesRef.current) return true;
       setPendingHref(href);
       return new Promise<boolean>((resolve) => {
@@ -108,7 +109,7 @@ export function PublishPageView({ page, layout }: { page: PublishPageProps; layo
       remove?.();
       leaveResolver.current?.(true);
     };
-  }, [runtime.registerNavigationBlocker, t]);
+  }, [registerNavigationBlocker, t]);
 
   function chooseCategory(category: PublishCategoryPayload) {
     setValidation(false);

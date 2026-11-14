@@ -1,0 +1,13 @@
+diff --git a/package.json b/package.json
+index e38a3dfff5f3edc439fb970d9f00aaa51ff73275..0d65f07d1785820bde5695b49b9d7b455424f1f1 100644
+--- a/package.json
++++ b/package.json
+@@ -63,7 +63,7 @@
+     "dompurify": "^3.3.3",
+     "es-toolkit": "^1.45.1",
+     "fastdom": "1.0.12",
+-    "katex": "^0.16.47",
++    "katex": "^0.18.2",
+     "khroma": "^2.1.0",
+     "marked": "^16.3.0",
+     "roughjs": "^4.6.6",

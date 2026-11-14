@@ -1,5 +1,6 @@
 import { AdminPage } from '../components/admin-page'
-import { useCallback, useEffect, useState } from "react";
+import { errorMessage } from '../error-message'
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { AdminBadge, GooseAdminApi } from "@gooseforum/client";
 import { Badge } from "@gooseforum/ui/components/badge";
 import { Button } from "@gooseforum/ui/components/button";
@@ -36,7 +37,7 @@ import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Switch } from "@gooseforum/ui/components/switch";
 import { Textarea } from "@gooseforum/ui/components/textarea";
 import { Edit3, Plus, RefreshCw, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@gooseforum/ui/components/sonner";
 import type { AssetTextKey } from "../assets-i18n";
 type Text = (key: AssetTextKey) => string;
 const colors = [
@@ -88,7 +89,7 @@ export function BadgesManagementPage({
     try {
       setItems(await api.assets.badges());
     } catch (reason) {
-      setError(message(reason, text("loadFailed")));
+      setError(errorMessage(reason, text("loadFailed")));
     } finally {
       setLoading(false);
     }
@@ -96,6 +97,17 @@ export function BadgesManagementPage({
   useEffect(() => {
     void load();
   }, [load]);
+  const counts = useMemo(
+    () =>
+      items.reduce(
+        (result, item) => {
+          result[item.type] += 1;
+          return result;
+        },
+        { system: 0, custom: 0 } as Record<AdminBadge["type"], number>,
+      ),
+    [items],
+  );
   return (
     <AdminPage>
       <header className="flex items-center justify-between gap-3">
@@ -111,10 +123,10 @@ export function BadgesManagementPage({
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
           <Badge variant="secondary">
-            {text("system")} {items.filter((x) => x.type === "system").length}
+            {text("system")} {counts.system}
           </Badge>
           <Badge variant="outline">
-            {text("custom")} {items.filter((x) => x.type === "custom").length}
+            {text("custom")} {counts.custom}
           </Badge>
         </div>
         <Button
@@ -251,7 +263,7 @@ function BadgeEditor({
       onClose();
       await onSaved();
     } catch (r) {
-      setError(message(r, text("saveFailed")));
+      setError(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -420,7 +432,7 @@ function DeleteBadge({
       onClose();
       await onDeleted();
     } catch (r) {
-      toast.error(message(r, text("saveFailed")));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -460,7 +472,4 @@ function AssetEmpty({ title, icon }: { title: string; icon: React.ReactNode }) {
       </EmptyHeader>
     </Empty>
   );
-}
-function message(r: unknown, f: string) {
-  return r instanceof Error && r.message ? r.message : f;
 }

@@ -425,7 +425,11 @@ test.beforeEach(async ({ page }) => {
       return
     }
     if (route.request().url().includes('/api/forum/chat/messages')) {
-      await route.fulfill({ json: { code: 0, result: chatMessages } })
+      const request = route.request().postDataJSON() as { afterId?: number }
+      const result = request.afterId
+        ? { ...chatMessages, list: [{ ...chatMessages.list[0], id: 5, content: 'A new message arrived.', createdAt: '2026-09-16T08:05:00Z' }], latestId: 5 }
+        : chatMessages
+      await route.fulfill({ json: { code: 0, result } })
       return
     }
     if (route.request().url().includes('/api/forum/topics/write')) {
@@ -796,6 +800,9 @@ test('loads the admin dashboard shell and deferred chart without accessibility r
   page.on('console', message => {
     if (message.type() === 'error') errors.push(message.text())
   })
+  await page.route('https://api.github.com/repos/leancodebox/GooseForum/releases', route =>
+    route.fulfill({ json: [] }),
+  )
 
   await page.goto('/admin?lang=en')
   await expect(page).toHaveTitle('Dashboard - GooseForum')
@@ -905,6 +912,25 @@ test('keeps short-message avatars inside every message row', async ({ page }, te
     body: await page.screenshot({ fullPage: false }),
     contentType: 'image/png',
   })
+})
+
+test('refreshes the active chat with the after cursor', async ({ page }) => {
+  await page.clock.install()
+  const requests: number[] = []
+  page.on('request', request => {
+    if (request.url().includes('/api/forum/chat/messages')) {
+      const body = request.postDataJSON() as { afterId?: number }
+      requests.push(body.afterId || 0)
+    }
+  })
+  await page.goto('/messages?userId=9&lang=en')
+  await expect(page.locator('[data-slot="message-scroller-item"]')).toHaveCount(4)
+  await page.clock.fastForward(15_000)
+  await expect.poll(() => requests).toEqual([0, 4])
+  await expect(page.getByRole('region', { name: 'Private conversation' }).getByText('A new message arrived.')).toBeVisible()
+  await page.clock.fastForward(15_000)
+  await expect.poll(() => requests).toEqual([0, 4, 5])
+  await expect(page.getByRole('region', { name: 'Private conversation' }).getByText('A new message arrived.')).toHaveCount(1)
 })
 
 test('edits, previews, and saves an announcement in Markdown', async ({ page }, testInfo) => {
@@ -1129,6 +1155,28 @@ test('reply transitions preserve the minimized draft and existing fresh-reply be
   await expect(page.locator('.goose-composer-surface')).toHaveCount(0)
   await reply.click()
   await expect(panel.locator('[contenteditable="true"]')).toHaveText('')
+})
+
+test('loads post edit history only after the history action is opened', async ({ page }) => {
+  let historyRequests = 0
+  await page.route('**/api/forum/posts/revisions**', async route => {
+    historyRequests++
+    await route.fulfill({ json: {
+      code: 0,
+      result: {
+        items: [{ postId: 61, revisionNo: 1, content: 'Original body', createdAt: '2026-09-14T08:00:00Z' }],
+        nextCursor: 0,
+        hasMore: false,
+      },
+    } })
+  })
+  await page.goto('/p/test/60?lang=en')
+  await expect(page.getByRole('heading', { name: 'Topic detail' })).toBeVisible()
+  expect(historyRequests).toBe(0)
+
+  await page.getByRole('button', { name: 'View edit history' }).click()
+  await expect(page.getByRole('dialog', { name: 'Edit history' })).toContainText('Original body')
+  expect(historyRequests).toBe(1)
 })
 
 test('settings underline follows variable-width tabs, keyboard selection and resize', async ({ page }) => {

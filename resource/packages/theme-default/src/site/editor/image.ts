@@ -1,5 +1,3 @@
-import type CompressorType from "compressorjs";
-
 export function validateImage(file: File, maxSize = 10 * 1024 * 1024) {
   return file.type.startsWith("image/") && file.size <= maxSize;
 }
@@ -7,9 +5,7 @@ export function validateImage(file: File, maxSize = 10 * 1024 * 1024) {
 export async function optimizeImage(file: File, quality = 0.85) {
   const mimeType = supportsWebP() ? "image/webp" : file.type || "image/jpeg";
   try {
-    const { default: Compressor } = (await import("compressorjs")) as {
-      default: typeof CompressorType;
-    };
+    const { default: Compressor } = await import("compressorjs");
     return await new Promise<File>((resolve, reject) => {
       new Compressor(file, {
         quality,

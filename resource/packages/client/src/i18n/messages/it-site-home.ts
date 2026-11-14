@@ -17,6 +17,7 @@ export default {
   emptyCategoryDescription: "Questa categoria non contiene argomenti pubblici.",
   categoryLabel: "Category",
   loadMore: "Carica altro",
+  retryLoad: "Riprova caricamento",
   loading: "Caricamento…",
   allShown: "Tutti gli argomenti visualizzati",
   previous: "Precedente",

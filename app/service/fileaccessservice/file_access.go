@@ -41,6 +41,11 @@ func Resolve(userID uint64, fileName string, uploaderID uint64) (Decision, error
 			topicIDs[post.TopicId] = struct{}{}
 		}
 	}
+	topicIDList := make([]uint64, 0, len(topicIDs))
+	for topicID := range topicIDs {
+		topicIDList = append(topicIDList, topicID)
+	}
+	topicMap := topics.GetMapByIds(topicIDList)
 	guest, err := accesscontrol.Resolve(0)
 	if err != nil {
 		return Decision{}, err
@@ -49,15 +54,14 @@ func Resolve(userID uint64, fileName string, uploaderID uint64) (Decision, error
 	if err != nil {
 		return Decision{}, err
 	}
-	for topicID := range topicIDs {
-		topic := topics.GetSimple(topicID)
+	for _, topic := range topicMap {
 		if topic.Id == 0 {
 			continue
 		}
-		if topic.Status == 1 && topic.ProcessStatus == 0 && guest.CanReadCategory(topic.MainCategoryId) {
+		if topic.IsPublished() && guest.CanReadCategory(topic.MainCategoryId) {
 			return Decision{Allowed: true, Public: true}, nil
 		}
-		if userID != 0 && ((topic.Status == 1 && topic.ProcessStatus == 0 && viewer.CanReadCategory(topic.MainCategoryId)) || topic.UserId == userID || viewer.CanManageAnyCategory(topic.CategoryIds)) {
+		if userID != 0 && ((topic.IsPublished() && viewer.CanReadCategory(topic.MainCategoryId)) || topic.UserId == userID || viewer.CanManageAnyCategory(topic.CategoryIds)) {
 			return Decision{Allowed: true}, nil
 		}
 	}

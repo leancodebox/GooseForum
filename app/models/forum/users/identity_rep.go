@@ -38,6 +38,28 @@ func CheckIdentityAvailable(username, email string, excludeUserID uint64) error 
 	return nil
 }
 
+func CheckIdentityAvailableWithDB(db *gorm.DB, username, email string, excludeUserID uint64) error {
+	for _, identity := range []struct {
+		column, value string
+		conflict      error
+	}{
+		{"username_lower", username, ErrUsernameExists}, {"email_normalized", email, ErrEmailExists},
+	} {
+		if strings.TrimSpace(identity.value) == "" {
+			continue
+		}
+		var match Identity
+		result := db.Model(&EntityComplete{}).Unscoped().Where("id <> ? AND "+identity.column+" = ?", excludeUserID, identityKey(identity.value)).Limit(1).Find(&match)
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected > 0 {
+			return identity.conflict
+		}
+	}
+	return nil
+}
+
 func identityKey(value string) string { return strings.ToLower(strings.TrimSpace(value)) }
 
 func (user *EntityComplete) BeforeCreate(_ *gorm.DB) error {

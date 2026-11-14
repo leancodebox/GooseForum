@@ -4,5 +4,9 @@ packages:
   - "packages/*"
 ignoreWorkspaceRootCheck: true
 overrides:
+  dompurify: 3.4.17
   nanoid: 3.3.18
   postcss: 8.5.26
+  katex: 0.18.2
+patchedDependencies:
+  mermaid@11.17.2: patches/mermaid@11.17.2.patch

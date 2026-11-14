@@ -1,6 +1,7 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   cleanup,
+  fireEvent,
   render,
   screen,
   waitFor,
@@ -13,7 +14,9 @@ import type {
   LayoutPayload,
   SettingsPageProps,
   NotificationsPageProps,
+  NotificationPayload,
   MessagesPageProps,
+  ModerationReportItem,
   DraftsPageProps,
   ModerationPageProps,
   PublishPageProps,
@@ -26,6 +29,7 @@ import { GooseApp } from "../src/app/root";
 import { prepareGoosePage } from "@gooseforum/runtime/prepared-page";
 import { GooseI18nProvider } from "@gooseforum/runtime/i18n";
 import { GooseRuntimeProvider, type GooseRuntime } from "@gooseforum/runtime";
+import { unreadStatusEvent } from "@gooseforum/runtime/unread-status";
 
 afterEach(() => {
   cleanup();
@@ -417,6 +421,62 @@ function messagesProps(): MessagesPageProps {
 }
 
 describe("AppShell and static pages", () => {
+  it("does not let a stale unread poll overwrite a local unread event", async () => {
+    vi.useFakeTimers();
+    let resolveUnread!: (value: { notifications: boolean; messages: boolean; moderationReports: boolean }) => void;
+    const unread = vi.fn(() => new Promise(resolve => { resolveUnread = resolve; }));
+    try {
+      const page = payload("home.index", {
+        sort: "",
+        tabs: [],
+        topics: [],
+        pagination: { page: 1, nextPage: 0, hasNext: false, nextUrl: "" },
+        announcement: { enabled: false, html: "", publishedAt: "" },
+      });
+      page.layout = {
+        ...page.layout,
+        viewer: { ...page.layout.viewer, id: 7, isAuthenticated: true },
+      };
+      renderPage(page, { notifications: { unread } as unknown as GooseSiteApi["notifications"] });
+      await vi.advanceTimersByTimeAsync(30_000);
+      window.dispatchEvent(new CustomEvent(unreadStatusEvent, { detail: { messages: true } }));
+      await vi.advanceTimersByTimeAsync(30_000);
+      expect(unread).toHaveBeenCalledTimes(1);
+      resolveUnread({ notifications: false, messages: false, moderationReports: false });
+      await vi.advanceTimersByTimeAsync(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("refreshes unread status immediately when the page becomes visible", async () => {
+    vi.useFakeTimers();
+    const visibility = Object.getOwnPropertyDescriptor(document, "visibilityState");
+    const unread = vi.fn().mockResolvedValue({ notifications: false, messages: false, moderationReports: false });
+    try {
+      const page = payload("home.index", {
+        sort: "",
+        tabs: [],
+        topics: [],
+        pagination: { page: 1, nextPage: 0, hasNext: false, nextUrl: "" },
+        announcement: { enabled: false, html: "", publishedAt: "" },
+      });
+      page.layout = { ...page.layout, viewer: { ...page.layout.viewer, id: 7, isAuthenticated: true } };
+      renderPage(page, { notifications: { unread } as unknown as GooseSiteApi["notifications"] });
+      Object.defineProperty(document, "visibilityState", { configurable: true, value: "hidden" });
+      document.dispatchEvent(new Event("visibilitychange"));
+      expect(unread).not.toHaveBeenCalled();
+      Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
+      document.dispatchEvent(new Event("visibilitychange"));
+      await Promise.resolve();
+      expect(unread).toHaveBeenCalledTimes(1);
+    } finally {
+      if (visibility) Object.defineProperty(document, "visibilityState", visibility);
+      else Reflect.deleteProperty(document, "visibilityState");
+      vi.useRealTimers();
+    }
+  });
+
   it("renders the home topic hierarchy and pagination controls", () => {
     renderPage(
       payload("home.index", {
@@ -731,6 +791,55 @@ describe("AppShell and static pages", () => {
     expect(screen.queryByText("1 未读")).toBeNull();
   });
 
+  it("rolls back only the failed notification when reads finish out of order", async () => {
+    let rejectFirst!: (reason?: unknown) => void;
+    const markRead = vi.fn().mockImplementation((id: number) =>
+      id === 91
+        ? new Promise((_resolve, reject) => { rejectFirst = reject; })
+        : Promise.resolve(true),
+    );
+    const props = notificationsProps();
+    props.unreadCount = 2;
+    props.notifications = [
+      props.notifications[0],
+      { ...props.notifications[0], id: 92, title: "Another notification" },
+    ];
+    const { user } = renderPage(
+      payload("notifications.index", props),
+      { notifications: { markRead } as unknown as GooseSiteApi["notifications"] },
+    );
+
+    const readButtons = await screen.findAllByRole("button", { name: "标为已读" });
+    await user.click(readButtons[0]);
+    await user.click(screen.getAllByRole("button", { name: "标为已读" })[0]);
+    rejectFirst(new Error("first notification read failed"));
+    await waitFor(() => expect(screen.getAllByRole("button", { name: "标为已读" })).toHaveLength(1));
+    expect(markRead).toHaveBeenNthCalledWith(1, 91);
+    expect(markRead).toHaveBeenNthCalledWith(2, 92);
+  });
+
+  it("does not restore an older notification snapshot after mark all read", async () => {
+    let rejectRead!: (reason?: unknown) => void;
+    const markRead = vi.fn().mockReturnValue(new Promise((_resolve, reject) => { rejectRead = reject; }));
+    const markAllRead = vi.fn().mockResolvedValue(true);
+    const props = notificationsProps();
+    props.total = 2;
+    props.unreadCount = 2;
+    props.notifications = [props.notifications[0], { ...props.notifications[0], id: 92, title: "Another notification" }];
+    const { user } = renderPage(
+      payload("notifications.index", props),
+      { notifications: { markRead, markAllRead } as unknown as GooseSiteApi["notifications"] },
+    );
+
+    await user.click(screen.getAllByRole("button", { name: "标为已读" })[0]);
+    await user.click(screen.getByRole("button", { name: "全部已读" }));
+    await waitFor(() => expect(markAllRead).toHaveBeenCalledOnce());
+    rejectRead(new Error("stale read failed"));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(screen.queryByText("2 未读")).toBeNull();
+    expect(screen.queryByText("1 未读")).toBeNull();
+  });
+
   it("loads the unread notification filter on demand", async () => {
     const list = vi.fn().mockResolvedValue({
       items: [{ ...notificationsProps().notifications[0], id: 92 }],
@@ -750,6 +859,117 @@ describe("AppShell and static pages", () => {
     expect(
       await screen.findByRole("link", { name: "React migration" }),
     ).toBeTruthy();
+  });
+
+  it("appends the next notification page and stops after the last cursor", async () => {
+    vi.stubGlobal("IntersectionObserver", class {
+      constructor(private readonly callback: IntersectionObserverCallback) {}
+      observe() { this.callback([{ isIntersecting: true } as IntersectionObserverEntry], this as unknown as IntersectionObserver); }
+      disconnect() {}
+    });
+    const props = notificationsProps();
+    props.pagination = { page: 1, nextPage: 2, hasNext: true, nextUrl: "/notifications?cursor=91" };
+    const list = vi.fn().mockResolvedValue({
+      items: [{
+        ...props.notifications[0],
+        id: 92,
+        title: "Next notification",
+        topic: { id: 21, title: "Next migration", url: "/p/next/21" },
+        payload: { ...props.notifications[0].payload, topicId: 21, topicTitle: "Next migration" },
+      }],
+      nextCursor: 0,
+      hasNext: false,
+      unreadCount: 2,
+    });
+    renderPage(
+      payload("notifications.index", props),
+      { notifications: { list } as unknown as GooseSiteApi["notifications"] },
+    );
+
+    await waitFor(() => expect(list).toHaveBeenCalledWith("all", 91, 20));
+    expect(await screen.findByRole("link", { name: "React migration" })).toBeTruthy();
+    expect(await screen.findByRole("link", { name: "Next migration" })).toBeTruthy();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(list).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not retry a failed unread notification load automatically", async () => {
+    const list = vi.fn().mockRejectedValue(new Error("temporary notification failure"));
+    const { user } = renderPage(
+      payload("notifications.index", notificationsProps()),
+      {
+        notifications: { list } as unknown as GooseSiteApi["notifications"],
+      },
+    );
+
+    await user.click(await screen.findByRole("tab", { name: /未读/ }));
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(1));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(list).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps an optimistic read state when a stale list response arrives", async () => {
+    let resolveList!: (value: { items: NotificationPayload[]; nextCursor: number; hasNext: boolean; unreadCount: number }) => void;
+    const list = vi.fn().mockReturnValue(new Promise((resolve) => { resolveList = resolve; }));
+    const markAllRead = vi.fn().mockResolvedValue(true);
+    const { user } = renderPage(
+      payload("notifications.index", notificationsProps()),
+      { notifications: { list, markAllRead } as unknown as GooseSiteApi["notifications"] },
+    );
+
+    await user.click(await screen.findByRole("tab", { name: /未读/ }));
+    await waitFor(() => expect(list).toHaveBeenCalledWith("unread", 0, 20));
+    await user.click(screen.getByRole("button", { name: "全部已读" }));
+    expect(markAllRead).toHaveBeenCalledOnce();
+
+    resolveList({ items: notificationsProps().notifications, nextCursor: 0, hasNext: false, unreadCount: 1 });
+    await waitFor(() => expect(screen.queryByText("1 未读")).toBeNull());
+    expect(screen.queryByRole("link", { name: "React migration" })).toBeNull();
+  });
+
+  it("ignores a stale notification load failure after mark all read", async () => {
+    let rejectList!: (reason?: unknown) => void;
+    const list = vi.fn().mockReturnValue(new Promise((_resolve, reject) => { rejectList = reject; }));
+    const markAllRead = vi.fn().mockResolvedValue(true);
+    const { user } = renderPage(
+      payload("notifications.index", notificationsProps()),
+      { notifications: { list, markAllRead } as unknown as GooseSiteApi["notifications"] },
+    );
+
+    await user.click(await screen.findByRole("tab", { name: /未读/ }));
+    await waitFor(() => expect(list).toHaveBeenCalledWith("unread", 0, 20));
+    await user.click(screen.getByRole("button", { name: "全部已读" }));
+    rejectList(new Error("stale notification load failed"));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(document.querySelector("p.text-destructive")).toBeNull();
+  });
+
+  it("clears a stale notification load state after mark all read", async () => {
+    const existingIntersectionObserver = globalThis.IntersectionObserver;
+    vi.stubGlobal("IntersectionObserver", class {
+      observe() {}
+      disconnect() {}
+    });
+    let resolveList!: (value: { items: NotificationPayload[]; nextCursor: number; hasNext: boolean; unreadCount: number }) => void;
+    const list = vi.fn().mockReturnValue(new Promise((resolve) => { resolveList = resolve; }));
+    const markAllRead = vi.fn().mockResolvedValue(true);
+    const props = notificationsProps();
+    props.unreadCount = 1;
+    props.pagination = { page: 1, nextPage: 2, hasNext: true, nextUrl: "/notifications?cursor=91" };
+    try {
+      const { user } = renderPage(
+        payload("notifications.index", props),
+        { notifications: { list, markAllRead } as unknown as GooseSiteApi["notifications"] },
+      );
+
+      await user.click(screen.getByRole("button", { name: "加载更多" }));
+      await waitFor(() => expect(list).toHaveBeenCalledWith("all", 91, 20));
+      await user.click(screen.getByRole("button", { name: "全部已读" }));
+      resolveList({ items: [], nextCursor: 0, hasNext: false, unreadCount: 0 });
+      await waitFor(() => expect((screen.getByRole("button", { name: "加载更多" }) as HTMLButtonElement).disabled).toBe(false));
+    } finally {
+      vi.stubGlobal("IntersectionObserver", existingIntersectionObserver);
+    }
   });
 
   it("loads a user card only after a topic participant avatar is clicked", async () => {
@@ -906,7 +1126,7 @@ describe("AppShell and static pages", () => {
         latestId: 31,
       });
     const markRead = vi.fn().mockResolvedValue(true);
-    const send = vi.fn().mockResolvedValue({ convId: 4 });
+    const send = vi.fn().mockResolvedValue({ convId: 4, messageId: 33 });
     const page = payload("messages.index", messagesProps());
     page.url = "/messages?userId=9";
     page.layout = {
@@ -947,6 +1167,198 @@ describe("AppShell and static pages", () => {
     expect(
       (await screen.findAllByText("Hello Bob")).length,
     ).toBeGreaterThanOrEqual(2);
+  });
+
+  it("surfaces a failed conversation read acknowledgement", async () => {
+    const markRead = vi.fn().mockRejectedValue(new Error("read sync failed"));
+    const page = payload("messages.index", messagesProps());
+    page.url = "/messages?userId=9";
+    renderPage(page, {
+      chat: {
+        messages: vi.fn().mockResolvedValue({ list: [], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 0, latestId: 0 }),
+        markRead,
+      } as unknown as GooseSiteApi["chat"],
+    });
+
+    await waitFor(() => expect(markRead).toHaveBeenCalledWith(4));
+    expect(await screen.findByText("read sync failed")).toBeTruthy();
+  });
+
+  it("does not retry a failed conversation read until the peer is revisited", async () => {
+    const markRead = vi.fn().mockRejectedValue(new Error("read sync failed"));
+    const page = payload("messages.index", messagesProps());
+    page.url = "/messages?userId=9";
+    const { user } = renderPage(page, {
+      chat: {
+        messages: vi.fn().mockResolvedValue({ list: [], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 0, latestId: 0 }),
+        markRead,
+      } as unknown as GooseSiteApi["chat"],
+    });
+
+    await waitFor(() => expect(markRead).toHaveBeenCalledTimes(1));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(markRead).toHaveBeenCalledTimes(1);
+    await user.click(screen.getByRole("button", { name: /dave/i }));
+    await user.click(screen.getByRole("button", { name: /bob/i }));
+    await waitFor(() => expect(markRead).toHaveBeenCalledTimes(2));
+  });
+
+  it("ignores a stale conversation load failure after switching peers", async () => {
+    let rejectMessages!: (reason?: unknown) => void;
+    const messages = vi.fn()
+      .mockImplementationOnce(() => new Promise((_resolve, reject) => { rejectMessages = reject; }))
+      .mockResolvedValueOnce({ list: [], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 0, latestId: 0 });
+    const page = payload("messages.index", messagesProps());
+    page.url = "/messages?userId=9";
+    const { user } = renderPage(page, {
+      chat: { messages, markRead: vi.fn().mockResolvedValue(true) } as unknown as GooseSiteApi["chat"],
+    });
+
+    await waitFor(() => expect(messages).toHaveBeenCalledWith({ convId: 4, limit: 30 }));
+    await user.click(screen.getByRole("button", { name: /dave/i }));
+    await waitFor(() => expect(messages).toHaveBeenCalledWith({ convId: 5, limit: 30 }));
+    rejectMessages(new Error("stale conversation load failed"));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(screen.queryByText("stale conversation load failed")).toBeNull();
+  });
+
+  it("ignores a stale older-message failure after switching peers", async () => {
+    let rejectOlder!: (reason?: unknown) => void;
+    const messages = vi.fn()
+      .mockResolvedValueOnce({ list: [{ id: 31, senderId: 9, content: "Hello back", msgType: 1, isRead: 1, createdAt: "2026-09-14T08:00:00Z", isSelf: false }], hasMoreBefore: true, hasMoreAfter: false, nextBeforeId: 31, latestId: 31 })
+      .mockImplementationOnce(() => new Promise((_resolve, reject) => { rejectOlder = reject; }))
+      .mockResolvedValueOnce({ list: [], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 0, latestId: 0 });
+    const page = payload("messages.index", messagesProps());
+    page.url = "/messages?userId=9";
+    const { user } = renderPage(page, { chat: { messages, markRead: vi.fn().mockResolvedValue(true) } as unknown as GooseSiteApi["chat"] });
+    await screen.findByText("Hello back");
+    await user.click(screen.getByRole("button", { name: "加载更早消息" }));
+    await user.click(screen.getByRole("button", { name: /dave/i }));
+    rejectOlder(new Error("stale older message failed"));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(screen.queryByText("stale older message failed")).toBeNull();
+  });
+
+  it("refreshes the active conversation with an after cursor", async () => {
+    vi.useFakeTimers();
+    try {
+      const messages = vi.fn()
+        .mockResolvedValueOnce({ list: [{ id: 31, senderId: 9, content: "Hello back", msgType: 1, isRead: 1, createdAt: "2026-09-14T08:00:00Z", isSelf: false }], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 31, latestId: 31 })
+        .mockResolvedValueOnce({ list: [{ id: 32, senderId: 9, content: "New message", msgType: 1, isRead: 1, createdAt: "2026-09-14T08:01:00Z", isSelf: false }], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 31, latestId: 32 });
+      const page = payload("messages.index", messagesProps());
+      const messageProps = page.props as MessagesPageProps;
+      messageProps.conversations = [...messageProps.conversations].reverse();
+      page.url = "/messages?userId=9";
+      renderPage(page, { chat: { messages, markRead: vi.fn().mockResolvedValue(true) } as unknown as GooseSiteApi["chat"] });
+      await vi.advanceTimersByTimeAsync(0);
+      expect(screen.getByText("Hello back")).toBeTruthy();
+      await vi.advanceTimersByTimeAsync(15_000);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(messages).toHaveBeenLastCalledWith({ convId: 4, afterId: 31, limit: 30 });
+      expect(screen.getAllByText("New message").length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByText("New message", { selector: '[data-slot="item-description"]' })).toBeTruthy();
+      const conversationDescriptions = screen.getAllByText(/message|conversation/, {
+        selector: '[data-slot="item-description"]',
+      });
+      expect(conversationDescriptions[0].textContent).toContain("New message");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("refreshes the active conversation when connectivity returns", async () => {
+    vi.useFakeTimers();
+    try {
+      const messages = vi.fn()
+        .mockResolvedValueOnce({ list: [{ id: 31, senderId: 9, content: "Hello back", msgType: 1, isRead: 1, createdAt: "2026-09-14T08:00:00Z", isSelf: false }], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 31, latestId: 31 })
+        .mockResolvedValueOnce({ list: [{ id: 32, senderId: 9, content: "Back online", msgType: 1, isRead: 1, createdAt: "2026-09-14T08:01:00Z", isSelf: false }], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 31, latestId: 32 });
+      const page = payload("messages.index", messagesProps());
+      page.url = "/messages?userId=9";
+      renderPage(page, { chat: { messages, markRead: vi.fn().mockResolvedValue(true) } as unknown as GooseSiteApi["chat"] });
+      await vi.advanceTimersByTimeAsync(0);
+      window.dispatchEvent(new Event("online"));
+      await vi.advanceTimersByTimeAsync(0);
+      await Promise.resolve();
+      expect(messages).toHaveBeenLastCalledWith({ convId: 4, afterId: 31, limit: 30 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("skips chat refresh while the page is hidden", async () => {
+    vi.useFakeTimers();
+    const visibility = Object.getOwnPropertyDescriptor(document, "visibilityState");
+    Object.defineProperty(document, "visibilityState", { configurable: true, value: "hidden" });
+    try {
+      const messages = vi.fn().mockResolvedValue({ list: [{ id: 31, senderId: 9, content: "Hello back", msgType: 1, isRead: 1, createdAt: "2026-09-14T08:00:00Z", isSelf: false }], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 31, latestId: 31 });
+      const page = payload("messages.index", messagesProps());
+      page.url = "/messages?userId=9";
+      renderPage(page, { chat: { messages, markRead: vi.fn().mockResolvedValue(true) } as unknown as GooseSiteApi["chat"] });
+      await vi.advanceTimersByTimeAsync(0);
+      await vi.advanceTimersByTimeAsync(15_000);
+      expect(messages).toHaveBeenCalledTimes(1);
+    } finally {
+      if (visibility) Object.defineProperty(document, "visibilityState", visibility);
+      else Reflect.deleteProperty(document, "visibilityState");
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not retry a failed chat refresh immediately", async () => {
+    vi.useFakeTimers();
+    let resolveRetry!: (value: { list: never[]; hasMoreBefore: boolean; hasMoreAfter: boolean; nextBeforeId: number; latestId: number }) => void;
+    try {
+      const messages = vi.fn()
+        .mockResolvedValueOnce({ list: [{ id: 31, senderId: 9, content: "Hello back", msgType: 1, isRead: 1, createdAt: "2026-09-14T08:00:00Z", isSelf: false }], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 31, latestId: 31 })
+        .mockRejectedValueOnce(new Error("refresh failed"))
+        .mockImplementationOnce(() => new Promise(resolve => { resolveRetry = resolve; }));
+      const page = payload("messages.index", messagesProps());
+      page.url = "/messages?userId=9";
+      renderPage(page, { chat: { messages, markRead: vi.fn().mockResolvedValue(true) } as unknown as GooseSiteApi["chat"] });
+      await vi.advanceTimersByTimeAsync(0);
+      await vi.advanceTimersByTimeAsync(15_000);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(messages).toHaveBeenCalledTimes(2);
+      expect(screen.getByText("refresh failed")).toBeTruthy();
+      expect(screen.getByRole("button", { name: "重试加载" })).toBeTruthy();
+      await vi.advanceTimersByTimeAsync(1_000);
+      expect(messages).toHaveBeenCalledTimes(2);
+      const retry = screen.getByRole("button", { name: "重试加载" });
+      fireEvent.click(retry);
+      expect((retry as HTMLButtonElement).disabled).toBe(true);
+      fireEvent.click(retry);
+      expect(messages).toHaveBeenCalledTimes(3);
+      resolveRetry({ list: [], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 31, latestId: 31 });
+      await vi.advanceTimersByTimeAsync(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("ignores a stale refresh read failure after switching peers", async () => {
+    vi.useFakeTimers();
+    let rejectRefreshRead!: (reason?: unknown) => void;
+    const markRead = vi.fn()
+      .mockResolvedValueOnce(true)
+      .mockImplementationOnce(() => new Promise((_resolve, reject) => { rejectRefreshRead = reject; }));
+    try {
+      const messages = vi.fn()
+        .mockResolvedValueOnce({ list: [{ id: 31, senderId: 9, content: "Hello back", msgType: 1, isRead: 1, createdAt: "2026-09-14T08:00:00Z", isSelf: false }], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 31, latestId: 31 })
+        .mockResolvedValueOnce({ list: [{ id: 32, senderId: 9, content: "New message", msgType: 1, isRead: 1, createdAt: "2026-09-14T08:01:00Z", isSelf: false }], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 31, latestId: 32 })
+        .mockResolvedValueOnce({ list: [], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 0, latestId: 0 });
+      const page = payload("messages.index", messagesProps());
+      page.url = "/messages?userId=9";
+      renderPage(page, { chat: { messages, markRead } as unknown as GooseSiteApi["chat"] });
+      await vi.advanceTimersByTimeAsync(0);
+      await vi.advanceTimersByTimeAsync(15_000);
+      await vi.advanceTimersByTimeAsync(0);
+      fireEvent.click(screen.getByRole("button", { name: /dave/i }));
+      rejectRefreshRead(new Error("stale refresh read failed"));
+      await vi.advanceTimersByTimeAsync(0);
+      expect(screen.queryByText("stale refresh read failed")).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("starts a new conversation from the shadcn user picker", async () => {
@@ -1122,6 +1534,46 @@ describe("AppShell and static pages", () => {
     expect(activeCategory.getAttribute("aria-current")).toBe("page");
     expect(activeCategory.style.borderColor).toBe("rgb(130, 65, 214)");
     expect(activeCategory.querySelector("span")?.style.backgroundColor).toBe("rgb(130, 65, 214)");
+  });
+
+  it("ignores an older open report response after switching to closed", async () => {
+    let resolveOpen!: (value: { items: ModerationReportItem[]; nextCursor: number; hasNext: boolean }) => void;
+    const reports = vi.fn()
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveOpen = resolve; }))
+      .mockResolvedValueOnce({ items: [], nextCursor: 0, hasNext: false });
+    const props: ModerationPageProps = {
+      categoryTabs: [],
+      topics: [],
+      pagination: { page: 1, nextPage: 2, hasNext: false, nextUrl: "" },
+    };
+    const { user } = renderPage(payload("moderation.index", props), {
+      moderation: { reports } as unknown as GooseSiteApi["moderation"],
+    });
+
+    await user.click(await screen.findByRole("tab", { name: "已处理" }));
+    await waitFor(() => expect(reports).toHaveBeenCalledWith(0, 20, "closed"));
+    resolveOpen({
+      items: [{
+        id: 81,
+        targetType: "topic",
+        targetId: 81,
+        targetUrl: "/p/stale-open/81",
+        title: "Stale open report",
+        excerpt: "old",
+        reason: "spam",
+        note: "",
+        status: "open",
+        resolution: "",
+        reporter: { id: 2, username: "reporter", avatarUrl: "" },
+        handler: { id: 0, username: "", avatarUrl: "" },
+        categories: [],
+        createdAt: "2026-09-14T08:00:00Z",
+      }],
+      nextCursor: 0,
+      hasNext: false,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(screen.queryByText("Stale open report")).toBeNull();
   });
 
   it("localizes server-backed error pages", async () => {

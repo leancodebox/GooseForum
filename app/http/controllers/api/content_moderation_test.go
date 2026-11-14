@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -80,6 +81,77 @@ func TestAdminReviewRejectsStaleDecisionAndDoesNotPublishDraft(t *testing.T) {
 	ReviewAdminTopic(component.BetterRequest[ReviewContentReq]{Params: ReviewContentReq{Id: 940001, Version: 3, Action: "approve", Reason: "checked"}})
 	if topics.Get(940001).Status != 0 {
 		t.Fatal("draft published by administrator review")
+	}
+}
+
+func TestAdminReviewBatchKeepsPerItemVersionConflicts(t *testing.T) {
+	db := setupAdminTopicTestDB(t)
+	seedAdminTopic(t, db, 940011)
+	seedAdminTopic(t, db, 940012)
+	result := ReviewAdminTopicBatch(component.BetterRequest[ReviewBatchReq]{UserId: 1, Params: ReviewBatchReq{
+		Items:  []ReviewBatchItem{{Id: 940011, Version: 0}, {Id: 940012, Version: 99}},
+		Action: "reject",
+		Reason: "batch review",
+	}})
+	batch, ok := result.Data.Result.(ReviewBatchResult)
+	if !ok || len(batch.Items) != 2 || !batch.Items[0].Success || batch.Items[1].Success {
+		t.Fatalf("unexpected batch result: %#v", result.Data.Result)
+	}
+	if got := topics.Get(940011); got.Status != 0 || got.ModerationStatus != "rejected" {
+		t.Fatalf("successful item was not rejected: %+v", got)
+	}
+	if got := topics.Get(940012); got.Status != 1 || got.ModerationStatus == "rejected" {
+		t.Fatalf("stale item changed unexpectedly: %+v", got)
+	}
+}
+
+func TestAdminReviewBatchRejectsDuplicateItems(t *testing.T) {
+	result := ReviewAdminTopicBatch(component.BetterRequest[ReviewBatchReq]{Params: ReviewBatchReq{
+		Items:  []ReviewBatchItem{{Id: 1, Version: 0}, {Id: 1, Version: 0}},
+		Action: "approve",
+		Reason: "duplicate",
+	}})
+	if result.Data.Code != component.FAIL {
+		t.Fatalf("duplicate batch should fail: %+v", result)
+	}
+}
+
+func TestAdminReplyReviewBatchKeepsPerItemVersionConflicts(t *testing.T) {
+	db := setupTopicWriteTestDB(t)
+	userID := uint64(950101)
+	topicID := uint64(950001)
+	firstPostID := uint64(950011)
+	replyID := uint64(950012)
+	staleReplyID := uint64(950013)
+	createTopicWriteUser(t, db, userID, "batch-reply")
+	now := time.Now().Add(-time.Hour)
+	topic := topics.Entity{Id: topicID, Title: "Batch reply review", UserId: userID, Status: 1, PostCount: 3, ReplyCount: 2, PostSeq: 3, FirstPostId: firstPostID, CreatedAt: now, UpdatedAt: now}
+	if err := db.Create(&topic).Error; err != nil {
+		t.Fatalf("create topic: %v", err)
+	}
+	for _, post := range []posts.Entity{
+		{Id: firstPostID, TopicId: topicID, PostNo: 1, UserId: userID, Content: "first post", CreatedAt: now, UpdatedAt: now},
+		{Id: replyID, TopicId: topicID, PostNo: 2, UserId: userID, Content: "reply one", ProcessStatus: 1, ModerationStatus: "pending", CreatedAt: now, UpdatedAt: now},
+		{Id: staleReplyID, TopicId: topicID, PostNo: 3, UserId: userID, Content: "reply two", ProcessStatus: 1, ModerationStatus: "pending", ModerationVersion: 2, CreatedAt: now, UpdatedAt: now},
+	} {
+		if err := db.Create(&post).Error; err != nil {
+			t.Fatalf("create post %d: %v", post.Id, err)
+		}
+	}
+	result := ReviewAdminPostBatch(component.BetterRequest[ReviewBatchReq]{UserId: 1, Params: ReviewBatchReq{
+		Items:  []ReviewBatchItem{{Id: replyID, Version: 0}, {Id: staleReplyID, Version: 0}},
+		Action: "approve",
+		Reason: "batch reply review",
+	}})
+	batch, ok := result.Data.Result.(ReviewBatchResult)
+	if !ok || len(batch.Items) != 2 || !batch.Items[0].Success || batch.Items[1].Success {
+		t.Fatalf("unexpected reply batch result: %#v", result.Data.Result)
+	}
+	if got := posts.Get(replyID); got.ProcessStatus != 0 || got.ModerationStatus != "approved" {
+		t.Fatalf("successful reply was not approved: %+v", got)
+	}
+	if got := posts.Get(staleReplyID); got.ProcessStatus != 1 || got.ModerationStatus != "pending" || got.ModerationVersion != 2 {
+		t.Fatalf("stale reply changed unexpectedly: %+v", got)
 	}
 }
 

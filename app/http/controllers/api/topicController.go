@@ -70,14 +70,8 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		Content: req.Params.Content, CategoryIDs: req.Params.CategoryId, Status: req.Params.TopicStatus,
 	})
 	if err != nil {
-		if response, ok := trustWriteFailure(err); ok {
+		if response, ok := commonContentWriteFailure(err); ok {
 			return response
-		}
-		if errors.Is(err, topicservice.ErrVersionConflict) || errors.Is(err, posts.ErrVersionConflict) || errors.Is(err, topicwriteservice.ErrVersionConflict) || errors.Is(err, postwriteservice.ErrVersionConflict) {
-			return component.FailResponseCode("attachment.conflict", nil)
-		}
-		if errors.Is(err, mentionservice.ErrInvalid) {
-			return component.FailResponseCode(component.MessageMentionInvalid, nil)
 		}
 		if errors.Is(err, topicwriteservice.ErrTopicNotFound) {
 			return component.FailResponseCode(component.MessageTopicNotFound, nil)
@@ -169,14 +163,8 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 		UserID:        req.UserId, TopicID: req.Params.TopicId, Content: content, ReplyToPostID: req.Params.ReplyToPostId,
 	})
 	if err != nil {
-		if response, ok := trustWriteFailure(err); ok {
+		if response, ok := commonContentWriteFailure(err); ok {
 			return response
-		}
-		if errors.Is(err, topicservice.ErrVersionConflict) || errors.Is(err, posts.ErrVersionConflict) || errors.Is(err, topicwriteservice.ErrVersionConflict) || errors.Is(err, postwriteservice.ErrVersionConflict) {
-			return component.FailResponseCode("attachment.conflict", nil)
-		}
-		if errors.Is(err, mentionservice.ErrInvalid) {
-			return component.FailResponseCode(component.MessageMentionInvalid, nil)
 		}
 		if errors.Is(err, postwriteservice.ErrTopicUnavailable) {
 			return component.FailResponseCode(component.MessageTopicNotFound, nil)
@@ -190,14 +178,7 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 			component.MessageParams{"error": err.Error()})
 
 	}
-	return component.SuccessResponse(map[string]any{
-		"attachments": postEntity.Attachments, "version": postEntity.ModerationVersion, "content": postEntity.Content, "sourceVersion": postEntity.SourceVersion,
-		"processStatus":    postEntity.ProcessStatus,
-		"moderationStatus": postEntity.ModerationStatus,
-		"id":               postEntity.Id,
-		"postNo":           postEntity.PostNo,
-		"renderedContent":  postEntity.RenderedHTML,
-	})
+	return component.SuccessResponse(postWriteResponse(postEntity))
 }
 
 type DeletePostReq struct {
@@ -221,14 +202,8 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 
 	postEntity, err := postwriteservice.Update(postwriteservice.UpdateInput{AttachmentIDs: req.Params.AttachmentIDs, ExpectedVersion: req.Params.Version, UserID: req.UserId, PostID: req.Params.PostId, Content: content, SourceVersion: req.Params.SourceVersion})
 	if err != nil {
-		if response, ok := trustWriteFailure(err); ok {
+		if response, ok := commonContentWriteFailure(err); ok {
 			return response
-		}
-		if errors.Is(err, topicservice.ErrVersionConflict) || errors.Is(err, posts.ErrVersionConflict) || errors.Is(err, topicwriteservice.ErrVersionConflict) || errors.Is(err, postwriteservice.ErrVersionConflict) {
-			return component.FailResponseCode("attachment.conflict", nil)
-		}
-		if errors.Is(err, mentionservice.ErrInvalid) {
-			return component.FailResponseCode(component.MessageMentionInvalid, nil)
 		}
 		if errors.Is(err, postwriteservice.ErrPostNotFound) || errors.Is(err, postwriteservice.ErrTopicUnavailable) {
 			return component.FailResponseCode(component.MessagePostNotFound, nil)
@@ -242,17 +217,36 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 			component.MessageParams{"error": err.Error()})
 
 	}
-	return component.SuccessResponse(map[string]any{
-		"id":            postEntity.Id,
-		"postNo":        postEntity.PostNo,
-		"content":       postEntity.Content,
-		"sourceVersion": postEntity.SourceVersion,
-		"attachments":   postEntity.Attachments, "version": postEntity.ModerationVersion,
+	response := postWriteResponse(postEntity)
+	response["updatedAt"] = postEntity.UpdatedAt.Format(time.DateTime)
+	return component.SuccessResponse(response)
+}
+
+func commonContentWriteFailure(err error) (component.Response, bool) {
+	if response, ok := trustWriteFailure(err); ok {
+		return response, true
+	}
+	if errors.Is(err, topicservice.ErrVersionConflict) || errors.Is(err, posts.ErrVersionConflict) || errors.Is(err, topicwriteservice.ErrVersionConflict) || errors.Is(err, postwriteservice.ErrVersionConflict) {
+		return component.FailResponseCode("attachment.conflict", nil), true
+	}
+	if errors.Is(err, mentionservice.ErrInvalid) {
+		return component.FailResponseCode(component.MessageMentionInvalid, nil), true
+	}
+	return component.Response{}, false
+}
+
+func postWriteResponse(postEntity posts.Entity) map[string]any {
+	return map[string]any{
+		"id":               postEntity.Id,
+		"postNo":           postEntity.PostNo,
+		"content":          postEntity.Content,
+		"sourceVersion":    postEntity.SourceVersion,
+		"attachments":      postEntity.Attachments,
+		"version":          postEntity.ModerationVersion,
 		"renderedContent":  postEntity.RenderedHTML,
-		"updatedAt":        postEntity.UpdatedAt.Format(time.DateTime),
 		"moderationStatus": postEntity.ModerationStatus,
 		"processStatus":    postEntity.ProcessStatus,
-	})
+	}
 }
 
 func DeletePost(req component.BetterRequest[DeletePostReq]) component.Response {

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
+	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/bundles/logincrypto"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
@@ -24,8 +25,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/validate"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/forum/invitations"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"gorm.io/gorm"
 )
 
 func Logout(c *gin.Context) {
@@ -104,7 +107,44 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	userEntity, err := userservice.CreateUser(r.Username, r.Password, r.Email, securityConfig.EnableEmailVerification, r.Locale)
+	invitationCode := strings.TrimSpace(r.InvitationCode)
+	if securityConfig.InviteOnly && invitationCode == "" {
+		c.JSON(200, component.FailDataError(registrationError(invitations.ErrRequired)))
+		return
+	}
+	reservation := ""
+	reservationCommitted := false
+	if invitationCode != "" {
+		if _, reservation, err = invitations.Reserve(invitationCode, time.Now(), 5*time.Minute); err != nil {
+			c.JSON(200, component.FailDataError(registrationError(err)))
+			return
+		}
+		defer func() {
+			if !reservationCommitted {
+				_ = invitations.Release(invitationCode, reservation, time.Now())
+			}
+		}()
+	}
+
+	var userEntity *users.EntityComplete
+	if invitationCode == "" {
+		userEntity, err = userservice.CreateUser(r.Username, r.Password, r.Email, securityConfig.EnableEmailVerification, r.Locale)
+	} else {
+		err = dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
+			userEntity, err = userservice.CreateUserEntityWithDB(tx, r.Username, r.Password, r.Email, securityConfig.EnableEmailVerification, r.Locale)
+			if err != nil {
+				return err
+			}
+			if _, err := invitations.CommitWithDB(tx, invitationCode, reservation, userEntity.Id, time.Now()); err != nil {
+				return err
+			}
+			return nil
+		})
+		reservationCommitted = err == nil
+		if err == nil {
+			err = userservice.InitializeCreatedUser(userEntity)
+		}
+	}
 	if userEntity == nil || err != nil {
 		slog.Error("注册创建用户失败", "username", r.Username, "email", r.Email, "error", err)
 		c.JSON(200, component.FailDataError(registrationError(err)))

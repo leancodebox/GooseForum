@@ -51,6 +51,8 @@ export interface LoginPageProps {
   initialMode: 'login' | 'register' | 'forgot'
   redirectUrl: string
   oauthProviders: OAuthProviderPayload[]
+  inviteOnly?: boolean
+  invitationCode?: string
 }
 
 export interface OAuthProviderPayload {
@@ -285,6 +287,11 @@ export interface PaginationPayload {
   nextUrl: string
 }
 
+export interface CursorPagination {
+  nextCursor: number
+  hasNext: boolean
+}
+
 export interface HomeProps {
   sort: string
   tabs: Array<{ key: string; label?: string; url: string; active: boolean }>
@@ -415,12 +422,7 @@ export interface TopicPayload {
 export interface ModerationPageProps {
   categoryTabs: Array<{ key: string; label?: string; color?: string; url: string; active: boolean }>
   topics: TopicPayload[]
-  pagination: {
-    page: number
-    nextPage: number
-    hasNext: boolean
-    nextUrl: string
-  }
+  pagination: PaginationPayload
 }
 
 export interface ModerationLogSubject {
@@ -446,10 +448,8 @@ export interface ModerationLogItem {
   createdAt: string
 }
 
-export interface ModerationLogListResponse {
+export interface ModerationLogListResponse extends CursorPagination {
   items: ModerationLogItem[]
-  nextCursor: number
-  hasNext: boolean
 }
 
 export interface ModerationReportItem {
@@ -478,10 +478,8 @@ export interface ModerationReportItem {
   handledAt?: string
 }
 
-export interface ModerationReportListResponse {
+export interface ModerationReportListResponse extends CursorPagination {
   items: ModerationReportItem[]
-  nextCursor: number
-  hasNext: boolean
 }
 
 export interface UserCardPayload {
@@ -596,12 +594,7 @@ export interface CategoryPageProps {
   sort: string
   tabs: Array<{ key: string; label?: string; url: string; active: boolean }>
   topics: TopicPayload[]
-  pagination: {
-    page: number
-    nextPage: number
-    hasNext: boolean
-    nextUrl: string
-  }
+  pagination: PaginationPayload
 }
 
 export interface CategoriesPageProps {
@@ -701,20 +694,13 @@ export interface NotificationsPageProps {
   total: number
   unreadCount: number
   notifications: NotificationPayload[]
-  pagination: {
-    page: number
-    nextPage: number
-    hasNext: boolean
-    nextUrl: string
-  }
+  pagination: PaginationPayload
 }
 
 export type NotificationFilter = 'all' | 'unread'
 
-export interface NotificationListResponse {
+export interface NotificationListResponse extends CursorPagination {
   items: NotificationPayload[]
-  nextCursor: number
-  hasNext: boolean
   unreadCount: number
 }
 
@@ -730,12 +716,7 @@ export type NotificationTemplateKey =
 export interface DraftsPageProps {
   total: number
   drafts: DraftPayload[]
-  pagination: {
-    page: number
-    nextPage: number
-    hasNext: boolean
-    nextUrl: string
-  }
+  pagination: PaginationPayload
 }
 
 export interface DraftPayload {
@@ -894,10 +875,5 @@ export interface SearchPageProps {
   topics: TopicPayload[]
   total: number
   totalPages: number
-  pagination: {
-    page: number
-    nextPage: number
-    hasNext: boolean
-    nextUrl: string
-  }
+  pagination: PaginationPayload
 }

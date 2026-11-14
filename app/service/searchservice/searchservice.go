@@ -55,13 +55,7 @@ func SearchTopics(req SearchRequest) (*SearchResponse, error) {
 		Offset: int64(req.Offset),
 	}
 
-	if req.FilterByCategories {
-		filters := lo.Map(req.Categories, func(categoryID uint64, _ int) string {
-			return fmt.Sprintf("mainCategory = %d", categoryID)
-		})
-		filterStr := fmt.Sprintf("(%s)", strings.Join(filters, " OR "))
-		searchReq.Filter = filterStr
-	}
+	searchReq.Filter = buildTopicFilter(req)
 
 	searchReq.AttributesToRetrieve = []string{"id", "title"}
 	if req.IncludeMatches {
@@ -97,4 +91,15 @@ func SearchTopics(req SearchRequest) (*SearchResponse, error) {
 		Results: results,
 		Total:   searchResp.EstimatedTotalHits,
 	}, nil
+}
+
+func buildTopicFilter(req SearchRequest) string {
+	filters := []string{"topicStatus = 1", "processStatus = 0"}
+	if req.FilterByCategories {
+		categories := lo.Map(req.Categories, func(categoryID uint64, _ int) string {
+			return fmt.Sprintf("mainCategory = %d", categoryID)
+		})
+		filters = append(filters, fmt.Sprintf("(%s)", strings.Join(categories, " OR ")))
+	}
+	return strings.Join(filters, " AND ")
 }

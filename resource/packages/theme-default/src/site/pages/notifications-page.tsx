@@ -5,6 +5,7 @@ import type {
   NotificationsPageProps,
 } from "@gooseforum/client";
 import { trustLevelName } from '@gooseforum/client'
+import { formatDate } from "../date-format";
 import {
   Award,
   Bell,
@@ -27,12 +28,13 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@gooseforum/ui/components/tabs";
 import { ListFilter, ListFilterItem } from "@gooseforum/ui/components/list-filter";
 import { cn } from "@gooseforum/ui/lib/utils";
-import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
+import { GooseLink, useGooseRuntime, useLatestRequest } from "@gooseforum/runtime";
 import { announceUnreadStatus } from "@gooseforum/runtime/unread-status";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { PageHeader } from "../layout/page-header";
 import { SiteListPanel } from "../layout/site-panel";
 import { UserCardPopover } from "../users/user-card-popover";
+import { useIntersectionSentinel } from "../use-intersection-sentinel";
 
 type ListState = {
   items: NotificationPayload[];
@@ -73,12 +75,23 @@ export function NotificationsPageView({
     }),
   );
   const sentinel = useRef<HTMLDivElement>(null);
+  const listsRef = useRef(lists);
+  const loadingFilters = useRef(new Set<NotificationFilter>());
+  const beginMutationRequest = useLatestRequest();
+  const readMutationVersions = useRef(new Map<number, number>());
+  const markAllReadEpoch = useRef(0);
+  useEffect(() => {
+    listsRef.current = lists;
+  }, [lists]);
   const active = lists[filter];
 
   const load = useCallback(
     async (target: NotificationFilter, reset = false) => {
-      const current = lists[target];
-      if (current.loading || (!reset && !current.hasNext)) return;
+      if (loadingFilters.current.has(target)) return;
+      const current = listsRef.current[target];
+      if (!reset && !current.hasNext) return;
+      loadingFilters.current.add(target);
+      const isCurrent = beginMutationRequest();
       setError("");
       setLists((state) => ({
         ...state,
@@ -90,6 +103,7 @@ export function NotificationsPageView({
           reset ? 0 : current.nextCursor,
           20,
         );
+        if (!isCurrent()) return;
         setUnreadCount(response.unreadCount);
         announceUnreadStatus({ notifications: response.unreadCount > 0 });
         setLists((state) => ({
@@ -105,41 +119,41 @@ export function NotificationsPageView({
           },
         }));
       } catch (reason) {
+        if (!isCurrent()) return;
         setError(serverError(reason, t("loadFailed")));
         setLists((state) => ({
           ...state,
           [target]: { ...state[target], loading: false },
         }));
+      } finally {
+        loadingFilters.current.delete(target);
+        setLists((state) =>
+          state[target].loading
+            ? { ...state, [target]: { ...state[target], loading: false } }
+            : state,
+        );
       }
     },
-    [lists, runtime.api.notifications, serverError, t],
+    [beginMutationRequest, runtime.api.notifications, serverError, t],
   );
 
   useEffect(() => {
     if (filter === "unread" && !lists.unread.loaded) void load("unread", true);
   }, [filter, lists.unread.loaded, load]);
 
-  useEffect(() => {
-    if (
-      !sentinel.current ||
-      !active.hasNext ||
-      !("IntersectionObserver" in window)
-    )
-      return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) void load(filter);
-      },
-      { rootMargin: "160px 0px" },
-    );
-    observer.observe(sentinel.current);
-    return () => observer.disconnect();
-  }, [active.hasNext, filter, load]);
+  useIntersectionSentinel(
+    sentinel,
+    () => void load(filter),
+    active.hasNext,
+    "160px 0px",
+  );
 
   async function markAllRead() {
     if (!unreadCount || markingAll) return;
     const previous = lists;
     const previousCount = unreadCount;
+    const isCurrent = beginMutationRequest();
+    markAllReadEpoch.current++;
     setMarkingAll(true);
     setError("");
     setUnreadCount(0);
@@ -154,12 +168,14 @@ export function NotificationsPageView({
     try {
       await runtime.api.notifications.markAllRead();
     } catch (reason) {
-      setLists(previous);
-      setUnreadCount(previousCount);
-      announceUnreadStatus({ notifications: previousCount > 0 });
-      setError(
-        serverError(reason, t("markAllReadFailed")),
-      );
+      if (isCurrent()) {
+        setLists(previous);
+        setUnreadCount(previousCount);
+        announceUnreadStatus({ notifications: previousCount > 0 });
+        setError(
+          serverError(reason, t("markAllReadFailed")),
+        );
+      }
     } finally {
       setMarkingAll(false);
     }
@@ -167,7 +183,10 @@ export function NotificationsPageView({
 
   function markRead(item: NotificationPayload) {
     if (item.isRead) return;
-    const previous = lists;
+    beginMutationRequest();
+    const itemMutationVersion = (readMutationVersions.current.get(item.id) ?? 0) + 1;
+    readMutationVersions.current.set(item.id, itemMutationVersion);
+    const markAllEpoch = markAllReadEpoch.current;
     const previousCount = unreadCount;
     setUnreadCount((count) => Math.max(0, count - 1));
     announceUnreadStatus({ notifications: previousCount - 1 > 0 });
@@ -184,9 +203,25 @@ export function NotificationsPageView({
       },
     }));
     void runtime.api.notifications.markRead(item.id).catch(() => {
-      setLists(previous);
-      setUnreadCount(previousCount);
-      announceUnreadStatus({ notifications: previousCount > 0 });
+      if (
+        readMutationVersions.current.get(item.id) === itemMutationVersion &&
+        markAllReadEpoch.current === markAllEpoch
+      ) {
+        setLists((state) => ({
+          ...state,
+          all: {
+            ...state.all,
+            items: state.all.items.map((entry) =>
+              entry.id === item.id ? { ...entry, isRead: false } : entry,
+            ),
+          },
+          unread: state.unread.items.some((entry) => entry.id === item.id)
+            ? state.unread
+            : { ...state.unread, items: [copy({ ...item, isRead: false }), ...state.unread.items] },
+        }));
+        setUnreadCount((count) => count + 1);
+        announceUnreadStatus({ notifications: true });
+      }
     });
   }
 
@@ -543,10 +578,4 @@ function targetUrl(item: NotificationPayload, actorUrl: string) {
     return item.payload.metadata?.profileUrl || actorUrl;
   if (item.eventType === "follow") return actorUrl;
   return "";
-}
-function formatDate(value: string, locale: string) {
-  const date = new Date(value.includes("T") ? value : value.replace(" ", "T"));
-  return Number.isNaN(date.getTime())
-    ? value
-    : date.toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" });
 }

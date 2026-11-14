@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"gorm.io/gorm"
 )
@@ -47,9 +48,7 @@ type CursorPageQuery struct {
 
 func CursorPage(q CursorPageQuery) []Entity {
 	var list []Entity
-	if q.PageSize < 1 {
-		q.PageSize = 20
-	}
+	q.PageSize = pageutil.DefaultPageSize(q.PageSize, uint64(20))
 	b := builder()
 	if q.Status != "" {
 		b = b.Where(queryopt.Eq(fieldStatus, q.Status))

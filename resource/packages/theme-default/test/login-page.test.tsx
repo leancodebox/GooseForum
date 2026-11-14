@@ -166,6 +166,25 @@ describe('LoginPageView', () => {
     expect(screen.queryByText('auth.email.exists')).toBeNull()
   })
 
+  it('prefills and submits an invitation code for invite-only registration', async () => {
+    const { auth, user } = renderLogin({
+      locale: 'en',
+      page: { ...loginPage, initialMode: 'register', inviteOnly: true, invitationCode: 'gf_inv_link' },
+    })
+    auth.register.mockResolvedValueOnce({ code: 0, messageCode: 'auth.login.success', message: 'ok', result: null })
+
+    expect(screen.getByLabelText<HTMLInputElement>('Invitation code').value).toBe('gf_inv_link')
+    await user.type(screen.getByLabelText('Username'), 'invited-user')
+    await user.type(screen.getByLabelText('Email'), 'invited@example.com')
+    await user.type(screen.getByLabelText('Password'), 'password123')
+    await user.type(screen.getByLabelText('Confirm password'), 'password123')
+    await user.type(screen.getByLabelText('Captcha'), 'valid')
+    await user.click(screen.getByLabelText('I have read and agree to the terms and privacy policy'))
+    await user.click(screen.getByRole('button', { name: 'Create account' }))
+
+    await waitFor(() => expect(auth.register).toHaveBeenCalledWith(expect.objectContaining({ invitationCode: 'gf_inv_link' })))
+  })
+
   async function submitRegistration(user: ReturnType<typeof userEvent.setup>) {
     await user.type(screen.getByLabelText('Username'), 'pending-user')
     await user.type(screen.getByLabelText('Email'), 'pending@example.com')

@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { Download, RefreshCw, ShieldCheck } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useGooseRuntime, GooseLink } from '@gooseforum/runtime'
+import { useGooseRuntime, GooseLink, useLatestRequest } from '@gooseforum/runtime'
 import { Button } from '@gooseforum/ui/components/button'
 import { Alert, AlertDescription } from '@gooseforum/ui/components/alert'
 import { Spinner } from '@gooseforum/ui/components/spinner'
@@ -23,19 +23,19 @@ export function MFASettings({ showError, onEnabled }: { showError(message: strin
   const [codes, setCodes] = useState<string[] | null>(null)
   const [statusError, setStatusError] = useState('')
   const [retry, setRetry] = useState(0)
+  const beginRequest = useLatestRequest();
   useEffect(() => {
-    let active = true
+    const isCurrent = beginRequest()
     if (!runtime.api.users.mfaStatus) return
     void Promise.resolve().then(() => {
-      if (!active) return
+      if (!isCurrent()) return
       setStatusError('')
       return runtime.api.users.mfaStatus()
     }).then((result) => {
       if (!result) return
-      if (active) { setStatus(result); onEnabled?.(result.enabled) }
-    }).catch((reason) => { if (active) setStatusError(serverError(reason, t('mfa.statusFailed'))) })
-    return () => { active = false }
-  }, [runtime.api.users, onEnabled, serverError, t, retry])
+      if (isCurrent()) { setStatus(result); onEnabled?.(result.enabled) }
+    }).catch((reason) => { if (isCurrent()) setStatusError(serverError(reason, t('mfa.statusFailed'))) })
+  }, [runtime.api.users, onEnabled, serverError, t, retry, beginRequest])
 
   async function submit(event: FormEvent, action: 'enable' | 'disable' | 'regenerate' = status?.enabled ? 'regenerate' : 'enable') {
     event.preventDefault()

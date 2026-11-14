@@ -7,9 +7,7 @@ import (
 
 var formats = []string{
 	time.DateTime,
-	"2006-01-02",
 	"2006/01/02 15:04:05",
-	"2006-01-02",
 	"2006/01/02",
 	time.RFC3339,
 	time.RFC3339Nano,
@@ -29,7 +27,6 @@ var formats = []string{
 	time.StampMilli,
 	time.StampMicro,
 	time.StampNano,
-	time.DateTime,
 }
 
 func Str2Time(input string) time.Time {

@@ -1,3 +1,4 @@
+import { useLatestRequest } from '@gooseforum/runtime'
 import { useEffect, useState } from 'react'
 import type { GooseAdminApi } from '@gooseforum/client'
 import { Button } from '@gooseforum/ui/components/button'
@@ -5,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Field, FieldLabel } from '@gooseforum/ui/components/field'
 import { Input } from '@gooseforum/ui/components/input'
 import { ShieldOff, RefreshCw } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@gooseforum/ui/components/sonner'
 import type { UserTextKey } from '../users-i18n'
 
 export function UserMFAReset({ userId, username, api, text, disabled }: { userId: number; username: string; api: GooseAdminApi; text(key: UserTextKey): string; disabled: boolean }) {
@@ -15,11 +16,11 @@ export function UserMFAReset({ userId, username, api, text, disabled }: { userId
   const [open, setOpen] = useState(false)
   const [reason, setReason] = useState('')
   const [pending, setPending] = useState(false)
+  const beginRequest = useLatestRequest();
   useEffect(() => {
-    let active = true
-    void api.users.mfaStatus(userId).then(status => { if (active) { setEnabled(status.enabled); setError('') } }).catch(() => { if (active) setError(text('loadFailed')) })
-    return () => { active = false }
-  }, [api, userId, text, retry])
+    const isCurrent = beginRequest()
+    void api.users.mfaStatus(userId).then(status => { if (isCurrent()) { setEnabled(status.enabled); setError('') } }).catch(() => { if (isCurrent()) setError(text('loadFailed')) })
+      }, [api, userId, text, retry, beginRequest])
   async function reset() {
     if (pending || disabled || !reason.trim()) return
     setPending(true)

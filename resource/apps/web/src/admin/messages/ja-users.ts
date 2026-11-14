@@ -8,7 +8,6 @@ export default {
   restrictionNoEnd: "無期限",
   dateClear: "無期限にする",
   dateTime: "時刻",
-  dateDone: "完了",
   roleLoadFailed: "ロールを読み込めませんでした",
   badgeLoadFailed: "バッジを読み込めませんでした",
   restrictions: "アカウント制限",

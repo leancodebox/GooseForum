@@ -27,5 +27,6 @@ export default {
   more: "更多",
   scrollToLatest: "滚动到最新消息",
   loadFailed: "消息加载失败。",
+  retryLoad: "重试加载",
   sendFailed: "消息发送失败。",
 } as const;

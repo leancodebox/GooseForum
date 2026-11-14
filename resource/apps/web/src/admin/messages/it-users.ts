@@ -8,7 +8,6 @@ export default {
   restrictionNoEnd: "Permanente",
   dateClear: "Rendi permanente",
   dateTime: "Ora",
-  dateDone: "Fatto",
   roleLoadFailed: "Impossibile caricare i ruoli",
   badgeLoadFailed: "Impossibile caricare i badge",
   restrictions: "Limitazioni account",

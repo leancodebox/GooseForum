@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
@@ -170,10 +171,7 @@ func (h *Handler) topics(c *gin.Context) {
 		fail(c, 500, "internal_error", "Unable to read topics")
 		return
 	}
-	more := len(rows) > n
-	if more {
-		rows = rows[:n]
-	}
+	rows, more := pageutil.TrimPage(rows, n)
 	data := make([]gin.H, 0, len(rows))
 	for _, row := range rows {
 		data = append(data, h.topicData(c, row))
@@ -227,10 +225,7 @@ func (h *Handler) posts(c *gin.Context) {
 		fail(c, 500, "internal_error", "Unable to read posts")
 		return
 	}
-	more := len(rows) > n
-	if more {
-		rows = rows[:n]
-	}
+	rows, more := pageutil.TrimPage(rows, n)
 	if !h.filterReplyTargets(c, rows) {
 		return
 	}

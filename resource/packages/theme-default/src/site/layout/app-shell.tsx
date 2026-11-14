@@ -36,7 +36,6 @@ import {
 } from "lucide-react";
 import type { LayoutPayload, NavItemPayload } from "@gooseforum/client";
 import { useTranslation } from "react-i18next";
-import { activateDraftAccount, clearAccountDrafts, draftOwner } from "../drafts/local-draft-store";
 import {
   Avatar,
   AvatarFallback,
@@ -64,7 +63,7 @@ import {
 } from "@gooseforum/ui/components/sheet";
 import { authLocales, localeLabels } from "@gooseforum/runtime/i18n/auth";
 import { cn } from "@gooseforum/ui/lib/utils";
-import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
+import { GooseLink, useGooseRuntime, useLatestRequest } from "@gooseforum/runtime";
 import { RoutineIcon } from "@gooseforum/ui/components/icons/material-symbols/routine-icon";
 import { unreadStatusEvent } from "@gooseforum/runtime/unread-status";
 import {
@@ -97,7 +96,11 @@ export function AppShell({
 }) {
   const { t, i18n } = useTranslation("shell");
   const runtime = useGooseRuntime();
-  useEffect(() => { void activateDraftAccount(layout.viewer.isAuthenticated ? layout.viewer.id : 0); }, [layout.viewer.id, layout.viewer.isAuthenticated]);
+  useEffect(() => {
+    void import("../drafts/local-draft-store").then(({ activateDraftAccount }) =>
+      activateDraftAccount(layout.viewer.isAuthenticated ? layout.viewer.id : 0),
+    );
+  }, [layout.viewer.id, layout.viewer.isAuthenticated]);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem("goose:shell-sidebar-collapsed") === "true"; }
@@ -124,6 +127,8 @@ export function AppShell({
     language: undefined,
     user: undefined,
   });
+  const beginUnreadRequest = useLatestRequest();
+  const unreadRefreshInFlight = useRef(false);
   const activeKey = layout.sidebar.activeKey || "topics";
   const primary = [
     { ...nav("topics", t("nav.topics"), "/", MessageCircleIcon), active: ['topics', 'hot', 'popular'].includes(activeKey) },
@@ -214,6 +219,7 @@ export function AppShell({
   async function logout() {
     if (!window.dispatchEvent(new Event("goose:before-logout", { cancelable: true }))) return;
     await runtime.api.auth.logout();
+    const { clearAccountDrafts, draftOwner } = await import("../drafts/local-draft-store");
     await clearAccountDrafts(draftOwner(layout.viewer.id));
     runtime.redirect(runtime.currentUrl);
   }
@@ -252,30 +258,48 @@ export function AppShell({
   }
 
   useEffect(() => {
+    beginUnreadRequest();
     setUnread(layout.unread);
-  }, [layout.unread]);
+  }, [beginUnreadRequest, layout.unread]);
 
   useEffect(() => {
     const updateUnread = (event: Event) => {
       const detail = (event as CustomEvent<Partial<LayoutPayload["unread"]>>)
         .detail;
+      beginUnreadRequest();
       setUnread((current) => ({ ...current, ...detail }));
     };
     window.addEventListener(unreadStatusEvent, updateUnread);
     return () => window.removeEventListener(unreadStatusEvent, updateUnread);
-  }, []);
+  }, [beginUnreadRequest]);
 
   useEffect(() => {
     if (!layout.viewer.isAuthenticated) return;
     const refreshUnread = () => {
+      if (document.visibilityState === "hidden" || unreadRefreshInFlight.current)
+        return;
+      unreadRefreshInFlight.current = true;
+      const isCurrent = beginUnreadRequest();
       void runtime.api.notifications
         .unread()
-        .then(setUnread)
-        .catch(() => undefined);
+        .then((nextUnread) => {
+          if (isCurrent()) setUnread(nextUnread);
+        })
+        .catch(() => undefined)
+        .finally(() => {
+          unreadRefreshInFlight.current = false;
+        });
     };
     const timer = window.setInterval(refreshUnread, 30_000);
-    return () => window.clearInterval(timer);
-  }, [layout.viewer.isAuthenticated, runtime.api.notifications]);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") refreshUnread();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [beginUnreadRequest, layout.viewer.isAuthenticated, runtime.api.notifications]);
 
   useEffect(
     () => () => {
@@ -804,7 +828,7 @@ function NavList({
                 compact ? "h-7" : "h-8",
                 "focus-visible:ring-2",
                 item.active
-                  ? "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary [&>svg]:text-primary"
+                  ? "bg-primary/10 text-foreground hover:bg-primary/15 hover:text-foreground [&>svg]:text-primary"
                   : "text-foreground/75 hover:bg-accent hover:text-foreground",
               )}
             >

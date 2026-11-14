@@ -8,6 +8,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/accessGroups"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/categoryGroupPermissions"
+	"github.com/leancodebox/GooseForum/app/models/forum/postRevisions"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
@@ -65,6 +66,27 @@ func TestSaveTopicAndFirstPostPersistsBothCategoryRepresentations(t *testing.T) 
 	}
 	if len(indexes) != 2 || indexes[0].CategoryId != 3 || indexes[1].CategoryId != 4 {
 		t.Fatalf("stored category indexes = %#v", indexes)
+	}
+}
+
+func TestSaveTopicAndFirstPostRecordsFirstPostRevision(t *testing.T) {
+	conn := openTopicWriteDB(t)
+	topic := &topics.Entity{Title: "editable", UserId: 1, Status: 1}
+	firstPost := &posts.Entity{UserId: 1, Content: "before", SourceVersion: 1}
+	if err := SaveTopicAndFirstPostWithDB(conn, FirstPostWrite{Topic: topic, FirstPost: firstPost, CategoryIDs: []uint64{3}, Create: true}); err != nil {
+		t.Fatalf("create topic: %v", err)
+	}
+	expected := topic.ModerationVersion
+	firstPost.Content, firstPost.SourceVersion = "after", 2
+	if err := SaveTopicAndFirstPostWithDB(conn, FirstPostWrite{Topic: topic, FirstPost: firstPost, CategoryIDs: topic.CategoryIds, ExpectedVersion: &expected}); err != nil {
+		t.Fatalf("edit first post: %v", err)
+	}
+	var revision postRevisions.Entity
+	if err := conn.Where("post_id = ?", firstPost.Id).First(&revision).Error; err != nil {
+		t.Fatalf("load first post revision: %v", err)
+	}
+	if revision.RevisionNo != 1 || revision.Content != "before" || revision.SourceVersion != 1 {
+		t.Fatalf("revision = %+v, want previous first-post source", revision)
 	}
 }
 
@@ -178,7 +200,7 @@ func openTopicWriteDB(t *testing.T) *gorm.DB {
 	}
 	if err := conn.AutoMigrate(
 		&accessGroups.Entity{}, &categoryGroupPermissions.Entity{},
-		&topics.Entity{}, &posts.Entity{}, &category.Entity{}, &topicCategoryIndex.Entity{},
+		&topics.Entity{}, &posts.Entity{}, &postRevisions.Entity{}, &category.Entity{}, &topicCategoryIndex.Entity{},
 	); err != nil {
 		t.Fatalf("migrate topic write tables: %v", err)
 	}

@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/models/forum/authsessions"
 )
 
@@ -123,12 +124,7 @@ type Row = authsessions.LogRow
 type Page = authsessions.LogPage
 
 func List(filter Filter, owner uint64, admin bool) (Page, error) {
-	if filter.PageSize < 1 {
-		filter.PageSize = 20
-	}
-	if filter.PageSize > 100 {
-		filter.PageSize = 100
-	}
+	filter.PageSize = pageutil.NormalizePageSize(filter.PageSize, 20, 100)
 	var since, until *time.Time
 	if filter.Since != "" {
 		at, err := time.Parse(time.RFC3339, filter.Since)

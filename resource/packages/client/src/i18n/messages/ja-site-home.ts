@@ -17,6 +17,7 @@ export default {
   emptyCategoryDescription: "このカテゴリーには公開トピックがありません。",
   categoryLabel: "Category",
   loadMore: "さらに読み込む",
+  retryLoad: "読み込みを再試行",
   loading: "読み込み中…",
   allShown: "すべて表示しました",
   previous: "前へ",

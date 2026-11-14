@@ -1,3 +1,4 @@
+import { errorMessage } from "../error-message";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -9,7 +10,7 @@ import { Input } from "@gooseforum/ui/components/input";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Switch } from "@gooseforum/ui/components/switch";
 import { ArrowDown, ArrowUp, Code, GripVertical, Plus, Save, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@gooseforum/ui/components/sonner";
 import type { ContentSettingsTextKey } from "../content-settings-i18n";
 import { AnnouncementMarkdownEditor } from "../components/announcement-markdown-editor";
 
@@ -53,7 +54,7 @@ export function AnnouncementSettingsPage({ api, text }: { api: GooseAdminApi; te
       setForm(next);
       setSelectedId(next.items[0]?.id ?? "");
     } catch (reason) {
-      toast.error(reason instanceof Error ? reason.message : tr.current("loadFailed"));
+      toast.error(errorMessage(reason, tr.current("loadFailed")));
     } finally { setLoading(false); }
   }, [api]);
   useEffect(() => { void load(); }, [load]);
@@ -85,7 +86,7 @@ export function AnnouncementSettingsPage({ api, text }: { api: GooseAdminApi; te
     try {
       await api.settings.saveAnnouncement({ enabled: form.enabled, content: "", items: form.items });
       toast.success(text("saved"));
-    } catch (reason) { toast.error(reason instanceof Error ? reason.message : text("saveFailed")); }
+    } catch (reason) { toast.error(errorMessage(reason, text("saveFailed"))); }
     finally { setSaving(false); }
   }
 

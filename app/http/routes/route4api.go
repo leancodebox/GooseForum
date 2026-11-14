@@ -146,6 +146,8 @@ func apiRoute(ginApp *gin.Engine) {
 	forumApi := baseApi.Group("forum")
 	forumApi.GET("get-site-statistics", middleware.SessionAuthCheck, middleware.CheckPermission(permission.Admin), ginUpNP(api.GetSiteStatistics))
 	forumApi.GET("posts/window", middleware.SessionAuth, middleware.NoUpdateUserActivity, UpQueryReq(forum.PostWindow))
+	forumApi.GET("posts/revisions", middleware.SessionAuth, middleware.NoUpdateUserActivity, UpQueryReq(api.ListPostRevisions))
+	forumApi.GET("posts/revision", middleware.SessionAuth, middleware.NoUpdateUserActivity, UpQueryReq(api.GetPostRevision))
 
 	forumLoginApi := forumApi.Use(middleware.SessionAuthCheck)
 	forumLoginApi.GET("unread-status", middleware.NoUpdateUserActivity, UpButterReq(api.GetUnreadStatus))
@@ -191,6 +193,10 @@ func apiRoute(ginApp *gin.Engine) {
 
 	adminApi.
 		Group("", middleware.CheckPermission(permission.UserManager)).
+		GET("registration-invitations", UpButterReq(api.ListRegistrationInvitations)).
+		POST("registration-invitations/create", UpButterReq(api.CreateRegistrationInvitation)).
+		POST("registration-invitations/revoke", UpButterReq(api.RevokeRegistrationInvitation)).
+		POST("registration-invitations/retry-email", UpButterReq(api.RetryRegistrationInvitationEmail)).
 		GET("user-restriction-history", UpQueryReq(api.UserRestrictionHistory)).
 		GET("auth-logs", UpQueryReq(api.AdminAuthLogs)).
 		POST("user-list", UpButterReq(api.UserList)).
@@ -204,8 +210,10 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("topics/source", UpButterReq(api.TopicSource)).
 		POST("topics/edit", UpButterReq(api.EditTopic)).
 		POST("topics/review", UpButterReq(api.ReviewAdminTopic)).
+		POST("topics/review-batch", UpButterReq(api.ReviewAdminTopicBatch)).
 		POST("posts/review-list", UpButterReq(api.ReviewPostsList)).
 		POST("posts/review", UpButterReq(api.ReviewAdminPost)).
+		POST("posts/review-batch", UpButterReq(api.ReviewAdminPostBatch)).
 		POST("topics/delete", UpButterReq(api.DeleteTopic)).
 		POST("topics/pin-edit", UpButterReq(api.EditTopicPin)).
 		POST("topics/categories-edit", UpButterReq(api.EditTopicCategories)).

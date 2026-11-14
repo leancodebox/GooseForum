@@ -6,6 +6,7 @@ import {
   hasAdminPermission,
 } from './access'
 import { normalizeAdminPath, shouldUseClientNavigation } from './navigation'
+import { adminNavGroups } from './nav'
 
 describe('React admin access', () => {
   it('treats the administrator permission as a superuser permission', () => {
@@ -36,5 +37,11 @@ describe('React admin access', () => {
     expect(shouldUseClientNavigation(click)).toBe(true)
     expect(shouldUseClientNavigation({ ...click, metaKey: true })).toBe(false)
     expect(shouldUseClientNavigation({ ...click, button: 1 })).toBe(false)
+  })
+
+  it('keeps every sidebar route present in the access registry', () => {
+    for (const group of adminNavGroups)
+      for (const item of group.items)
+        expect(canVisitAdminPath([AdminPermission.Admin], item.url)).toBe(true)
   })
 })

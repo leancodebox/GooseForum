@@ -9,13 +9,13 @@ import {
   DialogTitle,
 } from "@gooseforum/ui/components/dialog";
 import { Spinner } from "@gooseforum/ui/components/spinner";
-import type { useAvatarCrop } from "./use-avatar-crop";
+import type { AvatarCropController } from "./use-avatar-crop";
 
 export function AvatarCropDialog({
   crop,
   cover = false,
 }: {
-  crop: ReturnType<typeof useAvatarCrop>;
+  crop: AvatarCropController;
   cover?: boolean;
 }) {
   const { t } = useTranslation("settings");

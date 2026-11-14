@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { AuthLogPayload } from '@gooseforum/client';
-import { useGooseRuntime } from '@gooseforum/runtime';
+import { useGooseRuntime, useLatestRequest } from '@gooseforum/runtime';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, History, RefreshCw } from 'lucide-react';
 import { Button } from '@gooseforum/ui/components/button';
@@ -27,7 +27,7 @@ export function AuthLogSettings() {
   const [refresh, setRefresh] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const requestEpoch = useRef(0);
+  const beginRequest = useLatestRequest();
   const [owner, setOwner] = useState(runtime.api.users);
   if (owner !== runtime.api.users) {
     setOwner(runtime.api.users); setCursors([0]); setRows([]); setNextCursor(0); setHasMore(false);
@@ -35,11 +35,9 @@ export function AuthLogSettings() {
     setLoading(true); setError(false);
   }
   const cursor = cursors[cursors.length - 1];
-  function reset() { requestEpoch.current++; setCursors([0]); setRefresh((value) => value + 1); setLoading(true); setError(false); }
+  function reset() { setCursors([0]); setRefresh((value) => value + 1); setLoading(true); setError(false); }
   useEffect(() => {
-    let active = true;
-    const epoch = ++requestEpoch.current;
-    const isCurrent = () => active && requestEpoch.current === epoch;
+    const isCurrent = beginRequest();
     void Promise.resolve().then(() => {
       if (!isCurrent()) return;
       setLoading(true); setError(false);
@@ -50,8 +48,7 @@ export function AuthLogSettings() {
     }).then((data) => { if (isCurrent() && data) { setRows(data.list); setNextCursor(data.nextCursor); setHasMore(data.hasMore); } })
       .catch(() => { if (isCurrent()) setError(true); })
       .finally(() => { if (isCurrent()) setLoading(false); });
-    return () => { active = false; };
-  }, [runtime.api.users, cursor, result, method, range, refresh]);
+  }, [runtime.api.users, cursor, result, method, range, refresh, beginRequest]);
   const label = (key: string) => t(`authLogs.${key}`, { defaultValue: key });
   return <section className="min-w-0">
     <SettingsSectionHeader icon={History} title={label('title')} actions={<Button type="button" variant="outline" size="icon" title={label('refresh')} aria-label={label('refresh')} disabled={loading} onClick={reset}><RefreshCw className="size-4" /></Button>} />
@@ -73,7 +70,7 @@ export function AuthLogSettings() {
           </TableRow>)}</TableBody>
         </Table>
       </div>}
-      <div className="flex items-center justify-end gap-2 text-xs"><span>{cursors.length}</span><Button type="button" variant="outline" size="icon-sm" title={label('previous')} aria-label={label('previous')} disabled={loading || error || cursors.length <= 1} onClick={() => { requestEpoch.current++; setLoading(true); setCursors((history) => history.slice(0, -1)); }}><ChevronLeft /></Button><Button type="button" variant="outline" size="icon-sm" title={label('next')} aria-label={label('next')} disabled={loading || error || !hasMore || nextCursor <= 0} onClick={() => { requestEpoch.current++; setLoading(true); setCursors((history) => [...history, nextCursor]); }}><ChevronRight /></Button></div>
+      <div className="flex items-center justify-end gap-2 text-xs"><span>{cursors.length}</span><Button type="button" variant="outline" size="icon-sm" title={label('previous')} aria-label={label('previous')} disabled={loading || error || cursors.length <= 1} onClick={() => { setLoading(true); setCursors((history) => history.slice(0, -1)); }}><ChevronLeft /></Button><Button type="button" variant="outline" size="icon-sm" title={label('next')} aria-label={label('next')} disabled={loading || error || !hasMore || nextCursor <= 0} onClick={() => { setLoading(true); setCursors((history) => [...history, nextCursor]); }}><ChevronRight /></Button></div>
     </div>
   </section>;
 }

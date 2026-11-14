@@ -19,6 +19,8 @@ export default {
   unlimited: "無制限",
   save: "保存",
   saved: "保存しました",
+  loadFailed: "設定を読み込めませんでした",
+  saveFailed: "設定を保存できませんでした",
   reload: "再読み込み",
   orderInvalid: "{higher}の「{field}」は{lower}より厳しく設定できません。",
   minPostAccountAgeMinutes: "投稿の待機時間（分）",

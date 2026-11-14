@@ -64,6 +64,8 @@ func TestForumTopicPostReadAndModerationRoutesUseTopicPostNames(t *testing.T) {
 
 	for _, route := range []string{
 		"GET /api/forum/posts/window",
+		"GET /api/forum/posts/revisions",
+		"GET /api/forum/posts/revision",
 		"POST /api/forum/moderation/topic-status",
 		"POST /api/forum/moderation/post-status",
 	} {
@@ -116,6 +118,26 @@ func TestAdminTopicManagementRoutesUseTopicNames(t *testing.T) {
 	} {
 		if registered[route] {
 			t.Fatalf("%s should not be registered", route)
+		}
+	}
+}
+
+func TestRegistrationInvitationAdminRoutesAreRegistered(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	apiRoute(router)
+	registered := map[string]bool{}
+	for _, route := range router.Routes() {
+		registered[route.Method+" "+route.Path] = true
+	}
+	for _, route := range []string{
+		"GET /api/admin/registration-invitations",
+		"POST /api/admin/registration-invitations/create",
+		"POST /api/admin/registration-invitations/revoke",
+		"POST /api/admin/registration-invitations/retry-email",
+	} {
+		if !registered[route] {
+			t.Fatalf("%s was not registered", route)
 		}
 	}
 }

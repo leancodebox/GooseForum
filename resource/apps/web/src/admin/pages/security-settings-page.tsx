@@ -1,3 +1,4 @@
+import { errorMessage } from "../error-message";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GooseAdminApi, SecuritySettings } from "@gooseforum/client";
 import { Badge } from "@gooseforum/ui/components/badge";
@@ -11,7 +12,7 @@ import { Input } from "@gooseforum/ui/components/input";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Switch } from "@gooseforum/ui/components/switch";
 import { MailCheck, Plus, Save, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@gooseforum/ui/components/sonner";
 import type { SystemSettingsTextKey } from "../system-settings-i18n";
 type Text = (k: SystemSettingsTextKey) => string;
 export function SecuritySettingsPage({
@@ -23,6 +24,7 @@ export function SecuritySettingsPage({
 }) {
   const [form, setForm] = useState<SecuritySettings>({
     enableSignup: true,
+    inviteOnly: false,
     enableEmailVerification: false,
     allowedDomains: [],
     registrationIPLimit: 5,
@@ -42,13 +44,14 @@ export function SecuritySettingsPage({
       const v = await api.settings.security();
       setForm({
         ...v,
+        inviteOnly: v.inviteOnly ?? false,
         registrationIPLimit: v.registrationIPLimit ?? 5,
         registrationEmailLimit: v.registrationEmailLimit ?? 3,
         registrationGlobalLimit: v.registrationGlobalLimit ?? 100,
         allowedDomains: Array.isArray(v.allowedDomains) ? v.allowedDomains : [],
       });
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : tr.current("loadFailed"));
+      toast.error(errorMessage(r, tr.current("loadFailed")));
     } finally {
       setLoading(false);
     }
@@ -69,7 +72,7 @@ export function SecuritySettingsPage({
       await api.settings.saveSecurity(form);
       toast.success(text("saved"));
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : text("saveFailed"));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -91,6 +94,13 @@ export function SecuritySettingsPage({
               setForm({ ...form, enableSignup })
             }
           />
+        </Field>
+        <Field orientation="horizontal">
+          <div className="flex-1">
+            <FieldLabel htmlFor="invite-only">{text("inviteOnly")}</FieldLabel>
+            <FieldDescription>{text("inviteOnlyHint")}</FieldDescription>
+          </div>
+          <Switch id="invite-only" checked={Boolean(form.inviteOnly)} disabled={loading} onCheckedChange={(inviteOnly) => setForm({ ...form, inviteOnly })} />
         </Field>
         <Field orientation="horizontal">
           <div className="flex-1">

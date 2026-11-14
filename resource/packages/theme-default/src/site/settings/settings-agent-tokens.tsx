@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { AgentTokenPayload } from "@gooseforum/client";
 import { Ban, Check, Copy, KeyRound, Plus, RefreshCw, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useGooseRuntime } from "@gooseforum/runtime";
+import { useGooseRuntime, useLatestRequest } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { Alert, AlertDescription } from "@gooseforum/ui/components/alert";
 import { Badge } from "@gooseforum/ui/components/badge";
@@ -48,23 +48,21 @@ export function AgentTokenSettings() {
   const [deleteID, setDeleteID] = useState("");
   const mfa = useMFAEnabled();
 
+  const beginRequest = useLatestRequest();
   useEffect(() => {
-    let active = true;
+    const isCurrent = beginRequest();
     void runtime.api.users
       .agentTokens()
       .then((items) => {
-        if (active) setRows(items);
+        if (isCurrent()) setRows(items);
       })
       .catch((reason) => {
-        if (active) setError(serverError(reason, t("agentTokens.failed")));
+        if (isCurrent()) setError(serverError(reason, t("agentTokens.failed")));
       })
       .finally(() => {
-        if (active) setLoading(false);
+        if (isCurrent()) setLoading(false);
       });
-    return () => {
-      active = false;
-    };
-  }, [runtime.api.users, serverError, t]);
+      }, [runtime.api.users, serverError, t, beginRequest]);
 
   async function run(action: () => Promise<void>) {
     if (inFlight.current) return;

@@ -70,6 +70,11 @@ func Create(entity *EntityComplete) error {
 	return identityWriteError(err, entity.Username, entity.Email, 0)
 }
 
+func CreateWithDB(db *gorm.DB, entity *EntityComplete) error {
+	err := db.Create(entity).Error
+	return identityWriteError(err, entity.Username, entity.Email, 0)
+}
+
 func Save(entity *EntityComplete) error {
 	result := builder().Omit("trust_level", "trust_level_locked", "trust_visit_days", "trust_last_visit_day", "trust_topic_ids", "trust_version", "username", "username_lower", "email", "email_normalized", "is_activated", "activated_at", "requires_email_verification", "password", "token_version", "role_id", "restriction_status", "restriction_until", "restriction_reason").Save(entity)
 	return result.Error

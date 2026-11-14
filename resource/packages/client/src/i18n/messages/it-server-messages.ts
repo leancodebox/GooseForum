@@ -37,6 +37,8 @@ export default {
   "auth.signupDisabled": "La registrazione è attualmente disabilitata.",
   "auth.emailDomain.invalid": "L’indirizzo email non è valido.",
   "auth.emailDomain.notAllowed": "Questo dominio email non è consentito.",
+  "auth.invitation.invalid": "Il codice d’invito non è valido, è scaduto, revocato o già esaurito.",
+  "auth.invitation.required": "Questo sito richiede un codice d’invito per registrarsi.",
   "auth.username.invalid": "Il formato del nome utente non è valido.",
   "auth.username.exists": "Questo nome utente è già in uso.",
   "auth.email.exists": "Questo indirizzo email è già in uso.",

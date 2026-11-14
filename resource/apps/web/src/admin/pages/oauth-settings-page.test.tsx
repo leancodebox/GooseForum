@@ -2,7 +2,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { GooseAdminApi } from "@gooseforum/client";
-import { toast } from "sonner";
+import { toast } from "@gooseforum/ui/components/sonner";
 import messages from "../messages/zh-identity-settings";
 import { OAuthSettingsPage } from "./oauth-settings-page";
 

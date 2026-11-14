@@ -35,7 +35,7 @@ import {
 import { Textarea } from "@gooseforum/ui/components/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@gooseforum/ui/components/toggle-group";
 import { cn } from "@gooseforum/ui/lib/utils";
-import { useGooseRuntime } from "@gooseforum/runtime";
+import { useGooseRuntime, useLatestRequest } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import {
   hasUnsupportedVisualMarkdown,
@@ -88,6 +88,7 @@ export function MarkdownComposer({
 }) {
   const { t } = useTranslation("publish");
   const runtime = useGooseRuntime();
+  const beginMentionRequest = useLatestRequest();
   const serverError = useServerErrorMessage();
   const [selectedMode, setMode] = useState<EditorMode>(() =>
     hasUnsupportedVisualMarkdown(value,sourceVersion) ? "markdown" : "visual",
@@ -115,14 +116,14 @@ export function MarkdownComposer({
   const mentionSelection = useRef<Selection | null>(null);
   useEffect(() => {
     if (query === null || sourceVersion === 0) return;
-    let active = true;
+    const isCurrent = beginMentionRequest();
     const timer = setTimeout(() => {
       void runtime.api.users.mentions(query)
-        .then((items) => { if (active) setCandidateResult({ query, items }); })
-        .catch(() => { if (active) setCandidateResult({ query, items: [] }); });
+        .then((items) => { if (isCurrent()) setCandidateResult({ query, items }); })
+        .catch(() => { if (isCurrent()) setCandidateResult({ query, items: [] }); });
     }, 200);
-    return () => { active = false; clearTimeout(timer); };
-  }, [query, sourceVersion, runtime]);
+    return () => { clearTimeout(timer); };
+  }, [beginMentionRequest, query, sourceVersion, runtime]);
   function updateQuery(next: string | null) {
     setQuery(next);
     if (next !== query) setCandidateIndex(0);

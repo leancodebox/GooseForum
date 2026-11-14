@@ -173,6 +173,7 @@ type MailSettingsConfig struct {
 
 type SecurityAndRegistration struct {
 	EnableSignup            bool     `json:"enableSignup"`
+	InviteOnly              bool     `json:"inviteOnly"`
 	EnableEmailVerification bool     `json:"enableEmailVerification"`
 	AllowedDomains          []string `json:"allowedDomains"`
 	RegistrationIPLimit     int      `json:"registrationIPLimit"`

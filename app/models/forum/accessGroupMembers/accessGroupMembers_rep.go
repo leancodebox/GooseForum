@@ -81,6 +81,24 @@ func ByGroupID(groupID uint64) ([]Entity, error) {
 	return entities, err
 }
 
+func ByGroupIDs(groupIDs []uint64) ([]Entity, error) {
+	if len(groupIDs) == 0 {
+		return []Entity{}, nil
+	}
+	var entities []Entity
+	err := builder().Where(queryopt.In("access_group_id", groupIDs)).Order(queryopt.Asc("access_group_id")).Order(queryopt.Asc("id")).Find(&entities).Error
+	return entities, err
+}
+
+func ByGroupIDsAndUser(groupIDs []uint64, userID uint64) ([]Entity, error) {
+	if len(groupIDs) == 0 || userID == 0 {
+		return []Entity{}, nil
+	}
+	var entities []Entity
+	err := builder().Where(queryopt.In("access_group_id", groupIDs)).Where(queryopt.Eq("user_id", userID)).Find(&entities).Error
+	return entities, err
+}
+
 func All() ([]Entity, error) {
 	var entities []Entity
 	err := builder().Order(queryopt.Asc("access_group_id")).Order(queryopt.Asc("id")).Find(&entities).Error

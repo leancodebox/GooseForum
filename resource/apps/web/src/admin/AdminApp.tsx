@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { flushSync } from 'react-dom'
+import { useLatestRequest } from '@gooseforum/runtime'
 import { applyBrowserTheme, createThemeTransition, detectBrowserTheme, detectBrowserThemePreference, resolveBrowserTheme, saveBrowserThemePreference, type BrowserThemePreference } from '@gooseforum/runtime/browser-host'
 import type { GooseAdminApi, PagePayload } from '@gooseforum/client'
 import { SidebarInset, SidebarProvider } from '@gooseforum/ui/components/sidebar'
@@ -30,8 +31,9 @@ import { TrustSettingsPage } from './page-registry'
 import { normalizeAdminPath, communityRulePaths, identitySettingPaths } from './navigation'
 import { prepareAdminTranslations, adminPageNamespaces, loadedAdminNamespaces } from './translation-loader'
 import { prepareAdminListData, type AdminListData } from './list-data'
+import { errorMessage } from './error-message'
 
-import { DashboardPage, CategoriesManagementPage, AccessGroupsManagementPage, RolesManagementPage, UsersManagementPage, PostsManagementPage, LinksManagementPage, SponsorsManagementPage, BadgesManagementPage, FileResourcesManagementPage, OptRecordsManagementPage, SiteInfoManagementPage, SiteChromeManagementPage, MailSettingsPage, SecuritySettingsPage, PostingSettingsPage, AnnouncementSettingsPage, HttpNotifySettingsPage, SensitiveWordsSettingsPage, OAuthSettingsPage, OIDCProviderSettingsPage, prepareAdminPage } from './page-registry'
+import { DashboardPage, CategoriesManagementPage, AccessGroupsManagementPage, RolesManagementPage, UsersManagementPage, RegistrationInvitationsPage, PostsManagementPage, LinksManagementPage, SponsorsManagementPage, BadgesManagementPage, FileResourcesManagementPage, OptRecordsManagementPage, SiteInfoManagementPage, SiteChromeManagementPage, MailSettingsPage, SecuritySettingsPage, PostingSettingsPage, AnnouncementSettingsPage, HttpNotifySettingsPage, SensitiveWordsSettingsPage, OAuthSettingsPage, OIDCProviderSettingsPage, prepareAdminPage } from './page-registry'
 
 const Toaster = lazy(() => import('@gooseforum/ui/components/sonner').then(module => ({ default: module.Toaster })))
 
@@ -58,12 +60,12 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
   const restoringHistory = useRef(false)
   const committedUrl = useRef(window.location.pathname + window.location.search)
   const pendingScroll = useRef<number | undefined>(undefined)
-  const requestVersion = useRef(0)
+  const beginNavigationRequest = useLatestRequest()
   const [isNavigating, setIsNavigating] = useState(false)
   const [navigationError, setNavigationError] = useState('')
   const [locale, setLocale] = useState(() => detectBrowserLocale())
   const localeRef = useRef(locale)
-  const localeVersion = useRef(0)
+  const beginLocaleRequest = useLatestRequest()
   const pathnameRef = useRef(pathname)
   const [theme, setTheme] = useState(() => detectBrowserTheme())
   const themeRef = useRef(theme)
@@ -100,7 +102,7 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
   }, [page.layout.site.name, text, titleKey])
 
   const navigate = useCallback(async (path: string, updateHistory = true, targetHistoryIndex = readHistoryIndex()) => {
-    const version = ++requestVersion.current
+    const isCurrent = beginNavigationRequest()
     const requestedUrl = new URL(path, window.location.href)
     const nextPath = normalizeAdminPath(requestedUrl.pathname)
     // A popstate already changed the address; remember the page being left separately.
@@ -128,7 +130,7 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
       const language = localeRef.current
       const [, , nextData] = await Promise.all([prepareAdminPage(nextPath), prepareAdminTranslations(language, adminPageNamespaces(nextPath)), prepareAdminListData(api, nextUrl)])
       if (language !== localeRef.current) await prepareAdminTranslations(localeRef.current, adminPageNamespaces(nextPath))
-      if (version !== requestVersion.current) return
+      if (!isCurrent()) return
       const nextHistoryIndex = updateHistory ? readHistoryIndex() + 1 : targetHistoryIndex
       if (updateHistory) window.history.pushState({ ...window.history.state, [historyIndexKey]: nextHistoryIndex }, '', nextKey)
       committedUrl.current = nextKey
@@ -139,14 +141,14 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
       setRouteKey(`${nextHistoryIndex}:${nextKey}`)
       setPathname(nextPath)
     } catch (error) {
-      if (version === requestVersion.current) {
+      if (isCurrent()) {
         restoreHistory()
-        setNavigationError(error instanceof Error ? error.message : String(error))
+        setNavigationError(errorMessage(error, 'Navigation failed'))
       }
     } finally {
-      if (version === requestVersion.current) setIsNavigating(false)
+      if (isCurrent()) setIsNavigating(false)
     }
-  }, [api, pathname])
+  }, [api, beginNavigationRequest, pathname])
 
   useLayoutEffect(() => {
     if (pendingScroll.current === undefined) return
@@ -175,26 +177,24 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
     }
   }, [navigate])
 
-  useEffect(() => () => { requestVersion.current++; localeVersion.current++ }, [])
-
   const prefetch = useCallback((path: string) => {
     void Promise.all([prepareAdminPage(path), prepareAdminTranslations(localeRef.current, adminPageNamespaces(path))]).catch(() => undefined)
   }, [])
 
   const changeLocale = useCallback(async (nextLocale: typeof locale) => {
-    const version = ++localeVersion.current
+    const isCurrent = beginLocaleRequest()
     setNavigationError('')
     try {
       await prepareAdminTranslations(nextLocale, loadedAdminNamespaces())
       await prepareAdminTranslations(nextLocale, adminPageNamespaces(pathnameRef.current))
-      if (version !== localeVersion.current) return
+      if (!isCurrent()) return
       localeRef.current = nextLocale
       applyBrowserLocale(nextLocale)
       setLocale(nextLocale)
     } catch (error) {
-      if (version === localeVersion.current) setNavigationError(error instanceof Error ? error.message : String(error))
+      if (isCurrent()) setNavigationError(errorMessage(error, 'Unable to change language'))
     }
-  }, [])
+  }, [beginLocaleRequest])
 
   const changeTheme = useCallback((preference: BrowserThemePreference) => {
     saveBrowserThemePreference(preference)
@@ -237,6 +237,8 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
         ? <RolesManagementPage api={api} text={roleText} />
       : pathname === '/admin/users'
         ? <UsersManagementPage key={routeKey} api={api} initialData={listData?.kind === 'users' ? listData.data : undefined} onUrlChange={rememberQueryUrl} text={userText} locale={locale} canResetMFA={page.layout.viewer?.adminPermissions?.includes(0)} currentUserId={page.layout.viewer?.id} />
+      : pathname === '/admin/registration-invitations'
+        ? <RegistrationInvitationsPage api={api} text={assetText} locale={locale} />
       : pathname === '/admin/posts'
         ? <PostsManagementPage key={routeKey} api={api} initialData={listData?.kind === 'posts' ? listData.data : undefined} onUrlChange={rememberQueryUrl} text={postText} />
       : pathname === '/admin/links'

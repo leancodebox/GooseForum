@@ -12,7 +12,7 @@
     "build:all": "pnpm build",
     "typecheck": "pnpm typecheck:react",
     "typecheck:react": "pnpm client:build && pnpm --filter @gooseforum/markdown --filter @gooseforum/runtime --filter @gooseforum/ui --filter @gooseforum/theme-default --filter @gooseforum/web run typecheck",
-    "lint:react": "eslint apps/web/src packages/markdown/src packages/runtime/src packages/ui/src packages/theme-default/src packages/theme-default/test --max-warnings 183 --format ./scripts/eslint-summary-formatter.mjs",
+    "lint:react": "eslint apps/web/src packages/markdown/src packages/runtime/src packages/ui/src packages/theme-default/src packages/theme-default/test --max-warnings 171 --format ./scripts/eslint-summary-formatter.mjs",
     "test:react": "pnpm --filter @gooseforum/theme-default test && pnpm --filter @gooseforum/web test && pnpm test:react-dom-scanner && pnpm test:tailwind-audit",
     "test:react:coverage": "vitest run --coverage -c vitest.coverage.config.ts",
     "test:react:e2e": "playwright test",
@@ -28,7 +28,8 @@
     "test:react-dom-scanner": "node --test scripts/scan-react-dom.test.mjs",
     "scan:dom": "pnpm scan:react-dom",
     "test": "pnpm client:build && pnpm client:test && pnpm test:react",
-    "check:boundaries": "node --test scripts/workspace-boundaries.test.mjs"
+    "check:boundaries": "node --test scripts/workspace-boundaries.test.mjs",
+    "check:docs": "node ../scripts/check-doc-links.mjs"
   },
   "dependencies": {},
   "devDependencies": {

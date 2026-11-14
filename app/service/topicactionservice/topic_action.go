@@ -68,7 +68,7 @@ func SetWatched(userID, topicID uint64, watched bool) error {
 
 func loadActionState(userID, topicID uint64) (topics.InteractionTarget, topicUserAction.Entity, error) {
 	topic := topics.GetInteractionTarget(topicID)
-	if topic.Id == 0 || topic.Status != 1 || topic.ProcessStatus != 0 {
+	if topic.Id == 0 || !topic.IsPublished() {
 		return topics.InteractionTarget{}, topicUserAction.Entity{}, ErrTopicUnavailable
 	}
 	snapshot, err := accesscontrol.Resolve(userID)

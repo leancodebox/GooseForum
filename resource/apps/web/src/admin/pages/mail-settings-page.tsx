@@ -1,3 +1,4 @@
+import { errorMessage } from "../error-message";
 import { AdminPage } from '../components/admin-page'
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GooseAdminApi, MailSettings } from "@gooseforum/client";
@@ -20,7 +21,7 @@ import { Input } from "@gooseforum/ui/components/input";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Switch } from "@gooseforum/ui/components/switch";
 import { Mail, Save, Send, Shield } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@gooseforum/ui/components/sonner";
 import type { SystemSettingsTextKey } from "../system-settings-i18n";
 type Text = (k: SystemSettingsTextKey) => string;
 const empty: MailSettings = {
@@ -55,7 +56,7 @@ export function MailSettingsPage({
       setForm({ ...empty, ...(await api.settings.mail()) });
     } catch (r) {
       toast.error(
-        r instanceof Error ? r.message : textRef.current("loadFailed"),
+        errorMessage(r, textRef.current("loadFailed")),
       );
     } finally {
       setLoading(false);
@@ -70,7 +71,7 @@ export function MailSettingsPage({
       await api.settings.saveMail(form);
       toast.success(text("saved"));
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : text("saveFailed"));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -82,7 +83,7 @@ export function MailSettingsPage({
       await api.settings.testMail(form, testEmail.trim());
       toast.success(text("testSent"));
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : text("saveFailed"));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setTesting(false);
     }

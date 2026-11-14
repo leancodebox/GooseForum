@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/chat/imConversations"
 	"github.com/leancodebox/GooseForum/app/models/chat/imUserChatConfigs"
@@ -28,9 +29,9 @@ type MessageCursorResult struct {
 }
 
 // SendMessage creates or updates a direct conversation and stores a message.
-func SendMessage(senderId, peerId uint64, content string, msgType int8) (uint64, error) {
+func SendMessage(senderId, peerId uint64, content string, msgType int8) (uint64, uint64, error) {
 	if senderId == peerId {
-		return 0, errors.New("cannot send message to yourself")
+		return 0, 0, errors.New("cannot send message to yourself")
 	}
 
 	senderConfig := imUserChatConfigs.GetConfig(senderId, peerId)
@@ -91,7 +92,7 @@ func SendMessage(senderId, peerId uint64, content string, msgType int8) (uint64,
 	imUserChatConfigs.InvalidateConversationAccess(peerId, convId)
 	unreadservice.Invalidate(peerId)
 
-	return convId, nil
+	return convId, msg.Id, nil
 }
 
 // GetChatList returns the current user's conversations.
@@ -149,12 +150,7 @@ func GetMessages(userId, convId uint64, beforeId, afterId uint64, limit int) (*M
 	if beforeId > 0 && afterId > 0 {
 		return nil, errors.New("beforeId and afterId cannot be used together")
 	}
-	if limit <= 0 {
-		limit = defaultMessageLimit
-	}
-	if limit > maxMessageLimit {
-		limit = maxMessageLimit
-	}
+	limit = pageutil.NormalizePageSize(limit, defaultMessageLimit, maxMessageLimit)
 
 	queryLimit := limit + 1
 	var msgs []messages.Entity
@@ -167,10 +163,9 @@ func GetMessages(userId, convId uint64, beforeId, afterId uint64, limit int) (*M
 		msgs = messages.GetLatestByConvId(convId, queryLimit)
 	}
 
-	hasMore := len(msgs) > limit
-	if hasMore {
-		msgs = msgs[:limit]
-	}
+	msgs, _, hasMore := pageutil.TrimCursorPage(msgs, limit, func(message messages.Entity) uint64 {
+		return message.Id
+	})
 	if afterId == 0 {
 		reverseMessages(msgs)
 	}

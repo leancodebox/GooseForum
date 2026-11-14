@@ -6,6 +6,7 @@ import (
 	"time"
 
 	core "github.com/leancodebox/GooseForum/app/bundles/oidcprovider"
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"gorm.io/gorm"
 )
 
@@ -50,10 +51,7 @@ func (s *Store) ListClientGrants(ctx context.Context, clientID, after, userID st
 	if err := query.Order("user_id ASC").Limit(21).Find(&rows).Error; err != nil {
 		return nil, false, err
 	}
-	more := len(rows) > 20
-	if more {
-		rows = rows[:20]
-	}
+	rows, more := pageutil.TrimPage(rows, 20)
 	return rows, more, nil
 }
 

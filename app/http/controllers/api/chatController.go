@@ -20,7 +20,7 @@ func SendMessage(req component.BetterRequest[SendMessageReq]) component.Response
 		msgType = 1
 	}
 
-	convId, err := chatservice.SendMessage(req.UserId, req.Params.PeerId, req.Params.Content, msgType)
+	convId, messageId, err := chatservice.SendMessage(req.UserId, req.Params.PeerId, req.Params.Content, msgType)
 	if err != nil {
 		return component.FailResponseCode(
 			component.MessageChatSendFailed,
@@ -28,7 +28,7 @@ func SendMessage(req component.BetterRequest[SendMessageReq]) component.Response
 			component.MessageParams{"error": err.Error()})
 
 	}
-	return successDataMap("convId", convId)
+	return component.SuccessResponse(component.DataMap{"convId": convId, "messageId": messageId})
 }
 
 // GetMessagesReq 获取消息记录请求

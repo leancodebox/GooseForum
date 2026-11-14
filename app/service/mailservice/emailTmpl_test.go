@@ -15,6 +15,24 @@ func TestBuildEmailActionURL(t *testing.T) {
 	}
 }
 
+func TestBuildInvitationURL(t *testing.T) {
+	got := buildInvitationURL("https://example.com/", "gf_inv_a/b+c=", "en-US")
+	want := "https://example.com/login?invitation=gf_inv_a%2Fb%2Bc%3D&lang=en&register=true"
+	if got != want {
+		t.Fatalf("buildInvitationURL() = %q, want %q", got, want)
+	}
+}
+
+func TestGenerateRegistrationInvitationEmailBody(t *testing.T) {
+	body, err := generateRegistrationInvitationEmailBody("gf_inv_test", "en")
+	if err != nil {
+		t.Fatalf("generateRegistrationInvitationEmailBody() error = %v", err)
+	}
+	if !strings.Contains(body, "gf_inv_test") || !strings.Contains(body, "register=true") {
+		t.Fatalf("invitation email body does not contain the invitation link: %s", body)
+	}
+}
+
 func TestBuildEmailActionURLIncludesLocale(t *testing.T) {
 	got := buildEmailActionURL("https://example.com/", "/activate", "token", "en-US")
 	want := "https://example.com/activate?lang=en&token=token"

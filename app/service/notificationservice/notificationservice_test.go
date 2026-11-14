@@ -1,6 +1,10 @@
 package notificationservice
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
+)
 
 func TestNormalizePageSize(t *testing.T) {
 	tests := []struct {
@@ -16,7 +20,7 @@ func TestNormalizePageSize(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := normalizePageSize(tt.in); got != tt.want {
+			if got := pageutil.NormalizePageSize(tt.in, DefaultNotificationPageSize, MaxNotificationPageSize); got != tt.want {
 				t.Fatalf("normalizePageSize(%d) = %d, want %d", tt.in, got, tt.want)
 			}
 		})

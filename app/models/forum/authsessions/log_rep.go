@@ -5,6 +5,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"gorm.io/gorm"
 )
 
@@ -79,10 +80,8 @@ func listLogs(db *gorm.DB, filter LogFilter, owner uint64, admin bool, since, un
 			return LogPage{}, err
 		}
 	}
-	if len(result.List) > filter.PageSize {
-		result.List = result.List[:filter.PageSize]
-		result.HasMore = true
-		result.NextCursor = result.List[len(result.List)-1].Id
-	}
+	result.List, result.NextCursor, result.HasMore = pageutil.TrimCursorPage(result.List, filter.PageSize, func(row LogRow) uint64 {
+		return row.Id
+	})
 	return result, nil
 }

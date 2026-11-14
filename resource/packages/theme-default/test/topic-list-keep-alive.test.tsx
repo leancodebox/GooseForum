@@ -15,7 +15,7 @@ import {
   type GooseRuntime,
 } from "@gooseforum/runtime";
 import { SearchPageView } from "../src/site/pages/search-page";
-import { useTopicList } from "../src/site/topics/topic-list";
+import { TopicListFooter, useTopicList } from "../src/site/topics/topic-list";
 import { Calendar } from "@gooseforum/ui/components/calendar";
 
 afterEach(cleanup);
@@ -68,6 +68,55 @@ describe("topic list keep-alive state", () => {
       vi.unstubAllGlobals();
     }
   });
+  it("does not automatically retry a failed waterfall load", async () => {
+    let notify: IntersectionObserverCallback | undefined;
+    vi.stubGlobal("IntersectionObserver", class {
+      constructor(callback: IntersectionObserverCallback) {
+        notify = callback;
+      }
+      observe() {
+        notify?.([{ isIntersecting: true } as IntersectionObserverEntry], this as unknown as IntersectionObserver);
+      }
+      disconnect() {}
+    });
+    const fetchPage = vi.fn().mockRejectedValue(new Error("temporary topic failure"));
+    const page = topicPage([topic(1, "First")], {
+      page: 1, nextPage: 2, hasNext: true, nextUrl: "/?page=2",
+    });
+    try {
+      render(<GooseRuntimeProvider runtime={createRuntime(fetchPage)}><TopicListState page={page} /></GooseRuntimeProvider>);
+      await waitFor(() => expect(fetchPage).toHaveBeenCalledTimes(1));
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(fetchPage).toHaveBeenCalledTimes(1);
+      fireEvent.click(screen.getByRole("button", { name: "load more" }));
+      await waitFor(() => expect(fetchPage).toHaveBeenCalledTimes(2));
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+  it("labels the waterfall action as retry after a load error", () => {
+    render(<TopicListFooter
+      mode="waterfall"
+      pagination={{ page: 1, nextPage: 2, hasNext: true, nextUrl: "/?page=2" }}
+      loading={false}
+      error="load failed"
+      t={((key: string) => key) as any}
+      onLoad={async () => {}}
+    />);
+    expect(screen.getByRole("button", { name: "retryLoad" })).toBeDefined();
+  });
+  it("preserves the category path and filters for the previous page", () => {
+    render(<GooseRuntimeProvider runtime={createRuntime()}><TopicListFooter
+      mode="pagination"
+      pagination={{ page: 2, nextPage: 3, hasNext: true, nextUrl: "/c/Coding/1?sort=latest&page=3" }}
+      loading={false}
+      error=""
+      pageUrl="/c/Coding/1?sort=latest&page=2"
+      t={((key: string) => key) as any}
+      onLoad={async () => {}}
+    /></GooseRuntimeProvider>);
+    expect(screen.getByRole("link", { name: /previous/i }).getAttribute("href")).toBe("/c/Coding/1?sort=latest&page=1");
+  });
   it("keeps appended topics when an Activity is hidden and shown again", async () => {
     const firstPage = topicPage([topic(1, "First")], {
       page: 1,
@@ -98,6 +147,28 @@ describe("topic list keep-alive state", () => {
     rendered.rerender(view("visible", { ...firstPage }));
 
     await waitFor(() => expect(screen.getByTestId("topics").textContent).toBe("1,2"));
+  });
+
+  it("drops an in-flight waterfall response after switching to pagination", async () => {
+    let resolvePage!: (value: AnyPagePayload) => void;
+    const firstPage = topicPage([topic(1, "First")], {
+      page: 1,
+      nextPage: 2,
+      hasNext: true,
+      nextUrl: "/?page=2",
+    });
+    const nextPage = topicPage([topic(2, "Second")], {
+      page: 2,
+      nextPage: 3,
+      hasNext: false,
+      nextUrl: "",
+    });
+    const fetchPage = vi.fn(() => new Promise<AnyPagePayload>((resolve) => { resolvePage = resolve; }));
+    render(<GooseRuntimeProvider runtime={createRuntime(fetchPage)}><TopicListState page={firstPage} /></GooseRuntimeProvider>);
+    fireEvent.click(screen.getByRole("button", { name: "load more" }));
+    fireEvent.click(screen.getByRole("button", { name: "switch mode" }));
+    resolvePage(payload(nextPage, "/?page=2"));
+    await waitFor(() => expect(screen.getByTestId("topics").textContent).toBe("1"));
   });
 
   it("replaces a cached list when the same URL receives a fresh payload", async () => {
@@ -172,6 +243,9 @@ function TopicListState({ page }: { page: HomeProps }) {
       <output data-testid="topics">{list.topics.map((item) => item.id).join(",")}</output>
       <button type="button" onClick={() => void list.loadMore()}>
         load more
+      </button>
+      <button type="button" onClick={() => list.switchMode()}>
+        switch mode
       </button>
     </div>
   );

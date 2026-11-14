@@ -37,6 +37,9 @@ jobs:
       - name: Test Go with embedded React assets
         run: go test ./... -coverprofile=coverage.out -covermode=atomic
 
+      - name: Vet Go packages
+        run: go vet ./...
+
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v6
         with:
@@ -48,6 +51,68 @@ jobs:
         with:
           files: coverage.out
           fail_ci_if_error: false
+
+  database-integration:
+    name: PostgreSQL integration
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gooseforum
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d gooseforum"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Verify invitation concurrency on PostgreSQL
+        env:
+          GOOSEFORUM_POSTGRES_TEST_DSN: host=localhost user=postgres password=postgres dbname=gooseforum port=5432 sslmode=disable
+        run: go test ./app/models/forum/invitations -run TestPostgresReservationAllowsOnlyOneWinner -count=3
+
+  mysql-integration:
+    name: MySQL integration
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: gooseforum
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Verify invitation concurrency on MySQL
+        env:
+          GOOSEFORUM_MYSQL_TEST_DSN: root:root@tcp(localhost:3306)/gooseforum?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci
+        run: go test ./app/models/forum/invitations -run TestMySQLReservationAllowsOnlyOneWinner -count=3
 
   resource:
     name: Resource build
@@ -107,6 +172,10 @@ jobs:
       - name: Install dependencies
         working-directory: resource
         run: pnpm install --frozen-lockfile
+
+      - name: Check documentation links
+        working-directory: resource
+        run: pnpm check:docs
 
       - name: Report production dependency vulnerabilities
         continue-on-error: true

@@ -27,6 +27,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/moderators"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pointsRecord"
+	"github.com/leancodebox/GooseForum/app/models/forum/postRevisions"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
@@ -59,7 +60,7 @@ func TestTrustHTTPContract(t *testing.T) {
 	if err := fileDB.AutoMigrate(&filedata.Entity{}); err != nil {
 		t.Fatal(err)
 	}
-	if err := db.AutoMigrate(&users.EntityComplete{}, &authsessions.Token{}, &authsessions.Log{}, &role.Entity{}, &rolePermissionRs.Entity{}, &pageConfig.Entity{}, &trusthistory.History{}, &accessGroups.Entity{}, &accessGroupMembers.Entity{}, &categoryGroupPermissions.Entity{}, &category.Entity{}, &topics.Entity{}, &posts.Entity{}, &topicCategoryIndex.Entity{}, &moderators.Entity{}, &userStatistics.Entity{}, &dailyStats.Entity{}, &fileUsage.Entity{}, &topicUserStat.Entity{}, &topicUserAction.Entity{}, &userActivities.Entity{}, &userPoints.Entity{}, &pointsRecord.Entity{}, &userBadges.Entity{}); err != nil {
+	if err := db.AutoMigrate(&users.EntityComplete{}, &authsessions.Token{}, &authsessions.Log{}, &role.Entity{}, &rolePermissionRs.Entity{}, &pageConfig.Entity{}, &trusthistory.History{}, &accessGroups.Entity{}, &accessGroupMembers.Entity{}, &categoryGroupPermissions.Entity{}, &category.Entity{}, &topics.Entity{}, &posts.Entity{}, &postRevisions.Entity{}, &topicCategoryIndex.Entity{}, &moderators.Entity{}, &userStatistics.Entity{}, &dailyStats.Entity{}, &fileUsage.Entity{}, &topicUserStat.Entity{}, &topicUserAction.Entity{}, &userActivities.Entity{}, &userPoints.Entity{}, &pointsRecord.Entity{}, &userBadges.Entity{}); err != nil {
 		t.Fatal(err)
 	}
 	for _, key := range []string{pageConfig.TrustSettings, pageConfig.SecuritySettings} {

@@ -137,7 +137,7 @@ func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEven
 }
 
 func topicPubliclyReadable(topic topics.Entity) bool {
-	if topic.Id == 0 || topic.Status != 1 || topic.ProcessStatus != 0 {
+	if topic.Id == 0 || !topic.IsPublished() {
 		return false
 	}
 	snapshot, err := accesscontrol.Resolve(0)

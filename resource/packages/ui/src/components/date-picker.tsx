@@ -8,7 +8,6 @@ import { cn } from "cn";
 import { Button } from "./button";
 import { Calendar } from "./calendar";
 import { Input } from "./input";
-import { Label } from "./label";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 interface DatePickerBaseProps {
@@ -22,8 +21,8 @@ interface DatePickerBaseProps {
   className?: string;
 }
 type DatePickerProps = DatePickerBaseProps & (
-  | { withTime: true; timeLabel: string; doneLabel: string }
-  | { withTime?: false; timeLabel?: never; doneLabel?: never }
+  | { withTime: true; timeLabel: string }
+  | { withTime?: false; timeLabel?: never }
 );
 const calendarLocales: Record<string, typeof enUS> = { en: enUS, zh: zhCN, ja, it };
 
@@ -33,7 +32,7 @@ function localDate(value: string) {
   return isValid(date) ? date : undefined;
 }
 
-export function DatePicker({ value, onChange, id, locale = "en", placeholder, clearLabel, withTime = false, timeLabel, doneLabel, disabled, className }: DatePickerProps) {
+export function DatePicker({ value, onChange, id, locale = "en", placeholder, clearLabel, withTime = false, timeLabel, disabled, className }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState<Date>();
   const timeId = useId();
@@ -41,31 +40,27 @@ export function DatePicker({ value, onChange, id, locale = "en", placeholder, cl
   const selected = localDate(value);
   const language = locale.split("-")[0];
   const calendarLocale = calendarLocales[language] || enUS;
-  const formatted = selected ? new Intl.DateTimeFormat(calendarLocale.code, { dateStyle: "medium", ...(withTime ? { timeStyle: "short" as const } : {}) }).format(selected) : placeholder;
+  const formatted = selected ? new Intl.DateTimeFormat(calendarLocale.code, { dateStyle: "medium" }).format(selected) : placeholder;
   const time = selected ? format(selected, "HH:mm") : "00:00";
 
   function select(date: Date | undefined) {
     if (!date) return;
     onChange(`${format(date, "yyyy-MM-dd")}${withTime ? `T${time}` : ""}`);
-    if (!withTime) setOpen(false);
+    setOpen(false);
   }
 
-  return <Popover open={open} onOpenChange={(next) => { if (next) setMonth(selected || new Date()); setOpen(next); }}>
-    <PopoverTrigger asChild>
-      <Button id={triggerId} type="button" data-slot="date-picker-trigger" variant="outline" disabled={disabled} className={cn("w-full min-w-0 justify-start font-normal", !selected && "text-muted-foreground", className)}>
-        <CalendarIcon className="shrink-0" /><span className="truncate">{formatted}</span>
-      </Button>
-    </PopoverTrigger>
-    <PopoverContent data-slot="date-picker-content" aria-labelledby={triggerId} align="start" className="max-h-[var(--radix-popover-content-available-height)] w-auto max-w-[calc(100vw-2rem)] overflow-y-auto p-0">
-      <Calendar mode="single" locale={calendarLocale} selected={selected} onSelect={select} month={month} onMonthChange={setMonth} captionLayout="label" autoFocus />
-      {withTime ? <div className="space-y-2 border-t px-3 py-2">
-        <Label htmlFor={timeId}>{timeLabel}</Label>
-        <Input id={timeId} type="time" step="60" value={time} disabled={!selected} onChange={(event) => { if (selected && event.target.validity.valid && event.target.value) onChange(`${format(selected, "yyyy-MM-dd")}T${event.target.value}`); }} />
-      </div> : null}
-      <div className="flex items-center justify-between gap-2 border-t p-2">
-        <Button type="button" size="sm" variant="ghost" disabled={!value} onClick={() => { onChange(""); setOpen(false); }}><XIcon />{clearLabel}</Button>
-        {withTime && doneLabel ? <Button type="button" size="sm" variant="outline" onClick={() => setOpen(false)}>{doneLabel}</Button> : null}
-      </div>
-    </PopoverContent>
-  </Popover>;
+  return <div className={cn(withTime && "flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center")}>
+    <Popover open={open} onOpenChange={(next) => { if (next) setMonth(selected || new Date()); setOpen(next); }}>
+      <PopoverTrigger asChild>
+        <Button id={triggerId} type="button" data-slot="date-picker-trigger" variant="outline" disabled={disabled} className={cn(withTime ? "min-w-0 flex-1" : "w-full", "justify-start font-normal", !selected && "text-muted-foreground", className)}>
+          <CalendarIcon className="shrink-0" /><span className="truncate">{formatted}</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent data-slot="date-picker-content" aria-labelledby={triggerId} align="start" className="max-h-[min(82dvh,44rem)] w-(--radix-popover-trigger-width) max-w-[calc(100dvw-1rem)] min-w-0 overscroll-contain overflow-x-hidden overflow-y-auto p-0">
+        <Calendar className="w-full" mode="single" locale={calendarLocale} selected={selected} onSelect={select} month={month} onMonthChange={setMonth} captionLayout="label" autoFocus />
+      </PopoverContent>
+    </Popover>
+    {withTime ? <Input id={timeId} aria-label={timeLabel} type="time" step="60" value={time} disabled={!selected || disabled} className="sm:w-32" onChange={(event) => { if (selected && event.target.validity.valid && event.target.value) onChange(`${format(selected, "yyyy-MM-dd")}T${event.target.value}`); }} /> : null}
+    {value ? <Button type="button" size="icon-sm" variant="ghost" aria-label={clearLabel} onClick={() => { onChange(""); setOpen(false); }}><XIcon /></Button> : null}
+  </div>;
 }

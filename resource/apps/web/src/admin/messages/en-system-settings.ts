@@ -30,6 +30,8 @@ export default {
   testSent: "Test message sent",
   signup: "Allow registration",
   signupHint: "Allow new users to create accounts.",
+  inviteOnly: "Require an invitation code",
+  inviteOnlyHint: "Only registrations with a valid invitation code will be accepted.",
   verification: "Require email verification",
   verificationHint: "New accounts must verify their email address.",
   domains: "Allowed email domains",

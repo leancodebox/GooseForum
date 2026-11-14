@@ -1,3 +1,4 @@
+import { errorMessage } from "../error-message";
 import { AdminPage } from '../components/admin-page'
 import { useCallback, useEffect, useRef, useState } from "react";
 import type {
@@ -40,7 +41,7 @@ import { Textarea } from "@gooseforum/ui/components/textarea";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@gooseforum/ui/components/collapsible";
 import { Check, ChevronDown, Copy, Pencil, Plus, RefreshCw, RotateCw, Trash2, Users } from "lucide-react";
 import { OIDCGrantsDialog } from './oidc-grants-dialog';
-import { toast } from "sonner";
+import { toast } from "@gooseforum/ui/components/sonner";
 import type { IdentityTextKey } from "../identity-settings-i18n";
 type Text = (k: IdentityTextKey) => string;
 const scopes = ["openid", "profile", "email", "offline_access", "forum:read", "topics:create", "posts:create", "topics:edit", "posts:edit", "images:upload"];
@@ -107,7 +108,7 @@ export function OIDCProviderSettingsPage({
             : null;
       if (failure)
         toast.error(
-          failure instanceof Error ? failure.message : tr.current("loadFailed"),
+          errorMessage(failure, tr.current("loadFailed")),
         );
     } finally {
       setLoading(false);
@@ -122,7 +123,7 @@ export function OIDCProviderSettingsPage({
       setStatus(await api.settings.saveOIDCStatus(enabled));
       toast.success(text("saved"));
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : text("saveFailed"));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -163,7 +164,7 @@ export function OIDCProviderSettingsPage({
       setEditor(null);
       toast.success(text("saved"));
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : text("saveFailed"));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -179,7 +180,7 @@ export function OIDCProviderSettingsPage({
       setSecret({ clientId: r.client.clientId, value: r.clientSecret || "" });
       setRotate(null);
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : text("saveFailed"));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -313,7 +314,7 @@ export function OIDCProviderSettingsPage({
                         );
                       } catch (r) {
                         toast.error(
-                          r instanceof Error ? r.message : text("saveFailed"),
+                          errorMessage(r, text("saveFailed")),
                         );
                       } finally {
                         setSaving(false);
@@ -362,14 +363,14 @@ export function OIDCProviderSettingsPage({
       <Confirm open={resetSigning} title={text('resetSigning')} description={text('resetSigningHint')} text={text} saving={saving} onClose={() => setResetSigning(false)} onConfirm={async () => {
         setSaving(true);
         try { setStatus(await api.settings.resetOIDCSigningKey()); setResetSigning(false); toast.success(text('saved')); }
-        catch (r) { toast.error(r instanceof Error ? r.message : text('saveFailed')); }
+        catch (r) { toast.error(errorMessage(r, text('saveFailed'))); }
         finally { setSaving(false); }
       }} />
       <Confirm open={Boolean(deleting)} title={text('deleteClient')} description={`${deleting?.name || ''}: ${text('deleteClientHint')}`} text={text} saving={saving} onClose={() => setDeleting(null)} onConfirm={async () => {
         if (!deleting) return;
         setSaving(true);
         try { await api.settings.deleteOIDCClient(deleting.clientId); setDeleting(null); await load(); toast.success(text('saved')); }
-        catch (r) { toast.error(r instanceof Error ? r.message : text('saveFailed')); await load(); }
+        catch (r) { toast.error(errorMessage(r, text('saveFailed'))); await load(); }
         finally { setSaving(false); }
       }} />
       <Confirm
@@ -386,7 +387,7 @@ export function OIDCProviderSettingsPage({
             setRotateSigning(false);
             toast.success(text("saved"));
           } catch (r) {
-            toast.error(r instanceof Error ? r.message : text("saveFailed"));
+            toast.error(errorMessage(r, text("saveFailed")));
           } finally {
             setSaving(false);
           }

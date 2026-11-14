@@ -43,10 +43,10 @@ function normalizeParams(locale: AuthLocale, params: Record<string, unknown>) {
   const values: Record<string, string> = {};
   for (const [key, value] of Object.entries(params))
     values[key] = Array.isArray(value)
-      ? value.map((item: unknown) => typeof item === "object" && item !== null ? JSON.stringify(item) : String(item ?? "")).join(", ")
+      ? value.map((item: unknown) => stringifyParam(item)).join(", ")
       : value == null
         ? ""
-        : typeof value === "object" ? JSON.stringify(value) : String(value);
+        : stringifyParam(value);
   if (
     typeof params.status === "string" &&
     params.status in
@@ -78,6 +78,17 @@ function normalizeParams(locale: AuthLocale, params: Record<string, unknown>) {
       )
       .join(", ");
   return values;
+}
+
+function stringifyParam(value: unknown): string {
+  if (value == null) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") return String(value);
+  try {
+    return JSON.stringify(value) ?? "";
+  } catch {
+    return "";
+  }
 }
 
 function localizedParam(

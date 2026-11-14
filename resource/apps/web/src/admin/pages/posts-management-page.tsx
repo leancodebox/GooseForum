@@ -1,9 +1,12 @@
+import { errorMessage } from '../error-message'
+import { useLatestRequest } from '@gooseforum/runtime'
 import { AdminPage } from '../components/admin-page'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { AdminCategory, AdminTopic, GooseAdminApi, ReviewPost, TopicSource } from '@gooseforum/client'
+import type { AdminCategory, AdminTopic, GooseAdminApi, ReviewBatchItem, ReviewBatchResult, ReviewPost, TopicSource } from '@gooseforum/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@gooseforum/ui/components/avatar'
 import { Badge } from '@gooseforum/ui/components/badge'
 import { Button } from '@gooseforum/ui/components/button'
+import { Checkbox } from '@gooseforum/ui/components/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@gooseforum/ui/components/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@gooseforum/ui/components/dropdown-menu'
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@gooseforum/ui/components/empty'
@@ -13,22 +16,24 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Spinner } from '@gooseforum/ui/components/spinner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@gooseforum/ui/components/table'
 import { Ban, FileText, MoreHorizontal, Pin, RefreshCw, Search, Tags, Trash2, Undo2 } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@gooseforum/ui/components/sonner'
 import type { PostTextKey } from '../posts-i18n'
 import { loadPosts, postsQuery, useAdminListQuery, type PostsPageData } from '../list-data'
 
 type Text = (key: PostTextKey) => string
 type ReviewAction = 'approve' | 'reject' | 'recheck'
+type ReviewBatchAction = ReviewAction
 
 export function PostsManagementPage({ api, text, initialData, onUrlChange }: { api: GooseAdminApi; text: Text; initialData?: PostsPageData; onUrlChange?: (url: string) => void }) {
   const [query, updateQuery] = useAdminListQuery('/admin/posts', initialData?.query || postsQuery(window.location.search), onUrlChange)
   const { kind, moderationStatus, categoryId, page, pageSize, search: appliedSearch } = query
-  const setKind = (value: 'topic' | 'post') => updateQuery({ kind: value })
-  const setModerationStatus = (value: string) => updateQuery({ moderationStatus: value })
-  const setCategoryId = (value: string) => updateQuery({ categoryId: value })
-  const setPage = (value: number) => updateQuery({ page: value })
-  const setPageSize = (value: number) => updateQuery({ pageSize: value })
-  const setAppliedSearch = (value: string) => updateQuery({ search: value })
+  const clearSelection = () => setSelected([])
+  const setKind = (value: 'topic' | 'post') => { clearSelection(); updateQuery({ kind: value }) }
+  const setModerationStatus = (value: string) => { clearSelection(); updateQuery({ moderationStatus: value }) }
+  const setCategoryId = (value: string) => { clearSelection(); updateQuery({ categoryId: value }) }
+  const setPage = (value: number) => { clearSelection(); updateQuery({ page: value }) }
+  const setPageSize = (value: number) => { clearSelection(); updateQuery({ pageSize: value }) }
+  const setAppliedSearch = (value: string) => { clearSelection(); updateQuery({ search: value }) }
   const [topics, setTopics] = useState<AdminTopic[]>(initialData?.query.kind === 'topic' ? initialData.result.list as AdminTopic[] || [] : [])
   const [replies, setReplies] = useState<ReviewPost[]>(initialData?.query.kind === 'post' ? initialData.result.list as ReviewPost[] || [] : [])
   const [categories, setCategories] = useState<AdminCategory[]>(initialData?.categories || [])
@@ -43,33 +48,36 @@ export function PostsManagementPage({ api, text, initialData, onUrlChange }: { a
   const [reviewReply, setReviewReply] = useState<ReviewPost | null>(null)
   const [processTopic, setProcessTopic] = useState<AdminTopic | null>(null)
   const [deleteTopic, setDeleteTopic] = useState<AdminTopic | null>(null)
-  const requestVersion = useRef(0)
-  useEffect(() => () => { requestVersion.current++ }, [])
+  const [selected, setSelected] = useState<ReviewBatchItem[]>([])
+  const [batchAction, setBatchAction] = useState<ReviewBatchAction | null>(null)
+  const beginPostsRequest = useLatestRequest();
+  const beginCategoryRequest = useLatestRequest();
 
   useEffect(() => {
+    const isCurrent = beginCategoryRequest();
     if (initialData) return
-    let active = true
-    void api.categories.list().then((items) => { if (active) setCategories(items) }).catch(() => undefined)
-    return () => { active = false }
-  }, [api, initialData])
+
+    void api.categories.list().then((items) => { if (isCurrent()) setCategories(items) }).catch(() => undefined)
+  }, [api, initialData, beginCategoryRequest])
 
   const load = useCallback(async () => {
-    const version = ++requestVersion.current
+    const isCurrent = beginPostsRequest()
+    setSelected([])
     setLoading(true); setError('')
     try {
       const result = await loadPosts(api, query)
-      if (version !== requestVersion.current) return
+      if (!isCurrent()) return
       if (kind === 'post') {
         setReplies(result.list as ReviewPost[] || []); setHasNext(Boolean(result.hasNext))
       } else {
         setTopics(result.list as AdminTopic[] || []); setHasNext(Boolean(result.hasNext))
       }
     } catch (reason) {
-      if (version === requestVersion.current) setError(errorMessage(reason, text('loadFailed')))
+      if (isCurrent()) setError(errorMessage(reason, text('loadFailed')))
     } finally {
-      if (version === requestVersion.current) setLoading(false)
+      if (isCurrent()) setLoading(false)
     }
-  }, [api, query, kind, text])
+  }, [api, beginPostsRequest, kind, query, setError, setHasNext, setLoading, setReplies, setTopics, text])
 
   useEffect(() => {
     if (preparedQuery.current === query) return
@@ -79,25 +87,49 @@ export function PostsManagementPage({ api, text, initialData, onUrlChange }: { a
   const visibleCount = kind === 'topic' ? topics.length : replies.length
   const rangeStart = visibleCount ? (page - 1) * pageSize + 1 : 0
   const rangeEnd = visibleCount ? rangeStart + visibleCount - 1 : 0
+  function toggleSelected(item: ReviewBatchItem) {
+    setSelected((current) => current.some((value) => value.id === item.id) ? current.filter((value) => value.id !== item.id) : [...current, item])
+  }
+  function toggleAll(items: ReviewBatchItem[], checked: boolean) {
+    setSelected(checked ? items : [])
+  }
+  async function submitBatch(result: ReviewBatchResult) {
+    const failed = result.items.filter((item) => !item.success).map((item) => item.id)
+    if (failed.length) toast.warning(`${text('batchPartial')} (${failed.join(', ')})`)
+    else toast.success(text('batchSaved'))
+    setBatchAction(null)
+    const failedSelection = selected.filter((item) => failed.includes(item.id))
+    clearSelection()
+    await load()
+    if (failedSelection.length) setSelected(failedSelection)
+  }
 
   return <AdminPage>
     <header><h2 className="text-lg font-semibold tracking-tight">{text('title')}</h2><p className="text-xs text-muted-foreground">{text('description')}</p></header>
     <div className="flex flex-wrap items-center gap-1.5"><FilterSelect value={kind} label={text('topics')} onChange={(value) => { setKind(value as 'topic' | 'post'); setPage(1) }} options={[['topic', text('topics')], ['post', text('replies')]]} /><FilterSelect value={moderationStatus} label={text('allReviews')} onChange={(value) => { setModerationStatus(value); setPage(1) }} options={[['all', text('allReviews')], ['pending', text('pending')], ['approved', text('approved')], ['rejected', text('rejected')], ['none', text('none')]]} />{kind === 'topic' ? <FilterSelect value={categoryId} label={text('allCategories')} onChange={(value) => { setCategoryId(value); setPage(1) }} options={[['all', text('allCategories')], ...categories.map((category) => [String(category.id), category.category] as [string, string])]} /> : null}</div>
     <section className="overflow-hidden rounded-lg border bg-background"><div className="flex flex-col gap-2 border-b bg-muted/20 p-2 lg:flex-row lg:items-center lg:justify-between"><form className="flex min-w-0 flex-1 gap-1.5 lg:max-w-xl" onSubmit={(event) => { event.preventDefault(); setAppliedSearch(search.trim()); setPage(1) }}><div className="relative min-w-0 flex-1"><Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} className="h-8 pl-8" placeholder={text('search')} /></div><Button type="submit" size="sm">{text('searchAction')}</Button>{appliedSearch ? <Button type="button" variant="ghost" size="sm" onClick={() => { setSearch(''); setAppliedSearch(''); setPage(1) }}>{text('clear')}</Button> : null}</form><div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground"><Button variant="outline" size="sm" disabled={loading} onClick={() => void load()}><RefreshCw data-icon="inline-start" className={loading ? 'animate-spin' : undefined} />{text('refresh')}</Button><span>{rangeStart}-{rangeEnd}</span><Select value={String(pageSize)} onValueChange={(value) => { setPageSize(Number(value)); setPage(1) }}><SelectTrigger size="sm" className="w-20"><SelectValue /></SelectTrigger><SelectContent><SelectGroup>{[10, 20, 50].map((size) => <SelectItem key={size} value={String(size)}>{size}</SelectItem>)}</SelectGroup></SelectContent></Select><Button variant="outline" size="sm" disabled={page <= 1 || loading} onClick={() => setPage(page - 1)}>{text('previous')}</Button><span>{text('page')} {page}</span><Button variant="outline" size="sm" disabled={!hasNext || loading} onClick={() => setPage(page + 1)}>{text('next')}</Button></div></div>
-      {loading && !visibleCount ? <ContentEmpty icon={<Spinner />} title={text('loading')} /> : error ? <ContentEmpty icon={<FileText />} title={error} /> : !visibleCount ? <ContentEmpty icon={<Search />} title={text('empty')} /> : kind === 'post' ? <ReplyList replies={replies} text={text} onReview={setReviewReply} /> : <TopicList topics={topics} categories={categories} text={text} onSource={setSourceTopic} onCategories={setCategoryTopic} onPin={setPinTopic} onProcess={setProcessTopic} onDelete={setDeleteTopic} />}
+      {selected.length ? <div className="flex flex-wrap items-center gap-1.5 border-t bg-muted/20 px-2 py-1.5 text-xs"><span className="mr-auto text-muted-foreground">{text('selected')} {selected.length} · {text('selectedPageOnly')}</span><Button size="sm" onClick={() => setBatchAction('approve')}>{text('approve')}</Button><Button size="sm" variant="destructive" onClick={() => setBatchAction('reject')}>{text('reject')}</Button><Button size="sm" variant="outline" onClick={() => setBatchAction('recheck')}>{text('recheck')}</Button></div> : null}
+      {loading && !visibleCount ? <ContentEmpty icon={<Spinner />} title={text('loading')} /> : error ? <ContentEmpty icon={<FileText />} title={error} /> : !visibleCount ? <ContentEmpty icon={<Search />} title={text('empty')} /> : kind === 'post' ? <ReplyList replies={replies} selected={selected} text={text} onToggleSelected={toggleSelected} onToggleAll={toggleAll} onReview={setReviewReply} /> : <TopicList topics={topics} categories={categories} selected={selected} text={text} onToggleSelected={toggleSelected} onToggleAll={toggleAll} onSource={setSourceTopic} onCategories={setCategoryTopic} onPin={setPinTopic} onProcess={setProcessTopic} onDelete={setDeleteTopic} />}
     </section>
     <CategoryDialog topic={categoryTopic} categories={categories} api={api} text={text} onClose={() => setCategoryTopic(null)} onSaved={load} />
     <PinDialog topic={pinTopic} api={api} text={text} onClose={() => setPinTopic(null)} onSaved={load} />
     <SourceDialog topic={sourceTopic} api={api} text={text} onClose={() => setSourceTopic(null)} onSaved={load} />
     <ReviewReplyDialog reply={reviewReply} api={api} text={text} onClose={() => setReviewReply(null)} onSaved={load} />
+    <BatchReviewDialog key={batchAction || 'closed'} kind={kind} action={batchAction} selected={selected} api={api} text={text} onClose={() => setBatchAction(null)} onDone={submitBatch} />
     <TopicActionDialog topic={processTopic} mode="process" api={api} text={text} onClose={() => setProcessTopic(null)} onSaved={load} />
     <TopicActionDialog topic={deleteTopic} mode="delete" api={api} text={text} onClose={() => setDeleteTopic(null)} onSaved={load} />
   </AdminPage>
 }
 
-function TopicList({ topics, categories, text, onSource, onCategories, onPin, onProcess, onDelete }: { topics: AdminTopic[]; categories: AdminCategory[]; text: Text; onSource(topic: AdminTopic): void; onCategories(topic: AdminTopic): void; onPin(topic: AdminTopic): void; onProcess(topic: AdminTopic): void; onDelete(topic: AdminTopic): void }) {
-  const categoryMap = new Map(categories.map((category) => [category.id, category]))
-  return <><div className="hidden md:block"><Table className="min-w-245 table-fixed"><TableHeader className="bg-muted/30"><TableRow><TableHead className="h-8">{text('topic')}</TableHead><TableHead className="h-8 w-44">{text('author')}</TableHead><TableHead className="h-8 w-24 text-center">{text('status')}</TableHead><TableHead className="h-8 w-20 text-right">{text('actions')}</TableHead></TableRow></TableHeader><TableBody>{topics.map((topic) => <TableRow key={topic.id}><TableCell className="max-w-0 py-2"><TopicSummary topic={topic} categoryMap={categoryMap} text={text} /></TableCell><TableCell className="py-2"><Author topic={topic} /></TableCell><TableCell className="py-2 text-center"><StatusBadge topic={topic} text={text} /></TableCell><TableCell className="py-2"><TopicActions topic={topic} text={text} onSource={() => onSource(topic)} onCategories={() => onCategories(topic)} onPin={() => onPin(topic)} onProcess={() => onProcess(topic)} onDelete={() => onDelete(topic)} /></TableCell></TableRow>)}</TableBody></Table></div><div className="divide-y md:hidden">{topics.map((topic) => <article key={topic.id} className="flex flex-col gap-2 px-3 py-2.5"><div className="flex items-start justify-between gap-2"><TopicSummary topic={topic} categoryMap={categoryMap} text={text} /><StatusBadge topic={topic} text={text} /></div><div className="flex items-center gap-2"><Author topic={topic} /><span className="text-xs text-muted-foreground">{datePart(topic.createdAt)}</span><TopicActions topic={topic} text={text} onSource={() => onSource(topic)} onCategories={() => onCategories(topic)} onPin={() => onPin(topic)} onProcess={() => onProcess(topic)} onDelete={() => onDelete(topic)} /></div></article>)}</div></>
+function TopicList({ topics, categories, selected, text, onToggleSelected, onToggleAll, onSource, onCategories, onPin, onProcess, onDelete }: { topics: AdminTopic[]; categories: AdminCategory[]; selected: ReviewBatchItem[]; text: Text; onToggleSelected(item: ReviewBatchItem): void; onToggleAll(items: ReviewBatchItem[], checked: boolean): void; onSource(topic: AdminTopic): void; onCategories(topic: AdminTopic): void; onPin(topic: AdminTopic): void; onProcess(topic: AdminTopic): void; onDelete(topic: AdminTopic): void }) {
+  const categoryMap = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories])
+  const items = useMemo(() => topics.map(({ id, moderationVersion: version }) => ({ id, version })), [topics])
+  const { selectedIds, selectedCount } = useMemo(() => getSelectionState(items, selected), [items, selected])
+  return <><div className="hidden md:block"><Table className="min-w-245 table-fixed"><TableHeader className="bg-muted/30"><TableRow><TableHead className="h-8 w-10"><PageSelectCheckbox label={text('selectAll')} selectedCount={selectedCount} total={items.length} onToggle={(checked) => onToggleAll(items, checked)} /></TableHead><TableHead className="h-8">{text('topic')}</TableHead><TableHead className="h-8 w-44">{text('author')}</TableHead><TableHead className="h-8 w-24 text-center">{text('status')}</TableHead><TableHead className="h-8 w-20 text-right">{text('actions')}</TableHead></TableRow></TableHeader><TableBody>{topics.map((topic) => <TableRow key={topic.id}><TableCell className="py-2"><Checkbox aria-label={`${text('select')} ${topic.title}`} checked={selectedIds.has(topic.id)} onCheckedChange={() => onToggleSelected({ id: topic.id, version: topic.moderationVersion })} /></TableCell><TableCell className="max-w-0 py-2"><TopicSummary topic={topic} categoryMap={categoryMap} text={text} /></TableCell><TableCell className="py-2"><Author topic={topic} /></TableCell><TableCell className="py-2 text-center"><StatusBadge topic={topic} text={text} /></TableCell><TableCell className="py-2"><TopicActions topic={topic} text={text} onSource={() => onSource(topic)} onCategories={() => onCategories(topic)} onPin={() => onPin(topic)} onProcess={() => onProcess(topic)} onDelete={() => onDelete(topic)} /></TableCell></TableRow>)}</TableBody></Table></div><div className="md:hidden"><div className="flex items-center gap-2 border-b bg-muted/20 px-3 py-2 text-xs"><PageSelectCheckbox label={text('selectAll')} selectedCount={selectedCount} total={items.length} onToggle={(checked) => onToggleAll(items, checked)} /><span>{text('selectAll')}</span></div><div className="divide-y">{topics.map((topic) => <article key={topic.id} className="flex flex-col gap-2 px-3 py-2.5"><div className="flex items-start gap-2"><Checkbox aria-label={`${text('select')} ${topic.title}`} checked={selectedIds.has(topic.id)} onCheckedChange={() => onToggleSelected({ id: topic.id, version: topic.moderationVersion })} /><div className="flex min-w-0 flex-1 items-start justify-between gap-2"><TopicSummary topic={topic} categoryMap={categoryMap} text={text} /><StatusBadge topic={topic} text={text} /></div></div><div className="flex items-center gap-2"><Author topic={topic} /><span className="text-xs text-muted-foreground">{datePart(topic.createdAt)}</span><TopicActions topic={topic} text={text} onSource={() => onSource(topic)} onCategories={() => onCategories(topic)} onPin={() => onPin(topic)} onProcess={() => onProcess(topic)} onDelete={() => onDelete(topic)} /></div></article>)}</div></div></>
+}
+
+function PageSelectCheckbox({ label, selectedCount, total, onToggle }: { label: string; selectedCount: number; total: number; onToggle(checked: boolean): void }) {
+  return <Checkbox aria-label={label} checked={selectedCount === total && total > 0 ? true : selectedCount > 0 ? 'indeterminate' : false} onCheckedChange={(checked) => onToggle(checked === true)} />
 }
 
 function TopicSummary({ topic, categoryMap, text }: { topic: AdminTopic; categoryMap: Map<number, AdminCategory>; text: Text }) {
@@ -126,7 +158,29 @@ function Author({ topic }: { topic: AdminTopic }) { return <div className="flex 
 function StatusBadge({ topic, text }: { topic: AdminTopic; text: Text }) { const label = topic.deleted ? text('deleted') : topic.topicStatus === 1 ? text('active') : ['rejected', 'pending', 'denied'].includes(topic.moderationStatus) ? reviewLabel(topic.moderationStatus, text) : text('inactive'); return <Badge variant={topic.deleted || ['rejected', 'denied'].includes(topic.moderationStatus) ? 'destructive' : 'secondary'}>{label}</Badge> }
 function TopicActions({ topic, text, onSource, onCategories, onPin, onProcess, onDelete }: { topic: AdminTopic; text: Text; onSource(): void; onCategories(): void; onPin(): void; onProcess(): void; onDelete(): void }) { return <div className="ml-auto flex justify-end"><Button variant="ghost" size="icon-sm" title={text('openReview')} onClick={onSource}><FileText /></Button>{!topic.deleted ? <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm" title={text('actions')}><MoreHorizontal /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuGroup><DropdownMenuItem onSelect={onCategories}><Tags />{text('editCategories')}</DropdownMenuItem><DropdownMenuItem onSelect={onPin}><Pin />{text('editPin')}</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuGroup><DropdownMenuItem variant={topic.processStatus === 1 ? 'default' : 'destructive'} onSelect={onProcess}>{topic.processStatus === 1 ? <Undo2 /> : <Ban />}{topic.processStatus === 1 ? text('restore') : text('disable')}</DropdownMenuItem><DropdownMenuItem variant="destructive" onSelect={onDelete}><Trash2 />{text('delete')}</DropdownMenuItem></DropdownMenuGroup></DropdownMenuContent></DropdownMenu> : null}</div> }
 
-function ReplyList({ replies, text, onReview }: { replies: ReviewPost[]; text: Text; onReview(reply: ReviewPost): void }) { return <div className="divide-y">{replies.map((reply) => <article key={reply.id} className="flex flex-col gap-2 p-3"><div className="flex items-center justify-between gap-3"><span className="font-medium">{reply.topicTitle} · #{reply.postNo} · UID {reply.userId}</span><Badge>{reviewLabel(reply.moderationStatus, text)}</Badge></div><p className="line-clamp-3 whitespace-pre-wrap break-words text-sm">{reply.content}</p>{reply.moderationReason ? <p className="text-sm text-muted-foreground">{reply.moderationReason}</p> : null}<Button variant="outline" size="sm" className="self-start" onClick={() => onReview(reply)}>{text('openReview')}</Button></article>)}</div> }
+function ReplyList({ replies, selected, text, onToggleSelected, onToggleAll, onReview }: { replies: ReviewPost[]; selected: ReviewBatchItem[]; text: Text; onToggleSelected(item: ReviewBatchItem): void; onToggleAll(items: ReviewBatchItem[], checked: boolean): void; onReview(reply: ReviewPost): void }) {
+  const items = useMemo(() => replies.map(({ id, moderationVersion: version }) => ({ id, version })), [replies])
+  const { selectedIds, selectedCount } = useMemo(() => getSelectionState(items, selected), [items, selected])
+  return <div className="divide-y"><div className="flex items-center gap-2 bg-muted/20 px-3 py-2 text-xs"><PageSelectCheckbox label={text('selectAll')} selectedCount={selectedCount} total={items.length} onToggle={(checked) => onToggleAll(items, checked)} /><span>{text('selectAll')}</span></div>{replies.map((reply) => <article key={reply.id} className="flex gap-2 p-3"><Checkbox aria-label={`${text('select')} ${reply.topicTitle}`} checked={selectedIds.has(reply.id)} onCheckedChange={() => onToggleSelected({ id: reply.id, version: reply.moderationVersion })} /><div className="flex min-w-0 flex-1 flex-col gap-2"><div className="flex items-center justify-between gap-3"><span className="font-medium">{reply.topicTitle} · #{reply.postNo} · UID {reply.userId}</span><Badge>{reviewLabel(reply.moderationStatus, text)}</Badge></div><p className="line-clamp-3 whitespace-pre-wrap break-words text-sm">{reply.content}</p>{reply.moderationReason ? <p className="text-sm text-muted-foreground">{reply.moderationReason}</p> : null}<Button variant="outline" size="sm" className="self-start" onClick={() => onReview(reply)}>{text('openReview')}</Button></div></article>)}</div>
+}
+
+function BatchReviewDialog({ kind, action, selected, api, text, onClose, onDone }: { kind: 'topic' | 'post'; action: ReviewBatchAction | null; selected: ReviewBatchItem[]; api: GooseAdminApi; text: Text; onClose(): void; onDone(result: ReviewBatchResult): Promise<void> }) {
+  const [reason, setReason] = useState('')
+  const [saving, setSaving] = useState(false)
+  async function submit() {
+    if (!action || !reason.trim() || !selected.length) return
+    setSaving(true)
+    try {
+      const result = await api.topics.reviewBatch(kind, { items: selected, action, reason: reason.trim() })
+      await onDone(result)
+    } catch (error) {
+      toast.error(errorMessage(error, text('batchFailed')))
+    } finally {
+      setSaving(false)
+    }
+  }
+  return <Dialog open={Boolean(action && selected.length)} onOpenChange={(open) => !open && !saving && onClose()}><DialogContent><DialogHeader><DialogTitle>{text('batchReviewTitle')}</DialogTitle><DialogDescription>{text('batchReviewHint')} {selected.length}</DialogDescription></DialogHeader><Input autoFocus value={reason} maxLength={300} onChange={(event) => setReason(event.target.value)} placeholder={text('reviewReason')} /><DialogFooter><Button variant="outline" disabled={saving} onClick={onClose}>{text('cancel')}</Button><Button variant={action === 'reject' ? 'destructive' : 'default'} disabled={saving || !reason.trim()} onClick={() => void submit()}>{saving ? <Spinner data-icon="inline-start" /> : null}{text(action || 'approve')}</Button></DialogFooter></DialogContent></Dialog>
+}
 
 function CategoryDialog({ topic, categories, api, text, onClose, onSaved }: { topic: AdminTopic | null; categories: AdminCategory[]; api: GooseAdminApi; text: Text; onClose(): void; onSaved(): Promise<void> }) {
   const [selected, setSelected] = useState<number[]>([]); const [pending, setPending] = useState<number[] | null>(null); const [saving, setSaving] = useState(false)
@@ -145,7 +199,7 @@ function CategoryDialog({ topic, categories, api, text, onClose, onSaved }: { to
 
 function PinDialog({ topic, api, text, onClose, onSaved }: { topic: AdminTopic | null; api: GooseAdminApi; text: Text; onClose(): void; onSaved(): Promise<void> }) { const [weight, setWeight] = useState(0); const [saving, setSaving] = useState(false); useEffect(() => { if (topic) setWeight(topic.pinWeight || 0) }, [topic]); async function save() { if (!topic) return; setSaving(true); try { await api.topics.setPin(topic.id, Math.max(0, Math.trunc(weight || 0))); toast.success(text('saved')); onClose(); await onSaved() } catch (reason) { toast.error(errorMessage(reason, text('loadFailed'))) } finally { setSaving(false) } } return <Dialog open={Boolean(topic)} onOpenChange={(open) => !open && !saving && onClose()}><DialogContent><DialogHeader><DialogTitle>{text('pinTitle')}</DialogTitle><DialogDescription>{topic?.title}</DialogDescription></DialogHeader><FieldGroup><Field><FieldLabel>{text('pinTitle')}</FieldLabel><Input type="number" min={0} max={1_000_000} value={weight} onChange={(event) => setWeight(Number(event.target.value) || 0)} /><FieldDescription>{text('pinHint')}</FieldDescription></Field></FieldGroup><DialogFooter><Button variant="outline" onClick={onClose}>{text('cancel')}</Button><Button disabled={saving} onClick={() => void save()}>{saving ? <Spinner data-icon="inline-start" /> : null}{text('save')}</Button></DialogFooter></DialogContent></Dialog> }
 
-function SourceDialog({ topic, api, text, onClose, onSaved }: { topic: AdminTopic | null; api: GooseAdminApi; text: Text; onClose(): void; onSaved(): Promise<void> }) { const [source, setSource] = useState<TopicSource | null>(null); const [reason, setReason] = useState(''); const [loading, setLoading] = useState(false); const [saving, setSaving] = useState(false); const textRef = useRef(text); useEffect(() => { textRef.current = text }, [text]); useEffect(() => { if (!topic) return; let active = true; setSource(null); setReason(''); setLoading(true); void api.topics.source(topic.id).then((value) => { if (active) setSource(value) }).catch((error) => toast.error(errorMessage(error, textRef.current('loadFailed')))).finally(() => { if (active) setLoading(false) }); return () => { active = false } }, [api, topic]); async function review(action: ReviewAction) { if (!source || !reason.trim()) return; setSaving(true); try { await api.topics.review('topic', { id: source.id, version: source.moderationVersion, action, reason: reason.trim() }); toast.success(text('reviewSaved')); onClose(); await onSaved() } catch (error) { toast.error(errorMessage(error, text('loadFailed'))) } finally { setSaving(false) } } async function copy() { if (!source?.content) return; try { await navigator.clipboard.writeText(source.content); toast.success(text('copied')) } catch { toast.error(text('loadFailed')) } } const reviewable = source && (source.topicStatus === 1 || ['rejected', 'pending', 'denied'].includes(source.moderationStatus)); return <Dialog open={Boolean(topic)} onOpenChange={(open) => !open && !saving && onClose()}><DialogContent className="sm:max-w-3xl"><DialogHeader><DialogTitle>{text('openReview')}</DialogTitle><DialogDescription>{topic?.title}</DialogDescription></DialogHeader><pre className="max-h-[50vh] overflow-auto whitespace-pre-wrap break-words rounded-lg border bg-muted/20 p-3 text-sm leading-6">{loading ? text('loading') : source?.content || text('sourceEmpty')}</pre>{source && !loading ? <div className="flex flex-col gap-1 text-sm"><p>{reviewLabel(source.moderationStatus, text)} · {source.moderatedAt || '—'}</p>{source.moderationReason ? <p className="text-muted-foreground">{source.moderationReason}</p> : null}</div> : null}{reviewable ? <div className="flex flex-col gap-2"><Input value={reason} maxLength={300} onChange={(event) => setReason(event.target.value)} placeholder={text('reviewReason')} /><div className="flex flex-wrap gap-1.5"><Button disabled={saving || !reason.trim()} onClick={() => void review('approve')}>{text('approve')}</Button><Button variant="destructive" disabled={saving || !reason.trim()} onClick={() => void review('reject')}>{text('reject')}</Button><Button variant="outline" disabled={saving || !reason.trim()} onClick={() => void review('recheck')}>{text('recheck')}</Button></div></div> : null}<DialogFooter><Button variant="outline" onClick={onClose}>{text('close')}</Button><Button disabled={!source?.content} onClick={() => void copy()}>{text('copy')}</Button></DialogFooter></DialogContent></Dialog> }
+function SourceDialog({ topic, api, text, onClose, onSaved }: { topic: AdminTopic | null; api: GooseAdminApi; text: Text; onClose(): void; onSaved(): Promise<void> }) { const [source, setSource] = useState<TopicSource | null>(null); const [reason, setReason] = useState(''); const [loading, setLoading] = useState(false); const [saving, setSaving] = useState(false); const textRef = useRef(text); const beginSourceRequest = useLatestRequest(); useEffect(() => { textRef.current = text }, [text]); useEffect(() => { const isCurrent = beginSourceRequest(); if (!topic) return; setSource(null); setReason(''); setLoading(true); void api.topics.source(topic.id).then((value) => { if (isCurrent()) setSource(value) }).catch((error) => toast.error(errorMessage(error, textRef.current('loadFailed')))).finally(() => { if (isCurrent()) setLoading(false) }); }, [api, topic, beginSourceRequest]); async function review(action: ReviewAction) { if (!source || !reason.trim()) return; setSaving(true); try { await api.topics.review('topic', { id: source.id, version: source.moderationVersion, action, reason: reason.trim() }); toast.success(text('reviewSaved')); onClose(); await onSaved() } catch (error) { toast.error(errorMessage(error, text('loadFailed'))) } finally { setSaving(false) } } async function copy() { if (!source?.content) return; try { await navigator.clipboard.writeText(source.content); toast.success(text('copied')) } catch { toast.error(text('loadFailed')) } } const reviewable = source && (source.topicStatus === 1 || ['rejected', 'pending', 'denied'].includes(source.moderationStatus)); return <Dialog open={Boolean(topic)} onOpenChange={(open) => !open && !saving && onClose()}><DialogContent className="sm:max-w-3xl"><DialogHeader><DialogTitle>{text('openReview')}</DialogTitle><DialogDescription>{topic?.title}</DialogDescription></DialogHeader><pre className="max-h-[50vh] overflow-auto whitespace-pre-wrap break-words rounded-lg border bg-muted/20 p-3 text-sm leading-6">{loading ? text('loading') : source?.content || text('sourceEmpty')}</pre>{source && !loading ? <div className="flex flex-col gap-1 text-sm"><p>{reviewLabel(source.moderationStatus, text)} · {source.moderatedAt || '—'}</p>{source.moderationReason ? <p className="text-muted-foreground">{source.moderationReason}</p> : null}</div> : null}{reviewable ? <div className="flex flex-col gap-2"><Input value={reason} maxLength={300} onChange={(event) => setReason(event.target.value)} placeholder={text('reviewReason')} /><div className="flex flex-wrap gap-1.5"><Button disabled={saving || !reason.trim()} onClick={() => void review('approve')}>{text('approve')}</Button><Button variant="destructive" disabled={saving || !reason.trim()} onClick={() => void review('reject')}>{text('reject')}</Button><Button variant="outline" disabled={saving || !reason.trim()} onClick={() => void review('recheck')}>{text('recheck')}</Button></div></div> : null}<DialogFooter><Button variant="outline" onClick={onClose}>{text('close')}</Button><Button disabled={!source?.content} onClick={() => void copy()}>{text('copy')}</Button></DialogFooter></DialogContent></Dialog> }
 
 function ReviewReplyDialog({ reply, api, text, onClose, onSaved }: { reply: ReviewPost | null; api: GooseAdminApi; text: Text; onClose(): void; onSaved(): Promise<void> }) { const [reason, setReason] = useState(''); const [saving, setSaving] = useState(false); useEffect(() => { if (reply) setReason('') }, [reply]); async function review(action: ReviewAction) { if (!reply || !reason.trim()) return; setSaving(true); try { await api.topics.review('post', { id: reply.id, version: reply.moderationVersion, action, reason: reason.trim() }); toast.success(text('reviewSaved')); onClose(); await onSaved() } catch (error) { toast.error(errorMessage(error, text('loadFailed'))) } finally { setSaving(false) } } return <Dialog open={Boolean(reply)} onOpenChange={(open) => !open && !saving && onClose()}><DialogContent className="sm:max-w-3xl"><DialogHeader><DialogTitle>{text('replies')}</DialogTitle><DialogDescription>{reply?.topicTitle} · #{reply?.postNo}</DialogDescription></DialogHeader><pre className="max-h-[45vh] overflow-auto whitespace-pre-wrap break-words rounded-lg border p-3 text-sm">{reply?.content}</pre>{reply?.moderationReason ? <p className="text-sm text-muted-foreground">{reply.moderationReason}</p> : null}<Input value={reason} maxLength={300} onChange={(event) => setReason(event.target.value)} placeholder={text('reviewReason')} /><DialogFooter><Button disabled={saving || !reason.trim()} onClick={() => void review('approve')}>{text('approve')}</Button><Button variant="destructive" disabled={saving || !reason.trim()} onClick={() => void review('reject')}>{text('reject')}</Button><Button variant="outline" disabled={saving || !reason.trim()} onClick={() => void review('recheck')}>{text('recheck')}</Button></DialogFooter></DialogContent></Dialog> }
 
@@ -153,6 +207,9 @@ function TopicActionDialog({ topic, mode, api, text, onClose, onSaved }: { topic
 
 function FilterSelect({ value, label, options, onChange }: { value: string; label: string; options: [string, string][]; onChange(value: string): void }) { return <Select value={value} onValueChange={onChange}><SelectTrigger aria-label={label} className="min-w-32"><SelectValue /></SelectTrigger><SelectContent><SelectGroup>{options.map(([option, title]) => <SelectItem key={option} value={option}>{title}</SelectItem>)}</SelectGroup></SelectContent></Select> }
 function ContentEmpty({ icon, title }: { icon: React.ReactNode; title: string }) { return <Empty className="min-h-32 rounded-none border-0"><EmptyHeader><EmptyMedia variant="icon">{icon}</EmptyMedia><EmptyTitle>{title}</EmptyTitle></EmptyHeader></Empty> }
+function getSelectionState(items: ReviewBatchItem[], selected: ReviewBatchItem[]) {
+  const selectedIds = new Set(selected.map((item) => item.id))
+  return { selectedIds, selectedCount: items.filter((item) => selectedIds.has(item.id)).length }
+}
 function reviewLabel(status: string, text: Text) { if (status === 'pending') return text('pending'); if (status === 'approved') return text('approved'); if (status === 'rejected' || status === 'denied') return text('rejected'); return text('none') }
 function datePart(value?: string) { return value ? value.replace('T', ' ').replace(/\.\d+/, '').slice(0, 19) : '—' }
-function errorMessage(reason: unknown, fallback: string) { return reason instanceof Error && reason.message ? reason.message : fallback }

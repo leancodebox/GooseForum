@@ -2,6 +2,15 @@ package accessGroups
 
 import "github.com/leancodebox/GooseForum/app/bundles/queryopt"
 
+func GetByIds(ids []uint64) ([]Entity, error) {
+	if len(ids) == 0 {
+		return []Entity{}, nil
+	}
+	var entities []Entity
+	err := builder().Where(queryopt.In("id", ids)).Find(&entities).Error
+	return entities, err
+}
+
 func GetBySystemKeys(systemKeys []string) ([]Entity, error) {
 	if len(systemKeys) == 0 {
 		return []Entity{}, nil

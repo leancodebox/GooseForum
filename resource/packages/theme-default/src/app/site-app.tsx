@@ -21,6 +21,7 @@ import { prepareGoosePage } from "@gooseforum/runtime/prepared-page";
 import {
   GooseRuntimeProvider,
   isSiteSpaPath,
+  useLatestRequest,
   type GooseNavigateOptions,
   type GooseRuntime,
 } from "@gooseforum/runtime";
@@ -92,8 +93,7 @@ export function SiteApp({
     initialLocale ?? detectBrowserLocale(),
   );
   const localeRef = useRef(locale);
-  const localeVersion = useRef(0);
-  useEffect(() => () => { localeVersion.current++; }, []);
+  const beginLocaleRequest = useLatestRequest();
   const [theme, setTheme] = useState(() =>
     initialTheme ?? detectBrowserTheme(),
   );
@@ -265,19 +265,19 @@ export function SiteApp({
   );
 
   const setLocale = useCallback(async (nextLocale: Locale) => {
-    const version = ++localeVersion.current;
+    const isCurrent = beginLocaleRequest();
     try {
       await prepareGooseTranslations(nextLocale, loadedGooseNamespaces());
       // A concurrent route load may have added another namespace in the meantime.
       await prepareGooseTranslations(nextLocale, loadedGooseNamespaces());
-      if (version !== localeVersion.current) return;
+      if (!isCurrent()) return;
       localeRef.current = nextLocale;
       applyBrowserLocale(nextLocale);
       setLocaleState(nextLocale);
     } catch (reason) {
-      if (version === localeVersion.current) queueBrowserFlash(reason instanceof Error ? reason.message : String(reason), "error");
+      if (isCurrent()) queueBrowserFlash(reason instanceof Error ? reason.message : String(reason), "error");
     }
-  }, []);
+  }, [beginLocaleRequest]);
 
   const setThemePreference = useCallback((preference: BrowserThemePreference) => {
     saveBrowserThemePreference(preference);

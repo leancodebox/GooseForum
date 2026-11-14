@@ -7,6 +7,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/models/forum/attachments"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
+	"github.com/leancodebox/GooseForum/app/models/forum/postRevisions"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
@@ -42,6 +43,7 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 	oldPublished := false
 	oldCategoryIDs := []uint64{}
 	if err := conn.Transaction(func(tx *gorm.DB) error {
+		var previousPost posts.Entity
 		if !input.Create {
 			var stored topics.Entity
 			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
@@ -52,16 +54,15 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 				return ErrVersionConflict
 			}
 			oldPublished = isCountedTopic(&stored)
+			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&previousPost, input.FirstPost.Id).Error; err != nil {
+				return err
+			}
 			if input.ReviewOnly {
-				var currentPost posts.Entity
-				if err := tx.Select("id", "process_status", "moderation_status", "moderation_version").First(&currentPost, input.FirstPost.Id).Error; err != nil {
-					return err
-				}
 				// A moderator can block the first post separately from the topic.
-				if currentPost.ProcessStatus == 1 && currentPost.ModerationStatus != "pending" && currentPost.ModerationStatus != "rejected" && currentPost.ModerationStatus != "denied" {
+				if previousPost.ProcessStatus == 1 && previousPost.ModerationStatus != "pending" && previousPost.ModerationStatus != "rejected" && previousPost.ModerationStatus != "denied" {
 					input.FirstPost.ProcessStatus = 1
 				}
-				input.FirstPost.ModerationVersion = currentPost.ModerationVersion + 1
+				input.FirstPost.ModerationVersion = previousPost.ModerationVersion + 1
 				// Keep counters, categories, pinning and manual blocks changed while the
 				// worker was matching text. Only reviewed content and its state may change.
 				reviewed := *input.Topic
@@ -110,6 +111,23 @@ func SaveTopicAndFirstPostWithDB(conn *gorm.DB, input FirstPostWrite) error {
 			}
 			if err := tx.Save(input.FirstPost).Error; err != nil {
 				return err
+			}
+			if !input.ReviewOnly && previousPost.Content != input.FirstPost.Content {
+				revisionNo, err := postRevisions.NextRevisionNoWithDB(tx, input.FirstPost.Id)
+				if err != nil {
+					return err
+				}
+				if err := postRevisions.CreateSnapshotWithDB(tx, postRevisions.SnapshotInput{
+					PostId:             previousPost.Id,
+					RevisionNo:         revisionNo,
+					AuthorId:           previousPost.UserId,
+					Content:            previousPost.Content,
+					SourceVersion:      previousPost.SourceVersion,
+					ModerationVersion:  previousPost.ModerationVersion,
+					VisibilitySnapshot: postRevisions.VisibilitySnapshot(previousPost.ProcessStatus),
+				}); err != nil {
+					return err
+				}
 			}
 		}
 		if err := attachments.BindWithDB(tx, input.FirstPost.UserId, input.FirstPost.Id, input.FirstPost.Attachments); err != nil {
@@ -277,7 +295,7 @@ func DeleteTopicWithDB(conn *gorm.DB, topic *topics.Entity) error {
 }
 
 func isCountedTopic(topic *topics.Entity) bool {
-	return topic != nil && topic.Status == 1 && topic.ProcessStatus == 0 && !topic.DeletedAt.Valid
+	return topic != nil && topic.IsPublished() && !topic.DeletedAt.Valid
 }
 
 func adjustCategoryTopicCounts(conn *gorm.DB, oldCounted bool, oldIDs []uint64, newCounted bool, newIDs []uint64) error {

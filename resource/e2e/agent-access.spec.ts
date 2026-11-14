@@ -130,6 +130,14 @@ test("creates and revokes a fallback token without retaining its secret", async 
       },
     }),
   );
+  await page.route("**/api/trust-level", (route) =>
+    route.fulfill({
+      json: {
+        code: 0,
+        result: { level: 0, locked: false, createdAt: "2026-01-01T00:00:00Z", next: null },
+      },
+    }),
+  );
   await page.route("**/api/forum/unread-status", (route) =>
     route.fulfill({
       json: { code: 0, result: { notifications: false, messages: false } },

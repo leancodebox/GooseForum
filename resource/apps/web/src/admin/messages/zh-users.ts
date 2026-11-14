@@ -5,7 +5,6 @@ export default {
   restrictionNoEnd: "永久",
   dateClear: "设为永久",
   dateTime: "时间",
-  dateDone: "完成",
   title: "用户",
   description: "搜索用户并管理账号状态、角色和徽章。",
   search: "搜索用户名…",

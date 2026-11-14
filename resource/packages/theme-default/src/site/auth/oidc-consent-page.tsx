@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@gooseforum/ui/components/alert'
 import { Button } from '@gooseforum/ui/components/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@gooseforum/ui/components/card'
 import { Spinner } from '@gooseforum/ui/components/spinner'
-import { GooseLink, useGooseRuntime } from '@gooseforum/runtime'
+import { GooseLink, useGooseRuntime, useLatestRequest } from '@gooseforum/runtime'
 import { useServerErrorMessage } from '@gooseforum/runtime/i18n/server-error'
 import { AuthBrand } from './auth-brand'
 import { AuthLocaleSwitcher } from './auth-locale-switcher'
@@ -30,22 +30,22 @@ export function OIDCConsentPageView({
   const [decision, setDecision] = useState<Decision>()
   const siteName = layout.site.name
 
+  const beginRequest = useLatestRequest();
   useEffect(() => {
-    let active = true
+    const isCurrent = beginRequest()
     if (!page.interaction) {
-      setError(t('expired'))
-      return () => { active = false }
+      void Promise.resolve().then(() => { if (isCurrent()) setError(t('expired')) })
+      return
     }
 
     void runtime.api.oidc.consentDetails(page.interaction)
       .then((result) => {
-        if (active) setDetails(result)
+        if (isCurrent()) setDetails(result)
       })
       .catch((reason: unknown) => {
-        if (active) setError(serverError(reason, t('loadFailed')))
+        if (isCurrent()) setError(serverError(reason, t('loadFailed')))
       })
-    return () => { active = false }
-  }, [page.interaction, runtime.api.oidc, serverError, t])
+  }, [page.interaction, runtime.api.oidc, serverError, t, beginRequest])
 
   async function decide(nextDecision: Decision) {
     if (decision) return

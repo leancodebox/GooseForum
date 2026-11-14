@@ -203,6 +203,21 @@ describe('API client', () => {
     })
   })
 
+  it('sends an optional invitation code when registering', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: true }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+
+    await client.api.auth.register({
+      username: 'invited-user', email: 'invited@example.com', password: 'password123',
+      captchaId: 'captcha', captchaCode: 'answer', invitationCode: 'gf_inv_link', locale: 'en',
+    })
+
+    expect(fetchMock.mock.calls[0]?.[1]?.body).toBe(JSON.stringify({
+      userName: 'invited-user', email: 'invited@example.com', passWord: 'password123',
+      locale: 'en', captchaId: 'captcha', captchaCode: 'answer', invitationCode: 'gf_inv_link',
+    }))
+  })
+
   it('exposes typed domain APIs with stable routes and payloads', async () => {
     const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: true }))
     const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
@@ -216,6 +231,19 @@ describe('API client', () => {
     expect(fetchMock.mock.calls[0]?.[1]?.body).toBe(JSON.stringify({ topicId: 42, action: 1 }))
     expect(fetchMock.mock.calls[1]?.[0]).toBe('https://forum.example/api/forum/notifications?filter=unread&cursor=10&limit=30')
     expect(fetchMock.mock.calls[2]?.[0]).toBe('https://forum.example/api/admin/publish-site-theme')
+  })
+
+  it('exposes post revision read APIs with cursor parameters', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: { items: [], nextCursor: 0, hasMore: false } }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+
+    await client.api.posts.revisions(42, 7, 10)
+    await client.api.posts.revision(42, 3)
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'https://forum.example/api/forum/posts/revisions?postId=42&cursor=7&limit=10',
+      'https://forum.example/api/forum/posts/revision?postId=42&revisionNo=3',
+    ])
   })
 
   it('exposes admin category APIs without coupling them to a UI framework', async () => {
@@ -286,6 +314,23 @@ describe('API client', () => {
       'https://forum.example/api/admin/save-user-badges',
     ])
     expect(fetchMock.mock.calls[2]?.[1]?.body).toBe(JSON.stringify({ userId: 9, badgeCodes: ['helper'] }))
+  })
+
+  it('exposes registration invitation administration with stable request bodies', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: [] }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+
+    await client.admin.users.registrationInvitations({ page: 1, pageSize: 20 })
+    await client.admin.users.createRegistrationInvitation({ maxUses: 2, expiresAt: '2030-01-01T00:00:00Z' })
+    await client.admin.users.revokeRegistrationInvitation(17)
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'https://forum.example/api/admin/registration-invitations?page=1&pageSize=20',
+      'https://forum.example/api/admin/registration-invitations/create',
+      'https://forum.example/api/admin/registration-invitations/revoke',
+    ])
+    expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(JSON.stringify({ maxUses: 2, expiresAt: '2030-01-01T00:00:00Z' }))
+    expect(fetchMock.mock.calls[2]?.[1]?.body).toBe(JSON.stringify({ id: 17 }))
   })
 
   it('exposes topic moderation with stable routes and request bodies', async () => {

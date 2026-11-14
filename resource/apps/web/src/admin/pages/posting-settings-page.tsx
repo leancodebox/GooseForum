@@ -1,3 +1,4 @@
+import { errorMessage } from "../error-message";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GooseAdminApi, PostingSettings } from "@gooseforum/client";
 import { Badge } from "@gooseforum/ui/components/badge";
@@ -14,7 +15,7 @@ import { Input } from "@gooseforum/ui/components/input";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Switch } from "@gooseforum/ui/components/switch";
 import { FileText, Plus, Save, Trash2, Upload } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@gooseforum/ui/components/sonner";
 import type { ContentSettingsTextKey } from "../content-settings-i18n";
 type Text = (k: ContentSettingsTextKey) => string;
 const attachmentDefaults = { enabled: true, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".pdf", ".txt", ".zip"] };
@@ -70,7 +71,7 @@ export function PostingSettingsPage({
         },
       });
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : tr.current("loadFailed"));
+      toast.error(errorMessage(r, tr.current("loadFailed")));
     } finally {
       setLoading(false);
     }
@@ -116,7 +117,7 @@ export function PostingSettingsPage({
       await api.settings.savePosting({ ...form, attachments: { ...attachmentDefaults, ...form.attachments, extensions } });
       toast.success(text("saved"));
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : text("saveFailed"));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }

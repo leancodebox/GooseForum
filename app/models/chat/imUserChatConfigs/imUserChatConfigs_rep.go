@@ -64,7 +64,10 @@ func conversationAccessCacheKey(userId, convId uint64) string {
 
 func GetUserConfigs(userId uint64) []Entity {
 	var entities []Entity
-	builder().Where("user_id = ? AND is_deleted = 0", userId).Order("updated_at DESC").Find(&entities)
+	builder().Where("user_id = ? AND is_deleted = 0", userId).
+		Order("updated_at DESC").
+		Order("id DESC").
+		Find(&entities)
 	return entities
 }
 

@@ -49,6 +49,7 @@ export function adminPageNamespaces(path: string) {
     "/admin/access-groups": ["access-groups"],
     "/admin/roles": ["roles"],
     "/admin/users": ["users"],
+    "/admin/registration-invitations": ["assets"],
     "/admin/posts": ["posts"],
     "/admin/links": ["page-config"],
     "/admin/sponsors": ["page-config"],

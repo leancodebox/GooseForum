@@ -128,11 +128,16 @@ func GetMapByIds(ids []uint64) map[uint64]Entity {
 }
 
 func GetPointerMapByIds(ids []uint64) map[uint64]*Entity {
-	valueMap := GetMapByIds(ids)
-	result := make(map[uint64]*Entity, len(valueMap))
-	for id, item := range valueMap {
-		entity := item
-		result[id] = &entity
+	if len(ids) == 0 {
+		return map[uint64]*Entity{}
+	}
+	var list []*Entity
+	builder().Where("id in ?", ids).Find(&list)
+	result := make(map[uint64]*Entity, len(list))
+	for _, item := range list {
+		if item != nil {
+			result[item.Id] = item
+		}
 	}
 	return result
 }
@@ -293,10 +298,7 @@ func PageWithDB(conn *gorm.DB, q PageQuery) TopicPage {
 	}
 	b = applyPageSort(b, q.Sort)
 	b.Limit(queryLimit).Offset(q.PageSize * q.Page).Find(&list)
-	hasNext := len(list) > q.PageSize
-	if hasNext {
-		list = list[:q.PageSize]
-	}
+	list, hasNext := pageutil.TrimPage(list, q.PageSize)
 	return TopicPage{Page: q.Page + 1, PageSize: q.PageSize, Data: list, HasNext: hasNext}
 }
 
@@ -350,10 +352,7 @@ func pageSparseCategoryTopics(query *gorm.DB, q PageQuery, topicIDs []uint64) To
 	start := min(q.Page*q.PageSize, len(list))
 	end := min(start+q.PageSize+1, len(list))
 	list = list[start:end]
-	hasNext := len(list) > q.PageSize
-	if hasNext {
-		list = list[:q.PageSize]
-	}
+	list, hasNext := pageutil.TrimPage(list, q.PageSize)
 	return TopicPage{Page: q.Page + 1, PageSize: q.PageSize, Data: list, HasNext: hasNext}
 }
 
@@ -416,10 +415,7 @@ func PageForAdmin(q AdminPageQuery) struct {
 		b = b.Order("pin_weight DESC").Order("updated_at DESC").Order("id DESC")
 	}
 	b.Limit(queryLimit).Offset(q.PageSize * q.Page).Find(&list)
-	hasNext := len(list) > q.PageSize
-	if hasNext {
-		list = list[:q.PageSize]
-	}
+	list, hasNext := pageutil.TrimPage(list, q.PageSize)
 	return struct {
 		Page     int
 		PageSize int
@@ -451,10 +447,7 @@ func PageForModeration(q ModerationPageQuery) struct {
 		)
 	}
 	b.Limit(queryLimit).Offset(q.PageSize * q.Page).Order(queryopt.Desc("updated_at")).Order(queryopt.Desc("id")).Find(&list)
-	hasNext := len(list) > q.PageSize
-	if hasNext {
-		list = list[:q.PageSize]
-	}
+	list, hasNext := pageutil.TrimPage(list, q.PageSize)
 	total := int64(q.Page*q.PageSize + len(list))
 	if hasNext {
 		total++

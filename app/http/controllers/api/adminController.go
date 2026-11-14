@@ -10,6 +10,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/buildinfo"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/outbound"
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/randopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -783,7 +784,7 @@ type OptRecordPageReq struct {
 func OptRecordPage(req component.BetterRequest[OptRecordPageReq]) component.Response {
 	pageData := optRecord.Page(optRecord.PageQuery{
 		Page:       req.Params.Page,
-		PageSize:   component.BoundPageSizeWithRange(req.Params.PageSize, 10, 50),
+		PageSize:   pageutil.BoundPageSizeWithRange(req.Params.PageSize, 10, 50),
 		OptUserId:  req.Params.OptUserId,
 		OptType:    req.Params.OptType,
 		TargetType: req.Params.TargetType,
@@ -810,7 +811,7 @@ type FileResourceItem struct {
 }
 
 func FileResourcePage(req component.BetterRequest[FileResourcePageReq]) component.Response {
-	pageData := filedata.FileResourcePage(req.Params.Page, component.BoundPageSizeWithRange(req.Params.PageSize, 10, 50))
+	pageData := filedata.FileResourcePage(req.Params.Page, pageutil.BoundPageSizeWithRange(req.Params.PageSize, 10, 50))
 	userIDs := lo.Map(pageData.List, func(item filedata.FileResource, _ int) uint64 {
 		return item.UserId
 	})

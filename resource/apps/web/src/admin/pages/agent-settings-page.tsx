@@ -1,3 +1,5 @@
+import { useLatestRequest } from '@gooseforum/runtime';
+import { errorMessage } from "../error-message";
 import { useEffect, useRef, useState } from "react";
 import type { AgentSettings, GooseAdminApi } from "@gooseforum/client";
 import { Button } from "@gooseforum/ui/components/button";
@@ -12,7 +14,7 @@ import { Input } from "@gooseforum/ui/components/input";
 import { Switch } from "@gooseforum/ui/components/switch";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { RefreshCw, Save } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@gooseforum/ui/components/sonner";
 import type { SystemSettingsTextKey } from "../system-settings-i18n";
 
 const limits = [
@@ -36,31 +38,27 @@ export function AgentSettingsPage({
   const [reload, setReload] = useState(0);
   const inFlight = useRef(false);
   const translate = useRef(text);
+  const beginRequest = useLatestRequest();
   useEffect(() => {
     translate.current = text;
   }, [text]);
   useEffect(() => {
-    let active = true;
+    const isCurrent = beginRequest();
     void api.settings
       .agent()
       .then((value) => {
-        if (active) setForm(value);
+        if (isCurrent()) setForm(value);
       })
       .catch((reason: unknown) => {
-        if (active)
+        if (isCurrent())
           toast.error(
-            reason instanceof Error
-              ? reason.message
-              : translate.current("loadFailed"),
+            errorMessage(reason, translate.current("loadFailed")),
           );
       })
       .finally(() => {
-        if (active) setLoading(false);
+        if (isCurrent()) setLoading(false);
       });
-    return () => {
-      active = false;
-    };
-  }, [api, reload]);
+      }, [api, reload, beginRequest]);
 
   async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -72,7 +70,7 @@ export function AgentSettingsPage({
       toast.success(text("saved"));
     } catch (reason) {
       toast.error(
-        reason instanceof Error ? reason.message : text("saveFailed"),
+        errorMessage(reason, text("saveFailed")),
       );
     } finally {
       inFlight.current = false;

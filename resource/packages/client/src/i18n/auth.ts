@@ -20,6 +20,7 @@ export interface AuthMessages {
   usernameOrEmail: string;
   username: string;
   email: string;
+  invitationCode: string;
   registeredEmail: string;
   password: string;
   passwordRequirements: string;
@@ -48,6 +49,7 @@ export interface AuthMessages {
     forgotRequired: string;
     passwordMismatch: string;
     termsRequired: string;
+    invitationRequired: string;
     captchaLoadFailed: string;
     loginFailed: string;
     registerFailed: string;

@@ -8,14 +8,20 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/closer"
+	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	paniclog "github.com/leancodebox/GooseForum/app/bundles/recovery"
 	"github.com/leancodebox/GooseForum/app/models/forum/taskQueue"
+	"gorm.io/gorm"
 )
 
 const (
 	MaxRetries    = 3
 	RetryInterval = time.Second * 5
 	BatchSize     = 10
+
+	EmailTypeActivation             = "activation"
+	EmailTypePasswordReset          = "reset_password"
+	EmailTypeRegistrationInvitation = "registration_invitation"
 )
 
 type EmailTask struct {
@@ -36,9 +42,15 @@ var emailProcessor = struct {
 
 // AddToQueue stores an email task for background processing.
 func AddToQueue(task EmailTask) error {
+	_, err := AddToQueueWithDB(dbconnect.Connect(), task)
+	return err
+}
+
+// AddToQueueWithDB stores an email task in the supplied transaction or connection.
+func AddToQueueWithDB(db *gorm.DB, task EmailTask) (uint64, error) {
 	taskJson, err := json.Marshal(task)
 	if err != nil {
-		return fmt.Errorf("序列化邮件任务失败: %w", err)
+		return 0, fmt.Errorf("序列化邮件任务失败: %w", err)
 	}
 
 	queueTask := &taskQueue.Entity{
@@ -47,12 +59,15 @@ func AddToQueue(task EmailTask) error {
 		TaskJson: string(taskJson),
 	}
 
-	if err = taskQueue.Create(queueTask); err != nil {
+	if db == nil {
+		return 0, fmt.Errorf("邮件任务写入队列失败: 数据库连接为空")
+	}
+	if err = db.Create(queueTask).Error; err != nil {
 		slog.Debug("邮件任务写入队列失败", "type", task.Type, "to", task.To, "err", err)
-		return err
+		return 0, err
 	}
 	slog.Debug("邮件任务写入队列成功", "id", queueTask.Id, "type", task.Type, "to", task.To)
-	return nil
+	return queueTask.Id, nil
 }
 
 // StartEmailProcessor starts the background email queue worker.
@@ -109,8 +124,13 @@ func processPendingEmailTasks(stopCh <-chan struct{}) bool {
 
 		for _, task := range tasks {
 			slog.Debug("邮件队列开始处理任务", "id", task.Id, "type", task.Type, "status", task.Status, "retryCount", task.RetryCount)
-			if err := taskQueue.UpdateStatus(task.Id, taskQueue.StatusRunning, nil); err != nil {
+			claimed, err := taskQueue.Claim(task.Id)
+			if err != nil {
 				slog.Error("更新任务状态失败", "error", err)
+				continue
+			}
+			if !claimed {
+				slog.Debug("邮件任务已被其他 worker 领取", "id", task.Id)
 				continue
 			}
 
@@ -123,7 +143,7 @@ func processPendingEmailTasks(stopCh <-chan struct{}) bool {
 				continue
 			}
 
-			err := processEmailTask(emailTask)
+			err = processEmailTask(emailTask)
 			if err != nil {
 				slog.Error("处理邮件任务失败",
 					"id", task.Id,
@@ -170,10 +190,12 @@ func processPendingEmailTasks(stopCh <-chan struct{}) bool {
 // processEmailTask dispatches an email task by type.
 func processEmailTask(task EmailTask) error {
 	switch task.Type {
-	case "activation":
+	case EmailTypeActivation:
 		return SendActivationEmail(task.To, task.Username, task.Token, task.Locale)
-	case "reset_password":
+	case EmailTypePasswordReset:
 		return SendPasswordResetEmail(task.To, task.Username, task.Token, task.Locale)
+	case EmailTypeRegistrationInvitation:
+		return SendRegistrationInvitationEmail(task.To, task.Token, task.Locale)
 	default:
 		return fmt.Errorf("未知的邮件类型: %s", task.Type)
 	}

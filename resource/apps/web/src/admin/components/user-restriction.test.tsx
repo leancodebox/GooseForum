@@ -30,7 +30,6 @@ it('edits an expiring ban and displays its administrator history', async () => {
   await actor.click(deadline)
   await actor.click(document.querySelector<HTMLButtonElement>('[data-day="10/6/2026"]')!)
   fireEvent.change(screen.getByLabelText('Time'), { target: { value: '10:00' } })
-  await actor.click(screen.getByRole('button',{name:'Done'}))
   await actor.click(screen.getByRole('button',{name:'Save changes'}))
   await waitFor(()=>expect(edit).toHaveBeenCalled())
   expect(edit.mock.calls[0][0]).toMatchObject({userId:7,restrictionStatus:'banned',restrictionReason:'Spam'})

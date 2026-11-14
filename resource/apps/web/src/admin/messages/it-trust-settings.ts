@@ -19,6 +19,8 @@ export default {
   unlimited: "Illimitato",
   save: "Salva",
   saved: "Salvato",
+  loadFailed: "Impossibile caricare le impostazioni",
+  saveFailed: "Impossibile salvare le impostazioni",
   reload: "Ricarica",
   orderInvalid: "{higher}: il limite di {field} non può essere più restrittivo di quello di {lower}.",
   minPostAccountAgeMinutes: "Attesa per post (min)",

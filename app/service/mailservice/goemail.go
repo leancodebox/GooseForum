@@ -79,45 +79,35 @@ func validateConfiguration(config pageConfig.MailSettingsConfig) error {
 }
 
 func SendActivationEmail(to, username, token string, locale ...string) error {
-	config := hotdataserve.GetMailSettingsConfigCache()
-	fromName, fromEmail := normalizeSender(config)
-	slog.Debug("准备发送激活邮件", "to", to, "username", username, "enableMail", config.EnableMail, "smtpHost", config.SmtpHost, "smtpPort", config.SmtpPort, "fromName", fromName, "fromEmail", fromEmail)
-	if !config.EnableMail {
-		return errors.New("mail settings config is disabled")
-	}
-	message := mail.NewMsg()
-	if err := message.To(to); err != nil {
-		return fmt.Errorf("failed to set To address: %w", err)
-	}
-	message.Subject(i18n.T(emailBodyLang(locale...), "email.activation.subject"))
-	if err := setMessageFrom(message, config); err != nil {
-		return err
-	}
 	body, err := generateActivationEmailBody(username, token, locale...)
 	if err != nil {
 		return fmt.Errorf("生成邮件内容失败: %w", err)
 	}
-	message.SetBodyString(mail.TypeTextHTML, body)
-
-	client, err := buildClientByConfig(config)
-	if err != nil {
-		return fmt.Errorf("failed to create mail client: %w", err)
-
-	}
-	defer func() { _ = client.Close() }()
-	if err = client.DialAndSend(message); err != nil {
-		slog.Debug("激活邮件 SMTP 发送失败", "to", to, "username", username, "err", err)
-		return fmt.Errorf("failed to send mail: %w", err)
-	}
-	slog.Debug("激活邮件 SMTP 发送成功", "to", to, "username", username)
-	return nil
+	return sendTemplatedEmail("激活", to, username, i18n.T(emailBodyLang(locale...), "email.activation.subject"), body)
 }
 
 // SendPasswordResetEmail 发送密码重置邮件
 func SendPasswordResetEmail(to, username, token string, locale ...string) error {
+	body, err := generatePasswordResetEmailBody(username, token, locale...)
+	if err != nil {
+		return fmt.Errorf("生成邮件内容失败: %w", err)
+	}
+	return sendTemplatedEmail("密码重置", to, username, i18n.T(emailBodyLang(locale...), "email.passwordReset.subject"), body)
+}
+
+// SendRegistrationInvitationEmail sends an invitation link for the public registration form.
+func SendRegistrationInvitationEmail(to, code string, locale ...string) error {
+	body, err := generateRegistrationInvitationEmailBody(code, locale...)
+	if err != nil {
+		return fmt.Errorf("生成邮件内容失败: %w", err)
+	}
+	return sendTemplatedEmail("注册邀请", to, "", i18n.T(emailBodyLang(locale...), "email.registrationInvitation.subject"), body)
+}
+
+func sendTemplatedEmail(kind, to, username, subject, body string) error {
 	config := hotdataserve.GetMailSettingsConfigCache()
 	fromName, fromEmail := normalizeSender(config)
-	slog.Debug("准备发送密码重置邮件", "to", to, "username", username, "enableMail", config.EnableMail, "smtpHost", config.SmtpHost, "smtpPort", config.SmtpPort, "fromName", fromName, "fromEmail", fromEmail)
+	slog.Debug("准备发送邮件", "kind", kind, "to", to, "username", username, "enableMail", config.EnableMail, "smtpHost", config.SmtpHost, "smtpPort", config.SmtpPort, "fromName", fromName, "fromEmail", fromEmail)
 	if !config.EnableMail {
 		return errors.New("mail settings config is disabled")
 	}
@@ -125,13 +115,9 @@ func SendPasswordResetEmail(to, username, token string, locale ...string) error 
 	if err := message.To(to); err != nil {
 		return fmt.Errorf("failed to set To address: %w", err)
 	}
-	message.Subject(i18n.T(emailBodyLang(locale...), "email.passwordReset.subject"))
+	message.Subject(subject)
 	if err := setMessageFrom(message, config); err != nil {
 		return err
-	}
-	body, err := generatePasswordResetEmailBody(username, token, locale...)
-	if err != nil {
-		return fmt.Errorf("生成邮件内容失败: %w", err)
 	}
 	message.SetBodyString(mail.TypeTextHTML, body)
 
@@ -141,10 +127,10 @@ func SendPasswordResetEmail(to, username, token string, locale ...string) error 
 	}
 	defer func() { _ = client.Close() }()
 	if err = client.DialAndSend(message); err != nil {
-		slog.Debug("密码重置邮件 SMTP 发送失败", "to", to, "username", username, "err", err)
+		slog.Debug("邮件 SMTP 发送失败", "kind", kind, "to", to, "username", username, "err", err)
 		return fmt.Errorf("failed to send mail: %w", err)
 	}
-	slog.Debug("密码重置邮件 SMTP 发送成功", "to", to, "username", username)
+	slog.Debug("邮件 SMTP 发送成功", "kind", kind, "to", to, "username", username)
 	return nil
 }
 

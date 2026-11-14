@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { expect, it } from "vitest";
-import { useLatestRequest } from "./use-latest-request";
+import { useLatestRequest } from "@gooseforum/runtime";
 
 it("invalidates older requests and requests completing after unmount", () => {
   const { result, unmount } = renderHook(useLatestRequest);

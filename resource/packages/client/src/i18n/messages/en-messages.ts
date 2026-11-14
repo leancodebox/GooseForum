@@ -28,5 +28,6 @@ export default {
   more: "More",
   scrollToLatest: "Scroll to latest message",
   loadFailed: "Could not load messages.",
+  retryLoad: "Retry loading",
   sendFailed: "Could not send the message.",
 } as const;

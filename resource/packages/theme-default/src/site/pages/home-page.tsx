@@ -111,6 +111,7 @@ export function HomePageView({
           error={list.error}
           t={t}
           onLoad={list.loadMore}
+          pageUrl={pageUrl}
         />
         <div ref={list.sentinel} />
       </SiteListPanel>

@@ -36,6 +36,8 @@ export default {
   "auth.signupDisabled": "現在、新規登録は無効になっています。",
   "auth.emailDomain.invalid": "メールアドレスの形式が正しくありません。",
   "auth.emailDomain.notAllowed": "このメールドメインは使用できません。",
+  "auth.invitation.invalid": "招待コードが無効、期限切れ、取り消し済み、または使用済みです。",
+  "auth.invitation.required": "このサイトでは登録に招待コードが必要です。",
   "auth.username.invalid": "ユーザー名の形式が正しくありません。",
   "auth.username.exists": "このユーザー名はすでに使用されています。",
   "auth.email.exists": "このメールアドレスはすでに使用されています。",

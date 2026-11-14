@@ -1,6 +1,8 @@
+import { formatDate } from "../date-format";
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
   type ComponentType,
   type ReactNode,
@@ -44,7 +46,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@gooseforum/ui/components/tabs";
-import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
+import { GooseLink, useGooseRuntime, useLatestRequest } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { PageHeader } from "../layout/page-header";
 import { UserCardPopover } from "../users/user-card-popover";
@@ -74,6 +76,8 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
   const [reportLoaded, setReportLoaded] = useState(false);
   const [reportError, setReportError] = useState("");
   const [reportBusy, setReportBusy] = useState<Set<number>>(() => new Set());
+  const beginReportRequest = useLatestRequest();
+  const reportLoadingRef = useRef(false);
   const [logs, setLogs] = useState<ModerationLogItem[]>([]);
   const [logCursor, setLogCursor] = useState(0);
   const [logMore, setLogMore] = useState(true);
@@ -86,8 +90,10 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
     setTopicError("");
   }, [page]);
   const loadReports = useCallback(
-    async (reset = false, status = reportStatus) => {
-      if (reportLoading) return;
+    async (reset = false, status = reportStatus, force = false) => {
+      if (reportLoadingRef.current && !force) return;
+      const isCurrent = beginReportRequest();
+      reportLoadingRef.current = true;
       setReportLoading(true);
       setReportError("");
       try {
@@ -96,6 +102,7 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
           20,
           status,
         );
+        if (!isCurrent()) return;
         setReports((current) =>
           reset ? result.items : merge(current, result.items),
         );
@@ -103,14 +110,18 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
         setReportMore(result.hasNext);
         setReportLoaded(true);
       } catch (reason) {
+        if (!isCurrent()) return;
         setReportError(
           serverError(reason, t("reports.loadFailed")),
         );
       } finally {
-        setReportLoading(false);
+        if (isCurrent()) {
+          reportLoadingRef.current = false;
+          setReportLoading(false);
+        }
       }
     },
-    [reportCursor, reportLoading, reportStatus, runtime.api.moderation, serverError, t],
+    [beginReportRequest, reportCursor, reportStatus, runtime.api.moderation, serverError, t],
   );
   const loadLogs = useCallback(
     async (reset = false) => {
@@ -150,7 +161,7 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
     setReportCursor(0);
     setReportMore(true);
     setReportLoaded(false);
-    void loadReports(true, status);
+    void loadReports(true, status, true);
   }
   async function handleReport(
     item: ModerationReportItem,
@@ -745,15 +756,6 @@ function resolution(item: ModerationReportItem, t: Translate) {
   const value =
     item.resolution || (item.status === "rejected" ? "ignored" : "resolved");
   return t(`reports.resolutions.${value}`, { defaultValue: value });
-}
-function formatDate(value: string, locale: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? value
-    : new Intl.DateTimeFormat(locale, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }).format(date);
 }
 function merge<T extends { id: number }>(current: T[], incoming: T[]) {
   const ids = new Set(current.map((item) => item.id));

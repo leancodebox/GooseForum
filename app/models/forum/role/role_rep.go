@@ -1,6 +1,7 @@
 package role
 
 import (
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 )
 
@@ -59,9 +60,7 @@ func Page(q PageQuery) struct {
 	} else {
 		q.Page = 0
 	}
-	if q.PageSize < 1 {
-		q.PageSize = 10
-	}
+	q.PageSize = pageutil.DefaultPageSize(q.PageSize, 10)
 	b := builder()
 	if q.RoleName != "" {
 		b.Where(queryopt.Like(fieldRoleName, q.RoleName))

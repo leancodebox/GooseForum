@@ -1,3 +1,4 @@
+import { errorMessage } from "../error-message";
 import { AdminPage } from '../components/admin-page'
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import type { AuthLocale } from "@gooseforum/runtime/i18n/auth";
@@ -20,7 +21,7 @@ import {
   TabsTrigger,
 } from "@gooseforum/ui/components/tabs";
 import { Plus, Save, Trash2, Webhook } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@gooseforum/ui/components/sonner";
 import type { ModerationSettingsTextKey } from "../moderation-settings-i18n";
 type Text = (k: ModerationSettingsTextKey) => string;
 const HttpNotifyGuide = lazy(() => import("../components/http-notify-guide"));
@@ -68,7 +69,7 @@ export function HttpNotifySettingsPage({
       const v = await api.settings.httpNotify();
       setForm(normalizeSettings(v));
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : tr.current("loadFailed"));
+      toast.error(errorMessage(r, tr.current("loadFailed")));
     } finally {
       setLoading(false);
     }
@@ -123,7 +124,7 @@ export function HttpNotifySettingsPage({
       setForm(normalized);
       toast.success(text("saved"));
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : text("saveFailed"));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }

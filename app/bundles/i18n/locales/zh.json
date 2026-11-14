@@ -95,5 +95,9 @@
   "meta.categories": "全部分类",
   "meta.categoriesDesc": "浏览 {site} 的全部可访问分类。",
   "meta.members": "所有成员",
-  "meta.membersDesc": "浏览 {site} 的社区成员。"
+  "meta.membersDesc": "浏览 {site} 的社区成员。",
+  "email.registrationInvitation.subject": "注册邀请",
+  "email.registrationInvitation.heading": "加入 {site}",
+  "email.registrationInvitation.instruction": "你已受邀注册此论坛，点击下面的按钮继续：",
+  "email.registrationInvitation.button": "立即注册"
 }

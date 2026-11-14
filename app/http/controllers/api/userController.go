@@ -578,7 +578,7 @@ func ForgotPassword(req component.BetterRequest[ForgotPasswordReq]) component.Re
 		To:       userEntity.Email,
 		Username: userEntity.Username,
 		Token:    token,
-		Type:     "reset_password",
+		Type:     mailservice.EmailTypePasswordReset,
 		Locale:   userEntity.Locale,
 	})
 	if err != nil {

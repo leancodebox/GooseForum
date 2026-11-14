@@ -211,12 +211,7 @@ func runVersionedDataMigrations() error {
 			slog.Error("app migration topic main category has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
 			return fmt.Errorf("backfill topic main category: %s", result.LastFailed)
 		}
-		searchResult := datamigration.RebuildTopicMainCategorySearchIndex()
-		slog.Info("app migration topic main category search index done", "skipped", searchResult.Skipped, "rebuilt", searchResult.Rebuilt, "processed", searchResult.ProcessedCount, "failedCount", searchResult.FailedCount, "failed", searchResult.Failed, "lastFailed", searchResult.LastFailed)
-		if searchResult.Failed > 0 || searchResult.FailedCount > 0 {
-			slog.Error("app migration topic main category search index has failures", "failed", searchResult.Failed, "failedCount", searchResult.FailedCount, "lastFailed", searchResult.LastFailed)
-			slog.Warn("app migration topic main category search index skipped failure", "err", searchResult.LastFailed)
-		}
+		logTopicMainCategorySearchIndex("topic main category")
 		if err := syncMigrationVersion(16); err != nil {
 			return err
 		}
@@ -231,12 +226,7 @@ func runVersionedDataMigrations() error {
 		}
 		// Always retry the search rebuild while v17 is pending. The database repair
 		// may have committed on a previous start whose search rebuild then failed.
-		searchResult := datamigration.RebuildTopicMainCategorySearchIndex()
-		slog.Info("app migration single restricted topic category search index done", "skipped", searchResult.Skipped, "rebuilt", searchResult.Rebuilt, "processed", searchResult.ProcessedCount, "failedCount", searchResult.FailedCount, "failed", searchResult.Failed, "lastFailed", searchResult.LastFailed)
-		if searchResult.Failed > 0 || searchResult.FailedCount > 0 {
-			slog.Error("app migration single restricted topic category search index has failures", "failed", searchResult.Failed, "failedCount", searchResult.FailedCount, "lastFailed", searchResult.LastFailed)
-			slog.Warn("app migration single restricted topic category search index skipped failure", "err", searchResult.LastFailed)
-		}
+		logTopicMainCategorySearchIndex("single restricted topic category")
 		if err := syncMigrationVersion(17); err != nil {
 			return err
 		}
@@ -381,6 +371,15 @@ func rebuildReplySearchIndex() {
 		return
 	}
 	slog.Info("app migration reply search index done", "processed", result.ProcessedCount)
+}
+
+func logTopicMainCategorySearchIndex(stage string) {
+	searchResult := datamigration.RebuildTopicMainCategorySearchIndex()
+	slog.Info("app migration "+stage+" search index done", "skipped", searchResult.Skipped, "rebuilt", searchResult.Rebuilt, "processed", searchResult.ProcessedCount, "failedCount", searchResult.FailedCount, "failed", searchResult.Failed, "lastFailed", searchResult.LastFailed)
+	if searchResult.Failed > 0 || searchResult.FailedCount > 0 {
+		slog.Error("app migration "+stage+" search index has failures", "failed", searchResult.Failed, "failedCount", searchResult.FailedCount, "lastFailed", searchResult.LastFailed)
+		slog.Warn("app migration "+stage+" search index skipped failure", "err", searchResult.LastFailed)
+	}
 }
 
 func syncMigrationVersion(version uint32) error {

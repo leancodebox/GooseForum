@@ -71,4 +71,13 @@ export default {
   deleteTitle: "Delete topic?",
   deleteHint: "This deletes the selected topic.",
   unknownCategory: "Unknown category",
+  selectAll: "Select all",
+  select: "Select",
+  selected: "Selected",
+  selectedPageOnly: "Selection applies to this page only.",
+  batchSaved: "Batch review saved",
+  batchPartial: "Some items failed; refresh and review these IDs",
+  batchFailed: "Batch review failed",
+  batchReviewTitle: "Review selected content",
+  batchReviewHint: "The action will run separately for each selected item.",
 } as const;

@@ -1,6 +1,7 @@
 package notificationservice
 
 import (
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -17,33 +18,17 @@ func GetNotificationCursorList(userId uint64, pageSize int, cursor uint64, unrea
 }
 
 func GetNotificationCursorListForAudience(userId uint64, pageSize int, cursor uint64, unreadOnly bool, readableCategoryIDs []uint64, filterAudience bool) ([]*eventNotification.Entity, uint64, bool, error) {
-	pageSize = normalizePageSize(pageSize)
+	pageSize = pageutil.NormalizePageSize(pageSize, DefaultNotificationPageSize, MaxNotificationPageSize)
 	notifications, err := eventNotification.QueryByUserIdForAudience(userId, pageSize+1, cursor, unreadOnly, readableCategoryIDs, filterAudience)
 	if err != nil {
 		return nil, 0, false, err
 	}
 
-	hasNext := len(notifications) > pageSize
-	if hasNext {
-		notifications = notifications[:pageSize]
-	}
+	notifications, nextCursor, hasNext := pageutil.TrimCursorPage(notifications, pageSize, func(notification *eventNotification.Entity) uint64 {
+		return notification.Id
+	})
 	hydrateNotifications(notifications)
-
-	nextCursor := uint64(0)
-	if hasNext && len(notifications) > 0 {
-		nextCursor = notifications[len(notifications)-1].Id
-	}
 	return notifications, nextCursor, hasNext, nil
-}
-
-func normalizePageSize(pageSize int) int {
-	if pageSize <= 0 {
-		return DefaultNotificationPageSize
-	}
-	if pageSize > MaxNotificationPageSize {
-		return MaxNotificationPageSize
-	}
-	return pageSize
 }
 
 func hydrateNotifications(notifications []*eventNotification.Entity) {

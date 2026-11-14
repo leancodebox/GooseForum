@@ -39,6 +39,8 @@ export function createSiteApi(http: GooseHttpClient): GooseSiteApi {
         afterPostNo: input.afterPostNo,
         limit: input.limit,
       } }),
+      revisions: (postId, cursor = 0, limit = 20) => http.request(route('postsRevisions'), { query: { postId, cursor, limit } }),
+      revision: (postId, revisionNo) => http.request(route('postsRevision'), { query: { postId, revisionNo } }),
     },
     topics: {
       like: (topicId, action) => post(http, route('topicsLike'), { topicId, action }),
@@ -116,6 +118,7 @@ export function createSiteApi(http: GooseHttpClient): GooseSiteApi {
         locale: input.locale,
         captchaId: input.captchaId,
         captchaCode: input.captchaCode,
+        invitationCode: input.invitationCode,
       }),
       forgotPassword: (email, captchaId, captchaCode) => postWithMeta(http, route('authForgotPassword'), { email, captchaId, captchaCode }),
       resetPassword: (token, newPassword) => postWithMeta(http, route('authResetPassword'), { token, newPassword }),

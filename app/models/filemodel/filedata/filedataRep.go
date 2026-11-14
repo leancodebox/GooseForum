@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 )
@@ -184,12 +185,7 @@ func FileResourcePage(page, pageSize int) FileResourcePageResult {
 	if page < 1 {
 		page = 1
 	}
-	if pageSize < 1 {
-		pageSize = 20
-	}
-	if pageSize > 50 {
-		pageSize = 50
-	}
+	pageSize = pageutil.NormalizePageSize(pageSize, 20, 50)
 
 	var total int64
 	builder().Where("storage_status = ?", StorageStatusReady).Count(&total)

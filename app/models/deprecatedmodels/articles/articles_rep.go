@@ -118,10 +118,7 @@ func Page[ResType SmallEntity](q PageQuery) struct {
 	applyPageSort(b, q.Sort)
 
 	b.Limit(queryLimit).Offset(q.PageSize * q.Page).Find(&list)
-	hasNext := len(list) > q.PageSize
-	if hasNext {
-		list = list[:q.PageSize]
-	}
+	list, hasNext := pageutil.TrimPage(list, q.PageSize)
 	return struct {
 		Page     int
 		PageSize int
@@ -151,10 +148,7 @@ func PageForModeration(q ModerationPageQuery) struct {
 		b.Where(categoryScopeSQL, q.CategoryIDs, 1)
 	}
 	b.Limit(queryLimit).Offset(q.PageSize * q.Page).Order(queryopt.Desc(fieldUpdatedAt)).Order(queryopt.Desc(pid)).Find(&list)
-	hasNext := len(list) > q.PageSize
-	if hasNext {
-		list = list[:q.PageSize]
-	}
+	list, hasNext := pageutil.TrimPage(list, q.PageSize)
 	total := int64(q.Page*q.PageSize + len(list))
 	if hasNext {
 		total++

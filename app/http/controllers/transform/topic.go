@@ -35,13 +35,7 @@ func Topics2Vo(data []*topics.Entity, categoryMap map[uint64]*category.Entity) [
 }
 
 func TopicsWithUser2Vo(data []*topics.Entity, categoryMap map[uint64]*category.Entity, userMap map[uint64]*users.EntityComplete) []*vo.TopicsSimpleVo {
-	selectedBadges := make(map[uint64]string, len(userMap))
-	for userID, user := range userMap {
-		if user != nil && user.WornBadgeCode != "" {
-			selectedBadges[userID] = user.WornBadgeCode
-		}
-	}
-	wornBadges := badgeservice.GetWornBadges(selectedBadges)
+	wornBadges := badgeservice.GetWornBadges(SelectedWornBadgeCodes(userMap))
 	res := make([]*vo.TopicsSimpleVo, 0, len(data))
 	for _, t := range data {
 		if t == nil {
@@ -110,6 +104,18 @@ func TopicsWithUser2Vo(data []*topics.Entity, categoryMap map[uint64]*category.E
 		})
 	}
 	return res
+}
+
+// SelectedWornBadgeCodes keeps the badge lookup input consistent across
+// topic list and topic detail payload assembly.
+func SelectedWornBadgeCodes(userMap map[uint64]*users.EntityComplete) map[uint64]string {
+	selected := make(map[uint64]string, len(userMap))
+	for userID, user := range userMap {
+		if user != nil && user.WornBadgeCode != "" {
+			selected[userID] = user.WornBadgeCode
+		}
+	}
+	return selected
 }
 
 func timeValue(value *time.Time) time.Time {

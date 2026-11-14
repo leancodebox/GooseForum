@@ -16,6 +16,8 @@ export const siteApiRoutes = {
   postsUpdate: ['POST', '/api/forum/posts/update'],
   postsDelete: ['POST', '/api/forum/posts/delete'],
   postsWindow: ['GET', '/api/forum/posts/window'],
+  postsRevisions: ['GET', '/api/forum/posts/revisions'],
+  postsRevision: ['GET', '/api/forum/posts/revision'],
   topicsLike: ['POST', '/api/forum/topics/like'],
   topicsBookmark: ['POST', '/api/forum/topics/bookmark'],
   topicsWatch: ['POST', '/api/forum/topics/watch'],

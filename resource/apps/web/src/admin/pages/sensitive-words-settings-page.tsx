@@ -1,3 +1,4 @@
+import { errorMessage } from "../error-message";
 import { AdminPage } from '../components/admin-page'
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
@@ -31,7 +32,7 @@ import {
   TableRow,
 } from "@gooseforum/ui/components/table";
 import { Pencil, Plus, RefreshCw, Save, Search, Trash2, X } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@gooseforum/ui/components/sonner";
 import type { ModerationSettingsTextKey } from "../moderation-settings-i18n";
 type Text = (k: ModerationSettingsTextKey) => string;
 const blank = (): SensitiveWord => ({
@@ -72,7 +73,7 @@ export function SensitiveWordsSettingsPage({
       setSettings(a);
       setWords(b);
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : tr.current("loadFailed"));
+      toast.error(errorMessage(r, tr.current("loadFailed")));
     } finally {
       setLoading(false);
     }
@@ -92,7 +93,7 @@ export function SensitiveWordsSettingsPage({
       await api.settings.saveSensitiveWordSettings(settings);
       toast.success(text("saved"));
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : text("saveFailed"));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -114,7 +115,7 @@ export function SensitiveWordsSettingsPage({
       setEditor(blank());
       toast.success(text("saved"));
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : text("saveFailed"));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -125,7 +126,7 @@ export function SensitiveWordsSettingsPage({
       const saved = await api.settings.saveSensitiveWord({ ...word, enabled });
       setWords(words.map((x) => (x.id === saved.id ? saved : x)));
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : text("saveFailed"));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -137,7 +138,7 @@ export function SensitiveWordsSettingsPage({
       setWords(words.filter((x) => x.id !== id));
       if (editor.id === id) setEditor(blank());
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : text("saveFailed"));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }

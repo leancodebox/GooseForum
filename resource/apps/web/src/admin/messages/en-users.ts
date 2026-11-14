@@ -5,7 +5,6 @@ export default {
   restrictionNoEnd: "Permanent",
   dateClear: "Make permanent",
   dateTime: "Time",
-  dateDone: "Done",
   title: "Users",
   description: "Search users and manage account status, roles, and badges.",
   search: "Search username…",

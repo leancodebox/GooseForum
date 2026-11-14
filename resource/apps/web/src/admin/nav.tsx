@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Bot, Award, FileText, Files, Heart, KeyRound, Link, ListChecks, Mail, Megaphone, Monitor, PanelLeft, PanelsTopLeft, ShieldAlert, ShieldCheck, Tags, UserCog, UsersRound, Webhook } from 'lucide-react'
+import { Bot, Award, FileText, Files, Heart, KeyRound, Link, ListChecks, Mail, Megaphone, Monitor, PanelLeft, PanelsTopLeft, ShieldAlert, ShieldCheck, Tags, Ticket, UserCog, UsersRound, Webhook } from 'lucide-react'
 import { AdminPermission } from './access'
 import type { AdminTextKey } from './i18n'
 
@@ -14,6 +14,7 @@ export const adminNavGroups: { label?: AdminTextKey; items: AdminNavItem[] }[] =
   { items: [
     { label: 'dashboard', url: '/admin', icon: <Monitor />, permission: AdminPermission.Admin },
     { label: 'users', url: '/admin/users', icon: <UserCog />, permission: AdminPermission.UserManager },
+    { label: 'registrationInvitations', url: '/admin/registration-invitations', icon: <Ticket />, permission: AdminPermission.UserManager },
     { label: 'authLogs', url: '/admin/auth-logs', icon: <ListChecks />, permission: AdminPermission.UserManager },
     { label: 'roles', url: '/admin/roles', icon: <ShieldCheck />, permission: AdminPermission.RoleManager },
     { label: 'accessGroups', url: '/admin/access-groups', icon: <UsersRound />, permission: AdminPermission.RoleManager },

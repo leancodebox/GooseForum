@@ -1,6 +1,7 @@
 package optRecord
 
 import (
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 )
 
@@ -44,9 +45,7 @@ func Page(q PageQuery) struct {
 	} else {
 		q.Page = 0
 	}
-	if q.PageSize < 1 {
-		q.PageSize = 10
-	}
+	q.PageSize = pageutil.DefaultPageSize(q.PageSize, 10)
 	b := builder()
 	if q.OptUserId != 0 {
 		b.Where(queryopt.Eq(fieldOptUserId, q.OptUserId))

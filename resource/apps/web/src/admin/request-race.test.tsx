@@ -30,7 +30,7 @@ it("does not overwrite a newer user search with an older response", async () => 
   await user.click(screen.getByRole("button", { name: "searchAction" }));
   await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
   await screen.findAllByText("new-user");
-  await act(async () => {
+  act(() => {
     finishOld({ list: [record("old-user")], total: 1 });
   });
   expect(screen.queryByText("old-user")).toBeNull();

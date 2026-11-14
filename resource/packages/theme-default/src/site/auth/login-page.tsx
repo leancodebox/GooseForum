@@ -55,7 +55,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
   const [notice, setNotice] = useState('')
   const [loginForm, setLoginForm] = useState({ username: '', password: '', captcha: '' })
   const [registerForm, setRegisterForm] = useState({
-    username: '', email: '', password: '', confirmPassword: '', captcha: '', agree: false,
+    username: '', email: '', password: '', confirmPassword: '', captcha: '', invitationCode: page.invitationCode || '', agree: false,
   })
   const [forgotForm, setForgotForm] = useState({ email: '', captcha: '' })
 
@@ -137,6 +137,11 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
       setError(t('validation.termsRequired'))
       return
     }
+    const invitationCode = registerForm.invitationCode.trim()
+    if (page.inviteOnly && !invitationCode) {
+      setError(t('validation.invitationRequired'))
+      return
+    }
 
     setPending('register')
     setError('')
@@ -149,11 +154,12 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
         captchaId: captcha.id,
         captchaCode,
         locale: runtime.locale,
+        invitationCode: invitationCode || undefined,
       })
       if (result.messageCode === 'auth.register.emailVerify') {
         setMode('login')
         setLoginForm({ username, password: '', captcha: '' })
-        setRegisterForm({ username: '', email: '', password: '', confirmPassword: '', captcha: '', agree: false })
+        setRegisterForm({ username: '', email: '', password: '', confirmPassword: '', captcha: '', invitationCode: '', agree: false })
         setNotice(t(result.messageCode, { ns: 'serverMessages', defaultValue: result.message || t('validation.registerSuccess') }))
         void refreshCaptcha()
         return
@@ -326,6 +332,13 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
                         value={registerForm.email}
                         onChange={(event) => setRegisterForm((current) => ({ ...current, email: event.target.value }))}
                       />
+                      {(page.inviteOnly || page.invitationCode) ? <TextField
+                        id="register-invitation-code"
+                        label={t('invitationCode')}
+                        autoComplete="off"
+                        value={registerForm.invitationCode}
+                        onChange={(event) => setRegisterForm((current) => ({ ...current, invitationCode: event.target.value }))}
+                      /> : null}
                       <TextField
                         id="register-password"
                         hint={t('passwordRequirements')}

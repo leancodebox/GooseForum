@@ -1,6 +1,7 @@
+import { errorMessage } from '../error-message'
 import { AdminPage } from '../components/admin-page'
 import { ColorPicker } from '@gooseforum/ui/components/color-picker'
-import { useLatestRequest } from '../use-latest-request'
+import { useLatestRequest } from '@gooseforum/runtime'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AccessControlOverview, AdminCategory, AdminCategoryModerator, AdminUser, GooseAdminApi } from '@gooseforum/client'
 import { Alert, AlertDescription, AlertTitle } from '@gooseforum/ui/components/alert'
@@ -16,7 +17,7 @@ import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetT
 import { Spinner } from '@gooseforum/ui/components/spinner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@gooseforum/ui/components/table'
 import { AlertTriangle, LoaderCircle, LockKeyhole, MoreHorizontal, Pencil, Plus, Search, Shield, Trash2, UserPlus, Users } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@gooseforum/ui/components/sonner'
 import { AdminPermission, hasAdminPermission } from '../access'
 import type { AdminTextKey } from '../i18n'
 
@@ -258,18 +259,19 @@ function ModeratorSheet({ open, title, description, moderators, categoryId, api,
   const [query, setQuery] = useState('')
   const [users, setUsers] = useState<AdminUser[]>([])
   const [searching, setSearching] = useState(false)
+  const beginSearchRequest = useLatestRequest();
   useEffect(() => {
+    const isCurrent = beginSearchRequest();
     if (!open || query.trim().length < 2) { setUsers([]); return }
-    let active = true
     const timer = window.setTimeout(() => void searchUsers(), 220)
     async function searchUsers() {
       setSearching(true)
       const value = query.trim()
       const search = /^\d+$/.test(value) ? { userId: Number(value) } : { username: value }
-      try { const result = await api.users.list({ page: 1, pageSize: 8, ...search }); if (active) setUsers(result.list) } catch { if (active) setUsers([]) } finally { if (active) setSearching(false) }
+      try { const result = await api.users.list({ page: 1, pageSize: 8, ...search }); if (isCurrent()) setUsers(result.list) } catch { if (isCurrent()) setUsers([]) } finally { if (isCurrent()) setSearching(false) }
     }
-    return () => { active = false; window.clearTimeout(timer) }
-  }, [api, open, query])
+    return () => { window.clearTimeout(timer) }
+  }, [api, open, query, beginSearchRequest])
 
   async function add(user: AdminUser) {
     try {
@@ -328,10 +330,6 @@ function AccessSheet({ category, overview, api, text, onClose, onSaved }: { cate
 
 function UserAvatar({ user }: { user: { username: string; avatarUrl?: string | null } }) {
   return <Avatar className="size-8"><AvatarImage src={user.avatarUrl || undefined} alt={user.username} /><AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar>
-}
-
-function errorMessage(reason: unknown, fallback: string) {
-  return reason instanceof Error && reason.message ? reason.message : fallback
 }
 
 function groupPriority(systemKey?: string) {

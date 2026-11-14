@@ -54,7 +54,7 @@ func PreserveLegacyMentions(post *posts.Entity, nextVersion uint8, wasPublished 
 	return nil
 }
 func Notify(topic topics.Entity, post posts.Entity) {
-	if post.SourceVersion == 0 || post.UserId == 0 || post.ProcessStatus != 0 || post.ModerationStatus == "pending" || post.ModerationStatus == "rejected" || post.ModerationStatus == "denied" || topic.Status != 1 || topic.ProcessStatus != 0 || topic.ModerationStatus == "pending" || post.DeletedAt.Valid {
+	if post.SourceVersion == 0 || post.UserId == 0 || post.ProcessStatus != 0 || post.ModerationStatus == "pending" || post.ModerationStatus == "rejected" || post.ModerationStatus == "denied" || !topic.IsPublished() || topic.ModerationStatus == "pending" || post.DeletedAt.Valid {
 		return
 	}
 	ids := Recipients(post)

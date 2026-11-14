@@ -79,6 +79,24 @@ export interface PostWindowInput {
   limit?: number
 }
 
+export interface PostRevision {
+  id: number
+  postId: number
+  revisionNo: number
+  authorId: number
+  content: string
+  sourceVersion: 0 | 1
+  moderationVersion: number
+  visibilitySnapshot: string
+  createdAt: string
+}
+
+export interface PostRevisionPage {
+  items: PostRevision[]
+  nextCursor: number
+  hasMore: boolean
+}
+
 export interface SubmitTopicInput {
  attachmentIds?: number[]
  version?: number
@@ -186,6 +204,7 @@ export interface RegisterInput {
   captchaId: string
   captchaCode: string
   locale?: string
+  invitationCode?: string
 }
 
 export interface ImageUploadInitResult {
@@ -213,6 +232,8 @@ export interface GooseSiteApi {
     update(input: UpdatePostInput): Promise<UpdatePostResult>
     delete(postId: number): Promise<boolean>
     window(input: PostWindowInput): Promise<PostWindowPayload>
+    revisions(postId: number, cursor?: number, limit?: number): Promise<PostRevisionPage>
+    revision(postId: number, revisionNo: number): Promise<PostRevision>
   }
   topics: {
     like(topicId: number, action: ToggleAction): Promise<boolean>
@@ -270,7 +291,7 @@ export interface GooseSiteApi {
   }
   chat: {
     messages(input: ChatMessagesInput): Promise<ChatMessagesResponse>
-    send(peerId: number, content: string): Promise<{ convId: number }>
+    send(peerId: number, content: string): Promise<{ convId: number; messageId: number }>
     markRead(convId: number): Promise<boolean>
   }
   auth: {

@@ -209,12 +209,17 @@ func ListJoinableAccessGroups(req component.BetterRequest[struct{}]) component.R
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 	grantsByGroup := lo.GroupBy(grants, func(item categoryGroupPermissions.Entity) uint64 { return item.AccessGroupId })
+	memberStates, err := accessGroupMembers.ByGroupIDsAndUser(lo.Map(groups, func(group accessGroups.Entity, _ int) uint64 { return group.Id }), req.UserId)
+	if err != nil {
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
+	memberStateByGroup := lo.KeyBy(memberStates, func(member accessGroupMembers.Entity) uint64 { return member.AccessGroupId })
 	result := make([]JoinableAccessGroupItem, 0)
 	for _, group := range groups {
 		if group.SystemKey != nil || group.Status != accessGroups.StatusEnabled || group.JoinMode != accessGroups.JoinModeApplication {
 			continue
 		}
-		member, _ := accessGroupMembers.GetByGroupUser(group.Id, req.UserId)
+		member := memberStateByGroup[group.Id]
 		categoryNames := make([]string, 0)
 		for _, grant := range grantsByGroup[group.Id] {
 			if grant.Status == categoryGroupPermissions.StatusEnabled && grant.PermissionLevel >= categoryGroupPermissions.PermissionRead && categoryByID[grant.CategoryId] != nil {
@@ -246,21 +251,29 @@ func ListManagedAccessGroups(req component.BetterRequest[struct{}]) component.Re
 	if err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
+	groups, err := accessGroups.GetByIds(groupIDs)
+	if err != nil {
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
+	groupMap := lo.KeyBy(groups, func(group accessGroups.Entity) uint64 { return group.Id })
+	members, err := accessGroupMembers.ByGroupIDs(groupIDs)
+	if err != nil {
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
+	membersByGroup := lo.GroupBy(members, func(member accessGroupMembers.Entity) uint64 { return member.AccessGroupId })
+	pendingUserIDs := lo.Map(lo.Filter(members, func(member accessGroupMembers.Entity, _ int) bool {
+		return member.Status == accessGroupMembers.StatusPending
+	}), func(member accessGroupMembers.Entity, _ int) uint64 { return member.UserId })
+	userMap := users.GetMapByIds(lo.Uniq(pendingUserIDs))
 	result := make([]ManagedAccessGroupItem, 0, len(groupIDs))
 	for _, groupID := range groupIDs {
-		group, err := accessGroups.Get(groupID)
-		if err != nil || group.Id == 0 {
+		group, ok := groupMap[groupID]
+		if !ok || group.Id == 0 {
 			continue
 		}
-		members, err := accessGroupMembers.ByGroupID(groupID)
-		if err != nil {
-			return component.FailResponseCode(component.MessageOperationFailed, nil)
-		}
-		pending := lo.Filter(members, func(member accessGroupMembers.Entity, _ int) bool {
+		pending := lo.Filter(membersByGroup[groupID], func(member accessGroupMembers.Entity, _ int) bool {
 			return member.Status == accessGroupMembers.StatusPending
 		})
-		userIDs := lo.Map(pending, func(member accessGroupMembers.Entity, _ int) uint64 { return member.UserId })
-		userMap := users.GetMapByIds(userIDs)
 		items := make([]AccessGroupMemberItem, 0, len(pending))
 		for _, member := range pending {
 			username, avatarURL := "", ""
@@ -302,7 +315,6 @@ func SaveCategoryAccess(req component.BetterRequest[SaveCategoryAccessReq]) comp
 		return accessAdminFailure("save category access", err)
 	}
 	hotdataserve.ClearCategoryCache()
-	hotdataserve.ClearTopicListCache()
 	return component.SuccessResponse(true)
 }
 

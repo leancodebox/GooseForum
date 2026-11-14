@@ -16,7 +16,7 @@ import {
   EmptyTitle,
 } from "@gooseforum/ui/components/empty";
 import { Spinner } from "@gooseforum/ui/components/spinner";
-import { useGooseRuntime } from "@gooseforum/runtime";
+import { useGooseRuntime, useLatestRequest } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { SettingsSectionHeader } from "./settings-section-header";
 import { useMFAEnabled } from "./use-mfa-enabled";
@@ -44,30 +44,28 @@ export function ConnectionsSettings({
   const { enabled: mfaEnabled, ready: mfaReady, error: mfaError, retry: retryMfa } = useMFAEnabled();
   const [mfaCode, setMfaCode] = useState("");
 
+  const beginRequest = useLatestRequest();
   useEffect(() => {
-    let active = true;
+    const isCurrent = beginRequest();
     void runtime.api.users
       .oauthBindings()
       .then((items) => {
-        if (active) setBindings(items);
+        if (isCurrent()) setBindings(items);
       })
-      .catch((reason) => { if (active) showError(serverError(reason, t("errors.bindings"))); })
+      .catch((reason) => { if (isCurrent()) showError(serverError(reason, t("errors.bindings"))); })
       .finally(() => {
-        if (active) setLoadingBindings(false);
+        if (isCurrent()) setLoadingBindings(false);
       });
     void runtime.api.users
       .oidcGrants()
       .then((items) => {
-        if (active) setGrants(items);
+        if (isCurrent()) setGrants(items);
       })
-      .catch((reason) => { if (active) showError(serverError(reason, t("errors.applications"))); })
+      .catch((reason) => { if (isCurrent()) showError(serverError(reason, t("errors.applications"))); })
       .finally(() => {
-        if (active) setLoadingGrants(false);
+        if (isCurrent()) setLoadingGrants(false);
       });
-    return () => {
-      active = false;
-    };
-  }, [runtime.api.users, serverError, showError, t]);
+      }, [runtime.api.users, serverError, showError, t, beginRequest]);
 
   async function refreshBindings() {
     setLoadingBindings(true);

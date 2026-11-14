@@ -9,10 +9,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/accesscontrol"
+	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
 	"github.com/leancodebox/GooseForum/app/service/topicviewservice"
@@ -58,7 +60,7 @@ func TopicDetail(c *gin.Context) {
 		firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
 	}
 	postservice.EnsureRenderedHTML(&firstPost)
-	if loginUser.UserId > 0 && topic.UserId != loginUser.UserId && topic.Status == 1 && topic.ProcessStatus == 0 && firstPost.Id > 0 && c.Request.Method == http.MethodGet && !strings.Contains(c.GetHeader("Purpose"), "prefetch") && !strings.Contains(c.GetHeader("Sec-Purpose"), "prefetch") {
+	if loginUser.UserId > 0 && topic.UserId != loginUser.UserId && topic.IsPublished() && firstPost.Id > 0 && c.Request.Method == http.MethodGet && !strings.Contains(c.GetHeader("Purpose"), "prefetch") && !strings.Contains(c.GetHeader("Sec-Purpose"), "prefetch") {
 		state, exists := c.Get("authenticatedAccount")
 		account, valid := state.(users.AccountState)
 		if !exists || !valid {
@@ -110,7 +112,7 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 	if topicEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
-	if !canViewTopicSimple(&topicEntity, req.UserId) {
+	if !canViewTopic(&topicEntity, req.UserId) {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 	snapshot, err := accesscontrol.Resolve(req.UserId)
@@ -140,41 +142,31 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		if !ok || anchor.Id == 0 || anchor.TopicId != topicID || anchor.PostNo < 1 {
 			return component.FailResponseCode(component.MessagePostNotFound, nil)
 		}
-		beforeLimit := min(5, limit/2)
-		afterLimit := limit - beforeLimit - 1
-		beforePosts := posts.GetByTopicPostNoBefore(topicID, anchor.PostNo, beforeLimit+1)
-		afterPosts := posts.GetByTopicPostNoAfter(topicID, anchor.PostNo, afterLimit+1)
-		hasBefore = len(beforePosts) > beforeLimit
-		hasAfter = len(afterPosts) > afterLimit
-		if hasBefore {
-			beforePosts = beforePosts[1:]
-		}
-		if hasAfter {
-			afterPosts = afterPosts[:afterLimit]
-		}
-		postEntities = append(postEntities, beforePosts...)
-		postEntities = append(postEntities, &anchor)
-		postEntities = append(postEntities, afterPosts...)
+		postEntities, hasBefore, hasAfter = buildAnchoredPostWindow(
+			&anchor,
+			limit,
+			func(queryLimit int) []*posts.Entity {
+				return posts.GetByTopicPostNoBefore(topicID, anchor.PostNo, queryLimit)
+			},
+			func(queryLimit int) []*posts.Entity {
+				return posts.GetByTopicPostNoAfter(topicID, anchor.PostNo, queryLimit)
+			},
+		)
 	case req.Params.AnchorPostID > 0:
 		anchor := posts.Get(req.Params.AnchorPostID)
 		if anchor.Id == 0 || anchor.TopicId != topicID || anchor.PostNo < 1 {
 			return component.FailResponseCode(component.MessagePostNotFound, nil)
 		}
-		beforeLimit := min(5, limit/2)
-		afterLimit := limit - beforeLimit - 1
-		beforePosts := posts.GetByTopicIdBefore(topicID, anchor.Id, beforeLimit+1)
-		afterPosts := posts.GetByTopicIdAfter(topicID, anchor.Id, afterLimit+1)
-		hasBefore = len(beforePosts) > beforeLimit
-		hasAfter = len(afterPosts) > afterLimit
-		if hasBefore {
-			beforePosts = beforePosts[1:]
-		}
-		if hasAfter {
-			afterPosts = afterPosts[:afterLimit]
-		}
-		postEntities = append(postEntities, beforePosts...)
-		postEntities = append(postEntities, &anchor)
-		postEntities = append(postEntities, afterPosts...)
+		postEntities, hasBefore, hasAfter = buildAnchoredPostWindow(
+			&anchor,
+			limit,
+			func(queryLimit int) []*posts.Entity {
+				return posts.GetByTopicIdBefore(topicID, anchor.Id, queryLimit)
+			},
+			func(queryLimit int) []*posts.Entity {
+				return posts.GetByTopicIdAfter(topicID, anchor.Id, queryLimit)
+			},
+		)
 	case req.Params.BeforePostNo > 0:
 		postEntities = posts.GetByTopicPostNoBefore(topicID, req.Params.BeforePostNo, limit+1)
 		hasBefore = len(postEntities) > limit
@@ -210,6 +202,8 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		userIDs = append(userIDs, item.UserId)
 	}
 	userMap := users.GetMapByIds(userIDs)
+	selectedBadges := transform.SelectedWornBadgeCodes(userMap)
+	wornBadges := badgeservice.GetWornBadges(selectedBadges)
 	canModeratePosts := accesscontrol.CanUserManageAnyCategory(req.UserId, topicEntity.CategoryIds)
 	maxPostNo := uint64(0)
 	if topicEntity.PostSeq > 0 {
@@ -225,6 +219,8 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 	return component.SuccessResponse(buildPostWindowPayloadFromEntities(
 		postEntities,
 		userMap,
+		selectedBadges,
+		wornBadges,
 		req.UserId,
 		canModeratePosts,
 		hasBefore,
@@ -233,6 +229,31 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		maxPostNo,
 		req.Params.AnchorPostID,
 	))
+}
+
+func buildAnchoredPostWindow(
+	anchor *posts.Entity,
+	limit int,
+	loadBefore func(int) []*posts.Entity,
+	loadAfter func(int) []*posts.Entity,
+) ([]*posts.Entity, bool, bool) {
+	beforeLimit := min(5, limit/2)
+	afterLimit := limit - beforeLimit - 1
+	beforePosts := loadBefore(beforeLimit + 1)
+	afterPosts := loadAfter(afterLimit + 1)
+	hasBefore := len(beforePosts) > beforeLimit
+	hasAfter := len(afterPosts) > afterLimit
+	if hasBefore {
+		beforePosts = beforePosts[1:]
+	}
+	if hasAfter {
+		afterPosts = afterPosts[:afterLimit]
+	}
+	window := make([]*posts.Entity, 0, len(beforePosts)+1+len(afterPosts))
+	window = append(window, beforePosts...)
+	window = append(window, anchor)
+	window = append(window, afterPosts...)
+	return window, hasBefore, hasAfter
 }
 
 func canViewTopic(entity *topics.Entity, userID uint64) bool {
@@ -245,18 +266,8 @@ func canViewTopic(entity *topics.Entity, userID uint64) bool {
 	return true
 }
 
-func canViewTopicSimple(entity *topics.Entity, userID uint64) bool {
-	if entity.Status != 1 {
-		return userID != 0 && userID == entity.UserId
-	}
-	if entity.ProcessStatus != 0 && !accesscontrol.CanUserManageAnyCategory(userID, entity.CategoryIds) {
-		return false
-	}
-	return true
-}
-
 func shouldCountTopicView(entity *topics.Entity) bool {
-	return entity.Status == 1 && entity.ProcessStatus == 0
+	return entity.IsPublished()
 }
 
 func renderNotFound(c *gin.Context) {

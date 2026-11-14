@@ -1,5 +1,6 @@
 import { AdminPage } from '../components/admin-page'
-import { useLatestRequest } from '../use-latest-request'
+import { errorMessage } from '../error-message'
+import { useLatestRequest } from '@gooseforum/runtime'
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AdminFileResource, GooseAdminApi } from "@gooseforum/client";
 import { Badge } from "@gooseforum/ui/components/badge";
@@ -27,7 +28,7 @@ import {
 } from "@gooseforum/ui/components/select";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { ChevronLeft, ChevronRight, Copy, File, LayoutGrid, List, RefreshCw } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@gooseforum/ui/components/sonner";
 import type { AssetTextKey } from "../assets-i18n";
 type Text = (key: AssetTextKey) => string;
 export function FileResourcesManagementPage({
@@ -63,7 +64,7 @@ export function FileResourcesManagementPage({
       setPageSize(r.pageSize || r.size || pageSize);
     } catch (reason) {
       if (!isCurrent()) return;
-      setError(message(reason, text("loadFailed")));
+      setError(errorMessage(reason, text("loadFailed")));
     } finally {
       if (isCurrent()) setLoading(false);
     }
@@ -142,7 +143,7 @@ export function FileResourcesManagementPage({
                 </tr></thead>
                 <tbody>{items.map(item => <tr key={item.id} className="border-b last:border-0 hover:bg-muted/30">
                   <td className="p-3"><button type="button" className="flex max-w-96 items-center gap-3 text-left hover:text-primary" onClick={() => setPreview(item)}>
-                    <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">{isImage(item) ? <img src={item.url} alt="" loading="lazy" className="size-full object-cover" /> : <File />}</span>
+                    <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">{isImage(item) ? <ResourceListImage item={item} /> : <File />}</span>
                     <span className="truncate">{item.name}</span>
                   </button></td>
                   <td className="p-3"><Badge variant="secondary">{item.type || "file"}</Badge></td>
@@ -232,6 +233,11 @@ function ResourceThumbnail({ item }: { item: AdminFileResource }) {
     <Badge variant="secondary">{item.type || "file"}</Badge>
   </div>;
 }
+function ResourceListImage({ item }: { item: AdminFileResource }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return <File className="size-5 text-muted-foreground" />;
+  return <img src={item.url} alt="" loading="lazy" onError={() => setFailed(true)} className="size-full object-cover" />;
+}
 function Preview({
   item,
   text,
@@ -265,11 +271,7 @@ function Preview({
           <div className="grid min-h-0 gap-3 lg:grid-cols-[minmax(0,1fr)_18rem]">
             <div className="flex max-h-[70vh] min-h-64 items-center justify-center overflow-hidden rounded-lg border bg-muted/50">
               {isImage(item) ? (
-                <img
-                  src={item.url}
-                  alt={item.name}
-                  className="max-h-full max-w-full object-contain"
-                />
+                <PreviewImage item={item} />
               ) : (
                 <File className="size-12 text-muted-foreground" />
               )}
@@ -297,6 +299,25 @@ function Preview({
         ) : null}
       </DialogContent>
     </Dialog>
+  );
+}
+function PreviewImage({ item }: { item: AdminFileResource }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <div className="flex flex-col items-center gap-3 p-6 text-muted-foreground">
+        <File className="size-12" />
+        <span className="break-all text-center text-sm">{item.name}</span>
+      </div>
+    );
+  }
+  return (
+    <img
+      src={item.url}
+      alt={item.name}
+      onError={() => setFailed(true)}
+      className="max-h-full max-w-full object-contain"
+    />
   );
 }
 function Detail({ label, value }: { label: string; value: string }) {
@@ -330,7 +351,4 @@ function formatTime(v: string) {
   if (!v) return "—";
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? v : d.toLocaleString();
-}
-function message(r: unknown, f: string) {
-  return r instanceof Error && r.message ? r.message : f;
 }

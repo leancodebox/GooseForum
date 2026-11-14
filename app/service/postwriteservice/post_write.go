@@ -17,6 +17,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
 	"github.com/leancodebox/GooseForum/app/service/mentionservice"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
+	"github.com/leancodebox/GooseForum/app/service/topicaccessservice"
 	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
 	"github.com/leancodebox/GooseForum/app/service/trustlevelservice"
 )
@@ -139,14 +140,17 @@ func Update(input UpdateInput) (posts.Entity, error) {
 	post.RenderedHTML = analysis.RenderedHTML
 	post.RenderedVersion = markdown2html.GetPostVersion()
 	contentmoderationservice.PreparePost(&post)
-	if err := posts.SaveReviewed(&post, expectedVersion); err != nil {
+	if err := posts.SaveReviewedWithRevision(&post, expectedVersion); err != nil {
 		return posts.Entity{}, err
 	}
 	fileusageservice.ReplacePostImages(post.Id, input.UserID, analysis.ImageURLs)
+	firstVisiblePost := eventhandlers.ShouldPublishVisiblePost(topic, post, wasPublished)
 	if wasVisible != (post.ProcessStatus == 0) {
 		postservice.SyncTopicPostStats(topic, post, post.ProcessStatus != 0)
-		hotdataserve.ClearTopicListCache()
-		if post.ProcessStatus == 0 && !wasPublished {
+		if !firstVisiblePost {
+			hotdataserve.ClearTopicListCache()
+		}
+		if firstVisiblePost {
 			eventhandlers.PublishVisiblePost(topic, post)
 		}
 	}
@@ -157,21 +161,13 @@ func Update(input UpdateInput) (posts.Entity, error) {
 }
 
 func authorizePublishedTopic(userID uint64, topic topics.Entity, required accesscontrol.Capability) error {
-	if topic.Id == 0 || topic.Status != 1 || topic.ProcessStatus != 0 {
-		return ErrTopicUnavailable
-	}
-	snapshot, err := accesscontrol.Resolve(userID)
-	if err != nil {
+	if err := topicaccessservice.AuthorizePublished(userID, topic, required); err != nil {
+		if errors.Is(err, topicaccessservice.ErrUnavailable) {
+			return ErrTopicUnavailable
+		}
 		return err
 	}
-	if required == accesscontrol.CapabilityReply {
-		if snapshot.CanReplyCategory(topic.MainCategoryId) {
-			return nil
-		}
-	} else if snapshot.CanReadCategory(topic.MainCategoryId) {
-		return nil
-	}
-	return ErrTopicUnavailable
+	return nil
 }
 
 func enqueueReview(id, version uint64, status string) {

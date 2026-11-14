@@ -12,10 +12,51 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
+	"gorm.io/gorm"
 )
 
 func CreateUser(username, password, email string, needValid bool, locale ...string) (*users.EntityComplete, error) {
 	return CreateUserWithBinding(username, password, email, needValid, nil, locale...)
+}
+
+// CreateUserEntityWithDB creates only the user row. Callers that need to
+// coordinate another write (such as an invitation reservation) can run this
+// inside their own transaction and initialize secondary projections after it
+// commits.
+func CreateUserEntityWithDB(db *gorm.DB, username, password, email string, needValid bool, locale ...string) (*users.EntityComplete, error) {
+	if db == nil {
+		return nil, fmt.Errorf("database is required")
+	}
+	username = strings.TrimSpace(username)
+	email = strings.TrimSpace(email)
+	userEntity := users.MakeUser(username, password, email)
+	userEntity.Locale = normalizeUserLocale(locale...)
+	userEntity.Nickname = GenerateGooseNickname()
+	userEntity.RequiresEmailVerification = needValid
+	if !needValid {
+		userEntity.IsActivated = users.ActivationSuccess
+	}
+	if err := users.CheckIdentityAvailableWithDB(db, username, email, 0); err != nil {
+		return nil, err
+	}
+	if err := users.CreateWithDB(db, userEntity); err != nil {
+		return nil, err
+	}
+	return userEntity, nil
+}
+
+func InitializeCreatedUser(userEntity *users.EntityComplete) error {
+	if userEntity == nil || userEntity.Id == 0 {
+		return fmt.Errorf("user is required")
+	}
+	pointservice.InitUserPoints(userEntity.Id, 100)
+	if err := userStatistics.EnsureInitialized(userEntity.Id); err != nil {
+		return err
+	}
+	if userEntity.Id == 1 {
+		return FirstUserInit(userEntity)
+	}
+	return nil
 }
 
 // CreateUserWithBinding retains a provider identity on the account so failed bindings can be retried.
@@ -70,14 +111,8 @@ func CreateUserWithBinding(username, password, email string, needValid bool, bin
 	if err != nil {
 		return nil, err
 	}
-	pointservice.InitUserPoints(userEntity.Id, 100)
-	if err := userStatistics.EnsureInitialized(userEntity.Id); err != nil {
+	if err := InitializeCreatedUser(userEntity); err != nil {
 		return nil, err
-	}
-	if userEntity.Id == 1 {
-		if err := FirstUserInit(userEntity); err != nil {
-			return nil, err
-		}
 	}
 	if binding != nil {
 		if err := users.CompleteOAuthRegistration(userEntity.Id); err != nil {

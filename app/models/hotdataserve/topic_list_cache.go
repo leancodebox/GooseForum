@@ -33,13 +33,10 @@ func GetLatestTopicsSimpleVoPaginatedForAudience(
 ) TopicSimpleVoPage {
 	page = normalizeTopicPage(page)
 	sort = normalizeTopicSort(sort)
-	if !cacheable || audience == "" || !shouldCacheTopicPage(page) {
-		return loadLatestTopicsSimpleVoPaginated(page, sort, readableCategoryIDs, filterAudience)
-	}
 	key := "home:GetLatestTopics:" + audience + ":" + sort + ":" + strconv.Itoa(page)
-	return topicSimpleVoCache.GetOrLoad(key, func() (TopicSimpleVoPage, error) {
-		return loadLatestTopicsSimpleVoPaginated(page, sort, readableCategoryIDs, filterAudience), nil
-	}, topicListCacheTTL)
+	return getCachedTopicPage(cacheable, audience, page, key, func() TopicSimpleVoPage {
+		return loadLatestTopicsSimpleVoPaginated(page, sort, readableCategoryIDs, filterAudience)
+	})
 }
 
 // GetTopicsByCategorySimpleVo lists a category page. The category being browsed
@@ -57,12 +54,18 @@ func GetTopicsByCategorySimpleVo(
 ) TopicSimpleVoPage {
 	page = normalizeTopicPage(page)
 	sort = normalizeTopicSort(sort)
-	if !cacheable || audience == "" || !shouldCacheTopicPage(page) {
-		return loadTopicsByCategorySimpleVo(categoryId, sort, page, readableCategoryIDs, filterAudience)
-	}
 	key := "GetTopicsByCategory:" + audience + ":" + strconv.FormatUint(categoryId, 10) + ":" + sort + ":" + strconv.Itoa(page)
+	return getCachedTopicPage(cacheable, audience, page, key, func() TopicSimpleVoPage {
+		return loadTopicsByCategorySimpleVo(categoryId, sort, page, readableCategoryIDs, filterAudience)
+	})
+}
+
+func getCachedTopicPage(cacheable bool, audience string, page int, key string, load func() TopicSimpleVoPage) TopicSimpleVoPage {
+	if !cacheable || audience == "" || !shouldCacheTopicPage(page) {
+		return load()
+	}
 	return topicSimpleVoCache.GetOrLoad(key, func() (TopicSimpleVoPage, error) {
-		return loadTopicsByCategorySimpleVo(categoryId, sort, page, readableCategoryIDs, filterAudience), nil
+		return load(), nil
 	}, topicListCacheTTL)
 }
 

@@ -95,5 +95,9 @@
   "meta.categories": "Tutte le categorie",
   "meta.categoriesDesc": "Sfoglia tutte le categorie disponibili su {site}.",
   "meta.members": "Tutti i membri",
-  "meta.membersDesc": "Sfoglia i membri della community di {site}."
+  "meta.membersDesc": "Sfoglia i membri della community di {site}.",
+  "email.registrationInvitation.subject": "Invito alla registrazione",
+  "email.registrationInvitation.heading": "Unisciti a {site}",
+  "email.registrationInvitation.instruction": "Sei stato invitato a registrarti su questo forum. Fai clic sul pulsante qui sotto per continuare:",
+  "email.registrationInvitation.button": "Registrati ora"
 }

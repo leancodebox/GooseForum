@@ -15,6 +15,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/fileUsage"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderators"
 	"github.com/leancodebox/GooseForum/app/models/forum/pointsRecord"
+	"github.com/leancodebox/GooseForum/app/models/forum/postRevisions"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
@@ -42,6 +43,7 @@ func setupTopicWriteTestDB(t *testing.T) *gorm.DB {
 		&userStatistics.Entity{},
 		&topics.Entity{},
 		&posts.Entity{},
+		&postRevisions.Entity{},
 		&category.Entity{},
 		&topicCategoryIndex.Entity{},
 		&topicUserAction.Entity{},

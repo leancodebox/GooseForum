@@ -10,6 +10,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/authsessions"
+	"github.com/leancodebox/GooseForum/app/models/forum/invitations"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pointsRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/taskQueue"
@@ -89,5 +90,98 @@ func TestRegistrationIssuesSessionOnlyWithoutRequiredEmailVerification(t *testin
 				t.Fatalf("normal registration did not sign in: response=%+v sessions=%d activated=%d", result, sessions, user.IsActivated)
 			}
 		})
+	}
+}
+
+func TestRegistrationInvitationCommitsExactlyOnce(t *testing.T) {
+	useMailSettings(t, pageConfig.MailSettingsConfig{EnableMail: true, SmtpHost: "smtp.example.com", SmtpPort: 587, FromEmail: "forum@example.com"})
+	db := dbconnect.Connect()
+	if err := db.AutoMigrate(&users.EntityComplete{}, &invitations.Entity{}, &userPoints.Entity{}, &pointsRecord.Entity{}, &userStatistics.Entity{}); err != nil {
+		t.Fatal(err)
+	}
+	preserveSecuritySettings(t, db)
+	if err := pageConfig.SaveConfig(pageConfig.SecuritySettings, `{"enableSignup":true,"enableEmailVerification":true,"registrationIPLimit":0,"registrationEmailLimit":0,"registrationGlobalLimit":0}`); err != nil {
+		t.Fatal(err)
+	}
+	hotdataserve.ClearSecuritySettingsConfigCache()
+	previousCaptcha := verifyRegistrationCaptcha
+	verifyRegistrationCaptcha = func(_, answer string) bool { return answer == "valid" }
+	t.Cleanup(func() { verifyRegistrationCaptcha = previousCaptcha })
+	seed := users.EntityComplete{Id: uint64(810000000 + time.Now().UnixNano()%100000000), Username: fmt.Sprintf("invite-seed-%d", time.Now().UnixNano())}
+	if err := db.Create(&seed).Error; err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { db.Unscoped().Delete(&seed) })
+	_, code, err := invitations.CreateWithDB(db, seed.Id, 1, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stamp := time.Now().UnixNano()
+	email := fmt.Sprintf("invited-%d@example.com", stamp)
+	payload, err := json.Marshal(vo.RegReq{Username: fmt.Sprintf("invited-%d", stamp), Email: email, Password: "password123", InvitationCode: code, CaptchaId: "id", CaptchaCode: "valid"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, response := mfaAPIContext(string(payload), nil)
+	Register(c)
+	var result component.ResultStruct
+	if err := json.Unmarshal(response.Body.Bytes(), &result); err != nil {
+		t.Fatal(err)
+	}
+	if result.Code != component.SUCCESS {
+		t.Fatalf("invited registration failed: %+v", result)
+	}
+	var invitation invitations.Entity
+	if err := db.Where("hash = ?", invitations.Digest(code)).First(&invitation).Error; err != nil {
+		t.Fatal(err)
+	}
+	if invitation.UsedCount != 1 || invitation.ReservationHash != "" || invitation.LastUsedUserId == 0 {
+		t.Fatalf("invitation after registration = %+v", invitation)
+	}
+	var user users.EntityComplete
+	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		db.Where("user_id = ?", user.Id).Delete(&userPoints.Entity{})
+		db.Where("user_id = ?", user.Id).Delete(&pointsRecord.Entity{})
+		db.Where("user_id = ?", user.Id).Delete(&userStatistics.Entity{})
+		db.Unscoped().Delete(&user)
+	})
+	secondPayload, _ := json.Marshal(vo.RegReq{Username: fmt.Sprintf("invitedsecond%d", stamp), Email: fmt.Sprintf("invited-second-%d@example.com", stamp), Password: "password123", InvitationCode: code, CaptchaId: "id", CaptchaCode: "valid"})
+	secondContext, secondResponse := mfaAPIContext(string(secondPayload), nil)
+	Register(secondContext)
+	var secondResult component.ResultStruct
+	if err := json.Unmarshal(secondResponse.Body.Bytes(), &secondResult); err != nil {
+		t.Fatal(err)
+	}
+	if secondResult.MessageCode != component.MessageAuthInvitationInvalid {
+		t.Fatalf("second invited registration = %+v, want invalid invitation", secondResult)
+	}
+}
+
+func TestInviteOnlyRegistrationRequiresCode(t *testing.T) {
+	db := dbconnect.Connect()
+	if err := db.AutoMigrate(&users.EntityComplete{}); err != nil {
+		t.Fatal(err)
+	}
+	preserveSecuritySettings(t, db)
+	if err := pageConfig.SaveConfig(pageConfig.SecuritySettings, `{"enableSignup":true,"inviteOnly":true,"enableEmailVerification":false,"registrationIPLimit":0,"registrationEmailLimit":0,"registrationGlobalLimit":0}`); err != nil {
+		t.Fatal(err)
+	}
+	hotdataserve.ClearSecuritySettingsConfigCache()
+	previousCaptcha := verifyRegistrationCaptcha
+	verifyRegistrationCaptcha = func(_, answer string) bool { return answer == "valid" }
+	t.Cleanup(func() { verifyRegistrationCaptcha = previousCaptcha })
+	stamp := time.Now().UnixNano()
+	payload, _ := json.Marshal(vo.RegReq{Username: "requiresinvite", Email: fmt.Sprintf("requiresinvite%d@example.com", stamp), Password: "password123", CaptchaId: "id", CaptchaCode: "valid"})
+	c, response := mfaAPIContext(string(payload), nil)
+	Register(c)
+	var result component.ResultStruct
+	if err := json.Unmarshal(response.Body.Bytes(), &result); err != nil {
+		t.Fatal(err)
+	}
+	if result.MessageCode != component.MessageAuthInvitationRequired {
+		t.Fatalf("invite-only registration = %+v, want invitation required", result)
 	}
 }

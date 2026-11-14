@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="{{.Lang}}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{call .T "email.registrationInvitation.subject"}}</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .container { background-color: #f9f9f9; border-radius: 5px; padding: 20px; margin-top: 20px; }
+        .button { display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 3px; margin: 20px 0; }
+        .note { font-size: 0.9em; color: #666; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>{{call .T "email.registrationInvitation.heading" "site" .SiteName}}</h2>
+    <p>{{call .T "email.registrationInvitation.instruction"}}</p>
+    <a href="{{.InvitationLink}}" class="button">{{call .T "email.registrationInvitation.button"}}</a>
+    <p class="note">{{call .T "email.copyLink"}}</p>
+    <p>{{.InvitationLink}}</p>
+</div>
+</body>
+</html>

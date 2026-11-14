@@ -1,5 +1,6 @@
+import { errorMessage } from '../error-message'
 import { AdminPage } from '../components/admin-page'
-import { useLatestRequest } from '../use-latest-request'
+import { useLatestRequest } from '@gooseforum/runtime'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AdminPermissionOption, AdminRole, GooseAdminApi } from '@gooseforum/client'
 import { Alert, AlertDescription, AlertTitle } from '@gooseforum/ui/components/alert'
@@ -14,7 +15,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Spinner } from '@gooseforum/ui/components/spinner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@gooseforum/ui/components/table'
 import { AlertTriangle, Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2 } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@gooseforum/ui/components/sonner'
 import type { RoleTextKey } from '../roles-i18n'
 
 type Text = (key: RoleTextKey) => string
@@ -105,5 +106,3 @@ function DeleteRoleDialog({ role, api, text, onClose, onDeleted }: { role: Admin
   async function remove() { if (!role) return; setSaving(true); try { await api.roles.delete(role.roleId); toast.success(text('deleted')); await onDeleted() } catch (reason) { toast.error(errorMessage(reason, text('deleteFailed'))) } finally { setSaving(false) } }
   return <Dialog open={Boolean(role)} onOpenChange={(open) => !open && !saving && onClose()}><DialogContent><DialogHeader><DialogTitle>{text('deleteTitle')}</DialogTitle><DialogDescription>{text('deleteConfirm')} {role?.roleName}</DialogDescription></DialogHeader><DialogFooter><Button variant="outline" disabled={saving} onClick={onClose}>{text('cancel')}</Button><Button variant="destructive" disabled={saving} onClick={() => void remove()}>{saving ? <Spinner data-icon="inline-start" /> : <Trash2 data-icon="inline-start" />}{text('delete')}</Button></DialogFooter></DialogContent></Dialog>
 }
-
-function errorMessage(reason: unknown, fallback: string) { return reason instanceof Error && reason.message ? reason.message : fallback }

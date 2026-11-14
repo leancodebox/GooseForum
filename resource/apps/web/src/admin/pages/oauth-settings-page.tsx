@@ -41,7 +41,7 @@ import {
   TooltipTrigger,
 } from "@gooseforum/ui/components/tooltip";
 import { CircleAlert, Copy, KeyRound, Plus, Save, Trash2, X } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@gooseforum/ui/components/sonner";
 import type { IdentityTextKey } from "../identity-settings-i18n";
 type Text = (k: IdentityTextKey) => string;
 type Form = OAuthProviderSettings & { scopeDraft: string };

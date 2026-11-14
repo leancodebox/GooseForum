@@ -95,5 +95,9 @@
   "meta.categories": "すべてのカテゴリー",
   "meta.categoriesDesc": "{site} で閲覧できるすべてのカテゴリーを見る。",
   "meta.members": "すべてのメンバー",
-  "meta.membersDesc": "{site} のコミュニティメンバーを見る。"
+  "meta.membersDesc": "{site} のコミュニティメンバーを見る。",
+  "email.registrationInvitation.subject": "登録への招待",
+  "email.registrationInvitation.heading": "{site} に参加する",
+  "email.registrationInvitation.instruction": "このフォーラムへの登録に招待されました。以下のボタンをクリックして続行してください:",
+  "email.registrationInvitation.button": "今すぐ登録"
 }

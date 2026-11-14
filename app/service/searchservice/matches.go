@@ -46,10 +46,13 @@ func (hit searchHit) matchedPost() (SearchPost, bool) {
 func buildSearchResults(hits []searchHit, includeMatches bool) ([]SearchResult, error) {
 	results := make([]SearchResult, 0, len(hits))
 	var ids []uint64
+	var matchedSources []SearchPost
 	if includeMatches {
-		for _, hit := range hits {
+		matchedSources = make([]SearchPost, len(hits))
+		for index, hit := range hits {
 			if source, ok := hit.matchedPost(); ok {
 				ids = append(ids, source.PostID)
+				matchedSources[index] = source
 			}
 		}
 	}
@@ -61,9 +64,14 @@ func buildSearchResults(hits []searchHit, includeMatches bool) ([]SearchResult, 
 	for _, row := range rows {
 		currentPosts[row.Id] = row
 	}
-	for _, hit := range hits {
+	for index, hit := range hits {
 		result := SearchResult{ID: hit.ID, Title: hit.Title}
-		if source, ok := hit.matchedPost(); ok && includeMatches {
+		if includeMatches {
+			source := matchedSources[index]
+			if source.PostID == 0 {
+				results = append(results, result)
+				continue
+			}
 			// An index task may lag behind edits, moderation or deletion. Only
 			// expose an excerpt when the source version is still publicly visible.
 			if post, exists := currentPosts[source.PostID]; exists && post.TopicId == hit.ID && post.PostNo == source.PostNo && post.ModerationVersion == source.Version && post.UpdatedAt.UnixMilli() == source.UpdatedAt {

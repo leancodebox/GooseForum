@@ -3,10 +3,13 @@ package posts
 import (
 	"errors"
 
+	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/attachments"
+	"github.com/leancodebox/GooseForum/app/models/forum/postRevisions"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicrank"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func SaveOrCreateById(entity *Entity) int64 {
@@ -51,7 +54,34 @@ var ErrVersionConflict = errors.New("content changed; reload before reviewing")
 
 // SaveReviewed compares the version before changing content or an admin decision.
 func SaveReviewed(entity *Entity, version uint64) error {
-	err := builder().Transaction(func(tx *gorm.DB) error {
+	return SaveReviewedWithDB(builder(), entity, version)
+}
+
+// SaveReviewedWithDB is the transaction-injectable form used by isolated
+// tests and callers that already own the database connection.
+func SaveReviewedWithDB(db *gorm.DB, entity *Entity, version uint64) error {
+	return saveReviewedWithDB(db, entity, version, false)
+}
+
+// SaveReviewedWithRevision records the previous source content when a user
+// edit changes it. Moderation-only callers keep using SaveReviewed so review
+// decisions do not create misleading edit history.
+func SaveReviewedWithRevision(entity *Entity, version uint64) error {
+	return SaveReviewedWithRevisionWithDB(dbconnect.Connect(), entity, version)
+}
+
+func SaveReviewedWithRevisionWithDB(db *gorm.DB, entity *Entity, version uint64) error {
+	return saveReviewedWithDB(db, entity, version, true)
+}
+
+func saveReviewedWithDB(db *gorm.DB, entity *Entity, version uint64, recordRevision bool) error {
+	err := db.Transaction(func(tx *gorm.DB) error {
+		var previous Entity
+		if recordRevision {
+			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&previous, entity.Id).Error; err != nil {
+				return err
+			}
+		}
 		result := tx.Model(&Entity{}).Where("id = ? AND moderation_version = ?", entity.Id, version).
 			Select("attachments", "content", "source_version", "legacy_mention_ids", "rendered_html", "rendered_version", "process_status", "moderation_status", "moderation_reason", "moderation_version", "moderated_at", "updated_at", "published_at").Updates(entity)
 		if result.Error != nil {
@@ -59,6 +89,23 @@ func SaveReviewed(entity *Entity, version uint64) error {
 		}
 		if result.RowsAffected == 0 {
 			return ErrVersionConflict
+		}
+		if recordRevision && previous.Content != entity.Content {
+			revisionNo, err := postRevisions.NextRevisionNoWithDB(tx, entity.Id)
+			if err != nil {
+				return err
+			}
+			if err := postRevisions.CreateSnapshotWithDB(tx, postRevisions.SnapshotInput{
+				PostId:             previous.Id,
+				RevisionNo:         revisionNo,
+				AuthorId:           previous.UserId,
+				Content:            previous.Content,
+				SourceVersion:      previous.SourceVersion,
+				ModerationVersion:  previous.ModerationVersion,
+				VisibilitySnapshot: postRevisions.VisibilitySnapshot(previous.ProcessStatus),
+			}); err != nil {
+				return err
+			}
 		}
 		return attachments.BindWithDB(tx, entity.UserId, entity.Id, entity.Attachments)
 	})

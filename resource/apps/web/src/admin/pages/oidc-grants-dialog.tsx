@@ -1,11 +1,13 @@
+import { errorMessage } from "../error-message";
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { GooseAdminApi, OIDCAdminGrant, OIDCClient } from '@gooseforum/client'
+import { useLatestRequest } from '@gooseforum/runtime'
 import { Button } from '@gooseforum/ui/components/button'
 import { Input } from '@gooseforum/ui/components/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@gooseforum/ui/components/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@gooseforum/ui/components/table'
 import { Search, Ban, ChevronLeft, ChevronRight } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@gooseforum/ui/components/sonner'
 import type { IdentityTextKey } from '../identity-settings-i18n'
 
 export function OIDCGrantsDialog({ api, client, text, onClose }: { api: GooseAdminApi; client: OIDCClient; text(k: IdentityTextKey): string; onClose(): void }) {
@@ -17,19 +19,19 @@ export function OIDCGrantsDialog({ api, client, text, onClose }: { api: GooseAdm
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
   const [revoking, setRevoking] = useState<string | null>(null)
-  const requestId = useRef(0)
+  const beginRequest = useLatestRequest()
   const tr = useRef(text)
   useEffect(() => { tr.current = text }, [text])
   const cursor = cursors[cursors.length - 1]
   const load = useCallback(async () => {
-    const id = ++requestId.current
+    const isCurrent = beginRequest()
     setBusy(true); setFailed(false)
     try {
       const result = await api.settings.oidcClientGrants(client.clientId, cursor, filter)
-      if (id === requestId.current) { setRows(result.items); setMore(result.hasMore) }
-    } catch (r) { if (id === requestId.current) { setFailed(true); toast.error(r instanceof Error ? r.message : tr.current('loadFailed')) } }
-    finally { if (id === requestId.current) setBusy(false) }
-  }, [api, client.clientId, cursor, filter])
+      if (isCurrent()) { setRows(result.items); setMore(result.hasMore) }
+    } catch (r) { if (isCurrent()) { setFailed(true); toast.error(errorMessage(r, tr.current('loadFailed'))) } }
+    finally { if (isCurrent()) setBusy(false) }
+  }, [api, beginRequest, client.clientId, cursor, filter])
   useEffect(() => {
     const timer = window.setTimeout(() => void load(), 0)
     return () => { window.clearTimeout(timer) }
@@ -56,7 +58,7 @@ export function OIDCGrantsDialog({ api, client, text, onClose }: { api: GooseAdm
     <Dialog open={revoking !== null} onOpenChange={(open) => !open && !busy && setRevoking(null)}><DialogContent><DialogHeader><DialogTitle>{text(revoking === '' ? 'revokeAllGrants' : 'revokeGrant')}</DialogTitle><DialogDescription>{client.name}{revoking ? ` · ID ${revoking}` : ''}: {text('revokeGrantHint')}</DialogDescription></DialogHeader><DialogFooter><Button variant="outline" disabled={busy} onClick={() => setRevoking(null)}>{text('cancel')}</Button><Button variant="destructive" disabled={busy} onClick={async () => {
       setBusy(true)
       try { await api.settings.revokeOIDCClientGrant(client.clientId, revoking || undefined); setRevoking(null); await load(); toast.success(text('saved')) }
-      catch (r) { toast.error(r instanceof Error ? r.message : text('saveFailed')) }
+      catch (r) { toast.error(errorMessage(r, text('saveFailed'))) }
       finally { setBusy(false) }
     }}>{text('confirm')}</Button></DialogFooter></DialogContent></Dialog>
   </>

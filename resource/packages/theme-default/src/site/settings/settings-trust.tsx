@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { trustLevelName, type TrustProgress, type TrustLimits } from '@gooseforum/client'
 import { trustQuotaFields } from '@gooseforum/client/trust-limits'
-import { useGooseRuntime } from '@gooseforum/runtime'
+import { useGooseRuntime, useLatestRequest } from '@gooseforum/runtime'
+import { useServerErrorMessage } from '@gooseforum/runtime/i18n/server-error'
 import { Button } from '@gooseforum/ui/components/button'
 import { Spinner } from '@gooseforum/ui/components/spinner'
 import { RefreshCw } from 'lucide-react'
@@ -13,12 +14,13 @@ export function useTrustProgress() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [reload, setReload] = useState(0)
+  const serverError = useServerErrorMessage()
+  const beginRequest = useLatestRequest();
   useEffect(() => {
-    let active = true
-    if (!api.users.trustLevel) { setLoading(false); return () => { active = false } }
-    void api.users.trustLevel().then(p => { if (active) setData(p) }).catch(e => { if (active) setError(String(e)) }).finally(() => { if (active) setLoading(false) })
-    return () => { active = false }
-  }, [api, reload])
+    const isCurrent = beginRequest()
+    if (!api.users.trustLevel) { void Promise.resolve().then(() => { if (isCurrent()) setLoading(false) }); return; }
+    void api.users.trustLevel().then(p => { if (isCurrent()) setData(p) }).catch(e => { if (isCurrent()) setError(serverError(e, 'Unable to load trust level')) }).finally(() => { if (isCurrent()) setLoading(false) })
+      }, [api, reload, serverError, beginRequest])
   return { data, error, loading, retry: () => { setError(''); setLoading(true); setReload(v => v + 1) } }
 }
 

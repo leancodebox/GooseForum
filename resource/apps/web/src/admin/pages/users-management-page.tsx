@@ -1,10 +1,11 @@
+import { errorMessage } from '../error-message'
 import { AdminPage } from '../components/admin-page'
 import { UserMFAReset } from '../components/user-mfa-reset'
 import { UserTrust } from '../components/user-trust'
 import { trustLevelName, trustLevels } from '@gooseforum/client'
 import { RestrictionFields, RestrictionHistory } from '../components/user-restriction'
 import { type RestrictionForm, restrictionForm } from '../components/user-restriction-form'
-import { useLatestRequest } from '../use-latest-request'
+import { useLatestRequest } from '@gooseforum/runtime'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { AdminBadge, AdminUser, GooseAdminApi, UserBadge } from '@gooseforum/client'
 import { Alert, AlertDescription, AlertTitle } from '@gooseforum/ui/components/alert'
@@ -22,7 +23,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@gooseforum/ui/components/tabs'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@gooseforum/ui/components/tooltip'
 import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, RefreshCw, Search, ShieldOff, UserCog } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@gooseforum/ui/components/sonner'
 import type { UserTextKey } from '../users-i18n'
 import { loadUsers, useAdminListQuery, usersQuery, type UsersPageData } from '../list-data'
 
@@ -159,32 +160,33 @@ function UserEditor({ user, api, text, locale, canResetMFA, onClose, onSaved }: 
   const [editorTab, setEditorTab] = useState('account')
   const [validationError, setValidationError] = useState('')
   const textRef = useRef(text)
+  const beginRolesRequest = useLatestRequest();
+  const beginBadgesRequest = useLatestRequest();
   useEffect(() => { textRef.current = text }, [text])
 
   useEffect(() => {
+    const isCurrent = beginRolesRequest();
     if (!user) return
-    let active = true
     void Promise.resolve().then(() => {
-      if (!active) return
+      if (!isCurrent()) return
       setRoleLoading(true); setRolesLoaded(false); setRoleError(''); setRoles([])
       return api.users.roles()
     }).then((roleItems) => {
-      if (!active || !roleItems) return
+      if (!isCurrent() || !roleItems) return
       setRoles(roleItems)
       setRolesLoaded(true)
-    }).catch((reason) => { if (active) setRoleError(errorMessage(reason, textRef.current('roleLoadFailed'))) }).finally(() => { if (active) setRoleLoading(false) })
-    return () => { active = false }
-  }, [api, user, roleRetry])
+    }).catch((reason) => { if (isCurrent()) setRoleError(errorMessage(reason, textRef.current('roleLoadFailed'))) }).finally(() => { if (isCurrent()) setRoleLoading(false) })
+  }, [api, user, roleRetry, beginRolesRequest])
 
   useEffect(() => {
+    const isCurrent = beginBadgesRequest();
     if (!user) return
-    let active = true
     void Promise.resolve().then(() => {
-      if (!active) return
+      if (!isCurrent()) return
       setBadgeLoading(true); setBadgesLoaded(false); setBadgeError(''); setBadgeOptions([]); setActiveBadges([]); setSelectedBadgeCodes([])
       return api.users.badgeOptions(user.userId)
     }).then((badges) => {
-      if (!active || !badges) return
+      if (!isCurrent() || !badges) return
       setBadgeOptions(badges.options || [])
       setActiveBadges(badges.active || [])
       const optionCodes = new Set((badges.options || []).map((badge) => badge.code))
@@ -192,9 +194,8 @@ function UserEditor({ user, api, text, locale, canResetMFA, onClose, onSaved }: 
       setSelectedBadgeCodes(codes)
       setInitialBadgeCodes(codes)
       setBadgesLoaded(true)
-    }).catch((reason) => { if (active) setBadgeError(errorMessage(reason, textRef.current('badgeLoadFailed'))) }).finally(() => { if (active) setBadgeLoading(false) })
-    return () => { active = false }
-  }, [api, user, badgeRetry])
+    }).catch((reason) => { if (isCurrent()) setBadgeError(errorMessage(reason, textRef.current('badgeLoadFailed'))) }).finally(() => { if (isCurrent()) setBadgeLoading(false) })
+  }, [api, user, badgeRetry, beginBadgesRequest])
 
   const roleName = roles.find((role) => role.value === form.roleId)?.name || user?.roleList?.find((role) => role.value === form.roleId)?.name || (form.roleId === 0 ? text('noRole') : `#${form.roleId}`)
   const automaticBadges = activeBadges.filter((badge) => badge.source !== 'manual')
@@ -299,4 +300,3 @@ function UserEditor({ user, api, text, locale, canResetMFA, onClose, onSaved }: 
 
 function Detail({ label, value }: { label: string; value: string }) { return <div className="min-w-0"><dt className="text-muted-foreground">{label}</dt><dd className="mt-1 truncate" title={value}>{value}</dd></div> }
 function UserEmpty({ icon, title }: { icon: React.ReactNode; title: string }) { return <Empty className="min-h-32 rounded-none border-0"><EmptyHeader><EmptyMedia variant="icon">{icon}</EmptyMedia><EmptyTitle>{title}</EmptyTitle></EmptyHeader></Empty> }
-function errorMessage(reason: unknown, fallback: string) { return reason instanceof Error && reason.message ? reason.message : fallback }

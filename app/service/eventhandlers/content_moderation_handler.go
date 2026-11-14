@@ -24,6 +24,12 @@ type ContentReviewRequestedEvent struct {
 	Version uint64
 }
 
+// ShouldPublishVisiblePost reports whether a post transition is handled by
+// PublishVisiblePost and therefore owns topic-list cache invalidation.
+func ShouldPublishVisiblePost(topic topics.Entity, post posts.Entity, wasPublished bool) bool {
+	return topic.IsPublished() && post.ProcessStatus == 0 && !wasPublished
+}
+
 func handleContentReviewRequested(_ context.Context, event *ContentReviewRequestedEvent) error {
 	if event == nil || event.ID == 0 {
 		return nil
@@ -44,7 +50,7 @@ func reviewTopicContent(event *ContentReviewRequestedEvent) error {
 		return nil
 	}
 	firstPublication := topic.PublishedAt == nil
-	wasCounted := topic.Status == 1 && topic.ProcessStatus == 0
+	wasCounted := topic.IsPublished()
 	// Pending is assigned only after an explicit publication request.
 	topic.Status = 1
 	contentmoderationservice.ReviewTopic(&topic, &post)
@@ -55,7 +61,7 @@ func reviewTopicContent(event *ContentReviewRequestedEvent) error {
 		return err
 	}
 	fileusageservice.ReplaceTopic(topic.Id, topic.UserId, post.Content, post.SourceVersion)
-	hotdataserve.ClearTopicWriteCaches(wasCounted != (topic.Status == 1 && topic.ProcessStatus == 0))
+	hotdataserve.ClearTopicWriteCaches(wasCounted != topic.IsPublished())
 	PublishTopicReviewResult(&topic, &post, firstPublication)
 	return nil
 }
@@ -78,10 +84,10 @@ func reviewPostContent(event *ContentReviewRequestedEvent) error {
 		postservice.SyncTopicPostStats(topic, post, post.ProcessStatus != 0)
 	}
 	fileusageservice.ReplacePost(post.Id, post.UserId, post.Content, post.SourceVersion)
-	hotdataserve.ClearTopicListCache()
-	if !wasPublished && post.ProcessStatus == 0 {
+	if ShouldPublishVisiblePost(topic, post, wasPublished) {
 		PublishVisiblePost(topic, post)
 	} else {
+		hotdataserve.ClearTopicListCache()
 		mentionservice.Notify(topic, post)
 		eventbus.Publish(context.Background(), &PostUpdatedEvent{TopicID: topic.Id})
 	}
@@ -93,7 +99,7 @@ func reviewPostContent(event *ContentReviewRequestedEvent) error {
 func PublishTopicReviewResult(topic *topics.Entity, post *posts.Entity, firstPublication bool) {
 	mentionservice.Notify(*topic, *post)
 	userservice.InvalidateUserPublicProfileCache(topic.UserId)
-	if firstPublication && topic.Status == 1 && topic.ProcessStatus == 0 {
+	if firstPublication && topic.IsPublished() {
 		userStatistics.WriteTopic(topic.UserId)
 		eventbus.Publish(context.Background(), &TopicPublishedEvent{Topic: topic, FirstPost: post})
 		return
@@ -104,7 +110,7 @@ func PublishTopicReviewResult(topic *topics.Entity, post *posts.Entity, firstPub
 // PublishVisiblePost dispatches the domain event produced when a reply first
 // becomes publicly visible.
 func PublishVisiblePost(topic topics.Entity, post posts.Entity, knownParentUserID ...uint64) {
-	if topic.Status != 1 || topic.ProcessStatus != 0 || post.ProcessStatus != 0 {
+	if !topic.IsPublished() || post.ProcessStatus != 0 {
 		return
 	}
 	userStatistics.WriteComment(post.UserId)

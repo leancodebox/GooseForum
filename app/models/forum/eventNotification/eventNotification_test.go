@@ -44,3 +44,26 @@ func TestAudienceQueryFiltersBeforeNotificationLimitAndUnreadCount(t *testing.T)
 		t.Fatalf("filtered unread count = %d, %v", count, err)
 	}
 }
+
+func TestQueryByUserCursorExcludesCursorAndKeepsDescendingOrder(t *testing.T) {
+	conn := dbconnect.Connect()
+	if err := conn.AutoMigrate(&Entity{}); err != nil {
+		t.Fatalf("migrate notification table: %v", err)
+	}
+	const userID uint64 = 950301
+	if err := conn.Create(&[]Entity{
+		{Id: 950311, UserId: userID, EventType: EventTypeSystem},
+		{Id: 950312, UserId: userID, EventType: EventTypeSystem},
+		{Id: 950313, UserId: userID, EventType: EventTypeSystem},
+	}).Error; err != nil {
+		t.Fatalf("create notifications: %v", err)
+	}
+
+	list, err := QueryByUserId(userID, 2, 950313, false)
+	if err != nil {
+		t.Fatalf("query cursor notifications: %v", err)
+	}
+	if len(list) != 2 || list[0].Id != 950312 || list[1].Id != 950311 {
+		t.Fatalf("cursor notifications = %#v, want [950312 950311]", list)
+	}
+}

@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
@@ -53,24 +54,14 @@ func Moderation(c *gin.Context) {
 		ProcessStatus:       1,
 		CategoryIDs:         []uint64{categoryID},
 	})
-	hasNext := pageData.HasNext
-	nextPage := 0
-	nextURL := ""
-	if hasNext {
-		nextPage = pageData.Page + 1
-		nextURL = buildModerationPageURL(categoryID, nextPage)
-	}
 	payload := PagePayload{
 		Component: PageComponentModeration,
 		Props: ModerationPageProps{
 			CategoryTabs: buildModerationCategoryTabs(availableCategories, categoryID),
 			Topics:       buildTopicPayloads(transform.Topics2Vo(moderationEntityPointers(pageData.Data), hotdataserve.CategoryMap())),
-			Pagination: PaginationPayload{
-				Page:     pageData.Page,
-				NextPage: nextPage,
-				HasNext:  hasNext,
-				NextURL:  nextURL,
-			},
+			Pagination: buildPagePagination(pageData.Page, pageData.HasNext, func(nextPage int) string {
+				return buildModerationPageURL(categoryID, nextPage)
+			}),
 		},
 		Meta: PageMeta{
 			Title:       pageTitle(i18n.T(requestLang(c), "meta.moderation")),
@@ -208,7 +199,7 @@ func CreateReport(req component.BetterRequest[CreateReportReq]) component.Respon
 	}
 	topic := topics.GetSimple(target.TopicID)
 	snapshot, err := accesscontrol.Resolve(req.UserId)
-	if err != nil || topic.Id == 0 || topic.Status != 1 || topic.ProcessStatus != 0 || !snapshot.CanReadCategory(topic.MainCategoryId) {
+	if err != nil || topic.Id == 0 || !topic.IsPublished() || !snapshot.CanReadCategory(topic.MainCategoryId) {
 		return component.FailResponseCode(component.MessageReportTargetInvalid, nil)
 	}
 	if target.UserID == req.UserId {
@@ -275,7 +266,7 @@ func ModerationReportList(req component.BetterRequest[ModerationReportListReq]) 
 	if _, _, ok := moderationAccessScope(req.UserId); !ok {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
-	pageSize := component.BoundPageSizeWithRange(req.Params.PageSize, 10, 50)
+	pageSize := pageutil.BoundPageSizeWithRange(req.Params.PageSize, 10, 50)
 	status := req.Params.Status
 	if status == "" {
 		status = reports.StatusOpen
@@ -318,7 +309,7 @@ func ModerationLogList(req component.BetterRequest[ModerationLogListReq]) compon
 	if !ok {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
-	pageSize := component.BoundPageSizeWithRange(req.Params.PageSize, 10, 50)
+	pageSize := pageutil.BoundPageSizeWithRange(req.Params.PageSize, 10, 50)
 	items, nextCursor, hasNext := moderationLogPage(global, categoryIDs, req.Params.Cursor, pageSize)
 	return component.SuccessResponse(ModerationLogListResponse{
 		Items:      items,
@@ -344,7 +335,7 @@ func reportTargetInfo(targetType string, targetID uint64, userID uint64) (report
 	switch targetType {
 	case reports.TargetTopic:
 		topic := topics.GetSimple(targetID)
-		if topic.Id == 0 || !canViewTopicSimple(&topic, userID) {
+		if topic.Id == 0 || !canViewTopic(&topic, userID) {
 			return reportTargetInfoData{}, false
 		}
 		return reportTargetInfoData{UserID: topic.UserId, ArticleID: topic.Id, TopicID: topic.Id}, true
@@ -354,7 +345,7 @@ func reportTargetInfo(targetType string, targetID uint64, userID uint64) (report
 			return reportTargetInfoData{}, false
 		}
 		topic := topics.GetSimple(post.TopicId)
-		if topic.Id == 0 || !canViewTopicSimple(&topic, userID) {
+		if topic.Id == 0 || !canViewTopic(&topic, userID) {
 			return reportTargetInfoData{}, false
 		}
 		return reportTargetInfoData{UserID: post.UserId, ArticleID: topic.Id, TopicID: topic.Id}, true
@@ -593,14 +584,9 @@ func moderationLogPage(global bool, categoryIDs []uint64, cursor uint64, pageSiz
 			break
 		}
 	}
-	hasNext := len(items) > pageSize
-	if hasNext {
-		items = items[:pageSize]
-	}
-	nextCursor := uint64(0)
-	if hasNext && len(items) > 0 {
-		nextCursor = items[len(items)-1].ID
-	}
+	items, nextCursor, hasNext := pageutil.TrimCursorPage(items, pageSize, func(item ModerationLogItem) uint64 {
+		return item.ID
+	})
 	return items, nextCursor, hasNext
 }
 
@@ -757,11 +743,9 @@ func moderationReportPage(userID uint64, status string, categoryID uint64, curso
 		query.Status = status
 	}
 	records := reports.CursorPage(query)
-	hasNext := len(records) > pageSize
-	pageRecords := records
-	if hasNext {
-		pageRecords = records[:pageSize]
-	}
+	pageRecords, nextCursor, hasNext := pageutil.TrimCursorPage(records, pageSize, func(record reports.Entity) uint64 {
+		return record.Id
+	})
 	batchMaps := reportBatchMaps(pageRecords)
 	items := make([]ModerationReportItem, 0, len(pageRecords))
 	for _, record := range pageRecords {
@@ -769,10 +753,6 @@ func moderationReportPage(userID uint64, status string, categoryID uint64, curso
 		if ok {
 			items = append(items, item)
 		}
-	}
-	nextCursor := uint64(0)
-	if hasNext && len(pageRecords) > 0 {
-		nextCursor = pageRecords[len(pageRecords)-1].Id
 	}
 	return items, nextCursor, hasNext
 }
@@ -830,14 +810,7 @@ func reportBatchMaps(records []reports.Entity) moderationReportBatchMaps {
 }
 
 func postMapByIDs(ids []uint64) map[uint64]*posts.Entity {
-	rows := posts.GetByIds(ids)
-	res := make(map[uint64]*posts.Entity, len(rows))
-	for _, row := range rows {
-		if row != nil {
-			res[row.Id] = row
-		}
-	}
-	return res
+	return posts.GetMapByIds(ids)
 }
 
 func reportCategoriesFromMaps(record reports.Entity, batchMaps moderationReportBatchMaps) ([]uint64, bool) {

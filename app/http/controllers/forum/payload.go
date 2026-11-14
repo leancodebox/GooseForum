@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/redirectopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
@@ -119,6 +120,8 @@ type LoginPageProps struct {
 	InitialMode    string                 `json:"initialMode"`
 	RedirectURL    string                 `json:"redirectUrl"`
 	OAuthProviders []OAuthProviderPayload `json:"oauthProviders"`
+	InviteOnly     bool                   `json:"inviteOnly,omitempty"`
+	InvitationCode string                 `json:"invitationCode,omitempty"`
 }
 
 type OAuthProviderPayload struct {
@@ -840,11 +843,24 @@ func buildChromeNavItems(items []pageConfig.ChromeItem) []NavItemPayload {
 	return result
 }
 
-func buildHomeProps(userID uint64, page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) HomeProps {
+func buildPagePagination(page int, hasNext bool, nextURL func(int) string) PaginationPayload {
 	nextPage := 0
 	if hasNext {
 		nextPage = page + 1
 	}
+	nextURLValue := ""
+	if nextPage > 0 {
+		nextURLValue = nextURL(nextPage)
+	}
+	return PaginationPayload{
+		Page:     page,
+		NextPage: nextPage,
+		HasNext:  nextPage > 0,
+		NextURL:  nextURLValue,
+	}
+}
+
+func buildHomeProps(userID uint64, page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) HomeProps {
 
 	announcement := hotdataserve.GetAnnouncementConfigCache()
 	announcementItems := make([]AnnouncementItemPayload, 0, len(announcement.Items))
@@ -859,12 +875,9 @@ func buildHomeProps(userID uint64, page int, sort string, topics []*vo.TopicsSim
 		Sort:   sort,
 		Tabs:   buildHomeTabs(sort),
 		Topics: buildTrackedTopicPayloads(userID, topics),
-		Pagination: PaginationPayload{
-			Page:     page,
-			NextPage: nextPage,
-			HasNext:  nextPage > 0,
-			NextURL:  buildHomePageURL(sort, nextPage),
-		},
+		Pagination: buildPagePagination(page, hasNext, func(nextPage int) string {
+			return buildHomePageURL(sort, nextPage)
+		}),
 		Announcement: AnnouncementPayload{
 			Enabled:     announcement.Enabled,
 			HTML:        announcementHTML,
@@ -904,6 +917,11 @@ func buildTrackedTopicPayloads(userID uint64, topics []*vo.TopicsSimpleVo) []Top
 func buildLoginPageProps(c *gin.Context) LoginPageProps {
 	mode := loginInitialMode(c)
 	redirectURL := redirectopt.Local(c.Query("redirect"))
+	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
+	invitationCode := strings.TrimSpace(c.Query("invitation"))
+	if invitationCode == "" {
+		invitationCode = strings.TrimSpace(c.Query("invitationCode"))
+	}
 	providers := oauthservice.EnabledProviders()
 	if c.Query("force") == "true" {
 		providers = nil
@@ -920,6 +938,7 @@ func buildLoginPageProps(c *gin.Context) LoginPageProps {
 	}
 	return LoginPageProps{
 		InitialMode: mode, RedirectURL: redirectURL, OAuthProviders: providerPayloads,
+		InviteOnly: securityConfig.InviteOnly, InvitationCode: invitationCode,
 	}
 }
 
@@ -1109,12 +1128,16 @@ func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *post
 	}
 	userMap := users.GetMapByIds(userIDs)
 	canModerate := cachedAccessSnapshot(c).CanManageAnyCategory(topic.CategoryIds)
+	selectedBadges := transform.SelectedWornBadgeCodes(userMap)
+	wornBadges := badgeservice.GetWornBadges(selectedBadges)
 
 	return TopicDetailProps{
-		Topic: buildTopicDetailPayload(c, topic, firstPost, userMap),
+		Topic: buildTopicDetailPayload(c, topic, firstPost, userMap, wornBadges),
 		PostStream: buildPostWindowPayloadFromEntities(
 			postEntities,
 			userMap,
+			selectedBadges,
+			wornBadges,
 			currentUserID,
 			canModerate,
 			hasBefore,
@@ -1146,8 +1169,8 @@ func topicInitialPosts(topic *topics.Entity, anchorPostNo uint64) ([]*posts.Enti
 	return items, true, hasAfter
 }
 
-func buildPostWindowPayloadFromEntities(postEntities []*posts.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool, hasBefore bool, hasAfter bool, total int64, maxPostNo uint64, anchorPostID uint64) PostWindowPayload {
-	payloadPosts, replyTargets := buildPostPayloads(postEntities, userMap, currentUserID, canModerate)
+func buildPostWindowPayloadFromEntities(postEntities []*posts.Entity, userMap map[uint64]*users.EntityComplete, selectedBadges map[uint64]string, wornBadges map[uint64]*badgeservice.UserBadge, currentUserID uint64, canModerate bool, hasBefore bool, hasAfter bool, total int64, maxPostNo uint64, anchorPostID uint64) PostWindowPayload {
+	payloadPosts, replyTargets := buildPostPayloads(postEntities, userMap, selectedBadges, wornBadges, currentUserID, canModerate)
 	var beforePostNo uint64
 	var afterPostNo uint64
 	if len(postEntities) > 0 {
@@ -1167,7 +1190,7 @@ func buildPostWindowPayloadFromEntities(postEntities []*posts.Entity, userMap ma
 	}
 }
 
-func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool) ([]PostPayload, []ReplyTargetPayload) {
+func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.EntityComplete, selectedBadges map[uint64]string, wornBadges map[uint64]*badgeservice.UserBadge, currentUserID uint64, canModerate bool) ([]PostPayload, []ReplyTargetPayload) {
 	postMap := make(map[uint64]*posts.Entity, len(postEntities))
 	for _, item := range postEntities {
 		if item != nil {
@@ -1210,7 +1233,14 @@ func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.E
 		}
 	}
 	maps.Copy(userMap, users.GetMapByIds(missingUserIDs))
-	wornBadges := badgeservice.GetWornBadges(selectedWornBadges(userMap))
+	newSelectedBadges := make(map[uint64]string, len(missingUserIDs))
+	for _, userID := range missingUserIDs {
+		if user, ok := userMap[userID]; ok && user != nil && user.WornBadgeCode != "" {
+			newSelectedBadges[userID] = user.WornBadgeCode
+			selectedBadges[userID] = user.WornBadgeCode
+		}
+	}
+	maps.Copy(wornBadges, badgeservice.GetWornBadges(newSelectedBadges))
 	authorPayload := func(userID uint64) TopicAuthorPayload {
 		return userPayloadWithWornBadge(userID, userMap, wornBadges[userID])
 	}
@@ -1322,8 +1352,7 @@ func buildTopicHotTopics(c *gin.Context, currentTopicID uint64) []TopicPayload {
 	return buildTopicPayloads(filtered)
 }
 
-func buildTopicDetailPayload(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity, userMap map[uint64]*users.EntityComplete) TopicDetailPayload {
-	wornBadges := badgeservice.GetWornBadges(selectedWornBadges(userMap))
+func buildTopicDetailPayload(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity, userMap map[uint64]*users.EntityComplete, wornBadges map[uint64]*badgeservice.UserBadge) TopicDetailPayload {
 	authorPayload := func(userID uint64) TopicAuthorPayload {
 		return userPayloadWithWornBadge(userID, userMap, wornBadges[userID])
 	}
@@ -1409,16 +1438,6 @@ func userPayload(userID uint64, userMap map[uint64]*users.EntityComplete) TopicA
 		return TopicAuthorPayload{ID: userID, Username: "匿名用户", AvatarURL: urlconfig.GetDefaultAvatar()}
 	}
 	return userPayloadWithWornBadge(userID, userMap, badgeservice.GetWornBadge(userID, user.WornBadgeCode))
-}
-
-func selectedWornBadges(userMap map[uint64]*users.EntityComplete) map[uint64]string {
-	selected := make(map[uint64]string, len(userMap))
-	for userID, user := range userMap {
-		if user != nil && user.WornBadgeCode != "" {
-			selected[userID] = user.WornBadgeCode
-		}
-	}
-	return selected
 }
 
 func userPayloadWithWornBadge(userID uint64, userMap map[uint64]*users.EntityComplete, wornBadge *badgeservice.UserBadge) TopicAuthorPayload {
@@ -1652,12 +1671,9 @@ func buildUserProfileProps(c *gin.Context, snapshot accesscontrol.Snapshot, user
 			if !showTopics {
 				break
 			}
-			cursor := positiveUint(c.Query("cursor"))
+			cursor := pageutil.ParseUintCursor(c.Query("cursor"))
 			topicPage, _ := topics.GetPublishedByUserBeforeIdForAudience(user.Id, cursor, userProfileTopicPageSize+1, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage())
-			hasNext := len(topicPage) > userProfileTopicPageSize
-			if hasNext {
-				topicPage = topicPage[:userProfileTopicPageSize]
-			}
+			topicPage, hasNext := pageutil.TrimPage(topicPage, userProfileTopicPageSize)
 			topicPayloads = buildTopicPayloads(transform.Topics2Vo(topicPage, hotdataserve.CategoryMap()))
 			pagination = buildUserActivityTopicPagination(user.Id, topicPage, hasNext)
 		case userProfileActivityLikes:
@@ -1681,12 +1697,9 @@ func buildUserProfileProps(c *gin.Context, snapshot accesscontrol.Snapshot, user
 			if !showActivity {
 				break
 			}
-			cursor := positiveUint(c.Query("cursor"))
+			cursor := pageutil.ParseUintCursor(c.Query("cursor"))
 			timeline, _ := userActivities.GetUserTimelineForAudience(user.Id, cursor, userProfileTimelinePageSize+1, snapshot.ReadableCategoryIDs(), !snapshot.HasGlobalManage(), excludedActions...)
-			hasNext := len(timeline) > userProfileTimelinePageSize
-			if hasNext {
-				timeline = timeline[:userProfileTimelinePageSize]
-			}
+			timeline, hasNext := pageutil.TrimPage(timeline, userProfileTimelinePageSize)
 			activities = buildUserActivities(timeline)
 			pagination = buildUserActivityTimelinePagination(user.Id, timeline, hasNext)
 		}
@@ -1725,25 +1738,25 @@ func buildUserProfileProps(c *gin.Context, snapshot accesscontrol.Snapshot, user
 	}
 }
 
-func positiveUint(raw string) uint64 {
-	value, err := strconv.ParseUint(raw, 10, 64)
-	if err != nil {
-		return 0
-	}
-	return value
-}
-
-func buildUserActivityTopicPagination(userID uint64, topics []*topics.Entity, hasNext bool) PaginationPayload {
+func buildUserActivityCursorPagination[T any](items []T, hasNext bool, id func(T) uint64, nextURL func(uint64) string) PaginationPayload {
 	nextCursor := uint64(0)
-	if hasNext && len(topics) > 0 {
-		nextCursor = topics[len(topics)-1].Id
+	if hasNext && len(items) > 0 {
+		nextCursor = id(items[len(items)-1])
 	}
 	return PaginationPayload{
 		Page:     1,
 		NextPage: 0,
 		HasNext:  nextCursor > 0,
-		NextURL:  buildUserActivityTopicCursorURL(userID, nextCursor),
+		NextURL:  nextURL(nextCursor),
 	}
+}
+
+func buildUserActivityTopicPagination(userID uint64, topicItems []*topics.Entity, hasNext bool) PaginationPayload {
+	return buildUserActivityCursorPagination(topicItems, hasNext, func(topic *topics.Entity) uint64 {
+		return topic.Id
+	}, func(cursor uint64) string {
+		return buildUserActivityTopicCursorURL(userID, cursor)
+	})
 }
 
 func buildUserActivityLikePagination(userID uint64, nextCursor string) PaginationPayload {
@@ -1756,16 +1769,11 @@ func buildUserActivityLikePagination(userID uint64, nextCursor string) Paginatio
 }
 
 func buildUserActivityTimelinePagination(userID uint64, activities []*userActivities.Entity, hasNext bool) PaginationPayload {
-	nextCursor := uint64(0)
-	if hasNext && len(activities) > 0 {
-		nextCursor = activities[len(activities)-1].Id
-	}
-	return PaginationPayload{
-		Page:     1,
-		NextPage: 0,
-		HasNext:  nextCursor > 0,
-		NextURL:  buildUserActivityTimelineCursorURL(userID, nextCursor),
-	}
+	return buildUserActivityCursorPagination(activities, hasNext, func(activity *userActivities.Entity) uint64 {
+		return activity.Id
+	}, func(cursor uint64) string {
+		return buildUserActivityTimelineCursorURL(userID, cursor)
+	})
 }
 
 func buildUserActivityTopicCursorURL(userID uint64, cursor uint64) string {
@@ -1823,7 +1831,7 @@ func buildUserLikes(refs []topicUserAction.LikedTopicRef) []UserLikePayload {
 	res := make([]UserLikePayload, 0, len(refs))
 	for _, ref := range refs {
 		topic := topicMap[ref.TopicID]
-		if topic == nil || topic.Status != 1 || topic.ProcessStatus != 0 {
+		if topic == nil || !topic.IsPublished() {
 			continue
 		}
 		res = append(res, UserLikePayload{
@@ -1880,14 +1888,7 @@ func userActivityReplyMap(activities []*userActivities.Entity) map[uint64]*posts
 		ids = append(ids, activity.SubjectId)
 	}
 
-	rows := posts.GetByIds(ids)
-	res := make(map[uint64]*posts.Entity, len(rows))
-	for _, row := range rows {
-		if row != nil && row.Id > 0 {
-			res[row.Id] = row
-		}
-	}
-	return res
+	return posts.GetMapByIds(ids)
 }
 
 func userActivityURL(activity *userActivities.Entity, replyByID map[uint64]*posts.Entity) string {
@@ -1967,10 +1968,6 @@ func buildUserMeta(c *gin.Context, user *vo.UserCard) PageMeta {
 }
 
 func buildCategoryPageProps(userID uint64, category *category.Entity, page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) CategoryPageProps {
-	nextPage := 0
-	if hasNext {
-		nextPage = page + 1
-	}
 	return CategoryPageProps{
 		Category: CategoryHeaderPayload{
 			ID:          category.Id,
@@ -1983,12 +1980,9 @@ func buildCategoryPageProps(userID uint64, category *category.Entity, page int, 
 		Sort:   sort,
 		Tabs:   buildCategoryTabs(category, sort),
 		Topics: buildTrackedTopicPayloads(userID, topics),
-		Pagination: PaginationPayload{
-			Page:     page,
-			NextPage: nextPage,
-			HasNext:  nextPage > 0,
-			NextURL:  buildCategoryPageURL(category, sort, nextPage),
-		},
+		Pagination: buildPagePagination(page, hasNext, func(nextPage int) string {
+			return buildCategoryPageURL(category, sort, nextPage)
+		}),
 	}
 }
 
@@ -2445,10 +2439,7 @@ func buildSearchPageProps(c *gin.Context, query string, page int, sort string) S
 	})
 	orderedTopics := filterCurrentSearchTopics(ids, topicMap, readableCategoryIDs, snapshot.HasGlobalManage())
 	totalPageCount := totalPages(result.Total, pageSize)
-	nextPage := 0
-	if page < totalPageCount {
-		nextPage = page + 1
-	}
+	hasNext := page < totalPageCount
 
 	props.Topics = buildTopicPayloads(transform.Topics2Vo(orderedTopics, hotdataserve.CategoryMap()))
 	searchMatches := make(map[uint64]*searchservice.SearchMatch, len(result.Results))
@@ -2466,19 +2457,16 @@ func buildSearchPageProps(c *gin.Context, query string, page int, sort string) S
 	}
 	props.Total = result.Total
 	props.TotalPages = totalPageCount
-	props.Pagination = PaginationPayload{
-		Page:     page,
-		NextPage: nextPage,
-		HasNext:  nextPage > 0,
-		NextURL:  buildSearchURL(query, nextPage, sort),
-	}
+	props.Pagination = buildPagePagination(page, hasNext, func(nextPage int) string {
+		return buildSearchURL(query, nextPage, sort)
+	})
 	return props
 }
 
 func filterCurrentSearchTopics(ids []uint64, topicMap map[uint64]*topics.Entity, readableCategoryIDs map[uint64]struct{}, globalManage bool) []*topics.Entity {
 	return lo.FilterMap(ids, func(id uint64, _ int) (*topics.Entity, bool) {
 		topic, ok := topicMap[id]
-		if !ok || topic == nil || topic.Status != 1 || topic.ProcessStatus != 0 {
+		if !ok || topic == nil || !topic.IsPublished() {
 			return nil, false
 		}
 		if !globalManage {

@@ -21,9 +21,14 @@ var emailTmpl *template.Template
 var passwordResetTemplate string
 var passwordResetTmpl *template.Template
 
+//go:embed registration-invitation-email.gohtml
+var registrationInvitationTemplate string
+var registrationInvitationTmpl *template.Template
+
 func init() {
 	emailTmpl = template.Must(template.New("activation").Parse(emailTemplate))
 	passwordResetTmpl = template.Must(template.New("passwordReset").Parse(passwordResetTemplate))
+	registrationInvitationTmpl = template.Must(template.New("registrationInvitation").Parse(registrationInvitationTemplate))
 }
 
 func generateActivationEmailBody(username, token string, locale ...string) (string, error) {
@@ -59,6 +64,22 @@ func generatePasswordResetEmailBody(username, token string, locale ...string) (s
 	return buf.String(), nil
 }
 
+func generateRegistrationInvitationEmailBody(code string, locale ...string) (string, error) {
+	siteConfig := hotdataserve.GetSiteSettingsConfigCache()
+	lang := emailBodyLang(locale...)
+	var buf bytes.Buffer
+	err := registrationInvitationTmpl.Execute(&buf, map[string]any{
+		"SiteName":       siteConfig.SiteName,
+		"InvitationLink": buildInvitationURL(emailSiteBaseURL(siteConfig.SiteUrl), code, locale...),
+		"Lang":           lang,
+		"T":              i18n.Func(lang),
+	})
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
 func emailSiteBaseURL(siteURL string) string {
 	baseURL := strings.TrimSpace(siteURL)
 	if baseURL == "" {
@@ -76,6 +97,18 @@ func buildEmailActionURL(baseURL, actionPath, token string, locale ...string) st
 		query.Set("lang", lang)
 	}
 	query.Set("token", token)
+	return actionURL + "?" + query.Encode()
+}
+
+func buildInvitationURL(baseURL, code string, locale ...string) string {
+	cleanBaseURL := strings.TrimRight(strings.TrimSpace(baseURL), "/")
+	actionURL := cleanBaseURL + urlconfig.Login()
+	query := url.Values{}
+	query.Set("register", "true")
+	query.Set("invitation", code)
+	if lang := normalizeEmailLocale(locale...); lang != "" {
+		query.Set("lang", lang)
+	}
 	return actionURL + "?" + query.Encode()
 }
 

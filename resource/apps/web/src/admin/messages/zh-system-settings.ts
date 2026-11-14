@@ -6,6 +6,8 @@ export default {
   registrationIPLimit: "每个 IP 地址",
   registrationEmailLimit: "每个邮箱地址",
   registrationGlobalLimit: "全站注册请求",
+  inviteOnly: "仅允许邀请码注册",
+  inviteOnlyHint: "只有提供有效邀请码的注册请求才会被接受。",
   mail: "邮件",
   mailHint: "配置 SMTP 发信与发件人身份。",
   security: "安全",

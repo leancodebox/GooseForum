@@ -96,7 +96,7 @@ func shouldNotifyParentReplyAuthor(event *CommentCreatedEvent) bool {
 }
 
 func notifyTopicWatchers(event *CommentCreatedEvent, topic topics.Entity, contentPreview string, excludeUserIDs []uint64) {
-	if topic.Id == 0 || topic.Status != 1 || topic.ProcessStatus != 0 {
+	if topic.Id == 0 || !topic.IsPublished() {
 		return
 	}
 	afterUserId := uint64(0)
@@ -118,7 +118,7 @@ func notifyTopicWatchers(event *CommentCreatedEvent, topic topics.Entity, conten
 }
 
 func canReceiveTopicNotification(userID uint64, topic topics.Entity) bool {
-	if userID == 0 || topic.Id == 0 || topic.Status != 1 || topic.ProcessStatus != 0 {
+	if userID == 0 || topic.Id == 0 || !topic.IsPublished() {
 		return false
 	}
 	snapshot, err := accesscontrol.Resolve(userID)

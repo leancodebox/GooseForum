@@ -28,7 +28,7 @@ func SendActivationEmail(userEntity *users.EntityComplete) error {
 		To:       userEntity.Email,
 		Username: userEntity.Username,
 		Token:    token,
-		Type:     "activation",
+		Type:     mailservice.EmailTypeActivation,
 		Locale:   userEntity.Locale,
 	})
 	if err != nil {

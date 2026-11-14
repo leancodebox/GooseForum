@@ -24,6 +24,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/fileUsage"
+	"github.com/leancodebox/GooseForum/app/models/forum/invitations"
 	"github.com/leancodebox/GooseForum/app/models/forum/migrationMapping"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderators"
@@ -31,6 +32,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pointsRecord"
+	"github.com/leancodebox/GooseForum/app/models/forum/postRevisions"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/reports"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
@@ -94,6 +96,7 @@ func defaultSchemaModels() []any {
 	return append([]any{
 		&accessGroups.Entity{},
 		&agenttokens.Entity{},
+		&invitations.Entity{},
 		&accessGroupMembers.Entity{},
 		&categoryGroupPermissions.Entity{},
 		&badges.Entity{},
@@ -111,6 +114,7 @@ func defaultSchemaModels() []any {
 		&topics.Entity{},
 		&topicrank.Entity{},
 		&posts.Entity{},
+		&postRevisions.Entity{},
 		&category.Entity{},
 		&topicCategoryIndex.Entity{},
 		&topicUserAction.Entity{},

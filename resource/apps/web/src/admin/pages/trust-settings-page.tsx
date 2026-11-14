@@ -1,3 +1,4 @@
+import { useLatestRequest } from '@gooseforum/runtime';
 import { useEffect, useRef, useState } from 'react'
 import { trustLevelName, type GooseAdminApi, type TrustConfig, type TrustLimits } from '@gooseforum/client'
 import { trustQuotaFields } from '@gooseforum/client/trust-limits'
@@ -10,8 +11,9 @@ import { Checkbox } from '@gooseforum/ui/components/checkbox'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@gooseforum/ui/components/tabs'
 import { Spinner } from '@gooseforum/ui/components/spinner'
 import { Save, RefreshCw } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@gooseforum/ui/components/sonner'
 import type { TrustSettingsText } from '../trust-settings-i18n'
+import { errorMessage } from '../error-message'
 
 export function TrustSettingsPage({ api, locale, text }: { api: GooseAdminApi; locale: string; text: TrustSettingsText }) {
   const [form, setForm] = useState<TrustConfig>()
@@ -21,11 +23,11 @@ export function TrustSettingsPage({ api, locale, text }: { api: GooseAdminApi; l
   const [reload, setReload] = useState(0)
   const busy = useRef(false)
   const finiteLimits = useRef(new Map<string, number>())
+  const beginRequest = useLatestRequest();
   useEffect(() => {
-    let active = true
-    void api.trust.settings().then(value => { if (active) { finiteLimits.current.clear(); setForm(value) } }).catch(reason => { if (active) setError(String(reason)) }).finally(() => { if (active) setLoading(false) })
-    return () => { active = false }
-  }, [api, reload])
+    const isCurrent = beginRequest()
+    void api.trust.settings().then(value => { if (isCurrent()) { finiteLimits.current.clear(); setForm(value) } }).catch(reason => { if (isCurrent()) setError(errorMessage(reason, text('loadFailed'))) }).finally(() => { if (isCurrent()) setLoading(false) })
+      }, [api, reload, text, beginRequest])
   async function save(event: React.FormEvent) {
     event.preventDefault()
     if (!form || busy.current) return
@@ -37,7 +39,7 @@ export function TrustSettingsPage({ api, locale, text }: { api: GooseAdminApi; l
     }
     busy.current = true; setSaving(true); setError('')
     try { await api.trust.saveSettings(form); toast.success(text('saved')) }
-    catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)) }
+    catch (reason) { setError(errorMessage(reason, text('saveFailed'))) }
     finally { busy.current = false; setSaving(false) }
   }
   function updateLimit(index: number, patch: Partial<TrustLimits>) {

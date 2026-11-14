@@ -92,6 +92,7 @@ export function createAdminApi(http: GooseHttpClient): GooseAdminApi {
       setPin: (topicId, pinWeight) => post(http, '/api/admin/topics/pin-edit', { topicId, pinWeight }),
       setCategories: (topicId, categoryId) => post(http, '/api/admin/topics/categories-edit', { topicId, categoryId }),
       review: (kind, input) => post(http, `/api/admin/${kind === 'topic' ? 'topics' : 'posts'}/review`, input),
+      reviewBatch: (kind, input) => post(http, `/api/admin/${kind === 'topic' ? 'topics' : 'posts'}/review-batch`, input),
     },
     users: {
       mfaStatus: (userId) => post(http, '/api/admin/user-mfa-status', { userId }),
@@ -102,6 +103,10 @@ export function createAdminApi(http: GooseHttpClient): GooseAdminApi {
       roles: () => http.request('/api/admin/get-all-role-item'),
       badgeOptions: (userId) => post(http, '/api/admin/user-badge-options', { userId }),
       saveBadges: (userId, badgeCodes) => post(http, '/api/admin/save-user-badges', { userId, badgeCodes }),
+      registrationInvitations: (input) => http.request('/api/admin/registration-invitations', { query: input }),
+      createRegistrationInvitation: (input) => post(http, '/api/admin/registration-invitations/create', input),
+      revokeRegistrationInvitation: (id) => post(http, '/api/admin/registration-invitations/revoke', { id }),
+      retryRegistrationInvitationEmail: (id) => post(http, '/api/admin/registration-invitations/retry-email', { id }),
     },
     roles: {
       list: () => post(http, '/api/admin/role-list'),

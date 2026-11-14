@@ -17,10 +17,12 @@ import {
 } from "@gooseforum/ui/components/avatar";
 import { Button } from "@gooseforum/ui/components/button";
 import { cn } from "@gooseforum/ui/lib/utils";
-import { GooseLink, useGoosePageFetcher } from "@gooseforum/runtime";
+import { GooseLink, useGoosePageFetcher, useLatestRequest } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { UserCardPopover } from "../users/user-card-popover";
 import { userDisplayName } from "../users/display-name";
+import { appendUniqueById } from "../collection-utils";
+import { useIntersectionSentinel } from "../use-intersection-sentinel";
 
 export type TopicListMode = "waterfall" | "pagination";
 
@@ -65,20 +67,16 @@ export function useTopicList<T extends TopicPage>(page: T, pageUrl: string) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const sentinel = useRef<HTMLDivElement>(null);
-  const revision = useRef(0);
-  const active = useRef(true);
+  const beginRequest = useLatestRequest();
+  const loadingRef = useRef(loading);
   const currentPageUrl = useRef(pageUrl);
   const currentTopics = useRef(page.topics);
   const currentPagination = useRef(page.pagination);
+  const paginationRef = useRef(pagination);
 
   useEffect(() => {
-    active.current = true;
-    setLoading(false);
-    return () => {
-      active.current = false;
-      revision.current++;
-    };
-  }, []);
+    loadingRef.current = loading;
+  }, [loading]);
 
   useEffect(() => {
     if (
@@ -90,12 +88,12 @@ export function useTopicList<T extends TopicPage>(page: T, pageUrl: string) {
     currentPageUrl.current = pageUrl;
     currentTopics.current = page.topics;
     currentPagination.current = page.pagination;
-    revision.current++;
+    beginRequest();
     setTopics(page.topics);
     setPagination(page.pagination);
     setLoading(false);
     setError("");
-  }, [page, pageUrl]);
+  }, [beginRequest, page, pageUrl]);
 
   useEffect(() => {
     const unseenById = new Map(
@@ -111,56 +109,48 @@ export function useTopicList<T extends TopicPage>(page: T, pageUrl: string) {
     });
   }, [page.topics]);
 
+  useEffect(() => {
+    paginationRef.current = pagination;
+  }, [pagination]);
+
   const loadMore = useCallback(async () => {
+    const currentPaginationValue = paginationRef.current;
     if (
-      !active.current ||
       mode !== "waterfall" ||
-      loading ||
-      !pagination.hasNext ||
-      !pagination.nextUrl ||
+      loadingRef.current ||
+      !currentPaginationValue.hasNext ||
+      !currentPaginationValue.nextUrl ||
       !fetchPage
     ) {
       return;
     }
-    const current = revision.current;
+    const isCurrent = beginRequest();
+    loadingRef.current = true;
     setLoading(true);
     setError("");
     try {
       const next = (await fetchPage(
-        pagination.nextUrl,
+        currentPaginationValue.nextUrl,
       )) as PagePayload<T>;
-      if (!active.current || current !== revision.current) return;
-      setTopics((existing) => appendUnique(existing, next.props.topics));
+      if (!isCurrent()) return;
+      setTopics((existing) => appendUniqueById(existing, next.props.topics));
       setPagination(next.props.pagination);
     } catch (reason) {
-      if (active.current && current === revision.current) {
-      setError(serverError(reason, "load failed"));
+      if (isCurrent()) {
+        setError(serverError(reason, "load failed"));
       }
     } finally {
-      if (active.current && current === revision.current) setLoading(false);
+      loadingRef.current = false;
+      if (isCurrent()) setLoading(false);
     }
-  }, [loading, mode, pagination, fetchPage, serverError]);
+  }, [beginRequest, mode, fetchPage, serverError]);
 
-  useEffect(() => {
-    if (
-      mode !== "waterfall" ||
-      !sentinel.current ||
-      !("IntersectionObserver" in window)
-    ) {
-      return;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) void loadMore();
-      },
-      { rootMargin: "480px 0px" },
-    );
-    observer.observe(sentinel.current);
-    return () => observer.disconnect();
-  }, [loadMore, mode]);
+  useIntersectionSentinel(sentinel, () => void loadMore(), mode === "waterfall");
 
   function switchMode() {
     const next = mode === "waterfall" ? "pagination" : "waterfall";
+    beginRequest();
+    loadingRef.current = false;
     setMode(next);
     try {
       localStorage.setItem(modeKey, next);
@@ -471,6 +461,7 @@ export function TopicListFooter({
   t,
   onLoad,
   previousUrl,
+  pageUrl,
 }: {
   mode: TopicListMode;
   pagination: TopicPagination;
@@ -479,9 +470,15 @@ export function TopicListFooter({
   t: TFunction;
   onLoad(): Promise<void>;
   previousUrl?: string;
+  pageUrl?: string;
 }) {
   const previous =
-    previousUrl ?? (pagination.page > 1 ? `?page=${pagination.page - 1}` : "");
+    previousUrl ??
+    (pageUrl
+      ? previousTopicPageUrl(pageUrl, pagination.page)
+      : pagination.page > 1
+        ? `?page=${pagination.page - 1}`
+        : "");
   return (
     <nav className="border-t bg-muted/50 p-3 text-center">
       {mode === "pagination" ? (
@@ -513,7 +510,7 @@ export function TopicListFooter({
           disabled={loading}
           onClick={() => void onLoad()}
         >
-          {loading ? t("loading") : t("loadMore")}
+          {loading ? t("loading") : error ? t("retryLoad") : t("loadMore")}
         </Button>
       ) : (
         <p className="text-xs text-muted-foreground">{t("allShown")}</p>
@@ -523,6 +520,17 @@ export function TopicListFooter({
       ) : null}
     </nav>
   );
+}
+
+function previousTopicPageUrl(pageUrl: string, page: number) {
+  if (page <= 1) return "";
+  try {
+    const url = new URL(pageUrl, "http://gooseforum.local");
+    url.searchParams.set("page", String(page - 1));
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return `?page=${page - 1}`;
+  }
 }
 
 export function compactNumber(value: number) {
@@ -541,18 +549,6 @@ function readMode(): TopicListMode {
   } catch {
     return "waterfall";
   }
-}
-
-function appendUnique(existing: TopicPayload[], incoming: TopicPayload[]) {
-  const ids = new Set(existing.map((topic) => topic.id));
-  return [
-    ...existing,
-    ...incoming.filter((topic) => {
-      if (ids.has(topic.id)) return false;
-      ids.add(topic.id);
-      return true;
-    }),
-  ];
 }
 
 function topicDescription(topic: TopicPayload) {

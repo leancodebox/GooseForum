@@ -12,6 +12,18 @@ import (
 	"gorm.io/gorm"
 )
 
+func TestIsPublishedUsesPublicationAndProcessStatus(t *testing.T) {
+	for name, topic := range map[string]Entity{
+		"published": {Status: 1, ProcessStatus: 0},
+		"draft":     {Status: 0, ProcessStatus: 0},
+		"hidden":    {Status: 1, ProcessStatus: 1},
+	} {
+		if got := topic.IsPublished(); (name == "published") != got {
+			t.Errorf("%s: IsPublished() = %v", name, got)
+		}
+	}
+}
+
 func TestInteractionTargetInfersSelectedColumnsFromReadModel(t *testing.T) {
 	conn, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	if err != nil {
@@ -131,6 +143,13 @@ func TestTopicRepositoryParity(t *testing.T) {
 		{TopicId: 40, CategoryId: 3, Effective: 1},
 		{TopicId: 50, CategoryId: 3, Effective: 1},
 	})
+	pointerMap := GetPointerMapByIds([]uint64{10, 20, 10})
+	if len(pointerMap) != 2 || pointerMap[10] == nil || pointerMap[10].Title != "zeta topic" || pointerMap[20] == nil {
+		t.Fatalf("GetPointerMapByIds() = %#v, want pointers for topics 10 and 20", pointerMap)
+	}
+	if got := GetPointerMapByIds(nil); len(got) != 0 {
+		t.Fatalf("GetPointerMapByIds(nil) len = %d, want 0", len(got))
+	}
 	conn.Delete(&Entity{}, 50)
 
 	page := Page(PageQuery{Page: 1, PageSize: 10, FilterStatus: true, CategoryId: 3, Sort: "new"})

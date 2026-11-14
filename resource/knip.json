@@ -25,11 +25,13 @@
       ]
     },
     "packages/markdown": {
-      "project": ["src/**/*.{ts,css}"]
+      "project": [
+        "src/**/*.ts"
+      ]
     },
     "packages/runtime": {
       "project": [
-        "src/**/*.{ts,tsx,css}"
+        "src/**/*.{ts,tsx}"
       ]
     },
     "packages/ui": {

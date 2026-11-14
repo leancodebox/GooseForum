@@ -43,32 +43,23 @@ func IsFollowing(userId, followUserId uint64) bool {
 
 // GetFollowingList returns followed users for a page.
 func GetFollowingList(userId uint64, page, pageSize int) []*users.EntityComplete {
-	offset := (page - 1) * pageSize
-	var userList []*users.EntityComplete
-
-	var followUserIds []uint64
-	builder().Select(fieldFollowUserId).Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldStatus, 1)).Offset(offset).Limit(pageSize).Order(fieldCreatedAt+" DESC").Order(pid+" DESC").Pluck(fieldFollowUserId, &followUserIds)
-
-	if len(followUserIds) > 0 {
-		userList = orderUsersByIDs(users.GetByIds(followUserIds), followUserIds)
-	}
-
-	return userList
+	return listUsersByRelation(userId, page, pageSize, fieldUserId, fieldFollowUserId)
 }
 
 // GetFollowerList returns followers for a page.
 func GetFollowerList(userId uint64, page, pageSize int) []*users.EntityComplete {
+	return listUsersByRelation(userId, page, pageSize, fieldFollowUserId, fieldUserId)
+}
+
+func listUsersByRelation(userId uint64, page, pageSize int, ownerField, selectedField string) []*users.EntityComplete {
 	offset := (page - 1) * pageSize
-	var userList []*users.EntityComplete
+	var userIDs []uint64
+	builder().Select(selectedField).Where(queryopt.Eq(ownerField, userId)).Where(queryopt.Eq(fieldStatus, 1)).Offset(offset).Limit(pageSize).Order(fieldCreatedAt+" DESC").Order(pid+" DESC").Pluck(selectedField, &userIDs)
 
-	var followerUserIds []uint64
-	builder().Select(fieldUserId).Where(queryopt.Eq(fieldFollowUserId, userId)).Where(queryopt.Eq(fieldStatus, 1)).Offset(offset).Limit(pageSize).Order(fieldCreatedAt+" DESC").Order(pid+" DESC").Pluck(fieldUserId, &followerUserIds)
-
-	if len(followerUserIds) > 0 {
-		userList = orderUsersByIDs(users.GetByIds(followerUserIds), followerUserIds)
+	if len(userIDs) > 0 {
+		return orderUsersByIDs(users.GetByIds(userIDs), userIDs)
 	}
-
-	return userList
+	return nil
 }
 
 func orderUsersByIDs(items []*users.EntityComplete, ids []uint64) []*users.EntityComplete {

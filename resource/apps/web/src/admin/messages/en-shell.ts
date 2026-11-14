@@ -8,6 +8,7 @@ export default {
   console: "Admin Console",
   dashboard: "Dashboard",
   users: "Users",
+  registrationInvitations: "Registration invitations",
   authLogs: "Login logs",
   roles: "Roles",
   accessGroups: "Access groups",

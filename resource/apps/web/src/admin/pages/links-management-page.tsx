@@ -1,7 +1,8 @@
+import { errorMessage } from '../error-message'
 import { AdminPage } from '../components/admin-page'
 import { withEditorId, withoutEditorId, type EditorIdentity } from '../editor-identity'
 import { useCallback, useEffect, useState } from 'react'
-import { useLatestRequest } from '../use-latest-request'
+import { useLatestRequest } from '@gooseforum/runtime'
 import { DndContext, PointerSensor, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { arrayMove, rectSortingStrategy, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -15,7 +16,7 @@ import { Input } from '@gooseforum/ui/components/input'
 import { Spinner } from '@gooseforum/ui/components/spinner'
 import { Switch } from '@gooseforum/ui/components/switch'
 import { ExternalLink, Eye, EyeOff, GripVertical, Link as LinkIcon, Pencil, Plus, RefreshCw, Send, ShieldCheck, Trash2 } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@gooseforum/ui/components/sonner'
 import type { PageConfigTextKey } from '../page-config-i18n'
 
 type EditorLink = FriendLink & EditorIdentity
@@ -77,4 +78,3 @@ function LinkEditor({ dialog, link, saving, text, onClose, onSave }: { dialog: L
 function DeleteDialog({ target, saving, text, onClose, onConfirm }: { target: DeleteTarget | null; saving: boolean; text: Text; onClose(): void; onConfirm(): void }) { const group = target?.type === 'group'; return <Dialog open={Boolean(target)} onOpenChange={(open) => !open && onClose()}><DialogContent><DialogHeader><DialogTitle>{group ? text('deleteGroup') : text('deleteLink')}</DialogTitle><DialogDescription>{group ? text('deleteGroupHint') : text('deleteLinkHint')}</DialogDescription></DialogHeader><DialogFooter><Button variant="outline" onClick={onClose}>{text('cancel')}</Button><Button variant="destructive" disabled={saving} onClick={onConfirm}><Trash2 data-icon="inline-start" />{text('delete')}</Button></DialogFooter></DialogContent></Dialog> }
 function Info({ title, children }: { title: string; children: React.ReactNode }) { return <section className="flex flex-col gap-3 rounded-xl border bg-background p-4 text-sm leading-6 text-muted-foreground"><h3 className="font-semibold text-foreground">{title}</h3>{children}</section> }
 function normalizeGroups(value: FriendLinkGroup[] | null | undefined): EditorGroup[] { return Array.isArray(value) ? value.map(group => withEditorId({ ...group, links: Array.isArray(group.links) ? group.links.map(withEditorId) : [] })) : [] }
-function errorMessage(reason: unknown, fallback: string) { return reason instanceof Error && reason.message ? reason.message : fallback }

@@ -18,3 +18,17 @@ it('keeps releases bounded and scrollable without stretching the card to the cha
   expect(list.tabIndex).toBe(0)
   expect(list.closest('section')?.classList.contains('self-start')).toBe(true)
 })
+
+it('shows an empty release state when the external request fails', async () => {
+  const api = {
+    dashboard: {
+      statistics: vi.fn().mockResolvedValue({}),
+      version: vi.fn().mockResolvedValue({ version: 'dev', mode: 'development' }),
+      releases: vi.fn().mockRejectedValue(new Error('GitHub unavailable')),
+      traffic: vi.fn().mockResolvedValue([]),
+    },
+  } as unknown as GooseAdminApi
+  render(<DashboardPage api={api} text={key => key} locale="zh" />)
+
+  expect(await screen.findByText('empty')).toBeTruthy()
+})

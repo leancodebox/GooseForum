@@ -1,3 +1,4 @@
+import { useLatestRequest } from '@gooseforum/runtime'
 import { useEffect, useRef, useState } from 'react'
 import { trustLevelName, trustLevels, type GooseAdminApi, type TrustProgress, type TrustHistory } from '@gooseforum/client'
 import { Button } from '@gooseforum/ui/components/button'
@@ -7,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@gooseforum/ui/components/switch'
 import { Spinner } from '@gooseforum/ui/components/spinner'
 import { Save, RefreshCw, ChevronDown } from 'lucide-react'
+import { errorMessage } from '../error-message'
 
 export function UserTrust({ api, userId, locale }: { api: GooseAdminApi; userId: number; locale: string }) {
   const zh = locale.startsWith('zh')
@@ -21,23 +23,23 @@ export function UserTrust({ api, userId, locale }: { api: GooseAdminApi; userId:
   const [busy, setBusy] = useState(false)
   const [reload, setReload] = useState(0)
   const inFlight = useRef(false)
+  const beginRequest = useLatestRequest();
   useEffect(() => {
-    let active = true
-    void Promise.all([api.trust.user(userId), api.trust.history(userId)]).then(([p, h]) => { if (active) { setProgress(p); setLevel(p.level); setLocked(p.locked); setHistory(h); setHasMore(h.length === 30) } }).catch(e => { if (active) setError(String(e)) }).finally(() => { if (active) setLoading(false) })
-    return () => { active = false }
-  }, [api, userId, reload])
+    const isCurrent = beginRequest()
+    void Promise.all([api.trust.user(userId), api.trust.history(userId)]).then(([p, h]) => { if (isCurrent()) { setProgress(p); setLevel(p.level); setLocked(p.locked); setHistory(h); setHasMore(h.length === 30) } }).catch(e => { if (isCurrent()) setError(errorMessage(e, zh ? '加载信任等级失败' : 'Unable to load trust level')) }).finally(() => { if (isCurrent()) setLoading(false) })
+  }, [api, userId, reload, zh, beginRequest])
   async function save() {
     if (!progress || !reason.trim() || inFlight.current) return
     inFlight.current = true; setBusy(true); setError('')
     try { const p = await api.trust.setUser({ userId, level, locked, expectedVersion: progress.version, reason }); setProgress(p); setLevel(p.level); setLocked(p.locked); setReason(''); setHistory(await api.trust.history(userId)) }
-    catch (e) { setError(e instanceof Error ? e.message : String(e)); setReload(v => v + 1) }
+    catch (e) { setError(errorMessage(e, zh ? '保存信任等级失败' : 'Unable to save trust level')); setReload(v => v + 1) }
     finally { inFlight.current = false; setBusy(false) }
   }
   async function more() {
     if (busy || !history.length) return
     setBusy(true)
     try { const rows = await api.trust.history(userId, history[history.length - 1].id); setHistory(current => [...current, ...rows]); setHasMore(rows.length === 30) }
-    catch (e) { setError(String(e)) }
+    catch (e) { setError(errorMessage(e, zh ? '加载更多历史失败' : 'Unable to load more history')) }
     finally { setBusy(false) }
   }
   return <section className="space-y-4">

@@ -17,6 +17,7 @@ export default {
   emptyCategoryDescription: "This category has no public topics yet.",
   categoryLabel: "Category",
   loadMore: "Load more",
+  retryLoad: "Retry loading",
   loading: "Loading…",
   allShown: "All topics shown",
   previous: "Previous",

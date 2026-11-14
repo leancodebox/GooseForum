@@ -137,7 +137,7 @@ export interface SiteChromeItem { id:string;enabled:boolean;type:'link'|'text'|s
 export interface SiteChromeGroup { id:string;title:string;i18nLabel:string;items:SiteChromeItem[] }
 export interface SiteChromeConfig { header:SiteChromeItem[];mainMenu:SiteChromeItem[];resources:SiteChromeItem[];sidebarGroups:SiteChromeGroup[];footerInfo?:{primary:{content:string}[];list:{name:string;url:string}[]};brandType?:string;brandText?:string;brandImage?:string }
 export interface MailSettings { enableMail:boolean;smtpHost:string;smtpPort:number;useSSL:boolean;smtpUsername:string;smtpPassword:string;fromName:string;fromEmail:string }
-export interface SecuritySettings { enableSignup:boolean;enableEmailVerification:boolean;allowedDomains:string[];registrationIPLimit?:number;registrationEmailLimit?:number;registrationGlobalLimit?:number }
+export interface SecuritySettings { enableSignup:boolean;inviteOnly?:boolean;enableEmailVerification:boolean;allowedDomains:string[];registrationIPLimit?:number;registrationEmailLimit?:number;registrationGlobalLimit?:number }
 export interface PostingSettings { attachments?: import("../contracts/payload.js").AttachmentPolicy; externalLinks?:{enabled:boolean;whitelist:string[]};textControl:{minPostLength:number;maxPostLength:number;minTitleLength:number;maxTitleLength:number};uploadControl:{allowAttachments:boolean;authorizedExtensions:string[];maxAttachmentSizeKb:number} }
 export interface AnnouncementItemConfig { id: string; title: string; content: string; enabled: boolean }
 export interface AnnouncementConfig { enabled: boolean; content: string; publishedAt?: number | string; items?: AnnouncementItemConfig[] }
@@ -210,6 +210,21 @@ export interface ReviewPost {
   updatedAt: string
 }
 
+export interface ReviewBatchItem {
+  id: number
+  version: number
+}
+
+export interface ReviewBatchItemResult {
+  id: number
+  success: boolean
+  messageCode?: string
+}
+
+export interface ReviewBatchResult {
+  items: ReviewBatchItemResult[]
+}
+
 export interface FriendLink {
   name: string
   url: string
@@ -259,6 +274,22 @@ export interface AdminRole {
   effective: number
   permissions: { id: number; name: string }[]
   createTime: string
+}
+
+export interface RegistrationInvitation {
+  id: number
+  prefix: string
+  maxUses: number
+  usedCount: number
+  createdBy: number
+  expiresAt?: string | null
+  revokedAt?: string | null
+  lastUsedAt?: string | null
+  lastUsedUserId?: number
+  createdAt: string
+  updatedAt: string
+  emailTaskId?: number
+  emailTaskStatus?: number
 }
 
 export interface GooseAdminApi {
@@ -338,6 +369,7 @@ export interface GooseAdminApi {
     setPin(topicId: number, pinWeight: number): Promise<unknown>
     setCategories(topicId: number, categoryId: number[]): Promise<unknown>
     review(kind: 'topic' | 'post', input: { id: number; version: number; action: 'approve' | 'reject' | 'recheck'; reason: string }): Promise<boolean>
+    reviewBatch(kind: 'topic' | 'post', input: { items: ReviewBatchItem[]; action: 'approve' | 'reject' | 'recheck'; reason: string }): Promise<ReviewBatchResult>
   }
   users: {
     mfaStatus(userId: number): Promise<{ enabled: boolean }>
@@ -348,6 +380,10 @@ export interface GooseAdminApi {
     roles(): Promise<{ name: string; value: number }[]>
     badgeOptions(userId: number): Promise<UserBadgeOptions>
     saveBadges(userId: number, badgeCodes: string[]): Promise<unknown>
+    registrationInvitations(input?: { page?: number; pageSize?: number }): Promise<PageResult<RegistrationInvitation>>
+    createRegistrationInvitation(input: { maxUses: number; expiresAt?: string | null; email?: string }): Promise<{ code: string; entry: RegistrationInvitation; emailQueued?: boolean }>
+    revokeRegistrationInvitation(id: number): Promise<unknown>
+    retryRegistrationInvitationEmail(id: number): Promise<unknown>
   }
   roles: {
     list(): Promise<PageResult<AdminRole>>

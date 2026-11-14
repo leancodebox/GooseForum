@@ -17,6 +17,7 @@ export default {
   emptyCategoryDescription: "这个分类还没有公开主题。",
   categoryLabel: "Category",
   loadMore: "加载更多",
+  retryLoad: "重试加载",
   loading: "加载中…",
   allShown: "已显示全部",
   previous: "上一页",

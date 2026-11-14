@@ -19,6 +19,8 @@ export default {
   unlimited: "Unlimited",
   save: "Save",
   saved: "Saved",
+  loadFailed: "Unable to load settings",
+  saveFailed: "Unable to save settings",
   reload: "Reload",
   orderInvalid: "{higher}: {field} cannot be stricter than {lower}.",
   minPostAccountAgeMinutes: "Posting wait (min)",

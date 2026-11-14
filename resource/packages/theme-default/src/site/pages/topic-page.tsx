@@ -1,3 +1,4 @@
+import { formatDate } from "../date-format";
 import { AttachmentList } from "../editor/attachment-editor";
 import {
   lazy,
@@ -12,6 +13,7 @@ import type { ReactNode } from "react";
 import type {
   LayoutPayload,
   PostPayload,
+  PostRevision,
   PostWindowPayload,
   ReplyTargetPayload,
   TopicDetailProps,
@@ -58,7 +60,7 @@ import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Textarea } from "@gooseforum/ui/components/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@gooseforum/ui/components/toggle-group";
 import { cn } from "@gooseforum/ui/lib/utils";
-import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
+import { GooseLink, useGooseRuntime, useLatestRequest } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { RenderedContent } from "../content/rendered-content";
 import { readImageMetadata } from "../content/image-metadata";
@@ -155,6 +157,13 @@ export function TopicPageView({
   const [pendingModeration, setPendingModeration] =
     useState<PendingModeration>();
   const [moderationBusy, setModerationBusy] = useState(false);
+  const [historyPost, setHistoryPost] = useState<PostPayload>();
+  const [historyItems, setHistoryItems] = useState<PostRevision[]>([]);
+  const [historyCursor, setHistoryCursor] = useState(0);
+  const [historyHasMore, setHistoryHasMore] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState(false);
+  const beginHistoryRequest = useLatestRequest();
   const [imageIndex, setImageIndex] = useState(-1);
   const [imageActualSize, setImageActualSize] = useState(false);
   const imageViewport = useRef<HTMLDivElement>(null);
@@ -174,19 +183,43 @@ export function TopicPageView({
   );
   const sentinel = useRef<HTMLDivElement>(null);
   const postsRef = useRef<HTMLDivElement>(null);
-  const windowRevision = useRef(0);
+  const beginWindowRequest = useLatestRequest();
   const [revealPostId, setRevealPostId] = useState(0);
-  useEffect(() => () => { windowRevision.current++; }, []);
   const targetMap = useMemo(
     () => new Map(replyTargets.map((target) => [target.id, target])),
     [replyTargets],
   );
   const draftTargets = useDraftReplyTargets({ candidates: localDraft.candidates, posts, references: replyTargets, api: runtime.api.posts, topicId: page.topic.id, context: `${layout.viewer.id}:${page.topic.id}:${draftBranch}`, enabled: composerOpen && page.permissions.canPost });
+  const loadHistory = useCallback(async (postId: number, cursor = 0, append = false) => {
+    const isCurrent = beginHistoryRequest();
+    setHistoryLoading(true);
+    setHistoryError(false);
+    try {
+      const result = await runtime.api.posts.revisions(postId, cursor, 20);
+      if (!isCurrent()) return;
+      setHistoryItems((current) => append ? [...current, ...result.items] : result.items);
+      setHistoryCursor(result.nextCursor);
+      setHistoryHasMore(result.hasMore);
+    } catch {
+      if (isCurrent()) setHistoryError(true);
+    } finally {
+      if (isCurrent()) setHistoryLoading(false);
+    }
+  }, [runtime.api.posts, beginHistoryRequest]);
+  const openHistory = useCallback((post: PostPayload) => {
+    setHistoryPost(post);
+    setHistoryItems([]);
+    setHistoryCursor(0);
+    setHistoryHasMore(false);
+    setHistoryError(false);
+    void loadHistory(post.id);
+  }, [loadHistory]);
   const replyTarget = posts.find((post) => post.id === replyTargetId) || draftTargets.target(replyTargetId).post;
   const composerDirty = JSON.stringify(composerValues) !== JSON.stringify(composerBase);
   const composerDirtyRef = useRef(false);
   const allowComposerLeave = useRef(false);
   composerDirtyRef.current = composerDirty;
+  const registerNavigationBlocker = runtime.registerNavigationBlocker;
   useEffect(() => { allowComposerLeave.current = false; }, [composerValues]);
   useEffect(() => {
     const beforeUnload = (event: BeforeUnloadEvent) => {
@@ -198,9 +231,9 @@ export function TopicPageView({
       else allowComposerLeave.current = true;
     };
     window.addEventListener("goose:before-logout", beforeLogout);
-    const remove = runtime.registerNavigationBlocker?.(() => !composerDirtyRef.current || window.confirm(t("localDraft.leave", { ns: "publish" })));
+    const remove = registerNavigationBlocker?.(() => !composerDirtyRef.current || window.confirm(t("localDraft.leave", { ns: "publish" })));
     return () => { window.removeEventListener("beforeunload", beforeUnload); window.removeEventListener("goose:before-logout", beforeLogout); remove?.(); };
-  }, [runtime.registerNavigationBlocker, t]);
+  }, [registerNavigationBlocker, t]);
   const openedLocalCopy = useRef(false);
   useEffect(() => {
     if (openedLocalCopy.current || !layout.viewer.isAuthenticated || !page.permissions.canPost) return;
@@ -262,7 +295,7 @@ export function TopicPageView({
   const loadWindow = useCallback(
     async (direction: "before" | "after" | "anchor", anchor?: number) => {
       if (loadingDirection) return;
-      const revision = ++windowRevision.current;
+      const isCurrent = beginWindowRequest();
       setLoadingDirection(direction);
       setWindowError("");
       const previousHeight = document.documentElement.scrollHeight;
@@ -274,7 +307,7 @@ export function TopicPageView({
               ? { topicId: page.topic.id, afterPostNo: afterNo, limit: 20 }
               : { topicId: page.topic.id, anchorPostNo: anchor, limit: 20 };
         const result = await runtime.api.posts.window(input);
-        if (revision !== windowRevision.current) return;
+        if (!isCurrent()) return;
         applyWindow(result, direction);
         if (direction === "before")
           requestAnimationFrame(() =>
@@ -290,15 +323,15 @@ export function TopicPageView({
               ?.scrollIntoView({ block: "center" }),
           );
       } catch (reason) {
-        if (revision !== windowRevision.current) return;
+        if (!isCurrent()) return;
         setWindowError(
           serverError(reason, t("loadFailed")),
         );
       } finally {
-        if (revision === windowRevision.current) setLoadingDirection("");
+        if (isCurrent()) setLoadingDirection("");
       }
     },
-    [afterNo, beforeNo, loadingDirection, page.topic.id, runtime.api.posts, serverError, t],
+    [afterNo, beforeNo, beginWindowRequest, loadingDirection, page.topic.id, runtime.api.posts, serverError, t],
   );
   function applyWindow(
     result: PostWindowPayload,
@@ -530,7 +563,7 @@ export function TopicPageView({
           };
           // A new tail reply must not create a hole in the current window.
           // Start with a navigable local window, then load its server context.
-          const revision = ++windowRevision.current;
+          const isCurrent = beginWindowRequest();
           setLoadingDirection("");
           setWindowError("");
           setPosts([newPost]);
@@ -551,18 +584,18 @@ export function TopicPageView({
             setLoadingDirection("anchor");
             try {
               const result = await runtime.api.posts.window({ topicId: page.topic.id, anchorPostNo: newPost.postNo, limit: 20 });
-              if (revision === windowRevision.current) {
+              if (isCurrent()) {
                 // Retain the submitted reply if it is not yet in the read window.
                 if (result.posts.some(post => post.id === newPost.id)) applyWindow(result, "anchor");
               }
             } catch (reason) {
-              if (revision === windowRevision.current)
+              if (isCurrent())
                 setWindowError(serverError(reason, t("loadFailed")));
             } finally {
-              if (revision === windowRevision.current) setLoadingDirection("");
+              if (isCurrent()) setLoadingDirection("");
             }
           }
-          if (revision === windowRevision.current) setRevealPostId(newPost.id);
+          if (isCurrent()) setRevealPostId(newPost.id);
         } else await runtime.refresh();
         runtime.queueFlash(t("replyPosted"), "success");
       }
@@ -817,6 +850,7 @@ export function TopicPageView({
               onToggle={toggleAction}
               onReply={() => openComposer(post)}
               onEdit={() => editPost(post)}
+              onHistory={() => openHistory(post)}
               onDelete={() => setPendingDelete(post)}
               onReport={() =>
                 requestReport({
@@ -1002,6 +1036,41 @@ export function TopicPageView({
         onClose={() => setPendingModeration(undefined)}
         onConfirm={() => void applyModeration()}
       />
+      <Dialog
+        open={Boolean(historyPost)}
+        onOpenChange={(open) => !open && setHistoryPost(undefined)}
+      >
+        <DialogContent className="max-h-[min(80dvh,48rem)] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t("historyTitle")}</DialogTitle>
+            <DialogDescription>{historyPost ? t("historyDescription", { no: historyPost.postNo }) : null}</DialogDescription>
+          </DialogHeader>
+          {historyError ? (
+            <Alert variant="destructive"><AlertDescription>{t("historyLoadFailed")}</AlertDescription></Alert>
+          ) : historyLoading && historyItems.length === 0 ? (
+            <div className="flex justify-center py-8"><Spinner /></div>
+          ) : historyItems.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">{t("historyEmpty")}</p>
+          ) : (
+            <div className="space-y-3">
+              {historyItems.map((revision) => (
+                <article key={`${revision.postId}-${revision.revisionNo}`} className="rounded-lg border p-3">
+                  <div className="mb-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                    <span>{t("historyRevision", { no: revision.revisionNo })}</span>
+                    <time dateTime={revision.createdAt}>{formatDate(revision.createdAt, runtime.locale)}</time>
+                  </div>
+                  <pre className="whitespace-pre-wrap break-words font-sans text-sm">{revision.content}</pre>
+                </article>
+              ))}
+              {historyHasMore ? (
+                <Button variant="outline" className="w-full" disabled={historyLoading} onClick={() => historyPost && void loadHistory(historyPost.id, historyCursor, true)}>
+                  {historyLoading ? <Spinner data-icon="inline-start" /> : null}{t("historyLoadMore")}
+                </Button>
+              ) : null}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
       <Dialog
         open={Boolean(pendingReport)}
         onOpenChange={(open) => !open && setPendingReport(undefined)}
@@ -1217,6 +1286,7 @@ function PostRow({
   onToggle,
   onReply,
   onEdit,
+  onHistory,
   onDelete,
   onReport,
   onModerate,
@@ -1239,6 +1309,7 @@ function PostRow({
   onToggle(type: "like" | "bookmark" | "watch"): void;
   onReply(): void;
   onEdit(): void;
+  onHistory(): void;
   onDelete(): void;
   onReport(): void;
   onModerate(action: "ban" | "unban"): void;
@@ -1287,6 +1358,15 @@ function PostRow({
                 <Button
                   variant="ghost"
                   size="icon-xs"
+                  className="text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                  aria-label={t("viewHistory")}
+                  onClick={onHistory}
+                >
+                  <Clock />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
                   className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                   aria-label={t("delete")}
                   onClick={onDelete}
@@ -1294,6 +1374,18 @@ function PostRow({
                   <Trash2 />
                 </Button>
               </>
+            ) : null}
+
+            {!post.isOwnPost && post.canModerate ? (
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                className="text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                aria-label={t("viewHistory")}
+                onClick={onHistory}
+              >
+                <Clock />
+              </Button>
             ) : null}
 
             {!post.isOwnPost && !(first && isOwnTopic) && !post.isHidden ? (
@@ -1813,15 +1905,6 @@ function mergePosts(current: PostPayload[], incoming: PostPayload[]) {
   return mergeById(current, incoming).sort(
     (left, right) => left.postNo - right.postNo,
   );
-}
-function formatDate(value: string, locale: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? value
-    : new Intl.DateTimeFormat(locale, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }).format(date);
 }
 
 function formatRailDate(value: string, locale: string) {

@@ -1,3 +1,4 @@
+import { errorMessage } from "../error-message";
 import { AdminPage } from '../components/admin-page'
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GooseAdminApi, SiteSettings } from "@gooseforum/client";
@@ -19,7 +20,7 @@ import { Input } from "@gooseforum/ui/components/input";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Textarea } from "@gooseforum/ui/components/textarea";
 import { FileText, Globe, Save, Upload } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@gooseforum/ui/components/sonner";
 import type { SettingsTextKey } from "../settings-i18n";
 type Text = (k: SettingsTextKey) => string;
 const empty: SiteSettings = {
@@ -52,7 +53,7 @@ export function SiteInfoManagementPage({
     try {
       setForm({ ...empty, ...(await api.settings.site()) });
     } catch (r) {
-      setError(msg(r, textRef.current("loadFailed")));
+      setError(errorMessage(r, textRef.current("loadFailed")));
     } finally {
       setLoading(false);
     }
@@ -67,7 +68,7 @@ export function SiteInfoManagementPage({
       await api.settings.saveSite({ ...form });
       toast.success(text("saved"));
     } catch (r) {
-      toast.error(msg(r, text("saveFailed")));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -79,7 +80,7 @@ export function SiteInfoManagementPage({
       setForm((current) => ({ ...current, siteLogo: r.url || "" }));
       toast.success(text("saved"));
     } catch (r) {
-      toast.error(msg(r, text("saveFailed")));
+      toast.error(errorMessage(r, text("saveFailed")));
     }
   }
   return (
@@ -235,7 +236,4 @@ export function SiteInfoManagementPage({
       )}
     </AdminPage>
   );
-}
-function msg(r: unknown, f: string) {
-  return r instanceof Error && r.message ? r.message : f;
 }

@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/agenttokens"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
@@ -257,7 +258,7 @@ func (h *Handler) submissionResult(c *gin.Context, row posts.Entity, status int,
 		fail(c, 404, "not_found", "Submission is unavailable")
 		return
 	}
-	visible := topic.Status == 1 && topic.ProcessStatus == 0 && row.ProcessStatus == 0
+	visible := topic.IsPublished() && row.ProcessStatus == 0
 	if visible && row.PostNo > 1 {
 		found, err := posts.AgentPostExists(topic.FirstPostId, 0)
 		if err != nil {
@@ -326,10 +327,7 @@ func (h *Handler) submissions(c *gin.Context) {
 		fail(c, 500, "internal_error", "Unable to read submissions")
 		return
 	}
-	more := len(rows) > n
-	if more {
-		rows = rows[:n]
-	}
+	rows, more := pageutil.TrimPage(rows, n)
 	data := make([]gin.H, 0, len(rows))
 	for _, row := range rows {
 		data = append(data, gin.H{"submissionId": fmt.Sprint(row.Id), "topicId": fmt.Sprint(row.TopicId), "clientRequestId": row.ClientRequestID})

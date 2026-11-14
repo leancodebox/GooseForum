@@ -68,4 +68,13 @@ export default {
   deleteTitle: "确认删除主题？",
   deleteHint: "此操作将删除选中的主题。",
   unknownCategory: "未知分类",
+  selectAll: "全选",
+  select: "选择",
+  selected: "已选择",
+  selectedPageOnly: "选择仅适用于当前页。",
+  batchSaved: "批量审核已保存",
+  batchPartial: "部分项目失败，请刷新后检查这些 ID",
+  batchFailed: "批量审核失败",
+  batchReviewTitle: "审核选中的内容",
+  batchReviewHint: "系统会分别处理每个选中项目。",
 } as const;

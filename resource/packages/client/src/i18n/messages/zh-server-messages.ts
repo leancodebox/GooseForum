@@ -30,6 +30,8 @@ export default {
   "auth.signupDisabled": "当前站点已关闭注册。",
   "auth.emailDomain.invalid": "邮箱格式不正确。",
   "auth.emailDomain.notAllowed": "该邮箱域名不允许注册。",
+  "auth.invitation.invalid": "邀请码无效、已过期、已撤销或已用尽。",
+  "auth.invitation.required": "当前站点需要邀请码才能注册。",
   "auth.username.invalid": "用户名格式不符合要求。",
   "auth.username.exists": "用户名已存在。",
   "auth.email.exists": "邮箱已被使用。",

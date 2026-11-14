@@ -25,6 +25,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@gooseforum/ui/components/avatar";
+import { formatDate } from "../date-format";
 import {
   Empty,
   EmptyDescription,
@@ -33,9 +34,11 @@ import {
   EmptyTitle,
 } from "@gooseforum/ui/components/empty";
 import { cn } from "@gooseforum/ui/lib/utils";
-import { GooseLink, useGooseLocale, useGoosePageFetcher } from "@gooseforum/runtime";
+import { GooseLink, useGooseLocale, useGoosePageFetcher, useLatestRequest } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { TopicListFooter, TopicTable } from "../topics/topic-list";
+import { appendUniqueById } from "../collection-utils";
+import { useIntersectionSentinel } from "../use-intersection-sentinel";
 
 export function UserActivity({ page }: { page: UserProfileProps }) {
   const { t } = useTranslation("user");
@@ -50,47 +53,72 @@ export function UserActivity({ page }: { page: UserProfileProps }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const sentinel = useRef<HTMLDivElement>(null);
+  const loadingRef = useRef(loading);
+  const paginationRef = useRef(pagination);
+  const activityTabRef = useRef(page.activityTab);
+  const beginRequest = useLatestRequest();
+
+  useEffect(() => {
+    loadingRef.current = loading;
+  }, [loading]);
+
+  useEffect(() => {
+    paginationRef.current = pagination;
+  }, [pagination]);
+
+  useEffect(() => {
+    if (activityTabRef.current === page.activityTab) return;
+    activityTabRef.current = page.activityTab;
+    beginRequest();
+    loadingRef.current = false;
+    setTopics(page.topics);
+    setActivities(page.activities);
+    setLikes(page.likes);
+    setPagination(page.pagination);
+    setLoading(false);
+    setError("");
+  }, [beginRequest, page.activityTab, page.activities, page.likes, page.pagination, page.topics]);
 
   const loadMore = useCallback(async () => {
+    const currentPagination = paginationRef.current;
     if (
-      loading ||
-      !pagination.hasNext ||
-      !pagination.nextUrl ||
+      loadingRef.current ||
+      !currentPagination.hasNext ||
+      !currentPagination.nextUrl ||
       !fetchPage
     )
       return;
+    const isCurrent = beginRequest();
+    const currentTab = page.activityTab;
+    loadingRef.current = true;
     setLoading(true);
     setError("");
     try {
       const next = (await fetchPage(
-        pagination.nextUrl,
+        currentPagination.nextUrl,
       )) as PagePayload<UserProfileProps>;
-      if (page.activityTab === "topics") {
-        setTopics((current) => mergeUnique(current, next.props.topics));
-      } else if (page.activityTab === "likes") {
-        setLikes((current) => mergeUnique(current, next.props.likes));
+      if (!isCurrent() || currentTab !== activityTabRef.current) return;
+      if (currentTab === "topics") {
+        setTopics((current) => appendUniqueById(current, next.props.topics));
+      } else if (currentTab === "likes") {
+        setLikes((current) => appendUniqueById(current, next.props.likes));
       } else {
-        setActivities((current) => mergeUnique(current, next.props.activities));
+        setActivities((current) => appendUniqueById(current, next.props.activities));
       }
       setPagination(next.props.pagination);
     } catch (reason) {
-      setError(serverError(reason, t("loadFailed")));
+      if (isCurrent() && currentTab === activityTabRef.current) {
+        setError(serverError(reason, t("loadFailed")));
+      }
     } finally {
-      setLoading(false);
+      loadingRef.current = false;
+      if (isCurrent() && currentTab === activityTabRef.current) {
+        setLoading(false);
+      }
     }
-  }, [loading, page.activityTab, pagination, fetchPage, serverError, t]);
+  }, [beginRequest, page.activityTab, fetchPage, serverError, t]);
 
-  useEffect(() => {
-    if (!sentinel.current || !("IntersectionObserver" in window)) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) void loadMore();
-      },
-      { rootMargin: "480px 0px" },
-    );
-    observer.observe(sentinel.current);
-    return () => observer.disconnect();
-  }, [loadMore]);
+  useIntersectionSentinel(sentinel, () => void loadMore());
 
   const connections =
     page.activityTab === "following" ? page.following : page.followers;
@@ -170,7 +198,7 @@ export function UserActivity({ page }: { page: UserProfileProps }) {
                     {like.title}
                   </span>
                   <time className="mt-1 block text-xs text-muted-foreground">
-                    {formatDateTime(like.likedAt, locale)}
+                    {formatDate(like.likedAt, locale)}
                   </time>
                 </span>
               </GooseLink>
@@ -226,7 +254,6 @@ export function UserActivity({ page }: { page: UserProfileProps }) {
     </div>
   );
 }
-
 function ProfileTabLink({
   tab,
   label,
@@ -296,7 +323,7 @@ export function UserActivityItem({
             : label}
         </span>
         <time className="mt-1 block text-xs text-muted-foreground">
-          {formatDateTime(activity.createdAt, locale)}
+          {formatDate(activity.createdAt, locale)}
         </time>
       </span>
     </GooseLink>
@@ -374,21 +401,4 @@ function activityLabel(
   if (activity.action === 5 || activity.label === "comment")
     return t("activity.comment");
   return activity.label || t("activity.default");
-}
-
-function mergeUnique<T extends { id: number }>(current: T[], incoming: T[]) {
-  const seen = new Set(current.map((item) => item.id));
-  const unique = incoming.filter((item) => {
-    if (seen.has(item.id)) return false;
-    seen.add(item.id);
-    return true;
-  });
-  return [...current, ...unique];
-}
-
-function formatDateTime(value: string, locale: string) {
-  const date = new Date(value.includes("T") ? value : value.replace(" ", "T"));
-  return Number.isNaN(date.getTime())
-    ? value
-    : date.toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" });
 }

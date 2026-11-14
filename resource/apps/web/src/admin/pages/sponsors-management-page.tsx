@@ -1,7 +1,8 @@
+import { errorMessage } from '../error-message'
 import { AdminPage } from '../components/admin-page'
 import { withEditorId, withoutEditorId, type EditorIdentity } from '../editor-identity'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useLatestRequest } from '../use-latest-request'
+import { useLatestRequest } from '@gooseforum/runtime'
 import { DndContext, PointerSensor, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { rectSortingStrategy, SortableContext, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -16,7 +17,7 @@ import { Spinner } from '@gooseforum/ui/components/spinner'
 import { Textarea } from '@gooseforum/ui/components/textarea'
 import { cn } from '@gooseforum/ui/lib/utils'
 import { GripVertical, PenLine, Plus, RefreshCw, Save, Trash2, Upload } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@gooseforum/ui/components/sonner'
 import type { PageConfigTextKey } from '../page-config-i18n'
 
 type EditorSponsor = SponsorItem & EditorIdentity
@@ -57,7 +58,6 @@ function SortableSponsor({ id, item, level, index, onEdit, onDelete, text }: { i
 function SponsorEditor({ dialog, sponsor, api, text, onClose, onSave }: { dialog: SponsorDialog | null; sponsor?: SponsorItem; api: GooseAdminApi; text: Text; onClose(): void; onSave(item: SponsorItem): void }) { const [form, setForm] = useState<SponsorItem>({ name: '', avatarUrl: '', message: '', link: '' }); const [uploading, setUploading] = useState(false); useEffect(() => { if (dialog) setForm(sponsor ? { ...sponsor } : { name: '', avatarUrl: '', message: '', link: '' }) }, [dialog, sponsor]); async function upload(file?: File) { if (!file) return; setUploading(true); try { const result = await api.pages.uploadImage(file); setForm((current) => ({ ...current, avatarUrl: result.url || '' })); toast.success(text('saved')) } catch (reason) { toast.error(errorMessage(reason, text('uploadFailed'))) } finally { setUploading(false) } } return <Dialog open={Boolean(dialog)} onOpenChange={(open) => !open && onClose()}><DialogContent className="sm:max-w-lg"><DialogHeader><DialogTitle>{dialog?.index == null ? text('newSponsor') : text('editSponsor')}</DialogTitle><DialogDescription>{text('sponsorHint')}</DialogDescription></DialogHeader><form id="sponsor-form" onSubmit={(event) => { event.preventDefault(); if (!form.name.trim()) { toast.warning(text('requiredSponsor')); return } onSave({ ...form, name: form.name.trim(), avatarUrl: form.avatarUrl.trim(), message: form.message.trim(), link: form.link.trim() }) }}><FieldGroup><Field><FieldLabel>{text('sponsorName')}</FieldLabel><Input autoFocus value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></Field><Field><FieldLabel>Logo</FieldLabel><div className="flex gap-2"><Input value={form.avatarUrl} onChange={(event) => setForm({ ...form, avatarUrl: event.target.value })} /><Button asChild variant="outline" size="icon" title={text('upload')}><label><input className="sr-only" type="file" accept="image/*" onChange={(event) => void upload(event.target.files?.[0])} />{uploading ? <Spinner /> : <Upload />}</label></Button></div>{form.avatarUrl ? <img src={form.avatarUrl} alt="" className="h-16 w-auto rounded-md border object-contain" /> : null}</Field><Field><FieldLabel>{text('sponsorMessage')}</FieldLabel><Textarea value={form.message} onChange={(event) => setForm({ ...form, message: event.target.value })} /></Field><Field><FieldLabel>{text('sponsorLink')}</FieldLabel><Input value={form.link} onChange={(event) => setForm({ ...form, link: event.target.value })} /></Field></FieldGroup></form><DialogFooter><Button variant="outline" onClick={onClose}>{text('cancel')}</Button><Button form="sponsor-form" type="submit" disabled={uploading}>{text('save')}</Button></DialogFooter></DialogContent></Dialog> }
 
 function normalizeConfig(value: Partial<SponsorsConfig> | undefined, defaults: SponsorsConfig): EditorConfig { return { sponsors: { level0: value?.sponsors?.level0?.map(withEditorId) || [], level1: value?.sponsors?.level1?.map(withEditorId) || [], level2: value?.sponsors?.level2?.map(withEditorId) || [], level3: value?.sponsors?.level3?.map(withEditorId) || [] }, content: { title: value?.content?.title || defaults.content.title, description: value?.content?.description || defaults.content.description }, contact: { title: value?.contact?.title || defaults.contact.title, description: value?.contact?.description || defaults.contact.description, buttonText: value?.contact?.buttonText || defaults.contact.buttonText, buttonLink: value?.contact?.buttonLink || defaults.contact.buttonLink }, rules: value?.rules?.map(withEditorId) || [] } }
-function errorMessage(reason: unknown, fallback: string) { return reason instanceof Error && reason.message ? reason.message : fallback }
 
 function serializeConfig(config: EditorConfig): SponsorsConfig {
   return { ...config, sponsors: { level0: config.sponsors.level0.map(withoutEditorId), level1: config.sponsors.level1.map(withoutEditorId), level2: config.sponsors.level2.map(withoutEditorId), level3: config.sponsors.level3.map(withoutEditorId) }, rules: config.rules.map(withoutEditorId) }

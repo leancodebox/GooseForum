@@ -68,7 +68,7 @@ func BuildSingleTopicSearchDocument(topic *topics.Entity, firstPost *posts.Entit
 	var task *meilisearch.TaskInfo
 	var err error
 	pk := "id"
-	if topic.Status == 1 && topic.ProcessStatus == 0 {
+	if topic.IsPublished() {
 		replies, err := posts.GetSearchReplies(topic.Id)
 		if err != nil {
 			return nil, fmt.Errorf("read search replies: %w", err)
@@ -170,6 +170,8 @@ func configureIndex(index meilisearch.IndexManager) error {
 	filterableAttributes := []any{
 		"category",
 		"mainCategory",
+		"topicStatus",
+		"processStatus",
 	}
 	_, err = index.UpdateFilterableAttributes(&filterableAttributes)
 	if err != nil {

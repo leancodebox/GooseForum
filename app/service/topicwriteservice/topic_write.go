@@ -108,7 +108,7 @@ func loadWriteState(input WriteInput) (*writeState, error) {
 		if input.ExpectedVersion != nil && *input.ExpectedVersion != state.expectedVersion {
 			return nil, ErrVersionConflict
 		}
-		state.wasPublished = state.topic.Status == 1 && state.topic.ProcessStatus == 0
+		state.wasPublished = state.topic.IsPublished()
 		state.wasCounted = state.wasPublished
 		state.previousCategoryIDs = append([]uint64(nil), state.topic.CategoryIds...)
 		state.firstPost = posts.Get(state.topic.FirstPostId)
@@ -257,7 +257,7 @@ func UpdateStatus(userID, topicID uint64, nextStatus int8) error {
 	} else {
 		analysis = markdown2html.AnalyzeTopicContentVersion(firstPost.Content, 200, firstPost.SourceVersion, true)
 	}
-	wasCounted := topic.Status == 1 && topic.ProcessStatus == 0
+	wasCounted := topic.IsPublished()
 	expectedVersion := topic.ModerationVersion
 	topic.Status = nextStatus
 	contentmoderationservice.PrepareTopicWithAnalysis(&topic, &firstPost, analysis)
@@ -266,7 +266,7 @@ func UpdateStatus(userID, topicID uint64, nextStatus int8) error {
 	}); err != nil {
 		return err
 	}
-	hotdataserve.ClearTopicWriteCaches(wasCounted != (topic.Status == 1 && topic.ProcessStatus == 0))
+	hotdataserve.ClearTopicWriteCaches(wasCounted != topic.IsPublished())
 	eventhandlers.PublishTopicReviewResult(&topic, &firstPost, firstPublication)
 	enqueueReview(topic.Id, topic.ModerationVersion, topic.ModerationStatus)
 	return nil
@@ -294,7 +294,7 @@ func authorizeCategories(userID uint64, topic *topics.Entity, next []uint64, new
 }
 
 func categoryCountsChanged(wasCounted bool, previousCategoryIDs []uint64, topic topics.Entity) bool {
-	isCounted := topic.Status == 1 && topic.ProcessStatus == 0
+	isCounted := topic.IsPublished()
 	return wasCounted != isCounted || (isCounted && !slices.Equal(previousCategoryIDs, topic.CategoryIds))
 }
 

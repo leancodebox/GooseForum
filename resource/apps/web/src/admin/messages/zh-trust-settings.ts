@@ -19,6 +19,8 @@ export default {
   unlimited: "不限",
   save: "保存",
   saved: "已保存",
+  loadFailed: "设置加载失败",
+  saveFailed: "设置保存失败",
   reload: "重新加载",
   orderInvalid: "{higher}的{field}不能比{lower}更严格",
   minPostAccountAgeMinutes: "发言冷静期（分钟）",

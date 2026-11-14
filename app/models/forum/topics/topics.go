@@ -59,8 +59,20 @@ type InteractionTarget struct {
 	MainCategoryId uint64
 }
 
+// IsPublished mirrors Entity.IsPublished for the interaction read model.
+func (t InteractionTarget) IsPublished() bool {
+	return t.Status == 1 && t.ProcessStatus == 0
+}
+
 func (itself *Entity) TableName() string {
 	return tableName
+}
+
+// IsPublished reports the runtime publication state used by topic services.
+// Soft deletion is intentionally separate because callers use this predicate
+// for publication transitions as well as public reads.
+func (e Entity) IsPublished() bool {
+	return e.Status == 1 && e.ProcessStatus == 0
 }
 
 func (itself *Entity) GetPosters() []Poster {

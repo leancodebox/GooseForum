@@ -9,7 +9,7 @@ afterEach(() => { cleanup(); vi.useRealTimers(); });
 
 function Harness({ initial = "", withTime = false, onChange = vi.fn(), locale = "en" }: { initial?: string; withTime?: boolean; onChange?(value: string): void; locale?: string }) {
   const [value, setValue] = useState(initial);
-  const timeProps = withTime ? { withTime: true as const, timeLabel: "Time", doneLabel: "Done" } : {};
+  const timeProps = withTime ? { withTime: true as const, timeLabel: "Time" } : {};
   return <><label htmlFor="date">Date</label><DatePicker id="date" value={value} locale={locale} {...timeProps} placeholder="Choose date" clearLabel="Clear date" onChange={(next) => { setValue(next); onChange(next); }} /></>;
 }
 
@@ -38,7 +38,6 @@ it("keeps the chosen time when changing dates and never submits an outer form", 
   fireEvent.change(screen.getByLabelText("Time"), { target: { value: "10:00" } });
   expect(change).toHaveBeenLastCalledWith("2026-10-06T10:00");
   expect([...document.querySelectorAll<HTMLButtonElement>('[data-slot="date-picker-content"] button')].every((button) => button.type === "button")).toBe(true);
-  await userEvent.click(screen.getByRole("button", { name: "Done" }));
   expect(document.querySelector('[data-slot="date-picker-content"]')).toBeNull();
   expect(submit).not.toHaveBeenCalled();
 });

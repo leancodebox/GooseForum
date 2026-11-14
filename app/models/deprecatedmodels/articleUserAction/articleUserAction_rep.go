@@ -1,9 +1,9 @@
 package articleUserAction
 
 import (
-	"strconv"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"gorm.io/gorm/clause"
 )
@@ -131,7 +131,7 @@ func ListLikedArticleRefsBefore(userId uint64, cursor string, limit int) ([]Like
 	}
 
 	rows := make([]LikedArticleRef, 0, limit+1)
-	cursorID := parseLikedCursor(cursor)
+	cursorID := pageutil.ParseUintCursor(cursor)
 	query := builder().
 		Select("id", fieldArticleId, fieldLikedAt).
 		Where(queryopt.Eq(fieldUserId, userId)).
@@ -141,27 +141,9 @@ func ListLikedArticleRefsBefore(userId uint64, cursor string, limit int) ([]Like
 	}
 	query.Order("id DESC").Limit(limit + 1).Find(&rows)
 
-	hasNext := len(rows) > limit
-	if hasNext {
-		rows = rows[:limit]
-	}
+	rows, hasNext := pageutil.TrimPage(rows, limit)
 	if hasNext && len(rows) > 0 {
-		return rows, formatLikedCursor(rows[len(rows)-1].ID)
+		return rows, pageutil.FormatUintCursor(rows[len(rows)-1].ID)
 	}
 	return rows, ""
-}
-
-func parseLikedCursor(cursor string) uint64 {
-	id, err := strconv.ParseUint(cursor, 10, 64)
-	if err != nil || id == 0 {
-		return 0
-	}
-	return id
-}
-
-func formatLikedCursor(id uint64) string {
-	if id == 0 {
-		return ""
-	}
-	return strconv.FormatUint(id, 10)
 }

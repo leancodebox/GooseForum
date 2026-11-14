@@ -51,4 +51,12 @@ func TestGetUserTimelineForAudienceFiltersBeforePagination(t *testing.T) {
 	if len(rows) != 2 || rows[0].Id != activityIDs[2] || rows[1].Id != activityIDs[0] {
 		t.Fatalf("filtered timeline ids = %#v", rows)
 	}
+
+	rows, err = GetUserTimelineForAudience(userID, activityIDs[2], 2, []uint64{9871}, true)
+	if err != nil {
+		t.Fatalf("GetUserTimelineForAudience(cursor): %v", err)
+	}
+	if len(rows) != 1 || rows[0].Id != activityIDs[0] {
+		t.Fatalf("cursor timeline ids = %#v, want [%d]", rows, activityIDs[0])
+	}
 }

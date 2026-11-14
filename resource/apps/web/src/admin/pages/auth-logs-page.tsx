@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { AuthLogPayload, GooseAdminApi } from '@gooseforum/client';
 import type { AuthLocale } from '@gooseforum/runtime/i18n/auth';
+import { useLatestRequest } from '@gooseforum/runtime';
 import { Button } from '@gooseforum/ui/components/button';
 import { Alert, AlertDescription } from '@gooseforum/ui/components/alert';
 import { Badge } from '@gooseforum/ui/components/badge';
@@ -30,7 +31,7 @@ export function AuthLogsPage({ api, locale }: { api: GooseAdminApi; locale: Auth
   const [refresh, setRefresh] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const requestEpoch = useRef(0);
+  const beginRequest = useLatestRequest();
   const [owner, setOwner] = useState(api);
   if (owner !== api) {
     setOwner(api); setCursors([0]); setRows([]); setNextCursor(0); setHasMore(false);
@@ -38,11 +39,9 @@ export function AuthLogsPage({ api, locale }: { api: GooseAdminApi; locale: Auth
     setLoading(true); setError(false);
   }
   const cursor = cursors[cursors.length - 1];
-  function reset() { requestEpoch.current++; setCursors([0]); setRefresh((value) => value + 1); setLoading(true); setError(false); }
+  function reset() { setCursors([0]); setRefresh((value) => value + 1); setLoading(true); setError(false); }
   useEffect(() => {
-    let active = true;
-    const epoch = ++requestEpoch.current;
-    const isCurrent = () => active && requestEpoch.current === epoch;
+    const isCurrent = beginRequest();
     void Promise.resolve().then(() => {
       if (!isCurrent()) return;
       setLoading(true); setError(false);
@@ -53,8 +52,7 @@ export function AuthLogsPage({ api, locale }: { api: GooseAdminApi; locale: Auth
     }).then((data) => { if (isCurrent() && data) { setRows(data.list); setNextCursor(data.nextCursor); setHasMore(data.hasMore); } })
       .catch(() => { if (isCurrent()) setError(true); })
       .finally(() => { if (isCurrent()) setLoading(false); });
-    return () => { active = false; };
-  }, [api, cursor, result, method, userId, range, refresh]);
+  }, [api, cursor, result, method, userId, range, refresh, beginRequest]);
   const option = (value: string) => text[(value || 'all') as keyof typeof text] || value;
   return <AdminPage className="min-w-0">
     <header><h2 className="text-xl font-semibold">{text.title}</h2></header>
@@ -82,7 +80,7 @@ export function AuthLogsPage({ api, locale }: { api: GooseAdminApi; locale: Auth
       </Table>
     </>}
     </section>
-    <footer className="flex items-center justify-between gap-3 text-xs"><span className="text-muted-foreground">{loading || error ? '-' : <>{rows.length ? (cursors.length - 1) * 20 + 1 : 0}-{rows.length ? (cursors.length - 1) * 20 + rows.length : 0}</>}</span><nav aria-label={text.title} className="flex items-center gap-2"><span className="min-w-8 text-center tabular-nums">{cursors.length}</span><Button type="button" variant="outline" size="icon-sm" title={text.previous} aria-label={text.previous} disabled={loading || error || cursors.length <= 1} onClick={() => { requestEpoch.current++; setLoading(true); setCursors((history) => history.slice(0, -1)); }}><ChevronLeft /></Button><Button type="button" variant="outline" size="icon-sm" title={text.next} aria-label={text.next} disabled={loading || error || !hasMore || nextCursor <= 0} onClick={() => { requestEpoch.current++; setLoading(true); setCursors((history) => [...history, nextCursor]); }}><ChevronRight /></Button></nav></footer>
+    <footer className="flex items-center justify-between gap-3 text-xs"><span className="text-muted-foreground">{loading || error ? '-' : <>{rows.length ? (cursors.length - 1) * 20 + 1 : 0}-{rows.length ? (cursors.length - 1) * 20 + rows.length : 0}</>}</span><nav aria-label={text.title} className="flex items-center gap-2"><span className="min-w-8 text-center tabular-nums">{cursors.length}</span><Button type="button" variant="outline" size="icon-sm" title={text.previous} aria-label={text.previous} disabled={loading || error || cursors.length <= 1} onClick={() => { setLoading(true); setCursors((history) => history.slice(0, -1)); }}><ChevronLeft /></Button><Button type="button" variant="outline" size="icon-sm" title={text.next} aria-label={text.next} disabled={loading || error || !hasMore || nextCursor <= 0} onClick={() => { setLoading(true); setCursors((history) => [...history, nextCursor]); }}><ChevronRight /></Button></nav></footer>
   </AdminPage>;
 }
 

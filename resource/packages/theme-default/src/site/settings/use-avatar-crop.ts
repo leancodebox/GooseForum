@@ -1,6 +1,24 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type Dispatch, type RefObject, type SetStateAction } from "react";
 import { useGooseRuntime } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
+
+export type AvatarCropController = {
+  avatarUrl: string;
+  setAvatarUrl: Dispatch<SetStateAction<string>>;
+  inputRef: RefObject<HTMLInputElement | null>;
+  imageRef: (element: HTMLImageElement | null) => void;
+  sourceUrl: string;
+  previewUrl: string;
+  previewAspectRatio: number;
+  open: boolean;
+  uploading: boolean;
+  ready: boolean;
+  cropError: string;
+  choose(): void;
+  selectFile(file?: File): void;
+  close(): void;
+  upload(): Promise<void>;
+};
 
 export function useAvatarCrop({
   initialUrl,
@@ -33,7 +51,6 @@ export function useAvatarCrop({
 
   useEffect(() => {
     if (!open || !sourceUrl || !imageElement) return;
-    setReady(false);
     let active = true;
     let cleanupCropper: (() => void) | undefined;
     void import("cropperjs")
@@ -180,7 +197,7 @@ export function useAvatarCrop({
     }
   }
 
-  return {
+  const controller: AvatarCropController = {
     avatarUrl,
     setAvatarUrl,
     inputRef,
@@ -197,6 +214,7 @@ export function useAvatarCrop({
     close,
     upload,
   };
+  return controller;
 }
 
 async function centerSelection(

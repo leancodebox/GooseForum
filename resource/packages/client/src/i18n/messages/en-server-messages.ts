@@ -30,6 +30,8 @@ export default {
   "auth.signupDisabled": "Registration is currently disabled.",
   "auth.emailDomain.invalid": "The email address is invalid.",
   "auth.emailDomain.notAllowed": "This email domain is not allowed.",
+  "auth.invitation.invalid": "The invitation code is invalid, expired, revoked, or already used.",
+  "auth.invitation.required": "This site requires an invitation code to register.",
   "auth.username.invalid": "The username format is invalid.",
   "auth.username.exists": "This username is already taken.",
   "auth.email.exists": "This email address is already in use.",

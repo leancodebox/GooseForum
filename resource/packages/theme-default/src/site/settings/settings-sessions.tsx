@@ -3,7 +3,7 @@ import type { AuthSessionPayload } from "@gooseforum/client";
 import { Monitor, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@gooseforum/ui/components/button";
-import { useGooseRuntime } from "@gooseforum/runtime";
+import { useGooseRuntime, useLatestRequest } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { SettingsSectionHeader } from "./settings-section-header";
 import { AuthLogSettings } from "./settings-auth-logs";
@@ -22,15 +22,15 @@ export function SessionSettings({
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [revoking, setRevoking] = useState<number | "others" | null>(null);
 
+  const beginRequest = useLatestRequest();
   useEffect(() => {
-    let active = true;
+    const isCurrent = beginRequest();
     void runtime.api.users.authSessions().then((items) => {
-      if (active) setSessions(items);
+      if (isCurrent()) setSessions(items);
     }).catch((reason) => {
-      if (active) showError(serverError(reason, t("account.sessionsLoadFailed")));
-    }).finally(() => { if (active) setLoadingSessions(false); });
-    return () => { active = false; };
-  }, [runtime.api.users, serverError, showError, t]);
+      if (isCurrent()) showError(serverError(reason, t("account.sessionsLoadFailed")));
+    }).finally(() => { if (isCurrent()) setLoadingSessions(false); });
+      }, [runtime.api.users, serverError, showError, t, beginRequest]);
 
   async function revoke(id: number | "others") {
     setRevoking(id);

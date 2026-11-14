@@ -37,7 +37,7 @@ func recalculateScheduled(ctx context.Context, entry topicrank.ScheduledTopic, n
 	}
 	var score int64
 	var next *time.Time
-	if topic.Status == 1 && topic.ProcessStatus == 0 && !topic.DeletedAt.Valid {
+	if topic.IsPublished() && !topic.DeletedAt.Valid {
 		published := topic.CreatedAt
 		if topic.PublishedAt != nil {
 			published = *topic.PublishedAt

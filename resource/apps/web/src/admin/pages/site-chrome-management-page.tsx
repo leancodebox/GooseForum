@@ -1,3 +1,4 @@
+import { errorMessage } from "../error-message";
 import { AdminPage } from '../components/admin-page'
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -78,7 +79,7 @@ import {
   UsersRound,
   Upload,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@gooseforum/ui/components/sonner";
 import type { SettingsTextKey } from "../settings-i18n";
 type Text = (k: SettingsTextKey) => string;
 const fixedMain = [
@@ -157,7 +158,7 @@ export function SiteChromeManagementPage({
     try {
       setConfig(normalize(await api.settings.chrome()));
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : textRef.current("loadFailed"));
+      toast.error(errorMessage(r, textRef.current("loadFailed")));
     } finally {
       setLoading(false);
     }
@@ -178,7 +179,7 @@ export function SiteChromeManagementPage({
       await api.settings.saveChrome(normalize(config));
       toast.success(text("saved"));
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : text("saveFailed"));
+      toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -936,7 +937,7 @@ function BrandEditor({
       const r = await api.pages.uploadImage(file);
       setValue(r.url || "");
     } catch (r) {
-      toast.error(r instanceof Error ? r.message : text("saveFailed"));
+      toast.error(errorMessage(r, text("saveFailed")));
     }
   }
   return (

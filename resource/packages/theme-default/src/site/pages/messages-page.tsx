@@ -25,6 +25,7 @@ import {
   X,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { appendUniqueById, prependUniqueById } from "../collection-utils";
 import {
   Avatar,
   AvatarFallback,
@@ -139,10 +140,27 @@ export function MessagesPageView({
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [refreshError, setRefreshError] = useState("");
+  const [refreshingPeerId, setRefreshingPeerId] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const loadingConversations = useRef(new Set<number>());
   const loadingOlderConversations = useRef(new Set<number>());
+  const refreshingConversations = useRef(new Set<number>());
+  const refreshLatestRef = useRef<(() => void) | null>(null);
+  const readMutationVersions = useRef(new Map<number, number>());
+  const failedReadConversations = useRef(new Set<number>());
+  const previousActivePeerId = useRef(0);
+  const conversationsRef = useRef(conversations);
+  const activePeerIdRef = useRef(activePeerId);
   const active = conversations.find((item) => item.peerId === activePeerId);
+
+  useEffect(() => {
+    conversationsRef.current = conversations;
+  }, [conversations]);
+
+  useEffect(() => {
+    activePeerIdRef.current = activePeerId;
+  }, [activePeerId]);
 
   useEffect(() => {
     const url = new URL(runtime.currentUrl, "http://gooseforum.local");
@@ -176,11 +194,19 @@ export function MessagesPageView({
       page.conversations[0]
     )
       setActivePeerId(page.conversations[0].peerId);
-  }, [page.conversations, runtime.currentUrl]);
+  }, [page.conversations, runtime.currentUrl, t]);
 
   useEffect(() => {
+    if (previousActivePeerId.current !== activePeerId) {
+      const previousConversation = conversationsRef.current.find(
+        (item) => item.peerId === previousActivePeerId.current,
+      );
+      if (previousConversation?.convId)
+        failedReadConversations.current.delete(previousConversation.convId);
+      previousActivePeerId.current = activePeerId;
+    }
     if (!activePeerId) return;
-    const conversation = conversations.find(
+    const conversation = conversationsRef.current.find(
       (item) => item.peerId === activePeerId,
     );
     if (!conversation) return;
@@ -209,7 +235,8 @@ export function MessagesPageView({
           })),
         )
         .catch((reason) => {
-          setError(serverError(reason, t("loadFailed")));
+          if (activePeerIdRef.current === conversation.peerId)
+            setError(serverError(reason, t("loadFailed")));
           updateConversation(conversation.peerId, (item) => ({
             ...item,
             loading: false,
@@ -220,21 +247,98 @@ export function MessagesPageView({
         );
     }
     if (conversation.unreadCount && conversation.convId) {
+      if (failedReadConversations.current.has(conversation.convId)) return;
+      const previousUnreadCount = conversation.unreadCount;
+      const mutationVersion =
+        (readMutationVersions.current.get(conversation.convId) ?? 0) + 1;
+      readMutationVersions.current.set(conversation.convId, mutationVersion);
       updateConversation(conversation.peerId, (item) => ({
         ...item,
         unreadCount: 0,
       }));
-      const hasOtherUnread = conversations.some(
+      const hasOtherUnread = conversationsRef.current.some(
         (item) => item.peerId !== conversation.peerId && item.unreadCount > 0,
       );
       announceUnreadStatus({ messages: hasOtherUnread });
       void runtime.api.chat
         .markRead(conversation.convId)
-        .catch(() => undefined);
+        .catch((reason) => {
+          failedReadConversations.current.add(conversation.convId);
+          if (
+            readMutationVersions.current.get(conversation.convId) ===
+            mutationVersion
+          ) {
+            updateConversation(conversation.peerId, (item) => ({
+              ...item,
+              unreadCount: Math.max(item.unreadCount, previousUnreadCount),
+            }));
+            announceUnreadStatus({ messages: true });
+          }
+          if (activePeerIdRef.current === conversation.peerId)
+            setError(serverError(reason, t("loadFailed")));
+        });
     }
     // Only a new conversation or unread change should trigger this load;
     // loading/error updates must not automatically retry a failed request.
   }, [activePeerId, active?.convId, active?.unreadCount, runtime.api.chat, serverError, t]);
+
+  useEffect(() => {
+    if (!active?.convId || !active.messagesLoaded) return;
+    const peerId = activePeerId;
+    const convId = active.convId;
+    let disposed = false;
+    async function refreshLatest() {
+      if (
+        disposed ||
+        document.visibilityState === "hidden" ||
+        refreshingConversations.current.has(convId)
+      ) return;
+      const current = conversationsRef.current.find((item) => item.peerId === peerId);
+      if (!current?.latestId) return;
+      refreshingConversations.current.add(convId);
+      setRefreshingPeerId(peerId);
+      try {
+        const result = await runtime.api.chat.messages({
+          convId,
+          afterId: current.latestId,
+          limit: messagePageLimit,
+        });
+        if (disposed) return;
+        if (result.list.length) {
+          const latestMessage = result.list[result.list.length - 1];
+          promoteConversation(peerId, (item) => item.convId !== convId ? item : {
+            ...item,
+            messages: appendUniqueById(item.messages, result.list),
+            latestId: Math.max(item.latestId, result.latestId || 0),
+            lastMsg: latestMessage.content,
+            lastMsgTime: latestMessage.createdAt,
+            unreadCount: 0,
+          });
+          announceUnreadStatus({ messages: conversationsRef.current.some((item) => item.peerId !== peerId && item.unreadCount > 0) });
+          void runtime.api.chat.markRead(convId).catch((reason) => {
+            if (!disposed && activePeerIdRef.current === peerId)
+              setError(serverError(reason, t("loadFailed")));
+          });
+        }
+        if (!disposed) setRefreshError("");
+      } catch (reason) {
+        if (!disposed) setRefreshError(serverError(reason, t("loadFailed")));
+      } finally {
+        refreshingConversations.current.delete(convId);
+        setRefreshingPeerId((current) => (current === peerId ? 0 : current));
+      }
+    }
+    refreshLatestRef.current = () => void refreshLatest();
+    const timer = window.setInterval(() => void refreshLatest(), 15_000);
+    const handleOnline = () => void refreshLatest();
+    window.addEventListener("online", handleOnline);
+    return () => {
+      disposed = true;
+      refreshLatestRef.current = null;
+      window.clearInterval(timer);
+      window.removeEventListener("online", handleOnline);
+    };
+  }, [active?.convId, active?.messagesLoaded, activePeerId, runtime.api.chat, serverError, t]);
 
   const filteredConversations = useMemo(() => {
     const keyword = conversationSearch.trim().toLowerCase();
@@ -266,6 +370,17 @@ export function MessagesPageView({
     );
   }
 
+  function promoteConversation(
+    peerId: number,
+    update: (item: Conversation) => Conversation,
+  ) {
+    setConversations((items) => {
+      const current = items.find((item) => item.peerId === peerId);
+      if (!current) return items;
+      return [update(current), ...items.filter((item) => item.peerId !== peerId)];
+    });
+  }
+
   async function loadOlder() {
     if (
       !active?.convId ||
@@ -289,14 +404,15 @@ export function MessagesPageView({
       });
       updateConversation(active.peerId, (item) => ({
         ...item,
-        messages: prependUnique(item.messages, result.list),
+        messages: prependUniqueById(item.messages, result.list),
         hasMoreBefore: result.hasMoreBefore,
         nextBeforeId: result.nextBeforeId || item.nextBeforeId,
         latestId: Math.max(item.latestId, result.latestId || 0),
         loadingOlder: false,
       }));
     } catch (reason) {
-      setError(serverError(reason, t("loadFailed")));
+      if (activePeerIdRef.current === active.peerId)
+        setError(serverError(reason, t("loadFailed")));
       updateConversation(active.peerId, (item) => ({
         ...item,
         loadingOlder: false,
@@ -314,7 +430,7 @@ export function MessagesPageView({
     try {
       const result = await runtime.api.chat.send(active.peerId, content);
       const message: ChatMessagePayload = {
-        id: Date.now(),
+        id: result.messageId,
         senderId: layout.viewer.id,
         content,
         msgType: 1,
@@ -322,20 +438,16 @@ export function MessagesPageView({
         createdAt: new Date().toISOString(),
         isSelf: true,
       };
-      setConversations((items) => {
-        const updated = items.find((item) => item.peerId === active.peerId);
-        if (!updated) return items;
-        const next = {
-          ...updated,
-          id: updated.id || result.convId,
-          convId: updated.convId || result.convId,
-          messages: [...updated.messages, message],
+      promoteConversation(active.peerId, (item) => ({
+          ...item,
+          id: item.id || result.convId,
+          convId: item.convId || result.convId,
+          latestId: Math.max(item.latestId, result.messageId),
+          messages: [...item.messages, message],
           lastMsg: content,
           lastMsgTime: message.createdAt,
           messagesLoaded: true,
-        };
-        return [next, ...items.filter((item) => item.peerId !== active.peerId)];
-      });
+        }));
       setNewMessage("");
       setShowEmoji(false);
       if (inputRef.current) inputRef.current.style.height = "auto";
@@ -400,6 +512,7 @@ export function MessagesPageView({
                       emptyLabel={t("noMessagesYet")}
                       onSelect={() => {
                         setError("");
+                        setRefreshError("");
                         setActivePeerId(conversation.peerId);
                       }}
                     />
@@ -552,8 +665,15 @@ export function MessagesPageView({
                     void sendMessage();
                   }}
                 >
-                  {error ? (
-                    <p className="mb-2 text-sm text-destructive">{error}</p>
+                  {error || refreshError ? (
+                    <div className="mb-2 flex items-center gap-2 text-sm text-destructive">
+                      <p className="min-w-0 flex-1">{error || refreshError}</p>
+                      {refreshError ? (
+                        <Button type="button" size="sm" variant="ghost" disabled={refreshingPeerId === active?.peerId} onClick={() => refreshLatestRef.current?.()}>
+                          {refreshingPeerId === active?.peerId ? t("loading") : t("retryLoad")}
+                        </Button>
+                      ) : null}
+                    </div>
                   ) : null}
                   <InputGroup className="h-auto flex-col items-stretch bg-muted/50 p-2 focus-within:bg-background">
                     <InputGroupTextarea
@@ -861,13 +981,6 @@ function newConversation(user: UserConnectionPayload): Conversation {
     nextBeforeId: 0,
     latestId: 0,
   };
-}
-function prependUnique(
-  current: ChatMessagePayload[],
-  incoming: ChatMessagePayload[],
-) {
-  const ids = new Set(current.map((message) => message.id));
-  return [...incoming.filter((message) => !ids.has(message.id)), ...current];
 }
 function formatChatTime(value: string, locale: string) {
   if (!value) return "";

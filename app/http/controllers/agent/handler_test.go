@@ -26,6 +26,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/fileUsage"
 	"github.com/leancodebox/GooseForum/app/models/forum/oidcProviderStore"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+	"github.com/leancodebox/GooseForum/app/models/forum/postRevisions"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserStat"
@@ -66,7 +67,7 @@ func TestAuthorizationForumWritesAndIsolation(t *testing.T) {
 	if err := fileDB.AutoMigrate(&filedata.Entity{}); err != nil {
 		t.Fatal(err)
 	}
-	models := append(oidcProviderStore.Models(), &users.EntityComplete{}, &agenttokens.Entity{}, &pageConfig.Entity{}, &posts.Entity{}, &topics.Entity{}, &category.Entity{}, &accessGroups.Entity{}, &categoryGroupPermissions.Entity{}, &topicCategoryIndex.Entity{}, &topicUserStat.Entity{}, &filedata.Entity{}, &fileUsage.Entity{})
+	models := append(oidcProviderStore.Models(), &users.EntityComplete{}, &agenttokens.Entity{}, &pageConfig.Entity{}, &posts.Entity{}, &postRevisions.Entity{}, &topics.Entity{}, &category.Entity{}, &accessGroups.Entity{}, &categoryGroupPermissions.Entity{}, &topicCategoryIndex.Entity{}, &topicUserStat.Entity{}, &filedata.Entity{}, &fileUsage.Entity{})
 	if err := db.AutoMigrate(models...); err != nil {
 		t.Fatal(err)
 	}

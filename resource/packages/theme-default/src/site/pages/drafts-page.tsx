@@ -1,3 +1,4 @@
+import { formatDate } from "../date-format";
 import { useEffect, useState } from "react";
 import type { DraftPayload, DraftsPageProps, LayoutPayload } from "@gooseforum/client";
 import { FileText, PenSquare, ShieldAlert, Trash2 } from "lucide-react";
@@ -183,14 +184,4 @@ function DraftRow({
       </div>
     </article>
   );
-}
-
-function formatDate(value: string, locale: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? value
-    : new Intl.DateTimeFormat(locale, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }).format(date);
 }

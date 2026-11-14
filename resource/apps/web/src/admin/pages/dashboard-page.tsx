@@ -1,4 +1,5 @@
 import { AdminPage } from '../components/admin-page'
+import { useLatestRequest } from '@gooseforum/runtime'
 import { lazy, Suspense, useEffect, useState } from "react";
 import type {
   DailyTraffic,
@@ -56,54 +57,52 @@ export default function DashboardPage({
     d.setDate(d.getDate() - 6);
     return { start: date(d), end: date(new Date()) };
   });
+  const beginDashboardRequest = useLatestRequest();
+  const beginTrafficRequest = useLatestRequest();
   useEffect(() => {
-    let active = true;
+    const isCurrent = beginDashboardRequest();
     void api.dashboard
       .statistics()
       .then((value) => {
-        if (active) setStats(value);
+        if (isCurrent()) setStats(value);
       })
       .catch(() => undefined)
       .finally(() => {
-        if (active) setStatsLoading(false);
+        if (isCurrent()) setStatsLoading(false);
       });
     void api.dashboard
       .version()
       .then((value) => {
-        if (active) setVersion(value);
+        if (isCurrent()) setVersion(value);
       })
       .catch(() => undefined);
     void api.dashboard
       .releases()
       .then((value) => {
-        if (active) setReleases(value);
+        if (isCurrent()) setReleases(value);
       })
       .catch(() => undefined)
       .finally(() => {
-        if (active) setReleasesLoading(false);
+        if (isCurrent()) setReleasesLoading(false);
       });
-    return () => {
-      active = false;
-    };
-  }, [api]);
+  }, [api, beginDashboardRequest]);
   useEffect(() => {
-    let active = true;
-    setTrafficLoading(true);
-    void api.dashboard
-      .traffic(range.start, range.end)
+    const isCurrent = beginTrafficRequest();
+    void Promise.resolve().then(() => {
+      if (!isCurrent()) return undefined;
+      setTrafficLoading(true);
+      return api.dashboard.traffic(range.start, range.end);
+    })
       .then((value) => {
-        if (active) setTraffic(value);
+        if (isCurrent() && value) setTraffic(value);
       })
       .catch(() => {
-        if (active) setTraffic([]);
+        if (isCurrent()) setTraffic([]);
       })
       .finally(() => {
-        if (active) setTrafficLoading(false);
+        if (isCurrent()) setTrafficLoading(false);
       });
-    return () => {
-      active = false;
-    };
-  }, [api, range.end, range.start]);
+  }, [api, range.end, range.start, beginTrafficRequest]);
   const cards = [
     {
       label: text("users"),
