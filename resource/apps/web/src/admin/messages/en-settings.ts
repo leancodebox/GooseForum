@@ -16,7 +16,7 @@ export default {
   content: "Content and metadata",
   description: "Site description",
   keywords: "Keywords",
-  external: "External links JSON",
+  external: "Custom HTML",
   chrome: "Site chrome",
   chromeHint:
     "Configure brand, header, sidebar, resources, and footer content.",

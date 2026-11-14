@@ -16,7 +16,7 @@ export default {
   content: "内容与元数据",
   description: "站点描述",
   keywords: "关键词",
-  external: "外部链接 JSON",
+  external: "自定义 HTML",
   chrome: "站点外观",
   chromeHint: "配置品牌、顶部导航、侧栏、资源区和页脚内容。",
   brand: "品牌",
