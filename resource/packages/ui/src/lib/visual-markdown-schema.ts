@@ -14,7 +14,8 @@ import {
 } from "prosemirror-markdown";
 import { tableNodes } from "prosemirror-tables";
 
-const nodes = baseSchema.spec.nodes.addBefore("paragraph", "gallery", {
+// Keep paragraph first: ProseMirror uses the first block type to fill empty documents.
+const nodes = baseSchema.spec.nodes.addBefore("text", "gallery", {
   group: "block", content: "paragraph*", isolating: true,
   attrs: { mode: { default: "grid" } },
   toDOM: (node) => ["div", { class: `image-gallery image-gallery--${node.attrs.mode}`, "data-gallery": node.attrs.mode as string, tabindex: "0" }, 0],

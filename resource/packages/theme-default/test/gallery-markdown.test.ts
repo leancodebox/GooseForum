@@ -3,6 +3,14 @@ import { hasUnsupportedVisualMarkdown, renderMarkdown } from "@gooseforum/markdo
 import { parseEditableVisualMarkdown, serializeVisualMarkdown } from "../src/site/editor/visual-markdown-schema";
 
 describe("image galleries", () => {
+  it("starts an empty editor with one paragraph rather than an empty gallery", () => {
+    const doc = parseEditableVisualMarkdown("");
+    expect(doc.childCount).toBe(1);
+    expect(doc.firstChild?.type.name).toBe("paragraph");
+    expect(doc.firstChild?.content.size).toBe(0);
+    expect(serializeVisualMarkdown(doc)).toBe("");
+    expect(doc.type.createAndFill()?.firstChild?.type.name).toBe("paragraph");
+  });
   for (const mode of ["grid", "carousel"]) it(`round-trips ${mode} with image metadata`, () => {
     const source = `[gallery mode="${mode}"]\n![First](/one.jpg "Caption")\n![Second](/two.jpg)\n[/gallery]`;
     expect(hasUnsupportedVisualMarkdown(source)).toBe(false);
