@@ -49,14 +49,14 @@ Open `http://localhost:5234`. The first registered user automatically becomes th
 Requirements:
 
 - Go 1.27+
-- Node.js 18+
-- pnpm
+- Node.js 24 (exact version in `resource/.node-version`)
+- pnpm (exact version in `resource/package.json` → `packageManager`)
 
 ```bash
 git clone https://github.com/leancodebox/GooseForum.git
 cd GooseForum
 
-cd resource && pnpm install && pnpm build && cd ..
+cd resource && pnpm install --frozen-lockfile && pnpm build && cd ..
 go mod tidy
 go build -ldflags="-w -s" .
 

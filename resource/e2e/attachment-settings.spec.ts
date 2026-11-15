@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './fixtures'
 
 test('attachment types use separate inputs and persist after reload', async ({ page }, info) => {
   const errors: string[] = []

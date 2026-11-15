@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './fixtures'
 import type { TrustProgress, TrustHistory } from '@gooseforum/client'
 import jaTrust from '../apps/web/src/admin/messages/ja-trust-settings'
 import itTrust from '../apps/web/src/admin/messages/it-trust-settings'

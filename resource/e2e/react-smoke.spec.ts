@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { fileURLToPath } from 'node:url'
 
 const homePage = {
@@ -310,10 +311,6 @@ const chatMessages = {
 
 test.beforeEach(async ({ page }) => {
   let published = false
-  // The browser suite starts Vite without Go; serve the real image fixtures locally.
-  await page.route('**/static/**', route => route.fulfill({
-    path: fileURLToPath(new URL(`../${new URL(route.request().url()).pathname.slice(1)}`, import.meta.url)),
-  }))
   await page.route('**/__goose_page/**', async route => {
     const url = route.request().url()
     if (url.includes('/p/test/60') && url.includes('transition=slow')) {
@@ -1068,8 +1065,9 @@ test('theme reveal preserves mounted content and scroll without loading data aga
     if (/\/(__goose_page|api)\//.test(request.url())) requests.push(request.url())
   })
   await page.goto('/?lang=en')
-  const announcement = page.locator('.gf-prose-announcement')
-  await expect(announcement).toBeVisible()
+  // The panel persists; its lazy content can replace the initial Suspense fallback.
+  const announcement = page.getByRole('complementary', { name: 'Announcement', exact: true })
+  await expect(announcement.locator('.gf-prose-announcement')).toBeVisible()
   const original = await announcement.elementHandle()
   await page.evaluate(() => window.scrollTo(0, 180))
   const scroll = await page.evaluate(() => window.scrollY)

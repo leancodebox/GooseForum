@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './fixtures'
 
 test('manages OIDC connections, grants, deletion and key recovery', async ({ page }, testInfo) => {
   await page.route('**/__goose_page/**', route => route.fulfill({ json: {

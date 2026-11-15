@@ -30,3 +30,11 @@ pnpm check:react:full
 ```
 
 添加基础组件：`pnpm dlx shadcn@latest add <component> -c apps/web`。组件应落入 packages/ui；业务页面应留在对应主题或后台。
+
+## CI 环境与排错
+
+Node 版本固定在 `.node-version`，pnpm 版本固定在 `package.json` 的 `packageManager`；本地与 GitHub Actions 使用同一组版本。升级 pnpm 时须一并提交它生成的锁文件，包括包管理器自身的记录。提交依赖改动前运行 `pnpm install --frozen-lockfile`，不要通过取消 frozen 检查绕过版本或补丁配置不一致。
+
+CI 仅构建一次生产资源，供 Go 嵌入测试和 React 包体预算检查复用。质量检查按步骤显示失败位置；浏览器测试失败时下载 `playwright-report` artifact，其中包含 HTML 报告及 `test-results` 的 trace、截图。完整本地检查使用 `pnpm check:react:full`（先完成依赖安装）。
+
+浏览器用例从 `e2e/fixtures.ts` 导入 `test` 和 `expect`。该套测试仅启动 Vite，公共 fixture 提供全局状态接口、附件策略与静态图片；业务接口由各用例显式模拟，新加全局请求时也需要同步补齐。

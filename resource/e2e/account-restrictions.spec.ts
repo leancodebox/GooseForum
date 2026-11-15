@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test } from '@playwright/test'
+import { expect, test } from './fixtures'
 
 test('edits account restrictions in the existing flat user manager', async ({ page }, testInfo) => {
   await page.clock.setFixedTime(new Date('2026-10-04T12:00:00Z'))
@@ -74,11 +74,11 @@ test('edits account restrictions in the existing flat user manager', async ({ pa
   await expect(deadline).toHaveAttribute('data-slot', 'date-picker-trigger')
   await deadline.click()
   const datePicker = page.locator('[data-slot="date-picker-content"][data-state="open"]')
-  await datePicker.locator('[data-day="10/6/2026"]').click()
-  await datePicker.getByLabel('Time', {exact:true}).fill('10:00')
   await testInfo.attach('restriction-date-picker',{body:await page.screenshot({path:`/tmp/gooseforum-restriction-date-picker-${testInfo.project.name}.png`}),contentType:'image/png'})
   expect((await new AxeBuilder({page}).include('[data-slot="date-picker-content"]').withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze()).violations).toEqual([])
-  await datePicker.getByRole('button', {name:'Done', exact:true}).click()
+  await datePicker.locator('[data-day="10/6/2026"]').click()
+  await expect(datePicker).toBeHidden()
+  await dialog.getByLabel('Time', {exact:true}).fill('10:00')
   expect(saved).toBeUndefined()
   await dialog.getByLabel('Restriction reason').fill('Repeated spam after warning')
   await dialog.getByRole('tab', {name:'Badges', exact:true}).click()

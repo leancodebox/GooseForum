@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const timestamp = "2026-10-03T00:00:00Z";
 const post = { id: 61, topicId: 60, postNo: 1, content: "Original topic", renderedContent: "<p>Original topic</p>", sourceVersion: 1, processStatus: 0, isHidden: false, canModerate: false, author: { id: 7, username: "alice", avatarUrl: "" }, createdAt: timestamp, isOwnPost: true };

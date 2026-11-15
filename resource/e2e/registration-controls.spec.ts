@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 test('edits hourly registration controls in the flat security settings', async ({ page }, testInfo) => {
   await page.route('**/__goose_page/**', route => route.fulfill({ json: {
