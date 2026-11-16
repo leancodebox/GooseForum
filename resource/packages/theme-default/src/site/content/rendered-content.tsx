@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { ImageIcon, Maximize2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@gooseforum/ui/lib/utils";
+import { enhanceContentTables } from "./content-tables";
 import { readImageMetadata } from "./image-metadata";
 
 const ImagePreviewDialog = lazy(() => import("./image-preview-dialog"));
@@ -26,6 +27,9 @@ export function RenderedContent({
   const root = useRef<HTMLDivElement>(null);
   const [galleries, setGalleries] = useState<Array<{ gallery: HTMLElement; target: HTMLElement }>>([]);
   const [images, setImages] = useState<Array<{ image: HTMLImageElement; target: HTMLElement }>>([]);
+  useEffect(() => {
+    if (root.current) return enhanceContentTables(root.current);
+  }, [html, variant]);
   useEffect(() => {
     if (root.current) void enhanceMermaid(root.current);
   }, [html, variant]);

@@ -690,6 +690,39 @@ test('follows the system theme and remembers explicit preferences across reloads
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-dark')
 })
 
+test('Markdown tables preserve readable columns and scroll inside the post', async ({ page }, testInfo) => {
+  const payload = structuredClone(topicPage)
+  payload.props.postStream.posts[0].renderedContent = `<table><thead><tr><th>序号</th><th>项目名称</th><th>适用人群</th><th>功能说明</th><th align="right">备注</th></tr></thead><tbody><tr><td>10</td><td>付费抓取预算与重试成本守门器</td><td>爬虫、数据团队 · B2B</td><td>请求前预留预算，追踪重试费用，定位异常支出</td><td align="right">研究池；费用规模和买方未证实，内部脚本可能足够</td></tr><tr><td>11</td><td>代理服务</td><td>商户与开发团队</td><td>检查 AI 代理商的服务可用性</td><td>https://example.com/${'long-path'.repeat(10)}</td></tr></tbody></table><table><thead><tr><th>名称</th><th>数量</th></tr></thead><tbody><tr><td>测试</td><td>10</td></tr></tbody></table>`
+  await page.route('**/__goose_page/p/**', route => route.fulfill({ json: payload }))
+  await page.goto('/p/test/60?lang=en')
+  const shell = page.locator('.gf-table-shell').first()
+  const viewport = shell.locator('.gf-table-scroll')
+  await expect(shell).toHaveAttribute('data-scroll-right', 'true')
+  await expect(viewport).toHaveAttribute('tabindex', '0')
+  const metrics = await viewport.evaluate(element => {
+    const cells = element.querySelectorAll('tbody tr:first-child td')
+    return { textWidth: cells[1].getBoundingClientRect().width, numberWrap: getComputedStyle(cells[0]).whiteSpace, align: getComputedStyle(cells[4]).textAlign, pageOverflows: document.documentElement.scrollWidth > innerWidth }
+  })
+  expect(metrics.textWidth).toBeGreaterThanOrEqual(190)
+  expect(metrics.numberWrap).toBe('nowrap')
+  expect(metrics.align).toBe('right')
+  expect(metrics.pageOverflows).toBe(false)
+  await viewport.focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(shell).toHaveAttribute('data-scroll-left', 'true')
+  // Let Chromium finish its native keyboard scroll animation before setting an absolute position.
+  await page.waitForTimeout(300)
+  await viewport.evaluate(element => { element.scrollLeft = element.scrollWidth })
+  await expect(shell).toHaveAttribute('data-scroll-right', 'false')
+  const small = page.locator('.gf-table-shell').nth(1)
+  await expect(small).toHaveAttribute('data-scroll-right', 'false')
+  await expect(small.locator('.gf-table-scroll')).toHaveAttribute('tabindex', '-1')
+  await viewport.evaluate(element => { element.scrollLeft = 0 })
+  await expect(shell).toHaveAttribute('data-scroll-left', 'false')
+  await viewport.blur()
+  await shell.screenshot({ path: `/tmp/gooseforum-table-${testInfo.project.name}.png` })
+})
+
 test('renders Mermaid diagrams and math while preserving invalid source', async ({ page }) => {
   const elkRequests: string[] = []
   page.on('request', request => { if (/\/elk-[^/]+\.(?:m?js)/.test(request.url())) elkRequests.push(request.url()) })

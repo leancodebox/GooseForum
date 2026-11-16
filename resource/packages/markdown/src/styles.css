@@ -538,6 +538,24 @@
   .gf-prose pre code { white-space: pre; }
   .gf-prose table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; }
   .gf-prose :where(th, td) { border: 1px solid var(--border); padding: 0.4rem 0.6rem; }
+  .gf-prose .gf-table-shell { position: relative; max-width: 100%; margin-block: var(--typeset-flow) 0; border: 1px solid var(--border); border-radius: 0.5rem; overflow: hidden; }
+  .gf-table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+  .gf-table-scroll:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+  .gf-prose .gf-table-scroll table { display: table; width: 100%; max-width: none; margin: 0; border-collapse: separate; border-spacing: 0; border: 0; }
+  .gf-prose .gf-table-scroll :is(th, td) { min-width: 12rem; padding: 0.65rem 0.85rem; border: 0; border-bottom: 1px solid var(--border); border-inline-end: 1px solid var(--border); vertical-align: top; line-height: 1.6; overflow-wrap: anywhere; word-break: normal; }
+  .gf-prose .gf-table-scroll :is(th, td):not([align]) { text-align: start; }
+  .gf-prose .gf-table-scroll [align="center"] { text-align: center; }
+  .gf-prose .gf-table-scroll [align="right"] { text-align: right; }
+  .gf-prose .gf-table-scroll [align="left"] { text-align: left; }
+  .gf-prose .gf-table-scroll th { background: var(--muted); font-weight: 600; white-space: normal; }
+  .gf-prose .gf-table-scroll :is(th, td):last-child { border-inline-end: 0; }
+  .gf-prose .gf-table-scroll tbody:last-child tr:last-child > * { border-bottom: 0; }
+  .gf-prose .gf-table-scroll .gf-table-compact { min-width: auto; width: 1%; white-space: nowrap; overflow-wrap: normal; }
+  .gf-prose .gf-table-scroll :is(th, td) :is(p, a, strong, em, code) { overflow-wrap: anywhere; word-break: normal; }
+  .gf-table-shell::before, .gf-table-shell::after { content: ""; position: absolute; z-index: 1; inset-block: 0; width: 1rem; pointer-events: none; opacity: 0; }
+  .gf-table-shell::before { left: 0; background: linear-gradient(to right, color-mix(in oklch, var(--foreground) 14%, transparent), transparent); }
+  .gf-table-shell::after { right: 0; background: linear-gradient(to left, color-mix(in oklch, var(--foreground) 14%, transparent), transparent); }
+  .gf-table-shell[data-scroll-left="true"]::before, .gf-table-shell[data-scroll-right="true"]::after { opacity: 1; }
   .gf-prose a { color: var(--primary); text-decoration-line: none; }
   .gf-prose blockquote { border-inline-start-width: 4px; background: color-mix(in oklch, var(--muted) 70%, transparent); padding-block: 0.25rem; padding-inline: 0.75rem; color: color-mix(in oklch, var(--foreground) 75%, transparent); }
   .gf-prose img { max-width: 100%; max-height: min(360px, 70vh); margin-block-start: var(--typeset-flow); border-radius: 0.5rem; object-fit: contain; }
