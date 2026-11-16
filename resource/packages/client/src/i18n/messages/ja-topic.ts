@@ -2,6 +2,9 @@
 import en from "./en-topic.js";
 export default {
   ...en,
+  positionHelp: "上下にドラッグし、指を離すと移動します。投稿番号でも移動できます。",
+  jumpToPost: "投稿番号に移動",
+  jumpGo: "移動",
   originalImageSize: "元のサイズ",
   fitImage: "画面に合わせる",
   reply: "返信",

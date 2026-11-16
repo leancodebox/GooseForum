@@ -5,11 +5,13 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
+  useId,
   useRef,
   useState,
 } from "react";
-import type { ReactNode } from "react";
+import type { ReactNode, RefObject } from "react";
 import type {
   LayoutPayload,
   PostPayload,
@@ -55,7 +57,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@gooseforum/ui/components/dialog";
-import { Slider } from "@gooseforum/ui/components/slider";
+import { Input } from "@gooseforum/ui/components/input";
+import { Label } from "@gooseforum/ui/components/label";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "@gooseforum/ui/components/sheet";
+import { SliderPrimitive } from "@gooseforum/ui/components/slider";
+import { usePostPosition } from "../topics/use-post-position";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Textarea } from "@gooseforum/ui/components/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@gooseforum/ui/components/toggle-group";
@@ -124,6 +130,7 @@ export function TopicPageView({
   const [loadingDirection, setLoadingDirection] = useState<
     "before" | "after" | "anchor" | ""
   >("");
+  const windowLoading = useRef<"before" | "after" | "anchor" | "reveal" | "">("");
   const [windowError, setWindowError] = useState("");
   const [likeCount, setLikeCount] = useState(page.topic.likeCount);
   const [replyCount, setReplyCount] = useState(page.topic.replyCount);
@@ -168,10 +175,14 @@ export function TopicPageView({
   const [imageActualSize, setImageActualSize] = useState(false);
   const imageViewport = useRef<HTMLDivElement>(null);
   const suppressImageClick = useRef(false);
+  const imageBackdropPress = useRef<{ x: number; y: number; pointerId: number } | null>(null);
+  const dismissImageOnClick = useRef(false);
   const imageDrag = useRef<{ x: number; y: number; left: number; top: number; moved: boolean } | null>(null);
   useEffect(() => {
     imageDrag.current = null;
     suppressImageClick.current = false;
+    imageBackdropPress.current = null;
+    dismissImageOnClick.current = false;
     const viewport = imageViewport.current;
     if (!viewport) return;
     viewport.scrollLeft = imageActualSize ? (viewport.scrollWidth - viewport.clientWidth) / 2 : 0;
@@ -183,8 +194,15 @@ export function TopicPageView({
   );
   const sentinel = useRef<HTMLDivElement>(null);
   const postsRef = useRef<HTMLDivElement>(null);
+  const prependAnchor = useRef<{ node: HTMLElement; top: number; isCurrent(): boolean } | null>(null);
   const beginWindowRequest = useLatestRequest();
   const [revealPostId, setRevealPostId] = useState(0);
+  useEffect(() => {
+    windowLoading.current = "";
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Activity resumes with preserved state but invalidated window requests.
+    setLoadingDirection("");
+    return () => { windowLoading.current = ""; prependAnchor.current = null; };
+  }, []);
   const targetMap = useMemo(
     () => new Map(replyTargets.map((target) => [target.id, target])),
     [replyTargets],
@@ -294,11 +312,11 @@ export function TopicPageView({
 
   const loadWindow = useCallback(
     async (direction: "before" | "after" | "anchor", anchor?: number) => {
-      if (loadingDirection) return;
+      if (windowLoading.current && direction !== "anchor") return;
+      windowLoading.current = direction;
       const isCurrent = beginWindowRequest();
       setLoadingDirection(direction);
       setWindowError("");
-      const previousHeight = document.documentElement.scrollHeight;
       try {
         const input =
           direction === "before"
@@ -308,30 +326,30 @@ export function TopicPageView({
               : { topicId: page.topic.id, anchorPostNo: anchor, limit: 20 };
         const result = await runtime.api.posts.window(input);
         if (!isCurrent()) return;
+        if (direction === "before") {
+          // Capture at response time so reading during the request is preserved.
+          const line = Math.min(window.innerHeight * 0.38, 340);
+          const visible = Array.from(postsRef.current?.querySelectorAll<HTMLElement>("[data-post-no]") || [])
+            .map(node => ({ node, rect: node.getBoundingClientRect() }))
+            .filter(({ rect }) => rect.bottom > 0 && rect.top < window.innerHeight);
+          const anchor = visible.find(({ rect }) => rect.bottom > line) || visible[0];
+          prependAnchor.current = anchor ? { node: anchor.node, top: anchor.rect.top, isCurrent } : null;
+        }
         applyWindow(result, direction);
-        if (direction === "before")
-          requestAnimationFrame(() =>
-            window.scrollBy({
-              top: document.documentElement.scrollHeight - previousHeight,
-              behavior: "auto",
-            }),
-          );
-        if (direction === "anchor")
-          requestAnimationFrame(() =>
-            document
-              .querySelector<HTMLElement>(`[data-post-no="${anchor}"]`)
-              ?.scrollIntoView({ block: "center" }),
-          );
+        if (direction === "anchor") {
+          return result.posts.find(post => (post.postNo || 0) >= (anchor || 1))?.postNo
+            ?? result.posts.at(-1)?.postNo;
+        }
       } catch (reason) {
         if (!isCurrent()) return;
         setWindowError(
           serverError(reason, t("loadFailed")),
         );
       } finally {
-        if (isCurrent()) setLoadingDirection("");
+        if (isCurrent()) { windowLoading.current = ""; setLoadingDirection(""); }
       }
     },
-    [afterNo, beforeNo, beginWindowRequest, loadingDirection, page.topic.id, runtime.api.posts, serverError, t],
+    [afterNo, beforeNo, beginWindowRequest, page.topic.id, runtime.api.posts, serverError, t],
   );
   function applyWindow(
     result: PostWindowPayload,
@@ -351,6 +369,15 @@ export function TopicPageView({
     }
     setMaxNo((current) => Math.max(result.maxPostNo || 0, current));
   }
+  useLayoutEffect(() => {
+    const anchor = prependAnchor.current;
+    prependAnchor.current = null;
+    if (!anchor?.isCurrent() || !anchor.node.isConnected || !postsRef.current?.contains(anchor.node)) return;
+    // Correct only the remaining displacement. Native scroll anchoring may have
+    // already kept this post in place, in which case no second compensation is needed.
+    const offset = anchor.node.getBoundingClientRect().top - anchor.top;
+    if (Math.abs(offset) > 0.5) window.scrollBy({ top: offset, behavior: "instant" });
+  }, [posts]);
   useEffect(() => {
     if (!revealPostId || composerOpen) return;
     const node = postsRef.current?.querySelector<HTMLElement>(`#post-${revealPostId}`);
@@ -375,42 +402,12 @@ export function TopicPageView({
     observer.observe(node);
     return () => observer.disconnect();
   }, [hasAfter, loadWindow]);
-  useEffect(() => {
-    let frame = 0;
-    const nodes = Array.from(
-      postsRef.current?.querySelectorAll<HTMLElement>("[data-post-no]") || [],
-    );
-    function measure() {
-      frame = 0;
-      const marker = Math.min(innerHeight * 0.38, 340);
-      let closest = nodes[0];
-      let distance = Number.POSITIVE_INFINITY;
-      for (const node of nodes) {
-        const rect = node.getBoundingClientRect();
-        const next =
-          rect.top <= marker && rect.bottom >= marker
-            ? 0
-            : Math.min(
-                Math.abs(rect.top - marker),
-                Math.abs(rect.bottom - marker),
-              );
-        if (next < distance) {
-          closest = node;
-          distance = next;
-        }
-      }
-      if (closest) setActivePostNo(Number(closest.dataset.postNo) || 1);
-    }
-    function onScroll() {
-      if (!frame) frame = requestAnimationFrame(measure);
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    measure();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(frame);
-    };
-  }, [posts]);
+  const cancelAnchorLoad = useCallback(() => {
+    if (windowLoading.current !== "anchor") return;
+    beginWindowRequest();
+    windowLoading.current = "";
+    setLoadingDirection("");
+  }, [beginWindowRequest]);
   useEffect(() => {
     const preload = () => void loadTopicComposer();
     if ("requestIdleCallback" in window) {
@@ -564,6 +561,7 @@ export function TopicPageView({
           // A new tail reply must not create a hole in the current window.
           // Start with a navigable local window, then load its server context.
           const isCurrent = beginWindowRequest();
+          windowLoading.current = "";
           setLoadingDirection("");
           setWindowError("");
           setPosts([newPost]);
@@ -581,6 +579,7 @@ export function TopicPageView({
           setMaxNo(current => Math.max(current, newPost.postNo));
           if (newPost.processStatus === 0) setReplyCount((count) => count + 1);
           if (newPost.processStatus === 0) {
+            windowLoading.current = "reveal";
             setLoadingDirection("anchor");
             try {
               const result = await runtime.api.posts.window({ topicId: page.topic.id, anchorPostNo: newPost.postNo, limit: 20 });
@@ -592,7 +591,7 @@ export function TopicPageView({
               if (isCurrent())
                 setWindowError(serverError(reason, t("loadFailed")));
             } finally {
-              if (isCurrent()) setLoadingDirection("");
+              if (isCurrent()) { windowLoading.current = ""; setLoadingDirection(""); }
             }
           }
           if (isCurrent()) setRevealPostId(newPost.id);
@@ -902,23 +901,15 @@ export function TopicPageView({
           page={page}
           replyCount={replyCount}
           active={activePostNo}
+          mobileHidden={composerOpen}
           max={maxPostNo}
-          busy={Boolean(loadingDirection)}
+          postsRoot={postsRef}
+          cancelLoad={cancelAnchorLoad}
           posts={posts}
           hasAfter={hasAfter}
           locale={runtime.locale}
           t={t}
-          onSelect={(value) => {
-            setActivePostNo(value);
-            const loaded = posts.find((post) => post.postNo === value);
-            if (loaded) {
-              document
-                .querySelector<HTMLElement>(`[data-post-no="${value}"]`)
-                ?.scrollIntoView({ behavior: "smooth", block: "center" });
-              return;
-            }
-            void loadWindow("anchor", value);
-          }}
+          onSelect={(value) => loadWindow("anchor", value)}
         />
       </section>
       {page.hotTopics.length ? (
@@ -929,7 +920,7 @@ export function TopicPageView({
           <TopicTable topics={page.hotTopics} showCategories t={homeT} />
         </section>
       ) : null}
-      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30">
+      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-30">
         <div
           data-slot="topic-reply-float-boundary"
           className="mx-auto flex w-full max-w-[1600px] justify-end gap-2 pl-4 pr-6 lg:pl-8 lg:pr-10"
@@ -1126,8 +1117,33 @@ export function TopicPageView({
         onOpenChange={(open) => !open && setImageIndex(-1)}
       >
         <DialogContent
-          className="flex h-dvh w-full max-w-none flex-col gap-0 rounded-none border-0 bg-black/90 p-0 text-white ring-0 sm:max-w-none"
+          className="flex h-dvh w-full max-w-none flex-col gap-0 rounded-none border-0 bg-transparent p-0 text-white ring-0 sm:max-w-none"
+          overlayClassName="bg-black/65 supports-backdrop-filter:backdrop-blur-none"
+          data-lightbox-backdrop=""
           showCloseButton={false}
+          onPointerDownCapture={(event) => {
+            suppressImageClick.current = false;
+            dismissImageOnClick.current = false;
+            imageBackdropPress.current = event.button === 0 && event.isPrimary && (event.target as HTMLElement).hasAttribute("data-lightbox-backdrop")
+              ? { x: event.clientX, y: event.clientY, pointerId: event.pointerId }
+              : null;
+          }}
+          onPointerUpCapture={(event) => {
+            const press = imageBackdropPress.current;
+            dismissImageOnClick.current = Boolean(press && press.pointerId === event.pointerId
+              && Math.hypot(event.clientX - press.x, event.clientY - press.y) <= 6
+              && (event.target as HTMLElement).hasAttribute("data-lightbox-backdrop"));
+            imageBackdropPress.current = null;
+          }}
+          onPointerCancelCapture={() => { imageBackdropPress.current = null; dismissImageOnClick.current = false; }}
+          onClickCapture={(event) => {
+            if (dismissImageOnClick.current && !suppressImageClick.current) {
+              event.preventDefault();
+              event.stopPropagation();
+              setImageIndex(-1);
+            }
+            dismissImageOnClick.current = false;
+          }}
           onKeyDown={(event) => {
             if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
               event.preventDefault();
@@ -1143,18 +1159,19 @@ export function TopicPageView({
             <DialogTitle>{t("imageViewer")}</DialogTitle>
             <DialogDescription>{images[imageIndex]?.alt}</DialogDescription>
           </DialogHeader>
-          <div className="flex shrink-0 items-center justify-between gap-2 px-3 py-2">
+          <div data-lightbox-backdrop="" className="flex shrink-0 items-center justify-between gap-2 px-3 py-2">
             <span className="text-sm tabular-nums" aria-live="polite">{imageIndex + 1} / {images.length}</span>
             <div className="flex items-center gap-2">
-              <Button variant="secondary" size="sm" aria-pressed={imageActualSize} onClick={() => setImageActualSize((value) => !value)}>
+              <Button variant="secondary" size="sm" className="bg-black/50 text-white hover:bg-black/65 focus-visible:ring-white/70" aria-pressed={imageActualSize} onClick={() => setImageActualSize((value) => !value)}>
                 {imageActualSize ? <Minimize2 data-icon="inline-start" /> : <Maximize2 data-icon="inline-start" />}
                 {t(imageActualSize ? 'fitImage' : 'originalImageSize')}
               </Button>
-              <Button variant="secondary" size="icon" aria-label={t('close')} onClick={() => setImageIndex(-1)}><X /></Button>
+              <Button variant="secondary" size="icon" className="bg-black/50 text-white hover:bg-black/65 focus-visible:ring-white/70" aria-label={t('close')} onClick={() => setImageIndex(-1)}><X /></Button>
             </div>
           </div>
           <div
             ref={imageViewport}
+            data-lightbox-backdrop=""
             className="min-h-0 flex-1 overflow-auto overscroll-contain p-3 sm:px-16"
             style={{ touchAction: imageActualSize ? "none" : "auto" }}
             onPointerDown={(event) => {
@@ -1189,7 +1206,7 @@ export function TopicPageView({
               suppressImageClick.current = false;
             }}
           >
-            <div className={imageActualSize ? "flex min-h-full w-max min-w-full" : "flex min-h-full w-full items-center justify-center"}>
+            <div data-lightbox-backdrop="" className={imageActualSize ? "flex min-h-full w-max min-w-full" : "flex min-h-full w-full items-center justify-center"}>
               <img
                 src={images[imageIndex]?.src}
                 alt={images[imageIndex]?.alt || ""}
@@ -1209,14 +1226,14 @@ export function TopicPageView({
               />
             </div>
           </div>
-          <div className="flex shrink-0 items-center justify-center gap-3 px-4 pb-3 text-xs text-white/75">
+          <div data-lightbox-backdrop="" className="flex shrink-0 items-center justify-center gap-3 px-4 pb-3 text-xs text-white/80">
             <span className="min-w-0 truncate" title={images[imageIndex]?.name}>{images[imageIndex]?.name || images[imageIndex]?.alt}</span>
             <span className="shrink-0 tabular-nums">{[images[imageIndex]?.dimensions, images[imageIndex]?.size].filter(Boolean).join(" · ")}</span>
           </div>
           <Button
             variant="secondary"
             size="icon"
-            className="absolute left-3 top-1/2 -translate-y-1/2"
+            className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 text-white hover:bg-black/65 focus-visible:ring-white/70"
             disabled={images.length < 2}
             aria-label={t("previousImage")}
             onClick={() => {
@@ -1229,7 +1246,7 @@ export function TopicPageView({
           <Button
             variant="secondary"
             size="icon"
-            className="absolute right-3 top-1/2 -translate-y-1/2"
+            className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 text-white hover:bg-black/65 focus-visible:ring-white/70"
             disabled={images.length < 2}
             aria-label={t("nextImage")}
             onClick={() => {
@@ -1646,8 +1663,10 @@ function TopicAside({
   page,
   replyCount,
   active,
+  mobileHidden,
   max,
-  busy,
+  postsRoot,
+  cancelLoad,
   posts,
   hasAfter,
   locale,
@@ -1657,25 +1676,26 @@ function TopicAside({
   page: TopicDetailProps;
   replyCount: number;
   active: number;
+  mobileHidden: boolean;
   max: number;
-  busy: boolean;
+  postsRoot: RefObject<HTMLDivElement | null>;
+  cancelLoad(): void;
   posts: PostPayload[];
   hasAfter: boolean;
   locale: string;
   t: Translate;
-  onSelect(value: number): void;
+  onSelect(value: number): Promise<number | undefined>;
 }) {
-  const currentPost = posts.find((post) => post.postNo === active);
   const endDate = hasAfter
     ? page.topic.updatedAt
     : posts.at(-1)?.createdAt || page.topic.updatedAt;
   return (
-    <aside className="hidden min-w-0 xl:block">
-      <div className="sticky top-19">
-        <h2 className="px-4 py-4 text-sm font-semibold text-muted-foreground">
+    <aside className="contents min-w-0 xl:block">
+      <div className="contents sticky top-19 xl:block">
+        <h2 className="hidden px-4 py-4 xl:block text-sm font-semibold text-muted-foreground">
           {t("overview")}
         </h2>
-        <dl className="flex flex-col gap-4 border-t px-4 py-5 text-sm">
+        <dl className="hidden flex-col gap-4 border-t px-4 py-5 text-sm xl:flex">
           <Stat label={t("replyCount")} value={replyCount} />
           <Stat label={t("viewCount")} value={page.topic.viewCount} />
           <Stat
@@ -1684,7 +1704,7 @@ function TopicAside({
           />
         </dl>
         {page.topic.participants.length ? (
-          <div className="border-t px-4 py-4">
+          <div className="hidden border-t px-4 py-4 xl:block">
             <h3 className="mb-3 text-sm font-semibold text-muted-foreground">
               {t("activeParticipants")}
             </h3>
@@ -1698,15 +1718,14 @@ function TopicAside({
         {max > 1 ? (
           <PostPositionRail
             current={active}
+            mobileHidden={mobileHidden}
             max={max}
             startLabel={formatRailDate(page.topic.createdAt, locale)}
             endLabel={formatRailDate(endDate, locale)}
-            currentLabel={
-              currentPost
-                ? formatRailDate(currentPost.createdAt, locale)
-                : undefined
-            }
-            busy={busy}
+            posts={posts}
+            postsRoot={postsRoot}
+            hasAfter={hasAfter}
+            cancelLoad={cancelLoad}
             locale={locale}
             t={t}
             onSelect={onSelect}
@@ -1718,83 +1737,201 @@ function TopicAside({
 }
 
 function PostPositionRail({
-  current,
-  max,
-  startLabel,
-  endLabel,
-  currentLabel,
-  busy,
-  locale,
-  t,
-  onSelect,
+  current, max, mobileHidden, startLabel, endLabel, posts, postsRoot, hasAfter, cancelLoad, locale, t, onSelect,
 }: {
   current: number;
+  mobileHidden: boolean;
   max: number;
   startLabel: string;
   endLabel: string;
-  currentLabel?: string;
-  busy: boolean;
+  posts: PostPayload[];
+  postsRoot: RefObject<HTMLDivElement | null>;
+  hasAfter: boolean;
+  cancelLoad(): void;
   locale: string;
   t: Translate;
-  onSelect(value: number): void;
+  onSelect(value: number): Promise<number | undefined>;
 }) {
+  const position = usePostPosition({ root: postsRoot, posts, max, hasAfter, current, load: onSelect, cancelLoad });
   const [preview, setPreview] = useState<number>();
-  const displayed = Math.min(max, Math.max(1, preview ?? current));
-  const progress = max <= 1 ? 0 : (displayed - 1) / (max - 1);
-  const thumbTop = Math.min(164, Math.max(0, progress * 192 - 14));
-  const indicatorTop = Math.min(156, Math.max(0, thumbTop - 4));
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [jumpInput, setJumpInput] = useState("");
+  const [mobileCommit, setMobileCommit] = useState<number>();
+  const [desktopSliderVersion, setDesktopSliderVersion] = useState(0);
+  const [mobileSliderVersion, setMobileSliderVersion] = useState(0);
+  const mobileGesture = useRef<{ id: number; start: number; value: number } | null>(null);
+  const jumpInputId = useId();
+  const mobileTrigger = useRef<HTMLButtonElement>(null);
+  const mobileClose = useRef<HTMLButtonElement>(null);
+  const pendingMobileSelection = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- A cached page must not reopen a preserved mobile sheet on Back.
+    setMobileOpen(false);
+    setMobileCommit(undefined);
+    const wideScreen = window.matchMedia?.("(min-width: 80rem)");
+    const closeOnDesktop = () => { if (wideScreen?.matches) setMobileOpen(false); };
+    wideScreen?.addEventListener("change", closeOnDesktop);
+    return () => { pendingMobileSelection.current = undefined; wideScreen?.removeEventListener("change", closeOnDesktop); };
+  }, []);
+  const indicatedTarget = position.target ?? mobileCommit;
+  const displayed = Math.min(max, Math.max(1, Math.round(preview ?? indicatedTarget ?? position.postNo)));
+  const progress = preview !== undefined ? (preview - 1) / Math.max(1, max - 1)
+    : indicatedTarget !== undefined ? (indicatedTarget - 1) / Math.max(1, max - 1) : position.progress;
+  const currentPost = posts.find(post => post.postNo === displayed);
+  const select = (value: number) => {
+    setPreview(undefined);
+    if (mobileOpen) {
+      setMobileCommit(Math.round(value));
+      pendingMobileSelection.current = Math.round(value);
+      setMobileOpen(false);
+    } else void position.select(Math.round(value));
+  };
 
-  return (
-    <div className="border-t px-3 py-2">
-      <PositionJumpButton
-        placement="start"
-        label={startLabel}
-        title={t("earliestContent")}
-        disabled={busy}
-        onClick={() => onSelect(1)}
-      />
+  const mobileValue = Math.min(max, Math.max(1, Math.round(Number(jumpInput) || 1)));
+  const mobilePost = posts.find(post => post.postNo === mobileValue);
+  const mobileProgress = ((preview ?? mobileValue) - 1) / Math.max(1, max - 1);
+  const cancelMobileGesture = () => {
+    const gesture = mobileGesture.current;
+    mobileGesture.current = null;
+    if (gesture) {
+      setJumpInput(String(gesture.start));
+      // Radix clears its cached drag bounds on pointerup, but not pointercancel.
+      setMobileSliderVersion(version => version + 1);
+    }
+    setPreview(undefined);
+  };
+
+  const controls = () => (
+    <div className="border-t px-3 py-2" data-testid="post-position-rail" data-progress={progress}
+      data-state={preview !== undefined ? "dragging" : position.target !== undefined ? "jumping" : "reading"}>
+      <PositionJumpButton placement="start" label={startLabel} title={t("earliestContent")} disabled={false} onClick={() => select(1)} />
       <div className="grid h-48 grid-cols-[24px_minmax(0,1fr)] gap-3">
-        <Slider
-          orientation="vertical"
-          inverted
-          aria-label={t("replyPosition")}
-          value={[displayed]}
-          min={1}
-          max={max}
-          step={1}
-          disabled={busy}
-          className="h-full [&_[data-slot=slider-range]]:bg-transparent [&_[data-slot=slider-thumb]]:h-7 [&_[data-slot=slider-thumb]]:w-1.5 [&_[data-slot=slider-thumb]]:border-0 [&_[data-slot=slider-thumb]]:bg-success [&_[data-slot=slider-track]]:w-px [&_[data-slot=slider-track]]:bg-border"
-          onValueChange={(values) => setPreview(values[0])}
-          onValueCommit={(values) => {
+        <SliderPrimitive.Root key={desktopSliderVersion} orientation="vertical" inverted min={1} max={max} step={0.001}
+          value={[1 + progress * (max - 1)]}
+          className="relative flex h-full w-6 touch-none select-none flex-col items-center"
+          onPointerDownCapture={() => position.cancel()}
+          onPointerCancel={() => {
             setPreview(undefined);
-            if (values[0]) onSelect(values[0]);
+            // A cancelled drag must discard Radix's cached bounds before the sticky rail moves.
+            setDesktopSliderVersion(version => version + 1);
           }}
-        />
+          onLostPointerCapture={() => setPreview(undefined)}
+          onKeyDown={(event) => {
+            const values: Record<string, number> = { ArrowDown: displayed + 1, ArrowUp: displayed - 1, ArrowRight: displayed + 1, ArrowLeft: displayed - 1, PageDown: displayed + 10, PageUp: displayed - 10, Home: 1, End: max };
+            if (values[event.key] === undefined) return;
+            event.preventDefault();
+            select(Math.max(1, Math.min(max, values[event.key])));
+          }}
+          onValueChange={values => setPreview(values[0])}
+          onValueCommit={values => select(values[0])}>
+          <SliderPrimitive.Track className="relative h-full w-px grow rounded-full bg-border" />
+          <SliderPrimitive.Thumb aria-label={t("replyPosition")} aria-valuenow={displayed}
+            aria-valuetext={`${displayed} / ${max.toLocaleString(locale)}`}
+            className="relative block h-7 w-1.5 rounded-full bg-primary outline-hidden after:absolute after:-inset-2 focus-visible:ring-3 focus-visible:ring-ring/50" />
+        </SliderPrimitive.Root>
         <div className="relative min-w-0">
-          <div
-            className="absolute left-0 min-w-0 transition-[top] duration-200 ease-out"
-            style={{ top: indicatorTop }}
-          >
-            <div className="whitespace-nowrap text-base font-black leading-none tabular-nums">
-              {displayed} / {max.toLocaleString(locale)}
+          <div className="absolute top-0 left-0 min-w-0" style={{ transform: `translateY(calc(${progress} * (12rem - 1.75rem)))` }}>
+            <div className="whitespace-nowrap text-base font-black leading-none tabular-nums">{displayed} / {max.toLocaleString(locale)}</div>
+            <div className="mt-2 h-5 truncate text-sm font-semibold leading-tight text-muted-foreground" aria-busy={position.target !== undefined}>
+              {currentPost ? formatRailDate(currentPost.createdAt, locale) : position.target !== undefined ? <Spinner className="size-3" /> : null}
             </div>
-            {currentLabel && preview === undefined && !busy ? (
-              <div className="mt-2 truncate text-sm font-semibold leading-tight text-muted-foreground">
-                {currentLabel}
-              </div>
-            ) : null}
           </div>
         </div>
       </div>
-      <PositionJumpButton
-        placement="end"
-        label={endLabel}
-        title={t("latestReply")}
-        disabled={busy}
-        onClick={() => onSelect(max)}
-      />
+      <PositionJumpButton placement="end" label={endLabel} title={t("latestReply")} disabled={false} onClick={() => select(max)} />
     </div>
   );
+  return <>
+    <div className="hidden xl:block">{controls()}</div>
+    <Sheet open={mobileOpen} onOpenChange={open => {
+      if (open) { position.cancel(); setMobileCommit(undefined); setJumpInput(String(position.postNo)); }
+      setPreview(undefined);
+      setMobileOpen(open);
+    }}>
+      <SheetTrigger asChild>
+        <Button ref={mobileTrigger} variant="outline" aria-label={t("replyPosition")} aria-describedby={`${jumpInputId}-current`}
+          className={cn("fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 z-30 h-9 min-w-28 max-w-[calc(100vw-10rem)] overflow-hidden rounded-full border-primary/25 bg-background px-4 text-primary shadow-lg xl:hidden", mobileHidden && "hidden")}
+          data-slot="mobile-topic-position">
+          <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 bg-primary/12" style={{ width: `${progress * 100}%` }} />
+          <span id={`${jumpInputId}-current`} className="relative min-w-0 truncate tabular-nums">{indicatedTarget ?? position.postNo} / {max.toLocaleString(locale)}</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="bottom" showCloseButton={false} className="max-h-[85dvh] overflow-y-auto rounded-t-2xl pb-[max(1rem,env(safe-area-inset-bottom))]"
+        onOpenAutoFocus={event => { event.preventDefault(); mobileClose.current?.focus({ preventScroll: true }); }}
+        onCloseAutoFocus={event => {
+          event.preventDefault();
+          mobileTrigger.current?.focus({ preventScroll: true });
+          const value = pendingMobileSelection.current;
+          pendingMobileSelection.current = undefined;
+          // Start after the modal unmounts and releases its body scroll lock.
+          if (value !== undefined) void position.select(value);
+          setMobileCommit(undefined);
+        }}>
+        <SheetHeader className="pr-14">
+          <SheetTitle>{t("replyPosition")}</SheetTitle>
+          <SheetDescription>{t("positionHelp")}</SheetDescription>
+        </SheetHeader>
+        <Button ref={mobileClose} variant="ghost" size="icon" aria-label={t("close")} className="absolute top-3 right-3" onClick={() => setMobileOpen(false)}><X /></Button>
+        <div className="mx-4 border-y px-3 py-2" data-testid="post-position-mobile">
+          <Button type="button" variant="ghost" aria-label={`${t("earliestContent")}: ${startLabel}`} className="mb-2 h-11 w-full justify-start px-0 text-base font-semibold text-muted-foreground hover:bg-transparent hover:text-foreground" onClick={() => select(1)}>
+            {startLabel}
+          </Button>
+          <SliderPrimitive.Root key={mobileSliderVersion} data-slot="mobile-position-slider" orientation="vertical" inverted min={1} max={max} step={0.001}
+            value={[preview ?? mobileValue]}
+            className="relative flex h-[clamp(8rem,calc(85dvh-22rem),22rem)] w-full touch-none select-none flex-col items-start"
+            onPointerDownCapture={event => {
+              if (event.button !== 0 || !event.isPrimary) { event.preventDefault(); return; }
+              mobileGesture.current = { id: event.pointerId, start: mobileValue, value: preview ?? mobileValue };
+            }}
+            onValueChange={values => {
+              if (mobileGesture.current) mobileGesture.current.value = values[0];
+              setPreview(values[0]);
+              setJumpInput(String(Math.round(values[0])));
+            }}
+            onPointerUp={event => {
+              const gesture = mobileGesture.current;
+              if (!gesture || gesture.id !== event.pointerId) return;
+              mobileGesture.current = null;
+              select(gesture.value);
+            }}
+            onPointerCancel={cancelMobileGesture}
+            onLostPointerCapture={() => { if (mobileGesture.current) cancelMobileGesture(); }}
+            onKeyDown={event => {
+              const values: Record<string, number> = { ArrowDown: mobileValue + 1, ArrowUp: mobileValue - 1, ArrowRight: mobileValue + 1, ArrowLeft: mobileValue - 1, PageDown: mobileValue + 10, PageUp: mobileValue - 10, Home: 1, End: max };
+              if (values[event.key] === undefined) return;
+              event.preventDefault();
+              select(Math.max(1, Math.min(max, values[event.key])));
+            }}>
+            <SliderPrimitive.Track className="relative ml-[22px] h-full w-px grow rounded-full bg-border" />
+            <SliderPrimitive.Thumb aria-label={t("replyPosition")} aria-valuenow={mobileValue} aria-valuetext={`${mobileValue} / ${max.toLocaleString(locale)}`}
+              className="flex size-11 cursor-grab items-center justify-center rounded-md outline-hidden active:cursor-grabbing focus-visible:ring-3 focus-visible:ring-ring/50">
+              <span aria-hidden="true" className="pointer-events-none h-7 w-1.5 rounded-full bg-primary" />
+            </SliderPrimitive.Thumb>
+            <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-12 right-0">
+              <div className="absolute left-0 w-full" style={{ top: `calc(0.5rem + ${mobileProgress} * (100% - 2.75rem))` }}>
+                <div className="whitespace-nowrap text-base font-black leading-none tabular-nums">{mobileValue.toLocaleString(locale)} / {max.toLocaleString(locale)}</div>
+                <div className="mt-2 h-5 truncate text-sm font-semibold leading-tight text-muted-foreground">{mobilePost ? formatRailDate(mobilePost.createdAt, locale) : null}</div>
+              </div>
+            </div>
+          </SliderPrimitive.Root>
+          <Button type="button" variant="ghost" aria-label={`${t("latestReply")}: ${endLabel}`} className="mt-6 h-11 w-full justify-start px-0 text-base font-semibold text-muted-foreground hover:bg-transparent hover:text-foreground" onClick={() => select(max)}>
+            {endLabel}
+          </Button>
+        </div>
+        <form className="px-4" onSubmit={event => {
+          event.preventDefault();
+          const value = Number(jumpInput);
+          if (Number.isInteger(value) && value >= 1 && value <= max) select(value);
+        }}>
+          <Label htmlFor={jumpInputId}>{t("jumpToPost")}</Label>
+          <div className="mt-2 flex gap-2">
+            <Input id={jumpInputId} type="number" inputMode="numeric" min={1} max={max} step={1} required value={jumpInput} onChange={event => { setPreview(undefined); setJumpInput(event.target.value); }} />
+            <Button type="submit">{t("jumpGo")}</Button>
+          </div>
+        </form>
+      </SheetContent>
+    </Sheet>
+  </>;
 }
 
 function PositionJumpButton({
@@ -1816,7 +1953,7 @@ function PositionJumpButton({
       variant="ghost"
       className={cn(
         "block max-w-full truncate px-0 text-left text-base font-semibold leading-tight text-muted-foreground hover:bg-transparent hover:text-foreground",
-        placement === "start" ? "mb-3" : "mt-3",
+        placement === "start" ? "mb-3" : "mt-6",
       )}
       title={title}
       aria-label={`${title}: ${label}`}

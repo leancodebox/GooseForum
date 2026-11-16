@@ -61,4 +61,4 @@ function Slider({
   )
 }
 
-export { Slider }
+export { Slider, SliderPrimitive }

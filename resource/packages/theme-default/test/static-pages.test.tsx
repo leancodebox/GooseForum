@@ -1814,8 +1814,8 @@ describe("AppShell and static pages", () => {
     await user.click(within(firstImage.closest(".gf-content-image") as HTMLElement).getByRole("button", { name: "图片预览" }));
     const imageDialog = screen.getByRole("dialog", { name: "图片预览" });
     expect(imageDialog.classList.contains("sm:max-w-none")).toBe(true);
-    expect(imageDialog.classList.contains("bg-black/90")).toBe(true);
-    expect(imageDialog.classList.contains("bg-background/95")).toBe(false);
+    expect(imageDialog.classList.contains("bg-transparent")).toBe(true);
+    expect(document.querySelector('[data-slot="dialog-overlay"]')).toBeTruthy();
     expect(imageDialog.classList.contains("ring-0")).toBe(true);
     expect(within(imageDialog).getByText("1 / 2")).toBeTruthy();
     expect(within(imageDialog).getByText("first.webp")).toBeTruthy();
@@ -1917,7 +1917,7 @@ describe("AppShell and static pages", () => {
         .getByRole("slider", { name: "回复位置" })
         .getAttribute("data-orientation"),
     ).toBe("vertical");
-    expect(screen.getByText("1 / 2")).toBeTruthy();
+    expect(within(screen.getByTestId("post-position-rail")).getByText("1 / 2")).toBeTruthy();
     const wornBadge = screen.getByAltText("Contributor badge");
     expect(wornBadge).toBeTruthy();
     expect(wornBadge.parentElement?.classList.contains("z-30")).toBe(true);

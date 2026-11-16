@@ -2,6 +2,9 @@
 import en from "./en-topic.js";
 export default {
   ...en,
+  positionHelp: "Trascina in verticale e rilascia per spostarti, oppure inserisci il numero del messaggio.",
+  jumpToPost: "Vai al messaggio",
+  jumpGo: "Vai",
   originalImageSize: "Dimensioni originali",
   fitImage: "Adatta allo schermo",
   reply: "Rispondi",
