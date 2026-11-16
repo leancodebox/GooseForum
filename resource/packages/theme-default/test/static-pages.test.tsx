@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -432,7 +433,7 @@ describe("AppShell and static pages", () => {
       });
       page.layout = { ...page.layout, viewer: { ...page.layout.viewer, id: 7, username: "alice", isAuthenticated: true } };
       renderPage(page, { notifications: { unread } as unknown as GooseSiteApi["notifications"] });
-      await vi.advanceTimersByTimeAsync(30_000);
+      await act(() => vi.advanceTimersByTimeAsync(30_000));
       expect(unread).not.toHaveBeenCalled();
       fireEvent(window, new CustomEvent(unreadStatusEvent, { detail: { messages: true } }));
       expect(screen.getByRole("button", { name: "alice" }).querySelector(".bg-destructive")).not.toBeNull();
@@ -1216,10 +1217,9 @@ describe("AppShell and static pages", () => {
       messageProps.conversations = [...messageProps.conversations].reverse();
       page.url = "/messages?userId=9";
       renderPage(page, { chat: { messages, markRead: vi.fn().mockResolvedValue(true) } as unknown as GooseSiteApi["chat"] });
-      await vi.advanceTimersByTimeAsync(0);
+      await act(() => vi.advanceTimersByTimeAsync(0));
       expect(screen.getByText("Hello back")).toBeTruthy();
-      await vi.advanceTimersByTimeAsync(15_000);
-      await vi.advanceTimersByTimeAsync(0);
+      await act(() => vi.advanceTimersByTimeAsync(15_000));
       expect(messages).toHaveBeenLastCalledWith({ convId: 4, afterId: 31, limit: 30 });
       expect(screen.getAllByText("New message").length).toBeGreaterThanOrEqual(2);
       expect(screen.getByText("New message", { selector: '[data-slot="item-description"]' })).toBeTruthy();
@@ -1241,9 +1241,9 @@ describe("AppShell and static pages", () => {
       const page = payload("messages.index", messagesProps());
       page.url = "/messages?userId=9";
       renderPage(page, { chat: { messages, markRead: vi.fn().mockResolvedValue(true) } as unknown as GooseSiteApi["chat"] });
-      await vi.advanceTimersByTimeAsync(0);
+      await act(() => vi.advanceTimersByTimeAsync(0));
       window.dispatchEvent(new Event("online"));
-      await vi.advanceTimersByTimeAsync(0);
+      await act(() => vi.advanceTimersByTimeAsync(0));
       await Promise.resolve();
       expect(messages).toHaveBeenLastCalledWith({ convId: 4, afterId: 31, limit: 30 });
     } finally {
@@ -1260,8 +1260,8 @@ describe("AppShell and static pages", () => {
       const page = payload("messages.index", messagesProps());
       page.url = "/messages?userId=9";
       renderPage(page, { chat: { messages, markRead: vi.fn().mockResolvedValue(true) } as unknown as GooseSiteApi["chat"] });
-      await vi.advanceTimersByTimeAsync(0);
-      await vi.advanceTimersByTimeAsync(15_000);
+      await act(() => vi.advanceTimersByTimeAsync(0));
+      await act(() => vi.advanceTimersByTimeAsync(15_000));
       expect(messages).toHaveBeenCalledTimes(1);
     } finally {
       if (visibility) Object.defineProperty(document, "visibilityState", visibility);
@@ -1281,13 +1281,13 @@ describe("AppShell and static pages", () => {
       const page = payload("messages.index", messagesProps());
       page.url = "/messages?userId=9";
       renderPage(page, { chat: { messages, markRead: vi.fn().mockResolvedValue(true) } as unknown as GooseSiteApi["chat"] });
-      await vi.advanceTimersByTimeAsync(0);
-      await vi.advanceTimersByTimeAsync(15_000);
-      await vi.advanceTimersByTimeAsync(0);
+      await act(() => vi.advanceTimersByTimeAsync(0));
+      await act(() => vi.advanceTimersByTimeAsync(15_000));
+      await act(() => vi.advanceTimersByTimeAsync(0));
       expect(messages).toHaveBeenCalledTimes(2);
       expect(screen.getByText("refresh failed")).toBeTruthy();
       expect(screen.getByRole("button", { name: "重试加载" })).toBeTruthy();
-      await vi.advanceTimersByTimeAsync(1_000);
+      await act(() => vi.advanceTimersByTimeAsync(1_000));
       expect(messages).toHaveBeenCalledTimes(2);
       const retry = screen.getByRole("button", { name: "重试加载" });
       fireEvent.click(retry);
@@ -1295,7 +1295,7 @@ describe("AppShell and static pages", () => {
       fireEvent.click(retry);
       expect(messages).toHaveBeenCalledTimes(3);
       resolveRetry({ list: [], hasMoreBefore: false, hasMoreAfter: false, nextBeforeId: 31, latestId: 31 });
-      await vi.advanceTimersByTimeAsync(0);
+      await act(() => vi.advanceTimersByTimeAsync(0));
     } finally {
       vi.useRealTimers();
     }
@@ -1315,12 +1315,12 @@ describe("AppShell and static pages", () => {
       const page = payload("messages.index", messagesProps());
       page.url = "/messages?userId=9";
       renderPage(page, { chat: { messages, markRead } as unknown as GooseSiteApi["chat"] });
-      await vi.advanceTimersByTimeAsync(0);
-      await vi.advanceTimersByTimeAsync(15_000);
-      await vi.advanceTimersByTimeAsync(0);
+      await act(() => vi.advanceTimersByTimeAsync(0));
+      await act(() => vi.advanceTimersByTimeAsync(15_000));
+      await act(() => vi.advanceTimersByTimeAsync(0));
       fireEvent.click(screen.getByRole("button", { name: /dave/i }));
       rejectRefreshRead(new Error("stale refresh read failed"));
-      await vi.advanceTimersByTimeAsync(0);
+      await act(() => vi.advanceTimersByTimeAsync(0));
       expect(screen.queryByText("stale refresh read failed")).toBeNull();
     } finally {
       vi.useRealTimers();
@@ -1516,6 +1516,7 @@ describe("AppShell and static pages", () => {
       moderation: { reports } as unknown as GooseSiteApi["moderation"],
     });
 
+    await waitFor(() => expect(reports).toHaveBeenCalledWith(0, 20, "open"));
     await user.click(await screen.findByRole("tab", { name: "已处理" }));
     await waitFor(() => expect(reports).toHaveBeenCalledWith(0, 20, "closed"));
     resolveOpen({

@@ -39,17 +39,17 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.63.0",
-    "@vitest/coverage-v8": "4.1.11",
-    "@vitest/eslint-plugin": "^1.6.27",
-    "eslint": "^10.10.0",
+    "@playwright/test": "^1.65.1",
+    "@vitest/coverage-v8": "4.1.12",
+    "@vitest/eslint-plugin": "^1.6.28",
+    "eslint": "^10.15.0",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.7",
-    "globals": "^16.4.0",
-    "knip": "^6.35.1",
-    "tailwindcss": "^4.1.18",
+    "eslint-plugin-react-refresh": "^0.5.8",
+    "globals": "^16.5.0",
+    "knip": "^6.45.1",
+    "tailwindcss": "^4.3.5",
     "typescript": "~6.0.3",
-    "typescript-eslint": "^8.70.0",
-    "vitest": "4.1.11"
+    "typescript-eslint": "^8.72.2",
+    "vitest": "4.1.12"
   }
 }

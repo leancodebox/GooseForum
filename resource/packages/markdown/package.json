@@ -8,12 +8,12 @@
   },
   "dependencies": {
     "markdown-it": "^14.3.3",
-    "markdown-it-anchor": "^9.2.0",
+    "markdown-it-anchor": "^9.2.1",
     "markdown-it-task-lists": "^2.1.1",
-    "turndown": "^7.2.4"
+    "turndown": "^7.2.5"
   },
   "devDependencies": {
-    "@types/markdown-it": "^14.1.2",
+    "@types/markdown-it": "^14.2.0",
     "@types/turndown": "^5.0.6",
     "typescript": "~6.0.3"
   },
