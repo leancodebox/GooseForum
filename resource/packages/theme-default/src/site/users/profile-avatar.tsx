@@ -5,7 +5,7 @@ import {
   AvatarImage,
 } from "@gooseforum/ui/components/avatar";
 import { cn } from "@gooseforum/ui/lib/utils";
-import { badgeTone } from "./profile-badge";
+import { ForumBadge } from "@gooseforum/ui/components/forum-badge";
 
 export function ProfileAvatar({
   src,
@@ -47,22 +47,16 @@ export function ProfileAvatar({
         </AvatarFallback>
       </Avatar>
       {badge ? (
-        <span
+        <ForumBadge
+          badge={badge}
+          variant="worn"
           className={cn(
-            "pointer-events-none absolute -bottom-1 z-30 flex size-[38%] min-h-5 min-w-5 items-center justify-center rounded-full p-0.5 shadow-sm ring-1 ring-inset",
+            "pointer-events-none absolute -bottom-1 z-30 size-[38%] min-h-5 min-w-5",
             badgePosition === "left" ? "-left-1" : "-right-1",
             compactBadge && "min-h-4 min-w-4",
-            badgeTone(badge.color, badge.level),
             badgeClassName,
           )}
-          title={badge.description || badge.name}
-        >
-          <img
-            src={badge.iconUrl || "/static/badges/contributor.svg"}
-            alt={badge.name}
-            className="size-full object-contain"
-          />
-        </span>
+        />
       ) : null}
     </span>
   );

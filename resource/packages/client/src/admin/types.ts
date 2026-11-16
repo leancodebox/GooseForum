@@ -108,6 +108,31 @@ export interface AdminBadge {
   sortOrder: number
   isSystem?: boolean
   canDelete?: boolean
+  grantedCount?: number
+  grantRule?: {
+    metric: 'topics' | 'replies' | 'likesGiven' | 'likesReceived' | 'followers'
+    threshold: number
+  }
+}
+
+export interface AdminBadgeRecipient {
+  userId: number
+  username: string
+  avatarUrl: string
+  source: string
+  reason: string
+  grantedBy: number
+  grantedByName: string
+  grantedAt: string
+}
+
+export interface AdminBadgeRecipientPage {
+  list: AdminBadgeRecipient[]
+  page: number
+  size: number
+  hasNext: boolean
+  /** Persisted recipient count; omitted for filtered searches. */
+  total?: number
 }
 
 export interface AdminFileResource {
@@ -351,6 +376,8 @@ export interface GooseAdminApi {
     badges(): Promise<AdminBadge[]>
     saveBadge(badge: AdminBadge): Promise<unknown>
     deleteBadge(code: string): Promise<unknown>
+    badgeRecipients(input: { code: string; page?: number; pageSize?: number; search?: string }): Promise<AdminBadgeRecipientPage>
+    updateBadgeRecipient(input: { code: string; userId: number; action: 'grant' | 'revoke'; reason: string }): Promise<unknown>
     files(input: { page?: number; pageSize?: number }): Promise<PageResult<AdminFileResource>>
   }
   pages: {

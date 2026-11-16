@@ -292,6 +292,8 @@ func apiRoute(ginApp *gin.Engine) {
 		GET("badges", UpButterReq(api.BadgeList)).
 		POST("badge-save", UpButterReq(api.SaveBadge)).
 		POST("badge-delete", UpButterReq(api.DeleteBadge)).
+		POST("badge-recipients", middleware.CheckPermission(permission.UserManager), UpButterReq(api.BadgeRecipients)).
+		POST("badge-recipient-update", middleware.CheckPermission(permission.UserManager), UpButterReq(api.UpdateBadgeRecipient)).
 		POST("file-resources", UpButterReq(api.FileResourcePage)).
 		POST("img-upload", api.SaveAdminImgByGinContext).
 		POST("img-upload/init", api.InitDirectAdminImageUpload).

@@ -4,6 +4,7 @@ import en from "./en-server-messages.js";
 import mfa from './it-mfa.js';
 export default {
   ...en,
+  "admin.badge.inUse": "Questo distintivo ha uno storico di assegnazioni e non può essere eliminato. Disabilitalo.",
   "attachment.invalidFile": "Tipo di file non supportato o nome/contenuto non valido.",
   "attachment.tooLarge": "Il file è vuoto o supera il limite di dimensione.",
   "attachment.invalidReference": "Un allegato non è disponibile. Rimuovilo e caricalo di nuovo.",

@@ -1,5 +1,7 @@
 export default {
   messages: {
+    badgeGranted: "Distintivo «{badgeName}» ({badgeCode}) assegnato: {reason}",
+    badgeRevoked: "Distintivo «{badgeName}» ({badgeCode}) revocato: {reason}",
     userUpdated: "Utente {userId} aggiornato: {changedFields}",
     contentReviewed:
       "Moderazione {type} #{subjectId}: {action}, versione {version}: {reason}",

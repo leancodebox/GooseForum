@@ -46,3 +46,13 @@ func systemDefinitions() []Badge {
 		{Code: CodeRobot, Type: badges.TypeSystem, GrantMode: badges.GrantModeManual, Name: "机器人", Description: "你就是机器人！", IconType: badges.IconTypeAsset, IconURL: "/static/badges/robot.svg", Color: "slate", Level: LevelSpecial, IsEnabled: true, IsWearable: true, SortOrder: 150},
 	}
 }
+
+// SystemCodes identifies built-in badges without materializing presentation overrides.
+func SystemCodes() []string {
+	definitions := systemDefinitions()
+	codes := make([]string, len(definitions))
+	for i, definition := range definitions {
+		codes[i] = definition.Code
+	}
+	return codes
+}

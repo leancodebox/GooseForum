@@ -2,7 +2,6 @@ package api
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"strings"
 	"time"
@@ -11,12 +10,10 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/outbound"
 	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
-	"github.com/leancodebox/GooseForum/app/bundles/randopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
-	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderators"
@@ -28,7 +25,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/sensitiveWord"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
-	"github.com/leancodebox/GooseForum/app/models/forum/userBadges"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
@@ -52,7 +48,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/sensitivewordservice"
 	"github.com/leancodebox/GooseForum/app/service/themeservice"
 	"github.com/leancodebox/GooseForum/app/service/topicservice"
-	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/samber/lo"
 )
 
@@ -212,151 +207,6 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 		pageData.PageSize,
 		pageData.Total,
 	)
-}
-
-type BadgeSaveReq = badgeservice.Badge
-
-func BadgeList(req component.BetterRequest[component.Null]) component.Response {
-	return component.SuccessResponse(badgeservice.AllForAdmin())
-}
-
-func generateCustomBadgeCode() string {
-	for range 16 {
-		code := "custom_" + strings.ToLower(randopt.RandomString(10))
-		if badges.GetByCode(code).Id == 0 {
-			return code
-		}
-	}
-	return fmt.Sprintf("custom_%x", time.Now().UnixNano())
-}
-
-func SaveBadge(req component.BetterRequest[BadgeSaveReq]) component.Response {
-	params := req.Params
-	params.Code = strings.TrimSpace(params.Code)
-	params.Name = strings.TrimSpace(params.Name)
-	if params.Name == "" {
-		return component.FailResponseCode(component.MessageAdminBadgeNameRequired, nil)
-	}
-	if params.Type == "" {
-		params.Type = badges.TypeCustom
-	}
-	if params.Type != badges.TypeSystem && params.Type != badges.TypeCustom {
-		return component.FailResponseCode(component.MessageAdminBadgeTypeInvalid, nil)
-	}
-	if params.Code == "" {
-		if params.Type == badges.TypeSystem {
-			return component.FailResponseCode(component.MessageAdminBadgeCodeRequired, nil)
-		}
-		params.Code = generateCustomBadgeCode()
-	}
-	if params.GrantMode == "" {
-		params.GrantMode = badges.GrantModeManual
-	}
-	if params.GrantMode != badges.GrantModeAuto && params.GrantMode != badges.GrantModeManual {
-		return component.FailResponseCode(component.MessageAdminBadgeGrantModeInvalid, nil)
-	}
-	if params.IconType == "" {
-		params.IconType = badges.IconTypeAsset
-	}
-	if params.Type == badges.TypeSystem {
-		systemBadge := badgeservice.ResolveOne(params.Code)
-		if systemBadge.Code == "" || systemBadge.Type != badges.TypeSystem {
-			return component.FailResponseCode(component.MessageAdminBadgeSystemNotFound, nil)
-		}
-		params.GrantMode = systemBadge.GrantMode
-	}
-
-	entity := badges.GetByCode(params.Code)
-	if entity.Id == 0 {
-		entity.Code = params.Code
-	}
-	entity.Type = params.Type
-	entity.GrantMode = params.GrantMode
-	entity.Name = params.Name
-	entity.Description = params.Description
-	entity.IconType = params.IconType
-	entity.IconKey = params.IconKey
-	entity.IconURL = params.IconURL
-	entity.Color = params.Color
-	entity.Level = params.Level
-	entity.IsEnabled = params.IsEnabled
-	entity.IsWearable = params.IsWearable
-	entity.SortOrder = params.SortOrder
-	if err := badges.Save(&entity); err != nil {
-		return component.FailResponseCode(component.MessageAdminBadgeSaveFailed, nil)
-	}
-	badgeservice.InvalidateDefinitions()
-	userservice.ClearUserPublicProfileCache()
-	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
-}
-
-type BadgeDeleteReq struct {
-	Code string `json:"code"`
-}
-
-func DeleteBadge(req component.BetterRequest[BadgeDeleteReq]) component.Response {
-	code := strings.TrimSpace(req.Params.Code)
-	if code == "" {
-		return component.FailResponseCode(component.MessageAdminBadgeCodeRequired, nil)
-	}
-	badge := badgeservice.ResolveOne(code)
-	if badge.Type == badges.TypeSystem {
-		return component.FailResponseCode(component.MessageAdminBadgeSystemDeleteBlock, nil)
-	}
-	if err := badges.DeleteByCode(code); err != nil {
-		return component.FailResponseCode(component.MessageAdminBadgeDeleteFailed, nil)
-	}
-	badgeservice.InvalidateDefinitions()
-	userservice.ClearUserPublicProfileCache()
-	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
-}
-
-type UserBadgeOptionsReq struct {
-	UserId uint64 `json:"userId"`
-}
-
-type UserBadgeOptionsResp struct {
-	Options []badgeservice.Badge     `json:"options"`
-	Active  []badgeservice.UserBadge `json:"active"`
-}
-
-func UserBadgeOptions(req component.BetterRequest[UserBadgeOptionsReq]) component.Response {
-	return component.SuccessResponse(UserBadgeOptionsResp{
-		Options: badgeservice.ManualGrantBadgesForAdmin(),
-		Active:  badgeservice.GetUserBadges(req.Params.UserId),
-	})
-}
-
-type SaveUserBadgesReq struct {
-	UserId     uint64   `json:"userId"`
-	BadgeCodes []string `json:"badgeCodes"`
-}
-
-func SaveUserBadges(req component.BetterRequest[SaveUserBadgesReq]) component.Response {
-	userID := req.Params.UserId
-	if userID == 0 {
-		return component.FailResponseCode(component.MessageUserNotFound, nil)
-	}
-	allowed := lo.KeyBy(badgeservice.ManualGrantBadgesForAdmin(), func(item badgeservice.Badge) string { return item.Code })
-	nextCodes := lo.Uniq(req.Params.BadgeCodes)
-	nextSet := map[string]bool{}
-	for _, code := range nextCodes {
-		if _, ok := allowed[code]; !ok {
-			continue
-		}
-		nextSet[code] = true
-		_, _ = badgeservice.Grant(userID, code, userBadges.SourceManual, "管理员手动授予", req.UserId)
-	}
-	for _, active := range badgeservice.GetUserBadges(userID) {
-		if active.Source != userBadges.SourceManual {
-			continue
-		}
-		if !nextSet[active.Code] {
-			_ = userBadges.Revoke(userID, active.Code)
-		}
-	}
-	userservice.InvalidateUserPublicProfileCache(userID)
-	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
 
 type EditUserReq struct {

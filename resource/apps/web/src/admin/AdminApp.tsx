@@ -32,6 +32,7 @@ import { normalizeAdminPath, communityRulePaths, identitySettingPaths } from './
 import { prepareAdminTranslations, adminPageNamespaces, loadedAdminNamespaces } from './translation-loader'
 import { prepareAdminListData, type AdminListData } from './list-data'
 import { errorMessage } from './error-message'
+import { AdminPermission, hasAdminPermission } from './access'
 
 import { DashboardPage, CategoriesManagementPage, AccessGroupsManagementPage, RolesManagementPage, UsersManagementPage, RegistrationInvitationsPage, PostsManagementPage, LinksManagementPage, SponsorsManagementPage, BadgesManagementPage, FileResourcesManagementPage, OptRecordsManagementPage, SiteInfoManagementPage, SiteChromeManagementPage, MailSettingsPage, SecuritySettingsPage, PostingSettingsPage, AnnouncementSettingsPage, HttpNotifySettingsPage, SensitiveWordsSettingsPage, OAuthSettingsPage, OIDCProviderSettingsPage, prepareAdminPage } from './page-registry'
 
@@ -246,7 +247,7 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
       : pathname === '/admin/sponsors'
         ? <SponsorsManagementPage api={api} text={pageConfigText} />
       : pathname === '/admin/badges'
-        ? <BadgesManagementPage api={api} text={assetText} />
+        ? <BadgesManagementPage api={api} text={assetText} canManageRecipients={hasAdminPermission(page.layout.viewer?.adminPermissions || [], AdminPermission.UserManager)} />
       : pathname === '/admin/files/resources'
         ? <FileResourcesManagementPage api={api} text={assetText} />
       : pathname === '/admin/opt-records'

@@ -1,6 +1,7 @@
 // 后端 MessageCode 的前端兜底翻译；完整性由 check-server-message-i18n.mjs 校验。
 import mfa from './zh-mfa.js';
 export default {
+  "admin.badge.inUse": "此徽章已有授予记录，无法删除。可改为停用。",
   "attachment.invalidFile": "文件类型不支持，或文件名、内容不合法。",
   "attachment.tooLarge": "文件为空或超过附件大小限制。",
   "attachment.invalidReference": "附件已失效，请移除后重新上传。",

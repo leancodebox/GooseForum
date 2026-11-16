@@ -1,11 +1,14 @@
 package pageConfig
 
 import (
+	"errors"
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/spf13/cast"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func GetPostingSettingsConfig(defaultValue PostingContent) PostingContent {
@@ -76,7 +79,7 @@ func GetConfigByPageType[T any](pageType string, defaultValue T) T {
 	return defaultValue
 }
 
-const AppMigrationVersion uint32 = 30
+const AppMigrationVersion uint32 = 31
 
 func GetMigrationVersion() uint32 {
 	configEntity := GetByPageType(Migration)
@@ -91,4 +94,21 @@ func SyncMigrationVersion(version uint32) error {
 		return builder().Create(&configEntity).Error
 	}
 	return builder().Save(&configEntity).Error
+}
+
+func GetMigrationVersionWithDB(conn *gorm.DB) (uint32, error) {
+	var entity Entity
+	err := conn.Where("page_type = ?", Migration).First(&entity).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return 0, nil
+	}
+	return cast.ToUint32(entity.Config), err
+}
+
+func SyncMigrationVersionWithDB(conn *gorm.DB, version uint32) error {
+	entity := Entity{PageType: Migration, Config: cast.ToString(version)}
+	return conn.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "page_type"}},
+		DoUpdates: clause.AssignmentColumns([]string{"config", "updated_at"}),
+	}).Create(&entity).Error
 }

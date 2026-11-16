@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
 	paniclog "github.com/leancodebox/GooseForum/app/bundles/recovery"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/datamigration"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"github.com/leancodebox/GooseForum/app/service/topicrankservice"
@@ -363,6 +365,12 @@ func runVersionedDataMigrations() error {
 			return err
 		}
 		currentVersion = 30
+	}
+	if currentVersion < 31 {
+		if err := migrateBadgeStatsWithDB(dbconnect.Connect(), badgeservice.SystemCodes()); err != nil {
+			return err
+		}
+		currentVersion = 31
 	}
 	slog.Info("app migration end", "version", currentVersion)
 	return nil

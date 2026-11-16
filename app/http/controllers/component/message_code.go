@@ -177,6 +177,7 @@ const (
 	MessageAdminBadgeSystemNotFound         MessageCode = "admin.badge.systemNotFound"         // 系统徽章不存在。
 	MessageAdminBadgeSaveFailed             MessageCode = "admin.badge.saveFailed"             // 保存徽章失败。
 	MessageAdminBadgeSystemDeleteBlock      MessageCode = "admin.badge.systemDeleteBlocked"    // 系统默认徽章不可删除。
+	MessageAdminBadgeInUse                  MessageCode = "admin.badge.inUse"                  // 已授予过的徽章不可删除。
 	MessageAdminBadgeDeleteFailed           MessageCode = "admin.badge.deleteFailed"           // 删除徽章失败。
 	MessageAdminTargetUserFetchFailed       MessageCode = "admin.user.targetFetchFailed"       // 目标用户查询失败。
 	MessageAdminCategoryRequired            MessageCode = "admin.category.nameRequired"        // 分类名称不能为空。

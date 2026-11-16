@@ -4,6 +4,7 @@ import en from "./en-server-messages.js";
 import mfa from './ja-mfa.js';
 export default {
   ...en,
+  "admin.badge.inUse": "このバッジには付与記録があるため削除できません。無効化してください。",
   "attachment.invalidFile": "未対応のファイル形式、または無効なファイル名・内容です。",
   "attachment.tooLarge": "ファイルが空か、サイズ上限を超えています。",
   "attachment.invalidReference": "利用できない添付ファイルがあります。削除して再アップロードしてください。",

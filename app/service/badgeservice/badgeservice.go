@@ -34,8 +34,10 @@ type Badge struct {
 
 type AdminBadge struct {
 	Badge
-	IsSystem  bool `json:"isSystem"`
-	CanDelete bool `json:"canDelete"`
+	IsSystem     bool       `json:"isSystem"`
+	CanDelete    bool       `json:"canDelete"`
+	GrantedCount int64      `json:"grantedCount"`
+	GrantRule    *GrantRule `json:"grantRule,omitempty"`
 }
 
 type UserBadge struct {
@@ -65,7 +67,7 @@ func buildAllForAdmin() []AdminBadge {
 	for _, def := range systemDefs {
 		seen[def.Code] = true
 		badge := applyOverride(def, overrides[def.Code])
-		result = append(result, AdminBadge{Badge: badge, IsSystem: true, CanDelete: false})
+		result = append(result, AdminBadge{Badge: badge, IsSystem: true, CanDelete: false, GrantRule: RuleForCode(def.Code)})
 	}
 
 	for _, entity := range overrides {
@@ -257,9 +259,7 @@ func applyOverride(def Badge, override *badges.Entity) Badge {
 	if override.Name != "" {
 		item.Name = override.Name
 	}
-	if override.Description != "" {
-		item.Description = override.Description
-	}
+	item.Description = override.Description
 	if override.IconType != "" {
 		item.IconType = override.IconType
 	}
@@ -277,9 +277,7 @@ func applyOverride(def Badge, override *badges.Entity) Badge {
 	}
 	item.IsEnabled = override.IsEnabled
 	item.IsWearable = override.IsWearable
-	if override.SortOrder != 0 {
-		item.SortOrder = override.SortOrder
-	}
+	item.SortOrder = override.SortOrder
 	return item
 }
 

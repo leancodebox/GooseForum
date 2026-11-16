@@ -1,6 +1,7 @@
 // Frontend fallbacks for backend MessageCode values; completeness is checked in CI.
 import mfa from './en-mfa.js';
 export default {
+  "admin.badge.inUse": "This badge has award history and cannot be deleted. Disable it instead.",
   "attachment.invalidFile": "Unsupported file type or invalid filename/content.",
   "attachment.tooLarge": "The file is empty or exceeds the attachment size limit.",
   "attachment.invalidReference": "An attachment is unavailable. Remove it and upload again.",

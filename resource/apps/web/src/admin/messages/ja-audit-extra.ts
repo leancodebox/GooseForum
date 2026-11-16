@@ -1,5 +1,7 @@
 export default {
   messages: {
+    badgeGranted: "バッジ「{badgeName}」（{badgeCode}）を付与：{reason}",
+    badgeRevoked: "バッジ「{badgeName}」（{badgeCode}）を取り消し：{reason}",
     userUpdated: "ユーザー {userId} を更新：{changedFields}",
     contentReviewed:
       "{type} #{subjectId} を審査：{action}、バージョン {version}：{reason}",

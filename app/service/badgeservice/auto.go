@@ -52,27 +52,56 @@ func candidateCodes(trigger Trigger) []string {
 	}
 }
 
-func shouldGrant(code string, stats userStatistics.Entity) bool {
+// GrantRule describes the same fixed rule used by the event handler.
+type GrantRule struct {
+	Metric    string `json:"metric"`
+	Threshold int64  `json:"threshold"`
+}
+
+func RuleForCode(code string) *GrantRule {
+	var rule GrantRule
 	switch code {
 	case CodeFirstPost:
-		return stats.TopicCount >= 1
+		rule = GrantRule{"topics", 1}
 	case CodeWriter10:
-		return stats.TopicCount >= 10
+		rule = GrantRule{"topics", 10}
 	case CodeFirstComment:
-		return stats.ReplyCount >= 1
+		rule = GrantRule{"replies", 1}
 	case CodeCommenter50:
-		return stats.ReplyCount >= 50
+		rule = GrantRule{"replies", 50}
 	case CodeFirstLikeGiven:
-		return stats.LikeGivenCount >= 1
+		rule = GrantRule{"likesGiven", 1}
 	case CodeLiked10:
-		return stats.LikeReceivedCount >= 10
+		rule = GrantRule{"likesReceived", 10}
 	case CodePopular100:
-		return stats.LikeReceivedCount >= 100
+		rule = GrantRule{"likesReceived", 100}
 	case CodeFirstFollower:
-		return stats.FollowerCount >= 1
+		rule = GrantRule{"followers", 1}
 	case CodeSocial10:
-		return stats.FollowerCount >= 10
+		rule = GrantRule{"followers", 10}
 	default:
+		return nil
+	}
+	return &rule
+}
+
+func shouldGrant(code string, stats userStatistics.Entity) bool {
+	rule := RuleForCode(code)
+	if rule == nil {
 		return false
 	}
+	var count int64
+	switch rule.Metric {
+	case "topics":
+		count = int64(stats.TopicCount)
+	case "replies":
+		count = int64(stats.ReplyCount)
+	case "likesGiven":
+		count = int64(stats.LikeGivenCount)
+	case "likesReceived":
+		count = int64(stats.LikeReceivedCount)
+	case "followers":
+		count = int64(stats.FollowerCount)
+	}
+	return count >= rule.Threshold
 }

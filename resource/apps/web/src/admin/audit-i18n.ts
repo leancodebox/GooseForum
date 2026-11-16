@@ -6,6 +6,8 @@ import type { AuthLocale } from "@gooseforum/runtime/i18n/auth";
 type MessageKey = keyof AuditExtra["messages"];
 
 export const adminAuditMessageCodes = {
+  "admin.opt.badge.granted": "badgeGranted",
+  "admin.opt.badge.revoked": "badgeRevoked",
   "admin.opt.content.reviewed": "contentReviewed",
   "admin.opt.user.updated": "userUpdated",
   "admin.opt.topic.statusChanged": "topicStatusChanged",

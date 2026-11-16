@@ -5,13 +5,23 @@ import (
 	"testing"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
+	"github.com/leancodebox/GooseForum/app/models/forum/badgeStats"
+	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+	"github.com/leancodebox/GooseForum/app/models/forum/userBadges"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
 func TestVersion28StartupMigratesAttachmentPermissions(t *testing.T) {
 	db := dbconnect.Connect()
-	if err := db.AutoMigrate(&pageConfig.Entity{}); err != nil {
-		t.Fatal(err)
+	for _, model := range []any{&pageConfig.Entity{}, &badgeStats.Entity{}, &badges.Entity{}, &userBadges.Entity{}, &users.EntityComplete{}} {
+		existed := db.Migrator().HasTable(model)
+		if err := db.AutoMigrate(model); err != nil {
+			t.Fatal(err)
+		}
+		if !existed {
+			t.Cleanup(func() { db.Migrator().DropTable(model) })
+		}
 	}
 	types := []string{pageConfig.Migration, pageConfig.TrustSettings, pageConfig.PostingSettings}
 	var previous []pageConfig.Entity

@@ -1,5 +1,7 @@
 export default {
   messages: {
+    badgeGranted: "授予徽章「{badgeName}」（{badgeCode}）：{reason}",
+    badgeRevoked: "撤销徽章「{badgeName}」（{badgeCode}）：{reason}",
     userUpdated: "更新用户 {userId}：{changedFields}",
     contentReviewed:
       "审核{type} #{subjectId}，操作{action}，版本 {version}：{reason}",

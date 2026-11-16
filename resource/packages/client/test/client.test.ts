@@ -418,6 +418,25 @@ describe('API client', () => {
     expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(JSON.stringify({ page: 2, pageSize: 20 }))
   })
 
+  it('preserves badge recipient pagination and grant/revoke reasons', async () => {
+    const recipients = { list: [{ userId: 9, username: 'alice', source: 'manual', reason: 'Community help' }], page: 2, size: 20, hasNext: false }
+    const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: recipients }))
+    const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })
+    expect(await client.admin.assets.badgeRecipients({ code: 'helper', page: 2, pageSize: 20, search: 'alice' })).toEqual(recipients)
+    await client.admin.assets.updateBadgeRecipient({ code: 'helper', userId: 9, action: 'grant', reason: '感谢贡献' })
+    await client.admin.assets.updateBadgeRecipient({ code: 'helper', userId: 9, action: 'revoke', reason: 'Granted in error' })
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'https://forum.example/api/admin/badge-recipients',
+      'https://forum.example/api/admin/badge-recipient-update',
+      'https://forum.example/api/admin/badge-recipient-update',
+    ])
+    expect(fetchMock.mock.calls.map(([, options]) => JSON.parse(String(options?.body)))).toEqual([
+      { code: 'helper', page: 2, pageSize: 20, search: 'alice' },
+      { code: 'helper', userId: 9, action: 'grant', reason: '感谢贡献' },
+      { code: 'helper', userId: 9, action: 'revoke', reason: 'Granted in error' },
+    ])
+  })
+
   it('exposes paginated audit records', async () => {
     const fetchMock = vi.fn(async () => jsonResponse({ code: 0, result: { list: [], page: 1, total: 0 } }))
     const client = createGooseClient({ baseURL: 'https://forum.example', fetch: fetchMock })

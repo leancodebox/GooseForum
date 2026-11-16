@@ -69,6 +69,8 @@ export function createAdminApi(http: GooseHttpClient): GooseAdminApi {
       badges: () => http.request('/api/admin/badges'),
       saveBadge: (badge) => post(http, '/api/admin/badge-save', badge),
       deleteBadge: (code) => post(http, '/api/admin/badge-delete', { code }),
+      badgeRecipients: (input) => post(http, '/api/admin/badge-recipients', input),
+      updateBadgeRecipient: (input) => post(http, '/api/admin/badge-recipient-update', input),
       files: (input) => post(http, '/api/admin/file-resources', input),
     },
     pages: {
