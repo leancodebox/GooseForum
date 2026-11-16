@@ -1,6 +1,8 @@
 package meiliconnect
 
 import (
+	"context"
+
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/meilisearch/meilisearch-go"
 )
@@ -35,6 +37,6 @@ func IsAvailable() bool {
 	if client == nil {
 		return false
 	}
-	_, err := client.Health()
+	_, err := client.Health(context.Background())
 	return err == nil
 }

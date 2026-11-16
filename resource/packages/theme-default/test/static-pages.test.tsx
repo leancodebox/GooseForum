@@ -1541,6 +1541,7 @@ describe("AppShell and static pages", () => {
     });
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(screen.queryByText("Stale open report")).toBeNull();
+    expect(reports.mock.calls).toEqual([[0, 20, "open"], [0, 20, "closed"]]);
   });
 
   it("localizes server-backed error pages", async () => {

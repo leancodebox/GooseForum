@@ -1,6 +1,7 @@
 package searchservice
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -64,7 +65,10 @@ func BuildSingleTopicSearchDocument(topic *topics.Entity, firstPost *posts.Entit
 	}
 
 	client := meiliconnect.GetClient()
-	index := client.Index(TopicIndex)
+	return syncTopicSearchDocument(client.Index(TopicIndex), topic, firstPost)
+}
+
+func syncTopicSearchDocument(index meilisearch.IndexManager, topic *topics.Entity, firstPost *posts.Entity) (*meilisearch.TaskInfo, error) {
 	var task *meilisearch.TaskInfo
 	var err error
 	pk := "id"
@@ -74,14 +78,14 @@ func BuildSingleTopicSearchDocument(topic *topics.Entity, firstPost *posts.Entit
 			return nil, fmt.Errorf("read search replies: %w", err)
 		}
 		doc := convertTopicToSearchDocument(topic, firstPost, replies)
-		task, err = index.AddDocuments(doc, &meilisearch.DocumentOptions{PrimaryKey: &pk})
+		task, err = index.AddDocuments(context.Background(), doc, &meilisearch.DocumentOptions{PrimaryKey: &pk})
 		if err != nil {
 			slog.Warn(fmt.Sprintf("Meilisearch 处理主题 ID:%v 失败: %v\n", doc.ID, err))
 			return nil, fmt.Errorf("add search document: %w", err)
 		}
 		slog.Info(fmt.Sprintf("处理主题 ID:%v, TaskUID: %v\n", doc.ID, getTaskUID(task)))
 	} else {
-		_, err = index.Delete(cast.ToString(topic.Id))
+		task, err = index.DeleteDocument(context.Background(), cast.ToString(topic.Id), nil)
 		if err != nil {
 			slog.Warn(fmt.Sprintf("Meilisearch 删除文档失败: %v, Error: %v\n", topic.Id, err))
 			return nil, fmt.Errorf("delete search document: %w", err)
@@ -162,7 +166,7 @@ func configureIndex(index meilisearch.IndexManager) error {
 		"title",
 		"searchContent",
 	}
-	_, err := index.UpdateSearchableAttributes(&searchableAttributes)
+	_, err := index.UpdateSearchableAttributes(context.Background(), &searchableAttributes)
 	if err != nil {
 		return fmt.Errorf("设置可搜索字段失败: %w", err)
 	}
@@ -173,7 +177,7 @@ func configureIndex(index meilisearch.IndexManager) error {
 		"topicStatus",
 		"processStatus",
 	}
-	_, err = index.UpdateFilterableAttributes(&filterableAttributes)
+	_, err = index.UpdateFilterableAttributes(context.Background(), &filterableAttributes)
 	if err != nil {
 		return fmt.Errorf("设置可过滤字段失败: %w", err)
 	}
@@ -182,13 +186,13 @@ func configureIndex(index meilisearch.IndexManager) error {
 		"createdAt",
 		"updatedAt",
 	}
-	_, err = index.UpdateSortableAttributes(&sortableAttributes)
+	_, err = index.UpdateSortableAttributes(context.Background(), &sortableAttributes)
 	if err != nil {
 		return fmt.Errorf("设置可排序字段失败: %w", err)
 	}
 
 	displayedAttributes := []string{"id", "title", "searchContent", "searchPosts"}
-	_, err = index.UpdateDisplayedAttributes(&displayedAttributes)
+	_, err = index.UpdateDisplayedAttributes(context.Background(), &displayedAttributes)
 	if err != nil {
 		return fmt.Errorf("设置显示字段失败: %w", err)
 	}

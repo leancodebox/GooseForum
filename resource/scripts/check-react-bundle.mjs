@@ -43,6 +43,12 @@ const scenarios = {
   },
 }
 const maxChunkBudget = 150 * 1024
+// Mermaid 12 ships ELK as one optional layout engine (~450 KiB gzip).
+// Keep its allowance separate from the application and other lazy chunks.
+const elkChunkBudget = 500 * 1024
+const elkFiles = new Set(Object.values(manifest)
+  .filter(chunk => chunk.isDynamicEntry && /\/mermaid\/dist\/chunks\/mermaid\.core\/elk-[^/]+\.mjs$/.test(chunk.src || ''))
+  .map(chunk => chunk.file))
 
 let failed = false
 for (const [name, { roots, budget }] of Object.entries(scenarios)) {
@@ -52,16 +58,22 @@ for (const [name, { roots, budget }] of Object.entries(scenarios)) {
     (total, file) => total + gzipSync(readFileSync(join(outputRoot, file))).byteLength,
     0,
   )
-  const status = gzipBytes <= budget ? 'PASS' : 'FAIL'
+  const loadsElk = files.some(file => elkFiles.has(file))
+  const status = gzipBytes <= budget && !loadsElk ? 'PASS' : 'FAIL'
   console.log(`${status} ${name}: ${format(gzipBytes)} gzip / ${format(budget)} budget (${format(rawBytes)} raw)`)
-  if (gzipBytes > budget) failed = true
+  if (gzipBytes > budget || loadsElk) failed = true
 }
 
 const chunks = [...new Set(Object.values(manifest).map(chunk => chunk.file))]
   .filter(file => file.endsWith('.js'))
   .map(file => ({ file, gzipBytes: gzipSync(readFileSync(join(outputRoot, file))).byteLength }))
   .sort((left, right) => right.gzipBytes - left.gzipBytes)
-const largestChunk = chunks[0]
+for (const chunk of chunks.filter(chunk => elkFiles.has(chunk.file))) {
+  const status = chunk.gzipBytes <= elkChunkBudget ? 'PASS' : 'FAIL'
+  console.log(`${status} optional Mermaid ELK: ${format(chunk.gzipBytes)} gzip / ${format(elkChunkBudget)} budget`)
+  if (chunk.gzipBytes > elkChunkBudget) failed = true
+}
+const largestChunk = chunks.find(chunk => !elkFiles.has(chunk.file))
 if (largestChunk) {
   const status = largestChunk.gzipBytes <= maxChunkBudget ? 'PASS' : 'FAIL'
   console.log(`${status} largest lazy chunk: ${largestChunk.file} is ${format(largestChunk.gzipBytes)} gzip / ${format(maxChunkBudget)} budget`)

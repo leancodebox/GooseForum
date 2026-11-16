@@ -1,6 +1,7 @@
 package datamigration
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -26,7 +27,7 @@ func MigrateTopicSearchIndex() TopicSearchIndexMigrationResult {
 		meiliconnect.IsAvailable,
 		searchservice.BuildMeilisearchIndex,
 		func(index string) error {
-			_, err := meiliconnect.GetClient().DeleteIndex(index)
+			_, err := meiliconnect.GetClient().DeleteIndex(context.Background(), index)
 			return err
 		},
 	)

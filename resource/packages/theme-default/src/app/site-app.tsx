@@ -2,6 +2,8 @@
 
 import {
   Activity,
+  lazy,
+  Suspense,
   startTransition,
   useCallback,
   useEffect,
@@ -15,7 +17,6 @@ import type { Locale } from "@gooseforum/client/i18n/locale";
 import type { Resource } from "i18next";
 import { GoosePage, isStandalonePage } from "./root";
 import { AppShell } from "../site/layout/app-shell";
-import { Toaster } from "@gooseforum/ui/components/sonner";
 import { BootstrapError, BootstrapLoading } from "@gooseforum/ui/bootstrap";
 import { prepareGoosePage } from "@gooseforum/runtime/prepared-page";
 import {
@@ -40,6 +41,8 @@ import {
 } from "@gooseforum/runtime/browser-host";
 import type { PageSource } from "@gooseforum/runtime/page-source";
 import { GooseI18nProvider, prepareGooseTranslations, goosePageNamespaces, loadedGooseNamespaces } from "@gooseforum/runtime/i18n";
+
+const Toaster = lazy(() => import("@gooseforum/ui/components/sonner").then(module => ({ default: module.Toaster })));
 
 export interface SiteAppProps {
   pageSource: PageSource<AnyPagePayload>;
@@ -468,7 +471,9 @@ export function SiteApp({
         ) : (
           <BootstrapLoading />
         )}
-        <Toaster position="bottom-right" theme={theme === "gf-dark" ? "dark" : "light"} />
+        <Suspense fallback={null}>
+          <Toaster position="bottom-right" theme={theme === "gf-dark" ? "dark" : "light"} />
+        </Suspense>
       </GooseRuntimeProvider>
     </GooseI18nProvider>
   );

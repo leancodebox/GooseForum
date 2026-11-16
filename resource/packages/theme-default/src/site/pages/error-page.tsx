@@ -18,10 +18,10 @@ export function ErrorPageView({ page }: { page: ErrorPageProps }) {
   const title = page.code === "404" ? t("notFoundTitle") : page.title;
   const knownMessage =
     page.messageCode && i18n.exists(page.messageCode, { ns: "serverMessages" })
-      ? serverT(page.messageCode, page.params)
+      ? serverT(page.messageCode, page.params ?? {})
       : page.messageCode === "page.notFound" ||
           page.messageCode === "route.notFound"
-        ? t(`messages.${page.messageCode}`, page.params)
+        ? t(`messages.${page.messageCode}`, page.params ?? {})
         : "";
   function back() {
     if (window.history.length > 1) window.history.back();

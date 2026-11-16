@@ -1,6 +1,7 @@
 package searchservice
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -69,7 +70,7 @@ func SearchTopics(req SearchRequest) (*SearchResponse, error) {
 		searchReq.Sort = []string{"updatedAt:desc"}
 	}
 
-	searchResp, err := index.Search(req.Query, searchReq)
+	searchResp, err := index.Search(context.Background(), req.Query, searchReq)
 	if err != nil {
 		return nil, fmt.Errorf("搜索失败: %w", err)
 	}

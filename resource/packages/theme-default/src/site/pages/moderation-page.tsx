@@ -90,8 +90,8 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
     setTopicError("");
   }, [page]);
   const loadReports = useCallback(
-    async (reset = false, status = reportStatus, force = false) => {
-      if (reportLoadingRef.current && !force) return;
+    async (reset = false) => {
+      if (reportLoadingRef.current) return;
       const isCurrent = beginReportRequest();
       reportLoadingRef.current = true;
       setReportLoading(true);
@@ -100,7 +100,7 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
         const result = await runtime.api.moderation.reports(
           reset ? 0 : reportCursor,
           20,
-          status,
+          reportStatus,
         );
         if (!isCurrent()) return;
         setReports((current) =>
@@ -156,12 +156,13 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
 
   function changeReportStatus(status: ReportStatus) {
     if (status === reportStatus) return;
+    beginReportRequest();
+    reportLoadingRef.current = false;
     setReportStatus(status);
     setReports([]);
     setReportCursor(0);
     setReportMore(true);
     setReportLoaded(false);
-    void loadReports(true, status, true);
   }
   async function handleReport(
     item: ModerationReportItem,

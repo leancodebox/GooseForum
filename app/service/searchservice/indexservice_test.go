@@ -1,6 +1,9 @@
 package searchservice
 
 import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
@@ -8,8 +11,51 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
+	"github.com/meilisearch/meilisearch-go"
 	"gorm.io/gorm"
 )
+
+func TestUnpublishedTopicDeletesOnlyItsSearchDocument(t *testing.T) {
+	var requests []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests = append(requests, r.Method+" "+r.URL.Path)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusAccepted)
+		fmt.Fprint(w, `{"taskUid":42,"indexUid":"topics","status":"enqueued","type":"documentDeletion"}`)
+	}))
+	defer server.Close()
+	index := meilisearch.New(server.URL).Index(TopicIndex)
+	task, err := syncTopicSearchDocument(index, &topics.Entity{Id: 123, Status: 0}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if task == nil || task.TaskUID != 42 {
+		t.Fatalf("unexpected deletion task: %#v", task)
+	}
+	want := []string{"DELETE /indexes/" + TopicIndex + "/documents/123"}
+	if !reflect.DeepEqual(requests, want) {
+		t.Fatalf("requests = %v, want %v", requests, want)
+	}
+}
+
+func TestConfigureIndexUsesSettingsEndpoints(t *testing.T) {
+	var requests []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests = append(requests, r.Method+" "+r.URL.Path)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusAccepted)
+		fmt.Fprint(w, `{"taskUid":1,"status":"enqueued","type":"settingsUpdate"}`)
+	}))
+	defer server.Close()
+	if err := configureIndex(meilisearch.New(server.URL).Index(TopicIndex)); err != nil {
+		t.Fatal(err)
+	}
+	prefix := "PUT /indexes/" + TopicIndex + "/settings/"
+	want := []string{prefix + "searchable-attributes", prefix + "filterable-attributes", prefix + "sortable-attributes", prefix + "displayed-attributes"}
+	if !reflect.DeepEqual(requests, want) {
+		t.Fatalf("requests = %v, want %v", requests, want)
+	}
+}
 
 func TestConvertTopicToSearchDocument(t *testing.T) {
 	createdAt := time.Unix(1700000000, 0)

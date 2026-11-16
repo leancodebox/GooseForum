@@ -690,6 +690,40 @@ test('follows the system theme and remembers explicit preferences across reloads
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-dark')
 })
 
+test('renders Mermaid diagrams and math while preserving invalid source', async ({ page }) => {
+  const elkRequests: string[] = []
+  page.on('request', request => { if (/\/elk-[^/]+\.(?:m?js)/.test(request.url())) elkRequests.push(request.url()) })
+  const payload = structuredClone(topicPage)
+  payload.props.postStream.posts[0].renderedContent = [
+    '<pre><code class="language-mermaid">flowchart LR\n A["$$x^2$$"] --&gt; B["Done"]</code></pre>',
+    '<pre><code class="language-mermaid">not a valid diagram</code></pre>',
+    '<pre><code class="language-mermaid">sequenceDiagram\n Alice-&gt;&gt;Bob: Hello</code></pre>',
+  ].join('')
+  await page.route('**/__goose_page/p/**', route => route.fulfill({ json: payload }))
+  await page.goto('/p/test/60?lang=en')
+  const diagrams = page.locator('[data-gf-enhanced="mermaid"]')
+  await expect(diagrams).toHaveCount(2, { timeout: 30_000 })
+  await expect(diagrams.first().locator('svg')).toBeVisible()
+  await expect(diagrams.first().locator('.katex')).toHaveCount(1)
+  await expect(diagrams.last()).toContainText('Hello')
+  await expect(page.locator('pre[data-gf-enhancement="mermaid-error"]')).toHaveText('not a valid diagram')
+  expect(elkRequests).toEqual([])
+})
+
+test('loads the Mermaid ELK layout only when requested by a diagram', async ({ page }) => {
+  const elkRequests: string[] = []
+  page.on('request', request => { if (/\/elk-[^/]+\.(?:m?js)/.test(request.url())) elkRequests.push(request.url()) })
+  await page.goto('/?lang=en')
+  await expect(page.getByText('No topics yet')).toBeVisible()
+  expect(elkRequests).toEqual([])
+  const payload = structuredClone(topicPage)
+  payload.props.postStream.posts[0].renderedContent = '<pre><code class="language-mermaid">---\nconfig:\n  layout: elk\n---\nflowchart LR\n A[Start] --&gt; B[Finish]</code></pre>'
+  await page.route('**/__goose_page/p/**', route => route.fulfill({ json: payload }))
+  await page.goto('/p/test/60?lang=en')
+  await expect(page.locator('[data-gf-enhanced="mermaid"] svg')).toBeVisible({ timeout: 30_000 })
+  expect(elkRequests.length).toBeGreaterThan(0)
+})
+
 test('loads, responds to a primary control, and meets automated WCAG checks', async ({ page }, testInfo) => {
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))

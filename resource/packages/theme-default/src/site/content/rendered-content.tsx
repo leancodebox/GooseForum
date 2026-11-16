@@ -159,6 +159,7 @@ async function enhanceMermaid(root: HTMLElement) {
     mermaidPromise = import("mermaid").then(({ default: mermaid }) => {
       mermaid.initialize({
         startOnLoad: false,
+        layout: "dagre",
         securityLevel: "strict",
         suppressErrorRendering: true,
         fontFamily: "inherit",
