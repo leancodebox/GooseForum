@@ -11,6 +11,7 @@ export default {
   watchAdded: "Watching topic replies.",
   watchRemoved: "Stopped watching topic replies.",
   reply: "Reply",
+  replyToTopic: "Reply to topic",
   replyRequired: "Reply content cannot be empty",
   replyUpdated: "Reply updated.",
   replyPosted: "Reply posted.",

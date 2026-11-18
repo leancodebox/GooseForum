@@ -8,6 +8,7 @@ export default {
   originalImageSize: "元のサイズ",
   fitImage: "画面に合わせる",
   reply: "返信",
+  replyToTopic: "トピックに返信",
   like: "いいね",
   bookmark: "保存",
   watch: "フォロー",

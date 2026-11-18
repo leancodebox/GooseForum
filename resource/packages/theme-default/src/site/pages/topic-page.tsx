@@ -12,6 +12,7 @@ import {
   useState,
 } from "react";
 import type { ReactNode, RefObject } from "react";
+import { createPortal } from "react-dom";
 import type {
   LayoutPayload,
   PostPayload,
@@ -29,13 +30,13 @@ import {
   ChevronRight,
   Clock,
   Eye,
-  MessageSquareWarning,
   Heart,
   Maximize2,
-  Minimize2,
+  MessageCircle,
+  MessageCircleExclamationPoint,
   MessageSquare,
-  SquarePen,
-  MessageSquareReply,
+  Minimize2,
+  PenLine,
   RotateCcw,
   Trash2,
   X,
@@ -98,6 +99,7 @@ const loadTopicComposer = () => import("../topics/topic-composer");
 const TopicComposer = lazy(() =>
   loadTopicComposer().then((module) => ({ default: module.TopicComposer })),
 );
+const topicReadingTop = 80;
 
 export function TopicPageView({
   layout,
@@ -194,6 +196,9 @@ export function TopicPageView({
   );
   const sentinel = useRef<HTMLDivElement>(null);
   const postsRef = useRef<HTMLDivElement>(null);
+  const firstTopicReply = useRef<HTMLButtonElement>(null);
+  const [showFloatingReply, setShowFloatingReply] = useState(false);
+  const [topicControls, setTopicControls] = useState<HTMLDivElement | null>(null);
   const prependAnchor = useRef<{ node: HTMLElement; top: number; isCurrent(): boolean } | null>(null);
   const beginWindowRequest = useLatestRequest();
   const [revealPostId, setRevealPostId] = useState(0);
@@ -275,6 +280,11 @@ export function TopicPageView({
     ...posts.map((post) => post.postNo || 0),
     1,
   );
+  const canReplyToTopic = page.permissions.canPost || !layout.viewer.isAuthenticated;
+  const showFirstTopicReply = canReplyToTopic && posts.some((post) => post.postNo === 1);
+  const showDockedReply = canReplyToTopic && (!showFirstTopicReply || showFloatingReply) && !composerOpen;
+  const showMobilePosition = maxPostNo > 1 && !composerOpen;
+  const shareTopicEndRow = !hasAfter && !windowError && posts.length > 0;
 
   useEffect(() => {
     const title = page.topic.title;
@@ -299,7 +309,7 @@ export function TopicPageView({
             : current,
         );
       },
-      { threshold: 0, rootMargin: "-80px 0px 0px 0px" },
+      { threshold: 0, rootMargin: `-${topicReadingTop}px 0px 0px 0px` },
     );
     observer.observe(titleNode);
     return () => {
@@ -309,6 +319,25 @@ export function TopicPageView({
       );
     };
   }, [page.topic.categories, page.topic.id, page.topic.title, setShellHeader]);
+
+  useEffect(() => {
+    const title = titleRef.current;
+    const inlineReply = firstTopicReply.current;
+    if (!showFirstTopicReply || !title || !inlineReply || !("IntersectionObserver" in window)) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry?.rootBounds) return;
+      const { top, bottom } = entry.rootBounds;
+      const bounds = inlineReply.getBoundingClientRect();
+      setShowFloatingReply(
+        title.getBoundingClientRect().bottom < top &&
+        (bounds.bottom < top || bounds.top > bottom),
+      );
+    }, { rootMargin: `-${topicReadingTop}px 0px 0px 0px` });
+    observer.observe(title);
+    observer.observe(inlineReply);
+    return () => observer.disconnect();
+  }, [showFirstTopicReply]);
 
   const loadWindow = useCallback(
     async (direction: "before" | "after" | "anchor", anchor?: number) => {
@@ -419,6 +448,10 @@ export function TopicPageView({
   }, []);
 
   async function toggleAction(type: "like" | "bookmark" | "watch") {
+    if (type === "watch" && !layout.viewer.isAuthenticated) {
+      void runtime.navigate(loginUrl(runtime.currentUrl));
+      return;
+    }
     if (actionBusy) return;
     setActionBusy(type);
     setActionError("");
@@ -752,6 +785,25 @@ export function TopicPageView({
       ),
     );
   }
+  const topicReplyButton = (floating = false) => (
+    <Button
+      ref={floating ? undefined : firstTopicReply}
+      data-slot={floating ? "topic-reply-floating" : "topic-reply-first"}
+      size={floating ? "lg" : "sm"}
+      variant={floating ? "outline" : "default"}
+      className={cn(
+        "rounded-full",
+        floating
+          ? "pointer-events-auto ml-auto min-w-0 max-w-[34%] shrink border-primary/25 px-2.5 text-primary shadow-lg hover:text-primary sm:px-4 dark:border-primary/25 dark:bg-background dark:hover:bg-muted"
+          : "ml-auto h-9 px-3 lg:h-7",
+      )}
+      disabled={composerBusy}
+      onClick={() => openComposer()}
+    >
+      <MessageCircle />
+      <span className={floating ? "truncate" : undefined}>{t("replyToTopic")}</span>
+    </Button>
+  );
 
   return (
     <main className="min-w-0 pb-10">
@@ -838,6 +890,7 @@ export function TopicPageView({
               liked={liked}
               bookmarked={bookmarked}
               watched={watched}
+              topicReplyAction={showFirstTopicReply && post.postNo === 1 ? topicReplyButton() : undefined}
               likeCount={likeCount}
               actionBusy={actionBusy}
               composerBusy={composerBusy}
@@ -871,10 +924,11 @@ export function TopicPageView({
               }
             />
           ))}
-          <div
-            ref={sentinel}
-            className={cn("px-4 py-3 text-center", hasAfter && "border-t")}
-          >
+          <div ref={sentinel} className={cn(
+            "px-4 py-3 text-center",
+            hasAfter && "border-t",
+            shareTopicEndRow && "flex h-13 items-center justify-center",
+          )}>
             {hasAfter ? (
               <Button
                 variant="ghost"
@@ -888,13 +942,23 @@ export function TopicPageView({
                 {windowError ? t("retryLoadReplies") : t("loadMoreReplies")}
               </Button>
             ) : posts.length ? (
-              <span className="text-xs text-muted-foreground">
+              <span className={cn("text-xs text-muted-foreground", shareTopicEndRow && "max-w-[32%] truncate")}>
                 {t("allRepliesShown")}
               </span>
             ) : null}
             {windowError ? (
               <p className="mt-1 text-xs text-destructive">{windowError}</p>
             ) : null}
+          </div>
+          <div
+            className={cn(
+              "pointer-events-none sticky bottom-[calc(0.5rem+env(safe-area-inset-bottom))] z-30 flex h-13 items-center gap-2 px-4",
+              shareTopicEndRow && "-mt-13",
+              !showDockedReply && (showMobilePosition ? "xl:mt-0 xl:h-0" : "mt-0 h-0"),
+            )}
+          >
+            <div ref={setTopicControls} className="contents" />
+            {showDockedReply ? topicReplyButton(true) : null}
           </div>
         </div>
         <TopicAside
@@ -903,6 +967,7 @@ export function TopicPageView({
           active={activePostNo}
           mobileHidden={composerOpen}
           max={maxPostNo}
+          topicControls={topicControls}
           postsRoot={postsRef}
           cancelLoad={cancelAnchorLoad}
           posts={posts}
@@ -920,50 +985,6 @@ export function TopicPageView({
           <TopicTable topics={page.hotTopics} showCategories t={homeT} />
         </section>
       ) : null}
-      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-30">
-        <div
-          data-slot="topic-reply-float-boundary"
-          className="mx-auto flex w-full max-w-[1600px] justify-end gap-2 pl-4 pr-6 lg:pl-8 lg:pr-10"
-        >
-          {page.permissions.canPost || !layout.viewer.isAuthenticated ? (
-            <Button
-              size="icon-lg"
-              className="pointer-events-auto rounded-full shadow-lg"
-              aria-label={t("joinDiscussion")}
-              disabled={composerBusy}
-              onClick={() =>
-                page.permissions.canPost
-                  ? openComposer()
-                  : void runtime.navigate(loginUrl(runtime.currentUrl))
-              }
-            >
-              <MessageSquareReply />
-            </Button>
-          ) : null}
-          <Button
-            data-slot="topic-watch-float"
-            variant={watched ? "default" : "outline"}
-            size="icon-lg"
-            className="pointer-events-auto rounded-full shadow-lg"
-            aria-label={t(watched ? "watched" : "watch")}
-            aria-pressed={watched}
-            disabled={Boolean(actionBusy)}
-            onClick={() =>
-              layout.viewer.isAuthenticated
-                ? void toggleAction("watch")
-                : void runtime.navigate(loginUrl(runtime.currentUrl))
-            }
-          >
-            {actionBusy === "watch" ? (
-              <Spinner />
-            ) : watched ? (
-              <BellRing />
-            ) : (
-              <Bell />
-            )}
-          </Button>
-        </div>
-      </div>
       <Suspense fallback={null}>
         <TopicComposer
           open={composerOpen}
@@ -1105,7 +1126,7 @@ export function TopicPageView({
               {reportBusy ? (
                 <Spinner data-icon="inline-start" />
               ) : (
-                <MessageSquareWarning data-icon="inline-start" />
+                <MessageCircleExclamationPoint data-icon="inline-start" />
               )}
               {t("submitReport")}
             </Button>
@@ -1266,20 +1287,30 @@ type Translate = ReturnType<typeof useTranslation>["t"];
 
 function PostActionGroup({
   placement,
+  primaryAction,
   children,
 }: {
   placement: "header" | "topic";
+  primaryAction?: ReactNode;
   children: ReactNode;
 }) {
+  if (placement === "topic") {
+    return (
+      <div
+        data-slot="topic-actions"
+        className="col-span-full row-start-3 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 pt-1 lg:mt-3 lg:border-t lg:pt-3"
+      >
+        <div className="flex min-w-0 flex-wrap items-center lg:gap-2 [&_button]:size-9 [&_button]:gap-0 [&_button]:p-0! [&_svg]:size-[18px]! [&_svg]:stroke-2 lg:[&_button]:h-7 lg:[&_button]:w-auto lg:[&_button]:gap-1 lg:[&_button]:px-2.5! lg:[&_svg]:size-3.5!">
+          {children}
+        </div>
+        {primaryAction}
+      </div>
+    );
+  }
   return (
     <div
-      data-slot={placement === "header" ? "post-actions" : "topic-actions"}
-      className={cn(
-        "[&_button]:size-9 [&_button]:gap-0 [&_button]:p-0! [&_svg]:size-[18px]! [&_svg]:stroke-2",
-        placement === "header"
-          ? "contents lg:flex lg:shrink-0 lg:items-center lg:gap-1.5 lg:[&_button]:size-6 lg:[&_svg]:size-3!"
-          : "col-span-2 row-start-3 flex min-w-0 flex-wrap items-center gap-0 lg:mt-4 lg:gap-2 lg:border-t lg:pt-3 lg:[&_button]:h-7 lg:[&_button]:w-auto lg:[&_button]:gap-1 lg:[&_button]:px-2.5! lg:[&_svg]:size-3.5!",
-      )}
+      data-slot="post-actions"
+      className="contents lg:flex lg:shrink-0 lg:items-center lg:gap-1.5 [&_button]:size-9 [&_button]:gap-0 [&_button]:p-0! [&_svg]:size-[18px]! [&_svg]:stroke-2 lg:[&_button]:size-6 lg:[&_svg]:size-3!"
     >
       {children}
     </div>
@@ -1294,6 +1325,7 @@ function PostRow({
   liked,
   bookmarked,
   watched,
+  topicReplyAction,
   likeCount,
   actionBusy,
   canPost,
@@ -1317,6 +1349,7 @@ function PostRow({
   liked: boolean;
   bookmarked: boolean;
   watched: boolean;
+  topicReplyAction?: ReactNode;
   likeCount: number;
   actionBusy: string;
   canPost: boolean;
@@ -1372,7 +1405,7 @@ function PostRow({
                   disabled={composerBusy}
                   onClick={onEdit}
                 >
-                  <SquarePen />
+                  <PenLine />
                 </Button>
                 <Button
                   variant="ghost"
@@ -1406,7 +1439,7 @@ function PostRow({
                 aria-label={t("report")}
                 onClick={onReport}
               >
-                <MessageSquareWarning />
+                <MessageCircleExclamationPoint />
               </Button>
             ) : null}
             {!first && post.canModerate ? (
@@ -1432,7 +1465,7 @@ function PostRow({
               </Button>
             ) : null}
             </div>
-            {canPost && !post.isHidden ? (
+            {!first && canPost && !post.isHidden ? (
               <Button
                 variant="ghost"
                 size="icon-xs"
@@ -1441,7 +1474,7 @@ function PostRow({
                 onClick={onReply}
                 disabled={composerBusy}
               >
-                <MessageSquareReply />
+                <MessageCircle />
               </Button>
             ) : null}
             <time
@@ -1478,7 +1511,7 @@ function PostRow({
         ) : null}
         </div>
         {first ? (
-          <PostActionGroup placement="topic">
+          <PostActionGroup placement="topic" primaryAction={topicReplyAction}>
             <ActionButton
               tone="like"
               active={liked}
@@ -1499,7 +1532,7 @@ function PostRow({
               tone="watch"
               active={watched}
               busy={actionBusy === "watch"}
-              icon={Bell}
+              icon={watched ? BellRing : Bell}
               label={t(watched ? "watched" : "watch")}
               onClick={() => onToggle("watch")}
             />
@@ -1510,7 +1543,7 @@ function PostRow({
                 className="hidden lg:inline-flex"
                 onClick={onReport}
               >
-                <MessageSquareWarning data-icon="inline-start" />
+                <MessageCircleExclamationPoint data-icon="inline-start" />
                 <span className="sr-only lg:not-sr-only">{t("report")}</span>
               </Button>
             ) : null}
@@ -1582,6 +1615,7 @@ function ActionButton({
               ? "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
               : "bg-success/10 text-success hover:bg-success/15 hover:text-success"),
       )}
+      aria-pressed={tone === "watch" ? active : undefined}
       disabled={busy}
       onClick={onClick}
     >
@@ -1665,6 +1699,7 @@ function TopicAside({
   active,
   mobileHidden,
   max,
+  topicControls,
   postsRoot,
   cancelLoad,
   posts,
@@ -1678,6 +1713,7 @@ function TopicAside({
   active: number;
   mobileHidden: boolean;
   max: number;
+  topicControls: HTMLDivElement | null;
   postsRoot: RefObject<HTMLDivElement | null>;
   cancelLoad(): void;
   posts: PostPayload[];
@@ -1722,6 +1758,7 @@ function TopicAside({
             max={max}
             startLabel={formatRailDate(page.topic.createdAt, locale)}
             endLabel={formatRailDate(endDate, locale)}
+            topicControls={topicControls}
             posts={posts}
             postsRoot={postsRoot}
             hasAfter={hasAfter}
@@ -1737,13 +1774,14 @@ function TopicAside({
 }
 
 function PostPositionRail({
-  current, max, mobileHidden, startLabel, endLabel, posts, postsRoot, hasAfter, cancelLoad, locale, t, onSelect,
+  current, max, mobileHidden, startLabel, endLabel, topicControls, posts, postsRoot, hasAfter, cancelLoad, locale, t, onSelect,
 }: {
   current: number;
   mobileHidden: boolean;
   max: number;
   startLabel: string;
   endLabel: string;
+  topicControls: HTMLDivElement | null;
   posts: PostPayload[];
   postsRoot: RefObject<HTMLDivElement | null>;
   hasAfter: boolean;
@@ -1848,14 +1886,14 @@ function PostPositionRail({
       setPreview(undefined);
       setMobileOpen(open);
     }}>
-      <SheetTrigger asChild>
+      {topicControls && createPortal(<SheetTrigger asChild>
         <Button ref={mobileTrigger} variant="outline" aria-label={t("replyPosition")} aria-describedby={`${jumpInputId}-current`}
-          className={cn("fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 z-30 h-9 min-w-28 max-w-[calc(100vw-10rem)] overflow-hidden rounded-full border-primary/25 bg-background px-4 text-primary shadow-lg xl:hidden", mobileHidden && "hidden")}
+          className={cn("pointer-events-auto relative h-9 min-w-[min(7rem,34%)] max-w-[34%] overflow-hidden rounded-full border-primary/25 bg-background px-2.5 text-primary shadow-lg sm:px-4 xl:hidden", mobileHidden && "hidden")}
           data-slot="mobile-topic-position">
           <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 bg-primary/12" style={{ width: `${progress * 100}%` }} />
           <span id={`${jumpInputId}-current`} className="relative min-w-0 truncate tabular-nums">{indicatedTarget ?? position.postNo} / {max.toLocaleString(locale)}</span>
         </Button>
-      </SheetTrigger>
+      </SheetTrigger>, topicControls)}
       <SheetContent side="bottom" showCloseButton={false} className="max-h-[85dvh] overflow-y-auto rounded-t-2xl pb-[max(1rem,env(safe-area-inset-bottom))]"
         onOpenAutoFocus={event => { event.preventDefault(); mobileClose.current?.focus({ preventScroll: true }); }}
         onCloseAutoFocus={event => {

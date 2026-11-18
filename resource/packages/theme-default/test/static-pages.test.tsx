@@ -1844,26 +1844,16 @@ describe("AppShell and static pages", () => {
         ?.querySelector('[data-slot="avatar"]')
         ?.classList.contains("size-5"),
     ).toBe(true);
-    const firstReply = screen.getByRole("button", { name: "回复" });
-    expect(firstReply.closest("header")).toBeTruthy();
-    const floatingBoundary = document.querySelector(
-      '[data-slot="topic-reply-float-boundary"]',
-    );
-    expect(floatingBoundary?.classList.contains("max-w-[1600px]")).toBe(true);
-    expect(floatingBoundary?.classList.contains("pr-6")).toBe(true);
-    expect(floatingBoundary?.classList.contains("lg:pr-10")).toBe(true);
-    expect(floatingBoundary?.classList.contains("gap-2")).toBe(true);
-    const floatingButtons = floatingBoundary?.querySelectorAll("button");
-    expect(floatingButtons).toHaveLength(2);
-    expect(floatingButtons?.[0]?.getAttribute("aria-label")).toBe("参与讨论");
-    expect(floatingButtons?.[1]?.getAttribute("aria-label")).toBe("已关注");
-    const floatingWatch = floatingBoundary?.querySelector<HTMLButtonElement>(
-      '[data-slot="topic-watch-float"]',
-    );
-    expect(floatingWatch?.getAttribute("aria-pressed")).toBe("true");
-    expect(floatingWatch?.getAttribute("data-variant")).toBe("default");
-    expect(floatingWatch?.querySelector(".lucide-bell-ring")).toBeTruthy();
-    const postAvatarLink = firstReply.closest('article')?.querySelector(':scope > a');
+    const topicReply = screen.getByRole("button", { name: "回复主题" });
+    const firstPost = topicReply.closest("article")!;
+    expect(within(firstPost).queryByRole("button", { name: /^回复$/ })).toBeNull();
+    const topicActions = topicReply.closest('[data-slot="topic-actions"]');
+    expect(topicActions?.previousElementSibling).toBe(renderedPost?.closest('[data-slot="post-body"]'));
+    const watchButton = screen.getByRole("button", { name: "已关注" });
+    expect(topicActions?.contains(watchButton)).toBe(true);
+    expect(watchButton.getAttribute("aria-pressed")).toBe("true");
+    expect(watchButton.querySelector(".lucide-bell-ring")).toBeTruthy();
+    const postAvatarLink = firstPost.querySelector(':scope > a');
     expect(postAvatarLink?.classList.contains('lg:sticky')).toBe(true);
     expect(postAvatarLink?.classList.contains('lg:top-19')).toBe(true);
     expect(postAvatarLink?.classList.contains('self-start')).toBe(true);
@@ -1883,12 +1873,11 @@ describe("AppShell and static pages", () => {
         .querySelector('[data-tone="watch"]')
         ?.classList.contains("text-success"),
     ).toBe(true);
-    await user.click(floatingWatch as HTMLButtonElement);
+    await user.click(watchButton);
     expect(watch).toHaveBeenCalledWith(60, 2);
-    expect(floatingWatch?.getAttribute("aria-label")).toBe("关注");
-    expect(floatingWatch?.getAttribute("aria-pressed")).toBe("false");
-    expect(floatingWatch?.getAttribute("data-variant")).toBe("outline");
-    expect(floatingWatch?.querySelector(".lucide-bell")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^关注$/ })).toBe(watchButton);
+    expect(watchButton.getAttribute("aria-pressed")).toBe("false");
+    expect(watchButton.querySelector(".lucide-bell")).toBeTruthy();
     expect(
       document
         .querySelector('[data-tone="watch"]')
@@ -1949,7 +1938,7 @@ describe("AppShell and static pages", () => {
       replyTargets: [], beforePostNo: 79, afterPostNo: 80,
       hasBefore: true, hasAfter: false, total: 80, maxPostNo: 80,
     });
-    await user.click(within(screen.getByText("Second").closest("article")!).getByRole("button", { name: "回复" }));
+    await user.click(within(screen.getByText("Second").closest("article")!).getByRole("button", { name: /^回复$/ }));
     const publishReply = screen.getByRole("button", { name: "发布回复" });
     const composerToolbar = publishReply.closest(
       '[data-slot="markdown-composer-toolbar"]',

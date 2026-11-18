@@ -898,7 +898,7 @@ test('cold-loads the badges route after preparing its assets translations', asyn
   expect(errors).toEqual([])
 })
 
-test('keeps the topic reply control inside the content edge and shares one composer action row', async ({ page }, testInfo) => {
+test('places the short-topic reply after the post and shares one composer action row', async ({ page }, testInfo) => {
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))
   page.on('console', message => {
@@ -909,27 +909,27 @@ test('keeps the topic reply control inside the content edge and shares one compo
   await expect(page).toHaveTitle('Topic detail')
   await expect(page.getByRole('heading', { level: 1, name: 'Topic detail' })).toBeVisible()
 
-  const boundary = page.locator('[data-slot="topic-reply-float-boundary"]')
-  const reply = boundary.getByRole('button', { name: 'Join the discussion' })
-  const watch = boundary.getByRole('button', { name: 'Watch comments' })
-  await expect(watch).toHaveAttribute('data-variant', 'outline')
-  const [boundaryBox, replyBox, watchBox] = await Promise.all([
-    boundary.boundingBox(),
+  const actions = page.locator('[data-slot="topic-actions"]')
+  const reply = actions.getByRole('button', { name: 'Reply to topic' })
+  const watch = actions.getByRole('button', { name: 'Watch comments' })
+  await expect(reply).toBeInViewport()
+  await expect(page.locator('[data-post-no="1"]').getByRole('button', { name: 'Reply', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Reply to topic' })).toHaveCount(1)
+  await expect(watch).toHaveAttribute('aria-pressed', 'false')
+  const [bodyBox, replyBox, watchBox] = await Promise.all([
+    page.locator('[data-slot="post-body"]').boundingBox(),
     reply.boundingBox(),
     watch.boundingBox(),
   ])
-  expect(boundaryBox).not.toBeNull()
-  expect(replyBox).not.toBeNull()
-  expect(watchBox).not.toBeNull()
-  expect(replyBox!.x).toBeLessThan(watchBox!.x)
-  const rightGap = boundaryBox!.x + boundaryBox!.width - watchBox!.x - watchBox!.width
-  expect(rightGap).toBeGreaterThanOrEqual(23)
+  expect(replyBox!.x).toBeGreaterThan(watchBox!.x)
+  expect(replyBox!.x + replyBox!.width).toBeCloseTo(bodyBox!.x + bodyBox!.width)
+  expect(replyBox!.y - bodyBox!.y - bodyBox!.height).toBeLessThan(32)
+  expect(replyBox!.height).toBe(watchBox!.height)
 
   await watch.click()
-  const watched = boundary.getByRole('button', { name: 'Watching comments' })
-  await expect(watched).toBeVisible()
-  await expect(watched).toHaveAttribute('data-variant', 'default')
-  await expect(page.getByRole('button', { name: 'Watching comments' })).toHaveCount(2)
+  const watched = page.getByRole('button', { name: 'Watching comments' })
+  await expect(watched).toHaveCount(1)
+  await expect(watched).toHaveAttribute('aria-pressed', 'true')
 
   await reply.click()
   const toolbar = page.locator('[data-slot="markdown-composer-toolbar"]')
@@ -945,6 +945,92 @@ test('keeps the topic reply control inside the content edge and shares one compo
     body: await page.screenshot({ fullPage: false }),
     contentType: 'image/png',
   })
+})
+
+test('keeps the floating topic controls within the discussion', async ({ page, isMobile }) => {
+  await page.setViewportSize(isMobile ? { width: 320, height: 780 } : { width: 1680, height: 900 })
+  const payload = structuredClone(topicPage)
+  const original = payload.props.postStream.posts[0]
+  Object.assign(original, { renderedContent: '<p>Main post</p><div style="height:1600px">Long main post</div>' })
+  payload.props.postStream.posts.push({
+    ...original, id: 62, postNo: 2, isOwnPost: false,
+    renderedContent: '<p>First comment</p><div style="height:1600px">Long comment</div>',
+  })
+  Object.assign(payload.props.topic, { replyCount: 1, maxPostNo: 2 })
+  Object.assign(payload.props.postStream, { afterPostNo: 2, total: 2, maxPostNo: 2 })
+  Object.assign(payload.props, { hotTopics: Array.from({ length: 18 }, (_, index) => ({
+    ...publishedTopic, id: 100 + index, title: `Related topic ${index + 1}`, url: `/p/post/${100 + index}`,
+  })) })
+  await page.route('**/__goose_page/**', route => route.fulfill({ json: payload }))
+  await page.goto('/p/test/60?lang=en')
+
+  const first = page.locator('[data-slot="topic-reply-first"]')
+  const floating = page.locator('[data-slot="topic-reply-floating"]')
+  const position = page.getByRole('button', { name: 'Reply position', exact: true })
+  await expect(first).toBeAttached()
+  await expect(page.locator('[data-post-no="2"]').getByRole('button', { name: 'Reply', exact: true })).toHaveCount(1)
+  await expect(first).not.toBeInViewport()
+  await expect(floating).toBeHidden()
+
+  await page.evaluate(() => window.scrollTo(0, 400))
+  await expect(floating).toBeInViewport()
+  const replyBounds = (await floating.boundingBox())!
+  const bodyBounds = (await page.locator('[data-slot="post-body"]').first().boundingBox())!
+  expect(Math.abs(replyBounds.x + replyBounds.width - bodyBounds.x - bodyBounds.width)).toBeLessThan(2)
+  expect(page.viewportSize()!.height - replyBounds.y - replyBounds.height).toBeCloseTo(16)
+  if (isMobile) {
+    const positionBounds = (await position.boundingBox())!
+    expect(positionBounds.x).toBeCloseTo(bodyBounds.x)
+    expect(positionBounds.x + positionBounds.width).toBeLessThan(replyBounds.x)
+    expect(positionBounds.y).toBeCloseTo(replyBounds.y)
+    await position.focus()
+    await page.keyboard.press('Tab')
+    await expect(floating).toBeFocused()
+  }
+
+  await first.evaluate(button => button.scrollIntoView({ block: 'center' }))
+  await expect(first).toBeInViewport()
+  await expect(floating).toBeHidden()
+
+  await page.locator('[data-post-no="2"]').evaluate(post => {
+    window.scrollBy(0, post.getBoundingClientRect().top + 400)
+  })
+  await expect(floating).toBeInViewport()
+  const scroll = await page.evaluate(() => scrollY)
+  await floating.click()
+  const composer = page.locator('.goose-composer-surface[data-state="open"] section')
+  await expect(composer.getByRole('button', { name: 'Post reply' })).toBeVisible()
+  await expect(composer.getByText(/^Reply to .* · #/)).toHaveCount(0)
+  await expect(floating).toBeHidden()
+  expect(await page.evaluate(() => scrollY)).toBe(scroll)
+  await composer.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(floating).toBeInViewport()
+
+  const end = page.getByText('All replies shown')
+  await end.evaluate(node => node.scrollIntoView({ block: 'center' }))
+  await expect(end).toBeInViewport()
+  await expect(floating).toBeInViewport()
+  const discussion = (await page.locator('[data-event-delegation="image-viewer"]').boundingBox())!
+  const parkedReply = (await floating.boundingBox())!
+  const endBounds = (await end.boundingBox())!
+  expect(discussion.y + discussion.height - parkedReply.y - parkedReply.height).toBeGreaterThanOrEqual(8)
+  expect(parkedReply.y + parkedReply.height / 2).toBeCloseTo(endBounds.y + endBounds.height / 2)
+  expect(parkedReply.x).toBeGreaterThanOrEqual(endBounds.x + endBounds.width)
+  if (isMobile) {
+    await expect(position).toBeInViewport()
+    const parkedPosition = (await position.boundingBox())!
+    expect(parkedPosition.y).toBeCloseTo(parkedReply.y)
+    expect(parkedPosition.x + parkedPosition.width).toBeLessThanOrEqual(endBounds.x)
+  }
+  await expect(page.getByRole('button', { name: 'Reply to topic' })).toHaveCount(2)
+
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+  await expect(floating).not.toBeInViewport()
+  if (isMobile) await expect(position).not.toBeInViewport()
+
+  await first.evaluate(button => button.scrollIntoView({ block: 'center' }))
+  await expect(first).toBeInViewport()
+  await expect(floating).toBeHidden()
 })
 
 test('keeps short-message avatars inside every message row', async ({ page }, testInfo) => {
@@ -1202,7 +1288,7 @@ test('reply transitions preserve the minimized draft and existing fresh-reply be
     }
   })
   await page.goto('/p/test/60?lang=en')
-  const reply = page.locator('[data-slot="topic-reply-float-boundary"]').getByRole('button', { name: 'Join the discussion' })
+  const reply = page.getByRole('button', { name: 'Reply to topic', exact: true })
   await reply.click()
   const panel = page.locator('.goose-composer-surface[data-state="open"] section')
   await panel.getByRole('radio', { name: 'Markdown', exact: true }).click()
@@ -1312,7 +1398,7 @@ test('keeps the active reply branch while its submission is pending', async ({ p
     ...topicPage.props.postStream, posts: [...topicPage.props.postStream.posts, created], afterPostNo: 2, maxPostNo: 2, total: 2,
   } } }))
   await page.goto('/p/test/60?lang=en')
-  const reply = page.getByRole('button', { name: 'Reply', exact: true }).first()
+  const reply = page.locator('[data-slot="topic-reply-first"]')
   await reply.click()
   const panel = page.locator('.goose-composer-surface section')
   await panel.getByRole('radio', { name: 'Markdown', exact: true }).click()
@@ -1734,7 +1820,7 @@ test('restoring the reply window never reveals an exiting bubble when its animat
     }
   })
   await page.goto('/p/test/60?lang=en')
-  await page.locator('[data-slot="topic-reply-float-boundary"]').getByRole('button', { name: 'Join the discussion' }).click()
+  await page.getByRole('button', { name: 'Reply to topic', exact: true }).click()
   const panel = page.locator('.goose-composer-surface[data-state="open"] section')
   for (let i = 0; i < 3; i++) {
     await panel.locator('header').getByRole('button', { name: 'Join the discussion' }).click()
@@ -1909,7 +1995,7 @@ test('unified site status prompts guests after deployment and offers resource re
 test('site update refresh respects an unfinished reply', async ({ page }) => {
   await page.route('**/api/forum/status', route => route.fulfill({ json: { code: 0, result: { deploymentId: 'old' } } }))
   await page.goto('/p/test/60?lang=en')
-  await page.locator('[data-slot="topic-reply-float-boundary"]').getByRole('button', { name: 'Join the discussion' }).click()
+  await page.getByRole('button', { name: 'Reply to topic', exact: true }).click()
   const panel = page.locator('.goose-composer-surface[data-state="open"] section')
   await panel.getByRole('radio', { name: 'Markdown', exact: true }).click()
   await panel.locator('textarea').fill('Keep my unfinished reply')

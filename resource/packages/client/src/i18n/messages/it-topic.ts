@@ -8,6 +8,7 @@ export default {
   originalImageSize: "Dimensioni originali",
   fitImage: "Adatta allo schermo",
   reply: "Rispondi",
+  replyToTopic: "Rispondi alla discussione",
   like: "Mi piace",
   bookmark: "Salva",
   watch: "Segui",

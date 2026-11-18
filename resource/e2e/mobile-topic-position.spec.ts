@@ -167,13 +167,18 @@ test('mobile navigation resolves a missing unloaded floor after dismissing the p
 test('the mobile timeline entrance stays out of the reply composer', async ({ page }) => {
   await openTopic(page)
   const trigger = page.getByRole('button', { name: 'Reply position', exact: true })
-  await page.locator('[data-slot="topic-reply-float-boundary"]').getByRole('button', { name: 'Join the discussion' }).click()
+  await page.evaluate(() => window.scrollTo(0, 350))
+  const floatingReply = page.locator('[data-slot="topic-reply-floating"]')
+  await expect(floatingReply).toBeInViewport()
+  await floatingReply.click()
   const composer = page.locator('.goose-composer-surface[data-state="open"] section')
   await expect(composer).toBeVisible()
   await expect(trigger).toBeHidden()
+  await expect(floatingReply).toBeHidden()
   await composer.locator('header').getByRole('button', { name: 'Close', exact: true }).click()
   await expect(composer).toBeHidden()
   await expect(trigger).toBeVisible()
+  await expect(floatingReply).toBeInViewport()
 })
 
 test('the vertical mobile slider uses the theme primary and accepts taps far from the thin rail', async ({ page }, testInfo) => {

@@ -11,6 +11,7 @@ export default {
   watchAdded: "已关注主题回复。",
   watchRemoved: "已取消关注主题回复。",
   reply: "回复",
+  replyToTopic: "回复主题",
   replyRequired: "回复内容不能为空",
   replyUpdated: "回复已更新。",
   replyPosted: "回复已发布。",
