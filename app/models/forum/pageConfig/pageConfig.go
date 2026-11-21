@@ -132,14 +132,15 @@ type FooterInfo struct {
 }
 
 type SiteChromeConfig struct {
-	Header        []ChromeItem  `json:"header"`
-	MainMenu      []ChromeItem  `json:"mainMenu"`
-	Resources     []ChromeItem  `json:"resources"`
-	SidebarGroups []ChromeGroup `json:"sidebarGroups"`
-	FooterInfo    FooterInfo    `json:"footerInfo"`
-	BrandType     string        `json:"brandType"`
-	BrandText     string        `json:"brandText"`
-	BrandImage    string        `json:"brandImage"`
+	Header                   []ChromeItem  `json:"header"`
+	MainMenu                 []ChromeItem  `json:"mainMenu"`
+	Resources                []ChromeItem  `json:"resources"`
+	HiddenSidebarSystemLinks []string      `json:"hiddenSidebarSystemLinks,omitempty"`
+	SidebarGroups            []ChromeGroup `json:"sidebarGroups"`
+	FooterInfo               FooterInfo    `json:"footerInfo"`
+	BrandType                string        `json:"brandType"`
+	BrandText                string        `json:"brandText"`
+	BrandImage               string        `json:"brandImage"`
 }
 
 type ChromeItem struct {

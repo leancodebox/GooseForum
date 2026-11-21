@@ -99,6 +99,10 @@ const fixedResources = [
   [Heart, "sponsors"],
   [Palette, "themePreview"],
 ] as const;
+const isSystemHeader = (id: string): id is "links" | "sponsors" =>
+  id === "links" || id === "sponsors";
+type SidebarSystemLink = "links" | "sponsors" | "members";
+type VisibilityControl = { label: string; enabled: boolean; onToggle(): void };
 type Key = "header" | "mainMenu" | "resources";
 type ChromeScope =
   | { key: "mainMenu" | "resources" }
@@ -172,6 +176,18 @@ export function SiteChromeManagementPage({
       fn(next);
       return next;
     });
+  }
+  function sidebarVisibility(id: SidebarSystemLink): VisibilityControl {
+    return {
+      label: text("showInSidebar").replace("{item}", text(id)),
+      enabled: !config.hiddenSidebarSystemLinks?.includes(id),
+      onToggle: () => update((next) => {
+        const hidden = next.hiddenSidebarSystemLinks ?? [];
+        next.hiddenSidebarSystemLinks = hidden.includes(id)
+          ? hidden.filter((key) => key !== id)
+          : [...hidden, id];
+      }),
+    };
   }
   async function save() {
     setSaving(true);
@@ -267,14 +283,16 @@ export function SiteChromeManagementPage({
                 <ChromeList
                   items={config.header}
                   horizontal
-                  systemIds={["links", "sponsors"]}
+                  visibilityLabel={(id) => isSystemHeader(id)
+                    ? text("showInHeader").replace("{item}", text(id))
+                    : undefined}
                   onChange={(items) =>
                     update((n) => {
                       n.header = items;
                     })
                   }
                   onEdit={(index) =>
-                    ["links", "sponsors"].includes(config.header[index].id)
+                    isSystemHeader(config.header[index].id)
                       ? update((n) => {
                           n.header[index].enabled = !n.header[index].enabled;
                         })
@@ -282,11 +300,7 @@ export function SiteChromeManagementPage({
                   }
                   onDelete={(index) =>
                     update((n) => {
-                      if (["links", "sponsors"].includes(n.header[index].id)) {
-                        n.header[index].enabled = false;
-                      } else {
-                        n.header.splice(index, 1);
-                      }
+                      n.header.splice(index, 1);
                     })
                   }
                 />
@@ -314,10 +328,13 @@ export function SiteChromeManagementPage({
                 <div className="flex flex-col">
                   <div className="flex flex-col gap-0.5">
                     {fixedMain.map(([Icon, key], index) => (
-                      <div key={key} className={`flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium ${index === 0 ? "bg-primary/10 text-primary" : "text-foreground/75"}`}>
-                        <Icon className="size-4 shrink-0" />
-                        <span className="truncate">{text(key)}</span>
-                      </div>
+                      <FixedNavRow
+                        key={key}
+                        icon={Icon}
+                        label={text(key)}
+                        active={index === 0}
+                        visibility={key === "members" ? sidebarVisibility(key) : undefined}
+                      />
                     ))}
                     <Popover>
                       <PopoverTrigger asChild>
@@ -356,6 +373,7 @@ export function SiteChromeManagementPage({
                           fixed={fixedResources.map(([icon, key]) => ({
                             icon,
                             label: text(key),
+                            visibility: isSystemHeader(key) ? sidebarVisibility(key) : undefined,
                           }))}
                           scope={{ key: "resources" }}
                           items={config.resources}
@@ -549,6 +567,21 @@ export function SiteChromeManagementPage({
     </AdminPage>
   );
 }
+function FixedNavRow({ icon: Icon, label, active = false, visibility }: {
+  icon: typeof Link;
+  label: string;
+  active?: boolean;
+  visibility?: VisibilityControl;
+}) {
+  return (
+    <div className={`flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium ${active ? "bg-primary/10 text-primary" : "text-foreground/75"}`}>
+      <Icon className={`size-4 shrink-0 ${visibility?.enabled === false ? "opacity-40" : ""}`} />
+      <span className={`min-w-0 flex-1 truncate ${visibility?.enabled === false ? "opacity-40" : ""}`}>{label}</span>
+      {visibility && <VisibilityToggle {...visibility} />}
+    </div>
+  );
+}
+
 function PreviewSection({
   title,
   addLabel,
@@ -570,7 +603,7 @@ function PreviewSection({
   onEdit(i: number): void;
   onDelete(i: number): void;
   onAdd?: () => void;
-  fixed?: Array<{ icon: typeof Link; label: string }>;
+  fixed?: Array<{ icon: typeof Link; label: string; visibility?: VisibilityControl }>;
   hideTitle?: boolean;
   scope: ChromeScope;
   onEditGroup?: () => void;
@@ -599,15 +632,7 @@ function PreviewSection({
           ) : null}
         </span>
       </div> : null}
-      {fixed.map(({ icon: Icon, label }) => (
-        <div
-          key={label}
-          className="flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium text-foreground/75"
-        >
-          <Icon className="size-4" />
-          <span className="truncate">{label}</span>
-        </div>
-      ))}
+      {fixed.map((item) => <FixedNavRow key={item.label} {...item} />)}
       <ChromeList
         items={items}
         standalone={false}
@@ -634,7 +659,7 @@ function ChromeList({
   onEdit,
   onDelete,
   horizontal = false,
-  systemIds = [],
+  visibilityLabel,
   standalone = true,
   scope,
 }: {
@@ -643,7 +668,7 @@ function ChromeList({
   onEdit(i: number): void;
   onDelete(i: number): void;
   horizontal?: boolean;
-  systemIds?: string[];
+  visibilityLabel?(id: string): string | undefined;
   standalone?: boolean;
   scope?: ChromeScope;
 }) {
@@ -673,7 +698,7 @@ function ChromeList({
             onEdit={() => onEdit(index)}
             onDelete={() => onDelete(index)}
             horizontal={horizontal}
-            system={systemIds.includes(item.id)}
+            visibilityLabel={visibilityLabel?.(item.id)}
             dragData={scope ? { type: "chrome-item", scope, index } : undefined}
           />
         ))}
@@ -693,14 +718,14 @@ function ChromeRow({
   onEdit,
   onDelete,
   horizontal,
-  system = false,
+  visibilityLabel,
   dragData,
 }: {
   item: SiteChromeItem;
   onEdit(): void;
   onDelete(): void;
   horizontal: boolean;
-  system?: boolean;
+  visibilityLabel?: string;
   dragData?: ChromeDragData;
 }) {
   const s = useSortable({ id: item.id, data: dragData });
@@ -721,16 +746,8 @@ function ChromeRow({
         {item.label || item.i18nLabel || "Item"}
       </span>
       <span className="absolute right-1 top-1/2 z-10 flex -translate-y-1/2 items-center gap-0.5 rounded-sm bg-background p-0.5 opacity-0 shadow-sm ring-1 ring-border group-hover:opacity-100 group-focus-within:opacity-100">
-        {system ? (
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            className="size-5 rounded-sm p-0"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={onEdit}
-          >
-            {item.enabled ? <EyeOff /> : <Eye />}
-          </Button>
+        {visibilityLabel ? (
+          <VisibilityToggle label={visibilityLabel} enabled={item.enabled} onToggle={onEdit} />
         ) : (
           <>
             <Button
@@ -755,6 +772,23 @@ function ChromeRow({
         )}
       </span>
     </div>
+  );
+}
+function VisibilityToggle({ label, enabled, onToggle }: VisibilityControl) {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon-xs"
+      className="size-5 rounded-sm p-0"
+      aria-label={label}
+      aria-pressed={enabled}
+      title={label}
+      onPointerDown={(event) => event.stopPropagation()}
+      onClick={onToggle}
+    >
+      {enabled ? <EyeOff /> : <Eye />}
+    </Button>
   );
 }
 function ChromeDragPreview({ item }: { item: SiteChromeItem }) {
@@ -1192,6 +1226,9 @@ function normalize(v: Partial<SiteChromeConfig>): SiteChromeConfig {
     header: [...headers.filter((x) => !ids.has(x.id)), ...current],
     mainMenu: (v.mainMenu || []).map(item),
     resources: (v.resources || []).map(item),
+    hiddenSidebarSystemLinks: (v.hiddenSidebarSystemLinks ?? []).filter(
+      (id) => isSystemHeader(id) || id === "members",
+    ),
     sidebarGroups: (v.sidebarGroups || []).map((g) => ({
       id: g.id || crypto.randomUUID(),
       title: g.title || "Group",

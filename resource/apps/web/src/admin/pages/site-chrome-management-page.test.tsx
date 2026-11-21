@@ -59,8 +59,34 @@ it("folds secondary navigation into More and preserves custom configuration when
   expect(screen.getByText("新增入口")).toBeTruthy();
   await user.keyboard("{Escape}");
   expect(screen.queryByText("自定义主菜单")).toBeNull();
+
+  const linksToggle = screen.getByRole("button", { name: "在顶部导航中显示友情链接" });
+  const sponsorsToggle = screen.getByRole("button", { name: "在顶部导航中显示赞助者" });
+  const membersToggle = sidebar.getByRole("button", { name: "在侧栏中显示成员" });
+  expect(linksToggle.getAttribute("aria-pressed")).toBe("true");
+  await user.click(linksToggle);
+  expect(linksToggle.getAttribute("aria-pressed")).toBe("false");
+  await user.click(membersToggle);
+  expect(membersToggle.getAttribute("aria-pressed")).toBe("false");
+  await user.click(more);
+  const resources = within(screen.getByRole("dialog"));
+  const sidebarLinksToggle = resources.getByRole("button", { name: "在侧栏中显示友情链接" });
+  const sidebarSponsorsToggle = resources.getByRole("button", { name: "在侧栏中显示赞助者" });
+  expect(screen.getAllByRole("button", { name: /^在侧栏中显示/ })).toHaveLength(3);
+  expect(sidebarLinksToggle.getAttribute("aria-pressed")).toBe("true");
+  await user.click(sidebarSponsorsToggle);
+  expect(sidebarSponsorsToggle.getAttribute("aria-pressed")).toBe("false");
+  expect(sponsorsToggle.getAttribute("aria-pressed")).toBe("true");
+  expect(resources.getByText("自定义资源")).toBeTruthy();
+  await user.keyboard("{Escape}");
+
   await user.click(screen.getByRole("button", { name: "保存" }));
   await waitFor(() => expect(saveChrome).toHaveBeenCalledWith(expect.objectContaining({
+    header: expect.arrayContaining([
+      expect.objectContaining({ id: "links", enabled: false }),
+      expect.objectContaining({ id: "sponsors", enabled: true }),
+    ]),
+    hiddenSidebarSystemLinks: ["members", "sponsors"],
     mainMenu: config.mainMenu,
     resources: [...config.resources, expect.objectContaining({ label: "新增入口", type: "text" })],
     sidebarGroups: config.sidebarGroups,

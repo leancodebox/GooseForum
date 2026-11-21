@@ -12,6 +12,7 @@ import {
   useState,
 } from "react";
 import { flushSync } from "react-dom";
+import { useTranslation } from "react-i18next";
 import type { AnyPagePayload } from "@gooseforum/client";
 import type { Locale } from "@gooseforum/client/i18n/locale";
 import type { Resource } from "i18next";
@@ -91,7 +92,8 @@ export function SiteApp({
       : [],
   );
   const [error, setError] = useState<unknown>();
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [pageLoad, setPageLoad] = useState<"navigation" | "refresh" | null>(null);
+  const isNavigating = pageLoad !== null;
   const [locale, setLocaleState] = useState<Locale>(() =>
     initialLocale ?? detectBrowserLocale(),
   );
@@ -156,7 +158,7 @@ export function SiteApp({
       activeRequest.current?.abort();
       const request = new AbortController();
       activeRequest.current = request;
-      setIsNavigating(true);
+      setPageLoad(scrollAction === "preserve" ? "refresh" : "navigation");
 
       try {
         const nextPage = await pageSource.load(url, request.signal);
@@ -227,7 +229,7 @@ export function SiteApp({
       } finally {
         if (activeRequest.current === request) {
           activeRequest.current = null;
-          setIsNavigating(false);
+          setPageLoad(null);
         }
       }
     },
@@ -365,7 +367,8 @@ export function SiteApp({
       activeHistoryIndex.current = targetIndex;
       const cached = cachedPageRef.current.get(routeCacheKey(url));
       if (cached) {
-        setIsNavigating(false);
+        activeRequest.current = null;
+        setPageLoad(null);
         setError(undefined);
         prepareDocument(cached, themeRef.current);
         pendingScroll.current = {
@@ -457,6 +460,7 @@ export function SiteApp({
   return (
     <GooseI18nProvider locale={locale} initialResources={initialResources}>
       <GooseRuntimeProvider runtime={runtime}>
+        {pageLoad === "navigation" && <NavigationProgress />}
         {!page && error ? (
           <BootstrapError
             error={error}
@@ -477,6 +481,25 @@ export function SiteApp({
       </GooseRuntimeProvider>
     </GooseI18nProvider>
   );
+}
+
+function NavigationProgress() {
+  const { t } = useTranslation("contentCommon");
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setVisible(true), 200);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  return visible ? (
+    <div
+      role="progressbar"
+      aria-label={t("loading")}
+      className="goose-navigation-progress pointer-events-none fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden bg-primary/15"
+    >
+      <div className="h-full w-1/3 bg-primary motion-reduce:w-full" />
+    </div>
+  ) : null;
 }
 
 function browserHref() {

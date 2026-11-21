@@ -265,6 +265,7 @@ export interface NavItemPayload {
 export interface SidebarPayload {
   main?: NavItemPayload[]
   resources?: NavItemPayload[]
+  hiddenSystemLinks?: string[]
   groups?: Array<{
     key: string
     title: string

@@ -160,7 +160,17 @@ export interface AdminOptRecord {
 export interface SiteSettings { siteName:string;siteUrl:string;siteLogo:string;siteEmail:string;siteDescription:string;siteKeywords:string;externalLinks?:string }
 export interface SiteChromeItem { id:string;enabled:boolean;type:'link'|'text'|string;label:string;i18nLabel:string;url:string }
 export interface SiteChromeGroup { id:string;title:string;i18nLabel:string;items:SiteChromeItem[] }
-export interface SiteChromeConfig { header:SiteChromeItem[];mainMenu:SiteChromeItem[];resources:SiteChromeItem[];sidebarGroups:SiteChromeGroup[];footerInfo?:{primary:{content:string}[];list:{name:string;url:string}[]};brandType?:string;brandText?:string;brandImage?:string }
+export interface SiteChromeConfig {
+  header: SiteChromeItem[]
+  mainMenu: SiteChromeItem[]
+  resources: SiteChromeItem[]
+  hiddenSidebarSystemLinks?: string[]
+  sidebarGroups: SiteChromeGroup[]
+  footerInfo?: { primary: { content: string }[]; list: { name: string; url: string }[] }
+  brandType?: string
+  brandText?: string
+  brandImage?: string
+}
 export interface MailSettings { enableMail:boolean;smtpHost:string;smtpPort:number;useSSL:boolean;smtpUsername:string;smtpPassword:string;fromName:string;fromEmail:string }
 export interface SecuritySettings { enableSignup:boolean;inviteOnly?:boolean;enableEmailVerification:boolean;allowedDomains:string[];registrationIPLimit?:number;registrationEmailLimit?:number;registrationGlobalLimit?:number }
 export interface PostingSettings { attachments?: import("../contracts/payload.js").AttachmentPolicy; externalLinks?:{enabled:boolean;whitelist:string[]};textControl:{minPostLength:number;maxPostLength:number;minTitleLength:number;maxTitleLength:number};uploadControl:{allowAttachments:boolean;authorizedExtensions:string[];maxAttachmentSizeKb:number} }

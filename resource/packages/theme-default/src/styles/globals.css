@@ -1,6 +1,17 @@
 @import "@gooseforum/ui/styles/base.css";
 @import "@gooseforum/markdown/styles.css";
 
+@media (prefers-reduced-motion: no-preference) {
+  .goose-navigation-progress > div {
+    animation: goose-navigation-progress 1.1s ease-in-out infinite;
+  }
+}
+
+@keyframes goose-navigation-progress {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(400%); }
+}
+
 .site-more-trigger[data-state="open"],
 .site-more-menu[data-slot="dropdown-menu-content"] {
   background-color: color-mix(in oklch, var(--muted) 94%, white);

@@ -18,6 +18,8 @@ export default {
   keywords: "Keywords",
   external: "Custom HTML",
   chrome: "Site chrome",
+  showInHeader: "Show {item} in header navigation",
+  showInSidebar: "Show {item} in the sidebar",
   chromeHint:
     "Configure brand, header, sidebar, resources, and footer content.",
   brand: "Brand",

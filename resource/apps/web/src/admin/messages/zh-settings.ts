@@ -18,6 +18,8 @@ export default {
   keywords: "关键词",
   external: "自定义 HTML",
   chrome: "站点外观",
+  showInHeader: "在顶部导航中显示{item}",
+  showInSidebar: "在侧栏中显示{item}",
   chromeHint: "配置品牌、顶部导航、侧栏、资源区和页脚内容。",
   brand: "品牌",
   brandType: "品牌类型",

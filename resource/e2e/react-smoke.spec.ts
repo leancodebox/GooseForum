@@ -3,6 +3,11 @@ import type { Page } from '@playwright/test'
 import { expect, test } from './fixtures'
 import { fileURLToPath } from 'node:url'
 
+const systemHeaderLinks = [
+  { key: 'sponsors', label: 'Sponsors', url: '/sponsors' },
+  { key: 'links', label: 'Links', url: '/links' },
+]
+
 const homePage = {
   component: 'home.index',
   props: {
@@ -1920,7 +1925,9 @@ test('shows one announcement at a time in order and reopens the panel after a to
 
 test('desktop sidebar remembers its width preference and leaves mobile navigation available', async ({ page }) => {
   const requests: string[] = []
-  await page.route('**/__goose_page/**', route => route.fulfill({ json: homePage }))
+  await page.route('**/__goose_page/**', route => route.fulfill({
+    json: { ...homePage, layout: { ...homePage.layout, header: systemHeaderLinks } },
+  }))
   page.on('request', request => { if (/\/(__goose_page|api)\//.test(request.url())) requests.push(request.url()) })
   await page.goto('/?lang=en')
   const content = page.locator('[data-slot="goose-page-content"]')
@@ -1962,6 +1969,79 @@ test('desktop sidebar remembers its width preference and leaves mobile navigatio
   await page.getByRole('button', { name: 'Expand sidebar' }).click()
   await expect.poll(async () => (await content.boundingBox())!.width).toBe(width)
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+})
+
+test('header and sidebar system link visibility can be set independently', async ({ page }) => {
+  const customResource = { key: 'custom', label: 'Custom resource', url: '/custom' }
+  const settings = [
+    { header: systemHeaderLinks, hiddenSystemLinks: undefined },
+    { header: systemHeaderLinks.slice(1), hiddenSystemLinks: ['links', 'members'] },
+    { header: [], hiddenSystemLinks: ['links', 'sponsors'] },
+  ]
+  let current = settings[0]
+  await page.route('**/__goose_page/**', route => route.fulfill({
+    json: {
+      ...homePage,
+      layout: {
+        ...homePage.layout,
+        header: current.header,
+        sidebar: { ...homePage.layout.sidebar, hiddenSystemLinks: current.hiddenSystemLinks, resources: [customResource] },
+      },
+    },
+  }))
+
+  const desktop = page.viewportSize()!.width >= 1024
+  const headerNav = page.getByRole('navigation', { name: 'Header navigation' })
+  for (const setting of settings) {
+    current = setting
+    await page.goto('/?lang=en')
+    if (!desktop) await page.getByRole('button', { name: 'Open menu' }).click()
+    const sidebar = desktop ? page.getByRole('complementary', { name: 'Sidebar' }) : page.getByRole('dialog')
+    await expect(sidebar.getByRole('link', { name: 'Topics', exact: true })).toBeVisible()
+    await expect(sidebar.getByRole('link', { name: 'All categories', exact: true })).toBeVisible()
+    await expect(sidebar.getByRole('link', { name: 'Members', exact: true })).toHaveCount(setting.hiddenSystemLinks?.includes('members') ? 0 : 1)
+    await sidebar.getByRole('button', { name: 'More' }).click()
+    const more = page.getByRole('menu')
+    await expect(more.getByRole('menuitem', { name: 'Custom resource' })).toBeVisible()
+    for (const item of systemHeaderLinks) {
+      await expect(more.getByRole('menuitem', { name: item.label, exact: true })).toHaveCount(setting.hiddenSystemLinks?.includes(item.key) ? 0 : 1)
+      if (desktop) await expect(headerNav.getByRole('link', { name: item.label, exact: true })).toHaveCount(setting.header.includes(item) ? 1 : 0)
+    }
+    if (desktop && setting.header.length === 0) await expect(headerNav).toHaveCount(0)
+  }
+})
+
+test('slow site navigation preserves the page and clears progress after success or failure', async ({ page }) => {
+  let releaseTopic!: () => void
+  let fail = false
+  await page.route('**/__goose_page/p/test/60', async route => {
+    await new Promise<void>(resolve => { releaseTopic = resolve })
+    await route.fulfill(fail ? { status: 500 } : { json: topicPage })
+  })
+  await page.goto('/?lang=en&responsive=topics')
+  const topicLink = page.getByRole('link', { name: responsiveTopic.title, exact: true })
+  const progress = page.getByRole('progressbar', { name: 'Loading…' })
+  await expect(progress).toHaveCount(0)
+  await topicLink.click()
+  await expect(progress).toBeVisible()
+  await expect(topicLink).toBeVisible()
+  await expect(progress).toHaveCSS('position', 'fixed')
+  await expect(progress).toHaveCSS('height', '2px')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect(progress.locator('div')).toHaveCSS('animation-name', 'none')
+  releaseTopic()
+  await expect(page.getByRole('heading', { name: 'Topic detail', exact: true })).toBeVisible()
+  await expect(progress).toHaveCount(0)
+
+  await page.goBack()
+  await expect(topicLink).toBeVisible()
+  await expect(progress).toHaveCount(0)
+  fail = true
+  await page.goForward()
+  await expect(progress).toBeVisible()
+  releaseTopic()
+  await expect(page.getByText('无法加载 GooseForum 页面')).toBeVisible()
+  await expect(progress).toHaveCount(0)
 })
 
 test('unified site status prompts guests after deployment and offers resource recovery', async ({ page }, testInfo) => {

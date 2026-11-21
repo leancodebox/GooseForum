@@ -128,10 +128,13 @@ export function AppShell({
     user: undefined,
   });
   const activeKey = layout.sidebar.activeKey || "topics";
+  const hiddenSystemLinks = layout.sidebar.hiddenSystemLinks ?? [];
   const primary = [
     { ...nav("topics", t("nav.topics"), "/", MessageCircleIcon), active: ['topics', 'hot', 'popular'].includes(activeKey) },
     nav("categories", t("nav.categories"), "/categories", LayoutGridIcon),
-    nav("members", t("nav.members"), "/members", UsersRoundIcon),
+    ...(!hiddenSystemLinks.includes("members")
+      ? [nav("members", t("nav.members"), "/members", UsersRoundIcon)]
+      : []),
     ...(layout.viewer.isAuthenticated
       ? [
           nav(
@@ -165,9 +168,13 @@ export function AppShell({
       : []),
     ...serverItems(layout.sidebar.main),
   ];
-  const resources = [
+  const systemResources = [
     nav("links", t("nav.links"), "/links", LinkIcon),
     nav("sponsors", t("nav.sponsors"), "/sponsors", HeartIcon),
+  ];
+  const headerItems = layout.header ? serverItems(layout.header) : systemResources;
+  const resources = [
+    ...systemResources.filter((resource) => !hiddenSystemLinks.includes(resource.key)),
     ...(layout.viewer.isAuthenticated && layout.viewer.canAccessAdmin
       ? [nav("theme-preview", t("themePreview"), "/theme-preview", PaletteIcon)]
       : []),
@@ -187,10 +194,6 @@ export function AppShell({
       items: serverItems(group.items),
     }))
     .filter((group) => group.title && group.items.length);
-  const headerItems = layout.header?.length
-    ? serverItems(layout.header)
-    : resources.slice(0, 2);
-
   function nav(
     key: string,
     label: string,
@@ -370,23 +373,25 @@ export function AppShell({
               ) : null}
             </button>
           ) : null}
-          <nav
-            className={cn(
-              "hidden items-center gap-1 lg:flex",
-              shellHeader.visible && "lg:hidden",
-            )}
-            aria-label="Header navigation"
-          >
-            {headerItems.map((item) => (
-              <GooseLink
-                key={item.key}
-                href={item.url}
-                className="rounded-md px-2 py-1.5 text-sm font-medium text-foreground/75 hover:bg-accent"
-              >
-                {item.label}
-              </GooseLink>
-            ))}
-          </nav>
+          {headerItems.length > 0 && (
+            <nav
+              className={cn(
+                "hidden items-center gap-1 lg:flex",
+                shellHeader.visible && "lg:hidden",
+              )}
+              aria-label="Header navigation"
+            >
+              {headerItems.map((item) => (
+                <GooseLink
+                  key={item.key}
+                  href={item.url}
+                  className="rounded-md px-2 py-1.5 text-sm font-medium text-foreground/75 hover:bg-accent"
+                >
+                  {item.label}
+                </GooseLink>
+              ))}
+            </nav>
+          )}
 
           <div
             className={cn(
@@ -704,7 +709,7 @@ function ShellNavigation({
     <nav className="flex flex-col gap-2">
       <div className="flex flex-col gap-0.5">
         <NavList items={visibleItems} onNavigate={onNavigate} />
-        <NavMoreMenu label={labels.more} items={moreItems} onNavigate={onNavigate} />
+        {moreItems.length > 0 && <NavMoreMenu label={labels.more} items={moreItems} onNavigate={onNavigate} />}
       </div>
       {groups.map((group) => (
         <NavSection key={group.key} title={group.title}>
