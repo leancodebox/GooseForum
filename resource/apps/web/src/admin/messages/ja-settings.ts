@@ -15,7 +15,7 @@ export default {
   uploadAvatars: "アバターをアップロード",
   selectAvatar: "アバターを一つ以上有効にしてください。",
   assignAvatar: "自動割り当て",
-  removeAvatar: "画像を削除",
+  removeAvatar: "アバター一覧から外す",
   site: "サイト情報",
   chrome: "サイト表示",
   showInHeader: "ヘッダーに{item}を表示",

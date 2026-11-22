@@ -45,7 +45,7 @@ it("saves the uploaded object key and preserves it while assignment is disabled"
   const preview = screen.getByRole("button", { name: text.customAvatars + " 2" }).querySelector("img");
   expect(preview?.getAttribute("src")).toBe("/file/img/2026/one.webp");
   await user.click(toggle);
-  for (const button of screen.getAllByRole("button", { name: text.removeAvatar })) await user.click(button);
+  for (const button of screen.getAllByRole("button", { name: new RegExp(text.removeAvatar) })) await user.click(button);
   expect(screen.getByRole("alert").textContent).toBe(text.selectAvatar);
   expect((screen.getByRole("button", { name: text.save }) as HTMLButtonElement).disabled).toBe(true);
   await user.click(screen.getByRole("button", { name: text.enableAll }));

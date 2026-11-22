@@ -12,7 +12,7 @@ export default {
   uploadAvatars: "上传头像",
   selectAvatar: "请至少启用一个头像。",
   assignAvatar: "自动分配",
-  removeAvatar: "移除图片",
+  removeAvatar: "从头像库移除",
   site: "站点信息",
   siteHint: "配置站点标识、公开地址、联系方式与元数据。",
   save: "保存",

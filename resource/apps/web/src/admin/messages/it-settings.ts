@@ -15,7 +15,7 @@ export default {
   uploadAvatars: "Carica avatar",
   selectAvatar: "Attiva almeno un avatar.",
   assignAvatar: "Assegnazione automatica",
-  removeAvatar: "Rimuovi immagine",
+  removeAvatar: "Rimuovi dalla raccolta",
   site: "Informazioni sito",
   chrome: "Aspetto sito",
   showInHeader: "Mostra {item} nella navigazione in alto",

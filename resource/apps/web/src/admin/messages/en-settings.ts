@@ -12,7 +12,7 @@ export default {
   uploadAvatars: "Upload avatars",
   selectAvatar: "Enable at least one avatar.",
   assignAvatar: "Auto-assign",
-  removeAvatar: "Remove image",
+  removeAvatar: "Remove from avatar library",
   site: "Site information",
   siteHint: "Configure identity, public URL, contact, and metadata.",
   save: "Save",

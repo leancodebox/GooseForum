@@ -21,10 +21,11 @@ import { Input } from "@gooseforum/ui/components/input";
 import { Switch } from "@gooseforum/ui/components/switch";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Textarea } from "@gooseforum/ui/components/textarea";
-import { ChevronDown, FileText, Globe, Save, Upload } from "lucide-react";
+import { ChevronDown, CircleMinus, FileText, Globe, Save, Upload } from "lucide-react";
 import { toast } from "@gooseforum/ui/components/sonner";
 import type { SettingsTextKey } from "../settings-i18n";
 type Text = (k: SettingsTextKey) => string;
+const avatarImageClass = "size-full rounded-full bg-muted object-cover";
 type AvatarOption = { file: string; enabled: boolean };
 
 function avatarOptions(settings: SiteSettings, builtins: string[]): AvatarOption[] {
@@ -310,12 +311,12 @@ export function SiteInfoManagementPage({
                       </label>}
                     </div>
                     {options.length > 0 && <div className="flex flex-wrap gap-3">
-                      {options.map(({ file, enabled: checked }, index) => <div key={file} className="relative grid justify-items-center gap-1">
+                      {options.map(({ file, enabled: checked }, index) => <div key={file} className="grid w-12 shrink-0 justify-items-center gap-1">
                         <button type="button" aria-pressed={checked} aria-label={text(builtin ? "builtinAvatars" : "customAvatars") + " " + (index + 1)} onClick={() => updatePool(items => items.map(item => item.file === file ? { ...item, enabled: !item.enabled } : item))} className="relative size-12 rounded-full outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring">
-                          <img loading="lazy" decoding="async" src={builtin ? file : `/file/img/${file}`} alt="" className="size-full rounded-full bg-muted object-cover" />
+                          <img loading="lazy" decoding="async" src={builtin ? file : `/file/img/${file}`} alt="" className={checked ? avatarImageClass : avatarImageClass + " grayscale opacity-60"} />
                           {checked && <span aria-hidden="true" className="absolute bottom-0 right-0 grid size-4 place-items-center rounded-full bg-primary text-xs text-primary-foreground">✓</span>}
                         </button>
-                        {!builtin && <Button type="button" size="sm" variant="ghost" onClick={() => updatePool(items => items.filter(item => item.file !== file))}>{text("removeAvatar")}</Button>}
+                        {!builtin && <Button type="button" size="icon-sm" variant="ghost" title={text("removeAvatar")} aria-label={text("removeAvatar") + " " + (index + 1)} onClick={() => updatePool(items => items.filter(item => item.file !== file))}><CircleMinus aria-hidden="true" /></Button>}
                       </div>)}
                     </div>}
                   </fieldset>;
