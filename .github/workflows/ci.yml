@@ -84,10 +84,12 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Verify invitation concurrency on PostgreSQL
+      - name: Verify invitation concurrency and forum upserts on PostgreSQL
         env:
           GOOSEFORUM_POSTGRES_TEST_DSN: host=localhost user=postgres password=postgres dbname=gooseforum port=5432 sslmode=disable
-        run: go test ./app/models/forum/invitations -run TestPostgresReservationAllowsOnlyOneWinner -count=3
+        run: |
+          go test ./app/models/forum/invitations -run TestPostgresReservationAllowsOnlyOneWinner -count=3
+          go test ./app/models/forum/topicrank -run '^TestForumUpsertsAcrossDialects$/^postgres$'
 
   mysql-integration:
     name: MySQL integration
@@ -116,10 +118,12 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Verify invitation concurrency on MySQL
+      - name: Verify invitation concurrency and forum upserts on MySQL
         env:
           GOOSEFORUM_MYSQL_TEST_DSN: root:root@tcp(localhost:3306)/gooseforum?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci
-        run: go test ./app/models/forum/invitations -run TestMySQLReservationAllowsOnlyOneWinner -count=3
+        run: |
+          go test ./app/models/forum/invitations -run TestMySQLReservationAllowsOnlyOneWinner -count=3
+          go test ./app/models/forum/topicrank -run '^TestForumUpsertsAcrossDialects$/^mysql$'
 
   resource:
     name: Resource build

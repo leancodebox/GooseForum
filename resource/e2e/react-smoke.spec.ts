@@ -1923,6 +1923,37 @@ test('shows one announcement at a time in order and reopens the panel after a to
   })
 })
 
+test('sidebar XML links open full documents', async ({ page }) => {
+  const documents = [
+    { name: 'RSS', path: '/rss.xml', body: '<rss version="2.0"><channel/></rss>' },
+    { name: 'Site Map', path: '/sitemap.xml', body: '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"/>' },
+  ]
+  await page.route('**/__goose_page/**', route => route.fulfill({
+    json: {
+      ...homePage,
+      layout: {
+        ...homePage.layout,
+        footer: { ...homePage.layout.footer, links: documents.map(({ name, path }) => ({ name, url: path })) },
+      },
+    },
+  }))
+
+  for (const { name, path, body } of documents) {
+    await page.route(url => url.pathname === path, route => route.fulfill({ contentType: 'application/xml', body }))
+    await page.goto('/?lang=en')
+    const desktop = page.viewportSize()!.width >= 1024
+    if (!desktop) await page.getByRole('button', { name: 'Open menu' }).click()
+    const sidebar = desktop ? page.getByRole('complementary', { name: 'Sidebar' }) : page.getByRole('dialog')
+    const [response] = await Promise.all([
+      page.waitForResponse(response => new URL(response.url()).pathname === path),
+      sidebar.getByRole('link', { name, exact: true }).click(),
+    ])
+    expect(response.request().isNavigationRequest()).toBe(true)
+    expect(response.headers()['content-type']).toContain('application/xml')
+    await expect(page).toHaveURL(url => url.pathname === path)
+  }
+})
+
 test('desktop sidebar remembers its width preference and leaves mobile navigation available', async ({ page }) => {
   const requests: string[] = []
   await page.route('**/__goose_page/**', route => route.fulfill({

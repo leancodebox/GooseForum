@@ -29,7 +29,7 @@ func IncrementUserPostWithDB(db *gorm.DB, topicId, userId uint64) error {
 	return db.Model(&Entity{}).Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "topic_id"}, {Name: "user_id"}},
 		DoUpdates: clause.Assignments(map[string]any{
-			"reply_count":   gorm.Expr("reply_count + 1"),
+			"reply_count":   gorm.Expr("? + 1", clause.Column{Table: tableName, Name: "reply_count"}),
 			"last_reply_at": now,
 		}),
 	}).Create(map[string]any{

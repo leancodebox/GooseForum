@@ -4,12 +4,17 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
+	"net/mail"
+	"net/url"
+	"strings"
 	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/leancodebox/GooseForum/resource"
@@ -66,6 +71,11 @@ type ActivateAccountData struct {
 	Message     string
 	Success     bool
 	Description string
+	SiteName    string
+	BrandType   string
+	BrandText   string
+	BrandImage  string
+	ContactURL  string
 }
 
 // renderActivationPage 渲染账号激活结果页。messageKey 为 i18n 文案键。
@@ -87,7 +97,19 @@ func renderActivationPage(c *gin.Context, success bool, messageKey string) {
 		return
 	}
 
+	site := hotdataserve.GetSiteSettingsConfigCache()
+	chrome := hotdataserve.GetSiteChromeConfigCache()
+	siteName := strings.TrimSpace(site.SiteName)
+	if siteName == "" {
+		siteName = defaultconfig.GetDefaultSiteSettingsConfig().SiteName
+	}
+	var contactURL string
+	if address, err := mail.ParseAddress(strings.TrimSpace(site.SiteEmail)); err == nil {
+		contactURL = "mailto:" + url.PathEscape(address.Address)
+	}
+
 	c.Header("Content-Type", "text/html; charset=utf-8")
+	c.Header("Referrer-Policy", "no-referrer")
 	if err = tmpl.Execute(c.Writer, struct {
 		Data ActivateAccountData
 		T    func(string, ...any) string
@@ -98,6 +120,11 @@ func renderActivationPage(c *gin.Context, success bool, messageKey string) {
 			Message:     tr(messageKey),
 			Success:     success,
 			Description: description,
+			SiteName:    siteName,
+			BrandType:   chrome.BrandType,
+			BrandText:   chrome.BrandText,
+			BrandImage:  chrome.BrandImage,
+			ContactURL:  contactURL,
 		},
 		T:    tr,
 		Lang: lang,

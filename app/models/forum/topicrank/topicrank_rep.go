@@ -14,20 +14,25 @@ func MarkAt(ctx context.Context, topicID uint64, now time.Time) error {
 	if topicID == 0 {
 		return nil
 	}
-	result := builder().WithContext(ctx).Clauses(clause.OnConflict{
-		Columns: []clause.Column{{Name: "topic_id"}},
-		DoUpdates: clause.Assignments(map[string]any{
-			"next_run_at": gorm.Expr("CASE WHEN next_run_at IS NULL OR next_run_at > ? THEN ? ELSE next_run_at END", now, now),
-			"version":     gorm.Expr("version + 1"),
-		}),
-	}).Create(&Entity{TopicID: topicID, NextRunAt: &now, Version: 1})
-	if result.Error == nil {
+	err := markAtWithDB(builder().WithContext(ctx), topicID, now)
+	if err == nil {
 		select {
 		case wakeups <- struct{}{}:
 		default:
 		}
 	}
-	return result.Error
+	return err
+}
+
+func markAtWithDB(db *gorm.DB, topicID uint64, now time.Time) error {
+	nextRunAt := clause.Column{Table: tableName, Name: "next_run_at"}
+	return db.Clauses(clause.OnConflict{
+		Columns: []clause.Column{{Name: "topic_id"}},
+		DoUpdates: clause.Assignments(map[string]any{
+			"next_run_at": gorm.Expr("CASE WHEN ? IS NULL OR ? > ? THEN ? ELSE ? END", nextRunAt, nextRunAt, now, now, nextRunAt),
+			"version":     gorm.Expr("? + 1", clause.Column{Table: tableName, Name: "version"}),
+		}),
+	}).Create(&Entity{TopicID: topicID, NextRunAt: &now, Version: 1}).Error
 }
 
 func Get(ctx context.Context, topicID uint64) (Entity, error) {

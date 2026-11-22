@@ -137,5 +137,8 @@ function shouldNavigateInApp(
 }
 
 export function isSiteSpaPath(pathname: string) {
-  return pathname !== "/admin" && !pathname.startsWith("/admin/");
+  return pathname !== "/admin" &&
+    !pathname.startsWith("/admin/") &&
+    pathname !== "/rss.xml" &&
+    pathname !== "/sitemap.xml";
 }
