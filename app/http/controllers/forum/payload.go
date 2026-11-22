@@ -578,11 +578,18 @@ type PrivacySettingsPayload struct {
 	ShowFollowing bool `json:"showFollowing"`
 }
 
+type AvatarPreset struct {
+	File string `json:"file"`
+	URL  string `json:"url"`
+}
+
 type SettingsPageProps struct {
-	Privacy PrivacySettingsPayload `json:"privacy"`
-	User    *vo.UserDetailedVo     `json:"user"`
-	Stats   SettingsStatsPayload   `json:"stats"`
-	Tabs    []TabPayload           `json:"tabs"`
+	AvatarPresets     []AvatarPreset         `json:"avatarPresets"`
+	CurrentPresetFile string                 `json:"currentPresetFile"`
+	Privacy           PrivacySettingsPayload `json:"privacy"`
+	User              *vo.UserDetailedVo     `json:"user"`
+	Stats             SettingsStatsPayload   `json:"stats"`
+	Tabs              []TabPayload           `json:"tabs"`
 }
 
 type SettingsStatsPayload struct {
@@ -2312,9 +2319,20 @@ func buildMessagesPageProps(c *gin.Context) MessagesPageProps {
 
 func buildSettingsPageProps(user users.EntityComplete) SettingsPageProps {
 	stats := userStatistics.Get(user.Id)
+	files := hotdataserve.GetSiteSettingsConfigCache().EnabledAvatarFiles()
+	presets := make([]AvatarPreset, 0, len(files))
+	currentPreset := ""
+	for _, file := range files {
+		presets = append(presets, AvatarPreset{File: file, URL: users.AvatarFileURL(file)})
+		if file == user.AvatarUrl {
+			currentPreset = file
+		}
+	}
 	return SettingsPageProps{
-		Privacy: PrivacySettingsPayload{ShowActivity: !user.HideActivity, ShowTopics: !user.HideTopics, ShowFollowing: !user.HideFollowing},
-		User:    transform.User2UserDetailedVo(user),
+		AvatarPresets:     presets,
+		CurrentPresetFile: currentPreset,
+		Privacy:           PrivacySettingsPayload{ShowActivity: !user.HideActivity, ShowTopics: !user.HideTopics, ShowFollowing: !user.HideFollowing},
+		User:              transform.User2UserDetailedVo(user),
 		Stats: SettingsStatsPayload{
 			TopicCount:        stats.TopicCount,
 			ReplyCount:        stats.ReplyCount,

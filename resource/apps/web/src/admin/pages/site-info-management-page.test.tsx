@@ -19,7 +19,7 @@ it("saves the uploaded object key and preserves it while assignment is disabled"
   });
   const saveSite = vi.fn().mockResolvedValue("success");
   const uploadImage = vi.fn().mockImplementation(async (file: File) => ({ objectName: "2026/" + file.name }));
-  const api = { settings: { site: async () => ({ defaultAvatarFile: "legacy.png" }), saveSite }, pages: { uploadImage } } as unknown as GooseAdminApi;
+  const api = { settings: { site: async () => ({ builtinAvatarFiles: ["/static/pic/1.webp", "/static/pic/2.webp"], defaultAvatarFile: "legacy.png" }), saveSite }, pages: { uploadImage } } as unknown as GooseAdminApi;
   const user = userEvent.setup();
   render(<SiteInfoManagementPage api={api} text={key => text[key]} />);
   const toggle = await screen.findByRole("switch", { name: text.assignAvatar });
@@ -50,5 +50,5 @@ it("saves the uploaded object key and preserves it while assignment is disabled"
   expect((screen.getByRole("button", { name: text.save }) as HTMLButtonElement).disabled).toBe(true);
   await user.click(screen.getByRole("button", { name: text.enableAll }));
   await user.click(screen.getByRole("button", { name: text.save }));
-  expect(saveSite.mock.lastCall?.[0].avatarPool).toHaveLength(12);
+  expect(saveSite.mock.lastCall?.[0].avatarPool).toHaveLength(2);
 });

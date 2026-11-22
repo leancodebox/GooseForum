@@ -1135,9 +1135,14 @@ test('keeps the avatar edit overlay below the worn badge', async ({ page }, test
     ...homePage,
     component: 'settings.index',
     props: {
+      currentPresetFile: '/static/pic/1.webp',
+      avatarPresets: [
+        { file: '/static/pic/1.webp', url: '/static/pic/1.webp?t=1791244800' },
+        { file: '2026/goose.webp', url: '/file/img/2026/goose.webp' },
+      ],
       user: {
         id: 7, username: 'avatar-editor', nickname: 'Avatar Editor', email: 'avatar@example.test',
-        locale: 'en', avatarUrl: '/static/pic/default-avatar.webp', profileCoverUrl: '',
+        locale: 'en', avatarUrl: '/static/pic/1.webp?t=1791244800', profileCoverUrl: '',
         bio: '', signature: '', websiteName: '', website: '', prestige: 0,
         createdAt: '2026-01-01T00:00:00Z', externalInformation: {},
         wornBadgeCode: badge.code, badges: [badge], wearableBadges: [badge], wornBadge: badge,
@@ -1156,6 +1161,13 @@ test('keeps the avatar edit overlay below the worn badge', async ({ page }, test
     meta: { title: 'Avatar settings' },
     url: '/settings?lang=en',
   } }))
+  await page.route('**/file/img/2026/goose.webp', route => route.fulfill({
+    contentType: 'image/webp', path: fileURLToPath(new URL('../static/pic/2.webp', import.meta.url)),
+  }))
+  await page.route('**/api/set-preset-avatar', route => {
+    expect(route.request().postDataJSON()).toEqual({ avatarUrl: '2026/goose.webp' })
+    return route.fulfill({ json: { code: 0, result: { avatarUrl: '/file/img/2026/goose.webp' } } })
+  })
   await page.goto('/settings?lang=en')
   await expect(page).toHaveTitle(/Avatar settings/)
   const button = page.getByRole('button', { name: 'Change avatar', exact: true })
@@ -1164,6 +1176,13 @@ test('keeps the avatar edit overlay below the worn badge', async ({ page }, test
   const badgeImage = button.getByRole('img', { name: badge.name, exact: true })
   await expect(badgeImage).toBeVisible()
   await expect.poll(() => badgeImage.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0)
+  const presets = page.getByRole('button', { name: 'Select preset avatar' })
+  await expect(presets).toHaveCount(2)
+  await expect(presets.first()).toHaveAttribute('aria-pressed', 'true')
+  await presets.last().click()
+  await page.getByRole('button', { name: 'Apply avatar' }).click()
+  await expect(page.getByRole('button', { name: 'Apply avatar' })).toHaveCount(0)
+  await expect(button.locator('[data-slot="avatar-image"]')).toHaveAttribute('src', '/file/img/2026/goose.webp')
   await button.hover()
   const overlay = button.locator(':scope > span').last()
   const supportsHover = await page.evaluate(() => matchMedia('(hover: hover)').matches)

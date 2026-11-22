@@ -121,7 +121,7 @@ export default {
   avatar: {
     change: "Change avatar",
     presetsTitle: "Preset avatars",
-    presetsDescription: "Choose a built-in avatar or upload your own.",
+    presetsDescription: "Choose a preset avatar or upload your own.",
     applyPreset: "Apply avatar",
     uploadCustom: "Upload custom",
     selectPreset: "Select preset avatar",

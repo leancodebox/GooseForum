@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"mime/multipart"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -259,7 +260,7 @@ type SetPresetAvatarReq struct {
 	AvatarUrl string `json:"avatarUrl" validate:"required"`
 }
 
-// SetPresetAvatar switches the current user to a built-in avatar.
+// SetPresetAvatar switches the current user to an enabled preset.
 func SetPresetAvatar(req component.BetterRequest[SetPresetAvatarReq]) component.Response {
 	userEntity, err := req.GetUser()
 	if err != nil {
@@ -267,7 +268,7 @@ func SetPresetAvatar(req component.BetterRequest[SetPresetAvatarReq]) component.
 	}
 
 	avatarUrl := strings.TrimSpace(req.Params.AvatarUrl)
-	if !isAllowedPresetAvatar(avatarUrl) {
+	if !slices.Contains(hotdataserve.GetSiteSettingsConfigCache().EnabledAvatarFiles(), avatarUrl) {
 		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
 	}
 
@@ -290,15 +291,6 @@ func WearBadge(req component.BetterRequest[WearBadgeReq]) component.Response {
 		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
 	}
 	return component.SuccessResponseCode("更新成功", component.MessageUserUpdateSuccess, nil)
-}
-
-func isAllowedPresetAvatar(avatarUrl string) bool {
-	for i := 1; i <= 12; i++ {
-		if avatarUrl == fmt.Sprintf("/static/pic/%d.webp", i) {
-			return true
-		}
-	}
-	return false
 }
 
 // UploadAvatar stores a new avatar for the current user.

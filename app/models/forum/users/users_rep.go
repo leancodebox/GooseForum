@@ -1,8 +1,6 @@
 package users
 
 import (
-	"fmt"
-	"math/rand"
 	"strings"
 	"time"
 
@@ -57,11 +55,6 @@ func MakeUser(name string, password string, email string) *EntityComplete {
 	user := EntityComplete{Username: name, Email: email}
 	user.SetPassword(password)
 	return &user
-}
-
-func RandAvatarUrl() string {
-	randomNum := rand.Intn(12) + 1
-	return fmt.Sprintf("/static/pic/%d.webp", randomNum)
 }
 
 func Create(entity *EntityComplete) error {

@@ -272,6 +272,8 @@ function userProfileProps(): UserProfileProps {
 
 function settingsProps(): SettingsPageProps {
   return {
+    avatarPresets: [{ file: "/static/pic/1.webp", url: "/static/pic/1.webp?t=1791244800" }],
+    currentPresetFile: "",
     privacy: { showActivity: true, showTopics: true, showFollowing: true },
     user: {
       id: 7,
@@ -635,6 +637,12 @@ describe("AppShell and static pages", () => {
     expect(savePresetAvatar).toHaveBeenCalledWith("/static/pic/1.webp");
   });
 
+  it("keeps personal upload available when the preset catalog is empty", async () => {
+    renderPage(payload("settings.index", { ...settingsProps(), avatarPresets: [] }), { users: {} as GooseSiteApi["users"] });
+    expect(screen.queryByRole("button", { name: "选择预设头像" })).toBeNull();
+    expect(await screen.findByRole("button", { name: "更换头像" })).toBeTruthy();
+  });
+
   it("edits and saves the React settings profile", async () => {
     const saveInfo = vi.fn().mockResolvedValue(undefined);
     const saveCover = vi.fn().mockResolvedValue(undefined);
@@ -647,7 +655,7 @@ describe("AppShell and static pages", () => {
     ).toBeTruthy();
     expect(
       screen.getAllByRole("button", { name: "选择预设头像" }),
-    ).toHaveLength(12);
+    ).toHaveLength(1);
     const cover = document.querySelector('[data-slot="profile-cover"]');
     expect(cover?.getAttribute("style")).toContain('url("/cover.webp")');
     expect(

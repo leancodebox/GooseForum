@@ -347,7 +347,7 @@ export interface GooseAdminApi {
     releases(): Promise<GithubRelease[]>
   }
   settings: {
-    site(): Promise<SiteSettings>
+    site(): Promise<SiteSettings & { builtinAvatarFiles: string[] }>
     saveSite(settings: SiteSettings): Promise<unknown>
     chrome(): Promise<SiteChromeConfig>
     saveChrome(settings: SiteChromeConfig): Promise<unknown>

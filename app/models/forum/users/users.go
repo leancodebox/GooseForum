@@ -127,13 +127,17 @@ func (itself *EntityComplete) GetWebAvatarUrl() string {
 	if itself.EffectiveRestriction(time.Now()) != RestrictionNormal {
 		return urlconfig.GetBannedAvatar()
 	}
-	if itself.AvatarUrl == "" {
+	return AvatarFileURL(itself.AvatarUrl)
+}
+
+func AvatarFileURL(file string) string {
+	if file == "" {
 		return ""
 	}
-	if strings.HasPrefix(itself.AvatarUrl, "/static/pic/") {
-		return urlconfig.VersionBuiltinAvatar(itself.AvatarUrl)
+	if strings.HasPrefix(file, "/static/pic/") {
+		return urlconfig.VersionBuiltinAvatar(file)
 	}
-	return strings.ReplaceAll(urlconfig.FilePath(itself.AvatarUrl), "\\", "/")
+	return strings.ReplaceAll(urlconfig.FilePath(file), "\\", "/")
 }
 
 func (itself *EntityComplete) TableName() string {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"slices"
 	"strings"
 	"time"
 
@@ -1034,7 +1035,10 @@ func fillSponsorsConfigDefaults(config *pageConfig.SponsorsConfig) {
 func GetSiteSettings(req component.BetterRequest[component.Null]) component.Response {
 	defaultSettings := defaultconfig.GetDefaultSiteSettingsConfig()
 	res := pageConfig.GetConfigByPageType(pageConfig.SiteSettings, defaultSettings)
-	return component.SuccessResponse(res)
+	return component.SuccessResponse(struct {
+		pageConfig.SiteSettingsConfig
+		BuiltinAvatarFiles []string `json:"builtinAvatarFiles"`
+	}{res, pageConfig.BuiltinAvatarFiles()})
 }
 
 func ServerVersion(req component.BetterRequest[component.Null]) component.Response {
@@ -1049,6 +1053,7 @@ type SaveSiteSettingsReq struct {
 func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) component.Response {
 	settings := req.Params.Settings
 	var files []string
+	builtins := pageConfig.BuiltinAvatarFiles()
 	if settings.AvatarPool != nil {
 		settings.DefaultAvatarFile = ""
 		enabled := false
@@ -1059,7 +1064,7 @@ func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) componen
 			}
 			seen[option.File] = true
 			enabled = enabled || option.Enabled
-			if !isAllowedPresetAvatar(option.File) {
+			if !slices.Contains(builtins, option.File) {
 				files = append(files, option.File)
 			}
 		}

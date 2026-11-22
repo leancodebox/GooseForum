@@ -807,6 +807,8 @@ export interface PrivacySettingsPayload {
 }
 
 export interface SettingsPageProps {
+  avatarPresets: Array<{ file: string; url: string }>
+  currentPresetFile: string
   privacy: PrivacySettingsPayload
   user: SettingsUserPayload
   stats: {

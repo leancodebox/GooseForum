@@ -53,11 +53,6 @@ const tabKeys = [
   "agent-tokens",
 ] as const;
 type TabKey = (typeof tabKeys)[number];
-const presetAvatars = Array.from(
-  { length: 12 },
-  (_, index) => `/static/pic/${index + 1}.webp`,
-);
-
 export function SettingsPageView({
   page,
   layout,
@@ -90,7 +85,10 @@ export function SettingsPageView({
   }));
   const [username, setUsername] = useState(page.user.username);
   const [email, setEmail] = useState(page.user.email);
-  const [presetDraft, setPresetDraft] = useState(page.user.avatarUrl);
+  const presets = page.avatarPresets ?? [];
+  const [currentPreset, setCurrentPreset] = useState(page.currentPresetFile || "");
+  const [draftFile, setDraftFile] = useState(currentPreset);
+  const draft = presets.find(preset => preset.file === draftFile);
   const [savingPreset, setSavingPreset] = useState(false);
   const [wornCode, setWornCode] = useState(page.user.wornBadgeCode || "");
   const [savingBadge, setSavingBadge] = useState(false);
@@ -112,8 +110,9 @@ export function SettingsPageView({
 
   const crop = useAvatarCrop({
     initialUrl: page.user.avatarUrl,
-    onSuccess(url) {
-      setPresetDraft(url);
+    onSuccess() {
+      setDraftFile("");
+      setCurrentPreset("");
       showStatus(t("status.avatarSaved"));
     },
     onError: showError,
@@ -160,13 +159,13 @@ export function SettingsPageView({
   }
 
   async function applyPreset() {
-    if (savingPreset || presetDraft === crop.avatarUrl) return;
+    if (savingPreset || !draft || draft.file === currentPreset) return;
     setSavingPreset(true);
     try {
-      const result = await runtime.api.users.savePresetAvatar(presetDraft);
-      const url = result.avatarUrl || presetDraft;
+      const result = await runtime.api.users.savePresetAvatar(draft.file);
+      const url = result.avatarUrl || draft.url;
       crop.setAvatarUrl(url);
-      setPresetDraft(url);
+      setCurrentPreset(draft.file);
       showStatus(t("status.avatarSaved"));
     } catch (reason) {
       showError(serverError(reason, t("errors.avatar")));
@@ -232,7 +231,7 @@ export function SettingsPageView({
                 onClick={crop.choose}
               >
                 <ProfileAvatar
-                  src={presetDraft}
+                  src={draft && draft.file !== currentPreset ? draft.url : crop.avatarUrl}
                   name={displayName}
                   badge={wornBadge}
                   className="size-full isolation-auto"
@@ -281,12 +280,10 @@ export function SettingsPageView({
                 <h2 className="text-sm font-semibold">
                   {t("avatar.presetsTitle")}
                 </h2>
-                <p className="text-xs text-muted-foreground">
-                  {t("avatar.presetsDescription")}
-                </p>
+                {presets.length > 0 && <p className="text-xs text-muted-foreground">{t("avatar.presetsDescription")}</p>}
               </div>
               <div className="flex gap-2">
-                {presetDraft !== crop.avatarUrl ? (
+                {draft && draft.file !== currentPreset ? (
                   <Button
                     size="sm"
                     disabled={savingPreset}
@@ -303,24 +300,28 @@ export function SettingsPageView({
               </div>
             </div>
             <div className="flex gap-1.5 overflow-x-auto pb-1">
-              {presetAvatars.map((url) => (
+              {presets.map(({ file, url }) => (
                 <button
-                  key={url}
+                  key={file}
                   type="button"
+                  disabled={savingPreset}
                   aria-label={t("avatar.selectPreset")}
+                  aria-pressed={draftFile === file}
                   className={cn(
                     "relative size-11 shrink-0 overflow-hidden rounded-md border p-0.5",
-                    presetDraft === url &&
+                    draftFile === file &&
                       "border-primary ring-2 ring-primary/15",
                   )}
-                  onClick={() => setPresetDraft(url)}
+                  onClick={() => setDraftFile(file)}
                 >
                   <img
-                    src={`${url}?t=1791244800`}
+                    src={url}
+                    loading="lazy"
+                    decoding="async"
                     alt=""
                     className="size-full rounded object-cover"
                   />
-                  {crop.avatarUrl === url ? (
+                  {currentPreset === file ? (
                     <span className="absolute right-0.5 top-0.5 grid size-4 place-items-center rounded-full bg-primary text-primary-foreground">
                       <Check className="size-3" />
                     </span>

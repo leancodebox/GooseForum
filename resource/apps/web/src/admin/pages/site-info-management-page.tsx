@@ -25,10 +25,9 @@ import { ChevronDown, FileText, Globe, Save, Upload } from "lucide-react";
 import { toast } from "@gooseforum/ui/components/sonner";
 import type { SettingsTextKey } from "../settings-i18n";
 type Text = (k: SettingsTextKey) => string;
-const builtins = Array.from({ length: 12 }, (_, i) => `/static/pic/${i + 1}.webp`);
 type AvatarOption = { file: string; enabled: boolean };
 
-function avatarOptions(settings: SiteSettings): AvatarOption[] {
+function avatarOptions(settings: SiteSettings, builtins: string[]): AvatarOption[] {
   const pool = settings.avatarPool ?? (settings.defaultAvatarFile
     ? [{ file: settings.defaultAvatarFile, enabled: true }]
     : builtins.map(file => ({ file, enabled: true })));
@@ -53,6 +52,7 @@ export function SiteInfoManagementPage({
   api: GooseAdminApi;
   text: Text;
 }) {
+  const [builtins, setBuiltins] = useState<string[]>([]);
   const [form, setForm] = useState(empty);
   const [loading, setLoading] = useState(true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -67,7 +67,10 @@ export function SiteInfoManagementPage({
     setLoading(true);
     setError("");
     try {
-      setForm({ ...empty, ...(await api.settings.site()) });
+      const { builtinAvatarFiles, ...settings } = await api.settings.site();
+      if (!Array.isArray(builtinAvatarFiles)) throw new Error(textRef.current("loadFailed"));
+      setBuiltins(builtinAvatarFiles);
+      setForm({ ...empty, ...settings });
     } catch (r) {
       setError(errorMessage(r, textRef.current("loadFailed")));
     } finally {
@@ -77,11 +80,11 @@ export function SiteInfoManagementPage({
   useEffect(() => {
     void load();
   }, [load]);
-  const pool = avatarOptions(form);
+  const pool = avatarOptions(form, builtins);
   const enabledAvatars = pool.filter(option => option.enabled);
   const missingSelection = !form.disableDefaultAvatar && enabledAvatars.length === 0;
   function updatePool(update: (options: AvatarOption[]) => AvatarOption[]) {
-    setForm(current => ({ ...current, defaultAvatarFile: "", avatarPool: update(avatarOptions(current)) }));
+    setForm(current => ({ ...current, defaultAvatarFile: "", avatarPool: update(avatarOptions(current, builtins)) }));
   }
   async function save(e?: React.FormEvent) {
     e?.preventDefault();
@@ -293,7 +296,7 @@ export function SiteInfoManagementPage({
                 {avatarsExpanded && [true, false].map(builtin => {
                   const options = pool.filter(option => builtins.includes(option.file) === builtin);
                   const enabled = options.filter(option => option.enabled).length;
-                  return <fieldset key={String(builtin)} aria-labelledby={builtin ? "builtin-avatar-title" : "custom-avatar-title"} disabled={form.disableDefaultAvatar || saving} className="min-w-0 space-y-3 disabled:opacity-60">
+                  return <fieldset key={String(builtin)} aria-labelledby={builtin ? "builtin-avatar-title" : "custom-avatar-title"} disabled={saving} className="min-w-0 space-y-3 disabled:opacity-60">
                     <div className="flex min-h-8 flex-wrap items-center gap-2">
                       <div className="grid grid-cols-[minmax(5em,auto)_auto] items-baseline gap-x-3">
                         <h4 id={builtin ? "builtin-avatar-title" : "custom-avatar-title"} className="font-medium">{text(builtin ? "builtinAvatars" : "customAvatars")}</h4>

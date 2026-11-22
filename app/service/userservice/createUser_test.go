@@ -1,6 +1,7 @@
 package userservice
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -93,6 +94,9 @@ func TestDefaultAvatarAppliesAtRegistration(t *testing.T) {
 	empty := register("empty-avatar", `{"disableDefaultAvatar":true,"defaultAvatarFile":"2026/site.png"}`)
 	if empty.AvatarUrl != "" || empty.GetWebAvatarUrl() != "" {
 		t.Fatal("disabled assignment returned an image")
+	}
+	if got := hotdataserve.GetSiteSettingsConfigCache().EnabledAvatarFiles(); !slices.Equal(got, []string{"2026/site.png"}) {
+		t.Fatalf("manual selection with automatic assignment off: %v", got)
 	}
 	selected := register("pool-avatar", `{"avatarPool":[{"file":"2026/skipped.png","enabled":false},{"file":"/static/pic/3.webp","enabled":true}]}`)
 	if selected.AvatarUrl != "/static/pic/3.webp" {
