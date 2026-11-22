@@ -23,11 +23,20 @@ it("saves the uploaded object key and preserves it while assignment is disabled"
   const user = userEvent.setup();
   render(<SiteInfoManagementPage api={api} text={key => text[key]} />);
   const toggle = await screen.findByRole("switch", { name: text.assignAvatar });
+  const manage = screen.getByRole("button", { name: text.manageAvatars });
+  expect(manage.getAttribute("aria-expanded")).toBe("false");
+  expect(screen.queryByLabelText(text.uploadAvatars)).toBeNull();
+  manage.focus();
+  await user.keyboard("{Enter}");
+  expect(manage.getAttribute("aria-expanded")).toBe("true");
   expect(toggle.getAttribute("aria-checked")).toBe("true");
   expect(screen.getByRole("button", { name: text.builtinAvatars + " 1" }).getAttribute("aria-pressed")).toBe("false");
   await user.upload(screen.getByLabelText(text.uploadAvatars), ["one.png", "two.png"].map(name => new File(["avatar"], name, { type: "image/png" })));
   await screen.findByRole("button", { name: text.customAvatars + " 3" });
   expect(drawImage).toHaveBeenCalledWith(bitmap, 200, 0, 400, 400, 0, 0, 256, 256);
+  await user.click(manage);
+  expect(screen.getByText("已启用 3 张")).toBeTruthy();
+  await user.click(manage);
   await user.click(toggle);
   await user.click(screen.getByRole("button", { name: text.save }));
   expect(saveSite).toHaveBeenCalledWith(expect.objectContaining({ disableDefaultAvatar: true, avatarPool: expect.arrayContaining([

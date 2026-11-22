@@ -2,6 +2,8 @@
 import en from "./en-settings";
 export default {
   ...en,
+  manageAvatars: "Gestisci avatar",
+  avatarEnabledCount: "Attivi: {count}",
   avatarEnabled: "Attivi",
   avatarPoolTitle: "Avatar per i nuovi utenti",
   avatarOff: "I nuovi utenti senza immagine vedranno l’iniziale del nome visualizzato.",
@@ -10,9 +12,9 @@ export default {
   customAvatars: "Avatar personalizzati",
   disableAll: "Disattiva tutti",
   enableAll: "Attiva tutti",
-  uploadAvatars: "Carica immagini",
+  uploadAvatars: "Carica avatar",
   selectAvatar: "Attiva almeno un avatar.",
-  assignAvatar: "Assegna un avatar predefinito ai nuovi utenti",
+  assignAvatar: "Assegnazione automatica",
   removeAvatar: "Rimuovi immagine",
   site: "Informazioni sito",
   chrome: "Aspetto sito",

@@ -21,7 +21,7 @@ import { Input } from "@gooseforum/ui/components/input";
 import { Switch } from "@gooseforum/ui/components/switch";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Textarea } from "@gooseforum/ui/components/textarea";
-import { FileText, Globe, Save, Upload } from "lucide-react";
+import { ChevronDown, FileText, Globe, Save, Upload } from "lucide-react";
 import { toast } from "@gooseforum/ui/components/sonner";
 import type { SettingsTextKey } from "../settings-i18n";
 type Text = (k: SettingsTextKey) => string;
@@ -56,6 +56,7 @@ export function SiteInfoManagementPage({
   const [form, setForm] = useState(empty);
   const [loading, setLoading] = useState(true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarsExpanded, setAvatarsExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const textRef = useRef(text);
@@ -77,7 +78,8 @@ export function SiteInfoManagementPage({
     void load();
   }, [load]);
   const pool = avatarOptions(form);
-  const missingSelection = !form.disableDefaultAvatar && !pool.some(option => option.enabled);
+  const enabledAvatars = pool.filter(option => option.enabled);
+  const missingSelection = !form.disableDefaultAvatar && enabledAvatars.length === 0;
   function updatePool(update: (options: AvatarOption[]) => AvatarOption[]) {
     setForm(current => ({ ...current, defaultAvatarFile: "", avatarPool: update(avatarOptions(current)) }));
   }
@@ -269,42 +271,53 @@ export function SiteInfoManagementPage({
                 </Field>
               </FieldGroup>
             </FieldSet>
-            <section className="space-y-5 rounded-xl border bg-card p-4 sm:p-6 md:col-span-2">
+            <section className="space-y-3 border-t pt-5 md:col-span-2">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="text-lg font-semibold">{text("avatarPoolTitle")}</h3>
+                <h3 className="text-base font-semibold">{text("avatarPoolTitle")}</h3>
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <label htmlFor="avatar-assignment">{text("assignAvatar")}</label>
                   <Switch id="avatar-assignment" checked={!form.disableDefaultAvatar} disabled={saving} onCheckedChange={enabled => setForm(current => ({ ...current, disableDefaultAvatar: !enabled }))} />
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">{text(form.disableDefaultAvatar ? "avatarOff" : "avatarRandom")}</p>
-              {[true, false].map(builtin => {
-                const options = pool.filter(option => builtins.includes(option.file) === builtin);
-                const enabled = options.filter(option => option.enabled).length;
-                return <fieldset key={String(builtin)} aria-labelledby={builtin ? "builtin-avatar-title" : "custom-avatar-title"} disabled={form.disableDefaultAvatar || saving} className="min-w-0 space-y-3 disabled:opacity-60">
-                  <div className="flex min-h-8 flex-wrap items-center justify-between gap-2">
-                    <div className="grid grid-cols-[minmax(5em,auto)_auto] items-baseline gap-x-3">
-                      <h4 id={builtin ? "builtin-avatar-title" : "custom-avatar-title"} className="font-medium">{text(builtin ? "builtinAvatars" : "customAvatars")}</h4>
-                      <span className="text-sm text-muted-foreground">{text("avatarEnabled")} {enabled} / {options.length}</span>
+              <div className="flex flex-wrap items-center gap-3">
+                {enabledAvatars.length > 0 && <div aria-hidden="true" className="flex -space-x-1.5">
+                  {enabledAvatars.slice(0, 3).map(({ file }) => <img key={file} src={builtins.includes(file) ? file : `/file/img/${file}`} alt="" className="size-7 rounded-full border-2 border-background bg-muted object-cover" />)}
+                </div>}
+                <span className="text-sm text-muted-foreground">{text("avatarEnabledCount").replace("{count}", String(enabledAvatars.length))}</span>
+                <Button type="button" variant="ghost" size="sm" aria-expanded={avatarsExpanded} aria-controls="avatar-options" onClick={() => setAvatarsExpanded(value => !value)}>
+                  {text("manageAvatars")}<ChevronDown aria-hidden="true" className={avatarsExpanded ? "rotate-180" : ""} />
+                </Button>
+              </div>
+              <div id="avatar-options" hidden={!avatarsExpanded} className="space-y-5">
+                {avatarsExpanded && [true, false].map(builtin => {
+                  const options = pool.filter(option => builtins.includes(option.file) === builtin);
+                  const enabled = options.filter(option => option.enabled).length;
+                  return <fieldset key={String(builtin)} aria-labelledby={builtin ? "builtin-avatar-title" : "custom-avatar-title"} disabled={form.disableDefaultAvatar || saving} className="min-w-0 space-y-3 disabled:opacity-60">
+                    <div className="flex min-h-8 flex-wrap items-center gap-2">
+                      <div className="grid grid-cols-[minmax(5em,auto)_auto] items-baseline gap-x-3">
+                        <h4 id={builtin ? "builtin-avatar-title" : "custom-avatar-title"} className="font-medium">{text(builtin ? "builtinAvatars" : "customAvatars")}</h4>
+                        {options.length > 0 && <span className="text-sm text-muted-foreground">{text("avatarEnabled")} {enabled} / {options.length}</span>}
+                      </div>
+                      {builtin ? <Button type="button" size="sm" variant="outline" onClick={() => updatePool(items => items.map(item => builtins.includes(item.file) ? { ...item, enabled: enabled !== options.length } : item))}>
+                        {text(enabled === options.length ? "disableAll" : "enableAll")}
+                      </Button> : <label className="relative inline-flex h-8 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm focus-within:ring-2">
+                        {uploadingAvatar ? <Spinner /> : <Upload className="size-4" />}{text("uploadAvatars")}
+                        <input className="sr-only" type="file" multiple accept="image/*" disabled={uploadingAvatar} onChange={e => { const files = Array.from(e.target.files || []); e.target.value = ""; void uploadAvatars(files); }} />
+                      </label>}
                     </div>
-                    {builtin ? <Button type="button" size="sm" variant="outline" onClick={() => updatePool(items => items.map(item => builtins.includes(item.file) ? { ...item, enabled: enabled !== options.length } : item))}>
-                      {text(enabled === options.length ? "disableAll" : "enableAll")}
-                    </Button> : <label className="relative inline-flex h-8 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm focus-within:ring-2">
-                      {uploadingAvatar ? <Spinner /> : <Upload className="size-4" />}{text("uploadAvatars")}
-                      <input className="sr-only" type="file" multiple accept="image/*" disabled={uploadingAvatar} onChange={e => { const files = Array.from(e.target.files || []); e.target.value = ""; void uploadAvatars(files); }} />
-                    </label>}
-                  </div>
-                  <div className="grid grid-cols-3 gap-x-2 gap-y-4 min-[400px]:grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
-                    {options.map(({ file, enabled: checked }, index) => <div key={file} className="relative grid justify-items-center gap-1">
-                      <button type="button" aria-pressed={checked} aria-label={text(builtin ? "builtinAvatars" : "customAvatars") + " " + (index + 1)} onClick={() => updatePool(items => items.map(item => item.file === file ? { ...item, enabled: !item.enabled } : item))} className="relative size-16 rounded-full p-1 outline-offset-2 aria-pressed:ring-2 aria-pressed:ring-primary">
-                        <img loading="lazy" decoding="async" src={builtin ? file : `/file/img/${file}`} alt="" className="size-full rounded-full bg-muted object-cover" />
-                        {checked && <span aria-hidden="true" className="absolute bottom-0 right-0 grid size-5 place-items-center rounded-full bg-primary text-xs text-primary-foreground">✓</span>}
-                      </button>
-                      {!builtin && <Button type="button" size="sm" variant="ghost" onClick={() => updatePool(items => items.filter(item => item.file !== file))}>{text("removeAvatar")}</Button>}
-                    </div>)}
-                  </div>
-                </fieldset>;
-              })}
+                    {options.length > 0 && <div className="flex flex-wrap gap-3">
+                      {options.map(({ file, enabled: checked }, index) => <div key={file} className="relative grid justify-items-center gap-1">
+                        <button type="button" aria-pressed={checked} aria-label={text(builtin ? "builtinAvatars" : "customAvatars") + " " + (index + 1)} onClick={() => updatePool(items => items.map(item => item.file === file ? { ...item, enabled: !item.enabled } : item))} className="relative size-12 rounded-full outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring">
+                          <img loading="lazy" decoding="async" src={builtin ? file : `/file/img/${file}`} alt="" className="size-full rounded-full bg-muted object-cover" />
+                          {checked && <span aria-hidden="true" className="absolute bottom-0 right-0 grid size-4 place-items-center rounded-full bg-primary text-xs text-primary-foreground">✓</span>}
+                        </button>
+                        {!builtin && <Button type="button" size="sm" variant="ghost" onClick={() => updatePool(items => items.filter(item => item.file !== file))}>{text("removeAvatar")}</Button>}
+                      </div>)}
+                    </div>}
+                  </fieldset>;
+                })}
+              </div>
               {missingSelection && <p role="alert" className="text-sm text-destructive">{text("selectAvatar")}</p>}
             </section>
           </div>

@@ -2,6 +2,8 @@
 import en from "./en-settings";
 export default {
   ...en,
+  manageAvatars: "アバターを管理",
+  avatarEnabledCount: "有効 {count} 件",
   avatarEnabled: "有効",
   avatarPoolTitle: "新規ユーザーのアバター",
   avatarOff: "画像のない新規ユーザーには表示名の先頭文字を表示します。",
@@ -10,9 +12,9 @@ export default {
   customAvatars: "カスタムアバター",
   disableAll: "すべて無効",
   enableAll: "すべて有効",
-  uploadAvatars: "一括アップロード",
+  uploadAvatars: "アバターをアップロード",
   selectAvatar: "アバターを一つ以上有効にしてください。",
-  assignAvatar: "新規ユーザーに既定のアバターを割り当てる",
+  assignAvatar: "自動割り当て",
   removeAvatar: "画像を削除",
   site: "サイト情報",
   chrome: "サイト表示",

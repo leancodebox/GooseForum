@@ -1,4 +1,6 @@
 export default {
+  manageAvatars: "管理头像",
+  avatarEnabledCount: "已启用 {count} 张",
   avatarEnabled: "已启用",
   avatarPoolTitle: "新用户默认头像",
   avatarOff: "关闭分配后，没有头像的新用户将显示昵称首字符。",
@@ -7,9 +9,9 @@ export default {
   customAvatars: "自定义头像",
   disableAll: "全部停用",
   enableAll: "全部启用",
-  uploadAvatars: "批量上传",
+  uploadAvatars: "上传头像",
   selectAvatar: "请至少启用一个头像。",
-  assignAvatar: "为新用户分配默认头像",
+  assignAvatar: "自动分配",
   removeAvatar: "移除图片",
   site: "站点信息",
   siteHint: "配置站点标识、公开地址、联系方式与元数据。",

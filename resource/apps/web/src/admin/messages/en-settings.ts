@@ -1,4 +1,6 @@
 export default {
+  manageAvatars: "Manage avatars",
+  avatarEnabledCount: "Enabled: {count}",
   avatarEnabled: "Enabled",
   avatarPoolTitle: "New user avatars",
   avatarOff: "New users without an image will show their display-name initial.",
@@ -7,9 +9,9 @@ export default {
   customAvatars: "Custom avatars",
   disableAll: "Disable all",
   enableAll: "Enable all",
-  uploadAvatars: "Upload images",
+  uploadAvatars: "Upload avatars",
   selectAvatar: "Enable at least one avatar.",
-  assignAvatar: "Assign a default avatar to new users",
+  assignAvatar: "Auto-assign",
   removeAvatar: "Remove image",
   site: "Site information",
   siteHint: "Configure identity, public URL, contact, and metadata.",
