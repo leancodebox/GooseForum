@@ -1,0 +1,13 @@
+/* Share each hue across the light and dark themes. */
+[data-avatar-tone="0"] { --avatar-tint: #dbeafe; --avatar-ink: #1e408a; }
+[data-avatar-tone="1"] { --avatar-tint: #ccfbf1; --avatar-ink: #115e59; }
+[data-avatar-tone="2"] { --avatar-tint: #ede9fe; --avatar-ink: #5b21b6; }
+[data-avatar-tone="3"] { --avatar-tint: #ffedd5; --avatar-ink: #7c2d12; }
+[data-avatar-tone="4"] { --avatar-tint: #fce7f3; --avatar-ink: #831843; }
+[data-avatar-tone="5"] { --avatar-tint: #dcfce7; --avatar-ink: #14532d; }
+[data-avatar-tone="6"] { --avatar-tint: #fef3c7; --avatar-ink: #713f12; }
+[data-avatar-tone="7"] { --avatar-tint: #cffafe; --avatar-ink: #155e75; }
+[data-avatar-tone] {
+  background-color: light-dark(var(--avatar-tint), var(--avatar-ink));
+  color: light-dark(var(--avatar-ink), var(--avatar-tint));
+}

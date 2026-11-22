@@ -35,6 +35,7 @@
     {{if .Payload.Meta.JSONLD}}<script type="application/ld+json" data-goose-jsonld="page">{{json .Payload.Meta.JSONLD}}</script>{{end}}
     <link rel="icon" href="/favicon.ico">
     {{if .Payload.Layout.Site.ExternalLinks}}{{SafeHTML .Payload.Layout.Site.ExternalLinks}}{{end}}
+    <noscript><link rel="stylesheet" href="/static/css/avatar-tones.css"></noscript>
     {{ResourceEntry `site`}}
     {{if .Payload.Layout.Theme.Href}}<link id="goose-site-theme-link" rel="stylesheet" href="{{.Payload.Layout.Theme.Href}}">{{end}}
 </head>
@@ -82,7 +83,8 @@
             noscript .gf-crawler-user-page { max-width: 980px; }
             noscript .gf-crawler-user-head { display: flex; gap: 18px; align-items: center; padding-bottom: 22px; border-bottom: 1px solid #e5e7eb; }
             noscript .gf-crawler-user-avatar { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; background: #f3f4f6; }
-            noscript .gf-avatar-initial { display: inline-block; width: 40px; line-height: 40px; overflow: hidden; border-radius: 50%; background: #f3f4f6; text-align: center; white-space: nowrap; font-size: 0; }
+            noscript .gf-avatar-initial { display: inline-block; width: 40px; line-height: 40px; overflow: hidden; border-radius: 50%; text-align: center; white-space: nowrap; font-size: 0; }
+            noscript .gf-avatar-initial:not([data-avatar-tone]) { background: #f3f4f6; }
             noscript .gf-avatar-initial::first-letter { font-size: 18px; text-transform: uppercase; }
             noscript .gf-crawler-user-head .gf-avatar-initial { width: 88px; line-height: 88px; }
             noscript .gf-crawler-user-head h1 { margin: 0 0 4px; }

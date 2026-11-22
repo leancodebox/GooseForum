@@ -35,6 +35,7 @@ export function MembersPageView({ page }: { page: MembersPageProps }) {
               >
                 <div className="flex min-w-0 items-center gap-2.5 px-3.5 pt-3.5">
                   <ProfileAvatar
+                    userId={member.id}
                     src={member.avatarUrl}
                     name={displayName}
                     badge={member.wornBadge}

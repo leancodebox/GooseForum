@@ -1665,6 +1665,7 @@ function Person({
         ) : (
           showBadge ? (
             <ProfileAvatar
+              userId={user.id}
               src={user.avatarUrl}
               name={displayName}
               badge={user.wornBadge}
@@ -1683,7 +1684,7 @@ function Person({
               )}
             >
               <AvatarImage src={user.avatarUrl} alt="" />
-              <AvatarFallback>
+              <AvatarFallback userId={user.id}>
                 {avatarInitial(displayName)}
               </AvatarFallback>
             </Avatar>

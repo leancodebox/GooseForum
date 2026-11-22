@@ -104,6 +104,7 @@ export function UserCardPopover({
           <div className="flex items-start gap-3">
             <GooseLink href={profileUrl} className="shrink-0 rounded-full">
               <ProfileAvatar
+                userId={user.id}
                 src={card?.avatarUrl || user.avatarUrl || ""}
                 name={displayName}
                 badge={card?.wornBadge || user.wornBadge}

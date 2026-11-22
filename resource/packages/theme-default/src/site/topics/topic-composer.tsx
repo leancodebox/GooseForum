@@ -119,7 +119,7 @@ export function TopicComposer({
         <div className="pointer-events-auto flex w-full max-w-lg items-center gap-3 rounded-xl border bg-background p-2 shadow-xl">
           <Avatar className="size-8">
             <AvatarImage src={viewer.avatarUrl} />
-            <AvatarFallback>
+            <AvatarFallback userId={viewer.id}>
               {avatarInitial(viewer.nickname, viewer.username)}
             </AvatarFallback>
           </Avatar>
@@ -165,7 +165,7 @@ export function TopicComposer({
           <header className="flex items-center gap-3 border-b px-3 py-2 sm:px-4">
             <Avatar className="size-9">
               <AvatarImage src={viewer.avatarUrl} />
-              <AvatarFallback>
+              <AvatarFallback userId={viewer.id}>
                 {avatarInitial(viewer.nickname, viewer.username)}
               </AvatarFallback>
             </Avatar>

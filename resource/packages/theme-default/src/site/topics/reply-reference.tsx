@@ -60,6 +60,7 @@ export function ReplyReference({
       <div className="flex min-h-7 items-center gap-2 px-3 text-sm text-muted-foreground">
         {available ? (
           <ProfileAvatar
+            userId={target.author.id}
             src={target.author.avatarUrl}
             name={target.author.nickname?.trim() || target.author.username}
             className="size-6"

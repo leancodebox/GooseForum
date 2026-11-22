@@ -47,7 +47,7 @@ export function AppSidebar({ layout, pathname, text, onNavigate, onPrefetch, ...
         }}
       >{item.icon}<span>{text(item.label)}</span></a></SidebarMenuButton></SidebarMenuItem>)}</SidebarMenu>
     </SidebarGroup>)}</SidebarContent>
-    <SidebarFooter className="px-2 pb-2"><SidebarMenu><SidebarMenuItem><SidebarMenuButton size="lg" className="h-11 rounded-xl px-2"><Avatar className="size-8"><AvatarImage className="object-cover" src={layout.viewer.avatarUrl} alt={layout.viewer.username || 'Admin'} /><AvatarFallback>{initials}</AvatarFallback></Avatar><div className="grid flex-1 text-left text-sm leading-tight"><span className="truncate font-semibold">{layout.viewer.username || 'Admin'}</span><span className="truncate text-xs text-muted-foreground">{layout.viewer.email}</span></div></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter>
+    <SidebarFooter className="px-2 pb-2"><SidebarMenu><SidebarMenuItem><SidebarMenuButton size="lg" className="h-11 rounded-xl px-2"><Avatar className="size-8"><AvatarImage className="object-cover" src={layout.viewer.avatarUrl} alt={layout.viewer.username || 'Admin'} /><AvatarFallback userId={layout.viewer.id}>{initials}</AvatarFallback></Avatar><div className="grid flex-1 text-left text-sm leading-tight"><span className="truncate font-semibold">{layout.viewer.username || 'Admin'}</span><span className="truncate text-xs text-muted-foreground">{layout.viewer.email}</span></div></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter>
     <SidebarRail />
   </Sidebar>
 }

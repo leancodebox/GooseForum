@@ -10,6 +10,7 @@ import { ForumBadge } from "@gooseforum/ui/components/forum-badge";
 
 export function ProfileAvatar({
   src,
+  userId,
   name,
   badge,
   className,
@@ -21,6 +22,7 @@ export function ProfileAvatar({
   badgeClassName,
 }: {
   src: string;
+  userId: number;
   name: string;
   badge?: UserBadgePayload | null;
   className?: string;
@@ -43,7 +45,7 @@ export function ProfileAvatar({
         )}
       >
         <AvatarImage src={src} alt={name} className="object-cover" />
-        <AvatarFallback className="text-[length:50cqi] leading-none font-semibold">
+        <AvatarFallback userId={userId} className="text-[length:50cqi] leading-none font-semibold">
           {avatarInitial(name)}
         </AvatarFallback>
       </Avatar>

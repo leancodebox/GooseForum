@@ -92,6 +92,7 @@ export function UserProfilePageView({ page }: { page: UserProfileProps }) {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex min-w-0 flex-1 gap-4">
               <ProfileAvatar
+                userId={page.user.userId}
                 src={page.user.avatarUrl}
                 name={displayName}
                 badge={page.user.wornBadge}

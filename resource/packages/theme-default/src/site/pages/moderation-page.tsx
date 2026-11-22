@@ -719,7 +719,7 @@ function Person({
       >
         <Avatar className="size-5 shrink-0">
           <AvatarImage src={user.avatarUrl} alt="" />
-          <AvatarFallback>
+          <AvatarFallback userId={user.id}>
             {avatarInitial(user.nickname, user.username)}
           </AvatarFallback>
         </Avatar>

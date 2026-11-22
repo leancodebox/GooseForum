@@ -231,7 +231,7 @@ export function UserActivity({ page }: { page: UserProfileProps }) {
                   src={connection.avatarUrl}
                   alt={connection.username}
                 />
-                <AvatarFallback>
+                <AvatarFallback userId={connection.id}>
                   {avatarInitial(connection.nickname, connection.username)}
                 </AvatarFallback>
               </Avatar>

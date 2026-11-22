@@ -329,8 +329,8 @@ function AccessSheet({ category, overview, api, text, onClose, onSaved }: { cate
   </div><SheetFooter className="flex-row justify-end"><Button variant="outline" onClick={onClose}>{text('cancel')}</Button><Button disabled={saving || conflict || !everyone || !dirty} onClick={() => void save()}>{saving ? <Spinner data-icon="inline-start" /> : null}{saving ? text('saving') : text('save')}</Button></SheetFooter></SheetContent></Sheet>
 }
 
-function UserAvatar({ user }: { user: { username: string; nickname?: string; avatarUrl?: string | null } }) {
-  return <Avatar className="size-8"><AvatarImage src={user.avatarUrl || undefined} alt={user.username} /><AvatarFallback>{avatarInitial(user.nickname, user.username)}</AvatarFallback></Avatar>
+function UserAvatar({ user }: { user: { userId: number; username: string; nickname?: string; avatarUrl?: string | null } }) {
+  return <Avatar className="size-8"><AvatarImage src={user.avatarUrl || undefined} alt={user.username} /><AvatarFallback userId={user.userId}>{avatarInitial(user.nickname, user.username)}</AvatarFallback></Avatar>
 }
 
 function groupPriority(systemKey?: string) {

@@ -282,7 +282,7 @@ const TopicRow = memo(function TopicRow({
                 src={topic.author.avatarUrl}
                 alt={userDisplayName(topic.author)}
               />
-              <AvatarFallback>
+              <AvatarFallback userId={topic.author.id}>
                 {avatarInitial(topic.author.nickname, topic.author.username)}
               </AvatarFallback>
             </Avatar>
@@ -445,7 +445,7 @@ function AvatarStack({
           >
             <Avatar className="size-full after:hidden">
               <AvatarImage src={user.avatarUrl} alt={userDisplayName(user)} />
-              <AvatarFallback>{avatarInitial(user.nickname, user.username)}</AvatarFallback>
+              <AvatarFallback userId={user.id}>{avatarInitial(user.nickname, user.username)}</AvatarFallback>
             </Avatar>
           </GooseLink>
         </UserCardPopover>

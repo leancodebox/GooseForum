@@ -966,7 +966,7 @@ function ChatUserAvatar({ userId, username, nickname, avatarUrl, profileUrl, siz
       <GooseLink href={profileUrl || `/u/${userId}`} aria-label={nickname?.trim() || username} className="block shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <Avatar className={size}>
           <AvatarImage src={avatarUrl} alt="" />
-          <AvatarFallback>{avatarInitial(nickname, username)}</AvatarFallback>
+          <AvatarFallback userId={userId}>{avatarInitial(nickname, username)}</AvatarFallback>
         </Avatar>
       </GooseLink>
     </UserCardPopover>

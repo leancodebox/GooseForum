@@ -231,6 +231,7 @@ export function SettingsPageView({
                 onClick={crop.choose}
               >
                 <ProfileAvatar
+                  userId={page.user.id}
                   src={draft && draft.file !== currentPreset ? draft.url : crop.avatarUrl}
                   name={displayName}
                   badge={wornBadge}

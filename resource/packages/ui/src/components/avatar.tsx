@@ -45,11 +45,13 @@ function AvatarImage({
 
 function AvatarFallback({
   className,
+  userId,
   ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
+}: React.ComponentProps<typeof AvatarPrimitive.Fallback> & { userId?: number }) {
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
+      data-avatar-tone={userId && userId > 0 ? userId % 8 : undefined}
       className={cn(
         "flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs",
         className

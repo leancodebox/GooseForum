@@ -516,7 +516,7 @@ export function AppShell({
                           src={layout.viewer.avatarUrl}
                           alt={layout.viewer.username}
                         />
-                        <AvatarFallback>
+                        <AvatarFallback userId={layout.viewer.id}>
                           {avatarInitial(layout.viewer.nickname, layout.viewer.username)}
                         </AvatarFallback>
                       </Avatar>
