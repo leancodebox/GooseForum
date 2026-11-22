@@ -1,11 +1,14 @@
 package chatservice_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
+	"github.com/leancodebox/GooseForum/app/models/chat/imConversations"
 	"github.com/leancodebox/GooseForum/app/models/chat/imUserChatConfigs"
 	"github.com/leancodebox/GooseForum/app/models/chat/messages"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/chatservice"
 )
 
@@ -95,5 +98,34 @@ func TestMarkReadRequiresConversationMembership(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestMissingRecipientDoesNotCreateConversation(t *testing.T) {
+	db := dbconnect.Connect()
+	tables := []any{&imConversations.Entity{}, &imUserChatConfigs.Entity{}, &messages.Entity{}}
+	if err := db.AutoMigrate(append(tables, &users.EntityComplete{})...); err != nil {
+		t.Fatal(err)
+	}
+	count := func(model any) int64 {
+		t.Helper()
+		var n int64
+		if err := db.Model(model).Count(&n).Error; err != nil {
+			t.Fatal(err)
+		}
+		return n
+	}
+	before := make([]int64, len(tables))
+	for i, model := range tables {
+		before[i] = count(model)
+	}
+	_, _, err := chatservice.SendMessage(21, 987654321, "hello", 1)
+	if !errors.Is(err, chatservice.ErrRecipientNotFound) {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	for i, model := range tables {
+		if count(model) != before[i] {
+			t.Errorf("unexpected write to %T", model)
+		}
 	}
 }

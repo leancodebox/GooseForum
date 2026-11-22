@@ -13,6 +13,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/unreadservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/samber/lo"
+	"gorm.io/gorm"
 )
 
 const (
@@ -28,10 +29,19 @@ type MessageCursorResult struct {
 	LatestId      uint64          `json:"latestId"`
 }
 
+var ErrRecipientNotFound = errors.New("message recipient not found")
+
 // SendMessage creates or updates a direct conversation and stores a message.
 func SendMessage(senderId, peerId uint64, content string, msgType int8) (uint64, uint64, error) {
 	if senderId == peerId {
 		return 0, 0, errors.New("cannot send message to yourself")
+	}
+
+	if _, err := users.GetIdentity(peerId); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, 0, ErrRecipientNotFound
+		}
+		return 0, 0, err
 	}
 
 	senderConfig := imUserChatConfigs.GetConfig(senderId, peerId)

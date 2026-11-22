@@ -1,6 +1,8 @@
 package api
 
 import (
+	"errors"
+
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/service/chatservice"
 )
@@ -21,6 +23,9 @@ func SendMessage(req component.BetterRequest[SendMessageReq]) component.Response
 	}
 
 	convId, messageId, err := chatservice.SendMessage(req.UserId, req.Params.PeerId, req.Params.Content, msgType)
+	if errors.Is(err, chatservice.ErrRecipientNotFound) {
+		return component.FailResponseCode(component.MessageUserNotFound, nil)
+	}
 	if err != nil {
 		return component.FailResponseCode(
 			component.MessageChatSendFailed,

@@ -7,6 +7,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
+import { GooseClientError } from "@gooseforum/client";
 import type {
   ChatItemPayload,
   ChatMessagePayload,
@@ -140,6 +141,8 @@ export function MessagesPageView({
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [recipientAttempt, setRecipientAttempt] = useState(0);
+  const [recipientError, setRecipientError] = useState("");
   const [refreshError, setRefreshError] = useState("");
   const [refreshingPeerId, setRefreshingPeerId] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -152,6 +155,7 @@ export function MessagesPageView({
   const previousActivePeerId = useRef(0);
   const conversationsRef = useRef(conversations);
   const activePeerIdRef = useRef(activePeerId);
+  const targetUserId = Number(new URL(runtime.currentUrl, "http://gooseforum.local").searchParams.get("userId"));
   const active = conversations.find((item) => item.peerId === activePeerId);
 
   useEffect(() => {
@@ -163,38 +167,32 @@ export function MessagesPageView({
   }, [activePeerId]);
 
   useEffect(() => {
-    const url = new URL(runtime.currentUrl, "http://gooseforum.local");
-    const targetUserId = Number(url.searchParams.get("userId") || 0);
+    setRecipientError("");
     if (targetUserId) {
-      const existing = page.conversations.find(
-        (item) => item.peerId === targetUserId,
-      );
-      if (existing) setActivePeerId(existing.peerId);
-      else {
-        const username = url.searchParams.get("username") || t("userFallback");
-        const avatarUrl =
-          url.searchParams.get("avatar") || "/static/pic/default-avatar.webp";
-        setConversations((items) => [
-          newConversation({
-            id: targetUserId,
-            username,
-            nickname: username,
-            avatarUrl,
-            bio: "",
-            url: `/u/${targetUserId}`,
-          }),
-          ...items,
-        ]);
-        setActivePeerId(targetUserId);
+      const existing = conversationsRef.current.find((item) => item.peerId === targetUserId);
+      if (existing) {
+        setActivePeerId(existing.peerId);
+        return;
       }
-      return;
+      let cancelled = false;
+      setActivePeerId(0);
+      runtime.api.users.card(targetUserId).then((user) => {
+        if (cancelled || activePeerIdRef.current) return;
+        setConversations((items) => items.some((item) => item.peerId === user.userId)
+          ? items
+          : [newConversation({ ...user, id: user.userId, url: `/u/${user.userId}` }), ...items]);
+        setActivePeerId(user.userId);
+      }).catch((reason) => {
+        if (!cancelled && !activePeerIdRef.current) setRecipientError(serverError(reason, t("loadFailed")));
+      });
+      return () => { cancelled = true; };
     }
     if (
       window.matchMedia?.("(min-width: 768px)").matches &&
       page.conversations[0]
     )
       setActivePeerId(page.conversations[0].peerId);
-  }, [page.conversations, runtime.currentUrl, t]);
+  }, [page.conversations, recipientAttempt, runtime.api, targetUserId, serverError, t]);
 
   useEffect(() => {
     if (previousActivePeerId.current !== activePeerId) {
@@ -452,7 +450,17 @@ export function MessagesPageView({
       setShowEmoji(false);
       if (inputRef.current) inputRef.current.style.height = "auto";
     } catch (reason) {
-      setError(serverError(reason, t("sendFailed")));
+      const message = serverError(reason, t("sendFailed"));
+      if (reason instanceof GooseClientError && reason.messageCode === "user.notFound") {
+        setConversations((items) => items.filter((item) => item.peerId !== active.peerId));
+        if (activePeerIdRef.current === active.peerId) {
+          setNewMessage("");
+          setActivePeerId(0);
+          setRecipientError(message);
+        }
+      } else {
+        setError(message);
+      }
     } finally {
       setSending(false);
     }
@@ -500,6 +508,16 @@ export function MessagesPageView({
               />
             </InputGroup>
           </div>
+          {recipientError && !active && (
+            <div className="flex items-center justify-between gap-2 px-4 py-2">
+              <p role="alert" className="text-sm text-destructive">{recipientError}</p>
+              {Boolean(targetUserId) && (
+                <Button variant="ghost" size="sm" onClick={() => setRecipientAttempt((attempt) => attempt + 1)}>
+                  {t("retryLoad")}
+                </Button>
+              )}
+            </div>
+          )}
           {filteredConversations.length ? (
             <ScrollArea className="min-h-0 flex-1">
               <ItemGroup className="gap-0 has-data-[size=sm]:gap-0">

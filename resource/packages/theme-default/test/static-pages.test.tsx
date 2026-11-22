@@ -1055,6 +1055,26 @@ describe("AppShell and static pages", () => {
     expect(messages).toHaveBeenCalledTimes(1);
   });
 
+  it("opens a new conversation using the resolved recipient", async () => {
+    const page = payload("messages.index", messagesProps());
+    page.url = "/messages?userId=404&username=unverified";
+    const card = vi.fn().mockResolvedValue({ ...userProfileProps().user, userId: 404, nickname: "Resolved recipient" });
+    renderPage(page, { users: { card } as unknown as GooseSiteApi["users"] });
+    await screen.findAllByText("Resolved recipient");
+    expect(document.querySelector("textarea")).toBeTruthy();
+    expect(screen.queryByText("unverified")).toBeNull();
+  });
+
+  it("rejects a direct chat link when the recipient lookup fails", async () => {
+    const page = payload("messages.index", messagesProps());
+    page.url = "/messages?userId=404&username=unverified";
+    const card = vi.fn().mockRejectedValue(new Error("User not found"));
+    renderPage(page, { users: { card } as unknown as GooseSiteApi["users"] });
+    expect((await screen.findByRole("alert")).textContent).toContain("User not found");
+    expect(card).toHaveBeenCalledWith(404);
+    expect(document.querySelector("textarea")).toBeNull();
+  });
+
   it("loads a selected conversation, marks it read, and sends on Enter", async () => {
     const messages = vi
       .fn()
