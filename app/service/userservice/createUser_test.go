@@ -94,6 +94,10 @@ func TestDefaultAvatarAppliesAtRegistration(t *testing.T) {
 	if empty.AvatarUrl != "" || empty.GetWebAvatarUrl() != "" {
 		t.Fatal("disabled assignment returned an image")
 	}
+	selected := register("pool-avatar", `{"avatarPool":[{"file":"2026/skipped.png","enabled":false},{"file":"/static/pic/3.webp","enabled":true}]}`)
+	if selected.AvatarUrl != "/static/pic/3.webp" {
+		t.Fatalf("selected avatar = %q", selected.AvatarUrl)
+	}
 	stored, err := users.Get(custom.Id)
 	if err != nil || stored.AvatarUrl != custom.AvatarUrl {
 		t.Fatalf("existing avatar changed: %q, %v", stored.AvatarUrl, err)

@@ -5,23 +5,30 @@ import type { GooseAdminApi } from "@gooseforum/client";
 import text from "../messages/zh-settings";
 import { SiteInfoManagementPage } from "./site-info-management-page";
 
-afterEach(cleanup);
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 it("saves the uploaded object key and preserves it while assignment is disabled", async () => {
+  vi.stubGlobal("ResizeObserver", class { observe() {} unobserve() {} disconnect() {} });
   const saveSite = vi.fn().mockResolvedValue(undefined);
-  const uploadImage = vi.fn().mockResolvedValue({ url: "https://cdn.example.org/example.png", objectName: "2026/example.png" });
-  const api = { settings: { site: async () => ({}), saveSite }, pages: { uploadImage } } as unknown as GooseAdminApi;
+  const uploadImage = vi.fn().mockImplementation(async (file: File) => ({ objectName: "2026/" + file.name }));
+  const api = { settings: { site: async () => ({ defaultAvatarFile: "legacy.png" }), saveSite }, pages: { uploadImage } } as unknown as GooseAdminApi;
   const user = userEvent.setup();
   render(<SiteInfoManagementPage api={api} text={key => text[key]} />);
-  const toggle = await screen.findByRole("checkbox", { name: text.assignAvatar });
-  expect((toggle as HTMLInputElement).checked).toBe(true);
-  await user.upload(screen.getByLabelText(text.defaultAvatar), new File(["avatar"], "avatar.png", { type: "image/png" }));
-  await screen.findByRole("button", { name: text.removeAvatar });
+  const toggle = await screen.findByRole("switch", { name: text.assignAvatar });
+  expect(toggle.getAttribute("aria-checked")).toBe("true");
+  expect(screen.getByRole("button", { name: text.builtinAvatars + " 1" }).getAttribute("aria-pressed")).toBe("false");
+  await user.upload(screen.getByLabelText(text.uploadAvatars), ["one.png", "two.png"].map(name => new File(["avatar"], name, { type: "image/png" })));
+  await screen.findByRole("button", { name: text.customAvatars + " 3" });
   await user.click(toggle);
   await user.click(screen.getByRole("button", { name: text.save }));
-  expect(saveSite).toHaveBeenCalledWith(expect.objectContaining({ disableDefaultAvatar: true, defaultAvatarFile: "2026/example.png" }));
+  expect(saveSite).toHaveBeenCalledWith(expect.objectContaining({ disableDefaultAvatar: true, avatarPool: expect.arrayContaining([
+    { file: "legacy.png", enabled: true }, { file: "2026/one.png", enabled: true }, { file: "2026/two.png", enabled: true },
+  ]) }));
   await user.click(toggle);
-  await user.click(screen.getByRole("button", { name: text.removeAvatar }));
+  for (const button of screen.getAllByRole("button", { name: text.removeAvatar })) await user.click(button);
+  expect(screen.getByRole("alert").textContent).toBe(text.selectAvatar);
+  expect((screen.getByRole("button", { name: text.save }) as HTMLButtonElement).disabled).toBe(true);
+  await user.click(screen.getByRole("button", { name: text.enableAll }));
   await user.click(screen.getByRole("button", { name: text.save }));
-  expect(saveSite).toHaveBeenLastCalledWith(expect.objectContaining({ disableDefaultAvatar: false, defaultAvatarFile: "" }));
+  expect(saveSite.mock.lastCall?.[0].avatarPool).toHaveLength(12);
 });

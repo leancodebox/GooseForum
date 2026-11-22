@@ -1045,7 +1045,29 @@ type SaveSiteSettingsReq struct {
 
 // SaveSiteSettings 保存站点设置
 func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) component.Response {
-	if key := req.Params.Settings.DefaultAvatarFile; key != "" {
+	settings := req.Params.Settings
+	var files []string
+	if settings.AvatarPool != nil {
+		settings.DefaultAvatarFile = ""
+		enabled := false
+		seen := make(map[string]bool)
+		for _, option := range settings.AvatarPool {
+			if seen[option.File] || option.File == "" {
+				return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
+			}
+			seen[option.File] = true
+			enabled = enabled || option.Enabled
+			if !isAllowedPresetAvatar(option.File) {
+				files = append(files, option.File)
+			}
+		}
+		if !settings.DisableDefaultAvatar && !enabled {
+			return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
+		}
+	} else if settings.DefaultAvatarFile != "" {
+		files = append(files, settings.DefaultAvatarFile)
+	}
+	for _, key := range files {
 		usages, err := fileUsage.GetByFileName(key)
 		if err != nil {
 			return component.FailResponseError(err)
@@ -1054,7 +1076,7 @@ func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) componen
 			return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
 		}
 	}
-	response := savePageConfig(pageConfig.SiteSettings, req.Params.Settings, hotdataserve.ClearSiteSettingsConfigCache)
+	response := savePageConfig(pageConfig.SiteSettings, settings, hotdataserve.ClearSiteSettingsConfigCache)
 	if response.Data.Code != component.SUCCESS {
 		return response
 	}

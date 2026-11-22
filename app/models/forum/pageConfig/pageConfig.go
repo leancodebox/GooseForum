@@ -111,7 +111,13 @@ type SponsorsRule struct {
 }
 
 // SiteSettingsConfig 站点设置配置
+type AvatarOption struct {
+	File    string `json:"file"`
+	Enabled bool   `json:"enabled"`
+}
+
 type SiteSettingsConfig struct {
+	AvatarPool []AvatarOption `json:"avatarPool"`
 	// 站点基本信息
 	SiteName             string `json:"siteName"`
 	DisableDefaultAvatar bool   `json:"disableDefaultAvatar"`

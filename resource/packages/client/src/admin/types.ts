@@ -160,7 +160,7 @@ export interface AdminOptRecord {
   createdAt: string
 }
 
-export interface SiteSettings { siteName:string;siteUrl:string;siteLogo:string;disableDefaultAvatar?:boolean;defaultAvatarFile?:string;siteEmail:string;siteDescription:string;siteKeywords:string;externalLinks?:string }
+export interface SiteSettings { siteName:string;siteUrl:string;siteLogo:string;disableDefaultAvatar?:boolean;defaultAvatarFile?:string;avatarPool?:Array<{file:string;enabled:boolean}> | null;siteEmail:string;siteDescription:string;siteKeywords:string;externalLinks?:string }
 export interface SiteChromeItem { id:string;enabled:boolean;type:'link'|'text'|string;label:string;i18nLabel:string;url:string }
 export interface SiteChromeGroup { id:string;title:string;i18nLabel:string;items:SiteChromeItem[] }
 export interface SiteChromeConfig {

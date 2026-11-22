@@ -22,6 +22,18 @@ func NewUserAvatar() string {
 	if config.DisableDefaultAvatar {
 		return ""
 	}
+	if config.AvatarPool != nil {
+		var choices []string
+		for _, option := range config.AvatarPool {
+			if option.Enabled {
+				choices = append(choices, option.File)
+			}
+		}
+		if len(choices) == 0 {
+			return ""
+		}
+		return choices[rand.Intn(len(choices))]
+	}
 	if config.DefaultAvatarFile != "" {
 		return config.DefaultAvatarFile
 	}
