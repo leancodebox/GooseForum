@@ -19,9 +19,6 @@ import (
 // NewUserAvatar selects the stored file name or built-in path for a new account.
 func NewUserAvatar() string {
 	config := hotdataserve.GetSiteSettingsConfigCache()
-	if config.DisableDefaultAvatar {
-		return ""
-	}
 	choices := config.EnabledAvatarFiles()
 	if len(choices) == 0 {
 		return ""

@@ -3,7 +3,7 @@ export default {
   avatarEnabledCount: "已启用 {count} 张",
   avatarEnabled: "已启用",
   avatarPoolTitle: "预设头像库",
-  avatarOff: "用户仍可选择已启用的头像。没有来源头像的新用户将显示文字头像。",
+  avatarOff: "关闭后，个人设置隐藏预设头像。没有来源头像的新用户将显示文字头像。",
   avatarRandom: "用户可以从已启用的头像中选择；没有来源头像的新用户会随机获得一张。",
   builtinAvatars: "内置头像",
   customAvatars: "自定义头像",

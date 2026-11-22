@@ -6,7 +6,7 @@ export default {
   avatarEnabledCount: "有効 {count} 件",
   avatarEnabled: "有効",
   avatarPoolTitle: "プリセットアバター",
-  avatarOff: "ユーザーは有効なアバターを選べます。画像のない新規ユーザーには表示名の先頭文字を表示します。",
+  avatarOff: "個人設定のプリセットアバターを非表示にします。画像のない新規ユーザーには表示名の先頭文字を表示します。",
   avatarRandom: "ユーザーは有効なアバターを選べます。画像のない新規ユーザーにはその中からランダムに割り当てます。",
   builtinAvatars: "内蔵アバター",
   customAvatars: "カスタムアバター",

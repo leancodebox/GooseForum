@@ -3,7 +3,7 @@ export default {
   avatarEnabledCount: "Enabled: {count}",
   avatarEnabled: "Enabled",
   avatarPoolTitle: "Preset avatar library",
-  avatarOff: "Members can still choose an enabled avatar. New users without an image initially see their initial.",
+  avatarOff: "Preset avatars are hidden in personal settings. New users without an image see their initial.",
   avatarRandom: "Members can choose an enabled avatar. New users without an image receive one at random.",
   builtinAvatars: "Built-in avatars",
   customAvatars: "Custom avatars",

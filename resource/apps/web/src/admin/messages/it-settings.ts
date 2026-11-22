@@ -6,7 +6,7 @@ export default {
   avatarEnabledCount: "Attivi: {count}",
   avatarEnabled: "Attivi",
   avatarPoolTitle: "Raccolta di avatar predefiniti",
-  avatarOff: "Gli utenti possono scegliere un avatar attivo. I nuovi utenti senza immagine vedono la loro iniziale.",
+  avatarOff: "Gli avatar predefiniti sono nascosti nelle impostazioni personali. I nuovi utenti senza immagine vedono la loro iniziale.",
   avatarRandom: "Gli utenti possono scegliere un avatar attivo. Ai nuovi utenti senza immagine ne viene assegnato uno a caso.",
   builtinAvatars: "Avatar integrati",
   customAvatars: "Avatar personalizzati",

@@ -10,7 +10,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 )
 
-func TestManualAvatarUsesCurrentPoolWithAssignmentOff(t *testing.T) {
+func TestManualAvatarFollowsAssignmentSwitchAndPool(t *testing.T) {
 	db := dbconnect.Connect()
 	if err := db.AutoMigrate(&users.EntityComplete{}, &pageConfig.Entity{}); err != nil {
 		t.Fatal(err)
@@ -30,7 +30,7 @@ func TestManualAvatarUsesCurrentPoolWithAssignmentOff(t *testing.T) {
 	}
 	t.Cleanup(func() { db.Unscoped().Delete(user) })
 	const file = "2026/preset.webp"
-	config := pageConfig.SiteSettingsConfig{DisableDefaultAvatar: true, AvatarPool: []pageConfig.AvatarOption{{File: file, Enabled: true}}}
+	config := pageConfig.SiteSettingsConfig{AvatarPool: []pageConfig.AvatarOption{{File: file, Enabled: true}}}
 	savePool := func() {
 		t.Helper()
 		if err := pageConfig.SaveSiteConfig(config); err != nil {
@@ -45,6 +45,12 @@ func TestManualAvatarUsesCurrentPoolWithAssignmentOff(t *testing.T) {
 	if choose("/static/pic/1.webp") || !choose(file) {
 		t.Fatal("manual selection ignored configured candidates")
 	}
+	config.DisableDefaultAvatar = true
+	savePool()
+	if choose(file) {
+		t.Fatal("accepted a preset after automatic assignment was switched off")
+	}
+	config.DisableDefaultAvatar = false
 	config.AvatarPool[0].Enabled = false
 	savePool()
 	if choose(file) {

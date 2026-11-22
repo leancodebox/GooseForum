@@ -639,6 +639,7 @@ describe("AppShell and static pages", () => {
 
   it("keeps personal upload available when the preset catalog is empty", async () => {
     renderPage(payload("settings.index", { ...settingsProps(), avatarPresets: [] }), { users: {} as GooseSiteApi["users"] });
+    expect(screen.queryByRole("heading", { name: "预设头像" })).toBeNull();
     expect(screen.queryByRole("button", { name: "选择预设头像" })).toBeNull();
     expect(await screen.findByRole("button", { name: "更换头像" })).toBeTruthy();
   });

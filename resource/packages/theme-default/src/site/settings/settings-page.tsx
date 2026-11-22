@@ -276,12 +276,12 @@ export function SettingsPageView({
           </div>
           <section className="mt-4 border-t pt-3">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <div>
+              {presets.length > 0 && <div>
                 <h2 className="text-sm font-semibold">
                   {t("avatar.presetsTitle")}
                 </h2>
-                {presets.length > 0 && <p className="text-xs text-muted-foreground">{t("avatar.presetsDescription")}</p>}
-              </div>
+                <p className="text-xs text-muted-foreground">{t("avatar.presetsDescription")}</p>
+              </div>}
               <div className="flex gap-2">
                 {draft && draft.file !== currentPreset ? (
                   <Button
@@ -299,7 +299,7 @@ export function SettingsPageView({
                 </Button>
               </div>
             </div>
-            <div className="flex gap-1.5 overflow-x-auto pb-1">
+            {presets.length > 0 && <div className="flex gap-1.5 overflow-x-auto pb-1">
               {presets.map(({ file, url }) => (
                 <button
                   key={file}
@@ -328,7 +328,7 @@ export function SettingsPageView({
                   ) : null}
                 </button>
               ))}
-            </div>
+            </div>}
           </section>
           {page.user.badges.length ? (
             <section className="mt-4 border-t pt-3">

@@ -20,6 +20,9 @@ func BuiltinAvatarFiles() []string {
 
 // EnabledAvatarFiles is shared by manual selection and automatic assignment.
 func (c SiteSettingsConfig) EnabledAvatarFiles() []string {
+	if c.DisableDefaultAvatar {
+		return nil
+	}
 	if c.AvatarPool == nil {
 		if c.DefaultAvatarFile != "" {
 			return []string{c.DefaultAvatarFile}
