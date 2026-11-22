@@ -78,7 +78,9 @@ export default defineConfig(({ command, mode }) => {
         ] : []),
       ],
     },
-    optimizeDeps: { include: ['@gooseforum/theme-default > cropperjs'] },
+    optimizeDeps: {
+      include: ['@gooseforum/theme-default > cropperjs', '@gooseforum/theme-default > qrcode.react'],
+    },
     build: {
       manifest: true,
       outDir: '../../static/dist/react',
