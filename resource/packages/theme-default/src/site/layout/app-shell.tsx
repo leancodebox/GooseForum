@@ -25,7 +25,6 @@ import {
   MoonIcon,
   PaletteIcon,
   PenSquareIcon,
-  SearchIcon,
   SettingsIcon,
   ShieldIcon,
   ScaleIcon,
@@ -66,6 +65,7 @@ import { cn } from "@gooseforum/ui/lib/utils";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
 import { RoutineIcon } from "@gooseforum/ui/components/icons/material-symbols/routine-icon";
 import { announceUnreadStatus, unreadStatusEvent } from "@gooseforum/runtime/unread-status";
+import { HeaderSearch } from "./header-search";
 import {
   emptyShellHeader,
   ShellHeaderContext,
@@ -114,6 +114,7 @@ export function AppShell({
     try { localStorage.setItem("goose:shell-sidebar-collapsed", String(collapsed)); } catch {}
   }
   const [unread, setUnread] = useState(layout.unread);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -343,13 +344,16 @@ export function AppShell({
             <MenuIcon className="size-5.5" />
           </Button>
 
-          <div className={cn(shellHeader.visible && "hidden md:block")}>
+          <div className={cn((shellHeader.visible || searchOpen) && "hidden md:block")}>
             <SiteBrand layout={layout} />
           </div>
           {shellHeader.visible ? (
             <button
               type="button"
-              className="flex min-w-0 flex-1 flex-col items-start justify-center gap-0.5 self-stretch text-left"
+              className={cn(
+                "flex min-w-0 flex-1 flex-col items-start justify-center gap-0.5 self-stretch text-left",
+                searchOpen && "hidden lg:flex",
+              )}
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             >
               <span className="block max-w-full truncate text-lg font-semibold leading-6 hover:text-primary md:text-xl">
@@ -376,8 +380,9 @@ export function AppShell({
           {headerItems.length > 0 && (
             <nav
               className={cn(
-                "hidden items-center gap-1 lg:flex",
-                shellHeader.visible && "lg:hidden",
+                "hidden items-center gap-1",
+                !shellHeader.visible && (searchOpen ? "xl:flex" : "lg:flex"),
+                searchOpen && "min-w-0 overflow-x-auto whitespace-nowrap [scrollbar-width:none]",
               )}
               aria-label="Header navigation"
             >
@@ -395,21 +400,17 @@ export function AppShell({
 
           <div
             className={cn(
-              "ml-auto items-center gap-0.5 lg:gap-1",
-              shellHeader.visible ? "hidden md:flex" : "flex",
+              "ml-auto flex min-w-0 items-center justify-end gap-0.5 lg:gap-1",
+              searchOpen && "flex-1 lg:min-w-120",
             )}
           >
-            <Button
-              asChild
-              variant="ghost"
-              size="icon-lg"
-              className="[&_svg]:size-5"
-              aria-label={t("search")}
+            <HeaderSearch open={searchOpen} onOpenChange={setSearchOpen} />
+            <div
+              className={cn(
+                "shrink-0 items-center gap-0.5 lg:gap-1",
+                searchOpen ? "hidden lg:flex" : shellHeader.visible ? "hidden md:flex" : "flex",
+              )}
             >
-              <GooseLink href="/search">
-                <SearchIcon className="size-5" />
-              </GooseLink>
-            </Button>
             <DropdownMenu
               modal={false}
               open={themeMenuOpen}
@@ -620,6 +621,7 @@ export function AppShell({
                 </Button>
               </>
             )}
+            </div>
           </div>
         </div>
       </header>

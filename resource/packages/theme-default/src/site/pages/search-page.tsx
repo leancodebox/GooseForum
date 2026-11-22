@@ -16,6 +16,7 @@ import { ListFilter, ListFilterItem } from "@gooseforum/ui/components/list-filte
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
 import { PageHeader } from "../layout/page-header";
 import { SiteListPanel } from "../layout/site-panel";
+import { searchUrl } from "../search-url";
 import { compactNumber, TopicListToolbar, TopicTable } from "../topics/topic-list";
 
 export function SearchPageView({ page }: { page: SearchPageProps }) {
@@ -27,14 +28,6 @@ export function SearchPageView({ page }: { page: SearchPageProps }) {
   const payloadQuery = useRef(page.query);
   const hasQuery = Boolean(page.query.trim());
   const sort = page.sort;
-
-  function searchUrl(query: string, sort: string, page = 1) {
-    const params = new URLSearchParams();
-    if (query.trim()) params.set("q", query.trim());
-    if (sort !== "relevance") params.set("sort", sort);
-    if (page > 1) params.set("page", String(page));
-    return `/search${params.size ? `?${params}` : ""}`;
-  }
 
   useEffect(() => {
     if (payloadQuery.current === page.query) return;

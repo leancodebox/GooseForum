@@ -1923,6 +1923,107 @@ test('shows one announcement at a time in order and reopens the panel after a to
   })
 })
 
+test('header search expands in place and submits a keyword', async ({ page, isMobile }) => {
+  const queries: string[] = []
+  await page.route('**/__goose_page/?*', route => route.fulfill({ json: {
+    ...homePage,
+    layout: {
+      ...homePage.layout,
+      header: Array.from({ length: 8 }, (_, index) => ({
+        key: `custom-${index}`, label: `Custom menu ${index}`, url: `/custom/${index}`,
+      })),
+    },
+  } }))
+  await page.route('**/__goose_page/search?*', route => {
+    const search = new URL(route.request().url()).search
+    const query = new URLSearchParams(search).get('q') ?? ''
+    queries.push(query)
+    return route.fulfill({ json: {
+      ...homePage,
+      component: 'search.index',
+      props: {
+        query,
+        sort: 'relevance',
+        topics: [],
+        matches: {},
+        total: 0,
+        totalPages: 0,
+        pagination: { page: 1, nextPage: 0, hasNext: false, nextUrl: '' },
+      },
+      url: `/search${search}`,
+    } })
+  })
+
+  await page.goto('/?lang=en')
+  const header = page.locator('header').first()
+  const trigger = header.getByRole('button', { name: 'Open search' })
+  const form = header.getByRole('search')
+  const input = form.getByRole('searchbox', { name: 'Search topics…' })
+  await expect(trigger).toBeVisible()
+  const collapsedWidth = (await trigger.boundingBox())!.width
+
+  await trigger.click()
+  await expect(input).toBeFocused()
+  await expect.poll(async () => (await input.boundingBox())!.width).toBeGreaterThan(collapsedWidth * 3)
+  await expect(form).toHaveCSS('border-right-width', '1px')
+  if (!isMobile) {
+    const submit = form.getByRole('button', { name: 'Search', exact: true })
+    const borderColor = await form.evaluate(element => getComputedStyle(element).borderRightColor)
+    await submit.hover()
+    await expect(form).toHaveCSS('border-right-color', borderColor)
+    const [field, button] = await Promise.all([form.boundingBox(), submit.boundingBox()])
+    expect(field!.x + field!.width - button!.x - button!.width).toBeGreaterThan(1)
+  }
+  expect(new URL(page.url()).pathname).toBe('/')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await input.fill('   ')
+  await input.press('Enter')
+  expect(queries).toEqual([])
+  await input.press('Escape')
+  await expect(trigger).toBeFocused()
+  await expect(form).toHaveCount(0)
+
+  await trigger.click()
+  await page.getByText('No topics yet', { exact: true }).click()
+  await expect(form).toHaveCount(0)
+  await trigger.click()
+  await input.fill('  Goose & 中文  ')
+  await input.press('Enter')
+  await expect(page.getByRole('heading', { name: 'Search', exact: true })).toBeVisible()
+  expect(new URL(page.url()).searchParams.get('q')).toBe('Goose & 中文')
+  expect(queries).toEqual(['Goose & 中文'])
+  await expect(form).toHaveCount(0)
+
+  await trigger.click()
+  await input.fill('another query')
+  await form.getByRole('button', { name: 'Search', exact: true }).click()
+  await expect(page).toHaveURL(url => url.searchParams.get('q') === 'another query')
+  expect(queries).toEqual(['Goose & 中文', 'another query'])
+})
+
+test('header search stays accessible from a compact topic header', async ({ page, isMobile }) => {
+  if (isMobile) await page.setViewportSize({ width: 320, height: 760 })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const payload = structuredClone(topicPage)
+  payload.props.postStream.posts[0].renderedContent = '<p>A long readable topic.</p>'.repeat(80)
+  await page.route('**/__goose_page/p/test/60?*', route => route.fulfill({ json: payload }))
+  await page.goto('/p/test/60?lang=en')
+  await expect(page.getByRole('heading', { name: 'Topic detail', exact: true })).toBeVisible()
+  await page.evaluate(() => window.scrollTo(0, 800))
+
+  const header = page.locator('header').first()
+  const compactTitle = header.getByRole('button', { name: 'Topic detail', exact: true })
+  const trigger = header.getByRole('button', { name: 'Open search' })
+  await expect(compactTitle).toBeVisible()
+  await trigger.click()
+  await expect(header.getByRole('searchbox')).toBeFocused()
+  await expect(header.getByRole('search')).toHaveCSS('transition-property', 'none')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await header.getByRole('button', { name: 'Close search' }).click()
+  await expect(trigger).toBeFocused()
+  await expect(compactTitle).toBeVisible()
+})
+
 test('sidebar XML links open full documents', async ({ page }) => {
   const documents = [
     { name: 'RSS', path: '/rss.xml', body: '<rss version="2.0"><channel/></rss>' },
