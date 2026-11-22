@@ -1923,7 +1923,7 @@ test('shows one announcement at a time in order and reopens the panel after a to
   })
 })
 
-test('header search expands in place and submits a keyword', async ({ page, isMobile }) => {
+test('header search opens a popover and submits a keyword', async ({ page, isMobile }) => {
   const queries: string[] = []
   await page.route('**/__goose_page/?*', route => route.fulfill({ json: {
     ...homePage,
@@ -1957,14 +1957,18 @@ test('header search expands in place and submits a keyword', async ({ page, isMo
   await page.goto('/?lang=en')
   const header = page.locator('header').first()
   const trigger = header.getByRole('button', { name: 'Open search' })
-  const form = header.getByRole('search')
+  const popover = page.getByRole('dialog', { name: 'Search', exact: true })
+  const form = popover.getByRole('search')
   const input = form.getByRole('searchbox', { name: 'Search topics…' })
   await expect(trigger).toBeVisible()
-  const collapsedWidth = (await trigger.boundingBox())!.width
+  const triggerBox = await trigger.boundingBox()
 
   await trigger.click()
   await expect(input).toBeFocused()
-  await expect.poll(async () => (await input.boundingBox())!.width).toBeGreaterThan(collapsedWidth * 3)
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  await expect(popover).toHaveAttribute('data-side', 'bottom')
+  expect(await trigger.boundingBox()).toEqual(triggerBox)
+  expect((await input.boundingBox())!.width).toBeGreaterThan(triggerBox!.width * 3)
   await expect(form).toHaveCSS('border-right-width', '1px')
   if (!isMobile) {
     const submit = form.getByRole('button', { name: 'Search', exact: true })
@@ -2014,12 +2018,18 @@ test('header search stays accessible from a compact topic header', async ({ page
   const header = page.locator('header').first()
   const compactTitle = header.getByRole('button', { name: 'Topic detail', exact: true })
   const trigger = header.getByRole('button', { name: 'Open search' })
+  const popover = page.getByRole('dialog', { name: 'Search', exact: true })
   await expect(compactTitle).toBeVisible()
   await trigger.click()
-  await expect(header.getByRole('searchbox')).toBeFocused()
-  await expect(header.getByRole('search')).toHaveCSS('transition-property', 'none')
+  await expect(popover.getByRole('searchbox')).toBeFocused()
+  const duration = await popover.evaluate(element => Number.parseFloat(getComputedStyle(element).animationDuration))
+  expect(duration).toBeLessThanOrEqual(0.0001)
+  await expect(compactTitle).toBeVisible()
+  const bounds = (await popover.boundingBox())!
+  expect(bounds.x).toBeGreaterThanOrEqual(0)
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(page.viewportSize()!.width)
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
-  await header.getByRole('button', { name: 'Close search' }).click()
+  await popover.getByRole('button', { name: 'Close search' }).click()
   await expect(trigger).toBeFocused()
   await expect(compactTitle).toBeVisible()
 })
