@@ -280,10 +280,12 @@ export function SiteInfoManagementPage({
               {[true, false].map(builtin => {
                 const options = pool.filter(option => builtins.includes(option.file) === builtin);
                 const enabled = options.filter(option => option.enabled).length;
-                return <fieldset key={String(builtin)} disabled={form.disableDefaultAvatar || saving} className="min-w-0 space-y-3 disabled:opacity-60">
-                  <legend className="float-left mr-3 font-medium">{text(builtin ? "builtinAvatars" : "customAvatars")}</legend>
+                return <fieldset key={String(builtin)} aria-labelledby={builtin ? "builtin-avatar-title" : "custom-avatar-title"} disabled={form.disableDefaultAvatar || saving} className="min-w-0 space-y-3 disabled:opacity-60">
                   <div className="flex min-h-8 flex-wrap items-center justify-between gap-2">
-                    <span className="text-sm text-muted-foreground">{text("avatarEnabled")} {enabled} / {options.length}</span>
+                    <div className="grid grid-cols-[minmax(5em,auto)_auto] items-baseline gap-x-3">
+                      <h4 id={builtin ? "builtin-avatar-title" : "custom-avatar-title"} className="font-medium">{text(builtin ? "builtinAvatars" : "customAvatars")}</h4>
+                      <span className="text-sm text-muted-foreground">{text("avatarEnabled")} {enabled} / {options.length}</span>
+                    </div>
                     {builtin ? <Button type="button" size="sm" variant="outline" onClick={() => updatePool(items => items.map(item => builtins.includes(item.file) ? { ...item, enabled: enabled !== options.length } : item))}>
                       {text(enabled === options.length ? "disableAll" : "enableAll")}
                     </Button> : <label className="relative inline-flex h-8 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm focus-within:ring-2">
