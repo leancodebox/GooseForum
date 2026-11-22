@@ -1,3 +1,4 @@
+import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import { formatDate } from "../date-format";
 import { AttachmentList } from "../editor/attachment-editor";
 import {
@@ -1683,7 +1684,7 @@ function Person({
             >
               <AvatarImage src={user.avatarUrl} alt="" />
               <AvatarFallback>
-                {displayName.slice(0, 1).toUpperCase()}
+                {avatarInitial(displayName)}
               </AvatarFallback>
             </Avatar>
           )

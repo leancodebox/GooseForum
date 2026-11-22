@@ -1,3 +1,4 @@
+import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { PagePayload, TopicPayload } from "@gooseforum/client";
@@ -282,7 +283,7 @@ const TopicRow = memo(function TopicRow({
                 alt={userDisplayName(topic.author)}
               />
               <AvatarFallback>
-                {userDisplayName(topic.author).slice(0, 1)}
+                {avatarInitial(topic.author.nickname, topic.author.username)}
               </AvatarFallback>
             </Avatar>
           </GooseLink>
@@ -444,7 +445,7 @@ function AvatarStack({
           >
             <Avatar className="size-full after:hidden">
               <AvatarImage src={user.avatarUrl} alt={userDisplayName(user)} />
-              <AvatarFallback>{userDisplayName(user).slice(0, 1)}</AvatarFallback>
+              <AvatarFallback>{avatarInitial(user.nickname, user.username)}</AvatarFallback>
             </Avatar>
           </GooseLink>
         </UserCardPopover>

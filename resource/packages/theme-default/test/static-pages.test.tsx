@@ -1055,6 +1055,13 @@ describe("AppShell and static pages", () => {
     expect(messages).toHaveBeenCalledTimes(1);
   });
 
+  it.each([["👩🏽‍💻 Alice", "👩🏽‍💻"], ["   ", "A"]])("renders a text avatar for nickname %j", (nickname, expected) => {
+    const props = userProfileProps();
+    Object.assign(props.user, { avatarUrl: "", username: "alice", nickname });
+    renderPage(payload("user.profile", props));
+    expect(screen.getAllByText(expected, { selector: '[data-slot="avatar-fallback"]' }).length).toBeGreaterThan(0);
+  });
+
   it("opens a new conversation using the resolved recipient", async () => {
     const page = payload("messages.index", messagesProps());
     page.url = "/messages?userId=404&username=unverified";

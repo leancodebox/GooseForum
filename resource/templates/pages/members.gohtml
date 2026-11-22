@@ -12,7 +12,9 @@
     <ul>
         {{range .Payload.Props.Members}}
         <li>
-            <img src="{{.AvatarURL}}" alt="" width="40" height="40" loading="lazy">
+            {{if .AvatarURL}}<img src="{{.AvatarURL}}" alt="" width="40" height="40" loading="lazy">{{else}}
+            <span aria-hidden="true" class="gf-avatar-initial">{{or .Nickname .Username}}</span>
+            {{end}}
             <h2><a href="{{.URL}}">{{.Nickname}}</a></h2>
             <p>@{{.Username}}</p>
             {{if .Bio}}<p>{{.Bio}}</p>{{end}}

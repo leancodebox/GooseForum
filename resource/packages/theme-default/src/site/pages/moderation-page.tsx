@@ -1,3 +1,4 @@
+import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import { formatDate } from "../date-format";
 import {
   useCallback,
@@ -719,7 +720,7 @@ function Person({
         <Avatar className="size-5 shrink-0">
           <AvatarImage src={user.avatarUrl} alt="" />
           <AvatarFallback>
-            {user.username.slice(0, 1).toUpperCase()}
+            {avatarInitial(user.nickname, user.username)}
           </AvatarFallback>
         </Avatar>
         {label && <span className="shrink-0 text-muted-foreground">{label}</span>}

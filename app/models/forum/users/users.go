@@ -128,7 +128,7 @@ func (itself *EntityComplete) GetWebAvatarUrl() string {
 		return urlconfig.GetBannedAvatar()
 	}
 	if itself.AvatarUrl == "" {
-		return urlconfig.GetDefaultAvatar()
+		return ""
 	}
 	if strings.HasPrefix(itself.AvatarUrl, "/static/pic/") {
 		return urlconfig.VersionBuiltinAvatar(itself.AvatarUrl)

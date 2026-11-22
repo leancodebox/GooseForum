@@ -1,3 +1,4 @@
+import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import * as React from 'react'
 import type { LayoutPayload } from '@gooseforum/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@gooseforum/ui/components/avatar'
@@ -20,7 +21,7 @@ export function AppSidebar({ layout, pathname, text, onNavigate, onPrefetch, ...
 }) {
   const { open, isMobile, setOpenMobile } = useSidebar()
   const logo = layout.site.logo || layout.site.brandImage || layout.site.favicon
-  const initials = (layout.viewer.username || 'A').slice(0, 2).toUpperCase()
+  const initials = avatarInitial(layout.viewer.nickname, layout.viewer.username)
   const groups = adminNavGroups.map((group) => ({
     ...group,
     items: group.items.filter((item) => hasAnyAdminPermission(layout.viewer.adminPermissions, item.permission)),

@@ -41,6 +41,7 @@ export function SiteInfoManagementPage({
 }) {
   const [form, setForm] = useState(empty);
   const [loading, setLoading] = useState(true);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const textRef = useRef(text);
@@ -63,6 +64,7 @@ export function SiteInfoManagementPage({
   }, [load]);
   async function save(e?: React.FormEvent) {
     e?.preventDefault();
+    if (uploadingAvatar || saving) return;
     setSaving(true);
     try {
       await api.settings.saveSite({ ...form });
@@ -71,6 +73,19 @@ export function SiteInfoManagementPage({
       toast.error(errorMessage(r, text("saveFailed")));
     } finally {
       setSaving(false);
+    }
+  }
+  async function uploadAvatar(file?: File) {
+    if (!file) return;
+    setUploadingAvatar(true);
+    try {
+      const { objectName } = await api.pages.uploadImage(file);
+      if (!objectName) throw new Error(text("saveFailed"));
+      setForm(current => ({ ...current, defaultAvatarFile: objectName }));
+    } catch (reason) {
+      toast.error(errorMessage(reason, text("saveFailed")));
+    } finally {
+      setUploadingAvatar(false);
     }
   }
   async function upload(file?: File) {
@@ -92,7 +107,7 @@ export function SiteInfoManagementPage({
         </div>
         <Button
           size="sm"
-          disabled={saving || loading}
+          disabled={saving || loading || uploadingAvatar}
           onClick={() => void save()}
         >
           {saving ? (
@@ -193,6 +208,21 @@ export function SiteInfoManagementPage({
                     </div>
                   </div>
                 </Field>
+                <Field>
+                  <FieldLabel>
+                    <input type="checkbox" checked={!form.disableDefaultAvatar} onChange={e => setForm({ ...form, disableDefaultAvatar: !e.target.checked })} />
+                    {text("assignAvatar")}
+                  </FieldLabel>
+                  <p className="text-xs text-muted-foreground">{text("assignAvatarHint")}</p>
+                </Field>
+                {!form.disableDefaultAvatar && <Field>
+                  <FieldLabel htmlFor="default-avatar-upload">{text("defaultAvatar")}</FieldLabel>
+                  {form.defaultAvatarFile && <div className="flex items-center gap-3">
+                    <img src={`/file/img/${form.defaultAvatarFile}`} alt="" className="size-12 rounded-full object-cover" />
+                    <Button type="button" variant="outline" size="sm" disabled={uploadingAvatar} onClick={() => setForm({ ...form, defaultAvatarFile: "" })}>{text("removeAvatar")}</Button>
+                  </div>}
+                  <Input id="default-avatar-upload" type="file" accept="image/*" disabled={uploadingAvatar || saving} onChange={e => { void uploadAvatar(e.target.files?.[0]); e.target.value = ""; }} />
+                </Field>}
               </FieldGroup>
             </FieldSet>
             <FieldSet>

@@ -130,8 +130,9 @@ func Register(c *gin.Context) {
 	if invitationCode == "" {
 		userEntity, err = userservice.CreateUser(r.Username, r.Password, r.Email, securityConfig.EnableEmailVerification, r.Locale)
 	} else {
+		avatar := userservice.NewUserAvatar()
 		err = dbconnect.Connect().Transaction(func(tx *gorm.DB) error {
-			userEntity, err = userservice.CreateUserEntityWithDB(tx, r.Username, r.Password, r.Email, securityConfig.EnableEmailVerification, r.Locale)
+			userEntity, err = userservice.CreateUserEntityWithDB(tx, r.Username, r.Password, r.Email, avatar, securityConfig.EnableEmailVerification, r.Locale)
 			if err != nil {
 				return err
 			}

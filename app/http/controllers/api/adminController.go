@@ -16,6 +16,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
+	"github.com/leancodebox/GooseForum/app/models/forum/fileUsage"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderators"
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
@@ -133,6 +134,7 @@ type UserListReq struct {
 }
 
 type UserItem struct {
+	Nickname          string                              `json:"nickname"`
 	TrustLevel        int16                               `json:"trustLevel"`
 	RestrictionStatus string                              `json:"restrictionStatus"`
 	RestrictionUntil  *time.Time                          `json:"restrictionUntil"`
@@ -191,6 +193,7 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 			UserId:            t.Id,
 			AvatarUrl:         t.GetWebAvatarUrl(),
 			Username:          t.Username,
+			Nickname:          t.Nickname,
 			Email:             t.Email,
 			Validate:          t.IsActivated,
 			Prestige:          t.Prestige,
@@ -293,6 +296,7 @@ type TopicAdminBaseVo struct {
 }
 
 type TopicInfoAdminVo struct {
+	Nickname string `json:"nickname"`
 	TopicAdminBaseVo
 	Username      string `json:"username"`
 	UserAvatarUrl string `json:"userAvatarUrl"`
@@ -321,9 +325,11 @@ func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
 	return component.SuccessResponse(component.Page[TopicInfoAdminVo]{
 		List: lo.Map(pageData.Data, func(t topics.Entity, _ int) TopicInfoAdminVo {
 			username := ""
+			nickname := ""
 			userAvatarUrl := ""
 			if user := userMap[t.UserId]; user != nil {
 				username = user.Username
+				nickname = user.Nickname
 				userAvatarUrl = user.GetWebAvatarUrl()
 			}
 			return TopicInfoAdminVo{
@@ -340,6 +346,7 @@ func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
 				Deleted:       t.DeletedAt.Valid,
 				Username:      username,
 				UserAvatarUrl: userAvatarUrl,
+				Nickname:      nickname,
 				ViewCount:     t.ViewCount,
 				ReplyCount:    t.ReplyCount,
 				LikeCount:     t.LikeCount,
@@ -697,6 +704,7 @@ type CategoryItem struct {
 }
 
 type CategoryModeratorItem struct {
+	Nickname  string `json:"nickname"`
 	Id        uint64 `json:"id"`
 	UserId    uint64 `json:"userId"`
 	Username  string `json:"username"`
@@ -737,9 +745,11 @@ func buildCategoryModeratorItems(moderatorList []*moderators.Entity, userMap map
 	return lo.Map(moderatorList, func(item *moderators.Entity, _ int) CategoryModeratorItem {
 		user := userMap[item.UserId]
 		username := ""
+		nickname := ""
 		avatarURL := ""
 		if user != nil {
 			username = user.Username
+			nickname = user.Nickname
 			avatarURL = user.GetWebAvatarUrl()
 		}
 		return CategoryModeratorItem{
@@ -747,6 +757,7 @@ func buildCategoryModeratorItems(moderatorList []*moderators.Entity, userMap map
 			UserId:    item.UserId,
 			Username:  username,
 			AvatarUrl: avatarURL,
+			Nickname:  nickname,
 			Status:    item.Status,
 		}
 	})
@@ -1034,6 +1045,15 @@ type SaveSiteSettingsReq struct {
 
 // SaveSiteSettings 保存站点设置
 func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) component.Response {
+	if key := req.Params.Settings.DefaultAvatarFile; key != "" {
+		usages, err := fileUsage.GetByFileName(key)
+		if err != nil {
+			return component.FailResponseError(err)
+		}
+		if !lo.ContainsBy(usages, func(usage fileUsage.Entity) bool { return usage.TargetType == fileUsage.TargetAdminUpload }) {
+			return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
+		}
+	}
 	response := savePageConfig(pageConfig.SiteSettings, req.Params.Settings, hotdataserve.ClearSiteSettingsConfigCache)
 	if response.Data.Code != component.SUCCESS {
 		return response

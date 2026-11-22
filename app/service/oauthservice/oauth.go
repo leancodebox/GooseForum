@@ -225,12 +225,9 @@ func populateOAuthProfile(userEntity *users.EntityComplete, userInfo OAuthUserIn
 		localAvatarPath, err := downloadAndSaveAvatar(userEntity.Id, userInfo.AvatarURL)
 		if err != nil {
 			slog.Warn("下载头像失败，使用默认头像", "error", err, "avatarURL", userInfo.AvatarURL)
-			userEntity.AvatarUrl = users.RandAvatarUrl()
 		} else {
 			userEntity.AvatarUrl = localAvatarPath
 		}
-	} else {
-		userEntity.AvatarUrl = users.RandAvatarUrl()
 	}
 
 	userEntity.Nickname = strings.TrimSpace(userInfo.Name)

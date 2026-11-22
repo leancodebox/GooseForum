@@ -189,7 +189,7 @@ export function SettingsPageView({
 
   const wornBadge =
     page.user.wearableBadges.find((badge) => badge.code === wornCode) || null;
-  const displayName = profile.nickname || username;
+  const displayName = profile.nickname.trim() || username;
   return (
     <main className="min-w-0 pb-8">
       <SitePanel clip>
@@ -233,7 +233,7 @@ export function SettingsPageView({
               >
                 <ProfileAvatar
                   src={presetDraft}
-                  name={username}
+                  name={displayName}
                   badge={wornBadge}
                   className="size-full isolation-auto"
                 />

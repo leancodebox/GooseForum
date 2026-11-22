@@ -1,3 +1,4 @@
+import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import { Maximize2, Minimize2, Minus, Send, X } from "lucide-react";
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -119,7 +120,7 @@ export function TopicComposer({
           <Avatar className="size-8">
             <AvatarImage src={viewer.avatarUrl} />
             <AvatarFallback>
-              {viewer.username.slice(0, 1).toUpperCase()}
+              {avatarInitial(viewer.nickname, viewer.username)}
             </AvatarFallback>
           </Avatar>
           <button
@@ -165,7 +166,7 @@ export function TopicComposer({
             <Avatar className="size-9">
               <AvatarImage src={viewer.avatarUrl} />
               <AvatarFallback>
-                {viewer.username.slice(0, 1).toUpperCase()}
+                {avatarInitial(viewer.nickname, viewer.username)}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">

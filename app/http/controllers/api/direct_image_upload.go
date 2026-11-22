@@ -126,7 +126,7 @@ func completeDirectImageUpload(c *gin.Context, adminUpload bool) {
 		return
 	}
 	c.JSON(http.StatusOK, component.SuccessDataCode(map[string]any{
-		"url": metadata.GetAccessPath(), "filename": metadata.Name, "size": metadata.Size,
+		"url": metadata.GetAccessPath(), "filename": metadata.Name, "objectName": metadata.Name, "size": metadata.Size,
 	}, component.MessageUploadSuccess, nil))
 }
 

@@ -56,7 +56,6 @@ func GetByUsername(username string) (entity EntityComplete, err error) {
 func MakeUser(name string, password string, email string) *EntityComplete {
 	user := EntityComplete{Username: name, Email: email}
 	user.SetPassword(password)
-	user.AvatarUrl = RandAvatarUrl()
 	return &user
 }
 

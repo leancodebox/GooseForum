@@ -1,4 +1,8 @@
 export default {
+  assignAvatar: "为新用户分配默认头像",
+  assignAvatarHint: "仅用于没有来源头像的新用户。未上传图片时随机使用内置头像；关闭后显示昵称首字符。",
+  defaultAvatar: "默认头像图片",
+  removeAvatar: "移除图片",
   site: "站点信息",
   siteHint: "配置站点标识、公开地址、联系方式与元数据。",
   save: "保存",

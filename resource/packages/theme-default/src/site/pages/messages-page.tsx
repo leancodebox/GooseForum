@@ -1,3 +1,4 @@
+import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import {
   Fragment,
   useEffect,
@@ -579,7 +580,7 @@ export function MessagesPageView({
                   >
                     <ArrowLeft />
                   </Button>
-                  <ChatUserAvatar userId={active.peerId} username={active.peerUsername} avatarUrl={active.peerAvatar} profileUrl={active.peerUrl} size="size-9" />
+                  <ChatUserAvatar userId={active.peerId} username={active.peerUsername} nickname={active.peerNickname} avatarUrl={active.peerAvatar} profileUrl={active.peerUrl} size="size-9" />
                   <div className="min-w-0">
                     <GooseLink
                       href={active.peerUrl}
@@ -647,6 +648,7 @@ export function MessagesPageView({
                               peerId={active.peerId}
                               peerAvatar={active.peerAvatar}
                               peerUsername={active.peerUsername}
+                              peerNickname={active.peerNickname}
                               locale={runtime.locale}
                             />
                           ))}
@@ -826,7 +828,7 @@ export function MessagesPageView({
                 <Fragment key={user.id}>
                   <Item className="border-0">
                     <ItemMedia>
-                      <ChatUserAvatar userId={user.id} username={user.nickname || user.username} avatarUrl={user.avatarUrl} profileUrl={user.url} size="size-10" />
+                      <ChatUserAvatar userId={user.id} username={user.username} nickname={user.nickname} avatarUrl={user.avatarUrl} profileUrl={user.url} size="size-10" />
                     </ItemMedia>
                     <button type="button" className="min-w-0 flex-1 rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-ring" onClick={() => startChat(user)}>
                       <ItemContent>
@@ -875,7 +877,7 @@ function ConversationListItem({
       )}
     >
       <ItemMedia className="relative">
-        <ChatUserAvatar userId={conversation.peerId} username={conversation.peerUsername} avatarUrl={conversation.peerAvatar} profileUrl={conversation.peerUrl} size="size-10" />
+        <ChatUserAvatar userId={conversation.peerId} username={conversation.peerUsername} nickname={conversation.peerNickname} avatarUrl={conversation.peerAvatar} profileUrl={conversation.peerUrl} size="size-10" />
         {conversation.unreadCount ? (
           <span className="pointer-events-none absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-destructive ring-2 ring-background" />
         ) : null}
@@ -909,12 +911,14 @@ function ChatMessageItem({
   peerId,
   peerAvatar,
   peerUsername,
+  peerNickname,
   locale,
 }: {
   message: ChatMessagePayload;
   peerId: number;
   peerAvatar: string;
   peerUsername: string;
+  peerNickname?: string;
   locale: string;
 }) {
   return (
@@ -928,7 +932,7 @@ function ChatMessageItem({
       >
         {!message.isSelf ? (
           <MessageAvatar>
-            <ChatUserAvatar userId={peerId} username={peerUsername} avatarUrl={peerAvatar} size="size-8" />
+            <ChatUserAvatar userId={peerId} username={peerUsername} nickname={peerNickname} avatarUrl={peerAvatar} size="size-8" />
           </MessageAvatar>
         ) : null}
         <MessageContent className="w-auto max-w-full gap-1">
@@ -949,19 +953,20 @@ function ChatMessageItem({
   );
 }
 
-function ChatUserAvatar({ userId, username, avatarUrl, profileUrl, size }: {
+function ChatUserAvatar({ userId, username, nickname, avatarUrl, profileUrl, size }: {
   userId: number;
   username: string;
+  nickname?: string;
   avatarUrl: string;
   profileUrl?: string;
   size: "size-8" | "size-9" | "size-10";
 }) {
   return (
-    <UserCardPopover user={{ id: userId, username, avatarUrl }}>
-      <GooseLink href={profileUrl || `/u/${userId}`} aria-label={username} className="block shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+    <UserCardPopover user={{ id: userId, username, nickname, avatarUrl }}>
+      <GooseLink href={profileUrl || `/u/${userId}`} aria-label={nickname?.trim() || username} className="block shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <Avatar className={size}>
           <AvatarImage src={avatarUrl} alt="" />
-          <AvatarFallback>{username.slice(0, 1).toUpperCase()}</AvatarFallback>
+          <AvatarFallback>{avatarInitial(nickname, username)}</AvatarFallback>
         </Avatar>
       </GooseLink>
     </UserCardPopover>
@@ -984,7 +989,8 @@ function newConversation(user: UserConnectionPayload): Conversation {
   return {
     id: 0,
     peerId: user.id,
-    peerUsername: user.nickname || user.username,
+    peerUsername: user.nickname?.trim() || user.username,
+    peerNickname: user.nickname,
     peerAvatar: user.avatarUrl,
     lastMsg: "",
     lastMsgTime: "",

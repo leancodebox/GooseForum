@@ -1,13 +1,16 @@
 package userservice
 
 import (
+	"strings"
 	"testing"
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 )
 
 func setupCreateUserTestDB(t *testing.T) {
@@ -49,5 +52,50 @@ func TestGenerateName(t *testing.T) {
 		if name := GenerateGooseNickname(); name == "" {
 			t.Fatal("expected generated nickname")
 		}
+	}
+}
+
+func TestDefaultAvatarAppliesAtRegistration(t *testing.T) {
+	setupCreateUserTestDB(t)
+	conn := db.Connect()
+	if err := conn.AutoMigrate(&pageConfig.Entity{}); err != nil {
+		t.Fatal(err)
+	}
+	original := pageConfig.GetByPageType(pageConfig.SiteSettings)
+	t.Cleanup(func() {
+		if original.Id == 0 {
+			conn.Where("page_type = ?", pageConfig.SiteSettings).Delete(&pageConfig.Entity{})
+		} else if err := pageConfig.SaveConfig(pageConfig.SiteSettings, original.Config); err != nil {
+			t.Error(err)
+		}
+		hotdataserve.ClearSiteSettingsConfigCache()
+	})
+	register := func(name, settings string) *users.EntityComplete {
+		t.Helper()
+		if err := pageConfig.SaveConfig(pageConfig.SiteSettings, settings); err != nil {
+			t.Fatal(err)
+		}
+		hotdataserve.ClearSiteSettingsConfigCache()
+		user, err := CreateUser(name, "password", name+"@example.com", false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return user
+	}
+	legacy := register("legacy-avatar", "{}")
+	if !strings.HasPrefix(legacy.AvatarUrl, "/static/pic/") {
+		t.Fatalf("expected built-in avatar, got %q", legacy.AvatarUrl)
+	}
+	custom := register("custom-avatar", `{"defaultAvatarFile":"2026/site.png"}`)
+	if custom.GetWebAvatarUrl() != "/file/img/2026/site.png" {
+		t.Fatalf("custom avatar = %q", custom.GetWebAvatarUrl())
+	}
+	empty := register("empty-avatar", `{"disableDefaultAvatar":true,"defaultAvatarFile":"2026/site.png"}`)
+	if empty.AvatarUrl != "" || empty.GetWebAvatarUrl() != "" {
+		t.Fatal("disabled assignment returned an image")
+	}
+	stored, err := users.Get(custom.Id)
+	if err != nil || stored.AvatarUrl != custom.AvatarUrl {
+		t.Fatalf("existing avatar changed: %q, %v", stored.AvatarUrl, err)
 	}
 }

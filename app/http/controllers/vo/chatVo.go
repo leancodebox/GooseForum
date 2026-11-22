@@ -4,6 +4,7 @@ package vo
 type ChatItemVo struct {
 	Id           uint64 `json:"id"` // user_chat_config id
 	PeerId       uint64 `json:"peerId"`
+	PeerNickname string `json:"peerNickname,omitempty"`
 	PeerUsername string `json:"peerUsername"`
 	PeerAvatar   string `json:"peerAvatar"`
 	LastMsg      string `json:"lastMsg"`

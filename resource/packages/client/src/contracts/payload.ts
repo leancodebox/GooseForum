@@ -467,11 +467,13 @@ export interface ModerationReportItem {
   resolution: string
   reporter: {
     id: number
+    nickname?: string
     username: string
     avatarUrl: string
   }
   handler: {
     id: number
+    nickname?: string
     username: string
     avatarUrl: string
   }
@@ -788,6 +790,7 @@ export interface MessagesPageProps {
 export interface ChatItemPayload {
   id: number
   peerId: number
+  peerNickname?: string
   peerUsername: string
   peerAvatar: string
   lastMsg: string

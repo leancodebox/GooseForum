@@ -1,4 +1,8 @@
 export default {
+  assignAvatar: "Assign a default avatar to new users",
+  assignAvatarHint: "Applies to new users without an avatar. With no image selected, a built-in avatar is assigned at random. Turn off to show the first character of the display name.",
+  defaultAvatar: "Default avatar image",
+  removeAvatar: "Remove image",
   site: "Site information",
   siteHint: "Configure identity, public URL, contact, and metadata.",
   save: "Save",

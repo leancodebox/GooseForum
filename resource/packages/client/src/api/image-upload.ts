@@ -4,6 +4,7 @@ import type { ImageUploadInitResult } from './types.js'
 
 export interface ImageUploadResult {
   url: string
+  objectName?: string
   filename?: string
   size?: number
 }

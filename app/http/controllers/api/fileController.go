@@ -131,9 +131,10 @@ func saveImgByGinContext(c *gin.Context, adminUpload bool) {
 	}
 
 	c.JSON(http.StatusOK, component.SuccessDataCode(map[string]any{
-		"url":      entity.GetAccessPath(),
-		"filename": file.Filename,
-		"size":     len(fileData),
+		"url":        entity.GetAccessPath(),
+		"filename":   file.Filename,
+		"objectName": entity.Name,
+		"size":       len(fileData),
 	}, component.MessageUploadSuccess, nil))
 }
 

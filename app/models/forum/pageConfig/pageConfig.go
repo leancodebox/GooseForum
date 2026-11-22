@@ -113,13 +113,15 @@ type SponsorsRule struct {
 // SiteSettingsConfig 站点设置配置
 type SiteSettingsConfig struct {
 	// 站点基本信息
-	SiteName        string `json:"siteName"`
-	SiteLogo        string `json:"siteLogo"`
-	SiteDescription string `json:"siteDescription"`
-	SiteKeywords    string `json:"siteKeywords"`
-	SiteUrl         string `json:"siteUrl"`
-	SiteEmail       string `json:"siteEmail"`
-	ExternalLinks   string `json:"externalLinks"`
+	SiteName             string `json:"siteName"`
+	DisableDefaultAvatar bool   `json:"disableDefaultAvatar"`
+	DefaultAvatarFile    string `json:"defaultAvatarFile"`
+	SiteLogo             string `json:"siteLogo"`
+	SiteDescription      string `json:"siteDescription"`
+	SiteKeywords         string `json:"siteKeywords"`
+	SiteUrl              string `json:"siteUrl"`
+	SiteEmail            string `json:"siteEmail"`
+	ExternalLinks        string `json:"externalLinks"`
 }
 
 type OIDCProviderSettingsConfig struct {

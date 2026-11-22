@@ -2,6 +2,10 @@
 import en from "./en-settings";
 export default {
   ...en,
+  assignAvatar: "新規ユーザーに既定のアバターを割り当てる",
+  assignAvatarHint: "アバターがない新規ユーザーが対象です。画像が未設定なら内蔵画像をランダムに割り当て、無効時は表示名の先頭文字を表示します。",
+  defaultAvatar: "既定のアバター画像",
+  removeAvatar: "画像を削除",
   site: "サイト情報",
   chrome: "サイト表示",
   showInHeader: "ヘッダーに{item}を表示",

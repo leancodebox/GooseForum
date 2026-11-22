@@ -1,3 +1,4 @@
+import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import {
   useCallback,
   useEffect,
@@ -231,7 +232,7 @@ export function UserActivity({ page }: { page: UserProfileProps }) {
                   alt={connection.username}
                 />
                 <AvatarFallback>
-                  {connection.username.slice(0, 1).toUpperCase()}
+                  {avatarInitial(connection.nickname, connection.username)}
                 </AvatarFallback>
               </Avatar>
               <span className="min-w-0">

@@ -57,7 +57,7 @@ export function UserProfilePageView({ page }: { page: UserProfileProps }) {
   const [following, setFollowing] = useState(page.user.isFollowing);
   const [followLoading, setFollowLoading] = useState(false);
   const [followError, setFollowError] = useState("");
-  const displayName = page.user.nickname || page.user.username;
+  const displayName = page.user.nickname?.trim() || page.user.username;
   const cover = safeUrl(page.user.profileCoverUrl, true);
 
   async function toggleFollow() {
@@ -93,7 +93,7 @@ export function UserProfilePageView({ page }: { page: UserProfileProps }) {
             <div className="flex min-w-0 flex-1 gap-4">
               <ProfileAvatar
                 src={page.user.avatarUrl}
-                name={page.user.username}
+                name={displayName}
                 badge={page.user.wornBadge}
                 className="-mt-9 size-24 lg:-mt-10 lg:size-28"
               />

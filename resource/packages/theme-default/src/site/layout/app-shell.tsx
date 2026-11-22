@@ -1,4 +1,5 @@
 "use client";
+import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import { DefaultBrand } from "./default-brand";
 
 import {
@@ -516,7 +517,7 @@ export function AppShell({
                           alt={layout.viewer.username}
                         />
                         <AvatarFallback>
-                          {layout.viewer.username.slice(0, 2).toUpperCase()}
+                          {avatarInitial(layout.viewer.nickname, layout.viewer.username)}
                         </AvatarFallback>
                       </Avatar>
                       {unread.messages || unread.notifications ? (

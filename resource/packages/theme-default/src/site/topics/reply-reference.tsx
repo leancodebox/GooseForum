@@ -61,7 +61,7 @@ export function ReplyReference({
         {available ? (
           <ProfileAvatar
             src={target.author.avatarUrl}
-            name={target.author.username}
+            name={target.author.nickname?.trim() || target.author.username}
             className="size-6"
             framed={false}
           />

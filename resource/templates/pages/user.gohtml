@@ -7,7 +7,9 @@
 {{define "page"}}
 <main class="gf-crawler-user-page">
     <header class="gf-crawler-user-head">
-        <img class="gf-crawler-user-avatar" src="{{.Payload.Props.User.AvatarUrl}}" alt="{{.Payload.Props.User.Username}}" width="96" height="96">
+        {{if .Payload.Props.User.AvatarUrl}}<img class="gf-crawler-user-avatar" src="{{.Payload.Props.User.AvatarUrl}}" alt="{{.Payload.Props.User.Username}}" width="96" height="96">{{else}}
+            <span aria-hidden="true" class="gf-avatar-initial">{{or .Payload.Props.User.Nickname .Payload.Props.User.Username}}</span>
+            {{end}}
         <div>
             <h1>{{.Payload.Props.User.Nickname}}</h1>
             <p class="gf-crawler-user-meta">@{{.Payload.Props.User.Username}}</p>

@@ -19,6 +19,7 @@ import (
 )
 
 type AccessGroupMemberItem struct {
+	Nickname   string `json:"nickname"`
 	ID         uint64 `json:"id"`
 	UserID     uint64 `json:"userId"`
 	Username   string `json:"username"`
@@ -95,11 +96,11 @@ func GetAccessControlOverview(req component.BetterRequest[struct{}]) component.R
 		}
 		memberItems := make([]AccessGroupMemberItem, 0, len(membersByGroup[group.Id]))
 		for _, member := range membersByGroup[group.Id] {
-			username, avatarURL := "", ""
+			username, nickname, avatarURL := "", "", ""
 			if user := userMap[member.UserId]; user != nil {
-				username, avatarURL = user.Username, user.GetWebAvatarUrl()
+				username, nickname, avatarURL = user.Username, user.Nickname, user.GetWebAvatarUrl()
 			}
-			memberItems = append(memberItems, AccessGroupMemberItem{ID: member.Id, UserID: member.UserId, Username: username, AvatarURL: avatarURL, MemberRole: member.MemberRole, Status: member.Status})
+			memberItems = append(memberItems, AccessGroupMemberItem{ID: member.Id, UserID: member.UserId, Username: username, Nickname: nickname, AvatarURL: avatarURL, MemberRole: member.MemberRole, Status: member.Status})
 		}
 		grantItems := make([]AccessGroupGrantItem, 0, len(grantsByGroup[group.Id]))
 		for _, grant := range grantsByGroup[group.Id] {
@@ -276,11 +277,11 @@ func ListManagedAccessGroups(req component.BetterRequest[struct{}]) component.Re
 		})
 		items := make([]AccessGroupMemberItem, 0, len(pending))
 		for _, member := range pending {
-			username, avatarURL := "", ""
+			username, nickname, avatarURL := "", "", ""
 			if user := userMap[member.UserId]; user != nil {
-				username, avatarURL = user.Username, user.GetWebAvatarUrl()
+				username, nickname, avatarURL = user.Username, user.Nickname, user.GetWebAvatarUrl()
 			}
-			items = append(items, AccessGroupMemberItem{ID: member.Id, UserID: member.UserId, Username: username, AvatarURL: avatarURL, MemberRole: member.MemberRole, Status: member.Status})
+			items = append(items, AccessGroupMemberItem{ID: member.Id, UserID: member.UserId, Username: username, Nickname: nickname, AvatarURL: avatarURL, MemberRole: member.MemberRole, Status: member.Status})
 		}
 		result = append(result, ManagedAccessGroupItem{ID: group.Id, Name: group.Name, Applications: items})
 	}

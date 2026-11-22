@@ -20,6 +20,7 @@ export interface AgentSettings {
 export interface AdminCategoryModerator {
   id: number
   userId: number
+  nickname?: string
   username: string
   avatarUrl?: string | null
   status: number
@@ -44,6 +45,7 @@ export interface AccessGroupGrant {
 export interface AccessGroupMember {
   id: number
   userId: number
+  nickname?: string
   username: string
   avatarUrl?: string | null
   memberRole: 'member' | 'manager'
@@ -80,6 +82,7 @@ export interface AdminUser {
 	 restrictionReason?: string
 
   userId: number
+  nickname?: string
   username: string
   avatarUrl?: string | null
   email: string
@@ -157,7 +160,7 @@ export interface AdminOptRecord {
   createdAt: string
 }
 
-export interface SiteSettings { siteName:string;siteUrl:string;siteLogo:string;siteEmail:string;siteDescription:string;siteKeywords:string;externalLinks?:string }
+export interface SiteSettings { siteName:string;siteUrl:string;siteLogo:string;disableDefaultAvatar?:boolean;defaultAvatarFile?:string;siteEmail:string;siteDescription:string;siteKeywords:string;externalLinks?:string }
 export interface SiteChromeItem { id:string;enabled:boolean;type:'link'|'text'|string;label:string;i18nLabel:string;url:string }
 export interface SiteChromeGroup { id:string;title:string;i18nLabel:string;items:SiteChromeItem[] }
 export interface SiteChromeConfig {
@@ -214,6 +217,7 @@ export interface AdminTopic {
   description?: string | null
   categoryId: number[]
   userId: number
+  nickname?: string
   username: string
   userAvatarUrl?: string | null
   topicStatus: number
@@ -292,6 +296,7 @@ export interface SponsorsConfig {
 }
 
 export interface AdminImageUploadResult {
+  objectName?: string
   url?: string
   filename?: string
   size?: number

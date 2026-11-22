@@ -11,9 +11,22 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userOAuth"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"gorm.io/gorm"
 )
+
+// NewUserAvatar selects the stored file name or built-in path for a new account.
+func NewUserAvatar() string {
+	config := hotdataserve.GetSiteSettingsConfigCache()
+	if config.DisableDefaultAvatar {
+		return ""
+	}
+	if config.DefaultAvatarFile != "" {
+		return config.DefaultAvatarFile
+	}
+	return users.RandAvatarUrl()
+}
 
 func CreateUser(username, password, email string, needValid bool, locale ...string) (*users.EntityComplete, error) {
 	return CreateUserWithBinding(username, password, email, needValid, nil, locale...)
@@ -23,13 +36,14 @@ func CreateUser(username, password, email string, needValid bool, locale ...stri
 // coordinate another write (such as an invitation reservation) can run this
 // inside their own transaction and initialize secondary projections after it
 // commits.
-func CreateUserEntityWithDB(db *gorm.DB, username, password, email string, needValid bool, locale ...string) (*users.EntityComplete, error) {
+func CreateUserEntityWithDB(db *gorm.DB, username, password, email, avatar string, needValid bool, locale ...string) (*users.EntityComplete, error) {
 	if db == nil {
 		return nil, fmt.Errorf("database is required")
 	}
 	username = strings.TrimSpace(username)
 	email = strings.TrimSpace(email)
 	userEntity := users.MakeUser(username, password, email)
+	userEntity.AvatarUrl = avatar
 	userEntity.Locale = normalizeUserLocale(locale...)
 	userEntity.Nickname = GenerateGooseNickname()
 	userEntity.RequiresEmailVerification = needValid
@@ -88,6 +102,7 @@ func CreateUserWithBinding(username, password, email string, needValid bool, bin
 			}
 		}
 		if userEntity.Id == 0 {
+			userEntity.AvatarUrl = NewUserAvatar()
 			if err := users.CheckIdentityAvailable(username, email, 0); err != nil {
 				return err
 			}

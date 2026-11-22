@@ -1,3 +1,4 @@
+import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import { errorMessage } from '../error-message'
 import { AdminPage } from '../components/admin-page'
 import { UserMFAReset } from '../components/user-mfa-reset'
@@ -122,7 +123,7 @@ function UserIconButton({ label, children, variant = 'outline', ...props }: Omit
 
 function UserIdentity({ user, text, compact = false, locale = 'en' }: { user: AdminUser; text: Text; compact?: boolean; locale?: string }) {
   return <div className="flex min-w-0 flex-1 items-start gap-2.5">
-    <a href={`/u/${user.userId}`} target="_blank" rel="noreferrer" className="shrink-0"><Avatar className={compact ? 'size-10' : 'size-9'}><AvatarImage src={user.avatarUrl || undefined} alt={user.username} /><AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar></a>
+    <a href={`/u/${user.userId}`} target="_blank" rel="noreferrer" className="shrink-0"><Avatar className={compact ? 'size-10' : 'size-9'}><AvatarImage src={user.avatarUrl || undefined} alt={user.username} /><AvatarFallback>{avatarInitial(user.nickname, user.username)}</AvatarFallback></Avatar></a>
     <div className="min-w-0 flex-1">
       <div className="flex min-w-0 items-center gap-2">
         <a href={`/u/${user.userId}`} target="_blank" rel="noreferrer" className="truncate font-semibold hover:text-primary hover:underline">{user.username}</a>
@@ -226,7 +227,7 @@ function UserEditor({ user, api, text, locale, canResetMFA, onClose, onSaved }: 
       <form noValidate onSubmit={save} className="flex min-h-0 w-full flex-col">
         <DialogHeader className="border-b px-4 py-3">
           <div className="flex items-center gap-3">
-            {user ? <Avatar className="size-10"><AvatarImage src={user.avatarUrl || undefined} alt={user.username} /><AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar> : null}
+            {user ? <Avatar className="size-10"><AvatarImage src={user.avatarUrl || undefined} alt={user.username} /><AvatarFallback>{avatarInitial(user.nickname, user.username)}</AvatarFallback></Avatar> : null}
             <div className="min-w-0 pr-6">
               <DialogTitle>{text('edit')}</DialogTitle>
               <DialogDescription className="truncate">{user?.username} · {user?.email || '—'}</DialogDescription>

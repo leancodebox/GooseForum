@@ -1,3 +1,4 @@
+import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import type { UserBadgePayload } from "@gooseforum/client";
 import {
   Avatar,
@@ -43,7 +44,7 @@ export function ProfileAvatar({
       >
         <AvatarImage src={src} alt={name} className="object-cover" />
         <AvatarFallback className="text-lg font-semibold">
-          {name.trim().slice(0, 1).toUpperCase()}
+          {avatarInitial(name)}
         </AvatarFallback>
       </Avatar>
       {badge ? (

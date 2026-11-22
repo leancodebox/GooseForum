@@ -61,6 +61,7 @@ func TestRegistrationClosedRepairsPendingAccountWithExistingBinding(t *testing.T
 	withRegistrationConfig(t, `{"enableSignup":false}`)
 	conn := dbconnect.Connect()
 	u := users.MakeUser("registration-test-repair", "password", "repair@example.com")
+	u.AvatarUrl = "2026/site.png"
 	key := users.OAuthRegistrationKey("registration-test", "repair")
 	u.OAuthRegistrationKey = &key
 	u.IsActivated = users.ActivationSuccess
@@ -77,6 +78,9 @@ func TestRegistrationClosedRepairsPendingAccountWithExistingBinding(t *testing.T
 	stored, err := users.Get(u.Id)
 	if err != nil || stored.OAuthRegistrationKey != nil {
 		t.Fatalf("repair retained pending marker after profile save: user=%+v error=%v", stored, err)
+	}
+	if stored.AvatarUrl != u.AvatarUrl {
+		t.Fatalf("OAuth without a provider avatar replaced the assigned avatar: %q", stored.AvatarUrl)
 	}
 }
 

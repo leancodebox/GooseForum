@@ -26,7 +26,7 @@ export function MembersPageView({ page }: { page: MembersPageProps }) {
       {page.members.length ? (
         <section className="grid lg:grid-cols-2 lg:gap-3 xl:grid-cols-3">
           {page.members.map((member) => {
-            const displayName = member.nickname || member.username;
+            const displayName = member.nickname?.trim() || member.username;
             return (
               <GooseLink
                 key={member.id}
