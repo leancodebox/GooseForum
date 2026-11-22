@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"strings"
@@ -37,6 +38,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/contentmoderationservice"
 	"github.com/leancodebox/GooseForum/app/service/httpnotifyservice"
+	"github.com/leancodebox/GooseForum/app/service/imageuploadservice"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
@@ -1067,26 +1069,53 @@ func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) componen
 	} else if settings.DefaultAvatarFile != "" {
 		files = append(files, settings.DefaultAvatarFile)
 	}
+	valid, err := fileUsage.AllAdminUploads(files)
+	if err != nil {
+		return component.FailResponseError(err)
+	}
+	if !valid {
+		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
+	}
+	ctx := context.Background()
+	if req.GinContext != nil {
+		ctx = req.GinContext.Request.Context()
+	}
+	thumbnails := make(map[string]string, len(files))
 	for _, key := range files {
-		usages, err := fileUsage.GetByFileName(key)
+		thumbnail, err := imageuploadservice.DefaultAvatar(ctx, key)
 		if err != nil {
 			return component.FailResponseError(err)
 		}
-		if !lo.ContainsBy(usages, func(usage fileUsage.Entity) bool { return usage.TargetType == fileUsage.TargetAdminUpload }) {
-			return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
+		if key != thumbnail {
+			thumbnails[key] = thumbnail
 		}
 	}
-	response := savePageConfig(pageConfig.SiteSettings, settings, hotdataserve.ClearSiteSettingsConfigCache)
-	if response.Data.Code != component.SUCCESS {
-		return response
+	normalized := make(map[string]bool)
+	for i, option := range settings.AvatarPool {
+		file := option.File
+		if thumbnail, ok := thumbnails[file]; ok {
+			file = thumbnail
+		}
+		if normalized[file] {
+			return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
+		}
+		normalized[file] = true
+		settings.AvatarPool[i].File = file
 	}
+	if thumbnail, ok := thumbnails[settings.DefaultAvatarFile]; ok {
+		settings.DefaultAvatarFile = thumbnail
+	}
+	if err := pageConfig.SaveSiteConfig(settings); err != nil {
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
+	hotdataserve.ClearSiteSettingsConfigCache()
 	if err := oauthservice.ReloadCurrentProviders(); err != nil {
 		return component.FailResponseError(err)
 	}
 	if err := oidcproviderservice.ReloadDefault(); err != nil {
 		slog.Error("reload OIDC provider after site settings update", "err", err)
 	}
-	return response
+	return component.SuccessResponseCode(component.DataMap{"avatarFiles": thumbnails}, component.MessageOperationSuccess, nil)
 }
 
 func GetSiteChrome(req component.BetterRequest[component.Null]) component.Response {

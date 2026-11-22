@@ -51,6 +51,43 @@ func SaveConfig(pageType string, config string) error {
 	return builder().Save(&entity).Error
 }
 
+// SaveSiteConfig preserves avatar settings omitted by older clients. Compare-and-swap
+// also protects a concurrent pool change between reading and writing the site settings.
+func SaveSiteConfig(settings SiteSettingsConfig) error {
+	for range 3 {
+		var row Entity
+		err := builder().Where("page_type = ?", SiteSettings).First(&row).Error
+		next := settings
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			row = Entity{PageType: SiteSettings, Config: jsonopt.Encode(next)}
+			result := builder().Clauses(clause.OnConflict{DoNothing: true}).Create(&row)
+			if result.Error != nil || result.RowsAffected == 1 {
+				return result.Error
+			}
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		if next.AvatarPool == nil {
+			previous, err := jsonopt.DecodeE[SiteSettingsConfig](row.Config)
+			if err != nil {
+				return err
+			}
+			if previous.AvatarPool != nil {
+				next.AvatarPool = previous.AvatarPool
+				next.DisableDefaultAvatar = previous.DisableDefaultAvatar
+				next.DefaultAvatarFile = ""
+			}
+		}
+		saved, err := CompareAndSwapConfig(row, jsonopt.Encode(next))
+		if err != nil || saved {
+			return err
+		}
+	}
+	return errors.New("site settings changed concurrently")
+}
+
 // CompareAndSwapConfig updates one configuration only when it has not changed
 // since the caller read it. This prevents runtime status updates from
 // overwriting concurrent administrator changes.

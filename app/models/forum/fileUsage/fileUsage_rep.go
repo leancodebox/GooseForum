@@ -15,6 +15,20 @@ func CreateIfAbsent(entity *Entity) error {
 	return builder().Clauses(clause.OnConflict{DoNothing: true}).Create(entity).Error
 }
 
+// AllAdminUploads checks a distinct set of keys without loading individual usage rows.
+func AllAdminUploads(keys []string) (bool, error) {
+	for len(keys) > 0 {
+		n := min(len(keys), 500)
+		var count int64
+		err := builder().Where("target_type = ? AND file_name IN ?", TargetAdminUpload, keys[:n]).Distinct("file_name").Count(&count).Error
+		if err != nil || count != int64(n) {
+			return false, err
+		}
+		keys = keys[n:]
+	}
+	return true, nil
+}
+
 func GetByFileName(fileName string) ([]Entity, error) {
 	if fileName == "" {
 		return []Entity{}, nil

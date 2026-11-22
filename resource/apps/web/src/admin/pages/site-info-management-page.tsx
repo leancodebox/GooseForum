@@ -85,7 +85,9 @@ export function SiteInfoManagementPage({
     if (uploadingAvatar || saving || missingSelection) return;
     setSaving(true);
     try {
-      await api.settings.saveSite({ ...form, defaultAvatarFile: "", avatarPool: pool });
+      const result = await api.settings.saveSite({ ...form, defaultAvatarFile: "", avatarPool: pool });
+      const files = result?.avatarFiles;
+      if (files && Object.keys(files).length) updatePool(options => options.map(option => ({ ...option, file: files[option.file] ?? option.file })));
       toast.success(text("saved"));
     } catch (r) {
       toast.error(errorMessage(r, text("saveFailed")));
@@ -296,7 +298,7 @@ export function SiteInfoManagementPage({
                   <div className="grid grid-cols-3 gap-x-2 gap-y-4 min-[400px]:grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
                     {options.map(({ file, enabled: checked }, index) => <div key={file} className="relative grid justify-items-center gap-1">
                       <button type="button" aria-pressed={checked} aria-label={text(builtin ? "builtinAvatars" : "customAvatars") + " " + (index + 1)} onClick={() => updatePool(items => items.map(item => item.file === file ? { ...item, enabled: !item.enabled } : item))} className="relative size-16 rounded-full p-1 outline-offset-2 aria-pressed:ring-2 aria-pressed:ring-primary">
-                        <img src={builtin ? file : `/file/img/${file}`} alt="" className="size-full rounded-full bg-muted object-cover" />
+                        <img loading="lazy" decoding="async" src={builtin ? file : `/file/img/${file}`} alt="" className="size-full rounded-full bg-muted object-cover" />
                         {checked && <span aria-hidden="true" className="absolute bottom-0 right-0 grid size-5 place-items-center rounded-full bg-primary text-xs text-primary-foreground">✓</span>}
                       </button>
                       {!builtin && <Button type="button" size="sm" variant="ghost" onClick={() => updatePool(items => items.filter(item => item.file !== file))}>{text("removeAvatar")}</Button>}

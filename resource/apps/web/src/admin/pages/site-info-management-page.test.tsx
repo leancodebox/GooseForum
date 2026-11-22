@@ -9,7 +9,7 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 it("saves the uploaded object key and preserves it while assignment is disabled", async () => {
   vi.stubGlobal("ResizeObserver", class { observe() {} unobserve() {} disconnect() {} });
-  const saveSite = vi.fn().mockResolvedValue(undefined);
+  const saveSite = vi.fn().mockResolvedValue({ avatarFiles: { "2026/one.png": "avatars/default/v1/one.png" } });
   const uploadImage = vi.fn().mockImplementation(async (file: File) => ({ objectName: "2026/" + file.name }));
   const api = { settings: { site: async () => ({ defaultAvatarFile: "legacy.png" }), saveSite }, pages: { uploadImage } } as unknown as GooseAdminApi;
   const user = userEvent.setup();
@@ -24,6 +24,8 @@ it("saves the uploaded object key and preserves it while assignment is disabled"
   expect(saveSite).toHaveBeenCalledWith(expect.objectContaining({ disableDefaultAvatar: true, avatarPool: expect.arrayContaining([
     { file: "legacy.png", enabled: true }, { file: "2026/one.png", enabled: true }, { file: "2026/two.png", enabled: true },
   ]) }));
+  const preview = screen.getByRole("button", { name: text.customAvatars + " 2" }).querySelector("img");
+  expect(preview?.getAttribute("src")).toBe("/file/img/avatars/default/v1/one.png");
   await user.click(toggle);
   for (const button of screen.getAllByRole("button", { name: text.removeAvatar })) await user.click(button);
   expect(screen.getByRole("alert").textContent).toBe(text.selectAvatar);

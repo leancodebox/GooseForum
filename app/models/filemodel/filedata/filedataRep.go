@@ -110,8 +110,8 @@ func getFileMetadataByNameAndStatus(ctx context.Context, name string, status str
 	err := builder().WithContext(ctx).
 		Select("id, name, assert_type, CASE WHEN file_size > 0 THEN file_size ELSE LENGTH(content) END AS file_size, storage_driver, storage_status, user_id, created_at, updated_at").
 		Where(queryopt.Eq(fieldName, name)).Where("storage_status = ?", status).First(&entity).Error
-	if err != nil || entity.Id == 0 {
-		return nil, errors.New("file not found")
+	if err != nil {
+		return nil, err
 	}
 	return &entity, nil
 }

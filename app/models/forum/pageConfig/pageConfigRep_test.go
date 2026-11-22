@@ -34,3 +34,35 @@ func TestCompareAndSwapConfigRejectsStaleValue(t *testing.T) {
 		t.Fatalf("config = %s", got)
 	}
 }
+
+func TestLegacySiteSavePreservesPoolAndExplicitEmptyClearsIt(t *testing.T) {
+	if err := dbconnect.Connect().AutoMigrate(&Entity{}); err != nil {
+		t.Fatal(err)
+	}
+	old := GetByPageType(SiteSettings)
+	t.Cleanup(func() {
+		if old.Id == 0 {
+			builder().Where("page_type = ?", SiteSettings).Delete(&Entity{})
+		} else if err := SaveConfig(SiteSettings, old.Config); err != nil {
+			t.Error(err)
+		}
+	})
+	initial := SiteSettingsConfig{DisableDefaultAvatar: true, AvatarPool: []AvatarOption{{File: "example.png", Enabled: true}}}
+	if err := SaveSiteConfig(initial); err != nil {
+		t.Fatal(err)
+	}
+	if err := SaveSiteConfig(SiteSettingsConfig{SiteName: "updated"}); err != nil {
+		t.Fatal(err)
+	}
+	got := GetConfigByPageType(SiteSettings, SiteSettingsConfig{})
+	if !got.DisableDefaultAvatar || len(got.AvatarPool) != 1 || got.AvatarPool[0] != initial.AvatarPool[0] || got.SiteName != "updated" {
+		t.Fatalf("legacy save: %+v", got)
+	}
+	got.AvatarPool = []AvatarOption{}
+	if err := SaveSiteConfig(got); err != nil {
+		t.Fatal(err)
+	}
+	if pool := GetConfigByPageType(SiteSettings, SiteSettingsConfig{}).AvatarPool; pool == nil || len(pool) != 0 {
+		t.Fatalf("explicit empty pool = %#v", pool)
+	}
+}

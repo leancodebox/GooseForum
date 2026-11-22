@@ -111,10 +111,11 @@ func Save(ctx context.Context, userID uint64, data []byte, filename string, admi
 		return nil, err
 	}
 	if adminUpload {
-		fileusageservice.AddAdminUpload(userID, entity.Name)
-		return entity, nil
+		err = fileusageservice.AddAdminUpload(userID, entity.Name)
+	} else {
+		err = fileusageservice.AddUploadOwner(userID, entity.Name)
 	}
-	if err := fileusageservice.AddUploadOwner(userID, entity.Name); err != nil {
+	if err != nil {
 		cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 		cleanupErr := filestorage.Delete(cleanupCtx, entity.Name)
 		cancel()

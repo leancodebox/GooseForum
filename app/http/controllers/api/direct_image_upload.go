@@ -114,7 +114,10 @@ func completeDirectImageUpload(c *gin.Context, adminUpload bool) {
 		return
 	}
 	if adminUpload {
-		fileusageservice.AddAdminUpload(userId, metadata.Name)
+		if err := fileusageservice.AddAdminUpload(userId, metadata.Name); err != nil {
+			c.JSON(http.StatusInternalServerError, component.FailDataCode(component.MessageUploadSaveFailed, nil))
+			return
+		}
 	} else if err := fileusageservice.AddUploadOwner(userId, metadata.Name); err != nil {
 		cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(c.Request.Context()), 5*time.Second)
 		cleanupErr := filestorage.Delete(cleanupCtx, metadata.Name)

@@ -1,6 +1,7 @@
 package fileusageservice
 
 import (
+	"errors"
 	"log/slog"
 	"net/url"
 	"path"
@@ -35,20 +36,12 @@ func ReplaceAvatar(userId uint64, fileNames []string) {
 	replace(fileUsage.TargetUser, userId, []string{fileUsage.UsageAvatar}, userId, namesToUsages(fileNames, fileUsage.UsageAvatar))
 }
 
-func AddAdminUpload(userId uint64, fileName string) {
+func AddAdminUpload(userID uint64, fileName string) error {
 	name := fileNameFromURL(fileName)
 	if name == "" {
-		return
+		return errors.New("missing admin upload name")
 	}
-	if err := fileUsage.Create(&fileUsage.Entity{
-		FileName:   name,
-		TargetType: fileUsage.TargetAdminUpload,
-		TargetId:   userId,
-		UsageType:  fileUsage.UsageAdminUpload,
-		UserId:     userId,
-	}); err != nil {
-		slog.Error("create admin upload usage failed", "userId", userId, "fileName", name, "err", err)
-	}
+	return fileUsage.CreateIfAbsent(&fileUsage.Entity{FileName: name, TargetType: fileUsage.TargetAdminUpload, TargetId: userID, UsageType: fileUsage.UsageAdminUpload, UserId: userID})
 }
 
 func AddUploadOwner(userID uint64, fileName string) error {

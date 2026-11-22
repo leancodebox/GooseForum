@@ -348,7 +348,7 @@ export interface GooseAdminApi {
   }
   settings: {
     site(): Promise<SiteSettings>
-    saveSite(settings: SiteSettings): Promise<unknown>
+    saveSite(settings: SiteSettings): Promise<{ avatarFiles?: Record<string, string> }>
     chrome(): Promise<SiteChromeConfig>
     saveChrome(settings: SiteChromeConfig): Promise<unknown>
     mail(): Promise<MailSettings>
