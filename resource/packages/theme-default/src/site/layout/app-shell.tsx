@@ -793,10 +793,7 @@ function NavList({
               className={cn(
                 "w-full justify-start gap-2 text-[13px] leading-[18.5714px] transition-none",
                 compact ? "h-7" : "h-8",
-                "focus-visible:ring-2",
-                item.active
-                  ? "bg-primary/10 text-foreground hover:bg-primary/15 hover:text-foreground [&>svg]:text-primary"
-                  : "text-foreground/75 hover:bg-accent hover:text-foreground",
+                "sidebar-nav-link text-foreground/75 hover:bg-accent hover:text-foreground focus-visible:ring-2",
               )}
             >
               <GooseLink

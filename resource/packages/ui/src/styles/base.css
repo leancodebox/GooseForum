@@ -7,6 +7,12 @@
 [data-sliding-indicator="true"] [data-slot="tabs-trigger"]::after {
   opacity: 0 !important;
 }
+.sidebar-nav-link[aria-current="page"] {
+  @apply bg-primary/10 text-primary;
+}
+.sidebar-nav-link[aria-current="page"]:hover {
+  @apply bg-primary/15;
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
