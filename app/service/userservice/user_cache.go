@@ -16,6 +16,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/permission"
+	"gorm.io/gorm"
 )
 
 const (
@@ -93,20 +94,22 @@ var (
 )
 
 func GetUserInfo(userID uint64) (UserInfo, bool) {
+	user, err := GetUserInfoWithError(userID)
+	return user, err == nil
+}
+
+// GetUserInfoWithError preserves lookup failures for callers that distinguish missing users.
+func GetUserInfoWithError(userID uint64) (UserInfo, error) {
 	if userID == 0 {
-		return UserInfo{}, false
+		return UserInfo{}, gorm.ErrRecordNotFound
 	}
-	user, err := userInfoCache.GetOrLoadE(userInfoKey(userID), func() (UserInfo, error) {
+	return userInfoCache.GetOrLoadE(userInfoKey(userID), func() (UserInfo, error) {
 		entity, err := users.Get(userID)
-		if err != nil || entity.Id == 0 {
-			return UserInfo{}, errUserNotFound
+		if err != nil {
+			return UserInfo{}, err
 		}
 		return userInfoFromEntity(entity), nil
 	}, userInfoTTL)
-	if err != nil {
-		return UserInfo{}, false
-	}
-	return user, true
 }
 
 func GetUserRoleId(userID uint64) (uint64, bool) {

@@ -12,6 +12,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/unreadservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/samber/lo"
 	"gorm.io/gorm"
 )
@@ -37,7 +38,7 @@ func SendMessage(senderId, peerId uint64, content string, msgType int8) (uint64,
 		return 0, 0, errors.New("cannot send message to yourself")
 	}
 
-	if _, err := users.GetIdentity(peerId); err != nil {
+	if _, err := userservice.GetUserInfoWithError(peerId); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return 0, 0, ErrRecipientNotFound
 		}
