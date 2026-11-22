@@ -2,6 +2,8 @@ package api
 
 import (
 	"errors"
+	"github.com/gin-gonic/gin"
+	"net/http/httptest"
 	"slices"
 	"testing"
 
@@ -173,13 +175,19 @@ func TestPageConfigSaveRefreshesWarmCache(t *testing.T) {
 	if got := hotdataserve.GetSiteSettingsConfigCache(); got.SiteName != before.SiteName {
 		t.Fatalf("warm config = %+v", got)
 	}
-	after := pageConfig.SiteSettingsConfig{SiteName: "after-cache-save"}
+	after := pageConfig.SiteSettingsConfig{SiteName: "after-cache-save", DefaultLocale: "it"}
 	response := savePageConfig(pageConfig.SiteSettings, after, hotdataserve.ClearSiteSettingsConfigCache)
 	if response.Data.Code != component.SUCCESS {
 		t.Fatalf("config save failed: %+v", response)
 	}
 	if got := hotdataserve.GetSiteSettingsConfigCache(); got.SiteName != after.SiteName {
 		t.Fatalf("config remained stale after save: %+v", got)
+	}
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest("GET", "/", nil)
+	c.Request.Header.Set("Accept-Language", "fr-FR")
+	if lang := component.RequestLang(c); lang != "it" {
+		t.Fatalf("site default after save = %q", lang)
 	}
 	const hook = "test:reject-page-config-update"
 	if err := db.Callback().Update().Before("gorm:update").Register(hook, func(tx *gorm.DB) {

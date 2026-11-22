@@ -676,6 +676,91 @@ test('uses matching hover menus for theme and language', async ({ page }, testIn
   await expect(system).not.toBeVisible()
 })
 
+test('checks the browser language by default and remembers a manual selection', async ({ page }) => {
+  await page.route('**/__goose_page/**', route => {
+    const search = new URL(route.request().url()).search
+    return route.fulfill({ json: { ...homePage, url: '/' + search } })
+  })
+  await page.goto('/?keep=1')
+  await page.getByRole('button', { name: 'Switch language' }).click()
+  await expect(page.getByRole('menuitemradio', { name: 'English' })).toHaveAttribute('aria-checked', 'true')
+  await expect.poll(() => page.evaluate(() => document.cookie)).not.toMatch(/(?:^|; )lang=/)
+  await page.getByRole('menuitemradio', { name: 'Italiano' }).click()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'it')
+  await expect.poll(() => page.evaluate(() => document.cookie)).toContain('lang=it')
+  await page.reload()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'it')
+  await page.getByRole('button', { name: 'Cambia lingua' }).click()
+  await expect(page.getByRole('menuitemradio', { name: 'Italiano' })).toHaveAttribute('aria-checked', 'true')
+  await expect(page).toHaveURL(/keep=1/)
+})
+
+test('returns to the current URL after switching language and signing out', async ({ page }) => {
+  await page.route('**/__goose_page/**', route => route.fulfill({ json: {
+    ...homePage, url: '/' + new URL(route.request().url()).search,
+    layout: { ...homePage.layout, viewer: adminPage.layout.viewer },
+  } }))
+  await page.route('**/api/logout', route => route.fulfill({ json: { code: 0, result: true } }))
+  await page.goto('/?lang=ja&keep=1#top')
+  await page.getByRole('button', { name: '言語を切り替え' }).click()
+  await page.getByRole('menuitemradio', { name: 'Italiano' }).click()
+  await page.getByRole('button', { name: 'admin', exact: true }).click()
+  await Promise.all([
+    page.waitForEvent('framenavigated', frame => frame === page.mainFrame()),
+    page.getByRole('menuitem', { name: 'Esci' }).click(),
+  ])
+  await expect(page).toHaveURL(/\/\?keep=1#top$/)
+  await expect(page.locator('html')).toHaveAttribute('lang', 'it')
+})
+
+test('loads the destination topic dictionary in the URL language during SPA navigation', async ({ page }) => {
+  await page.addInitScript(() => performance.setResourceTimingBufferSize(4000))
+  await page.goto('/')
+  await expect(page.getByText('No topics yet')).toBeVisible()
+  await page.route('**/__goose_page/p/test/60*', route => route.fulfill({
+    json: { ...topicPage, url: '/p/test/60?lang=ja' },
+  }))
+  await page.evaluate(() => {
+    history.pushState(history.state, '', '/p/test/60?lang=ja')
+    window.dispatchEvent(new PopStateEvent('popstate', { state: history.state }))
+  })
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ja')
+  await expect(page.getByText('Original body', { exact: true }).first()).toBeVisible()
+  const prepared = await page.evaluate(async () => {
+    const loader = performance.getEntriesByType('resource').find(entry => entry.name.includes('/runtime/src/i18n/loader.ts'))
+    if (!loader) throw new Error('Vite translation loader was not loaded')
+    const { cachedGooseResources } = await import(/* @vite-ignore */ loader.name)
+    const resources = cachedGooseResources()
+    return { japanese: Boolean(resources.ja?.topic), english: Boolean(resources.en?.topic) }
+  })
+  expect(prepared).toEqual({ japanese: true, english: false })
+})
+
+test('requests role and permission labels in the page language', async ({ page }) => {
+  const requests: string[] = []
+  for (const endpoint of ['role-list', 'get-permission-list']) {
+    await page.route('**/api/admin/' + endpoint + '*', route => {
+      requests.push(endpoint + new URL(route.request().url()).search)
+      return route.fulfill({ json: { code: 0, result: endpoint === 'role-list' ? { list: [] } : [] } })
+    })
+  }
+  await page.goto('/admin/roles?lang=ja')
+  await expect.poll(() => requests).toEqual(expect.arrayContaining(['role-list?lang=ja', 'get-permission-list?lang=ja']))
+})
+
+test('uses the site default in the admin when browser languages are unsupported', async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(navigator, 'languages', { get: () => ['fr-FR'] }))
+  await page.route('**/__goose_page/**', route => route.fulfill({ json: {
+    ...adminPage, layout: { ...adminPage.layout, site: { ...adminPage.layout.site, defaultLocale: 'it' } },
+  } }))
+  await page.goto('/admin')
+  await expect(page.locator('html')).toHaveAttribute('lang', 'it')
+  await page.getByRole('button', { name: 'Cambia lingua' }).click()
+  await expect(page.getByRole('menuitemradio', { name: 'Italiano' })).toHaveAttribute('aria-checked', 'true')
+  await page.getByRole('menuitemradio', { name: '日本語' }).click()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ja')
+})
+
 test('follows the system theme and remembers explicit preferences across reloads', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' })
   await page.goto('/?lang=en')
@@ -1706,6 +1791,22 @@ for (const selection of ['click', 'keyboard'] as const) {
     await page.getByRole('radio', { name: 'Markdown', exact: true }).click()
     await expect(page.getByPlaceholder('Enter body text, Markdown supported; paste or drag images here'))
       .toHaveValue('Hello [mention user="12"]@alice[/mention] continues\n\nNext line')
+  })
+}
+
+for (const mode of ['login', 'register']) {
+  test(`opens the language popover on the ${mode} form`, async ({ page }) => {
+    await page.route('**/__goose_page/login**', route => route.fulfill({ json: {
+      ...homePage, component: 'auth.login',
+      props: { initialMode: mode, redirectUrl: '/', oauthProviders: [] }, url: '/login',
+    } }))
+    await page.goto('/login')
+    await page.getByRole('button', { name: 'Switch language' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Switch language' })
+    await expect(dialog.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'true')
+    await dialog.getByRole('button', { name: '日本語' }).click()
+    await expect(dialog).toBeHidden()
+    await expect(page.locator('html')).toHaveAttribute('lang', 'ja')
   })
 }
 

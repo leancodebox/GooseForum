@@ -117,7 +117,8 @@ type AvatarOption struct {
 }
 
 type SiteSettingsConfig struct {
-	AvatarPool []AvatarOption `json:"avatarPool"`
+	DefaultLocale string         `json:"defaultLocale"`
+	AvatarPool    []AvatarOption `json:"avatarPool"`
 	// 站点基本信息
 	SiteName             string `json:"siteName"`
 	DisableDefaultAvatar bool   `json:"disableDefaultAvatar"`

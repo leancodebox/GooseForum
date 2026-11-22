@@ -4,6 +4,7 @@ import i18next, { type i18n, type Resource } from "i18next";
 import { I18nextProvider, initReactI18next } from "react-i18next";
 import { supportedLocales, type Locale } from "@gooseforum/client/i18n/locale";
 import {
+  goosePageNamespaces,
   cachedGooseResources,
   loadedGooseNamespaces,
   prepareGooseTranslations,
@@ -41,10 +42,12 @@ export function createGooseI18n(
 
 export function GooseI18nProvider({
   locale,
+  component,
   initialResources,
   children,
 }: {
   locale: Locale;
+  component?: string;
   initialResources?: Resource;
   children: ReactNode;
 }) {
@@ -75,7 +78,7 @@ export function GooseI18nProvider({
   );
   useEffect(() => {
     let cancelled = false;
-    void prepareGooseTranslations(locale, loadedGooseNamespaces())
+    void prepareGooseTranslations(locale, component ? goosePageNamespaces(component) : loadedGooseNamespaces())
       .then(() => {
         if (!cancelled && instance.language !== locale)
           return instance.changeLanguage(locale);
@@ -89,6 +92,6 @@ export function GooseI18nProvider({
     return () => {
       cancelled = true;
     };
-  }, [instance, locale]);
+  }, [instance, locale, component]);
   return <I18nextProvider i18n={instance}>{children}</I18nextProvider>;
 }

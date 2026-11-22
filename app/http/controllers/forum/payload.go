@@ -160,6 +160,7 @@ type UnreadStatusPayload struct {
 }
 
 type SitePayload struct {
+	DefaultLocale string `json:"defaultLocale"`
 	Name          string `json:"name"`
 	Description   string `json:"description"`
 	Logo          string `json:"logo"`
@@ -700,6 +701,7 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 
 	return LayoutPayload{
 		Site: SitePayload{
+			DefaultLocale: i18n.Normalize(siteConfig.DefaultLocale),
 			Name:          siteConfig.SiteName,
 			Description:   siteConfig.SiteDescription,
 			Logo:          siteConfig.SiteLogo,

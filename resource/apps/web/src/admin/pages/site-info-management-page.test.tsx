@@ -23,6 +23,7 @@ it("saves the uploaded object key and preserves it while assignment is disabled"
   const user = userEvent.setup();
   render(<SiteInfoManagementPage api={api} text={key => text[key]} />);
   const toggle = await screen.findByRole("switch", { name: text.assignAvatar });
+  await user.selectOptions(screen.getByLabelText(text.defaultLocale), "ja");
   const manage = screen.getByRole("button", { name: text.manageAvatars });
   expect(manage.getAttribute("aria-expanded")).toBe("false");
   expect(screen.queryByLabelText(text.uploadAvatars)).toBeNull();
@@ -39,7 +40,7 @@ it("saves the uploaded object key and preserves it while assignment is disabled"
   await user.click(manage);
   await user.click(toggle);
   await user.click(screen.getByRole("button", { name: text.save }));
-  expect(saveSite).toHaveBeenCalledWith(expect.objectContaining({ disableDefaultAvatar: true, avatarPool: expect.arrayContaining([
+  expect(saveSite).toHaveBeenCalledWith(expect.objectContaining({ defaultLocale: "ja", disableDefaultAvatar: true, avatarPool: expect.arrayContaining([
     { file: "legacy.png", enabled: true }, { file: "2026/one.webp", enabled: true }, { file: "2026/two.webp", enabled: true },
   ]) }));
   const preview = screen.getByRole("button", { name: text.customAvatars + " 2" }).querySelector("img");

@@ -13,23 +13,34 @@ import type { GooseFlashType } from "./runtime";
 const flashStorageKey = "goose:flash-messages";
 const themeStorageKey = "goose-site-theme";
 
-export function detectBrowserLocale(): Locale {
+export function readLocalePreference(url = new URL(window.location.href)): Locale | "browser" {
   const queryLocale = normalizeLocale(
-    new URL(window.location.href).searchParams.get("lang"),
+    url.searchParams.get("lang"),
   );
   if (queryLocale) return queryLocale;
   const cookieLocale = normalizeLocale(readCookie("lang"));
-  if (cookieLocale) return cookieLocale;
+  return cookieLocale ?? "browser";
+}
+
+export function detectBrowserLocale(preference = readLocalePreference(), defaultLocale = document.documentElement.dataset.defaultLocale): Locale {
+  if (preference !== "browser") return preference;
   for (const language of navigator.languages || [navigator.language]) {
     const locale = normalizeLocale(language);
     if (locale) return locale;
   }
-  return supportedLocales[0];
+  return normalizeLocale(defaultLocale) ?? supportedLocales[0];
 }
 
-export function applyBrowserLocale(locale: Locale) {
+export function applyBrowserLocale(locale: Locale, preference: Locale | "browser" = locale) {
   document.documentElement.lang = locale;
-  document.cookie = `lang=${locale}; path=/; max-age=31536000; samesite=lax`;
+  const url = new URL(window.location.href);
+  if (url.searchParams.has("lang")) {
+    url.searchParams.delete("lang");
+    history.replaceState(history.state, "", url);
+  }
+  document.cookie = preference === "browser"
+    ? "lang=; path=/; max-age=0; samesite=lax"
+    : `lang=${locale}; path=/; max-age=31536000; samesite=lax`;
 }
 
 export function queueBrowserFlash(
@@ -106,6 +117,7 @@ export function prepareBrowserDocument(
   payload: PagePayload,
   preferredTheme?: ThemePayload["current"],
 ) {
+  if (payload.layout.site?.defaultLocale) document.documentElement.dataset.defaultLocale = payload.layout.site.defaultLocale;
   updateDocumentMetadata(payload);
   document.documentElement.lang ||= "zh-CN";
   applyBrowserTheme(
@@ -137,6 +149,11 @@ function readCookie(name: string) {
     .split("; ")
     .find((item) => item.startsWith(prefix))
     ?.slice(prefix.length);
-  return value ? decodeURIComponent(value) : undefined;
+  if (!value) return undefined;
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return undefined;
+  }
 }
 export { createThemeTransition } from "./theme-transition";

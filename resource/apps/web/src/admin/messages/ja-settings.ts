@@ -2,6 +2,7 @@
 import en from "./en-settings";
 export default {
   ...en,
+  defaultLocale: "サイトの既定の言語",
   manageAvatars: "アバターを管理",
   avatarEnabledCount: "有効 {count} 件",
   avatarEnabled: "有効",

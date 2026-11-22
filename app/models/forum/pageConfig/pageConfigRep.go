@@ -69,12 +69,15 @@ func SaveSiteConfig(settings SiteSettingsConfig) error {
 		if err != nil {
 			return err
 		}
-		if next.AvatarPool == nil {
+		if next.AvatarPool == nil || next.DefaultLocale == "" {
 			previous, err := jsonopt.DecodeE[SiteSettingsConfig](row.Config)
 			if err != nil {
 				return err
 			}
-			if previous.AvatarPool != nil {
+			if next.DefaultLocale == "" {
+				next.DefaultLocale = previous.DefaultLocale
+			}
+			if next.AvatarPool == nil && previous.AvatarPool != nil {
 				next.AvatarPool = previous.AvatarPool
 				next.DisableDefaultAvatar = previous.DisableDefaultAvatar
 				next.DefaultAvatarFile = ""

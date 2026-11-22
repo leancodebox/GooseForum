@@ -29,6 +29,7 @@ import {
 } from "@gooseforum/runtime";
 import {
   applyBrowserLocale,
+  readLocalePreference,
   createThemeTransition,
   applyBrowserTheme,
   detectBrowserTheme,
@@ -41,7 +42,7 @@ import {
   queueBrowserFlash,
 } from "@gooseforum/runtime/browser-host";
 import type { PageSource } from "@gooseforum/runtime/page-source";
-import { GooseI18nProvider, prepareGooseTranslations, goosePageNamespaces, loadedGooseNamespaces } from "@gooseforum/runtime/i18n";
+import { GooseI18nProvider, prepareGooseTranslations, goosePageNamespaces } from "@gooseforum/runtime/i18n";
 
 const Toaster = lazy(() => import("@gooseforum/ui/components/sonner").then(module => ({ default: module.Toaster })));
 
@@ -98,6 +99,8 @@ export function SiteApp({
     initialLocale ?? detectBrowserLocale(),
   );
   const localeRef = useRef(locale);
+  const activeComponent = useRef(initialPage?.component);
+  const [localePreference, setLocalePreference] = useState(readLocalePreference);
   const beginLocaleRequest = useLatestRequest();
   const [theme, setTheme] = useState(() =>
     initialTheme ?? detectBrowserTheme(),
@@ -163,15 +166,21 @@ export function SiteApp({
       try {
         const nextPage = await pageSource.load(url, request.signal);
         if (request.signal.aborted) return;
-        const language = localeRef.current;
+        const nextUrl = browserUrlForPage(nextPage.url, url);
+        const targetLanguage = () => initialLocale ? localeRef.current : detectBrowserLocale(
+          readLocalePreference(nextUrl), nextPage.layout.site.defaultLocale,
+        );
+        let language = targetLanguage();
         await Promise.all([
           prepareGoosePage(nextPage.component),
           prepareGooseTranslations(language, goosePageNamespaces(nextPage.component)),
         ]);
-        if (language !== localeRef.current) await prepareGooseTranslations(localeRef.current, goosePageNamespaces(nextPage.component));
+        while (!request.signal.aborted && language !== targetLanguage()) {
+          language = targetLanguage();
+          await prepareGooseTranslations(language, goosePageNamespaces(nextPage.component));
+        }
         if (request.signal.aborted) return;
 
-        const nextUrl = browserUrlForPage(nextPage.url, url);
         let nextHistoryEntry =
           targetHistoryEntry ||
           activeHistoryEntry.current ||
@@ -210,6 +219,7 @@ export function SiteApp({
         activeHistoryEntry.current = nextHistoryEntry;
         activeHistoryIndex.current = nextHistoryIndex;
 
+        activeComponent.current = nextPage.component;
         prepareDocument(nextPage, themeRef.current);
         setError(undefined);
         pendingScroll.current = scrollAction === "preserve"
@@ -221,6 +231,9 @@ export function SiteApp({
               hash: url.hash,
             };
         startTransition(() => {
+          localeRef.current = language;
+          setLocaleState(language);
+          setLocalePreference(readLocalePreference(nextUrl));
           rememberPage(nextPage);
           setPage(nextPage);
         });
@@ -233,7 +246,7 @@ export function SiteApp({
         }
       }
     },
-    [pageSource, rememberPage],
+    [pageSource, rememberPage, initialLocale],
   );
 
   const navigate = useCallback(
@@ -269,20 +282,36 @@ export function SiteApp({
     [],
   );
 
-  const setLocale = useCallback(async (nextLocale: Locale) => {
+  const setLocale = useCallback(async (preference: Locale | "browser", persist = true) => {
+    const nextLocale = detectBrowserLocale(preference);
     const isCurrent = beginLocaleRequest();
     try {
-      await prepareGooseTranslations(nextLocale, loadedGooseNamespaces());
-      // A concurrent route load may have added another namespace in the meantime.
-      await prepareGooseTranslations(nextLocale, loadedGooseNamespaces());
+      let component;
+      do {
+        component = activeComponent.current;
+        await prepareGooseTranslations(nextLocale, goosePageNamespaces(component ?? ""));
+      } while (isCurrent() && component !== activeComponent.current);
       if (!isCurrent()) return;
       localeRef.current = nextLocale;
-      applyBrowserLocale(nextLocale);
+      if (persist) applyBrowserLocale(nextLocale, preference);
+      setLocalePreference(preference);
       setLocaleState(nextLocale);
     } catch (reason) {
       if (isCurrent()) queueBrowserFlash(reason instanceof Error ? reason.message : String(reason), "error");
     }
   }, [beginLocaleRequest]);
+
+  useEffect(() => {
+    const update = () => {
+      const preference = readLocalePreference();
+      if (preference !== localePreference || detectBrowserLocale(preference) !== localeRef.current) {
+        void setLocale(preference, false);
+      }
+    };
+    if (!initialLocale) update();
+    window.addEventListener("languagechange", update);
+    return () => window.removeEventListener("languagechange", update);
+  }, [localePreference, setLocale, initialLocale, page?.url, page?.layout.site?.defaultLocale]);
 
   const setThemePreference = useCallback((preference: BrowserThemePreference) => {
     saveBrowserThemePreference(preference);
@@ -370,6 +399,7 @@ export function SiteApp({
         activeRequest.current = null;
         setPageLoad(null);
         setError(undefined);
+        activeComponent.current = cached.component;
         prepareDocument(cached, themeRef.current);
         pendingScroll.current = {
           page: cached,
@@ -406,7 +436,10 @@ export function SiteApp({
   const runtime = useMemo<GooseRuntime>(
     () => ({
       api: pageSource.api,
-      currentUrl: page?.url ?? browserHref(),
+      get currentUrl() {
+        const { pathname, search, hash } = window.location;
+        return pathname + search + hash;
+      },
       isNavigating,
       theme,
       themePreference,
@@ -458,7 +491,7 @@ export function SiteApp({
   ) : null;
 
   return (
-    <GooseI18nProvider locale={locale} initialResources={initialResources}>
+    <GooseI18nProvider component={page?.component} locale={locale} initialResources={initialResources}>
       <GooseRuntimeProvider runtime={runtime}>
         {pageLoad === "navigation" && <NavigationProgress />}
         {!page && error ? (

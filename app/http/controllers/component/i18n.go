@@ -3,6 +3,8 @@ package component
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"golang.org/x/text/language"
 )
 
 const requestLangContextKey = "goose:request-lang"
@@ -17,15 +19,22 @@ func RequestLang(c *gin.Context) string {
 			return lang
 		}
 	}
-	lang := c.Query("lang")
+	lang := i18n.Supported(c.Query("lang"))
 	if lang == "" {
-		if cookie, err := c.Cookie("lang"); err == nil && cookie != "" {
-			lang = cookie
-		} else {
-			lang = c.GetHeader("Accept-Language")
+		cookie, _ := c.Cookie("lang")
+		lang = i18n.Supported(cookie)
+	}
+	if lang == "" {
+		tags, _, _ := language.ParseAcceptLanguage(c.GetHeader("Accept-Language"))
+		for _, tag := range tags {
+			if lang = i18n.Supported(tag.String()); lang != "" {
+				break
+			}
 		}
 	}
-	lang = i18n.Normalize(lang)
+	if lang == "" {
+		lang = i18n.Normalize(hotdataserve.GetSiteSettingsConfigCache().DefaultLocale)
+	}
 	c.Set(requestLangContextKey, lang)
 	return lang
 }

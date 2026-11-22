@@ -2,6 +2,7 @@
 import en from "./en-settings";
 export default {
   ...en,
+  defaultLocale: "Lingua predefinita del sito",
   manageAvatars: "Gestisci avatar",
   avatarEnabledCount: "Attivi: {count}",
   avatarEnabled: "Attivi",

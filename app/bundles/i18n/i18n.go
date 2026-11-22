@@ -47,23 +47,28 @@ func init() {
 // the primary subtag, e.g. "en-US,en;q=0.9" -> "en", and returns Fallback when
 // nothing matches. It mirrors normalizeLocale/detectLocale on the frontend.
 func Normalize(raw string) string {
+	if lang := Supported(raw); lang != "" {
+		return lang
+	}
+	return Fallback
+}
+
+// Supported returns an empty string for an unsupported language.
+func Supported(raw string) string {
 	value := strings.ToLower(strings.TrimSpace(raw))
 	if value == "" {
-		return Fallback
+		return ""
 	}
-	primary := strings.FieldsFunc(value, func(r rune) bool {
-		return r == '-' || r == '_' || r == ',' || r == ';' || r == ' '
-	})
-	if len(primary) == 0 {
-		return Fallback
+	short := value
+	if end := strings.IndexAny(value, "-_,;"); end >= 0 {
+		short = value[:end]
 	}
-	short := primary[0]
 	for _, lang := range SupportedLocales {
 		if short == lang {
 			return lang
 		}
 	}
-	return Fallback
+	return ""
 }
 
 // T returns the translation for key in the given language. lang may be any raw

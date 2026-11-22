@@ -1,18 +1,11 @@
-import type { AuthLocale } from '@gooseforum/runtime/i18n/auth'
+import { authLocales, localeLabels, type AuthLocale } from '@gooseforum/runtime/i18n/auth'
 import type { BrowserThemePreference } from '@gooseforum/runtime/browser-host'
 import { Button } from '@gooseforum/ui/components/button'
 import { RoutineIcon } from '@gooseforum/ui/components/icons/material-symbols/routine-icon'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@gooseforum/ui/components/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@gooseforum/ui/components/dropdown-menu'
 import { Separator } from '@gooseforum/ui/components/separator'
 import { SidebarTrigger } from '@gooseforum/ui/components/sidebar'
 import { ArrowLeft, Languages, Moon, Sun } from 'lucide-react'
-
-const localeLabels: Record<AuthLocale, string> = {
-  zh: '简体中文',
-  en: 'English',
-  ja: '日本語',
-  it: 'Italiano',
-}
 
 const headerLabels = {
   zh: { language: '切换语言', theme: '选择主题', light: '浅色', dark: '深色', system: '跟随系统', site: '返回站点' },
@@ -51,7 +44,11 @@ export function SiteHeader({ title, locale, themePreference, onLocaleChange, onT
       </DropdownMenu>
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm" title={labels.language} aria-label={labels.language}><Languages /></Button></DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-36"><DropdownMenuGroup>{(Object.keys(localeLabels) as AuthLocale[]).map((item) => <DropdownMenuItem key={item} data-current={locale === item} className="data-[current=true]:font-semibold data-[current=true]:text-primary" onSelect={() => onLocaleChange(item)}>{localeLabels[item]}</DropdownMenuItem>)}</DropdownMenuGroup></DropdownMenuContent>
+        <DropdownMenuContent align="end">
+          <DropdownMenuRadioGroup value={locale} onValueChange={value => onLocaleChange(value as AuthLocale)}>
+            {authLocales.map(item => <DropdownMenuRadioItem key={item} value={item}>{localeLabels[item].label}</DropdownMenuRadioItem>)}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
       </DropdownMenu>
       <Button asChild variant="ghost" size="sm" className="hidden xl:inline-flex"><a href="/"><ArrowLeft data-icon="inline-start" />{labels.site}</a></Button>
     </div>

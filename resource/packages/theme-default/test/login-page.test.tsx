@@ -219,7 +219,8 @@ describe('LoginPageView', () => {
   it('updates translations when the host changes locale', async () => {
     const { user } = renderLogin()
 
-    await user.click(screen.getByRole('radio', { name: 'EN' }))
+    await user.click(screen.getByRole('button', { name: '切换语言' }))
+    await user.click(screen.getByRole('button', { name: 'English' }))
 
     expect(await screen.findByRole('heading', { name: 'Log in to your account' })).toBeTruthy()
     expect(screen.getByLabelText('Username or email')).toBeTruthy()

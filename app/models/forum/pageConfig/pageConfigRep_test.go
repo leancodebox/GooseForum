@@ -47,7 +47,7 @@ func TestLegacySiteSavePreservesPoolAndExplicitEmptyClearsIt(t *testing.T) {
 			t.Error(err)
 		}
 	})
-	initial := SiteSettingsConfig{DisableDefaultAvatar: true, AvatarPool: []AvatarOption{{File: "example.png", Enabled: true}}}
+	initial := SiteSettingsConfig{DefaultLocale: "it", DisableDefaultAvatar: true, AvatarPool: []AvatarOption{{File: "example.png", Enabled: true}}}
 	if err := SaveSiteConfig(initial); err != nil {
 		t.Fatal(err)
 	}
@@ -55,7 +55,7 @@ func TestLegacySiteSavePreservesPoolAndExplicitEmptyClearsIt(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := GetConfigByPageType(SiteSettings, SiteSettingsConfig{})
-	if !got.DisableDefaultAvatar || len(got.AvatarPool) != 1 || got.AvatarPool[0] != initial.AvatarPool[0] || got.SiteName != "updated" {
+	if got.DefaultLocale != "it" || !got.DisableDefaultAvatar || len(got.AvatarPool) != 1 || got.AvatarPool[0] != initial.AvatarPool[0] || got.SiteName != "updated" {
 		t.Fatalf("legacy save: %+v", got)
 	}
 	got.AvatarPool = []AvatarOption{}

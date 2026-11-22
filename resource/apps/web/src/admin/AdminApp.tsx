@@ -1,3 +1,4 @@
+import { readLocalePreference } from "@gooseforum/runtime/browser-host";
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { flushSync } from 'react-dom'
 import { useLatestRequest } from '@gooseforum/runtime'
@@ -65,7 +66,9 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
   const [isNavigating, setIsNavigating] = useState(false)
   const [navigationError, setNavigationError] = useState('')
   const [locale, setLocale] = useState(() => detectBrowserLocale())
+  const [defaultLocale, setDefaultLocale] = useState(page.layout.site?.defaultLocale)
   const localeRef = useRef(locale)
+  const [localePreference, setLocalePreference] = useState(readLocalePreference);
   const beginLocaleRequest = useLatestRequest()
   const pathnameRef = useRef(pathname)
   const [theme, setTheme] = useState(() => detectBrowserTheme())
@@ -182,7 +185,8 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
     void Promise.all([prepareAdminPage(path), prepareAdminTranslations(localeRef.current, adminPageNamespaces(path))]).catch(() => undefined)
   }, [])
 
-  const changeLocale = useCallback(async (nextLocale: typeof locale) => {
+  const changeLocale = useCallback(async (preference: typeof locale | "browser", persist = true) => {
+    const nextLocale = detectBrowserLocale(preference);
     const isCurrent = beginLocaleRequest()
     setNavigationError('')
     try {
@@ -190,12 +194,29 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
       await prepareAdminTranslations(nextLocale, adminPageNamespaces(pathnameRef.current))
       if (!isCurrent()) return
       localeRef.current = nextLocale
-      applyBrowserLocale(nextLocale)
+      if (persist) {
+        applyBrowserLocale(nextLocale, preference)
+        committedUrl.current = window.location.pathname + window.location.search
+      }
+      setLocalePreference(preference)
       setLocale(nextLocale)
     } catch (error) {
       if (isCurrent()) setNavigationError(errorMessage(error, 'Unable to change language'))
     }
   }, [beginLocaleRequest])
+
+  useEffect(() => {
+    if (defaultLocale) document.documentElement.dataset.defaultLocale = defaultLocale;
+    const update = () => {
+      const preference = readLocalePreference();
+      if (preference !== localePreference || detectBrowserLocale(preference) !== localeRef.current) {
+        void changeLocale(preference, false);
+      }
+    };
+    update();
+    window.addEventListener("languagechange", update);
+    return () => window.removeEventListener("languagechange", update);
+  }, [localePreference, changeLocale, routeKey, defaultLocale]);
 
   const changeTheme = useCallback((preference: BrowserThemePreference) => {
     saveBrowserThemePreference(preference)
@@ -235,7 +256,7 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
     : pathname === '/admin/access-groups'
       ? <AccessGroupsManagementPage api={api} text={accessGroupText} onNavigate={navigate} />
       : pathname === '/admin/roles'
-        ? <RolesManagementPage api={api} text={roleText} />
+        ? <RolesManagementPage locale={locale} api={api} text={roleText} />
       : pathname === '/admin/users'
         ? <UsersManagementPage key={routeKey} api={api} initialData={listData?.kind === 'users' ? listData.data : undefined} onUrlChange={rememberQueryUrl} text={userText} locale={locale} canResetMFA={page.layout.viewer?.adminPermissions?.includes(0)} currentUserId={page.layout.viewer?.id} />
       : pathname === '/admin/registration-invitations'
@@ -255,7 +276,7 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
       : pathname === '/admin/auth-logs'
         ? <AuthLogsPage key={page.layout.viewer.id} api={api} locale={locale} />
       : pathname === '/admin/settings/site-info'
-        ? <SiteInfoManagementPage api={api} text={settingsText} />
+        ? <SiteInfoManagementPage api={api} text={settingsText} onDefaultLocaleSaved={setDefaultLocale} />
       : pathname === '/admin/settings/site-chrome'
         ? <SiteChromeManagementPage api={api} text={settingsText} layout={page.layout} />
       : pathname === '/admin/settings/mail'

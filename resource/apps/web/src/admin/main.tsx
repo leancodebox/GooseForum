@@ -29,8 +29,8 @@ try {
   } else if (!canVisitAdminPath(page.layout.viewer.adminPermissions, pathname)) {
     window.location.replace(firstAdminPath(page.layout.viewer.adminPermissions))
   } else {
-    const [, , initialListData] = await Promise.all([prepareAdminPage(pathname), prepareAdminTranslations(detectBrowserLocale(), adminPageNamespaces(pathname)), prepareAdminListData(adminPageSource.admin, new URL(window.location.href))])
     prepareDocument(page)
+    const [, , initialListData] = await Promise.all([prepareAdminPage(pathname), prepareAdminTranslations(detectBrowserLocale(), adminPageNamespaces(pathname)), prepareAdminListData(adminPageSource.admin, new URL(window.location.href))])
     root.render(
       <StrictMode>
         <AdminApp page={page} api={adminPageSource.admin} initialListData={initialListData} />

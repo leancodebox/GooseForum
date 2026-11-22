@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"log/slog"
 	"slices"
 	"strings"
@@ -1035,6 +1036,7 @@ func fillSponsorsConfigDefaults(config *pageConfig.SponsorsConfig) {
 func GetSiteSettings(req component.BetterRequest[component.Null]) component.Response {
 	defaultSettings := defaultconfig.GetDefaultSiteSettingsConfig()
 	res := pageConfig.GetConfigByPageType(pageConfig.SiteSettings, defaultSettings)
+	res.DefaultLocale = i18n.Normalize(res.DefaultLocale)
 	return component.SuccessResponse(struct {
 		pageConfig.SiteSettingsConfig
 		BuiltinAvatarFiles []string `json:"builtinAvatarFiles"`
@@ -1052,6 +1054,9 @@ type SaveSiteSettingsReq struct {
 // SaveSiteSettings 保存站点设置
 func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) component.Response {
 	settings := req.Params.Settings
+	if settings.DefaultLocale != "" && !slices.Contains(i18n.SupportedLocales, settings.DefaultLocale) {
+		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
+	}
 	var files []string
 	builtins := pageConfig.BuiltinAvatarFiles()
 	if settings.AvatarPool != nil {

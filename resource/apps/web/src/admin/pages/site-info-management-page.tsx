@@ -1,3 +1,4 @@
+import { supportedLocales, localeLabels } from "@gooseforum/client/i18n/locale";
 import { defaultAvatarFile } from "../default-avatar-file";
 import { errorMessage } from "../error-message";
 import { AdminPage } from '../components/admin-page'
@@ -49,9 +50,11 @@ const empty: SiteSettings = {
 export function SiteInfoManagementPage({
   api,
   text,
+  onDefaultLocaleSaved,
 }: {
   api: GooseAdminApi;
   text: Text;
+  onDefaultLocaleSaved?(locale: string): void;
 }) {
   const [builtins, setBuiltins] = useState<string[]>([]);
   const [form, setForm] = useState(empty);
@@ -93,6 +96,7 @@ export function SiteInfoManagementPage({
     setSaving(true);
     try {
       await api.settings.saveSite({ ...form, defaultAvatarFile: "", avatarPool: pool });
+      onDefaultLocaleSaved?.(form.defaultLocale || "zh");
       toast.success(text("saved"));
     } catch (r) {
       toast.error(errorMessage(r, text("saveFailed")));
@@ -177,6 +181,12 @@ export function SiteInfoManagementPage({
                       setForm({ ...form, siteName: e.target.value })
                     }
                   />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="default-locale">{text("defaultLocale")}</FieldLabel>
+                  <select className="h-9 rounded-md border bg-background px-3" id="default-locale" value={form.defaultLocale || "zh"} onChange={e => setForm({ ...form, defaultLocale: e.target.value })}>
+                    {supportedLocales.map(language => <option key={language} value={language}>{localeLabels[language].label}</option>)}
+                  </select>
                 </Field>
                 <Field>
                   <FieldLabel>{text("url")}</FieldLabel>

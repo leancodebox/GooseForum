@@ -221,6 +221,7 @@ export interface UnreadStatusPayload {
 }
 
 export interface SitePayload {
+  defaultLocale?: string
   name: string
   description: string
   logo: string

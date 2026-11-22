@@ -111,8 +111,8 @@ export function createAdminApi(http: GooseHttpClient): GooseAdminApi {
       retryRegistrationInvitationEmail: (id) => post(http, '/api/admin/registration-invitations/retry-email', { id }),
     },
     roles: {
-      list: () => post(http, '/api/admin/role-list'),
-      permissions: () => post(http, '/api/admin/get-permission-list'),
+      list: (lang) => http.request('/api/admin/role-list', { method: 'POST', json: {}, query: { lang } }),
+      permissions: (lang) => http.request('/api/admin/get-permission-list', { method: 'POST', json: {}, query: { lang } }),
       save: (input) => post(http, '/api/admin/role-save', input),
       delete: (id) => post(http, '/api/admin/role-delete', { id }),
     },

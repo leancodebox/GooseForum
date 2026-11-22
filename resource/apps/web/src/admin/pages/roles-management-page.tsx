@@ -22,7 +22,7 @@ type Text = (key: RoleTextKey) => string
 type RoleDraft = { id: number; roleName: string; permissions: number[] }
 const emptyDraft: RoleDraft = { id: 0, roleName: '', permissions: [] }
 
-export function RolesManagementPage({ api, text }: { api: GooseAdminApi; text: Text }) {
+export function RolesManagementPage({ api, text, locale }: { locale: string; api: GooseAdminApi; text: Text }) {
   const [roles, setRoles] = useState<AdminRole[]>([])
   const [permissionOptions, setPermissionOptions] = useState<AdminPermissionOption[]>([])
   const [search, setSearch] = useState('')
@@ -41,7 +41,7 @@ export function RolesManagementPage({ api, text }: { api: GooseAdminApi; text: T
     setLoading(true)
     setError('')
     try {
-      const [roleResult, permissions] = await Promise.all([api.roles.list(), api.roles.permissions()])
+      const [roleResult, permissions] = await Promise.all([api.roles.list(locale), api.roles.permissions(locale)])
       if (!isCurrent()) return;
       setRoles(roleResult.list || [])
       setPermissionOptions(permissions)
@@ -51,7 +51,7 @@ export function RolesManagementPage({ api, text }: { api: GooseAdminApi; text: T
     } finally {
       if (isCurrent()) setLoading(false)
     }
-  }, [beginRequest, api, text])
+  }, [beginRequest, api, text, locale])
 
   useEffect(() => { void load() }, [load])
 

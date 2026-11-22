@@ -1,4 +1,5 @@
 export default {
+  defaultLocale: "站点默认语言",
   manageAvatars: "管理头像",
   avatarEnabledCount: "已启用 {count} 张",
   avatarEnabled: "已启用",

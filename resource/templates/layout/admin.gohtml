@@ -1,6 +1,6 @@
 {{define "layout/admin.gohtml"}}
 <!DOCTYPE html>
-<html lang="{{.Lang}}" class="goose-admin-document" data-goose-admin data-theme="{{.Payload.Layout.Theme.Current}}">
+<html data-default-locale="{{.Payload.Layout.Site.DefaultLocale}}" lang="{{.Lang}}" class="goose-admin-document" data-goose-admin data-theme="{{.Payload.Layout.Theme.Current}}">
 <head>
     <meta name="goose-deployment" content="{{deploymentID}}">
     <meta charset="UTF-8">

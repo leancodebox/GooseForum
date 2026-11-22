@@ -1,4 +1,5 @@
 export default {
+  defaultLocale: "Default site language",
   manageAvatars: "Manage avatars",
   avatarEnabledCount: "Enabled: {count}",
   avatarEnabled: "Enabled",

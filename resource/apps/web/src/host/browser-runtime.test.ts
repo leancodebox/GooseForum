@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  applyBrowserLocale,
+  detectBrowserLocale,
   applyBrowserTheme,
   detectBrowserTheme,
   prepareDocument,
@@ -9,6 +11,30 @@ import {
 
 import type { PagePayload } from '@gooseforum/client'
 import { detectBrowserThemePreference, saveBrowserThemePreference } from '@gooseforum/runtime/browser-host'
+
+describe('browser locale resolution', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    delete document.documentElement.dataset.defaultLocale
+    history.replaceState(null, '', '/')
+    document.cookie = 'lang=; path=/; max-age=0'
+  })
+
+  it('skips unsupported preferences and uses the configured site fallback', () => {
+    document.documentElement.dataset.defaultLocale = 'it'
+    const languages = vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['fr-FR'])
+    expect(detectBrowserLocale()).toBe('it')
+    languages.mockReturnValue(['fr-FR', 'ja-JP'])
+    expect(detectBrowserLocale()).toBe('ja')
+    document.cookie = 'lang=en; path=/'
+    history.replaceState(null, '', '/?lang=ko')
+    expect(detectBrowserLocale()).toBe('en')
+    history.replaceState(null, '', '/?lang=it')
+    expect(detectBrowserLocale()).toBe('it')
+    applyBrowserLocale(detectBrowserLocale('browser'), 'browser')
+    expect(detectBrowserLocale()).toBe('ja')
+  })
+})
 
 describe('browser theme runtime', () => {
   beforeEach(() => {
