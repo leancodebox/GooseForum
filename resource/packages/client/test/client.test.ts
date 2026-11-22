@@ -350,6 +350,15 @@ describe('API client', () => {
     expect(fetchMock.mock.calls[2]?.[1]?.body).toBe(JSON.stringify({ id: 44, version: 2, action: 'reject', reason: 'spam' }))
   })
 
+  it('preserves cooldown parameters for avatar upload error messages', async () => {
+    const client = createGooseClient({ fetch: async () => jsonResponse({
+      code: 1, messageCode: 'upload.cooldown', params: { minutes: 7 },
+    }) })
+    await expect(client.api.uploads.avatar(new Blob())).rejects.toMatchObject({
+      messageCode: 'upload.cooldown', params: { minutes: 7 },
+    })
+  })
+
   it('exposes page configuration and image upload contracts', async () => {
     const fetchMock = vi.fn(async (input: string | URL) => {
       const url = input.toString()

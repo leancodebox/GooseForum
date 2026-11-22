@@ -186,23 +186,9 @@ async function uploadAvatar(http: GooseHttpClient, avatar: Blob | Blob[]) {
     const filename = typeof File !== 'undefined' && item instanceof File ? item.name : filenames[index]
     formData.append(fields[index]!, item, filename)
   })
-  const response = await http.fetch(route('avatarUpload'), { method: 'POST', body: formData })
-  if (!response.ok) throw new GooseClientError(`Avatar upload failed with HTTP ${response.status}`, { status: response.status })
-  const envelope = await response.json() as {
-    code?: number
-    message?: string
-    messageCode?: string
-    result?: string | { avatarUrl?: string; url?: string }
-    data?: string | { avatarUrl?: string; url?: string }
-  }
-  if (envelope.code !== undefined && envelope.code !== 0) {
-    throw new GooseClientError(envelope.message || envelope.messageCode || 'Avatar upload failed', {
-      status: response.status,
-      code: envelope.code,
-      messageCode: envelope.messageCode,
-    })
-  }
-  const result = envelope.result ?? envelope.data
+  const result = await http.request<string | { avatarUrl?: string; url?: string }>(route('avatarUpload'), {
+    method: 'POST', body: formData,
+  })
   const url = typeof result === 'string' ? result : result?.avatarUrl || result?.url
   if (!url) throw new GooseClientError('GooseForum avatar upload returned no URL')
   return url

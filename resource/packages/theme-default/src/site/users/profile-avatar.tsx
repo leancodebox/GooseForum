@@ -36,14 +36,14 @@ export function ProfileAvatar({
     <span className={cn("relative isolate inline-block shrink-0", className)}>
       <Avatar
         className={cn(
-          "size-full",
+          "size-full @container",
           framed && "border-2 border-background bg-background shadow-sm",
           shouldHideOutline && "after:hidden",
           avatarClassName,
         )}
       >
         <AvatarImage src={src} alt={name} className="object-cover" />
-        <AvatarFallback className="text-lg font-semibold">
+        <AvatarFallback className="text-[length:50cqi] leading-none font-semibold">
           {avatarInitial(name)}
         </AvatarFallback>
       </Avatar>
