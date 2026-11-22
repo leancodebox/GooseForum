@@ -2,69 +2,37 @@ package imageuploadservice
 
 import (
 	"bytes"
-	"image"
-	"image/color"
-	"image/png"
+	"encoding/base64"
 	"testing"
-
-	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
-	"github.com/leancodebox/GooseForum/app/models/forum/fileUsage"
-	"github.com/leancodebox/GooseForum/app/service/filestorage"
 )
 
-func TestSharedAvatarThumbnail(t *testing.T) {
-	if err := db4fileconnect.Connect().AutoMigrate(&filedata.Entity{}); err != nil {
-		t.Fatal(err)
-	}
-	if err := dbconnect.Connect().AutoMigrate(&fileUsage.Entity{}); err != nil {
-		t.Fatal(err)
-	}
-	src := image.NewNRGBA(image.Rect(0, 0, 800, 400))
-	for y := range 400 {
-		for x := 200; x < 600; x++ {
-			src.SetNRGBA(x, y, color.NRGBA{G: 255, A: 255})
-		}
-	}
-	var buf bytes.Buffer
-	if err := png.Encode(&buf, src); err != nil {
-		t.Fatal(err)
-	}
-	ctx := t.Context()
-	original, err := Save(ctx, 7, buf.Bytes(), "original.png", true)
+func TestValidateDefaultAvatar(t *testing.T) {
+	// One opaque WebP pixel encoded with VP8.
+	data, err := base64.StdEncoding.DecodeString("UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEAAUAmJaQAA3AA/v89WAAAAA==")
 	if err != nil {
 		t.Fatal(err)
 	}
-	key, err := DefaultAvatar(ctx, original.Name)
-	if err != nil {
-		t.Fatal(err)
+	for _, tc := range []struct {
+		name, mime    string
+		width, height uint16
+		valid         bool
+	}{
+		{"small", "image/webp", 1, 1, true},
+		{"maximum", "image/webp", 256, 256, true},
+		{"oversize", "image/webp", 257, 257, false},
+		{"rectangular", "image/webp", 256, 128, false},
+		{"wrong MIME", "image/png", 1, 1, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			img := bytes.Clone(data)
+			img[26], img[27] = byte(tc.width), byte(tc.width>>8)
+			img[28], img[29] = byte(tc.height), byte(tc.height>>8)
+			if err := validateDefaultAvatar(bytes.NewReader(img), tc.mime); (err == nil) != tc.valid {
+				t.Fatalf("validation: %v", err)
+			}
+		})
 	}
-	again, err := DefaultAvatar(ctx, original.Name)
-	if err != nil || again != key || key == original.Name {
-		t.Fatalf("shared thumbnail %q, %q: %v", key, again, err)
-	}
-	valid, err := fileUsage.AllAdminUploads([]string{original.Name, key})
-	if err != nil || !valid {
-		t.Fatalf("admin references: %v, %v", valid, err)
-	}
-	valid, err = fileUsage.AllAdminUploads([]string{key, "unknown"})
-	if err != nil || valid {
-		t.Fatalf("missing reference: %v, %v", valid, err)
-	}
-	obj, err := filestorage.Open(ctx, key)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer obj.Body.Close()
-	decoded, err := png.Decode(obj.Body)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if decoded.Bounds() != image.Rect(0, 0, 256, 256) {
-		t.Fatalf("size = %v", decoded.Bounds())
-	}
-	if _, g, _, a := decoded.At(0, 0).RGBA(); g != 65535 || a != 65535 {
-		t.Fatal("thumbnail was not center cropped")
+	if validateDefaultAvatar(bytes.NewReader([]byte("invalid")), "image/webp") == nil {
+		t.Fatal("invalid WebP accepted")
 	}
 }

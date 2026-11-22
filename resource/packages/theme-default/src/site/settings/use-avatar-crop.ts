@@ -1,3 +1,4 @@
+import { canvasWebpFile as canvasFile } from "@gooseforum/ui/lib/canvas-webp";
 import { useEffect, useRef, useState, type Dispatch, type RefObject, type SetStateAction } from "react";
 import { useGooseRuntime } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
@@ -278,25 +279,4 @@ function resizeCanvas(source: HTMLCanvasElement, size: number) {
   context.imageSmoothingQuality = "high";
   context.drawImage(source, 0, 0, size, size);
   return canvas;
-}
-
-function canvasFile(
-  canvas: HTMLCanvasElement,
-  filename: string,
-  quality: number,
-) {
-  return new Promise<File>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return reject(new Error("无法处理头像。"));
-        resolve(
-          new File([blob], filename.replace(/\.[^.]+$/, ".webp"), {
-            type: blob.type,
-          }),
-        );
-      },
-      "image/webp",
-      quality,
-    );
-  });
 }

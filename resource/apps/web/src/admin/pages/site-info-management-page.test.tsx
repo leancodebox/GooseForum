@@ -5,11 +5,19 @@ import type { GooseAdminApi } from "@gooseforum/client";
 import text from "../messages/zh-settings";
 import { SiteInfoManagementPage } from "./site-info-management-page";
 
-afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 it("saves the uploaded object key and preserves it while assignment is disabled", async () => {
   vi.stubGlobal("ResizeObserver", class { observe() {} unobserve() {} disconnect() {} });
-  const saveSite = vi.fn().mockResolvedValue({ avatarFiles: { "2026/one.png": "avatars/default/v1/one.png" } });
+  const bitmap = { width: 800, height: 400, close: vi.fn() };
+  vi.stubGlobal("createImageBitmap", vi.fn().mockResolvedValue(bitmap));
+  const drawImage = vi.fn();
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);
+  vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation(function (this: HTMLCanvasElement, callback, type) {
+    expect([this.width, this.height, type]).toEqual([256, 256, "image/webp"]);
+    callback(new Blob(["encoded"], { type }));
+  });
+  const saveSite = vi.fn().mockResolvedValue("success");
   const uploadImage = vi.fn().mockImplementation(async (file: File) => ({ objectName: "2026/" + file.name }));
   const api = { settings: { site: async () => ({ defaultAvatarFile: "legacy.png" }), saveSite }, pages: { uploadImage } } as unknown as GooseAdminApi;
   const user = userEvent.setup();
@@ -19,13 +27,14 @@ it("saves the uploaded object key and preserves it while assignment is disabled"
   expect(screen.getByRole("button", { name: text.builtinAvatars + " 1" }).getAttribute("aria-pressed")).toBe("false");
   await user.upload(screen.getByLabelText(text.uploadAvatars), ["one.png", "two.png"].map(name => new File(["avatar"], name, { type: "image/png" })));
   await screen.findByRole("button", { name: text.customAvatars + " 3" });
+  expect(drawImage).toHaveBeenCalledWith(bitmap, 200, 0, 400, 400, 0, 0, 256, 256);
   await user.click(toggle);
   await user.click(screen.getByRole("button", { name: text.save }));
   expect(saveSite).toHaveBeenCalledWith(expect.objectContaining({ disableDefaultAvatar: true, avatarPool: expect.arrayContaining([
-    { file: "legacy.png", enabled: true }, { file: "2026/one.png", enabled: true }, { file: "2026/two.png", enabled: true },
+    { file: "legacy.png", enabled: true }, { file: "2026/one.webp", enabled: true }, { file: "2026/two.webp", enabled: true },
   ]) }));
   const preview = screen.getByRole("button", { name: text.customAvatars + " 2" }).querySelector("img");
-  expect(preview?.getAttribute("src")).toBe("/file/img/avatars/default/v1/one.png");
+  expect(preview?.getAttribute("src")).toBe("/file/img/2026/one.webp");
   await user.click(toggle);
   for (const button of screen.getAllByRole("button", { name: text.removeAvatar })) await user.click(button);
   expect(screen.getByRole("alert").textContent).toBe(text.selectAvatar);

@@ -1080,30 +1080,20 @@ func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) componen
 	if req.GinContext != nil {
 		ctx = req.GinContext.Request.Context()
 	}
-	thumbnails := make(map[string]string, len(files))
-	for _, key := range files {
-		thumbnail, err := imageuploadservice.DefaultAvatar(ctx, key)
-		if err != nil {
-			return component.FailResponseError(err)
+	if len(files) > 0 {
+		// Stored avatars may predate the WebP requirement. Validate only additions.
+		previous := hotdataserve.GetSiteSettingsConfigCache()
+		existing := map[string]bool{previous.DefaultAvatarFile: true}
+		for _, option := range previous.AvatarPool {
+			existing[option.File] = true
 		}
-		if key != thumbnail {
-			thumbnails[key] = thumbnail
+		for _, key := range files {
+			if !existing[key] {
+				if err := imageuploadservice.ValidateDefaultAvatar(ctx, key); err != nil {
+					return component.FailResponseError(err)
+				}
+			}
 		}
-	}
-	normalized := make(map[string]bool)
-	for i, option := range settings.AvatarPool {
-		file := option.File
-		if thumbnail, ok := thumbnails[file]; ok {
-			file = thumbnail
-		}
-		if normalized[file] {
-			return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
-		}
-		normalized[file] = true
-		settings.AvatarPool[i].File = file
-	}
-	if thumbnail, ok := thumbnails[settings.DefaultAvatarFile]; ok {
-		settings.DefaultAvatarFile = thumbnail
 	}
 	if err := pageConfig.SaveSiteConfig(settings); err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
@@ -1115,7 +1105,7 @@ func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) componen
 	if err := oidcproviderservice.ReloadDefault(); err != nil {
 		slog.Error("reload OIDC provider after site settings update", "err", err)
 	}
-	return component.SuccessResponseCode(component.DataMap{"avatarFiles": thumbnails}, component.MessageOperationSuccess, nil)
+	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
 
 func GetSiteChrome(req component.BetterRequest[component.Null]) component.Response {

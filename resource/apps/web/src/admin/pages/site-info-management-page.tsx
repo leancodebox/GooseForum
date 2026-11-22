@@ -1,3 +1,4 @@
+import { defaultAvatarFile } from "../default-avatar-file";
 import { errorMessage } from "../error-message";
 import { AdminPage } from '../components/admin-page'
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -85,9 +86,7 @@ export function SiteInfoManagementPage({
     if (uploadingAvatar || saving || missingSelection) return;
     setSaving(true);
     try {
-      const result = await api.settings.saveSite({ ...form, defaultAvatarFile: "", avatarPool: pool });
-      const files = result?.avatarFiles;
-      if (files && Object.keys(files).length) updatePool(options => options.map(option => ({ ...option, file: files[option.file] ?? option.file })));
+      await api.settings.saveSite({ ...form, defaultAvatarFile: "", avatarPool: pool });
       toast.success(text("saved"));
     } catch (r) {
       toast.error(errorMessage(r, text("saveFailed")));
@@ -100,7 +99,7 @@ export function SiteInfoManagementPage({
     try {
       for (const file of files) {
         try {
-          const { objectName } = await api.pages.uploadImage(file);
+          const { objectName } = await api.pages.uploadImage(await defaultAvatarFile(file));
           if (!objectName) throw new Error(text("saveFailed"));
           updatePool(options => options.some(option => option.file === objectName)
             ? options : [...options, { file: objectName, enabled: true }]);
