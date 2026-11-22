@@ -638,10 +638,14 @@ describe("AppShell and static pages", () => {
   });
 
   it("keeps personal upload available when the preset catalog is empty", async () => {
-    renderPage(payload("settings.index", { ...settingsProps(), avatarPresets: [] }), { users: {} as GooseSiteApi["users"] });
+    const { user } = renderPage(payload("settings.index", { ...settingsProps(), avatarPresets: [] }), { users: {} as GooseSiteApi["users"] });
     expect(screen.queryByRole("heading", { name: "预设头像" })).toBeNull();
     expect(screen.queryByRole("button", { name: "选择预设头像" })).toBeNull();
-    expect(await screen.findByRole("button", { name: "更换头像" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "上传自定义" })).toBeNull();
+    const fileInput = document.querySelector<HTMLInputElement>('input[type="file"][accept="image/*"]')!;
+    const chooseFile = vi.spyOn(fileInput, "click");
+    await user.click(screen.getByRole("button", { name: "更换头像" }));
+    expect(chooseFile).toHaveBeenCalledOnce();
   });
 
   it("edits and saves the React settings profile", async () => {

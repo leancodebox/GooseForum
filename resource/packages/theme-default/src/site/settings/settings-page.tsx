@@ -274,62 +274,64 @@ export function SettingsPageView({
               </span>
             ) : null}
           </div>
-          <section className="mt-4 border-t pt-3">
-            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-              {presets.length > 0 && <div>
-                <h2 className="text-sm font-semibold">
-                  {t("avatar.presetsTitle")}
-                </h2>
-                <p className="text-xs text-muted-foreground">{t("avatar.presetsDescription")}</p>
-              </div>}
-              <div className="flex gap-2">
-                {draft && draft.file !== currentPreset ? (
-                  <Button
-                    size="sm"
-                    disabled={savingPreset}
-                    onClick={() => void applyPreset()}
-                  >
-                    <Check data-icon="inline-start" />
-                    {t("avatar.applyPreset")}
-                  </Button>
-                ) : null}
-                <Button size="sm" variant="outline" onClick={crop.choose}>
-                  <Camera data-icon="inline-start" />
-                  {t("avatar.uploadCustom")}
-                </Button>
-              </div>
-            </div>
-            {presets.length > 0 && <div className="flex gap-1.5 overflow-x-auto pb-1">
-              {presets.map(({ file, url }) => (
-                <button
-                  key={file}
-                  type="button"
-                  disabled={savingPreset}
-                  aria-label={t("avatar.selectPreset")}
-                  aria-pressed={draftFile === file}
-                  className={cn(
-                    "relative size-11 shrink-0 overflow-hidden rounded-md border p-0.5",
-                    draftFile === file &&
-                      "border-primary ring-2 ring-primary/15",
-                  )}
-                  onClick={() => setDraftFile(file)}
-                >
-                  <img
-                    src={url}
-                    loading="lazy"
-                    decoding="async"
-                    alt=""
-                    className="size-full rounded object-cover"
-                  />
-                  {currentPreset === file ? (
-                    <span className="absolute right-0.5 top-0.5 grid size-4 place-items-center rounded-full bg-primary text-primary-foreground">
-                      <Check className="size-3" />
-                    </span>
+          {presets.length > 0 && (
+            <section className="mt-4 border-t pt-3">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h2 className="text-sm font-semibold">
+                    {t("avatar.presetsTitle")}
+                  </h2>
+                  <p className="text-xs text-muted-foreground">{t("avatar.presetsDescription")}</p>
+                </div>
+                <div className="flex gap-2">
+                  {draft && draft.file !== currentPreset ? (
+                    <Button
+                      size="sm"
+                      disabled={savingPreset}
+                      onClick={() => void applyPreset()}
+                    >
+                      <Check data-icon="inline-start" />
+                      {t("avatar.applyPreset")}
+                    </Button>
                   ) : null}
-                </button>
-              ))}
-            </div>}
-          </section>
+                  <Button size="sm" variant="outline" onClick={crop.choose}>
+                    <Camera data-icon="inline-start" />
+                    {t("avatar.uploadCustom")}
+                  </Button>
+                </div>
+              </div>
+              <div className="flex gap-1.5 overflow-x-auto pb-1">
+                {presets.map(({ file, url }) => (
+                  <button
+                    key={file}
+                    type="button"
+                    disabled={savingPreset}
+                    aria-label={t("avatar.selectPreset")}
+                    aria-pressed={draftFile === file}
+                    className={cn(
+                      "relative size-11 shrink-0 overflow-hidden rounded-md border p-0.5",
+                      draftFile === file &&
+                        "border-primary ring-2 ring-primary/15",
+                    )}
+                    onClick={() => setDraftFile(file)}
+                  >
+                    <img
+                      src={url}
+                      loading="lazy"
+                      decoding="async"
+                      alt=""
+                      className="size-full rounded object-cover"
+                    />
+                    {currentPreset === file ? (
+                      <span className="absolute right-0.5 top-0.5 grid size-4 place-items-center rounded-full bg-primary text-primary-foreground">
+                        <Check className="size-3" />
+                      </span>
+                    ) : null}
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
           {page.user.badges.length ? (
             <section className="mt-4 border-t pt-3">
               <div className="mb-2 flex items-center justify-between gap-2">
