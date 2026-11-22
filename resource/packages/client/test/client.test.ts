@@ -35,13 +35,14 @@ describe('i18n contracts', () => {
     ['EN_us', 'en'],
     ['ja,zh;q=0.9', 'ja'],
     ['it-IT', 'it'],
+    ['ru-RU', 'ru'],
     ['unknown', undefined],
   ])('normalizes %s to %s', (input, expected) => {
     expect(normalizeLocale(input)).toBe(expected)
   })
 
   it('keeps every auth locale structurally complete', () => {
-    expect(Object.keys(authResources)).toEqual(['zh', 'en', 'ja', 'it'])
+    expect(Object.keys(authResources)).toEqual(['zh', 'en', 'ja', 'it', 'ru'])
     expect(authResources.en.validation.loginRequired).toBeTruthy()
     expect(authResources.ja.server.passwordResetMailQueued).toBeTruthy()
   })

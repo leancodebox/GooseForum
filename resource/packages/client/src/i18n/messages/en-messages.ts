@@ -21,7 +21,6 @@ export default {
   selectConversationDescription:
     "Choose a conversation on the left, or start a new one.",
   searchUsers: "Search users…",
-  userFallback: "User",
   noContactableUsers: "No contactable users.",
   close: "Close",
   back: "Back",

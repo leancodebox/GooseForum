@@ -5,7 +5,6 @@ export default {
   summary: "未公開のトピックをここに保存し、あとで編集を続けられます。",
   newDraft: "下書きを作成",
   edit: "編集を続ける",
-  publishNow: "公開する",
   untitled: "無題の下書き",
   blocked: "停止中",
   emptyTitle: "下書きはまだありません",

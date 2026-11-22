@@ -5,7 +5,7 @@ beforeEach(() => {
   vi.resetModules();
 });
 describe("on-demand admin translations", () => {
-  it.each(["zh", "en", "ja", "it"] as const)("prepares attachment permission labels on the trust route in %s", async locale => {
+  it.each(["zh", "en", "ja", "it", "ru"] as const)("prepares attachment permission labels on the trust route in %s", async locale => {
     const loader = await import("./translation-loader");
     await loader.prepareAdminTranslations(locale, loader.adminPageNamespaces("/admin/settings/trust"));
     const dictionary = loader.getAdminDictionary<Record<string, string>>("trust-settings", locale);
@@ -16,6 +16,7 @@ describe("on-demand admin translations", () => {
       en: "Attachments",
       ja: "ファイル添付",
       it: "Allegati",
+      ru: "Вложения",
     }[locale]);
     const { createTrustSettingsText } = await import("./trust-settings-i18n");
     expect(createTrustSettingsText(locale)("orderInvalid", { higher: "H", lower: "L", field: "F" })).not.toMatch(/\{\w+\}/);

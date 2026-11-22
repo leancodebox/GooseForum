@@ -10,7 +10,6 @@ export default {
   dateTime: "Ora",
   roleLoadFailed: "Impossibile caricare i ruoli",
   badgeLoadFailed: "Impossibile caricare i badge",
-  restrictions: "Limitazioni account",
   suspended: "Sospeso",
   banned: "Bloccato",
   restrictionUntil: "Fine della limitazione",

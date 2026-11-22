@@ -1,7 +1,6 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
   presetsTitle: "Preset",
-  presetApplied: "Preset {name} applicato. Salva la bozza per mantenerlo.",
   saveDraft: "Salva bozza",
   publishSite: "Pubblica sul sito",
   workflowTitle: "Come funziona:",
@@ -21,9 +20,6 @@ export default {
   resetDefault: "Predefinito",
   restoreToSavedTitle: "Ripristina alla configurazione salvata",
   enableLabel: "Abilita",
-  tabLatest: "Recenti",
-  tabHot: "Di tendenza",
-  tabFeatured: "In evidenza",
   samplePublish: "Pubblica argomento",
   sampleTopic1:
     "Discussione sul refactoring del sistema di temi: colori, raggi e stati dei componenti",
@@ -39,7 +35,6 @@ export default {
     "La gerarchia dei colori dovrebbe essere discreta, ma mai vaga.",
   sampleMessageIncoming: "Questo sfondo è comodo?",
   sampleMessageOutgoing: "Il contrasto deve rimanere solido.",
-  sampleTextarea: "Le variabili del tema coprono input, focus e testo.",
   presets: {
     goose: {
       label: "Goose",

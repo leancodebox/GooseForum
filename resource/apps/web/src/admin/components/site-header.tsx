@@ -11,6 +11,7 @@ const headerLabels = {
   zh: { language: '切换语言', theme: '选择主题', light: '浅色', dark: '深色', system: '跟随系统', site: '返回站点' },
   en: { language: 'Switch language', theme: 'Choose theme', light: 'Light', dark: 'Dark', system: 'System', site: 'Back to site' },
   ja: { language: '言語を切り替え', theme: 'テーマを選択', light: 'ライト', dark: 'ダーク', system: 'システム', site: 'サイトに戻る' },
+  ru: { language: "Выбрать язык", theme: "Выбрать тему", light: "Светлая", dark: "Тёмная", system: "Системная", site: "На сайт" },
   it: { language: 'Cambia lingua', theme: 'Scegli tema', light: 'Chiaro', dark: 'Scuro', system: 'Sistema', site: 'Torna al sito' },
 } as const
 

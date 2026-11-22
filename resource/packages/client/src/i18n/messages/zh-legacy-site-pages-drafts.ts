@@ -5,7 +5,6 @@ export default {
   summary: "这里保存你尚未发布的主题，可以随时继续编辑。",
   newDraft: "新建草稿",
   edit: "继续编辑",
-  publishNow: "去发布",
   untitled: "未命名草稿",
   blocked: "已封禁",
   emptyTitle: "还没有草稿",

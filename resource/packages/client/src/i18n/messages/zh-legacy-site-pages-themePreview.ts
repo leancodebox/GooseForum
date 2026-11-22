@@ -1,7 +1,6 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
   presetsTitle: "预设",
-  presetApplied: "已应用 {name} 预设，保存草稿后保留",
   saveDraft: "保存草稿",
   publishSite: "发布到全站",
   workflowTitle: "使用说明：",
@@ -20,9 +19,6 @@ export default {
   resetDefault: "默认",
   restoreToSavedTitle: "还原到已保存配置",
   enableLabel: "启用",
-  tabLatest: "最新",
-  tabHot: "热门",
-  tabFeatured: "精华",
   samplePublish: "发布主题",
   sampleTopic1: "主题系统重构讨论：颜色、圆角和组件状态",
   sampleTopic2: "Markdown 正文在深色模式下的可读性",
@@ -34,7 +30,6 @@ export default {
   sampleTopicQuote: "颜色层级应该安静，但不能含糊。",
   sampleMessageIncoming: "这个背景还舒服吗？",
   sampleMessageOutgoing: "对比度需要稳。",
-  sampleTextarea: "主题变量覆盖输入、焦点和正文。",
   presets: {
     goose: {
       label: "Goose",

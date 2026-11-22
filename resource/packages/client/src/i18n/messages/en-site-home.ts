@@ -12,7 +12,6 @@ export default {
   replies: "Replies",
   views: "Views",
   activity: "Activity",
-  pinned: "Pinned",
   emptyTitle: "No topics yet",
   emptyDescription: "There are no topics to show yet.",
   emptyCategoryDescription: "This category has no public topics yet.",

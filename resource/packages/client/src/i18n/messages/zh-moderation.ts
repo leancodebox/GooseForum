@@ -43,7 +43,6 @@ export default {
     reporter: "提交人",
     handler: "处理人",
     submitted: "提交",
-    handled: "处理",
     noExcerpt: "暂无摘要",
     block: "封禁",
     ignore: "忽略",

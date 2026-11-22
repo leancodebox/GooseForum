@@ -1,8 +1,6 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
   presetsTitle: "プリセット",
-  presetApplied:
-    "{name} プリセットを適用しました。草稿を保存すると保持されます",
   saveDraft: "草稿を保存",
   publishSite: "全体に公開",
   workflowTitle: "使い方:",
@@ -22,9 +20,6 @@ export default {
   resetDefault: "既定",
   restoreToSavedTitle: "保存済みの設定に戻す",
   enableLabel: "有効化",
-  tabLatest: "最新",
-  tabHot: "人気",
-  tabFeatured: "注目",
   samplePublish: "トピックを投稿",
   sampleTopic1:
     "テーマシステム再構築の議論：カラー、角丸、コンポーネントの状態",
@@ -39,7 +34,6 @@ export default {
     "カラーの階層は静かであるべきですが、曖昧にしてはいけません。",
   sampleMessageIncoming: "この背景は快適ですか？",
   sampleMessageOutgoing: "コントラストは安定させる必要があります。",
-  sampleTextarea: "テーマ変数は入力・フォーカス・本文をカバーします。",
   presets: {
     goose: {
       label: "Goose",

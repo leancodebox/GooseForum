@@ -11,24 +11,9 @@ export default {
   systemGroupHint: "everyone 与 registered 是系统组，不保存成员记录。",
   systemImmutable: "系统组名称和加入方式不可修改。",
   categoryPermissions: "分类权限",
-  configureAccess: "权限",
-  categoryPermissionsTitle: "“{category}”的访问权限",
-  categoryPermissionsDescription:
-    "集中设置每个系统组和自定义组在该分类中拥有的能力。",
-  resultingVisibility: "最终可见范围",
-  visibilityDerivedHint:
-    "只有“所有访客与成员”组拥有读取能力时，该分类才是公开分类。",
-  noReadableAudienceWarning:
-    "当前没有任何启用的组可以读取此分类，可能只有全局管理员能够恢复访问。",
-  legacyImageVisibilityWarning:
-    "分类中的旧图片若没有资源归属记录，持有原始链接的人仍可能直接访问；新上传且已记录归属的图片会按主分类权限保护。",
-  restrictionConflictWarning:
-    "此分类仍被 {count} 个多分类主题引用。请先把这些主题改为单分类，才能将该分类设为受限。",
   group: "访问组",
-  groupType: "成员来源",
   permissionSummaryHint: "权限统一在分类管理页配置；此处仅显示只读授权摘要。",
   manageCategoryPermissions: "按分类管理",
-  permissionHint: "能力逐级包含；无授权表示不可见。",
   members: "成员",
   username: "用户名或用户 ID",
   addMember: "添加成员",
@@ -41,7 +26,6 @@ export default {
   deleteConfirm: "确定删除访问组“{name}”及其全部成员关系和授权吗？",
   memberSaved: "成员已保存",
   memberSaveFailed: "保存成员失败",
-  memberDeleteFailed: "移除成员失败",
   applicationFailed: "提交加入申请失败",
   joinTitle: "申请加入访问组",
   joinDescription: "加入后可以访问该组获授权的受限分类。",
@@ -57,9 +41,6 @@ export default {
   applicationsToReview: "待审核申请",
   managerReviewHint: "你是这些访问组的组经理。",
   noPendingApplications: "暂无待审核申请",
-  customGroupCount: "{count} 个自定义组",
-  restrictedCategoryCount: "{count} 个受限分类",
-  refreshing: "正在刷新",
   noGroups: "暂无访问组",
   noMatchingGroups: "没有匹配的访问组，请尝试其他关键词。",
   systemGroup: "系统组",
@@ -70,7 +51,6 @@ export default {
   category: "分类",
   visibility: "可见范围",
   capability: "当前能力",
-  noCategories: "暂无分类",
   public: "公开",
   restricted: "受限",
   memberHint:
@@ -87,7 +67,6 @@ export default {
   removeMember: "移除成员",
   selectGroup: "请选择一个访问组查看详情。",
   groupNamePlaceholder: "例如：内部成员",
-  joinModeLabel: "加入方式",
   enabledHint: "停用后，所有成员会立即失去该组授予的分类能力。",
   groupNameRequired: "请输入访问组名称",
   deleteGroupTitle: "删除访问组",

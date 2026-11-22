@@ -19,6 +19,7 @@ import {
   FieldLegend,
 } from "@gooseforum/ui/components/field";
 import { Input } from "@gooseforum/ui/components/input";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@gooseforum/ui/components/select";
 import { Switch } from "@gooseforum/ui/components/switch";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Textarea } from "@gooseforum/ui/components/textarea";
@@ -184,9 +185,18 @@ export function SiteInfoManagementPage({
                 </Field>
                 <Field>
                   <FieldLabel htmlFor="default-locale">{text("defaultLocale")}</FieldLabel>
-                  <select className="h-9 rounded-md border bg-background px-3" id="default-locale" value={form.defaultLocale || "zh"} onChange={e => setForm({ ...form, defaultLocale: e.target.value })}>
-                    {supportedLocales.map(language => <option key={language} value={language}>{localeLabels[language].label}</option>)}
-                  </select>
+                  <Select value={form.defaultLocale || "zh"} onValueChange={defaultLocale => setForm(current => ({ ...current, defaultLocale }))}>
+                    <SelectTrigger id="default-locale" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {supportedLocales.map(locale => (
+                          <SelectItem key={locale} value={locale}>{localeLabels[locale].label}</SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </Field>
                 <Field>
                   <FieldLabel>{text("url")}</FieldLabel>

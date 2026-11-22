@@ -1,6 +1,5 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
-  moderationPending: "内容を保存しました。審査通過後に公開されます。",
   moderationRejected:
     "内容は保存されましたが、審査に通らなかったため公開されません。編集して再投稿するか、管理者に確認を依頼してください。",
   createTitle: "トピックを投稿",
@@ -16,8 +15,6 @@ export default {
   mainCategoryChangeDescription:
     "「{current}」を外すと「{next}」がメインカテゴリーになり、このトピックを読める人が変わります。",
   confirmMainCategoryChange: "メインカテゴリーを変更",
-  restrictedCategoryHint:
-    "このカテゴリーへのアクセス権を持つメンバーだけが閲覧できます",
   restrictedCategorySingleHint:
     "制限カテゴリーは単独で選択する必要があります。選択すると現在のカテゴリーが置き換わります",
   noCreatePermission:
@@ -25,16 +22,12 @@ export default {
   markdownMode: "Markdown",
   visualMode: "編集",
   preview: "プレビュー",
-  pastePlainText: "プレーンテキストとして貼り付け",
-  clipboardReadFailed:
-    "クリップボードを読み取れません。ブラウザの権限を確認してください。",
   visualUnsupported:
     "本文にタスクリストが含まれています。Markdown モードで編集してください。",
   processingImage: "画像を処理中...",
   processingImages: "画像を処理中 {done}/{total}",
   imageInserted: "画像を挿入しました。",
   imagesInserted: "{count} 枚の画像を挿入しました。",
-  moreImageFailures: "；ほか {count} 件が失敗",
   noUploadableImages: "アップロードできる画像ファイルがありません",
   topicUpdated: "トピックを更新しました。",
   topicPublished: "トピックを公開しました。",

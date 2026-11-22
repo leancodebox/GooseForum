@@ -13,25 +13,10 @@ export default {
     "everyone と registered はメンバー行を持たないシステムグループです。",
   systemImmutable: "システムグループは変更できません。",
   categoryPermissions: "カテゴリ権限",
-  configureAccess: "権限",
-  categoryPermissionsTitle: "「{category}」の権限",
-  categoryPermissionsDescription:
-    "このカテゴリーで各システムグループまたはカスタムグループに付与する権限を設定します。",
-  resultingVisibility: "設定後の公開範囲",
-  visibilityDerivedHint:
-    "「全員」グループに閲覧権限がある場合のみ、カテゴリーは公開されます。",
-  noReadableAudienceWarning:
-    "このカテゴリーを閲覧できる有効なグループがありません。復旧できるのは全体管理者のみになる可能性があります。",
-  legacyImageVisibilityWarning:
-    "リソース所有記録のない古い画像は、元のURLを知る人が直接閲覧できる場合があります。新しく追跡されるアップロードはメインカテゴリーの権限で保護されます。",
-  restrictionConflictWarning:
-    "このカテゴリーを参照する複数カテゴリーのトピックが {count} 件あります。制限する前に単一カテゴリーへ変更してください。",
   group: "アクセスグループ",
-  groupType: "参加方式",
   permissionSummaryHint:
     "権限はカテゴリーページで設定します。この表は読み取り専用の概要です。",
   manageCategoryPermissions: "カテゴリー別に管理",
-  permissionHint: "権限は累積し、付与なしはアクセス不可です。",
   members: "メンバー",
   username: "ユーザー名または ID",
   addMember: "メンバーを追加",
@@ -44,7 +29,6 @@ export default {
   deleteConfirm: "「{name}」とすべてのメンバー・権限を削除しますか？",
   memberSaved: "メンバーを保存しました",
   memberSaveFailed: "メンバーの保存に失敗しました",
-  memberDeleteFailed: "メンバーの削除に失敗しました",
   applicationFailed: "申請の送信に失敗しました",
   joinTitle: "アクセスグループへの参加申請",
   joinDescription:
@@ -61,9 +45,6 @@ export default {
   applicationsToReview: "審査待ちの申請",
   managerReviewHint: "あなたが管理するアクセスグループです。",
   noPendingApplications: "審査待ちの申請はありません",
-  customGroupCount: "カスタムグループ {count} 件",
-  restrictedCategoryCount: "制限付きカテゴリ {count} 件",
-  refreshing: "更新中",
   noGroups: "アクセスグループはありません",
   noMatchingGroups:
     "一致するアクセスグループがありません。別のキーワードをお試しください。",
@@ -75,7 +56,6 @@ export default {
   category: "カテゴリ",
   visibility: "公開範囲",
   capability: "現在の権限",
-  noCategories: "カテゴリはありません",
   public: "公開",
   restricted: "制限付き",
   memberHint:
@@ -92,7 +72,6 @@ export default {
   removeMember: "メンバーを削除",
   selectGroup: "詳細を表示するアクセスグループを選択してください。",
   groupNamePlaceholder: "例：社内メンバー",
-  joinModeLabel: "参加方法",
   enabledHint:
     "無効にすると、このグループが付与したカテゴリ権限は直ちに失効します。",
   groupNameRequired: "アクセスグループ名を入力してください",

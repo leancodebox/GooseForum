@@ -1,0 +1,22 @@
+// Canonical translation data; compatibility exports and React loaders share this file.
+export default {
+  joinTitle: "Подать заявку на доступ к группам",
+  joinDescription:
+    "Вступите в группу, чтобы получить доступ к закрытым категориям, которые ей предоставлены.",
+  noJoinableGroups: "Нет групп, принимающих заявки",
+  noJoinableGroupsHint:
+    "Группы только по приглашениям: вас должен добавить администратор.",
+  unlocksCategories: "Даёт доступ к: {categories}",
+  noCategoryGrants: "У этой группы пока нет предоставленных категорий",
+  joined: "Вступил",
+  pending: "На рассмотрении",
+  apply: "Подать заявку на вступление",
+  approve: "Одобрить",
+  reject: "Отклонить",
+  applicationsToReview: "Заявки на рассмотрение",
+  managerReviewHint: "Вы управляете этими группами доступа.",
+  noPendingApplications: "Нет заявок на рассмотрении",
+  loadFailed: "Не удалось загрузить настройки контроля доступа",
+  memberSaveFailed: "Не удалось сохранить участника",
+  applicationFailed: "Не удалось отправить заявку",
+} as const;

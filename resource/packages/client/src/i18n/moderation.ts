@@ -2,6 +2,7 @@ import zh from "./messages/zh-moderation.js";
 import en from "./messages/en-moderation.js";
 import ja from "./messages/ja-moderation.js";
 import it from "./messages/it-moderation.js";
+import ru from "./messages/ru-moderation.js";
 import type { Locale } from "./auth.js";
 
 type Widen<T> = T extends string ? string : { [K in keyof T]: Widen<T[K]> };
@@ -12,4 +13,5 @@ export const moderationResources: Record<Locale, Messages> = {
   en,
   ja,
   it,
+  ru,
 } as const;

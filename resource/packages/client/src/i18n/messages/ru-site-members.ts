@@ -1,0 +1,15 @@
+// Canonical translation data; compatibility exports and React loaders share this file.
+export default {
+  title: "Все участники",
+  subtitle: "Познакомьтесь с людьми, которые вместе создают это сообщество.",
+  noBio: "Участник пока не добавил биографию.",
+  prestige: "Престиж",
+  topics: "Темы",
+  replies: "Ответы",
+  joinedAt: "Зарегистрирован {date}",
+  pagination: "Страницы участников",
+  previous: "Предыдущая",
+  next: "Следующая",
+  emptyTitle: "Пока нет участников",
+  emptyDescription: "Здесь пока нечего показывать.",
+} as const;

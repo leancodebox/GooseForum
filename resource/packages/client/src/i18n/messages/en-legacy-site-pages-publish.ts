@@ -1,7 +1,5 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
-  moderationPending:
-    "Your content was saved and will be public after approval.",
   moderationRejected:
     "Your content was saved but did not pass moderation and is not public. Edit and resubmit it, or contact an administrator.",
   createTitle: "Publish topic",
@@ -17,8 +15,6 @@ export default {
   mainCategoryChangeDescription:
     "Removing “{current}” makes “{next}” the main category and changes who can read this topic.",
   confirmMainCategoryChange: "Change main category",
-  restrictedCategoryHint:
-    "Visible only to members who can access this category",
   restrictedCategorySingleHint:
     "A restricted category must be selected alone; selecting it replaces the current categories",
   noCreatePermission:
@@ -26,16 +22,12 @@ export default {
   markdownMode: "Markdown",
   visualMode: "Editor",
   preview: "Preview",
-  pastePlainText: "Paste as plain text",
-  clipboardReadFailed:
-    "Unable to read the clipboard. Check your browser permissions.",
   visualUnsupported:
     "This body contains task lists. Continue editing it in Markdown mode.",
   processingImage: "Processing image...",
   processingImages: "Processing images {done}/{total}",
   imageInserted: "Image inserted.",
   imagesInserted: "{count} images inserted.",
-  moreImageFailures: "; {count} more failed",
   noUploadableImages: "No uploadable image files",
   topicUpdated: "Topic updated.",
   topicPublished: "Topic published.",

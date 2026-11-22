@@ -10,7 +10,6 @@ export default {
   dateTime: "時刻",
   roleLoadFailed: "ロールを読み込めませんでした",
   badgeLoadFailed: "バッジを読み込めませんでした",
-  restrictions: "アカウント制限",
   suspended: "投稿停止",
   banned: "ログイン禁止",
   restrictionUntil: "制限の終了日時",

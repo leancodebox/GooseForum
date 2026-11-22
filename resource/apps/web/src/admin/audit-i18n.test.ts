@@ -14,7 +14,7 @@ import {
 
 beforeAll(async () => {
   await Promise.all(
-    (["zh", "en", "ja", "it"] as const).map((locale) =>
+    (["zh", "en", "ja", "it", "ru"] as const).map((locale) =>
       prepareAdminTranslations(locale, ["audit", "audit-extra"]),
     ),
   );
@@ -54,7 +54,7 @@ describe("admin audit i18n", () => {
   });
 
   it("keeps every audit dictionary structurally complete across locales", () => {
-    const locales = ["zh", "en", "ja", "it"] as const;
+    const locales = ["zh", "en", "ja", "it", "ru"] as const;
     const baseKeys = sortedKeys(getAdminDictionary("audit", "en"));
     const extra = getAdminDictionary<Record<string, Record<string, unknown>>>(
       "audit-extra",

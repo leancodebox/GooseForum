@@ -55,6 +55,12 @@ const copy = {
     previous: "元の色",
     current: "現在の色",
   },
+  ru: {
+    palette: "Палитра", recent: "Недавние цвета", channels: "Каналы RGB",
+    value: "Значение цвета", invalid: "Введите непрозрачный цвет HEX, RGB, HSL или OKLCH",
+    reset: "Вернуть исходный цвет", fine: "Точный выбор цвета", done: "Готово",
+    previous: "Исходный", current: "Текущий",
+  },
   it: {
     palette: "Tavolozza",
     recent: "Colori recenti",

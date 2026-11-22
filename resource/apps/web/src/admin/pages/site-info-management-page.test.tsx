@@ -19,11 +19,10 @@ it("saves the uploaded object key and preserves it while assignment is disabled"
   });
   const saveSite = vi.fn().mockResolvedValue("success");
   const uploadImage = vi.fn().mockImplementation(async (file: File) => ({ objectName: "2026/" + file.name }));
-  const api = { settings: { site: async () => ({ builtinAvatarFiles: ["/static/pic/1.webp", "/static/pic/2.webp"], defaultAvatarFile: "legacy.png" }), saveSite }, pages: { uploadImage } } as unknown as GooseAdminApi;
+  const api = { settings: { site: async () => ({ defaultLocale: "ja", builtinAvatarFiles: ["/static/pic/1.webp", "/static/pic/2.webp"], defaultAvatarFile: "legacy.png" }), saveSite }, pages: { uploadImage } } as unknown as GooseAdminApi;
   const user = userEvent.setup();
   render(<SiteInfoManagementPage api={api} text={key => text[key]} />);
   const toggle = await screen.findByRole("switch", { name: text.assignAvatar });
-  await user.selectOptions(screen.getByLabelText(text.defaultLocale), "ja");
   const manage = screen.getByRole("button", { name: text.manageAvatars });
   expect(manage.getAttribute("aria-expanded")).toBe("false");
   expect(screen.queryByLabelText(text.uploadAvatars)).toBeNull();

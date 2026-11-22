@@ -4,9 +4,6 @@ export default {
   description: "Handle community management tasks within your scope.",
   notice:
     "With great power comes great responsibility. Before blocking a post, make sure it violates the community rules and communicate first when appropriate.",
-  guidanceTitle: "Moderation reminders",
-  guidanceDescription:
-    "Moderator actions shape the community. Check the facts, rules, and impact before acting.",
   guidanceItems: {
     rule: {
       title: "Check the rules first",
@@ -24,27 +21,7 @@ export default {
         "Prefer reminders and conversation when they can work. Blocking is for clear and necessary cases.",
     },
   },
-  allTitle: "All posts",
-  allDescription:
-    "Review posts in the current category and act based on status.",
-  blockedTitle: "Blocked posts",
-  blockedDescription:
-    "Review blocked posts in the current category and restore them when needed.",
-  allEmptyTitle: "No posts",
-  blockedEmptyTitle: "No blocked posts",
-  banTitle: "Posts you can block",
-  banDescription:
-    "Review normal posts in your categories and block them when needed.",
-  unbanTitle: "Blocked posts",
-  unbanDescription:
-    "Review blocked posts in your categories and restore them when needed.",
-  banEmptyTitle: "No posts to block",
-  unbanEmptyTitle: "No blocked posts",
-  banAction: "Block",
-  unbanAction: "Restore",
   total: "{count} items",
-  knownTotal: "{count} items",
-  knownTotalMore: "{count}+ items",
   blocked: "Blocked",
   emptyDescription: "There is nothing to handle in your scope right now.",
   managementTabs: {
@@ -69,20 +46,12 @@ export default {
     table: {
       report: "Report",
       reason: "Report info",
-      people: "People",
       time: "Time",
       action: "Action",
     },
     ban: "Block",
-    hide: "Block",
     reject: "Ignore",
     resolve: "Resolved",
-    reasonLabel: "Reason",
-    statusLabel: "Status",
-    submittedAtLabel: "Submitted",
-    handledAtLabel: "Handled",
-    reporterLabel: "Reporter",
-    handlerLabel: "Handler",
     noExcerpt: "No excerpt",
     targetTypes: {
       topic: "Topic",

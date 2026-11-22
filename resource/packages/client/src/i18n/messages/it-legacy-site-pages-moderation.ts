@@ -5,9 +5,6 @@ export default {
     "Gestisci le attività di gestione della community nel tuo ambito.",
   notice:
     "Da un grande potere derivano grandi responsabilità. Prima di bloccare un post, assicurati che violi le regole della community e, quando opportuno, comunica prima.",
-  guidanceTitle: "Promemoria per la moderazione",
-  guidanceDescription:
-    "Le azioni dei moderatori plasmano la community. Verifica i fatti, le regole e l’impatto prima di agire.",
   guidanceItems: {
     rule: {
       title: "Controlla prima le regole",
@@ -25,27 +22,7 @@ export default {
         "Preferisci promemoria e dialogo quando possono funzionare. Il blocco è per i casi chiari e necessari.",
     },
   },
-  allTitle: "Tutti i post",
-  allDescription:
-    "Esamina i post nella categoria attuale e agisci in base allo stato.",
-  blockedTitle: "Post bloccati",
-  blockedDescription:
-    "Esamina i post bloccati nella categoria attuale e ripristinali quando serve.",
-  allEmptyTitle: "Nessun post",
-  blockedEmptyTitle: "Nessun post bloccato",
-  banTitle: "Post che puoi bloccare",
-  banDescription:
-    "Esamina i post normali nelle tue categorie e bloccali quando serve.",
-  unbanTitle: "Post bloccati",
-  unbanDescription:
-    "Esamina i post bloccati nelle tue categorie e ripristinali quando serve.",
-  banEmptyTitle: "Nessun post da bloccare",
-  unbanEmptyTitle: "Nessun post bloccato",
-  banAction: "Blocca",
-  unbanAction: "Ripristina",
   total: "{count} elementi",
-  knownTotal: "{count} elementi",
-  knownTotalMore: "{count}+ elementi",
   blocked: "Bloccato",
   emptyDescription: "Al momento non c’è nulla da gestire nel tuo ambito.",
   managementTabs: {
@@ -70,20 +47,12 @@ export default {
     table: {
       report: "Segnalazione",
       reason: "Info segnalazione",
-      people: "Persone",
       time: "Ora",
       action: "Azione",
     },
     ban: "Blocca",
-    hide: "Blocca",
     reject: "Ignora",
     resolve: "Risolta",
-    reasonLabel: "Motivo",
-    statusLabel: "Stato",
-    submittedAtLabel: "Inviata",
-    handledAtLabel: "Gestita",
-    reporterLabel: "Segnalante",
-    handlerLabel: "Gestore",
     noExcerpt: "Nessun estratto",
     targetTypes: {
       topic: "Topic",

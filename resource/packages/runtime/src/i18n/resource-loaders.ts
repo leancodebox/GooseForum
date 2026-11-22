@@ -191,4 +191,51 @@ export const resourceLoaders: Record<
     import("@gooseforum/client/i18n/messages/it-content-error"),
   "it/content-common": () =>
     import("@gooseforum/client/i18n/messages/it-content-common"),
+  "ru/auth": () => import("@gooseforum/client/i18n/messages/ru-auth"),
+  "ru/oidc-consent": () =>
+    import("@gooseforum/client/i18n/messages/ru-oidc-consent"),
+  "ru/settings": () => import("@gooseforum/client/i18n/messages/ru-settings"),
+  "ru/notifications": () =>
+    import("@gooseforum/client/i18n/messages/ru-notifications"),
+  "ru/messages": () => import("@gooseforum/client/i18n/messages/ru-messages"),
+  "ru/moderation": () =>
+    import("@gooseforum/client/i18n/messages/ru-moderation"),
+  "ru/publish": () => import("@gooseforum/client/i18n/messages/ru-publish"),
+  "ru/topic": () => import("@gooseforum/client/i18n/messages/ru-topic"),
+  "ru/theme-preview": () =>
+    import("@gooseforum/client/i18n/messages/ru-theme-preview"),
+  "ru/server-messages": () =>
+    import("@gooseforum/client/i18n/messages/ru-server-messages"),
+  "ru/site-shell": () =>
+    import("@gooseforum/client/i18n/messages/ru-site-shell"),
+  "ru/site-links": () =>
+    import("@gooseforum/client/i18n/messages/ru-site-links"),
+  "ru/site-sponsors": () =>
+    import("@gooseforum/client/i18n/messages/ru-site-sponsors"),
+  "ru/site-categories": () =>
+    import("@gooseforum/client/i18n/messages/ru-site-categories"),
+  "ru/site-members": () =>
+    import("@gooseforum/client/i18n/messages/ru-site-members"),
+  "ru/site-home": () => import("@gooseforum/client/i18n/messages/ru-site-home"),
+  "ru/site-search": () =>
+    import("@gooseforum/client/i18n/messages/ru-site-search"),
+  "ru/site-user": () => import("@gooseforum/client/i18n/messages/ru-site-user"),
+  "ru/site-userCard": () =>
+    import("@gooseforum/client/i18n/messages/ru-site-userCard"),
+  "ru/legacy-site-pages-drafts": () =>
+    import("@gooseforum/client/i18n/messages/ru-legacy-site-pages-drafts"),
+  "ru/legacy-site-pages-accessGroups": () =>
+    import("@gooseforum/client/i18n/messages/ru-legacy-site-pages-accessGroups"),
+  "ru/legacy-site-pages-moderation": () =>
+    import("@gooseforum/client/i18n/messages/ru-legacy-site-pages-moderation"),
+  "ru/legacy-site-pages-publish": () =>
+    import("@gooseforum/client/i18n/messages/ru-legacy-site-pages-publish"),
+  "ru/legacy-site-pages-topic": () =>
+    import("@gooseforum/client/i18n/messages/ru-legacy-site-pages-topic"),
+  "ru/legacy-site-pages-themePreview": () =>
+    import("@gooseforum/client/i18n/messages/ru-legacy-site-pages-themePreview"),
+  "ru/content-error": () =>
+    import("@gooseforum/client/i18n/messages/ru-content-error"),
+  "ru/content-common": () =>
+    import("@gooseforum/client/i18n/messages/ru-content-common"),
 };

@@ -287,7 +287,7 @@ function UserEditor({ user, api, text, locale, canResetMFA, onClose, onSaved }: 
             <TabsContent value="history">
               <RestrictionHistory userId={user?.userId} api={api} text={text} className="mt-0 min-w-0 border-t-0 pt-0" />
             </TabsContent>
-            {user && canResetMFA ? <TabsContent value="trust"><UserTrust api={api} userId={user.userId} locale={locale} /></TabsContent> : null}
+            {user && canResetMFA ? <TabsContent value="trust"><UserTrust text={text} api={api} userId={user.userId} locale={locale} /></TabsContent> : null}
           </div>
         </Tabs>
         <DialogFooter className="mx-0 mb-0 rounded-b-none">

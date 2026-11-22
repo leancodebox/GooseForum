@@ -13,25 +13,10 @@ export default {
     "everyone and registered are system groups without stored memberships.",
   systemImmutable: "System group names and join modes are immutable.",
   categoryPermissions: "Category permissions",
-  configureAccess: "Permissions",
-  categoryPermissionsTitle: "Permissions for “{category}”",
-  categoryPermissionsDescription:
-    "Set the capability each system or custom group receives in this category.",
-  resultingVisibility: "Resulting visibility",
-  visibilityDerivedHint:
-    "A category is public only when the Everyone group can read it.",
-  noReadableAudienceWarning:
-    "No enabled group can read this category. Only global administrators may be able to recover it.",
-  legacyImageVisibilityWarning:
-    "Older images without resource ownership records may remain reachable by their direct URLs. Newly tracked uploads are protected by the main category permissions.",
-  restrictionConflictWarning:
-    "{count} multi-category topics still reference this category. Make them single-category before restricting the category.",
   group: "Access group",
-  groupType: "Membership",
   permissionSummaryHint:
     "Permissions are configured from the Categories page; this table is a read-only summary.",
   manageCategoryPermissions: "Manage by category",
-  permissionHint: "Capabilities are cumulative; no grant means no access.",
   members: "Members",
   username: "Username or user ID",
   addMember: "Add member",
@@ -44,7 +29,6 @@ export default {
   deleteConfirm: "Delete “{name}”, including all memberships and grants?",
   memberSaved: "Member saved",
   memberSaveFailed: "Failed to save member",
-  memberDeleteFailed: "Failed to remove member",
   applicationFailed: "Failed to submit the application",
   joinTitle: "Apply to access groups",
   joinDescription:
@@ -62,9 +46,6 @@ export default {
   applicationsToReview: "Applications to review",
   managerReviewHint: "You manage these access groups.",
   noPendingApplications: "No pending applications",
-  customGroupCount: "{count} custom groups",
-  restrictedCategoryCount: "{count} restricted categories",
-  refreshing: "Refreshing",
   noGroups: "No access groups",
   noMatchingGroups: "No matching access groups. Try another keyword.",
   systemGroup: "System group",
@@ -75,7 +56,6 @@ export default {
   category: "Category",
   visibility: "Visibility",
   capability: "Capability",
-  noCategories: "No categories",
   public: "Public",
   restricted: "Restricted",
   memberHint:
@@ -92,7 +72,6 @@ export default {
   removeMember: "Remove member",
   selectGroup: "Select an access group to view its details.",
   groupNamePlaceholder: "For example: Internal members",
-  joinModeLabel: "Join mode",
   enabledHint:
     "Disabling the group immediately revokes the category capabilities it grants.",
   groupNameRequired: "Enter an access group name",

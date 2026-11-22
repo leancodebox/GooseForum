@@ -579,6 +579,7 @@
                         <button class="lang-btn" type="button" data-lang="zh">中文</button>
                         <button class="lang-btn" type="button" data-lang="en">English</button>
                         <button class="lang-btn" type="button" data-lang="ja">日本語</button>
+                        <button class="lang-btn" type="button" data-lang="ru">Русский</button>
                         <button class="lang-btn" type="button" data-lang="ko">한국어</button>
                     </div>
 
@@ -661,6 +662,18 @@
                     clockNote: "メンテナンス時間は現在の端末時刻に合わせてリアルタイムで更新されます。",
                     title: "メンテナンス中 | Maintenance",
                     weekday: ["日", "月", "火", "水", "木", "金", "土"]
+                },
+                ru: {
+                    meta: "Сервер находится на техническом обслуживании.",
+                    headlineTop: "Технические работы",
+                    headlineBottom: "Скоро вернёмся",
+                    summary: "Мы обновляем форум. Попробуйте обновить страницу немного позже.",
+                    hint: "Язык выбирается по настройкам браузера. Его также можно изменить вручную.",
+                    clockBadge: "Время обслуживания",
+                    clockLabel: "Местное время",
+                    clockNote: "Часы показывают текущее время на вашем устройстве.",
+                    title: "Техническое обслуживание",
+                    weekday: ["вс", "пн", "вт", "ср", "чт", "пт", "сб"]
                 },
                 ko: {
                     meta: "현재 서버가 점검 모드로 전환되어 있습니다.",
@@ -776,6 +789,7 @@
                 if (raw.indexOf("ja") === 0) {
                     return "ja";
                 }
+                if (raw.indexOf("ru") === 0) return "ru";
                 if (raw.indexOf("ko") === 0) {
                     return "ko";
                 }

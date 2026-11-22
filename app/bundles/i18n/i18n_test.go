@@ -10,6 +10,7 @@ func TestNormalize(t *testing.T) {
 		"zh-CN":          "zh",
 		"en":             "en",
 		"en-US,en;q=0.9": "en",
+		"ru-RU":          "ru",
 		"ja_JP":          "ja",
 		"ko":             Fallback, // unsupported -> fallback
 		"  en  ":         "en",

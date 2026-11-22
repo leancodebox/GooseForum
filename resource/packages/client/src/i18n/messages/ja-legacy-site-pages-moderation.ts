@@ -4,9 +4,6 @@ export default {
   description: "担当範囲内のコミュニティ管理タスクを処理します。",
   notice:
     "大きな権限には大きな責任が伴います。封禁する前に、投稿がコミュニティルールに違反しているか確認し、必要に応じて先に対話してください。",
-  guidanceTitle: "管理のリマインダー",
-  guidanceDescription:
-    "モデレーターの操作はコミュニティの空気に影響します。事実、ルール、影響を確認してから対応してください。",
   guidanceItems: {
     rule: {
       title: "まずルールを確認",
@@ -24,25 +21,7 @@ export default {
         "注意や対話で解決できる場合はそちらを優先し、封禁は明確で必要な場合に限ります。",
     },
   },
-  allTitle: "すべての記事",
-  allDescription: "現在のカテゴリ内の記事を確認し、状態に応じて処理します。",
-  blockedTitle: "封禁済みの記事",
-  blockedDescription:
-    "現在のカテゴリ内の封禁済み記事を確認し、必要に応じて解除します。",
-  allEmptyTitle: "記事はありません",
-  blockedEmptyTitle: "封禁済みの記事はありません",
-  banTitle: "封禁できる記事",
-  banDescription: "担当カテゴリ内の通常記事を確認し、必要に応じて封禁します。",
-  unbanTitle: "封禁済みの記事",
-  unbanDescription:
-    "担当カテゴリ内の封禁済み記事を確認し、必要に応じて解除します。",
-  banEmptyTitle: "封禁できる記事はありません",
-  unbanEmptyTitle: "封禁済みの記事はありません",
-  banAction: "封禁",
-  unbanAction: "解除",
   total: "{count} 件",
-  knownTotal: "{count} 件",
-  knownTotalMore: "{count}+ 件",
   blocked: "封禁済み",
   emptyDescription: "現在の範囲には処理する内容がありません。",
   managementTabs: {
@@ -67,20 +46,12 @@ export default {
     table: {
       report: "通報",
       reason: "通報情報",
-      people: "担当",
       time: "時間",
       action: "操作",
     },
     ban: "封禁",
-    hide: "封禁",
     reject: "無視",
     resolve: "処理済み",
-    reasonLabel: "理由",
-    statusLabel: "状態",
-    submittedAtLabel: "通報",
-    handledAtLabel: "処理",
-    reporterLabel: "通報者",
-    handlerLabel: "処理者",
     noExcerpt: "抜粋はありません",
     targetTypes: {
       topic: "トピック",

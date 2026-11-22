@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import { trustLevelName, type TrustProgress, type TrustLimits } from '@gooseforum/client'
 import { trustQuotaFields } from '@gooseforum/client/trust-limits'
@@ -10,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 export function useTrustProgress() {
   const { api } = useGooseRuntime()
+  const { t } = useTranslation('settings')
   const [data, setData] = useState<TrustProgress>()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -19,24 +21,24 @@ export function useTrustProgress() {
   useEffect(() => {
     const isCurrent = beginRequest()
     if (!api.users.trustLevel) { void Promise.resolve().then(() => { if (isCurrent()) setLoading(false) }); return; }
-    void api.users.trustLevel().then(p => { if (isCurrent()) setData(p) }).catch(e => { if (isCurrent()) setError(serverError(e, 'Unable to load trust level')) }).finally(() => { if (isCurrent()) setLoading(false) })
-      }, [api, reload, serverError, beginRequest])
+    void api.users.trustLevel().then(p => { if (isCurrent()) setData(p) }).catch(e => { if (isCurrent()) setError(serverError(e, t('trustProgress.loadFailed'))) }).finally(() => { if (isCurrent()) setLoading(false) })
+      }, [api, reload, serverError, beginRequest, t])
   return { data, error, loading, retry: () => { setError(''); setLoading(true); setReload(v => v + 1) } }
 }
 
 export function TrustProgressSection({ progress }: { progress: ReturnType<typeof useTrustProgress> }) {
   const { locale } = useGooseRuntime()
-  const zh = locale.startsWith('zh')
+  const { t } = useTranslation('settings')
   const { data, error, loading, retry } = progress
   return <section className="space-y-3 border-t p-4">
-    <h3 className="text-sm font-semibold">{zh ? '信任等级' : 'Trust level'}</h3>
-    {loading ? <Spinner /> : error ? <div role="alert" className="flex items-center gap-2 text-sm">{error}<Button type="button" size="icon-sm" variant="outline" aria-label={zh ? '重试' : 'Retry'} title={zh ? '重试' : 'Retry'} onClick={retry}><RefreshCw /></Button></div> : data ? <>
+    <h3 className="text-sm font-semibold">{t('trustProgress.level')}</h3>
+    {loading ? <Spinner /> : error ? <div role="alert" className="flex items-center gap-2 text-sm">{error}<Button type="button" size="icon-sm" variant="outline" aria-label={t('trustProgress.retry')} title={t('trustProgress.retry')} onClick={retry}><RefreshCw /></Button></div> : data ? <>
       <div className="text-sm font-medium">{trustLevelName(data.level, locale)}</div>
-      {data.locked ? <p className="text-xs text-muted-foreground">{zh ? '自动晋级已锁定' : 'Automatic promotion locked'}</p> : data.next ? <dl className="grid gap-3 text-sm sm:grid-cols-3">
-        <div><dt className="text-xs text-muted-foreground">{zh ? '下一等级' : 'Next level'}</dt><dd>{trustLevelName(data.next.level, locale)}</dd></div>
-        <div><dt className="text-xs text-muted-foreground">{zh ? '访问日（UTC）' : 'Visit days (UTC)'}</dt><dd>{data.visitDays} / {data.next.minVisitDays}</dd></div>
-        <div><dt className="text-xs text-muted-foreground">{zh ? '不同主题' : 'Distinct topics'}</dt><dd>{data.topicsVisited} / {data.next.minTopicsVisited}</dd></div>
-        <div className="sm:col-span-3"><dt className="text-xs text-muted-foreground">{zh ? '注册时长条件到期' : 'Account age requirement met at'}</dt><dd>{new Date(new Date(data.createdAt).getTime() + data.next.minAccountAgeHours * 3600000).toLocaleString(locale)}</dd></div>
+      {data.locked ? <p className="text-xs text-muted-foreground">{t('trustProgress.locked')}</p> : data.next ? <dl className="grid gap-3 text-sm sm:grid-cols-3">
+        <div><dt className="text-xs text-muted-foreground">{t('trustProgress.next')}</dt><dd>{trustLevelName(data.next.level, locale)}</dd></div>
+        <div><dt className="text-xs text-muted-foreground">{t('trustProgress.visits')}</dt><dd>{data.visitDays} / {data.next.minVisitDays}</dd></div>
+        <div><dt className="text-xs text-muted-foreground">{t('trustProgress.topics')}</dt><dd>{data.topicsVisited} / {data.next.minTopicsVisited}</dd></div>
+        <div className="sm:col-span-3"><dt className="text-xs text-muted-foreground">{t('trustProgress.ageMet')}</dt><dd>{new Date(new Date(data.createdAt).getTime() + data.next.minAccountAgeHours * 3600000).toLocaleString(locale)}</dd></div>
       </dl> : null}
       {data.limits ? <TrustCapabilities data={data} limits={data.limits} locale={locale} /> : null}
     </> : null}
@@ -45,37 +47,37 @@ export function TrustProgressSection({ progress }: { progress: ReturnType<typeof
 
 function TrustCapabilities({ data, limits, locale }: { data: TrustProgress; limits: TrustLimits; locale: string }) {
   const [viewedAt] = useState(() => Date.now())
-  const zh = locale.startsWith('zh')
+  const { t } = useTranslation('settings')
   const next = !data.locked ? data.nextLimits : null
   const labels = {
-    maxDailyTopics: zh ? '每日新建主题（含草稿）' : 'Daily topics (including drafts)',
-    maxDailyReplies: zh ? '每日回复' : 'Daily replies',
-    maxDailyUploads: zh ? '每日上传文件' : 'Daily uploads',
-    maxImagesPerPost: zh ? '每篇图片' : 'Images per post',
-    maxExternalLinksPerPost: zh ? '每篇外链' : 'External links per post',
-    maxMentionsPerPost: zh ? '每篇提及人数' : 'Mentions per post',
+    maxDailyTopics: t('trustProgress.dailyTopics'),
+    maxDailyReplies: t('trustProgress.dailyReplies'),
+    maxDailyUploads: t('trustProgress.dailyUploads'),
+    maxImagesPerPost: t('trustProgress.images'),
+    maxExternalLinksPerPost: t('trustProgress.links'),
+    maxMentionsPerPost: t('trustProgress.mentions'),
   }
-  const quota = (value: number | null) => value === null ? (zh ? '不限' : 'Unlimited') : String(value)
-  const upload = (value: TrustLimits) => data.communityUploadsEnabled !== false && value.allowImageUpload ? (zh ? '允许' : 'Allowed') : (zh ? '禁止' : 'Not allowed')
+  const quota = (value: number | null) => value === null ? (t('trustProgress.unlimited')) : String(value)
+  const upload = (value: TrustLimits) => data.communityUploadsEnabled !== false && value.allowImageUpload ? (t('trustProgress.allowed')) : (t('trustProgress.denied'))
   function cooldown(minutes: number) {
-    if (minutes === 0) return zh ? '无需等待' : 'No wait'
+    if (minutes === 0) return t('trustProgress.noWait')
     const until = new Date(new Date(data.createdAt).getTime() + minutes * 60000)
-    return until.getTime() <= viewedAt ? (zh ? '已结束' : 'Completed') : until.toLocaleString(locale)
+    return until.getTime() <= viewedAt ? (t('trustProgress.completed')) : until.toLocaleString(locale)
   }
   return <div className="space-y-3">
-    <h4 className="text-sm font-medium">{zh ? '当前等级权限与额度' : 'Current level permissions and limits'}</h4>
-    {data.restrictionStatus && data.restrictionStatus !== 'normal' ? <p className="text-sm text-destructive">{zh ? '账号当前受限，等级权限不能绕过账号限制。' : 'Your account is restricted. Level permissions do not override account restrictions.'}</p> : null}
+    <h4 className="text-sm font-medium">{t('trustProgress.capabilities')}</h4>
+    {data.restrictionStatus && data.restrictionStatus !== 'normal' ? <p className="text-sm text-destructive">{t('trustProgress.restricted')}</p> : null}
     <Table className="w-full table-fixed text-xs">
-      <TableHeader><TableRow><TableHead className="w-1/2 whitespace-normal">{zh ? '项目' : 'Capability'}</TableHead><TableHead className="whitespace-normal">{trustLevelName(data.level, locale)}</TableHead>{next ? <TableHead className="whitespace-normal">{trustLevelName(next.level, locale)}</TableHead> : null}</TableRow></TableHeader>
+      <TableHeader><TableRow><TableHead className="w-1/2 whitespace-normal">{t('trustProgress.capability')}</TableHead><TableHead className="whitespace-normal">{trustLevelName(data.level, locale)}</TableHead>{next ? <TableHead className="whitespace-normal">{trustLevelName(next.level, locale)}</TableHead> : null}</TableRow></TableHeader>
       <TableBody>
-        <TableRow><TableCell className="whitespace-normal">{zh ? '社区图片上传' : 'Community image uploads'}</TableCell><TableCell>{upload(limits)}</TableCell>{next ? <TableCell>{upload(next) === upload(limits) && next.allowProfileCover === limits.allowProfileCover ? (zh ? '不变' : 'No change') : upload(next)}</TableCell> : null}</TableRow>
-        <TableRow><TableCell className="whitespace-normal">{zh ? '个人背景' : 'Profile background'}</TableCell><TableCell>{limits.allowProfileCover ? (zh ? '允许' : 'Allowed') : (zh ? '禁止' : 'Not allowed')}</TableCell>{next ? <TableCell>{next.allowProfileCover === limits.allowProfileCover ? (zh ? '不变' : 'No change') : next.allowProfileCover ? (zh ? '允许' : 'Allowed') : (zh ? '禁止' : 'Not allowed')}</TableCell> : null}</TableRow>
-        {trustQuotaFields.map(field => <TableRow key={field}><TableCell className="whitespace-normal">{labels[field]}</TableCell><TableCell>{quota(limits[field])}</TableCell>{next ? <TableCell>{next[field] === limits[field] ? (zh ? '不变' : 'No change') : quota(next[field])}</TableCell> : null}</TableRow>)}
+        <TableRow><TableCell className="whitespace-normal">{t('trustProgress.communityUploads')}</TableCell><TableCell>{upload(limits)}</TableCell>{next ? <TableCell>{upload(next) === upload(limits) && next.allowProfileCover === limits.allowProfileCover ? (t('trustProgress.unchanged')) : upload(next)}</TableCell> : null}</TableRow>
+        <TableRow><TableCell className="whitespace-normal">{t('trustProgress.cover')}</TableCell><TableCell>{limits.allowProfileCover ? (t('trustProgress.allowed')) : (t('trustProgress.denied'))}</TableCell>{next ? <TableCell>{next.allowProfileCover === limits.allowProfileCover ? (t('trustProgress.unchanged')) : next.allowProfileCover ? (t('trustProgress.allowed')) : (t('trustProgress.denied'))}</TableCell> : null}</TableRow>
+        {trustQuotaFields.map(field => <TableRow key={field}><TableCell className="whitespace-normal">{labels[field]}</TableCell><TableCell>{quota(limits[field])}</TableCell>{next ? <TableCell>{next[field] === limits[field] ? (t('trustProgress.unchanged')) : quota(next[field])}</TableCell> : null}</TableRow>)}
       </TableBody>
     </Table>
-    {next && trustQuotaFields.every(field => next[field] === limits[field]) && upload(next) === upload(limits) && next.allowProfileCover === limits.allowProfileCover ? <p className="text-xs text-muted-foreground">{zh ? '下一等级的以上额度相同。' : 'The next level has the same limits shown above.'}</p> : null}
-    {data.registrationCooldown ? <dl className="grid gap-3 text-xs sm:grid-cols-2"><div><dt className="text-muted-foreground">{zh ? '发言冷静期' : 'Posting cooldown'}</dt><dd>{cooldown(data.registrationCooldown.minPostAccountAgeMinutes)}</dd></div><div><dt className="text-muted-foreground">{zh ? '上传冷静期' : 'Upload cooldown'}</dt><dd>{cooldown(data.registrationCooldown.minUploadAccountAgeMinutes)}</dd></div></dl> : null}
-    {data.communityUploadRoleExempt ? <p className="text-xs text-muted-foreground">{zh ? '角色账号的社区图片上传豁免每日上传额度和上传冷静期；头像仍受限制。' : 'Your role exempts community image uploads from the daily upload limit and upload cooldown. Avatars remain subject to both.'}</p> : null}
-    <p className="text-xs text-muted-foreground">{zh ? '以上为额度上限，不是今日剩余次数；分类访问和账号状态仍独立决定可执行操作。' : 'These are limits, not remaining daily allowances. Category access and account status still apply.'}</p>
+    {next && trustQuotaFields.every(field => next[field] === limits[field]) && upload(next) === upload(limits) && next.allowProfileCover === limits.allowProfileCover ? <p className="text-xs text-muted-foreground">{t('trustProgress.sameLimits')}</p> : null}
+    {data.registrationCooldown ? <dl className="grid gap-3 text-xs sm:grid-cols-2"><div><dt className="text-muted-foreground">{t('trustProgress.postingCooldown')}</dt><dd>{cooldown(data.registrationCooldown.minPostAccountAgeMinutes)}</dd></div><div><dt className="text-muted-foreground">{t('trustProgress.uploadCooldown')}</dt><dd>{cooldown(data.registrationCooldown.minUploadAccountAgeMinutes)}</dd></div></dl> : null}
+    {data.communityUploadRoleExempt ? <p className="text-xs text-muted-foreground">{t('trustProgress.exempt')}</p> : null}
+    <p className="text-xs text-muted-foreground">{t('trustProgress.limitHint')}</p>
   </div>
 }

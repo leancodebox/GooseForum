@@ -1,6 +1,5 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
-  moderationPending: "内容已保存，审核通过后公开。",
   moderationRejected:
     "内容已保存，但未通过敏感词审核，暂不公开。请修改后重新发布，或联系管理员复核。",
   createTitle: "发布主题",
@@ -14,20 +13,16 @@ export default {
   mainCategoryChangeDescription:
     "移除“{current}”后，“{next}”将成为主分类，并决定谁能看到这个主题。",
   confirmMainCategoryChange: "确认更改",
-  restrictedCategoryHint: "仅拥有该分类访问权限的成员可见",
   restrictedCategorySingleHint: "受限分类必须单独选择；选择它会替换当前分类",
   noCreatePermission: "你已没有在所选分类发布主题的权限，可以继续保存草稿。",
   markdownMode: "Markdown",
   visualMode: "编辑",
   preview: "预览",
-  pastePlainText: "粘贴为纯文本",
-  clipboardReadFailed: "无法读取剪贴板，请检查浏览器权限。",
   visualUnsupported: "当前正文包含任务列表，请继续使用 Markdown 模式编辑。",
   processingImage: "正在处理图片...",
   processingImages: "正在处理图片 {done}/{total}",
   imageInserted: "图片已插入。",
   imagesInserted: "已插入 {count} 张图片。",
-  moreImageFailures: "；另有 {count} 张失败",
   noUploadableImages: "没有可上传的图片文件",
   topicUpdated: "主题已更新。",
   topicPublished: "主题已发布。",

@@ -2,6 +2,7 @@ import zh from "./messages/zh-oidc-consent.js";
 import en from "./messages/en-oidc-consent.js";
 import ja from "./messages/ja-oidc-consent.js";
 import it from "./messages/it-oidc-consent.js";
+import ru from "./messages/ru-oidc-consent.js";
 import type { Locale } from "./auth.js";
 
 export interface OIDCConsentMessages {
@@ -27,4 +28,5 @@ export const oidcConsentResources: Record<Locale, OIDCConsentMessages> = {
   en,
   ja,
   it,
+  ru,
 } as const;

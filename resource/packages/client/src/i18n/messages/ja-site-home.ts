@@ -12,7 +12,6 @@ export default {
   replies: "返信",
   views: "閲覧",
   activity: "アクティビティ",
-  pinned: "固定",
   emptyTitle: "トピックはありません",
   emptyDescription: "表示できるトピックはありません。",
   emptyCategoryDescription: "このカテゴリーには公開トピックがありません。",

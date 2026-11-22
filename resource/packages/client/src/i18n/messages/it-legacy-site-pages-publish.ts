@@ -1,6 +1,5 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
-  moderationPending: "Contenuto salvato. Sarà pubblico dopo l’approvazione.",
   moderationRejected:
     "Il contenuto è stato salvato ma non ha superato la moderazione e non è pubblico. Modificalo e riprova oppure contatta un amministratore.",
   createTitle: "Pubblica argomento",
@@ -16,8 +15,6 @@ export default {
   mainCategoryChangeDescription:
     "Rimuovendo “{current}”, “{next}” diventerà la categoria principale e cambierà chi può leggere questa discussione.",
   confirmMainCategoryChange: "Cambia categoria principale",
-  restrictedCategoryHint:
-    "Visibile solo ai membri con accesso a questa categoria",
   restrictedCategorySingleHint:
     "Una categoria riservata deve essere selezionata da sola; selezionandola sostituisci le categorie correnti",
   noCreatePermission:
@@ -25,16 +22,12 @@ export default {
   markdownMode: "Markdown",
   visualMode: "Editor",
   preview: "Anteprima",
-  pastePlainText: "Incolla come testo semplice",
-  clipboardReadFailed:
-    "Impossibile leggere gli appunti. Controlla le autorizzazioni del browser.",
   visualUnsupported:
     "Il contenuto include elenchi di attività. Continua a modificarlo in modalità Markdown.",
   processingImage: "Elaborazione immagine...",
   processingImages: "Elaborazione immagini {done}/{total}",
   imageInserted: "Immagine inserita.",
   imagesInserted: "{count} immagini inserite.",
-  moreImageFailures: "; altre {count} non riuscite",
   noUploadableImages: "Nessun file immagine caricabile",
   topicUpdated: "Argomento aggiornato.",
   topicPublished: "Argomento pubblicato.",

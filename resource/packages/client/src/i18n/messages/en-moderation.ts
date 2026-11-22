@@ -43,7 +43,6 @@ export default {
     reporter: "Reporter",
     handler: "Handler",
     submitted: "Submitted",
-    handled: "Handled",
     noExcerpt: "No excerpt",
     block: "Block",
     ignore: "Ignore",

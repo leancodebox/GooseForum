@@ -2,6 +2,7 @@ import zh from "./messages/zh-publish.js";
 import en from "./messages/en-publish.js";
 import ja from "./messages/ja-publish.js";
 import it from "./messages/it-publish.js";
+import ru from "./messages/ru-publish.js";
 import type { Locale } from "./auth.js";
 
 type Widen<T> = T extends string ? string : { [K in keyof T]: Widen<T[K]> };
@@ -12,4 +13,5 @@ export const publishResources: Record<Locale, Messages> = {
   en,
   ja,
   it,
+  ru,
 } as const;

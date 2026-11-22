@@ -12,7 +12,6 @@ export default {
   replies: "Risposte",
   views: "Visualizzazioni",
   activity: "Attività",
-  pinned: "Fissato",
   emptyTitle: "Nessun argomento",
   emptyDescription: "Non ci sono argomenti da mostrare.",
   emptyCategoryDescription: "Questa categoria non contiene argomenti pubblici.",

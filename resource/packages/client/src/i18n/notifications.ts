@@ -2,6 +2,7 @@ import zh from "./messages/zh-notifications.js";
 import en from "./messages/en-notifications.js";
 import ja from "./messages/ja-notifications.js";
 import it from "./messages/it-notifications.js";
+import ru from "./messages/ru-notifications.js";
 import type { Locale } from "./auth.js";
 
 type Widen<T> = T extends string ? string : { [K in keyof T]: Widen<T[K]> };
@@ -12,4 +13,5 @@ export const notificationResources: Record<Locale, Messages> = {
   en,
   ja,
   it,
+  ru,
 } as const;

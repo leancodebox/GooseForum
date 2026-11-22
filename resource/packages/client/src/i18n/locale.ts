@@ -1,9 +1,11 @@
-export const supportedLocales = ["zh", "en", "ja", "it"] as const;
+export const supportedLocales = ["zh", "en", "ja", "it", "ru"] as const;
 export type Locale = (typeof supportedLocales)[number];
 export const localeLabels = {
   zh: { label: '简体中文', short: '中' },
   en: { label: 'English', short: 'EN' },
   ja: { label: '日本語', short: '日' },
+  // Original Russian translations contributed by @oofsdfs in GooseForum PR #19.
+  ru: { label: "Русский", short: "RU" },
   it: { label: 'Italiano', short: 'IT' },
 } as const;
 

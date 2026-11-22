@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 const backendFile = fileURLToPath(
   new URL("../../app/http/controllers/component/message_code.go", import.meta.url),
 );
-const locales = ["zh", "en", "ja", "it"];
+const locales = ["zh", "en", "ja", "it", "ru"];
 
 export function parseBackendMessageCodes(source) {
   return collectMatches(source, /\b\w+\s+MessageCode\s*=\s*"([^"]+)"/g);

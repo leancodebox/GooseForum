@@ -14,26 +14,10 @@ export default {
     "everyone e registered sono gruppi di sistema senza membri memorizzati.",
   systemImmutable: "I gruppi di sistema non possono essere modificati.",
   categoryPermissions: "Permessi categoria",
-  configureAccess: "Permessi",
-  categoryPermissionsTitle: "Permessi per “{category}”",
-  categoryPermissionsDescription:
-    "Imposta la capacità assegnata a ogni gruppo di sistema o personalizzato in questa categoria.",
-  resultingVisibility: "Visibilità risultante",
-  visibilityDerivedHint:
-    "Una categoria è pubblica solo quando il gruppo Tutti può leggerla.",
-  noReadableAudienceWarning:
-    "Nessun gruppo attivo può leggere questa categoria. Potrebbero poterla recuperare solo gli amministratori globali.",
-  legacyImageVisibilityWarning:
-    "Le immagini precedenti senza un record di proprietà potrebbero restare accessibili tramite URL diretto. I nuovi caricamenti tracciati sono protetti dai permessi della categoria principale.",
-  restrictionConflictWarning:
-    "{count} argomenti con più categorie fanno ancora riferimento a questa categoria. Rendili a categoria singola prima di limitarla.",
   group: "Gruppo di accesso",
-  groupType: "Appartenenza",
   permissionSummaryHint:
     "I permessi si configurano nella pagina Categorie; questa tabella è un riepilogo in sola lettura.",
   manageCategoryPermissions: "Gestisci per categoria",
-  permissionHint:
-    "Le capacità sono cumulative; nessun permesso significa nessun accesso.",
   members: "Membri",
   username: "Nome utente o ID",
   addMember: "Aggiungi membro",
@@ -46,7 +30,6 @@ export default {
   deleteConfirm: "Eliminare “{name}” con tutti i membri e permessi?",
   memberSaved: "Membro salvato",
   memberSaveFailed: "Salvataggio membro non riuscito",
-  memberDeleteFailed: "Rimozione membro non riuscita",
   applicationFailed: "Invio della richiesta non riuscito",
   joinTitle: "Richiedi accesso ai gruppi",
   joinDescription:
@@ -64,9 +47,6 @@ export default {
   applicationsToReview: "Richieste da esaminare",
   managerReviewHint: "Gestisci questi gruppi di accesso.",
   noPendingApplications: "Nessuna richiesta in attesa",
-  customGroupCount: "{count} gruppi personalizzati",
-  restrictedCategoryCount: "{count} categorie riservate",
-  refreshing: "Aggiornamento in corso",
   noGroups: "Nessun gruppo di accesso",
   noMatchingGroups:
     "Nessun gruppo corrispondente. Prova un’altra parola chiave.",
@@ -78,7 +58,6 @@ export default {
   category: "Categoria",
   visibility: "Visibilità",
   capability: "Capacità",
-  noCategories: "Nessuna categoria",
   public: "Pubblica",
   restricted: "Riservata",
   memberHint:
@@ -95,7 +74,6 @@ export default {
   removeMember: "Rimuovi membro",
   selectGroup: "Seleziona un gruppo di accesso per visualizzarne i dettagli.",
   groupNamePlaceholder: "Ad esempio: Membri interni",
-  joinModeLabel: "Modalità di adesione",
   enabledHint:
     "La disattivazione revoca immediatamente le capacità concesse dal gruppo.",
   groupNameRequired: "Inserisci il nome del gruppo",

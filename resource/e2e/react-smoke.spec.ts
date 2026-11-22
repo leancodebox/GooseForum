@@ -748,6 +748,44 @@ test('requests role and permission labels in the page language', async ({ page }
   await expect.poll(() => requests).toEqual(expect.arrayContaining(['role-list?lang=ja', 'get-permission-list?lang=ja']))
 })
 
+test('selects and saves the default site language', async ({ page }) => {
+  await page.route('**/api/admin/site-settings', route => route.fulfill({ json: { code: 0, result: {
+    defaultLocale: 'en', disableDefaultAvatar: true, builtinAvatarFiles: [],
+  } } }))
+  await page.route('**/api/admin/save-site-settings', route => route.fulfill({ json: { code: 0 } }))
+  await page.goto('/admin/settings/site-info?lang=en')
+  const selector = page.getByRole('combobox', { name: 'Default site language' })
+  await expect(selector).toHaveText('English')
+  await selector.click()
+  await page.getByRole('option', { name: '日本語' }).click()
+  await expect(selector).toHaveText('日本語')
+  const saved = page.waitForRequest('**/api/admin/save-site-settings')
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  expect((await saved).postDataJSON().settings.defaultLocale).toBe('ja')
+})
+
+test('detects Russian on login and offers it as the site default', async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(navigator, 'languages', { get: () => ['ru-RU'] }))
+  await page.route('**/__goose_page/login**', route => route.fulfill({ json: {
+    ...homePage, component: 'auth.login', props: { initialMode: 'login', redirectUrl: '/', oauthProviders: [] }, url: '/login',
+  } }))
+  await page.goto('/login')
+  await expect(page.getByRole('heading', { name: 'Вход в аккаунт' })).toBeVisible()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ru')
+  await page.getByRole('button', { name: 'Сменить язык' }).click()
+  await expect(page.getByRole('button', { name: 'Русский' })).toHaveAttribute('aria-pressed', 'true')
+  await page.route('**/api/admin/site-settings', route => route.fulfill({ json: { code: 0, result: {
+    defaultLocale: 'en', disableDefaultAvatar: true, builtinAvatarFiles: [],
+  } } }))
+  await page.route('**/api/admin/save-site-settings', route => route.fulfill({ json: { code: 0 } }))
+  await page.goto('/admin/settings/site-info')
+  await page.getByRole('combobox', { name: 'Язык сайта по умолчанию' }).click()
+  await page.getByRole('option', { name: 'Русский' }).click()
+  const saved = page.waitForRequest('**/api/admin/save-site-settings')
+  await page.getByRole('button', { name: 'Сохранить', exact: true }).click()
+  expect((await saved).postDataJSON().settings.defaultLocale).toBe('ru')
+})
+
 test('uses the site default in the admin when browser languages are unsupported', async ({ page }) => {
   await page.addInitScript(() => Object.defineProperty(navigator, 'languages', { get: () => ['fr-FR'] }))
   await page.route('**/__goose_page/**', route => route.fulfill({ json: {

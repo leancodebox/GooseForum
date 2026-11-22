@@ -1,7 +1,6 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
   presetsTitle: "Presets",
-  presetApplied: "{name} preset applied. Save the draft to keep it.",
   saveDraft: "Save draft",
   publishSite: "Publish site",
   workflowTitle: "How it works:",
@@ -21,9 +20,6 @@ export default {
   resetDefault: "Default",
   restoreToSavedTitle: "Restore to the saved configuration",
   enableLabel: "Enable",
-  tabLatest: "Latest",
-  tabHot: "Hot",
-  tabFeatured: "Featured",
   samplePublish: "Publish topic",
   sampleTopic1:
     "Theme system refactor discussion: colors, radius, and component states",
@@ -37,7 +33,6 @@ export default {
   sampleTopicQuote: "Color hierarchy should be quiet, but never vague.",
   sampleMessageIncoming: "Is this background comfortable?",
   sampleMessageOutgoing: "The contrast needs to stay solid.",
-  sampleTextarea: "Theme variables cover inputs, focus, and body text.",
   presets: {
     goose: {
       label: "Goose",

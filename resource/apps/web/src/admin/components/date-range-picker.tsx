@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format, parseISO, subMonths } from "date-fns";
-import { enUS, it, ja, zhCN } from "date-fns/locale";
+import { enUS, ru, it, ja, zhCN } from "date-fns/locale";
 import { CalendarDays } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { Button } from "@gooseforum/ui/components/button";
@@ -146,6 +146,7 @@ function rangeLabel(value: DashboardDateRange, locale: string) {
 function calendarLocale(locale: string) {
   if (locale.startsWith("zh")) return zhCN;
   if (locale.startsWith("ja")) return ja;
+  if (locale.startsWith("ru")) return ru;
   if (locale.startsWith("it")) return it;
   return enUS;
 }

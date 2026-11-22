@@ -4,7 +4,7 @@
 // resource/packages/client/src/i18n; this package covers only what the Go side renders.
 //
 // Supported locales mirror the frontend (resource/packages/client/src/i18n/locale.ts):
-// zh (source / fallback), en, ja and it.
+// zh (source / fallback), en, ja, it and ru.
 package i18n
 
 import (
@@ -18,7 +18,7 @@ import (
 var localeFS embed.FS
 
 // SupportedLocales lists the locales the server can render, in preference order.
-var SupportedLocales = []string{"zh", "en", "ja", "it"}
+var SupportedLocales = []string{"zh", "en", "ja", "it", "ru"}
 
 // Fallback is used when a locale or a key is missing. It matches the frontend
 // fallbackLocale so the two stay consistent.

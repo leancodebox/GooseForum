@@ -12,7 +12,6 @@ export default {
   replies: "回复",
   views: "浏览",
   activity: "活动",
-  pinned: "置顶",
   emptyTitle: "暂无主题",
   emptyDescription: "社区还没有可以展示的主题。",
   emptyCategoryDescription: "这个分类还没有公开主题。",

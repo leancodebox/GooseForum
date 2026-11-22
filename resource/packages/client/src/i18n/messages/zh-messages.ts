@@ -20,7 +20,6 @@ export default {
   selectConversation: "选择一个会话",
   selectConversationDescription: "从左侧选择会话，或开始新的私信。",
   searchUsers: "搜索用户…",
-  userFallback: "用户",
   noContactableUsers: "暂无可联系用户。",
   close: "关闭",
   back: "返回",

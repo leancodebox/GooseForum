@@ -5,7 +5,6 @@ export default {
   summary: "Unpublished topics stay here so you can continue editing anytime.",
   newDraft: "New draft",
   edit: "Continue editing",
-  publishNow: "Publish",
   untitled: "Untitled draft",
   blocked: "Blocked",
   emptyTitle: "No drafts yet",

@@ -6,7 +6,6 @@ export default {
     "Gli argomenti non pubblicati restano qui, così puoi continuare a modificarli quando vuoi.",
   newDraft: "Nuova bozza",
   edit: "Continua a modificare",
-  publishNow: "Pubblica",
   untitled: "Bozza senza titolo",
   blocked: "Bloccata",
   emptyTitle: "Ancora nessuna bozza",

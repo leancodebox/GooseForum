@@ -31,6 +31,9 @@
 
 - 类型检查：`pnpm typecheck`。
 - 前端测试：`pnpm test`。
+- 国际化审计：`pnpm check:i18n` 校验各语言实际加载的键、占位符和已识别的静态引用。
+- 审查词典改动：`pnpm audit:i18n --base HEAD --history` 比较工作区和指定提交，列出新增中文键、调用位置及基线调用文件中的同文案。历史匹配限同文件、同键和基线的第一父链；检查 PR 时将 HEAD 换为合并基线。用 `pnpm audit:i18n --all --json` 导出逐键来源和动态候选；未识别引用的键需要复核后再删除。报告中的 `lostReferenceCandidates` 优先列出基线有调用线索、本次改动后只剩词典定义的候选，并区分明确键与动态前缀。
+- 批量筛选未识别键：在 resource/ 执行 `pnpm audit:i18n --groups` 查看按线索和命名空间汇总的数量，追加 `--json` 导出每个键的全部线索和位置。默认审计和分组只读取当前工作区。优先复核 `unusedCandidate`：已排除已识别的调用、动态候选和 API 契约，再检查各语言的共享定义、前端同名字符串、属性和动态前缀，以及 Go 键名字面量。候选只代表当前扫描范围内缺少使用线索。
 - 包依赖边界：`pnpm check:boundaries`。
 - 完整 React 检查：`pnpm check:react`。
 - 浏览器端到端测试：`pnpm test:react:e2e`。
