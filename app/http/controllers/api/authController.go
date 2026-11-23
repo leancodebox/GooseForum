@@ -55,9 +55,40 @@ func Logout(c *gin.Context) {
 
 var verifyImageCaptcha = captchaOpt.VerifyCaptcha
 
+func AltchaChallenge(c *gin.Context) {
+	c.Header("Cache-Control", "no-store")
+	settings, err := hotdataserve.LoadSecuritySettings()
+	if err != nil {
+		c.Status(http.StatusServiceUnavailable)
+		return
+	}
+	if settings.RegistrationCaptcha == nil || settings.RegistrationCaptcha.Provider != "altcha" {
+		c.Status(http.StatusNotFound)
+		return
+	}
+	action := c.Query("action")
+	if action != "login" && action != "register" {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	challenge, err := registrationservice.NewAltchaChallenge(action, c.ClientIP())
+	if errors.Is(err, registrationservice.ErrRateLimited) {
+		c.Status(http.StatusTooManyRequests)
+		return
+	}
+	if err != nil {
+		c.Status(http.StatusServiceUnavailable)
+		return
+	}
+	c.JSON(http.StatusOK, challenge)
+}
+
 func validAuthCaptcha(c *gin.Context, cfg *pageConfig.RegistrationCaptcha, action, id, answer, token string) bool {
 	if cfg == nil || cfg.Provider == "image" {
 		return verifyImageCaptcha(id, answer)
+	}
+	if cfg.Provider == "altcha" {
+		return registrationservice.VerifyAltcha(token, action)
 	}
 	if cfg.Provider == "none" {
 		return true

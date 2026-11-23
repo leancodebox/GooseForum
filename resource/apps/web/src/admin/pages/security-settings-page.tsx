@@ -63,7 +63,7 @@ export function SecuritySettingsPage({
     void load();
   }, [load]);
   const captcha = form.registrationCaptcha ?? { provider: "image" };
-  const hosted = captcha.provider !== "image" && captcha.provider !== "none";
+  const hosted = captcha.provider !== "image" && captcha.provider !== "none" && captcha.provider !== "altcha";
   const secretConfigured = hosted && savedCaptcha?.provider === captcha.provider && savedCaptcha.siteKey === captcha.siteKey?.trim();
   function add() {
     const v = domain.trim().toLowerCase();
@@ -142,6 +142,7 @@ export function SecuritySettingsPage({
             <SelectTrigger id="registration-captcha" className="w-full sm:max-w-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="image">{text("captchaImage")}</SelectItem>
+              <SelectItem value="altcha">{text("captchaAltcha")}</SelectItem>
               <SelectItem value="hcaptcha">hCaptcha</SelectItem>
               <SelectItem value="recaptcha_v2">Google reCAPTCHA v2</SelectItem>
               <SelectItem value="recaptcha_v3">Google reCAPTCHA v3</SelectItem>

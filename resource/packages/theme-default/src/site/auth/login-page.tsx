@@ -36,6 +36,7 @@ import { useServerErrorMessage } from '@gooseforum/runtime/i18n/server-error'
 import { AuthBrand } from './auth-brand'
 import { AuthLocaleSwitcher } from './auth-locale-switcher'
 
+const AltchaChallenge = lazy(() => import('./altcha-challenge'))
 const AuthChallenge = lazy(() => import('./auth-challenge'))
 
 type Mode = 'login' | 'register' | 'forgot'
@@ -55,7 +56,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
   const [mfaCode, setMfaCode] = useState('')
   const [captcha, setCaptcha] = useState({ id: '', image: '' })
   const provider = page.registrationCaptcha ?? 'image'
-  const hosted = provider !== 'none' && provider !== 'image'
+  const needsToken = provider !== 'none' && provider !== 'image'
   const needsImage = !mfa && (mode === 'forgot' || provider === 'image')
   const proof = useRef<(() => Promise<string>) | null>(null)
   const [challengeAttempt, setChallengeAttempt] = useState(0)
@@ -93,7 +94,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
 
   async function readCaptcha(answer: string) {
     if (provider === 'image') return { captchaId: captcha.id, captchaCode: answer }
-    if (!hosted) return {}
+    if (!needsToken) return {}
     const captchaToken = await proof.current?.()
     if (captchaToken) return { captchaToken }
     setError(t('captchaVerificationRequired'))
@@ -134,7 +135,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
         setError(resolveError(nextError, t('validation.loginFailed')))
       }
       setLoginForm((current) => ({ ...current, captcha: '' }))
-      if (hosted) setChallengeAttempt((n) => n + 1)
+      if (needsToken) setChallengeAttempt((n) => n + 1)
       if (provider === 'image') void refreshCaptcha()
     } finally {
       setPending(null)
@@ -191,7 +192,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
     } catch (nextError) {
       setError(resolveError(nextError, t('validation.registerFailed')))
       setRegisterForm((current) => ({ ...current, captcha: '' }))
-      if (hosted) setChallengeAttempt((n) => n + 1)
+      if (needsToken) setChallengeAttempt((n) => n + 1)
       if (provider === 'image') void refreshCaptcha()
     } finally {
       setPending(null)
@@ -238,10 +239,12 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
     }
   }
 
-  const hostedChallenge = mode !== 'forgot' && hosted && (
+  const tokenChallenge = mode !== 'forgot' && needsToken && (
     <Suspense fallback={<Spinner />}>
-      <AuthChallenge key={mode + challengeAttempt} action={mode} provider={provider} siteKey={page.captchaSiteKey ?? ''}
-        proof={proof} onError={() => setError(t('validation.captchaLoadFailed'))} />
+      {provider === 'altcha'
+        ? <AltchaChallenge key={mode + challengeAttempt} action={mode} proof={proof} />
+        : <AuthChallenge key={mode + challengeAttempt} action={mode} provider={provider} siteKey={page.captchaSiteKey ?? ''}
+          proof={proof} onError={() => setError(t('validation.captchaLoadFailed'))} />}
       {error && <Button type="button" variant="ghost" size="sm" onClick={() => { setError(''); setChallengeAttempt((n) => n + 1) }}>
         {t('refreshCaptcha')}
       </Button>}
@@ -339,7 +342,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
                       refreshLabel={t('refreshCaptcha')}
                       onRefresh={() => void refreshCaptcha()}
                     />}
-                    {hostedChallenge}
+                    {tokenChallenge}
                     <Button type="button" variant="link" className="h-6 self-end px-0 text-xs" onClick={() => switchMode('forgot')}>
                       {t('forgotPassword')}
                     </Button>
@@ -400,7 +403,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
                         refreshLabel={t('refreshCaptcha')}
                         onRefresh={() => void refreshCaptcha()}
                       />}
-                      {hostedChallenge}
+                      {tokenChallenge}
                       <Field orientation="horizontal">
                         <Checkbox
                           id="register-terms"

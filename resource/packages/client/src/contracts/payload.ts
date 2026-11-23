@@ -47,7 +47,7 @@ export interface ErrorPageProps {
   params?: Record<string, unknown>
 }
 
-export type RegistrationCaptchaProvider = 'image' | 'none' | 'hcaptcha' | 'recaptcha_v2' | 'recaptcha_v3'
+export type RegistrationCaptchaProvider = 'image' | 'none' | 'altcha' | 'hcaptcha' | 'recaptcha_v2' | 'recaptcha_v3'
 
 export interface LoginPageProps {
   registrationCaptcha?: RegistrationCaptchaProvider

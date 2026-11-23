@@ -40,7 +40,12 @@ test('configures a hosted registration captcha', async ({ page }) => {
   const captcha = page.getByRole('combobox', { name: 'Login and registration verification' });
   await expect(captcha).toHaveText('Local image CAPTCHA');
   await captcha.click();
-  await expect(page.getByRole('option')).toHaveCount(5);
+  await expect(page.getByRole('option')).toHaveCount(6);
+  await page.getByRole('option', { name: 'ALTCHA proof of work' }).click();
+  await expect(page.getByLabel('Site Key', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect.poll(() => saved).toMatchObject({ settings: { registrationCaptcha: { provider: 'altcha' } } });
+  await captcha.click();
   await page.getByRole('option', { name: 'Google reCAPTCHA v3' }).click();
   await expect(page.getByLabel('Secret Key', { exact: true })).toHaveAccessibleDescription('Enter the secret from your verification provider.');
   await page.getByLabel('Site Key', { exact: true }).fill('public-key');

@@ -12,6 +12,8 @@ github.com/Masterminds/sprig/v3 v3.3.0 h1:mQh0Yrg1XPo6vjYXgtf5OtijNAKJRNcTdOOGZe
 github.com/Masterminds/sprig/v3 v3.3.0/go.mod h1:Zy1iXRYNqNLUolqCpL4uhk6SHUMAOSCzdgBfDb35Lz0=
 github.com/ThreeDotsLabs/watermill v1.5.3 h1:GoTR7fW1ZT+itzUv/w3VB6Um1B7oTBrOWjJ8sOA9XqU=
 github.com/ThreeDotsLabs/watermill v1.5.3/go.mod h1:i9/968UriGphWfEbfMuYSD1qFbYRjb0mE0r+rV0FPp4=
+github.com/altcha-org/altcha-lib-go/v2 v2.5.0 h1:CWUOtIWMkG26l7/8cH2PC4OY4ninswBMMSJML1i/SNA=
+github.com/altcha-org/altcha-lib-go/v2 v2.5.0/go.mod h1:n3KVRk3ziFGC5GIPkiSFMSROrAZ0wezy88///KeYdRo=
 github.com/andybalholm/brotli v1.3.0 h1:IdkhjSe/+34U+fP7FSR2Q6Poj1hnHUa2GoWmzXJd6qY=
 github.com/andybalholm/brotli v1.3.0/go.mod h1:rzTDkvFWvIrjDXZHkuS16NPggd91W3kUSvPlQ1pLaKY=
 github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc h1:biVzkmvwrH8WK8raXaxBx6fRVTlJILwEwQGL1I/ByEI=

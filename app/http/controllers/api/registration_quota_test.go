@@ -75,6 +75,7 @@ func TestRegistrationUsesServerCaptchaPolicy(t *testing.T) {
 		want     component.MessageCode
 	}{
 		{"image", component.MessageAuthCaptchaInvalid},
+		{"altcha", component.MessageAuthCaptchaInvalid},
 		{"hcaptcha", component.MessageAuthCaptchaInvalid},
 		{"recaptcha_v2", component.MessageAuthCaptchaInvalid},
 		{"recaptcha_v3", component.MessageAuthCaptchaInvalid},
@@ -117,7 +118,7 @@ func TestPasswordLoginCaptchaAndAttemptLimit(t *testing.T) {
 	stamp := uint64(time.Now().UnixNano())
 	policyPeer := fmt.Sprintf("[2001:db8:%x:%x::1]:1234", uint16(stamp>>16), uint16(stamp))
 	quotaPeer := fmt.Sprintf("[2001:db8:%x:%x::2]:1234", uint16(stamp>>16), uint16(stamp))
-	for _, provider := range []string{"image", "hcaptcha", "recaptcha_v2", "recaptcha_v3", "none"} {
+	for _, provider := range []string{"altcha", "image", "hcaptcha", "recaptcha_v2", "recaptcha_v3", "none"} {
 		if err := pageConfig.SaveConfig(pageConfig.SecuritySettings, fmt.Sprintf(`{"registrationCaptcha":{"provider":%q}}`, provider)); err != nil {
 			t.Fatal(err)
 		}

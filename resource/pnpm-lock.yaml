@@ -379,6 +379,9 @@ importers:
       '@hcaptcha/react-hcaptcha':
         specifier: ^2.2.0
         version: 2.2.0
+      altcha:
+        specifier: ^3.7.0
+        version: 3.7.0
       compressorjs:
         specifier: ^1.4.0
         version: 1.4.0
@@ -2534,6 +2537,9 @@ packages:
   ajv@8.20.0:
     resolution: {integrity: sha512-Thbli+OlOj+iMPYFBVBfJ3OmCAnaSyNn4M1vz9T6Gka5Jt9ba/HIR56joy65tY6kx/FCF5VXNB819Y7/GUrBGA==}
 
+  altcha@3.7.0:
+    resolution: {integrity: sha512-YeFKA/gl7Lf83MtjfZ2KtXPxWSyuexUQKqo+HzRLzEspI2rrLFaipFvwys0GOfkmFCU0KQ/cmez9Bk3xM8GQHQ==}
+
   ansi-colors@4.1.3:
     resolution: {integrity: sha512-/6w/C21Pm1A7aZitlI5Ni/2J6FFQN8i1Cvz3kHABAAbw93v/NlvKdVOqz7CCWz/3iv/JplRSEEZ83XION15ovw==}
     engines: {node: '>=6'}
@@ -3195,6 +3201,9 @@ packages:
   has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
+
+  hash-wasm@4.13.0:
+    resolution: {integrity: sha512-GrWl7wsV46fKIXQZB5ebskLZLAmKL6d9RS0fspCxDeQyjoNu1AfTJTMLPOJyfzaQm0ldFiwFN21/w+sE/kgEFQ==}
 
   hashery@1.5.1:
     resolution: {integrity: sha512-iZyKG96/JwPz1N55vj2Ie2vXbhu440zfUfJvSwEqEbeLluk7NnapfGqa7LH0mOsnDxTF85Mx8/dyR6HfqcbmbQ==}
@@ -6583,6 +6592,10 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
+  altcha@3.7.0:
+    dependencies:
+      hash-wasm: 4.13.0
+
   ansi-colors@4.1.3: {}
 
   ansi-regex@5.0.1: {}
@@ -7249,6 +7262,8 @@ snapshots:
   hachure-fill@0.5.2: {}
 
   has-flag@4.0.0: {}
+
+  hash-wasm@4.13.0: {}
 
   hashery@1.5.1:
     dependencies:

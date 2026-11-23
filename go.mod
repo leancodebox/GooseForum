@@ -5,6 +5,7 @@ go 1.27.4
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/ThreeDotsLabs/watermill v1.5.3
+	github.com/altcha-org/altcha-lib-go/v2 v2.5.0
 	github.com/dgraph-io/badger/v4 v4.9.6
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gertd/go-pluralize v0.2.1

@@ -105,6 +105,7 @@ func apiRoute(ginApp *gin.Engine) {
 	baseApi.POST("register", api.Register)
 	baseApi.POST("logout", api.Logout)
 
+	baseApi.GET("altcha-challenge", api.AltchaChallenge)
 	baseApi.GET("get-captcha", UpQueryReq(api.GetCaptcha))
 	baseApi.GET("user-card", UpQueryReq(api.GetUserCard))
 	baseApi.POST("forgot-password", UpButterReq(api.ForgotPassword))

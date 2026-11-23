@@ -1,5 +1,6 @@
 export default {
   registrationCaptcha: "Login and registration verification",
+  captchaAltcha: "ALTCHA proof of work",
   captchaImage: "Local image CAPTCHA",
   captchaNone: "No extra verification",
   captchaSiteKey: "Site Key",

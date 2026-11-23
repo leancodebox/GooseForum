@@ -1,5 +1,6 @@
 export default {
   registrationCaptcha: "Проверка при входе и регистрации",
+  captchaAltcha: "ALTCHA — доказательство работы",
   captchaImage: "Локальная цифровая капча",
   captchaNone: "Без дополнительной проверки",
   captchaSiteKey: "Ключ сайта (Site Key)",

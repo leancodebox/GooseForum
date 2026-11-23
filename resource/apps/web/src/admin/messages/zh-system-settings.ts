@@ -1,5 +1,6 @@
 export default {
   registrationCaptcha: "登录与注册验证方式",
+  captchaAltcha: "ALTCHA 工作量验证",
   captchaImage: "本地数字验证码",
   captchaNone: "关闭额外验证",
   captchaSiteKey: "站点密钥（Site Key）",

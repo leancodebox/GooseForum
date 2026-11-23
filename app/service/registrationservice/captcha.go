@@ -21,7 +21,7 @@ func PrepareCaptchaSettings(settings *pageConfig.SecurityAndRegistration, previo
 		return nil
 	}
 	switch cfg.Provider {
-	case "image", "none":
+	case "altcha", "image", "none":
 		*cfg = pageConfig.RegistrationCaptcha{Provider: cfg.Provider}
 		return nil
 	case "hcaptcha", "recaptcha_v2", "recaptcha_v3":
