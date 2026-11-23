@@ -217,8 +217,10 @@ func newGinEngine() (*gin.Engine, error) {
 		gin.SetMode(gin.ReleaseMode)
 		engine = gin.New()
 	}
-	if err := engine.SetTrustedProxies(preferences.GetStringSlice("server.trustedProxies")); err != nil {
-		return nil, fmt.Errorf("invalid server.trustedProxies: %w", err)
+	// The local reverse proxy resolves the forwarding chain and overwrites X-Real-IP.
+	engine.RemoteIPHeaders = []string{"X-Real-IP"}
+	if err := engine.SetTrustedProxies([]string{"127.0.0.0/8", "::1"}); err != nil {
+		return nil, fmt.Errorf("configure loopback proxy handling: %w", err)
 	}
 	return engine, nil
 }

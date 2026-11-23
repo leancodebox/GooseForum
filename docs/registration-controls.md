@@ -10,9 +10,15 @@
 
 密码重置和验证邮件共享独立邮件配额：每个 IP 每小时 20 次，每个邮箱 3 次，全站 200 次。验证邮件重发仍保留已有每分钟一次、每天三次的账号限制。
 
-反向代理部署需在 `config.toml` 的 `[server].trustedProxies` 设置代理 IP 或 CIDR，
-才能使用代理传递的客户端 IP。默认空列表不信任转发头；未配置时限额会按代理本身
-的 IP 统计，不要把任意来源设为可信代理。
+## 访客 IP
+
+注册、邮件配额、Agent API、登录记录和 MFA 统一使用 Gin 的 `ClientIP()`。直连请求使用连接来源 IP。同机 Nginx 通过 IPv4 或 IPv6 回环地址连接 GooseForum 时，在现有的 `location` 中覆盖访客地址：
+
+```nginx
+proxy_set_header X-Real-IP $remote_addr;
+```
+
+有 CDN 或负载均衡器时，在 Nginx 配置可信上游并解析真实 IP，再将结果传给 GooseForum。应用忽略 `X-Forwarded-For`。旧版的 `server.trustedProxies` 已移除；若应用看到的直接上游为容器网桥或远端代理，它会记录该上游地址。此类部署要保留访客 IP，可让最终一跳的 Nginx 与应用共享网络命名空间并通过回环地址连接。
 
 ## 邮箱政策
 

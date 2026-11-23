@@ -6,39 +6,36 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 )
 
-func TestForwardingHeadersRequireAnExplicitTrustedProxy(t *testing.T) {
-	previous := preferences.GetStringSlice("server.trustedProxies")
-	t.Cleanup(func() { preferences.Set("server.trustedProxies", previous) })
+func TestVisitorIP(t *testing.T) {
+	engine, err := newGinEngine()
+	if err != nil {
+		t.Fatal(err)
+	}
+	engine.GET("/ip", func(c *gin.Context) { c.String(http.StatusOK, c.ClientIP()) })
+
 	for _, tc := range []struct {
-		name    string
-		proxies []string
-		want    string
+		name, peer, realIP, forwardedFor, want string
 	}{
-		{"untrusted", nil, "192.0.2.1"},
-		{"trusted", []string{"192.0.2.0/24"}, "198.51.100.8"},
+		{"direct", "192.0.2.1:1234", "", "", "192.0.2.1"},
+		{"direct with forwarding headers", "192.0.2.1:1234", "198.51.100.8", "203.0.113.9", "192.0.2.1"},
+		{"container gateway", "172.17.0.1:1234", "198.51.100.8", "", "172.17.0.1"},
+		{"local proxy", "127.0.0.1:1234", "198.51.100.8", "203.0.113.9", "198.51.100.8"},
+		{"IPv6 local proxy", "[::1]:1234", "2001:db8::8", "", "2001:db8::8"},
+		{"missing real IP", "127.0.0.1:1234", "", "203.0.113.9", "127.0.0.1"},
+		{"invalid real IP", "127.0.0.1:1234", "unknown", "", "127.0.0.1"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			preferences.Set("server.trustedProxies", tc.proxies)
-			engine, err := newGinEngine()
-			if err != nil {
-				t.Fatal(err)
-			}
-			engine.GET("/ip", func(c *gin.Context) { c.String(http.StatusOK, c.ClientIP()) })
 			req := httptest.NewRequest(http.MethodGet, "/ip", nil)
-			req.RemoteAddr = "192.0.2.1:2345"
-			req.Header.Set("X-Forwarded-For", "198.51.100.8")
+			req.RemoteAddr = tc.peer
+			req.Header.Set("X-Real-IP", tc.realIP)
+			req.Header.Set("X-Forwarded-For", tc.forwardedFor)
 			r := httptest.NewRecorder()
 			engine.ServeHTTP(r, req)
-			if r.Body.String() != tc.want {
-				t.Fatalf("client IP: %s", r.Body.String())
+			if got := r.Body.String(); got != tc.want {
+				t.Fatalf("client IP = %q, want %q", got, tc.want)
 			}
 		})
-	}
-	preferences.Set("server.trustedProxies", []string{"invalid proxy"})
-	if _, err := newGinEngine(); err == nil {
-		t.Fatal("invalid proxy configuration accepted")
 	}
 }
