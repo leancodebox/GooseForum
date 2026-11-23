@@ -34,6 +34,8 @@ import { Tabs, TabsList, TabsTrigger } from '@gooseforum/ui/components/tabs'
 import { useGooseRuntime } from '@gooseforum/runtime'
 import { useServerErrorMessage } from '@gooseforum/runtime/i18n/server-error'
 import { AuthBrand } from './auth-brand'
+import { DropdownMenu, DropdownMenuContent } from '@gooseforum/ui/components/dropdown-menu'
+import { ThemeMenuOptions, ThemeMenuTrigger } from '../layout/theme-menu'
 import { AuthLocaleSwitcher } from './auth-locale-switcher'
 
 const AltchaChallenge = lazy(() => import('./altcha-challenge'))
@@ -264,8 +266,16 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
   const showOAuth = !mfa && mode !== 'forgot' && page.oauthProviders.length > 0
 
   return (
-    <main className="relative flex min-h-svh items-center justify-center bg-muted px-4 py-12 sm:px-6">
-      <AuthLocaleSwitcher />
+    <main className="relative flex min-h-svh items-center justify-center bg-muted px-4 pb-12 pt-16 sm:px-6">
+      <div className="absolute right-4 top-4 flex items-center gap-1">
+        <DropdownMenu modal={false}>
+          <ThemeMenuTrigger />
+          <DropdownMenuContent align="end">
+            <ThemeMenuOptions />
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <AuthLocaleSwitcher />
+      </div>
 
       <Card className={`w-full overflow-hidden py-0 ${showOAuth ? 'max-w-4xl gap-0 md:grid md:grid-cols-2' : 'max-w-md gap-0'}`}>
         <div className="min-w-0 space-y-4 py-5 sm:py-6 [&>[data-slot=card-header]]:px-6 [&>[data-slot=card-content]]:px-6 sm:[&>[data-slot=card-header]]:px-10 sm:[&>[data-slot=card-content]]:px-10">

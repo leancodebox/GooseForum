@@ -23,13 +23,11 @@ import {
   LogOutIcon,
   MenuIcon,
   MessageCircleIcon,
-  MoonIcon,
   PaletteIcon,
   PenSquareIcon,
   SettingsIcon,
   ShieldIcon,
   ScaleIcon,
-  SunIcon,
   UserRoundIcon,
   UsersRoundIcon,
   XIcon,
@@ -64,7 +62,7 @@ import {
 import { authLocales, localeLabels } from "@gooseforum/runtime/i18n/auth";
 import { cn } from "@gooseforum/ui/lib/utils";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
-import { RoutineIcon } from "@gooseforum/ui/components/icons/material-symbols/routine-icon";
+import { ThemeMenuOptions, ThemeMenuTrigger } from "./theme-menu";
 import { announceUnreadStatus, unreadStatusEvent } from "@gooseforum/runtime/unread-status";
 import { HeaderSearch } from "./header-search";
 import {
@@ -412,22 +410,7 @@ export function AppShell({
                 onMouseEnter={() => openHeaderMenuOnHover("theme")}
                 onMouseLeave={() => closeHeaderMenuSoon("theme")}
               >
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon-lg"
-                    className="[&_svg]:size-5"
-                    aria-label={t("chooseTheme")}
-                  >
-                    {(!runtime.themePreference || runtime.themePreference === "system") ? (
-                      <RoutineIcon className="size-5" />
-                    ) : runtime.themePreference === "gf-light" ? (
-                      <SunIcon className="size-5" />
-                    ) : (
-                      <MoonIcon className="size-5" />
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
+                <ThemeMenuTrigger size="icon-lg" />
               </div>
               <DropdownMenuContent
                 className="w-max min-w-32 whitespace-nowrap"
@@ -437,17 +420,7 @@ export function AppShell({
                 onMouseLeave={() => closeHeaderMenuSoon("theme")}
                 onCloseAutoFocus={(event) => event.preventDefault()}
               >
-                <DropdownMenuRadioGroup
-                  value={runtime.themePreference ?? "system"}
-                  onValueChange={(value) => {
-                    if (value === "system" || value === "gf-light" || value === "gf-dark")
-                      runtime.setThemePreference?.(value);
-                  }}
-                >
-                  <DropdownMenuRadioItem value="system">{t("followSystem")}</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="gf-light">{t("lightTheme")}</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="gf-dark">{t("darkTheme")}</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
+                <ThemeMenuOptions />
               </DropdownMenuContent>
             </DropdownMenu>
             <DropdownMenu

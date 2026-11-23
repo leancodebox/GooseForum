@@ -800,17 +800,38 @@ test('uses the site default in the admin when browser languages are unsupported'
   await expect(page.locator('html')).toHaveAttribute('lang', 'ja')
 })
 
+test('shares theme preferences between login and registration', async ({ page }) => {
+  await page.route('**/__goose_page/login**', route => route.fulfill({ json: {
+    ...homePage, component: 'auth.login', url: '/login', props: {
+      initialMode: 'login', oauthProviders: [], registrationCaptcha: 'none',
+    },
+  } }))
+  await page.emulateMedia({ colorScheme: 'light' })
+  await page.goto('/login?lang=en')
+  const trigger = page.getByRole('button', { name: 'Choose theme' })
+  await trigger.click()
+  await page.getByRole('menuitemradio', { name: 'Dark', exact: true }).click()
+  await page.reload()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-dark')
+  await page.getByRole('tab', { name: 'Sign up' }).click()
+  await expect(page.locator('#register-username')).toBeVisible()
+  await trigger.click()
+  await expect(page.getByRole('menuitemradio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true')
+  await page.getByRole('menuitemradio', { name: 'System' }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-light')
+})
+
 test('follows the system theme and remembers explicit preferences across reloads', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' })
   await page.goto('/?lang=en')
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-dark')
   await page.emulateMedia({ colorScheme: 'light' })
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-light')
-  await page.getByRole('button', { name: 'Choose theme' }).click()
+  await page.getByRole('button', { name: 'Choose theme' }).press('ArrowDown')
   await page.getByRole('menuitemradio', { name: 'Dark', exact: true }).click()
   await page.reload()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-dark')
-  await page.getByRole('button', { name: 'Choose theme' }).click()
+  await page.getByRole('button', { name: 'Choose theme' }).press('ArrowDown')
   await page.getByRole('menuitemradio', { name: 'System', exact: true }).click()
   await page.reload()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-light')
@@ -2854,7 +2875,7 @@ for (const provider of ['hcaptcha', 'recaptcha_v2', 'recaptcha_v3']) {
           },
           getResponse: () => 'widget-token', getRespKey: () => 'test-key', reset() {}, remove() {}
         };
-        window[${JSON.stringify(callback)}]?.();
+        document.currentScript.addEventListener('load', () => window[${JSON.stringify(callback)}]?.(), { once: true });
       ` })
     })
     if (action === 'login') {

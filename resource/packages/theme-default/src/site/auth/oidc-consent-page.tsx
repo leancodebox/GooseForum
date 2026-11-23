@@ -63,7 +63,7 @@ export function OIDCConsentPageView({
 
   return (
     <main className="relative flex min-h-svh items-center justify-center bg-muted px-4 py-16 sm:px-6">
-      <AuthLocaleSwitcher />
+      <div className="absolute right-4 top-4"><AuthLocaleSwitcher /></div>
       <Card className="w-full max-w-lg">
         <CardHeader>
           <AuthBrand layout={layout} />

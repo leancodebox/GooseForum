@@ -16,7 +16,7 @@ export function AuthLocaleSwitcher() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="ghost" size="icon" className="absolute right-4 top-4" aria-label={t('switchLanguage')}>
+        <Button type="button" variant="ghost" size="icon" aria-label={t('switchLanguage')}>
           <Languages />
         </Button>
       </PopoverTrigger>
