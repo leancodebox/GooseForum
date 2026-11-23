@@ -9,6 +9,7 @@ import {
   FieldLabel,
 } from "@gooseforum/ui/components/field";
 import { Input } from "@gooseforum/ui/components/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@gooseforum/ui/components/select";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Switch } from "@gooseforum/ui/components/switch";
 import { MailCheck, Plus, Save, Trash2 } from "lucide-react";
@@ -31,6 +32,7 @@ export function SecuritySettingsPage({
     registrationEmailLimit: 3,
     registrationGlobalLimit: 100,
   });
+  const [savedCaptcha, setSavedCaptcha] = useState<SecuritySettings["registrationCaptcha"]>();
   const [domain, setDomain] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -42,6 +44,7 @@ export function SecuritySettingsPage({
     setLoading(true);
     try {
       const v = await api.settings.security();
+      setSavedCaptcha(v.registrationCaptcha);
       setForm({
         ...v,
         inviteOnly: v.inviteOnly ?? false,
@@ -59,6 +62,9 @@ export function SecuritySettingsPage({
   useEffect(() => {
     void load();
   }, [load]);
+  const captcha = form.registrationCaptcha ?? { provider: "image" };
+  const hosted = captcha.provider !== "image" && captcha.provider !== "none";
+  const secretConfigured = hosted && savedCaptcha?.provider === captcha.provider && savedCaptcha.siteKey === captcha.siteKey?.trim();
   function add() {
     const v = domain.trim().toLowerCase();
     if (v && !form.allowedDomains.includes(v)) {
@@ -70,6 +76,12 @@ export function SecuritySettingsPage({
     setSaving(true);
     try {
       await api.settings.saveSecurity(form);
+      setSavedCaptcha({ ...captcha, siteKey: captcha.siteKey?.trim(), secret: undefined });
+      if (captcha.secret) {
+        setForm((current) => current.registrationCaptcha === captcha
+          ? { ...current, registrationCaptcha: { ...captcha, secret: "" } }
+          : current);
+      }
       toast.success(text("saved"));
     } catch (r) {
       toast.error(errorMessage(r, text("saveFailed")));
@@ -119,6 +131,47 @@ export function SecuritySettingsPage({
             }
           />
         </Field>
+        <section aria-labelledby="captcha-heading" className="flex flex-col gap-4 border-y py-5">
+          <h3 id="captcha-heading" className="font-medium">
+            <label htmlFor="registration-captcha">{text("registrationCaptcha")}</label>
+          </h3>
+          <Select value={captcha.provider} disabled={loading || saving} onValueChange={(value) => {
+            const provider = value as typeof captcha.provider;
+            setForm({ ...form, registrationCaptcha: savedCaptcha?.provider === provider ? savedCaptcha : { provider } });
+          }}>
+            <SelectTrigger id="registration-captcha" className="w-full sm:max-w-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="image">{text("captchaImage")}</SelectItem>
+              <SelectItem value="hcaptcha">hCaptcha</SelectItem>
+              <SelectItem value="recaptcha_v2">Google reCAPTCHA v2</SelectItem>
+              <SelectItem value="recaptcha_v3">Google reCAPTCHA v3</SelectItem>
+              <SelectItem value="none">{text("captchaNone")}</SelectItem>
+            </SelectContent>
+          </Select>
+          {hosted && (
+            <fieldset disabled={loading || saving} aria-labelledby="registration-captcha" className="grid min-w-0 gap-4 border-s-2 ps-4">
+              <Field>
+                <FieldLabel htmlFor="captcha-site-key">{text("captchaSiteKey")}</FieldLabel>
+                <Input id="captcha-site-key" value={captcha.siteKey ?? ""} onChange={(e) =>
+                  setForm({ ...form, registrationCaptcha: { ...captcha, siteKey: e.target.value } })} />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="captcha-secret">{text("captchaSecretKey")}</FieldLabel>
+                <Input type="password" autoComplete="new-password" id="captcha-secret" aria-describedby="captcha-secret-hint"
+                  value={captcha.secret ?? ""} onChange={(e) =>
+                    setForm({ ...form, registrationCaptcha: { ...captcha, secret: e.target.value } })} />
+                <FieldDescription id="captcha-secret-hint">{text(secretConfigured ? "captchaSecretHint" : "captchaSecretNew")}</FieldDescription>
+              </Field>
+              {captcha.provider === "recaptcha_v3" && (
+                <Field>
+                  <FieldLabel htmlFor="captcha-score">{text("captchaScore")}</FieldLabel>
+                  <Input type="number" id="captcha-score" className="w-28" min={0} max={1} step={0.1} value={captcha.scoreThreshold ?? 0.5}
+                    onChange={(e) => setForm({ ...form, registrationCaptcha: { ...captcha, scoreThreshold: Number(e.target.value) } })} />
+                </Field>
+              )}
+            </fieldset>
+          )}
+        </section>
         <section className="flex flex-col gap-4">
           <div>
             <h3 className="font-medium">{text("domains")}</h3>

@@ -13,6 +13,7 @@ export interface AuthMessages {
   login: string;
   register: string;
   loginTitle: string;
+  captchaVerificationRequired: string;
   registerTitle: string;
   forgotTitle: string;
   loginSubtitle: string;
@@ -45,6 +46,7 @@ export interface AuthMessages {
   passwordAdviceDescription: string;
   passwordAdvice: { length: string; unique: string; loginAfterReset: string };
   validation: {
+    credentialsRequired: string;
     loginRequired: string;
     registerRequired: string;
     forgotRequired: string;

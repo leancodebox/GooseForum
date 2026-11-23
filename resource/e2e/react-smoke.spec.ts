@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import type { Page } from '@playwright/test'
 import { expect, test } from './fixtures'
+import { generateKeyPairSync } from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 
 const systemHeaderLinks = [
@@ -2830,3 +2831,57 @@ for (const canModerate of [false, true]) test(`hides another author's edit histo
   await expect(page.getByRole('button', { name: 'View edit history' })).toHaveCount(0)
   expect(requests).toBe(0)
 })
+
+for (const provider of ['hcaptcha', 'recaptcha_v2', 'recaptcha_v3']) {
+  for (const action of ['login', 'register']) test(`submits the ${provider} ${action} proof`, async ({ page }) => {
+    await page.route('**/__goose_page/login**', route => route.fulfill({ json: {
+      ...homePage, component: 'auth.login', url: '/login', props: {
+        initialMode: action, redirectUrl: '/', oauthProviders: [],
+        registrationCaptcha: provider, captchaSiteKey: 'public-key',
+      },
+    } }))
+    // Exercise the real widget adapters without contacting a provider or requiring a live key.
+    await page.route(/^https:\/\/(?:[^/]+\.hcaptcha\.com|www\.google\.com)\/.*api\.js/, route => {
+      const callback = new URL(route.request().url()).searchParams.get('onload')
+      return route.fulfill({ contentType: 'text/javascript', body: `
+        window.${provider === 'hcaptcha' ? 'hcaptcha' : 'grecaptcha'} = {
+          ready: cb => cb(), execute: async (key, opts) => key + ':' + opts.action,
+          render: (el, options) => {
+            const button = document.createElement('button');
+            button.type = 'button'; button.textContent = 'Complete test challenge';
+            button.onclick = () => options.callback('widget-token');
+            el.appendChild(button); return 1;
+          },
+          getResponse: () => 'widget-token', getRespKey: () => 'test-key', reset() {}, remove() {}
+        };
+        window[${JSON.stringify(callback)}]?.();
+      ` })
+    })
+    if (action === 'login') {
+      const { publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048 })
+      await page.route('**/api/login-public-key', route => route.fulfill({ json: { code: 0, result: {
+        publicKey: publicKey.export({ type: 'spki', format: 'pem' }), serverTs: Date.now(),
+      } } }))
+    }
+    let submitted: unknown
+    await page.route(`**/api/${action}`, route => {
+      submitted = route.request().postDataJSON()
+      return route.fulfill({ json: { code: 1, messageCode: 'auth.email.exists' } })
+    })
+    await page.goto(`/login?mode=${action}&lang=en`)
+    await page.getByLabel(action === 'login' ? 'Username or email' : 'Username', { exact: true }).fill('pending-user')
+    await page.getByLabel('Password', { exact: true }).fill('password123')
+    if (action === 'register') {
+      await page.getByLabel('Email', { exact: true }).fill('pending@example.com')
+      await page.getByLabel('Confirm password').fill('password123')
+      await page.getByLabel('I have read and agree to the terms and privacy policy').check()
+    }
+    if (provider === 'recaptcha_v3') {
+      await expect.poll(() => page.evaluate(() => 'grecaptcha' in window)).toBe(true)
+    } else {
+      await page.getByRole('button', { name: 'Complete test challenge' }).click()
+    }
+    await page.getByRole('button', { name: action === 'register' ? 'Create account' : 'Log in' }).click()
+    await expect.poll(() => submitted).toMatchObject({ captchaToken: provider === 'recaptcha_v3' ? `public-key:${action}` : 'widget-token' })
+  })
+}

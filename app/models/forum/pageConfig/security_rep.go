@@ -16,7 +16,7 @@ func SecuritySettingsForPolicy(defaults SecurityAndRegistration) (SecurityAndReg
 	if err != nil {
 		return SecurityAndRegistration{}, err
 	}
-	return DecodeSecuritySettings(row.Config, defaults), nil
+	return decodeSecuritySettings(row.Config, defaults)
 }
 
 func SaveSecuritySettingsForPolicy(settings SecurityAndRegistration) error {

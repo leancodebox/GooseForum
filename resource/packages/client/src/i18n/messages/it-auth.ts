@@ -7,6 +7,7 @@ export default {
   login: "Accedi",
   register: "Registrati",
   loginTitle: "Accedi al tuo account",
+  captchaVerificationRequired: "Completa la verifica e riprova.",
   registerTitle: "Crea un account",
   forgotTitle: "Reimposta password",
   loginSubtitle: "Bentornato. Continua le tue discussioni e i tuoi scritti.",
@@ -49,6 +50,7 @@ export default {
       "Dopo la reimpostazione, torna ad accedere con la nuova password",
   },
   validation: {
+    credentialsRequired: "Inserisci account e password.",
     loginRequired: "Inserisci account, password e captcha",
     registerRequired: "Completa il modulo di registrazione",
     forgotRequired: "Inserisci email e captcha",

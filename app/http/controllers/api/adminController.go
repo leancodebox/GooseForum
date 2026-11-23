@@ -1248,7 +1248,13 @@ func SaveAnnouncement(req component.BetterRequest[SaveAnnouncementReq]) componen
 // GetSecuritySettings 获取安全与注册设置
 func GetSecuritySettings(req component.BetterRequest[component.Null]) component.Response {
 	defaultSettings := defaultconfig.GetDefaultSecuritySettingsConfig()
-	res := pageConfig.GetSecuritySettings(defaultSettings)
+	res, err := pageConfig.SecuritySettingsForPolicy(defaultSettings)
+	if err != nil {
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
+	if res.RegistrationCaptcha != nil {
+		res.RegistrationCaptcha.Secret = ""
+	}
 	return component.SuccessResponse(res)
 }
 
@@ -1258,6 +1264,13 @@ type SaveSecuritySettingsReq struct {
 
 // SaveSecuritySettings 保存安全与注册设置
 func SaveSecuritySettings(req component.BetterRequest[SaveSecuritySettingsReq]) component.Response {
+	previous, err := pageConfig.SecuritySettingsForPolicy(defaultconfig.GetDefaultSecuritySettingsConfig())
+	if err != nil {
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
+	if err := registrationservice.PrepareCaptchaSettings(&req.Params.Settings, previous.RegistrationCaptcha); err != nil {
+		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
+	}
 	if err := registrationservice.ValidateSettings(&req.Params.Settings); err != nil {
 		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
 	}

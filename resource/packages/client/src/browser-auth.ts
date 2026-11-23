@@ -4,8 +4,9 @@ import { GooseClientError, GooseProtocolError } from './http/error.js'
 export interface PasswordLoginInput {
   username: string
   password: string
-  captchaId: string
-  captchaCode: string
+  captchaId?: string
+  captchaCode?: string
+  captchaToken?: string
 }
 
 /** Encrypt a password using the server's ephemeral RSA-OAEP public key. */
@@ -40,6 +41,7 @@ export async function loginWithPassword(auth: GooseSiteApi['auth'], input: Passw
     return auth.login({
       username: input.username,
       encryptedPassword,
+      captchaToken: input.captchaToken,
       captchaId: input.captchaId,
       captchaCode: input.captchaCode,
     })

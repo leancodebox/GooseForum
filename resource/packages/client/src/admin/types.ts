@@ -175,7 +175,13 @@ export interface SiteChromeConfig {
   brandImage?: string
 }
 export interface MailSettings { enableMail:boolean;smtpHost:string;smtpPort:number;useSSL:boolean;smtpUsername:string;smtpPassword:string;fromName:string;fromEmail:string }
-export interface SecuritySettings { enableSignup:boolean;inviteOnly?:boolean;enableEmailVerification:boolean;allowedDomains:string[];registrationIPLimit?:number;registrationEmailLimit?:number;registrationGlobalLimit?:number }
+export interface RegistrationCaptchaSettings {
+  provider: import("../contracts/payload.js").RegistrationCaptchaProvider
+  siteKey?: string
+  secret?: string
+  scoreThreshold?: number
+}
+export interface SecuritySettings { registrationCaptcha?: RegistrationCaptchaSettings;enableSignup:boolean;inviteOnly?:boolean;enableEmailVerification:boolean;allowedDomains:string[];registrationIPLimit?:number;registrationEmailLimit?:number;registrationGlobalLimit?:number }
 export interface PostingSettings { attachments?: import("../contracts/payload.js").AttachmentPolicy; externalLinks?:{enabled:boolean;whitelist:string[]};textControl:{minPostLength:number;maxPostLength:number;minTitleLength:number;maxTitleLength:number};uploadControl:{allowAttachments:boolean;authorizedExtensions:string[];maxAttachmentSizeKb:number} }
 export interface AnnouncementItemConfig { id: string; title: string; content: string; enabled: boolean }
 export interface AnnouncementConfig { enabled: boolean; content: string; publishedAt?: number | string; items?: AnnouncementItemConfig[] }

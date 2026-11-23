@@ -7,6 +7,7 @@ export default {
   login: "Войти",
   register: "Зарегистрироваться",
   loginTitle: "Вход в аккаунт",
+  captchaVerificationRequired: "Пройдите проверку и повторите попытку.",
   registerTitle: "Создать аккаунт",
   forgotTitle: "Сброс пароля",
   loginSubtitle: "Добро пожаловать обратно. Продолжайте обсуждения и публикации.",
@@ -46,6 +47,7 @@ export default {
     loginAfterReset: "После сброса вернитесь и войдите с новым паролем",
   },
   validation: {
+    credentialsRequired: "Введите имя пользователя и пароль.",
     loginRequired: "Пожалуйста, введите аккаунт, пароль и пройдите капчу",
     registerRequired: "Пожалуйста, заполните форму регистрации",
     forgotRequired: "Пожалуйста, введите email и пройдите капчу",

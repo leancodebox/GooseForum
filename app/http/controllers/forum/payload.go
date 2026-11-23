@@ -117,11 +117,13 @@ type ErrorPageProps struct {
 }
 
 type LoginPageProps struct {
-	InitialMode    string                 `json:"initialMode"`
-	RedirectURL    string                 `json:"redirectUrl"`
-	OAuthProviders []OAuthProviderPayload `json:"oauthProviders"`
-	InviteOnly     bool                   `json:"inviteOnly,omitempty"`
-	InvitationCode string                 `json:"invitationCode,omitempty"`
+	RegistrationCaptcha string                 `json:"registrationCaptcha,omitempty"`
+	CaptchaSiteKey      string                 `json:"captchaSiteKey,omitempty"`
+	InitialMode         string                 `json:"initialMode"`
+	RedirectURL         string                 `json:"redirectUrl"`
+	OAuthProviders      []OAuthProviderPayload `json:"oauthProviders"`
+	InviteOnly          bool                   `json:"inviteOnly,omitempty"`
+	InvitationCode      string                 `json:"invitationCode,omitempty"`
 }
 
 type OAuthProviderPayload struct {
@@ -951,7 +953,12 @@ func buildLoginPageProps(c *gin.Context) LoginPageProps {
 			Key: provider.Key, DisplayName: provider.DisplayName, LoginURL: loginURL,
 		})
 	}
+	provider, siteKey := "image", ""
+	if cfg := securityConfig.RegistrationCaptcha; cfg != nil {
+		provider, siteKey = cfg.Provider, cfg.SiteKey
+	}
 	return LoginPageProps{
+		RegistrationCaptcha: provider, CaptchaSiteKey: siteKey,
 		InitialMode: mode, RedirectURL: redirectURL, OAuthProviders: providerPayloads,
 		InviteOnly: securityConfig.InviteOnly, InvitationCode: invitationCode,
 	}

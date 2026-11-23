@@ -57,6 +57,7 @@ const (
 	MessageAuthEmailDomainNotAllowed     MessageCode = "auth.emailDomain.notAllowed" // 邮箱域名不在注册白名单。
 	MessageAuthInvitationInvalid         MessageCode = "auth.invitation.invalid"     // 邀请码无效、过期、撤销或已用尽。
 	MessageAuthInvitationRequired        MessageCode = "auth.invitation.required"    // 当前站点需要邀请码注册。
+	MessageLoginRateLimited              MessageCode = "auth.login.rateLimited"
 	MessageRegistrationRateLimited       MessageCode = "auth.registration.rateLimited"
 	MessageAuthUsernameInvalid           MessageCode = "auth.username.invalid"           // 用户名格式不符合规则。
 	MessageAuthUsernameExists            MessageCode = "auth.username.exists"            // 用户名已存在。

@@ -193,16 +193,18 @@ export interface OIDCConsentResult {
 export interface LoginInput {
   username: string
   encryptedPassword: string
-  captchaId: string
-  captchaCode: string
+  captchaId?: string
+  captchaCode?: string
+  captchaToken?: string
 }
 
 export interface RegisterInput {
   username: string
   email: string
   password: string
-  captchaId: string
-  captchaCode: string
+  captchaToken?: string
+  captchaId?: string
+  captchaCode?: string
   locale?: string
   invitationCode?: string
 }

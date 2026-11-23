@@ -12,6 +12,7 @@ export default {
   "trust.adjustmentFailed": "Не удалось изменить уровень: {error}",
   "trust.dailyReplies": "Ваш дневной лимит новых ответов: {limit}.",
   "trust.dailyTopics": "Ваш дневной лимит новых тем с учётом черновиков: {limit}.",
+  "auth.login.rateLimited": "Слишком много запросов. Повторите попытку позже.",
   "auth.registration.rateLimited": "Слишком много запросов. Повторите попытку позже.",
   "markdown.mention.invalid": "Проверьте формат упоминаний в тексте. Можно указать не более 20 получателей.",
   "mfa.invalid": mfa.failed,

@@ -1,4 +1,13 @@
 export default {
+  registrationCaptcha: "Проверка при входе и регистрации",
+  captchaImage: "Локальная цифровая капча",
+  captchaNone: "Без дополнительной проверки",
+  captchaSiteKey: "Ключ сайта (Site Key)",
+  captchaSecretKey: "Секретный ключ (Secret Key)",
+  captchaSecretNew: "Введите секретный ключ из панели сервиса проверки.",
+  captchaSecretHint: "Ключ настроен. Оставьте поле пустым, чтобы сохранить его.",
+  captchaScore: "Минимальная оценка",
+
   agentRetry: "Повторить",
   agent: "Доступ агентов", agentEnabled: "Включить Agent API", agentManualTokens: "Разрешить ручное создание токенов", agentLimits: "Запросов в минуту", agentRead: "На авторизацию", agentUserRead: "На учётную запись", agentWrite: "Записей на учётную запись", agentAnonymousRead: "Анонимных запросов на чтение с IP", agentIP: "Всего запросов с IP",
   mail: "Почта",

@@ -7,6 +7,7 @@ export default {
   login: "ログイン",
   register: "登録",
   loginTitle: "アカウントにログイン",
+  captchaVerificationRequired: "認証を完了してから再試行してください。",
   registerTitle: "新規アカウント作成",
   forgotTitle: "パスワード再設定",
   loginSubtitle: "おかえりなさい。議論と投稿を続けましょう。",
@@ -46,6 +47,7 @@ export default {
     loginAfterReset: "再設定後は新しいパスワードでログインしてください",
   },
   validation: {
+    credentialsRequired: "アカウントとパスワードを入力してください。",
     loginRequired: "アカウント、パスワード、認証コードを入力してください",
     registerRequired: "登録情報をすべて入力してください",
     forgotRequired: "メールと認証コードを入力してください",

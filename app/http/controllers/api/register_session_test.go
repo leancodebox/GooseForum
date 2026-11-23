@@ -27,9 +27,9 @@ func TestRegistrationIssuesSessionOnlyWithoutRequiredEmailVerification(t *testin
 		t.Fatal(err)
 	}
 	preserveSecuritySettings(t, db)
-	originalCaptcha := verifyRegistrationCaptcha
-	verifyRegistrationCaptcha = func(_, answer string) bool { return answer == "valid" }
-	t.Cleanup(func() { verifyRegistrationCaptcha = originalCaptcha })
+	originalCaptcha := verifyImageCaptcha
+	verifyImageCaptcha = func(_, answer string) bool { return answer == "valid" }
+	t.Cleanup(func() { verifyImageCaptcha = originalCaptcha })
 	// Registration is tested independently from first-user initialization.
 	seed := users.EntityComplete{Id: uint64(800000000 + time.Now().UnixNano()%100000000), Username: fmt.Sprintf("register-seed-%d", time.Now().UnixNano())}
 	if err := db.Create(&seed).Error; err != nil {
@@ -104,9 +104,9 @@ func TestRegistrationInvitationCommitsExactlyOnce(t *testing.T) {
 		t.Fatal(err)
 	}
 	hotdataserve.ClearSecuritySettingsConfigCache()
-	previousCaptcha := verifyRegistrationCaptcha
-	verifyRegistrationCaptcha = func(_, answer string) bool { return answer == "valid" }
-	t.Cleanup(func() { verifyRegistrationCaptcha = previousCaptcha })
+	previousCaptcha := verifyImageCaptcha
+	verifyImageCaptcha = func(_, answer string) bool { return answer == "valid" }
+	t.Cleanup(func() { verifyImageCaptcha = previousCaptcha })
 	seed := users.EntityComplete{Id: uint64(810000000 + time.Now().UnixNano()%100000000), Username: fmt.Sprintf("invite-seed-%d", time.Now().UnixNano())}
 	if err := db.Create(&seed).Error; err != nil {
 		t.Fatal(err)
@@ -170,9 +170,9 @@ func TestInviteOnlyRegistrationRequiresCode(t *testing.T) {
 		t.Fatal(err)
 	}
 	hotdataserve.ClearSecuritySettingsConfigCache()
-	previousCaptcha := verifyRegistrationCaptcha
-	verifyRegistrationCaptcha = func(_, answer string) bool { return answer == "valid" }
-	t.Cleanup(func() { verifyRegistrationCaptcha = previousCaptcha })
+	previousCaptcha := verifyImageCaptcha
+	verifyImageCaptcha = func(_, answer string) bool { return answer == "valid" }
+	t.Cleanup(func() { verifyImageCaptcha = previousCaptcha })
 	stamp := time.Now().UnixNano()
 	payload, _ := json.Marshal(vo.RegReq{Username: "requiresinvite", Email: fmt.Sprintf("requiresinvite%d@example.com", stamp), Password: "password123", CaptchaId: "id", CaptchaCode: "valid"})
 	c, response := mfaAPIContext(string(payload), nil)

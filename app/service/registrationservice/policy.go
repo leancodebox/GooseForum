@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/mail"
+	"net/netip"
 	"strings"
 	"sync"
 	"time"
@@ -93,12 +94,14 @@ func ValidateEmail(email string, config pageConfig.SecurityAndRegistration) (str
 }
 
 func CheckPolicy(email string, oauth bool) (string, pageConfig.SecurityAndRegistration, error) {
-	config := hotdataserve.GetSecuritySettingsConfigCache()
+	config, err := hotdataserve.LoadSecuritySettings()
+	if err != nil {
+		return "", config, errors.New("registration settings unavailable")
+	}
 	if !config.EnableSignup {
 		return "", config, ErrClosed
 	}
 	value := ""
-	var err error
 	if email != "" || !oauth || config.EnableEmailVerification || len(config.AllowedDomains) > 0 {
 		value, err = ValidateEmail(email, config)
 		if err != nil {
@@ -110,7 +113,7 @@ func CheckPolicy(email string, oauth bool) (string, pageConfig.SecurityAndRegist
 
 func ConsumeSignup(email, ip string, config pageConfig.SecurityAndRegistration) error {
 	return signupLimits.consume(time.Now(), []quota{
-		{"ip:" + ip, config.RegistrationIPLimit}, {"email:" + email, config.RegistrationEmailLimit}, {"global", config.RegistrationGlobalLimit},
+		{"ip:" + ip, config.RegistrationIPLimit, time.Hour}, {"email:" + email, config.RegistrationEmailLimit, time.Hour}, {"global", config.RegistrationGlobalLimit, time.Hour},
 	})
 }
 
@@ -149,35 +152,64 @@ func ValidateSettings(config *pageConfig.SecurityAndRegistration) error {
 }
 
 type quota struct {
-	key   string
-	limit int
+	key    string
+	limit  int
+	window time.Duration
 }
+
+func (q quota) enabled() bool {
+	return q.limit > 0 && q.key != "ip:" && q.key != "email:"
+}
+
 type counter struct {
 	count   int
 	expires time.Time
 }
 type limiter struct {
-	mu      sync.Mutex
-	entries map[string]counter
+	mu        sync.Mutex
+	nextSweep time.Time
+	entries   map[string]counter
 }
 
 var signupLimits = limiter{entries: make(map[string]counter)}
+var loginLimits = limiter{entries: make(map[string]counter)}
+
+func AllowPasswordLogin(ip string) error {
+	return loginLimits.allowPasswordLogin(time.Now(), ip)
+}
+
+func (l *limiter) allowPasswordLogin(now time.Time, ip string) error {
+	addr, err := netip.ParseAddr(ip)
+	if err != nil {
+		return ErrRateLimited
+	}
+	ip = addr.Unmap().String()
+	return l.consume(now, []quota{{"minute:" + ip, 10, time.Minute}, {"hour:" + ip, 100, time.Hour}})
+}
+
 var mailLimits = limiter{entries: make(map[string]counter)}
 
 func (l *limiter) consume(now time.Time, quotas []quota) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	for key, entry := range l.entries {
-		if !now.Before(entry.expires) {
-			delete(l.entries, key)
+	if !now.Before(l.nextSweep) {
+		l.nextSweep = now.Add(time.Minute)
+		for key, entry := range l.entries {
+			if !now.Before(entry.expires) {
+				delete(l.entries, key)
+			}
 		}
 	}
 	needed := 0
 	for _, q := range quotas {
-		if q.limit == 0 || strings.HasSuffix(q.key, ":") {
+		if !q.enabled() {
 			continue
 		}
 		entry, exists := l.entries[q.key]
+		if exists && !now.Before(entry.expires) {
+			delete(l.entries, q.key)
+			exists = false
+		}
 		if exists && entry.count >= q.limit {
 			return ErrRateLimited
 		}
@@ -190,12 +222,12 @@ func (l *limiter) consume(now time.Time, quotas []quota) error {
 		return ErrRateLimited
 	}
 	for _, q := range quotas {
-		if q.limit == 0 || strings.HasSuffix(q.key, ":") {
+		if !q.enabled() {
 			continue
 		}
 		entry := l.entries[q.key]
 		if entry.count == 0 {
-			entry.expires = now.Add(time.Hour)
+			entry.expires = now.Add(q.window)
 		}
 		entry.count++
 		l.entries[q.key] = entry
@@ -208,5 +240,5 @@ func AllowMail(ip, email string) error {
 	if len(email) > 128 {
 		return ErrRateLimited
 	}
-	return mailLimits.consume(time.Now(), []quota{{"ip:" + ip, 20}, {"email:" + strings.ToLower(strings.TrimSpace(email)), 3}, {"global", 200}})
+	return mailLimits.consume(time.Now(), []quota{{"ip:" + ip, 20, time.Hour}, {"email:" + strings.ToLower(strings.TrimSpace(email)), 3, time.Hour}, {"global", 200, time.Hour}})
 }

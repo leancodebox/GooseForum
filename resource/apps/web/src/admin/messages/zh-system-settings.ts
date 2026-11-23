@@ -1,4 +1,13 @@
 export default {
+  registrationCaptcha: "登录与注册验证方式",
+  captchaImage: "本地数字验证码",
+  captchaNone: "关闭额外验证",
+  captchaSiteKey: "站点密钥（Site Key）",
+  captchaSecretKey: "验证密钥（Secret Key）",
+  captchaSecretNew: "请填写从验证服务商控制台获取的 Secret Key。",
+  captchaSecretHint: "已配置，留空保留现有密钥。",
+  captchaScore: "最低通过分数",
+
   agentRetry: "重试",
   agent: "Agent 接入", agentEnabled: "启用 Agent API", agentManualTokens: "允许手动 Token", agentLimits: "每分钟请求次数", agentRead: "每个授权身份", agentUserRead: "每个账号", agentWrite: "每个账号写入", agentAnonymousRead: "每个 IP 匿名读取", agentIP: "每个 IP 全部请求",
   registrationLimits: "注册请求限制",

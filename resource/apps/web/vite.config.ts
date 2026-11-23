@@ -79,7 +79,13 @@ export default defineConfig(({ command, mode }) => {
       ],
     },
     optimizeDeps: {
-      include: ['@gooseforum/theme-default > cropperjs', '@gooseforum/theme-default > qrcode.react'],
+      include: [
+        '@gooseforum/theme-default > cropperjs',
+        '@gooseforum/theme-default > qrcode.react',
+        '@gooseforum/theme-default > @hcaptcha/react-hcaptcha',
+        '@gooseforum/theme-default > react-google-recaptcha',
+        '@gooseforum/theme-default > react-google-recaptcha-v3',
+      ],
     },
     build: {
       manifest: true,

@@ -1,19 +1,18 @@
 package pageConfig
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"errors"
+)
 
-// DecodeSecuritySettings preserves defaults for fields absent in older settings.
-func DecodeSecuritySettings(raw string, defaults SecurityAndRegistration) SecurityAndRegistration {
-	if err := json.Unmarshal([]byte(raw), &defaults); err != nil {
-		return defaults
+// decodeSecuritySettings preserves defaults for fields absent in older settings.
+func decodeSecuritySettings(raw string, defaults SecurityAndRegistration) (SecurityAndRegistration, error) {
+	cfg := &defaults
+	if err := json.Unmarshal([]byte(raw), &cfg); err != nil {
+		return SecurityAndRegistration{}, err
 	}
-	return defaults
-}
-
-func GetSecuritySettings(defaults SecurityAndRegistration) SecurityAndRegistration {
-	entity := GetByPageType(SecuritySettings)
-	if entity.Id == 0 {
-		return defaults
+	if cfg == nil {
+		return SecurityAndRegistration{}, errors.New("empty security settings")
 	}
-	return DecodeSecuritySettings(entity.Config, defaults)
+	return *cfg, nil
 }

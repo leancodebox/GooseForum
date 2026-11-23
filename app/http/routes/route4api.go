@@ -277,7 +277,7 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("save-mail-settings", UpButterReq(api.SaveMailSettings)).
 		POST("test-mail-connection", UpButterReq(api.TestMailConnection)).
 		GET("security-settings", UpButterReq(api.GetSecuritySettings)).
-		POST("save-security-settings", UpButterReq(api.SaveSecuritySettings)).
+		POST("save-security-settings", UpJsonReq(api.SaveSecuritySettings)).
 		GET("sensitive-word-settings", UpButterReq(api.GetSensitiveWordSettings)).
 		POST("save-sensitive-word-settings", UpButterReq(api.SaveSensitiveWordSettings)).
 		GET("sensitive-words", UpButterReq(api.SensitiveWordList)).

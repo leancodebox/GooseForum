@@ -117,6 +117,7 @@ export function createSiteApi(http: GooseHttpClient): GooseSiteApi {
         email: input.email,
         passWord: input.password,
         locale: input.locale,
+        captchaToken: input.captchaToken,
         captchaId: input.captchaId,
         captchaCode: input.captchaCode,
         invitationCode: input.invitationCode,

@@ -30,7 +30,7 @@ func TestLimiterCountsConcurrentAttemptsAndExpires(t *testing.T) {
 	var wg sync.WaitGroup
 	for range 30 {
 		wg.Go(func() {
-			if l.consume(now, []quota{{"ip:local", 5}, {"global", 100}}) == nil {
+			if l.consume(now, []quota{{"ip:local", 5, time.Hour}, {"global", 100, time.Hour}}) == nil {
 				mu.Lock()
 				accepted++
 				mu.Unlock()
@@ -41,7 +41,7 @@ func TestLimiterCountsConcurrentAttemptsAndExpires(t *testing.T) {
 	if accepted != 5 {
 		t.Fatalf("accepted %d requests", accepted)
 	}
-	if err := l.consume(now.Add(time.Hour), []quota{{"ip:local", 5}}); err != nil {
+	if err := l.consume(now.Add(time.Hour), []quota{{"ip:local", 5, time.Hour}}); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -49,17 +49,17 @@ func TestLimiterCountsConcurrentAttemptsAndExpires(t *testing.T) {
 func TestLimiterRejectsWithoutConsumingOtherQuotas(t *testing.T) {
 	l := limiter{entries: make(map[string]counter)}
 	now := time.Now()
-	if err := l.consume(now, []quota{{"email:a", 1}}); err != nil {
+	if err := l.consume(now, []quota{{"email:a", 1, time.Hour}}); err != nil {
 		t.Fatal(err)
 	}
-	if err := l.consume(now, []quota{{"global", 3}, {"email:a", 1}}); !errors.Is(err, ErrRateLimited) {
+	if err := l.consume(now, []quota{{"global", 3, time.Hour}, {"email:a", 1, time.Hour}}); !errors.Is(err, ErrRateLimited) {
 		t.Fatal(err)
 	}
 	if _, exists := l.entries["global"]; exists {
 		t.Fatal("rejected request consumed global quota")
 	}
 	for range 20 {
-		if err := l.consume(now, []quota{{"ip:a", 0}}); err != nil {
+		if err := l.consume(now, []quota{{"ip:a", 0, time.Hour}}); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -73,5 +73,37 @@ func TestSettingsRejectInvalidLimitsAndDomains(t *testing.T) {
 		if ValidateSettings(&config) == nil {
 			t.Fatalf("accepted %+v", config)
 		}
+	}
+}
+
+func TestLoginAddressBudget(t *testing.T) {
+	l := limiter{entries: make(map[string]counter)}
+	now := time.Now()
+	if l.allowPasswordLogin(now, "") == nil {
+		t.Fatal("missing client IP accepted")
+	}
+	for range 10 {
+		if err := l.allowPasswordLogin(now, "2001:db8::"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if l.allowPasswordLogin(now, "2001:0db8:0:0:0:0:0:0") == nil {
+		t.Fatal("IPv6 minute limit missed")
+	}
+	for minute := range 10 {
+		for range 10 {
+			if err := l.allowPasswordLogin(now.Add(time.Duration(minute)*time.Minute), "192.0.2.1"); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if l.allowPasswordLogin(now.Add(time.Duration(minute)*time.Minute), "::ffff:192.0.2.1") == nil {
+			t.Fatal("minute limit missed")
+		}
+	}
+	if l.allowPasswordLogin(now.Add(10*time.Minute), "192.0.2.1") == nil {
+		t.Fatal("hour limit missed")
+	}
+	if err := l.allowPasswordLogin(now.Add(time.Hour), "192.0.2.1"); err != nil {
+		t.Fatal(err)
 	}
 }

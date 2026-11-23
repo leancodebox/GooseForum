@@ -181,14 +181,22 @@ type MailSettingsConfig struct {
 	FromEmail    string `json:"fromEmail"`
 }
 
+type RegistrationCaptcha struct {
+	Provider       string   `json:"provider"`
+	SiteKey        string   `json:"siteKey,omitempty"`
+	Secret         string   `json:"secret,omitempty"`
+	ScoreThreshold *float64 `json:"scoreThreshold,omitempty"`
+}
+
 type SecurityAndRegistration struct {
-	EnableSignup            bool     `json:"enableSignup"`
-	InviteOnly              bool     `json:"inviteOnly"`
-	EnableEmailVerification bool     `json:"enableEmailVerification"`
-	AllowedDomains          []string `json:"allowedDomains"`
-	RegistrationIPLimit     int      `json:"registrationIPLimit"`
-	RegistrationEmailLimit  int      `json:"registrationEmailLimit"`
-	RegistrationGlobalLimit int      `json:"registrationGlobalLimit"`
+	RegistrationCaptcha     *RegistrationCaptcha `json:"registrationCaptcha,omitempty"`
+	EnableSignup            bool                 `json:"enableSignup"`
+	InviteOnly              bool                 `json:"inviteOnly"`
+	EnableEmailVerification bool                 `json:"enableEmailVerification"`
+	AllowedDomains          []string             `json:"allowedDomains"`
+	RegistrationIPLimit     int                  `json:"registrationIPLimit"`
+	RegistrationEmailLimit  int                  `json:"registrationEmailLimit"`
+	RegistrationGlobalLimit int                  `json:"registrationGlobalLimit"`
 }
 
 // SensitiveWordConfig controls automatic content moderation.

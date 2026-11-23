@@ -1,4 +1,13 @@
 export default {
+  registrationCaptcha: "Login and registration verification",
+  captchaImage: "Local image CAPTCHA",
+  captchaNone: "No extra verification",
+  captchaSiteKey: "Site Key",
+  captchaSecretKey: "Secret Key",
+  captchaSecretNew: "Enter the secret from your verification provider.",
+  captchaSecretHint: "Already configured. Leave blank to keep the current secret.",
+  captchaScore: "Minimum passing score",
+
   agentRetry: "Retry",
   agent: "Agent access", agentEnabled: "Enable Agent API", agentManualTokens: "Allow manual tokens", agentLimits: "Requests per minute", agentRead: "Per authorization", agentUserRead: "Per account", agentWrite: "Writes per account", agentAnonymousRead: "Anonymous reads per IP", agentIP: "All requests per IP",
   mail: "Mail",

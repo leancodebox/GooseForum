@@ -109,6 +109,17 @@ describe('LoginPageView', () => {
     expect(screen.queryByLabelText('Authenticator or recovery code')).toBeNull()
     expect(auth.login).not.toHaveBeenCalled()
   })
+  it('skips disabled login and registration challenges but protects password recovery', async () => {
+    const { auth, user } = renderLogin({ locale: 'en', page: { ...loginPage, initialMode: 'register', registrationCaptcha: 'none' } })
+    expect(screen.queryByLabelText('Captcha')).toBeNull()
+    expect(auth.captcha).not.toHaveBeenCalled()
+    await user.click(screen.getByRole('tab', { name: 'Log in' }))
+    expect(screen.queryByLabelText('Captcha')).toBeNull()
+    await user.click(screen.getByRole('button', { name: /forgot/i }))
+    expect(await screen.findByLabelText('Captcha')).toBeTruthy()
+    expect(auth.captcha).toHaveBeenCalledTimes(1)
+  })
+
   it('loads and refreshes the captcha through the runtime API', async () => {
     const { auth, user } = renderLogin()
 

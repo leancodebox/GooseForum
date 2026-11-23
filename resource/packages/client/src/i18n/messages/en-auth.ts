@@ -7,6 +7,7 @@ export default {
   login: "Log in",
   register: "Sign up",
   loginTitle: "Log in to your account",
+  captchaVerificationRequired: "Complete the verification and try again.",
   registerTitle: "Create an account",
   forgotTitle: "Reset password",
   loginSubtitle: "Welcome back. Continue your discussions and writing.",
@@ -46,6 +47,7 @@ export default {
     loginAfterReset: "After resetting, return to log in with the new password",
   },
   validation: {
+    credentialsRequired: "Please enter your account and password.",
     loginRequired: "Please enter account, password, and captcha",
     registerRequired: "Please complete the registration form",
     forgotRequired: "Please enter email and captcha",

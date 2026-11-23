@@ -1,6 +1,9 @@
 "use client"
 
 import {
+  lazy,
+  Suspense,
+  useRef,
   useCallback,
   useEffect,
   useId,
@@ -33,6 +36,8 @@ import { useServerErrorMessage } from '@gooseforum/runtime/i18n/server-error'
 import { AuthBrand } from './auth-brand'
 import { AuthLocaleSwitcher } from './auth-locale-switcher'
 
+const AuthChallenge = lazy(() => import('./auth-challenge'))
+
 type Mode = 'login' | 'register' | 'forgot'
 
 interface LoginPageViewProps {
@@ -49,6 +54,11 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
   const [oauthMfa, setOAuthMfa] = useState(mfa)
   const [mfaCode, setMfaCode] = useState('')
   const [captcha, setCaptcha] = useState({ id: '', image: '' })
+  const provider = page.registrationCaptcha ?? 'image'
+  const hosted = provider !== 'none' && provider !== 'image'
+  const needsImage = !mfa && (mode === 'forgot' || provider === 'image')
+  const proof = useRef<(() => Promise<string>) | null>(null)
+  const [challengeAttempt, setChallengeAttempt] = useState(0)
   const [captchaLoading, setCaptchaLoading] = useState(false)
   const [pending, setPending] = useState<Mode | null>(null)
   const [error, setError] = useState('')
@@ -72,8 +82,8 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
   }, [resolveError, runtime.api.auth, t])
 
   useEffect(() => {
-    void refreshCaptcha()
-  }, [refreshCaptcha])
+    if (needsImage) void refreshCaptcha()
+  }, [refreshCaptcha, needsImage])
 
   function switchMode(nextMode: Mode) {
     setMode(nextMode)
@@ -81,12 +91,21 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
     setNotice('')
   }
 
+  async function readCaptcha(answer: string) {
+    if (provider === 'image') return { captchaId: captcha.id, captchaCode: answer }
+    if (!hosted) return {}
+    const captchaToken = await proof.current?.()
+    if (captchaToken) return { captchaToken }
+    setError(t('captchaVerificationRequired'))
+    return null
+  }
+
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const username = loginForm.username.trim()
     const captchaCode = loginForm.captcha.trim()
-    if (!username || !loginForm.password || !captchaCode) {
-      setError(t('validation.loginRequired'))
+    if (!username || !loginForm.password || (provider === 'image' && !captchaCode)) {
+      setError(t(provider === 'image' ? 'validation.loginRequired' : 'validation.credentialsRequired'))
       return
     }
 
@@ -94,11 +113,12 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
     setError('')
     setNotice('')
     try {
+      const captchaFields = await readCaptcha(captchaCode)
+      if (!captchaFields) return
       const result = await loginWithPassword(runtime.api.auth, {
         username,
         password: loginForm.password,
-        captchaId: captcha.id,
-        captchaCode,
+        ...captchaFields,
       })
       if (result?.mfaRequired) {
         setOAuthMfa(false)
@@ -114,7 +134,8 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
         setError(resolveError(nextError, t('validation.loginFailed')))
       }
       setLoginForm((current) => ({ ...current, captcha: '' }))
-      void refreshCaptcha()
+      if (hosted) setChallengeAttempt((n) => n + 1)
+      if (provider === 'image') void refreshCaptcha()
     } finally {
       setPending(null)
     }
@@ -125,7 +146,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
     const username = registerForm.username.trim()
     const email = registerForm.email.trim()
     const captchaCode = registerForm.captcha.trim()
-    if (!username || !email || !registerForm.password || !captchaCode) {
+    if (!username || !email || !registerForm.password || (provider === 'image' && !captchaCode)) {
       setError(t('validation.registerRequired'))
       return
     }
@@ -147,12 +168,13 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
     setError('')
     setNotice('')
     try {
+      const captchaFields = await readCaptcha(captchaCode)
+      if (!captchaFields) return
       const result = await runtime.api.auth.register({
         username,
         email,
         password: registerForm.password,
-        captchaId: captcha.id,
-        captchaCode,
+        ...captchaFields,
         locale: runtime.locale,
         invitationCode: invitationCode || undefined,
       })
@@ -161,7 +183,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
         setLoginForm({ username, password: '', captcha: '' })
         setRegisterForm({ username: '', email: '', password: '', confirmPassword: '', captcha: '', invitationCode: '', agree: false })
         setNotice(t(result.messageCode, { ns: 'serverMessages', defaultValue: result.message || t('validation.registerSuccess') }))
-        void refreshCaptcha()
+        if (provider === 'image') void refreshCaptcha()
         return
       }
       runtime.queueFlash(result.message || t('validation.registerSuccess'), 'success')
@@ -169,7 +191,8 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
     } catch (nextError) {
       setError(resolveError(nextError, t('validation.registerFailed')))
       setRegisterForm((current) => ({ ...current, captcha: '' }))
-      void refreshCaptcha()
+      if (hosted) setChallengeAttempt((n) => n + 1)
+      if (provider === 'image') void refreshCaptcha()
     } finally {
       setPending(null)
     }
@@ -214,6 +237,16 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
       setPending(null)
     }
   }
+
+  const hostedChallenge = mode !== 'forgot' && hosted && (
+    <Suspense fallback={<Spinner />}>
+      <AuthChallenge key={mode + challengeAttempt} action={mode} provider={provider} siteKey={page.captchaSiteKey ?? ''}
+        proof={proof} onError={() => setError(t('validation.captchaLoadFailed'))} />
+      {error && <Button type="button" variant="ghost" size="sm" onClick={() => { setError(''); setChallengeAttempt((n) => n + 1) }}>
+        {t('refreshCaptcha')}
+      </Button>}
+    </Suspense>
+  )
 
   const title = mode === 'register'
     ? t('registerTitle')
@@ -296,7 +329,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
                       value={loginForm.password}
                       onChange={(event) => setLoginForm((current) => ({ ...current, password: event.target.value }))}
                     />
-                    <CaptchaField
+                    {provider === 'image' && <CaptchaField
                       value={loginForm.captcha}
                       onChange={(value) => setLoginForm((current) => ({ ...current, captcha: value }))}
                       image={captcha.image}
@@ -305,7 +338,8 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
                       imageAlt={t('captchaAlt')}
                       refreshLabel={t('refreshCaptcha')}
                       onRefresh={() => void refreshCaptcha()}
-                    />
+                    />}
+                    {hostedChallenge}
                     <Button type="button" variant="link" className="h-6 self-end px-0 text-xs" onClick={() => switchMode('forgot')}>
                       {t('forgotPassword')}
                     </Button>
@@ -356,7 +390,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
                         value={registerForm.confirmPassword}
                         onChange={(event) => setRegisterForm((current) => ({ ...current, confirmPassword: event.target.value }))}
                       />
-                      <CaptchaField
+                      {provider === 'image' && <CaptchaField
                         value={registerForm.captcha}
                         onChange={(value) => setRegisterForm((current) => ({ ...current, captcha: value }))}
                         image={captcha.image}
@@ -365,7 +399,8 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
                         imageAlt={t('captchaAlt')}
                         refreshLabel={t('refreshCaptcha')}
                         onRefresh={() => void refreshCaptcha()}
-                      />
+                      />}
+                      {hostedChallenge}
                       <Field orientation="horizontal">
                         <Checkbox
                           id="register-terms"

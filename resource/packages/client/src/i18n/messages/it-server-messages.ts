@@ -14,6 +14,7 @@ export default {
   "trust.adjustmentFailed": "Modifica del livello non riuscita: {error}",
   "trust.dailyReplies": "Il tuo livello consente fino a {limit} nuove risposte al giorno.",
   "trust.dailyTopics": "Il tuo livello consente fino a {limit} nuovi argomenti al giorno, incluse le bozze.",
+  "auth.login.rateLimited": "Troppe richieste. Riprova più tardi.",
   "auth.registration.rateLimited": "Troppe richieste. Riprova più tardi.",
   "mfa.invalid": mfa.failed,
   "mfa.unavailable": mfa.unavailable,

@@ -47,9 +47,9 @@ func loginPasswordCipher(t *testing.T, password string) string {
 
 func TestPendingPasswordLoginResendsWithoutIssuingSession(t *testing.T) {
 	useMailSettings(t, pageConfig.MailSettingsConfig{EnableMail: true, SmtpHost: "smtp.example.com", SmtpPort: 587, FromEmail: "forum@example.com"})
-	originalCaptcha := verifyLoginCaptcha
-	verifyLoginCaptcha = func(_, answer string) bool { return answer == "valid" }
-	t.Cleanup(func() { verifyLoginCaptcha = originalCaptcha })
+	originalCaptcha := verifyImageCaptcha
+	verifyImageCaptcha = func(_, answer string) bool { return answer == "valid" }
+	t.Cleanup(func() { verifyImageCaptcha = originalCaptcha })
 	db := dbconnect.Connect()
 	if err := db.AutoMigrate(&users.EntityComplete{}, &taskQueue.Entity{}, &authsessions.Token{}, &authsessions.Log{}); err != nil {
 		t.Fatal(err)

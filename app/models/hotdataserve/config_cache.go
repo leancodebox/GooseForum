@@ -68,9 +68,15 @@ func GetAnnouncementConfigCache() pageConfig.AnnouncementConfig {
 var securitySettingsConfigCache = &sharedcache.Cache[pageConfig.SecurityAndRegistration]{Name: "security-settings-config", MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetSecuritySettingsConfigCache() pageConfig.SecurityAndRegistration {
-	return securitySettingsConfigCache.GetOrLoad("", func() (pageConfig.SecurityAndRegistration, error) {
-		return pageConfig.GetSecuritySettings(defaultconfig.GetDefaultSecuritySettingsConfig()), nil
-	}, configFastCacheTTL)
+	return securitySettingsConfigCache.GetOrLoad("", loadSecuritySettings, configFastCacheTTL)
+}
+
+func LoadSecuritySettings() (pageConfig.SecurityAndRegistration, error) {
+	return securitySettingsConfigCache.GetOrLoadE("", loadSecuritySettings, configFastCacheTTL)
+}
+
+func loadSecuritySettings() (pageConfig.SecurityAndRegistration, error) {
+	return pageConfig.SecuritySettingsForPolicy(defaultconfig.GetDefaultSecuritySettingsConfig())
 }
 
 var postingSettingsConfigCache = &sharedcache.Cache[pageConfig.PostingContent]{Name: "posting-settings-config", MaxEntries: cacheconfig.Current().PageConfig}

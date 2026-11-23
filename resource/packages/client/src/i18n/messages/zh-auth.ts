@@ -7,6 +7,7 @@ export default {
   login: "登录",
   register: "注册",
   loginTitle: "登录账号",
+  captchaVerificationRequired: "请完成验证后重试。",
   registerTitle: "创建新账号",
   forgotTitle: "重置密码",
   loginSubtitle: "欢迎回来，继续你的讨论和创作。",
@@ -45,6 +46,7 @@ export default {
     loginAfterReset: "重置成功后返回登录页使用新密码",
   },
   validation: {
+    credentialsRequired: "请填写账号和密码。",
     loginRequired: "请填写账号、密码和验证码",
     registerRequired: "请完整填写注册信息",
     forgotRequired: "请填写邮箱和验证码",

@@ -13,7 +13,7 @@ import (
 
 // 验证码存储结构
 type captchaStore struct {
-	sync.RWMutex
+	sync.Mutex
 	data map[string]captchaInfo
 }
 
@@ -38,27 +38,14 @@ func (s *customStore) Set(id string, value string) error {
 }
 
 func (s *customStore) Get(id string, clear bool) string {
-	s.RLock()
+	s.Lock()
+	defer s.Unlock()
 	info, exists := s.data[id]
-	s.RUnlock()
-
-	if !exists {
-		return ""
-	}
-
-	if time.Now().After(info.expiredAt) {
-		if clear {
-			s.Lock()
-			delete(s.data, id)
-			s.Unlock()
-		}
-		return ""
-	}
-
 	if clear {
-		s.Lock()
 		delete(s.data, id)
-		s.Unlock()
+	}
+	if !exists || !time.Now().Before(info.expiredAt) {
+		return ""
 	}
 
 	return info.code
@@ -66,7 +53,7 @@ func (s *customStore) Get(id string, clear bool) string {
 
 func (s *customStore) Verify(id, answer string, clear bool) bool {
 	v := s.Get(id, clear)
-	return strings.EqualFold(v, answer)
+	return v != "" && strings.EqualFold(v, answer)
 }
 
 // 全局验证码存储

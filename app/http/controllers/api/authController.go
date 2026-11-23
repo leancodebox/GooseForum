@@ -10,6 +10,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/bundles/logincrypto"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/service/authsessionservice"
 	"github.com/leancodebox/GooseForum/app/service/emailactivationservice"
@@ -26,6 +27,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/validate"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/invitations"
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"gorm.io/gorm"
@@ -51,7 +53,21 @@ func Logout(c *gin.Context) {
 	))
 }
 
-var verifyRegistrationCaptcha = captchaOpt.VerifyCaptcha
+var verifyImageCaptcha = captchaOpt.VerifyCaptcha
+
+func validAuthCaptcha(c *gin.Context, cfg *pageConfig.RegistrationCaptcha, action, id, answer, token string) bool {
+	if cfg == nil || cfg.Provider == "image" {
+		return verifyImageCaptcha(id, answer)
+	}
+	if cfg.Provider == "none" {
+		return true
+	}
+	siteURL := hotdataserve.GetSiteSettingsConfigCache().SiteUrl
+	if siteURL == "" {
+		siteURL = setting.URL("")
+	}
+	return registrationservice.VerifyHostedCaptcha(c.Request.Context(), *cfg, token, siteURL, action)
+}
 
 // Register 注册
 func Register(c *gin.Context) {
@@ -88,7 +104,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	if !verifyRegistrationCaptcha(r.CaptchaId, r.CaptchaCode) {
+	if !validAuthCaptcha(c, securityConfig.RegistrationCaptcha, "register", r.CaptchaId, r.CaptchaCode, r.CaptchaToken) {
 		c.JSON(200, component.FailDataCode(component.MessageAuthCaptchaInvalid, nil))
 		return
 	}
@@ -198,11 +214,10 @@ func Register(c *gin.Context) {
 type LoginReq struct {
 	Username          string `json:"username" validate:"required"` // 可以是用户名或邮箱
 	EncryptedPassword string `json:"encryptedPassword" validate:"required"`
+	CaptchaToken      string `json:"captchaToken"`
 	CaptchaId         string `json:"captchaId"`
 	CaptchaCode       string `json:"captchaCode"`
 }
-
-var verifyLoginCaptcha = captchaOpt.VerifyCaptcha
 
 func LoginPublicKey(c *gin.Context) {
 	c.JSON(http.StatusOK, component.SuccessData(map[string]any{
@@ -222,6 +237,11 @@ func Login(c *gin.Context) {
 			loginlogservice.Failure(c, "password", "", reason, identity)
 		}
 	}()
+	if registrationservice.AllowPasswordLogin(c.ClientIP()) != nil {
+		reason = "rate_limited"
+		c.JSON(http.StatusTooManyRequests, component.FailDataCode(component.MessageLoginRateLimited, nil))
+		return
+	}
 	var req LoginReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(200, component.FailDataCode(component.MessageRequestInvalidFormat, nil))
@@ -235,8 +255,6 @@ func Login(c *gin.Context) {
 
 	username := strings.TrimSpace(req.Username)
 	identity = username
-	captchaId := req.CaptchaId
-	captchaCode := req.CaptchaCode
 
 	if username == "" {
 		c.JSON(200, component.FailDataCode(component.MessageRequestInvalidParams, nil))
@@ -255,7 +273,13 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	if !verifyLoginCaptcha(captchaId, captchaCode) {
+	security, err := hotdataserve.LoadSecuritySettings()
+	if err != nil {
+		reason = "settings_unavailable"
+		c.JSON(http.StatusServiceUnavailable, component.FailDataCode(component.MessageAuthLoginFailed, nil))
+		return
+	}
+	if !validAuthCaptcha(c, security.RegistrationCaptcha, "login", req.CaptchaId, req.CaptchaCode, req.CaptchaToken) {
 		reason = "captcha_rejected"
 		c.JSON(200, component.FailDataCode(component.MessageAuthCaptchaInvalid, nil))
 		return
@@ -274,7 +298,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	if userEntity.NeedsEmailVerification(hotdataserve.GetSecuritySettingsConfigCache().EnableEmailVerification) {
+	if userEntity.NeedsEmailVerification(security.EnableEmailVerification) {
 		reason = "email_unverified"
 		c.JSON(200, resendPendingLogin(c, *userEntity))
 		return
