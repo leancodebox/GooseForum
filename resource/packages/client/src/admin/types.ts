@@ -179,6 +179,7 @@ export interface RegistrationCaptchaSettings {
   provider: import("../contracts/payload.js").RegistrationCaptchaProvider
   siteKey?: string
   secret?: string
+  difficulty?: "low" | "medium" | "high"
   scoreThreshold?: number
 }
 export interface SecuritySettings { registrationCaptcha?: RegistrationCaptchaSettings;enableSignup:boolean;inviteOnly?:boolean;enableEmailVerification:boolean;allowedDomains:string[];registrationIPLimit?:number;registrationEmailLimit?:number;registrationGlobalLimit?:number }

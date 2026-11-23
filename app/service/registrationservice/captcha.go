@@ -21,13 +21,27 @@ func PrepareCaptchaSettings(settings *pageConfig.SecurityAndRegistration, previo
 		return nil
 	}
 	switch cfg.Provider {
-	case "altcha", "image", "none":
+	case "altcha":
+		difficulty := cfg.Difficulty
+		if difficulty == "" && previous != nil && previous.Provider == "altcha" {
+			difficulty = previous.Difficulty
+		}
+		if difficulty == "" {
+			difficulty = "medium"
+		}
+		if _, err := altchaCounterBase(difficulty); err != nil {
+			return err
+		}
+		*cfg = pageConfig.RegistrationCaptcha{Provider: "altcha", Difficulty: difficulty}
+		return nil
+	case "image", "none":
 		*cfg = pageConfig.RegistrationCaptcha{Provider: cfg.Provider}
 		return nil
 	case "hcaptcha", "recaptcha_v2", "recaptcha_v3":
 	default:
 		return errors.New("unknown registration captcha")
 	}
+	cfg.Difficulty = ""
 	cfg.SiteKey = strings.TrimSpace(cfg.SiteKey)
 	cfg.Secret = strings.TrimSpace(cfg.Secret)
 	if cfg.Secret == "" && previous != nil && previous.Provider == cfg.Provider && previous.SiteKey == cfg.SiteKey {

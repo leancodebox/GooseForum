@@ -34,7 +34,21 @@ func altchaKeys() (signing, solution string, err error) {
 	return derive("gooseforum/altcha/challenge/v1"), derive("gooseforum/altcha/solution/v1"), nil
 }
 
-func NewAltchaChallenge(action, ip string) (altcha.Challenge, error) {
+// Each tier samples uniformly from [base, 3*base). Unset is the original medium tier.
+func altchaCounterBase(difficulty string) (int, error) {
+	switch difficulty {
+	case "low":
+		return 40, nil
+	case "", "medium":
+		return 80, nil
+	case "high":
+		return 160, nil
+	default:
+		return 0, errors.New("unknown ALTCHA difficulty")
+	}
+}
+
+func NewAltchaChallenge(action, ip, difficulty string) (altcha.Challenge, error) {
 	if action != "login" && action != "register" {
 		return altcha.Challenge{}, errors.New("invalid challenge action")
 	}
@@ -50,11 +64,15 @@ func NewAltchaChallenge(action, ip string) (altcha.Challenge, error) {
 	if err != nil {
 		return altcha.Challenge{}, err
 	}
-	offset, err := rand.Int(rand.Reader, big.NewInt(160))
+	base, err := altchaCounterBase(difficulty)
 	if err != nil {
 		return altcha.Challenge{}, err
 	}
-	counter := 80 + int(offset.Int64())
+	offset, err := rand.Int(rand.Reader, big.NewInt(int64(2*base)))
+	if err != nil {
+		return altcha.Challenge{}, err
+	}
+	counter := base + int(offset.Int64())
 	expires := now.Add(altchaLifetime)
 	challenge, err := altcha.CreateChallenge(altcha.CreateChallengeOptions{
 		Algorithm: "PBKDF2/SHA-256", Cost: 1000, Counter: &counter,

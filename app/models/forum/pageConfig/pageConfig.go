@@ -182,6 +182,7 @@ type MailSettingsConfig struct {
 }
 
 type RegistrationCaptcha struct {
+	Difficulty     string   `json:"difficulty,omitempty"`
 	Provider       string   `json:"provider"`
 	SiteKey        string   `json:"siteKey,omitempty"`
 	Secret         string   `json:"secret,omitempty"`

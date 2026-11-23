@@ -9,7 +9,7 @@ import {
   FieldLabel,
 } from "@gooseforum/ui/components/field";
 import { Input } from "@gooseforum/ui/components/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@gooseforum/ui/components/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@gooseforum/ui/components/select";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Switch } from "@gooseforum/ui/components/switch";
 import { MailCheck, Plus, Save, Trash2 } from "lucide-react";
@@ -75,7 +75,10 @@ export function SecuritySettingsPage({
   async function save() {
     setSaving(true);
     try {
-      await api.settings.saveSecurity(form);
+      const settings: SecuritySettings = captcha.provider === "altcha"
+        ? { ...form, registrationCaptcha: { provider: captcha.provider, difficulty: captcha.difficulty ?? "medium" } }
+        : form;
+      await api.settings.saveSecurity(settings);
       setSavedCaptcha({ ...captcha, siteKey: captcha.siteKey?.trim(), secret: undefined });
       if (captcha.secret) {
         setForm((current) => current.registrationCaptcha === captcha
@@ -141,14 +144,38 @@ export function SecuritySettingsPage({
           }}>
             <SelectTrigger id="registration-captcha" className="w-full sm:max-w-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="image">{text("captchaImage")}</SelectItem>
-              <SelectItem value="altcha">{text("captchaAltcha")}</SelectItem>
-              <SelectItem value="hcaptcha">hCaptcha</SelectItem>
-              <SelectItem value="recaptcha_v2">Google reCAPTCHA v2</SelectItem>
-              <SelectItem value="recaptcha_v3">Google reCAPTCHA v3</SelectItem>
               <SelectItem value="none">{text("captchaNone")}</SelectItem>
+              <SelectGroup>
+                <SelectLabel>{text("captchaBuiltIn")}</SelectLabel>
+                <SelectItem value="image">{text("captchaImage")}</SelectItem>
+                <SelectItem value="altcha">{text("captchaAltcha")}</SelectItem>
+              </SelectGroup>
+              <SelectGroup>
+                <SelectLabel>{text("captchaThirdParty")}</SelectLabel>
+                <SelectItem value="hcaptcha">hCaptcha</SelectItem>
+                <SelectItem value="recaptcha_v2">{text("captchaRecaptchaV2")}</SelectItem>
+                <SelectItem value="recaptcha_v3">{text("captchaRecaptchaV3")}</SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
+          {captcha.provider === "altcha" && (
+            <Field className="border-s-2 ps-4">
+              <FieldLabel htmlFor="altcha-difficulty">{text("captchaDifficulty")}</FieldLabel>
+              <Select value={captcha.difficulty ?? "medium"} disabled={loading || saving} onValueChange={(difficulty) => {
+                if (difficulty === "low" || difficulty === "medium" || difficulty === "high") {
+                  setForm({ ...form, registrationCaptcha: { ...captcha, difficulty } });
+                }
+              }}>
+                <SelectTrigger id="altcha-difficulty" aria-describedby="altcha-difficulty-hint" className="w-full sm:max-w-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">{text("captchaDifficultyLow")}</SelectItem>
+                  <SelectItem value="medium">{text("captchaDifficultyMedium")}</SelectItem>
+                  <SelectItem value="high">{text("captchaDifficultyHigh")}</SelectItem>
+                </SelectContent>
+              </Select>
+              <FieldDescription id="altcha-difficulty-hint">{text("captchaDifficultyHint")}</FieldDescription>
+            </Field>
+          )}
           {hosted && (
             <fieldset disabled={loading || saving} aria-labelledby="registration-captcha" className="grid min-w-0 gap-4 border-s-2 ps-4">
               <Field>

@@ -11,6 +11,7 @@ import (
 
 	altcha "github.com/altcha-org/altcha-lib-go/v2"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 )
 
 func encodeAltchaProof(t *testing.T, challenge altcha.Challenge, solution altcha.Solution) string {
@@ -23,7 +24,7 @@ func encodeAltchaProof(t *testing.T, challenge altcha.Challenge, solution altcha
 }
 
 func TestAltchaRedemption(t *testing.T) {
-	challenge, err := NewAltchaChallenge("login", "192.0.2.1")
+	challenge, err := NewAltchaChallenge("login", "192.0.2.1", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,11 +98,11 @@ func TestAltchaIssuanceHasSeparateQuota(t *testing.T) {
 		loginLimits.mu.Unlock()
 	})
 	for range 20 {
-		if _, err := NewAltchaChallenge("register", ip); err != nil {
+		if _, err := NewAltchaChallenge("register", ip, ""); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if _, err := NewAltchaChallenge("login", "::ffff:"+ip); !errors.Is(err, ErrRateLimited) {
+	if _, err := NewAltchaChallenge("login", "::ffff:"+ip, ""); !errors.Is(err, ErrRateLimited) {
 		t.Fatal("missing challenge limit")
 	}
 	if err := AllowPasswordLogin(ip); err != nil {
@@ -113,7 +114,7 @@ func TestAltchaRequiresSiteKeyAndPendingTicket(t *testing.T) {
 	old := preferences.Get("app.secretKey")
 	t.Cleanup(func() { preferences.Set("app.secretKey", old) })
 	preferences.Set("app.secretKey", "")
-	if _, err := NewAltchaChallenge("login", "192.0.2.55"); err == nil {
+	if _, err := NewAltchaChallenge("login", "192.0.2.55", ""); err == nil {
 		t.Fatal("issued without a site key")
 	}
 
@@ -122,7 +123,7 @@ func TestAltchaRequiresSiteKeyAndPendingTicket(t *testing.T) {
 	if err != nil || signing == solutionKey {
 		t.Fatal("missing distinct purpose keys")
 	}
-	challenge, err := NewAltchaChallenge("register", "192.0.2.55")
+	challenge, err := NewAltchaChallenge("register", "192.0.2.55", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,5 +142,32 @@ func TestAltchaRequiresSiteKeyAndPendingTicket(t *testing.T) {
 	}
 	if VerifyAltcha(token, "register") {
 		t.Fatal("accepted a ticket after cache loss")
+	}
+}
+
+func TestAltchaDifficultySettings(t *testing.T) {
+	for _, tc := range []struct {
+		input, previous, want string
+		base                  int
+	}{
+		{"", "", "medium", 80}, {"", "high", "high", 160},
+		{"low", "high", "low", 40}, {"medium", "high", "medium", 80}, {"high", "low", "high", 160},
+	} {
+		cfg := &pageConfig.RegistrationCaptcha{Provider: "altcha", Difficulty: tc.input, SiteKey: "stale"}
+		prev := &pageConfig.RegistrationCaptcha{Provider: "altcha", Difficulty: tc.previous}
+		if err := PrepareCaptchaSettings(&pageConfig.SecurityAndRegistration{RegistrationCaptcha: cfg}, prev); err != nil {
+			t.Fatal(err)
+		}
+		base, err := altchaCounterBase(cfg.Difficulty)
+		if err != nil || base != tc.base || cfg.Difficulty != tc.want || cfg.SiteKey != "" {
+			t.Errorf("input=%q previous=%q: difficulty=%q base=%d err=%v", tc.input, tc.previous, cfg.Difficulty, base, err)
+		}
+	}
+	if base, err := altchaCounterBase(""); err != nil || base != 80 {
+		t.Fatal("legacy configuration changed difficulty")
+	}
+	cfg := &pageConfig.RegistrationCaptcha{Provider: "altcha", Difficulty: "other"}
+	if PrepareCaptchaSettings(&pageConfig.SecurityAndRegistration{RegistrationCaptcha: cfg}, nil) == nil {
+		t.Fatal("unknown difficulty accepted")
 	}
 }

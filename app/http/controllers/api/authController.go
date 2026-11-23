@@ -71,7 +71,7 @@ func AltchaChallenge(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	challenge, err := registrationservice.NewAltchaChallenge(action, c.ClientIP())
+	challenge, err := registrationservice.NewAltchaChallenge(action, c.ClientIP(), settings.RegistrationCaptcha.Difficulty)
 	if errors.Is(err, registrationservice.ErrRateLimited) {
 		c.Status(http.StatusTooManyRequests)
 		return
