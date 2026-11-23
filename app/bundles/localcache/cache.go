@@ -100,6 +100,14 @@ func (c *Cache[V]) Get(key string) (V, bool) {
 	return *new(V), false
 }
 
+func (c *Cache[V]) Take(key string) (V, bool) {
+	c.init()
+	if item, found := c.cache.GetAndDelete(key); found {
+		return item.Value(), true
+	}
+	return *new(V), false
+}
+
 func (c *Cache[V]) DeletePrefix(prefix string) {
 	c.init()
 	var keys []string

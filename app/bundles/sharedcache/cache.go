@@ -163,6 +163,17 @@ func (c *Cache[V]) Get(key string) (V, bool, error) {
 	return c.backend.Get(key)
 }
 
+// Take invalidates pending fills and delegates single-use consumption to the backend.
+func (c *Cache[V]) Take(key string) (V, bool, error) {
+	if err := c.init(); err != nil {
+		return *new(V), false, err
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	delete(c.flights, key)
+	return c.backend.Take(key)
+}
+
 func (c *Cache[V]) Delete(key string) error {
 	if err := c.init(); err != nil {
 		c.logError("delete", err)

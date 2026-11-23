@@ -520,3 +520,44 @@ func TestConcurrentReadsAndInvalidationsConverge(t *testing.T) {
 		t.Fatalf("stress run retained %d flight records", remaining)
 	}
 }
+
+func TestTakeAcrossClients(t *testing.T) {
+	backend := &memoryBackend[int]{}
+	first := NewWithBackend[int]("pending", backend)
+	second := NewWithBackend[int]("pending", backend)
+	if err := first.Set("ticket", 42, time.Minute); err != nil {
+		t.Fatal(err)
+	}
+	var wg sync.WaitGroup
+	var successes atomic.Int32
+	for i := range 32 {
+		client := first
+		if i%2 == 0 {
+			client = second
+		}
+		wg.Go(func() {
+			value, found, err := client.Take("ticket")
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			if found {
+				if value != 42 {
+					t.Errorf("unexpected value: %d", value)
+				}
+				successes.Add(1)
+			}
+		})
+	}
+	wg.Wait()
+	if successes.Load() != 1 {
+		t.Fatalf("took ticket %d times", successes.Load())
+	}
+	if err := first.Set("expired", 1, time.Nanosecond); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(time.Millisecond)
+	if _, found, err := second.Take("expired"); err != nil || found {
+		t.Fatalf("expired entry: found=%t, err=%v", found, err)
+	}
+}

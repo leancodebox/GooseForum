@@ -17,6 +17,8 @@ import (
 // Implementations own serialization, expiration and backend-specific concurrency.
 type Backend[V any] interface {
 	Get(string) (V, bool, error)
+	// Take must atomically retrieve and remove a live entry across all backend clients.
+	Take(string) (V, bool, error)
 	Set(string, V, time.Duration) error
 	Delete(string) error
 	DeletePrefix(string) error
@@ -76,6 +78,11 @@ type memoryBackend[V any] struct {
 
 func (b *memoryBackend[V]) Get(key string) (V, bool, error) {
 	value, found := b.cache.Get(key)
+	return value, found, nil
+}
+
+func (b *memoryBackend[V]) Take(key string) (V, bool, error) {
+	value, found := b.cache.Take(key)
 	return value, found, nil
 }
 

@@ -66,7 +66,7 @@ driver = "memory"
 
 Only `memory` is currently supported and is also the default. The backend is validated
 and frozen at startup; restart after changes. This setting controls `sharedcache`
-business read caches. Fixed local caches, login sessions and captcha stores are unaffected.
+business caches, including pending ALTCHA challenges. Image CAPTCHAs and login sessions use their own stores.
 Redis is not implemented; setting `redis` prevents startup. See [cache design](cache-design.md).
 
 ### [db] Database Settings
