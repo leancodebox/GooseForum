@@ -21,6 +21,6 @@ export default function AltchaChallenge({ action, proof }: { action: 'login' | '
       proof.current = null
     }
   }, [proof])
-  return <altcha-widget ref={ref} style={{ '--altcha-max-width': '100%' }} auto="onfocus" challenge={`/api/altcha-challenge?action=${action}`}
+  return <altcha-widget ref={ref} style={{ '--altcha-max-width': '100%', '--altcha-border-color': 'var(--input)' }} auto="onfocus" challenge={`/api/altcha-challenge?action=${action}`}
     configuration='{"humanInteractionSignature":false}' />
 }
