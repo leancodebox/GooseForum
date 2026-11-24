@@ -88,6 +88,7 @@
   "meta.searchDesc": "{site} のトピック・キーワード・議論を検索します。",
   "meta.friendLinksDesc": "{site} の相互リンクとコミュニティパートナー。",
   "meta.sponsorsDesc": "{site} を支援してくださるスポンサーとコミュニティパートナーに感謝します。",
+  "meta.replyTitle": "{author}さんが「{title}」に返信しました",
   "meta.topicDesc": "「{title}」を読んで、{site} のコミュニティで議論に参加しましょう。",
   "meta.communityDesc": "{site} のコミュニティで議論に参加しましょう。",
   "meta.userDesc": "{site} での {username} のトピック・アクティビティ・コミュニティのつながりを見る。",

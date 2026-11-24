@@ -74,6 +74,7 @@ import { RenderedContent } from "../content/rendered-content";
 import { readImageMetadata } from "../content/image-metadata";
 import { emptyShellHeader, useShellHeader } from "../layout/shell-header";
 import { TopicTable } from "../topics/topic-list";
+import { PostShare } from "../topics/post-share";
 import { ReplyReference } from "../topics/reply-reference";
 import { LocalDraftPanel } from "../drafts/local-draft-panel";
 import { clearAccountDrafts, draftOwner, draftFingerprint, type DraftValues, type LocalDraft } from "../drafts/local-draft-store";
@@ -900,6 +901,7 @@ export function TopicPageView({
               topicCanModerate={page.permissions.canModerateTopic}
               topicStatus={topicStatus}
               t={t}
+              shareAction={!post.isHidden && <PostShare post={post} topic={page.topic} site={layout.site} path={post.postNo === 1 ? page.topic.url : postPermalink(post)} />}
               onToggle={toggleAction}
               onReply={() => openComposer(post)}
               onEdit={() => editPost(post)}
@@ -1335,6 +1337,7 @@ function PostRow({
   topicCanModerate,
   topicStatus,
   t,
+  shareAction,
   onToggle,
   onReply,
   onEdit,
@@ -1359,6 +1362,7 @@ function PostRow({
   topicCanModerate: boolean;
   topicStatus: number;
   t: Translate;
+  shareAction: ReactNode;
   onToggle(type: "like" | "bookmark" | "watch"): void;
   onReply(): void;
   onEdit(): void;
@@ -1396,6 +1400,7 @@ function PostRow({
           </div>
           <PostActionGroup placement="header">
             <div className="col-start-3 row-start-1 flex items-start justify-end gap-0 self-start lg:contents">
+            {shareAction}
             {post.isOwnPost ? (
               <>
                 <Button
@@ -1568,6 +1573,10 @@ function PostRow({
     </article>
   );
 }
+function postPermalink(post: PostPayload) {
+  return `/p/post/${post.topicId}${post.postNo > 1 ? `/${post.postNo}` : ""}#post-${post.id}`;
+}
+
 function PostPermalink({
   post,
   className,
@@ -1577,7 +1586,7 @@ function PostPermalink({
 }) {
   return (
     <GooseLink
-      href={`/p/post/${post.topicId}${post.postNo > 1 ? `/${post.postNo}` : ""}#post-${post.id}`}
+      href={postPermalink(post)}
       className={cn(
         "shrink-0 font-semibold tabular-nums text-muted-foreground hover:text-primary",
         className,

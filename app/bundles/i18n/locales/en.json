@@ -88,6 +88,7 @@
   "meta.searchDesc": "Search topics, keywords, and discussions on {site}.",
   "meta.friendLinksDesc": "Friends and community partners of {site}.",
   "meta.sponsorsDesc": "Thanks to the sponsors and community partners who support {site}.",
+  "meta.replyTitle": "{author} replied to “{title}”",
   "meta.topicDesc": "Read “{title}” and join the discussion on {site}.",
   "meta.communityDesc": "Join the community discussion on {site}.",
   "meta.userDesc": "See {username}’s topics, activity, and community connections on {site}.",

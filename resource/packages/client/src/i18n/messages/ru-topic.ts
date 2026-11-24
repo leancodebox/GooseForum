@@ -1,5 +1,16 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  shareTopic: "Поделиться темой",
+  shareReply: "Поделиться ответом",
+  shareCard: "Поделиться карточкой",
+  copyLink: "Скопировать ссылку",
+  saveCard: "Сохранить карточку",
+  topicAuthor: "Автор темы",
+  replyAuthor: "Автор ответа",
+  scanToRead: "Сканируйте, чтобы прочитать",
+  cardFailed: "Не удалось создать изображение. Попробуйте ещё раз.",
+  linkCopied: "Ссылка скопирована",
+  copyManually: "Скопируйте ссылку выше вручную.",
   originalPost: "Исходный пост",
   like: "Нравится",
   bookmark: "В закладки",

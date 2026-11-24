@@ -88,6 +88,7 @@
   "meta.searchDesc": "Cerca argomenti, parole chiave e discussioni su {site}.",
   "meta.friendLinksDesc": "Amici e partner della community di {site}.",
   "meta.sponsorsDesc": "Grazie agli sponsor e ai partner della community che supportano {site}.",
+  "meta.replyTitle": "{author} ha risposto a “{title}”",
   "meta.topicDesc": "Leggi “{title}” e partecipa alla discussione su {site}.",
   "meta.communityDesc": "Partecipa alla discussione della community su {site}.",
   "meta.userDesc": "Scopri argomenti, attività e connessioni di {username} su {site}.",

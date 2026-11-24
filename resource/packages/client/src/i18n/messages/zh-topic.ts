@@ -1,5 +1,16 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  shareTopic: "分享主题",
+  shareReply: "分享回复",
+  shareCard: "分享卡片",
+  copyLink: "复制链接",
+  saveCard: "保存卡片",
+  topicAuthor: "主题作者",
+  replyAuthor: "回复作者",
+  scanToRead: "扫码查看原文",
+  cardFailed: "图片生成失败，请重试。",
+  linkCopied: "链接已复制",
+  copyManually: "请手动复制上方链接。",
   originalPost: "正文",
   like: "点赞",
   bookmark: "收藏",

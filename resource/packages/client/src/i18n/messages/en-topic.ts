@@ -1,5 +1,16 @@
 // Canonical translation data; compatibility exports and React loaders share this file.
 export default {
+  shareTopic: "Share topic",
+  shareReply: "Share reply",
+  shareCard: "Share card",
+  copyLink: "Copy link",
+  saveCard: "Save card",
+  topicAuthor: "Topic author",
+  replyAuthor: "Reply author",
+  scanToRead: "Scan to read",
+  cardFailed: "Could not create the image. Please try again.",
+  linkCopied: "Link copied",
+  copyManually: "Copy the link above manually.",
   originalPost: "Original post",
   like: "Like",
   bookmark: "Bookmark",

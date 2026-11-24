@@ -88,6 +88,7 @@
   "meta.searchDesc": "Поиск тем, ключевых слов и обсуждений на {site}.",
   "meta.friendLinksDesc": "Друзья и партнёры сообщества {site}.",
   "meta.sponsorsDesc": "Благодарим спонсоров и партнёров сообщества, поддерживающих {site}.",
+  "meta.replyTitle": "{author} отвечает в теме «{title}»",
   "meta.topicDesc": "Прочитайте «{title}» и присоединяйтесь к обсуждению на {site}.",
   "meta.communityDesc": "Присоединяйтесь к обсуждениям сообщества на {site}.",
   "meta.userDesc": "Посмотрите темы, активность и связи {username} в сообществе {site}.",

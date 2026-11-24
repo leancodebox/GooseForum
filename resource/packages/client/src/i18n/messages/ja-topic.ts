@@ -2,6 +2,17 @@
 import en from "./en-topic.js";
 export default {
   ...en,
+  shareTopic: "トピックを共有",
+  shareReply: "返信を共有",
+  shareCard: "カードを共有",
+  copyLink: "リンクをコピー",
+  saveCard: "カードを保存",
+  topicAuthor: "トピックの投稿者",
+  replyAuthor: "返信の投稿者",
+  scanToRead: "原文を読む",
+  cardFailed: "画像を生成できませんでした。もう一度お試しください。",
+  linkCopied: "リンクをコピーしました",
+  copyManually: "上のリンクを手動でコピーしてください。",
   positionHelp: "上下にドラッグし、指を離すと移動します。投稿番号でも移動できます。",
   jumpToPost: "投稿番号に移動",
   jumpGo: "移動",

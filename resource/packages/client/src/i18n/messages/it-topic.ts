@@ -2,6 +2,17 @@
 import en from "./en-topic.js";
 export default {
   ...en,
+  shareTopic: "Condividi discussione",
+  shareReply: "Condividi risposta",
+  shareCard: "Condividi scheda",
+  copyLink: "Copia link",
+  saveCard: "Salva scheda",
+  topicAuthor: "Autore della discussione",
+  replyAuthor: "Autore della risposta",
+  scanToRead: "Scansiona per leggere",
+  cardFailed: "Creazione immagine non riuscita. Riprova.",
+  linkCopied: "Link copiato",
+  copyManually: "Copia manualmente il link qui sopra.",
   positionHelp: "Trascina in verticale e rilascia per spostarti, oppure inserisci il numero del messaggio.",
   jumpToPost: "Vai al messaggio",
   jumpGo: "Vai",

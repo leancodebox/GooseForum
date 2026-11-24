@@ -506,3 +506,25 @@ func ensureForumTestAccessCategory(t *testing.T, categoryID uint64) {
 		}
 	})
 }
+
+func TestReplyShareMetaUsesOnlyExactVisibleReply(t *testing.T) {
+	stream := []PostPayload{
+		{PostNo: 2, Content: "internal", IsHidden: true},
+		{PostNo: 3, Content: "pending", ProcessStatus: 1},
+		{PostNo: 5, Content: "**Useful** reply", Author: TopicAuthorPayload{Username: "alice"}},
+	}
+	for _, no := range []uint64{2, 3, 4, 5, 99} {
+		meta := PageMeta{Canonical: "https://example.com/p/post/1", OpenGraph: &OpenGraphMeta{Title: "Topic"}, Twitter: &TwitterMeta{Title: "Topic"}}
+		setReplyShareMeta(&meta, "en", "Topic", no, stream)
+		if no != 5 {
+			if meta.OpenGraph.Title != "Topic" || meta.Twitter.Title != "Topic" || meta.OpenGraph.Description != "" {
+				t.Fatalf("unexpected preview for post %d: %+v", no, meta.OpenGraph)
+			}
+			continue
+		}
+		if meta.OpenGraph.URL != meta.Canonical+"/5" || meta.OpenGraph.Description != "Useful reply" || meta.OpenGraph.Title != "alice replied to “Topic”" ||
+			meta.Twitter.Description != meta.OpenGraph.Description || meta.Twitter.Title != meta.OpenGraph.Title {
+			t.Fatalf("unexpected reply preview: %+v / %+v", meta.OpenGraph, meta.Twitter)
+		}
+	}
+}

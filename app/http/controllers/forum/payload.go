@@ -16,6 +16,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/redirectopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
@@ -1478,6 +1479,10 @@ func buildTopicMeta(c *gin.Context, topic TopicDetailPayload, postStream ...[]Po
 		description = i18n.T(requestLang(c), "meta.topicDesc", "title", topic.Title, "site", siteTitle())
 	}
 	inlineImages := topicImageURLs(topic, baseURL)
+	shareImage := firstString(inlineImages)
+	if shareImage == "" {
+		shareImage = absolutePublicURL(hotdataserve.GetSiteSettingsConfigCache().SiteLogo, baseURL)
+	}
 	categoryNames := lo.Map(topic.Categories, func(item TopicCategoryPayload, _ int) string { return item.Name })
 	section := ""
 	if len(categoryNames) > 0 {
@@ -1533,15 +1538,34 @@ func buildTopicMeta(c *gin.Context, topic TopicDetailPayload, postStream ...[]Po
 			Author:        topic.Author.Username,
 			Section:       section,
 			Tags:          categoryNames,
-			Image:         firstString(inlineImages),
+			Image:         shareImage,
 		},
 		Twitter: &TwitterMeta{
 			Card:        "summary",
 			Title:       topic.Title,
 			Description: description,
-			Image:       firstString(inlineImages),
+			Image:       shareImage,
 		},
 		JSONLD: jsonLD,
+	}
+}
+
+func setReplyShareMeta(meta *PageMeta, lang, topicTitle string, postNo uint64, stream []PostPayload) {
+	for _, post := range stream {
+		if post.PostNo != postNo || post.IsHidden || post.ProcessStatus != 0 {
+			continue
+		}
+		title := i18n.T(lang, "meta.replyTitle", "author", post.Author.DisplayName(), "title", topicTitle)
+		description := markdown2html.ExtractDescriptionVersion(post.Content, 200, post.SourceVersion)
+		meta.OpenGraph.Title = title
+		meta.OpenGraph.Description = description
+		meta.OpenGraph.URL = fmt.Sprintf("%s/%d", strings.TrimRight(meta.Canonical, "/"), postNo)
+		meta.OpenGraph.Author = post.Author.DisplayName()
+		meta.OpenGraph.PublishedTime = ""
+		meta.OpenGraph.ModifiedTime = ""
+		meta.Twitter.Title = title
+		meta.Twitter.Description = description
+		return
 	}
 }
 

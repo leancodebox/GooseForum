@@ -53,7 +53,8 @@ func TopicDetail(c *gin.Context) {
 		renderNotFound(c)
 		return
 	}
-	postNo := min(cast.ToUint64(c.Param("postNo")), topic.PostSeq)
+	requestedPostNo := cast.ToUint64(c.Param("postNo"))
+	postNo := min(requestedPostNo, topic.PostSeq)
 
 	firstPost := posts.Get(topic.FirstPostId)
 	if firstPost.Id == 0 {
@@ -79,10 +80,21 @@ func TopicDetail(c *gin.Context) {
 		c.Set(accessSnapshotContextKey, nil)
 	}
 	props := buildTopicDetailProps(c, &topic, &firstPost, postNo)
+	meta := buildTopicMeta(c, props.Topic, props.PostStream.Posts)
+	guest := snapshot
+	if loginUser.UserId != 0 {
+		guest, _ = accesscontrol.Resolve(0)
+	}
+	if !topic.IsPublished() || !guest.CanReadCategory(topic.MainCategoryId) {
+		meta.OpenGraph = nil
+		meta.Twitter = nil
+	} else if requestedPostNo > 1 {
+		setReplyShareMeta(&meta, requestLang(c), props.Topic.Title, requestedPostNo, props.PostStream.Posts)
+	}
 	payload := PagePayload{
 		Component: PageComponentTopic,
 		Props:     props,
-		Meta:      buildTopicMeta(c, props.Topic, props.PostStream.Posts),
+		Meta:      meta,
 		Layout:    buildLayout(c, activeKeyForTopic(props.Topic)),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
