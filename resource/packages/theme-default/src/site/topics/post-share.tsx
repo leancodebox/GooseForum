@@ -70,6 +70,31 @@ function wrapLines(ctx: CanvasRenderingContext2D, text: string, width: number, l
   return lines;
 }
 
+function shareExcerpt(body: HTMLElement) {
+  let text = "";
+  function endBlock() {
+    text = text.trimEnd() + "\n";
+  }
+  function visit(node: Node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      text += (node.textContent || "").replace(/[\t\r\n ]+/g, " ");
+      return;
+    }
+    if (!(node instanceof Element)) return;
+    if (node.tagName === "BR") {
+      text += "\n";
+      return;
+    }
+    const block = node.matches("p,li,ul,ol,blockquote,pre,h1,h2,h3,h4,h5,h6,tr,div");
+    if (block) endBlock();
+    if (node.tagName === "PRE") text += node.textContent;
+    else node.childNodes.forEach(visit);
+    if (block) endBlock();
+  }
+  body.childNodes.forEach(visit);
+  return text.replace(/ +\n/g, "\n").trim();
+}
+
 function CardPreview({ post, topic, site, url, onClose }: ShareProps & { url: string; onClose(): void }) {
   const { t } = useTranslation("topic");
   const brand = useRef<HTMLSpanElement>(null);
@@ -88,9 +113,7 @@ function CardPreview({ post, topic, site, url, onClose }: ShareProps & { url: st
     let active = true;
     const first = post.postNo === 1;
     const doc = new DOMParser().parseFromString(post.renderedContent, "text/html");
-    for (const br of doc.querySelectorAll("br")) br.replaceWith("\n");
-    for (const block of doc.querySelectorAll("p,li,pre,h1,h2,h3,h4,h5,h6")) block.append("\n");
-    const excerpt = doc.body.textContent?.trim() || (first ? topic.description : "");
+    const excerpt = shareExcerpt(doc.body) || (first ? topic.description : "");
     const author = userDisplayName(post.author);
     const palette = getComputedStyle(el);
     const paper = palette.backgroundColor;
