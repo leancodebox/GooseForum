@@ -100,15 +100,15 @@ function CardPreview({ post, topic, site, url, onClose }: ShareProps & { url: st
     function draw(cover?: HTMLImageElement, logo?: HTMLImageElement, avatar?: HTMLImageElement) {
       if (!active || !ctx || !el || !qr.current) return;
       const bannerHeight = cover ? 134 : 64;
-      ctx.font = "600 23px system-ui";
+      ctx.font = "550 20px system-ui";
       const heading = wrapLines(ctx, topic.title, 304, 3);
       const top = bannerHeight + 42;
-      const quoteTop = top + (heading.length - 1) * 30 + 31;
-      ctx.font = "400 16px system-ui";
+      const quoteTop = top + (heading.length - 1) * 27 + 28;
+      ctx.font = "400 15px system-ui";
       const detail = wrapLines(ctx, excerpt, 288, 8);
       const contentBottom = detail.length
-        ? quoteTop - 17 + detail.length * 25
-        : top + (heading.length - 1) * 30 + 5;
+        ? quoteTop - 15 + detail.length * 23
+        : top + (heading.length - 1) * 27 + 5;
       const footerY = contentBottom + 22;
       const height = footerY + 100;
       el.height = height * 2;
@@ -144,17 +144,17 @@ function CardPreview({ post, topic, site, url, onClose }: ShareProps & { url: st
       ctx.textAlign = "right";
       ctx.fillText(post.createdAt.slice(0, 10), 332, baseline);
       ctx.textAlign = "left";
-      ctx.font = "600 23px system-ui";
-      heading.forEach((line, i) => ctx.fillText(line, 28, top + i * 30));
-      ctx.font = "400 16px system-ui";
+      ctx.font = "550 20px system-ui";
+      heading.forEach((line, i) => ctx.fillText(line, 28, top + i * 27));
+      ctx.font = "400 15px system-ui";
       if (detail.length) {
         ctx.save();
         ctx.fillStyle = accent;
         ctx.globalAlpha = 0.3;
-        ctx.fillRect(29, quoteTop - 17, 3, detail.length * 25);
+        ctx.fillRect(29, quoteTop - 15, 3, detail.length * 23);
         ctx.restore();
         ctx.fillStyle = ink;
-        detail.forEach((line, i) => ctx.fillText(line, 44, quoteTop + i * 25));
+        detail.forEach((line, i) => ctx.fillText(line, 44, quoteTop + i * 23));
       }
       ctx.fillStyle = palette.borderTopColor;
       ctx.fillRect(28, footerY, 304, 1);
@@ -186,7 +186,7 @@ function CardPreview({ post, topic, site, url, onClose }: ShareProps & { url: st
       ctx.font = "12px system-ui";
       ctx.fillText(t(first ? "topicAuthor" : "replyAuthor"), 100, footerY + 42);
       ctx.fillStyle = ink;
-      ctx.font = "600 18px system-ui";
+      ctx.font = "550 15px system-ui";
       ctx.fillText(wrapLines(ctx, author, 158, 1)[0] || "", 100, footerY + 68);
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(qr.current, 270, footerY + 12, 62, 62);
