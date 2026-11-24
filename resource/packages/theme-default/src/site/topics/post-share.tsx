@@ -256,10 +256,8 @@ function CardPreview({ post, topic, site, url, onClose }: ShareProps & { url: st
     <span ref={brand} className="hidden text-primary" aria-hidden="true">{site.brandType !== "text" && !(site.brandType === "image" && site.brandImage) && <DefaultBrand />}</span>
     <span ref={fallbackTone} className="hidden bg-muted text-muted-foreground" data-slot="avatar-fallback" data-avatar-tone={post.author.id % 8} aria-hidden="true" />
     <QRCodeCanvas ref={qr} value={url} size={240} marginSize={4} className="hidden" />
-    <div className="max-h-[calc(100dvh-14rem)] overflow-y-auto rounded-xl shadow-xl ring-1 ring-border md:max-h-[calc(100dvh-9rem)]">
-      <canvas ref={canvas} width={720} role="img" aria-label={`${topic.title} · #${post.postNo}`}
-        className="block w-full border-border bg-card text-card-foreground" />
-    </div>
+    <canvas ref={canvas} width={720} role="img" aria-label={`${topic.title} · #${post.postNo}`}
+      className="mx-auto block h-auto max-h-[calc(100dvh-7rem)] w-auto max-w-full rounded-xl border-border bg-card text-card-foreground shadow-xl ring-1 ring-border md:max-h-[calc(100dvh-2rem)]" />
     {failed && <p role="alert">{t("cardFailed")}</p>}
     {copyStatus === "copyManually" && <label>{t("copyManually")}<Input autoFocus readOnly value={url} onFocus={event => event.target.select()} /></label>}
     <div className="flex justify-center gap-5 md:absolute md:left-full md:top-1/2 md:ml-4 md:-translate-y-1/2 md:flex-col md:gap-3">
