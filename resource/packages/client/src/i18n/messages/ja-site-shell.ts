@@ -11,6 +11,7 @@ export default {
   lightTheme: "ライト",
   darkTheme: "ダーク",
   more: "その他",
+  showLess: "折りたたむ",
   openMenu: "メニューを開く",
   closeMenu: "メニューを閉じる",
   menu: "メニュー",

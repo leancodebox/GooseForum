@@ -11,6 +11,7 @@ export default {
   lightTheme: "浅色",
   darkTheme: "深色",
   more: "更多",
+  showLess: "收起",
   openMenu: "打开菜单",
   closeMenu: "关闭菜单",
   menu: "菜单",

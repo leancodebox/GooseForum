@@ -11,6 +11,7 @@ export default {
   lightTheme: "Chiaro",
   darkTheme: "Scuro",
   more: "Altro",
+  showLess: "Mostra meno",
   openMenu: "Apri menu",
   closeMenu: "Chiudi menu",
   menu: "Menu",

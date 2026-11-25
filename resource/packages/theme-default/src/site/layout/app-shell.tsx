@@ -4,6 +4,8 @@ import { DefaultBrand } from "./default-brand";
 
 import {
   useEffect,
+  useId,
+  useLayoutEffect,
   useRef,
   useState,
   type ComponentType,
@@ -12,7 +14,7 @@ import {
 } from "react";
 import {
   BellIcon,
-  EllipsisVerticalIcon,
+  ChevronDownIcon,
   FileTextIcon,
   HeartIcon,
   InboxIcon,
@@ -101,6 +103,7 @@ export function AppShell({
     );
   }, [layout.viewer.id, layout.viewer.isAuthenticated]);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [moreExpanded, setMoreExpanded] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem("goose:shell-sidebar-collapsed") === "true"; }
     catch { return false; }
@@ -288,7 +291,9 @@ export function AppShell({
       groups={groups}
       categories={categories}
       footer={layout.footer}
-      labels={{ categories: t("categories"), more: t("more") }}
+      labels={{ categories: t("categories"), more: t("more"), showLess: t("showLess") }}
+      expanded={moreExpanded}
+      onExpandedChange={setMoreExpanded}
       onNavigate={() => setMobileOpen(false)}
     />
   ); }
@@ -649,6 +654,8 @@ function ShellNavigation({
   categories,
   footer,
   labels,
+  expanded,
+  onExpandedChange,
   onNavigate,
 }: {
   primary: ShellNavItem[];
@@ -656,26 +663,55 @@ function ShellNavigation({
   groups: Array<{ key: string; title: string; items: ShellNavItem[] }>;
   categories: ShellNavItem[];
   footer: LayoutPayload["footer"];
-  labels: { categories: string; more: string };
+  labels: { categories: string; more: string; showLess: string };
+  expanded: boolean;
+  onExpandedChange(expanded: boolean): void;
   onNavigate(): void;
 }) {
+  const listId = useId();
+  const focusRevealedLink = useRef(false);
+  useLayoutEffect(() => {
+    if (!expanded || !focusRevealedLink.current) return;
+    focusRevealedLink.current = false;
+    document.getElementById(listId)
+      ?.querySelector<HTMLAnchorElement>('[data-collapsible] a:not([aria-current="page"])')
+      ?.focus({ preventScroll: true });
+  }, [expanded, listId]);
+
   const topicItem = primary.find(item => item.key === 'topics');
-  const primaryKeys = ['topics', 'categories', 'members', 'messages', 'notifications'];
-  const secondaryItems = [...primary.filter(item => !primaryKeys.includes(item.key)), ...resources];
-  const promotedItem = secondaryItems.find(item => item.active);
-  const visibleItems = [
+  const alwaysVisibleKeys = ['categories', 'members', 'messages', 'notifications'];
+  const secondaryItems = [...primary.filter(item => item.key !== 'topics' && !alwaysVisibleKeys.includes(item.key)), ...resources];
+  const primaryItems = [
     ...(topicItem ? [topicItem] : []),
-    ...primary.filter(item => ['categories', 'members', 'messages', 'notifications'].includes(item.key)),
-    ...(promotedItem ? [promotedItem] : []),
+    ...primary.filter(item => alwaysVisibleKeys.includes(item.key)),
   ];
-  const moreItems = [
-    ...secondaryItems.filter(item => item.key !== promotedItem?.key),
-  ];
+  const moreItems = secondaryItems.filter(item => !item.active);
   return (
     <nav className="flex flex-col gap-2">
-      <div className="flex flex-col gap-0.5">
-        <NavList items={visibleItems} onNavigate={onNavigate} />
-        {moreItems.length > 0 && <NavMoreMenu label={labels.more} items={moreItems} onNavigate={onNavigate} />}
+      <div className="flex flex-col">
+        <NavList
+          id={listId}
+          items={primaryItems}
+          disclosure={{ items: secondaryItems, expanded }}
+          onNavigate={onNavigate}
+        />
+        {moreItems.length > 0 && (
+          <Button
+            type="button"
+            variant="ghost"
+            aria-expanded={expanded}
+            aria-controls={listId}
+            onClick={(event) => {
+              focusRevealedLink.current = !expanded && event.detail === 0;
+              onExpandedChange(!expanded);
+            }}
+            className="group h-8 w-full justify-start gap-2 text-[13px] leading-[18.5714px] text-foreground/75 transition-colors duration-150 aria-expanded:bg-accent aria-expanded:text-foreground"
+          >
+            <ChevronDownIcon aria-hidden="true" className="group-aria-expanded:rotate-180 motion-safe:transition-transform motion-safe:duration-150" />
+            <span>{expanded ? labels.showLess : labels.more}</span>
+            {!expanded && moreItems.some(item => item.attention) ? <MenuDot /> : null}
+          </Button>
+        )}
       </div>
       {groups.map((group) => (
         <NavSection key={group.key} title={group.title}>
@@ -705,29 +741,6 @@ function ShellNavigation({
   );
 }
 
-function NavMoreMenu({ label, items, onNavigate }: { label: string; items: ShellNavItem[]; onNavigate(): void }) {
-  return <DropdownMenu modal={false}>
-    <DropdownMenuTrigger asChild>
-      <Button variant="ghost" aria-label={label} className="site-more-trigger h-8 w-full justify-start gap-2 text-[13px] leading-[18.5714px] text-foreground/75 transition-colors duration-150 data-[state=open]:text-foreground">
-        <EllipsisVerticalIcon data-icon="inline-start" aria-hidden="true" />
-        <span>{label}</span>
-        {items.some(item => item.attention) ? <MenuDot /> : <span className="ml-auto" />}
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent side="bottom" align="start" sideOffset={2} collisionPadding={8} className="site-more-menu min-w-0 max-w-[calc(100vw-2rem)] max-h-[min(70dvh,32rem)] overflow-y-auto rounded-md p-0.5 ring-0 duration-100 [--tw-enter-scale:1]! [--tw-exit-scale:1]! [--tw-enter-translate-y:0]!">
-      <DropdownMenuGroup>
-        {items.map(item => { const Icon = item.icon; return <DropdownMenuItem key={item.key} asChild className="h-8 gap-2 rounded-md px-2 text-[13px] font-medium leading-[18.5714px] text-foreground/75 focus:bg-accent focus:text-foreground">
-          <GooseLink href={item.url} onClick={onNavigate}>
-            {Icon ? <Icon data-icon="inline-start" aria-hidden="true" /> : null}
-            <span>{item.label}</span>
-            {item.attention ? <MenuDot /> : null}
-          </GooseLink>
-        </DropdownMenuItem> })}
-      </DropdownMenuGroup>
-    </DropdownMenuContent>
-  </DropdownMenu>;
-}
-
 function NavSection({
   title,
   children,
@@ -746,20 +759,33 @@ function NavSection({
 }
 
 function NavList({
+  id,
   items,
   onNavigate,
   compact = false,
+  disclosure,
 }: {
+  id?: string;
   items: ShellNavItem[];
   onNavigate(): void;
   compact?: boolean;
+  disclosure?: { items: ShellNavItem[]; expanded: boolean };
 }) {
+  const allItems = disclosure ? [...items, ...disclosure.items] : items;
   return (
-    <ul className={cn("flex flex-col", compact ? "gap-px" : "gap-0.5")}>
-      {items.map((item) => {
+    <ul id={id} className={cn("flex flex-col", disclosure ? "goose-sidebar-nav-list" : compact ? "gap-px" : "gap-0.5")}>
+      {allItems.map((item, index) => {
         const Icon = item.icon;
+        const collapsible = index >= items.length;
+        const collapsed = collapsible && !disclosure?.expanded && !item.active;
         return (
-          <li key={item.key}>
+          <li
+            key={item.key}
+            data-collapsible={collapsible || undefined}
+            data-collapsed={collapsed || undefined}
+            inert={collapsed}
+            aria-hidden={collapsed || undefined}
+          >
             <Button
               asChild
               variant="ghost"
@@ -767,6 +793,7 @@ function NavList({
                 "w-full justify-start gap-2 text-[13px] leading-[18.5714px] transition-none",
                 compact ? "h-7" : "h-8",
                 "sidebar-nav-link text-foreground/75 hover:bg-accent hover:text-foreground focus-visible:ring-2",
+                collapsible && "focus-visible:ring-inset",
               )}
             >
               <GooseLink

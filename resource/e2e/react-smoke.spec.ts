@@ -2266,17 +2266,18 @@ test('desktop sidebar remembers its width preference and leaves mobile navigatio
   }
   const width = (await content.boundingBox())!.width
   const count = requests.length
-  const more = sidebar.locator('.site-more-trigger')
+  const more = sidebar.getByRole('button', { name: /^(More|Show less)$/ })
   const transition = await more.evaluate(element => getComputedStyle(element).transitionProperty)
   expect(transition).toContain('background-color')
   expect(transition).not.toMatch(/\b(all|visibility)\b/)
   const background = await more.evaluate(element => getComputedStyle(element).backgroundColor)
   await more.click()
-  await expect(more).toHaveAttribute('data-state', 'open')
+  await expect(more).toHaveAttribute('aria-expanded', 'true')
   await expect.poll(() => more.evaluate(element => getComputedStyle(element).backgroundColor)).not.toBe(background)
-  await page.keyboard.press('Escape')
+  await more.click()
+  await expect(more).toHaveAttribute('aria-expanded', 'false')
   await page.getByRole('button', { name: 'Collapse sidebar' }).click()
-  await expect(sidebar.locator('.site-more-trigger')).toHaveCSS('visibility', 'hidden')
+  await expect(sidebar.getByText('More', { exact: true })).toHaveCSS('visibility', 'hidden')
   await expect(sidebar).toHaveAttribute('inert', '')
   await expect(sidebar).toHaveAttribute('aria-hidden', 'true')
   await expect.poll(async () => (await content.boundingBox())!.width).toBeGreaterThan(width + 200)
@@ -2322,15 +2323,81 @@ test('header and sidebar system link visibility can be set independently', async
     await expect(sidebar.getByRole('link', { name: 'Topics', exact: true })).toBeVisible()
     await expect(sidebar.getByRole('link', { name: 'All categories', exact: true })).toBeVisible()
     await expect(sidebar.getByRole('link', { name: 'Members', exact: true })).toHaveCount(setting.hiddenSystemLinks?.includes('members') ? 0 : 1)
-    await sidebar.getByRole('button', { name: 'More' }).click()
-    const more = page.getByRole('menu')
-    await expect(more.getByRole('menuitem', { name: 'Custom resource' })).toBeVisible()
+    const more = sidebar.getByRole('button', { name: 'More', exact: true })
+    const showLess = sidebar.getByRole('button', { name: 'Show less', exact: true })
+    const topics = sidebar.getByRole('link', { name: 'Topics', exact: true })
+    const resource = sidebar.getByRole('link', { name: 'Custom resource' })
+    await expect(resource).toBeHidden()
+    await more.click()
+    await expect(showLess).toHaveAttribute('aria-expanded', 'true')
+    await expect(resource).toBeVisible()
+    const list = sidebar.locator('.goose-sidebar-nav-list')
+    await expect(resource.locator('..')).toHaveCSS('transition-property', /block-size/)
+    await list.evaluate(element => Promise.all(element.getAnimations({ subtree: true }).map(animation => animation.finished)))
+    const buttonBox = (await showLess.boundingBox())!
+    const resourceBox = (await resource.boundingBox())!
+    const topicsBox = (await topics.boundingBox())!
+    expect(resourceBox.y).toBeGreaterThan(topicsBox.y)
+    expect(resourceBox.y + resourceBox.height).toBeLessThanOrEqual(buttonBox.y)
+    expect(resourceBox.x).toBe(topicsBox.x)
+    expect(resourceBox.width).toBe(topicsBox.width)
     for (const item of systemHeaderLinks) {
-      await expect(more.getByRole('menuitem', { name: item.label, exact: true })).toHaveCount(setting.hiddenSystemLinks?.includes(item.key) ? 0 : 1)
+      await expect(sidebar.getByRole('link', { name: item.label, exact: true })).toHaveCount(setting.hiddenSystemLinks?.includes(item.key) ? 0 : 1)
       if (desktop) await expect(headerNav.getByRole('link', { name: item.label, exact: true })).toHaveCount(setting.header.includes(item) ? 1 : 0)
     }
     if (desktop && setting.header.length === 0) await expect(headerNav).toHaveCount(0)
+    await showLess.click()
+    await expect(resource).toBeHidden()
   }
+})
+
+test('sidebar links stay in order and the current link survives collapsing', async ({ page }) => {
+  const resource = { key: 'custom', label: 'Custom resource', url: '/custom' }
+  await page.route('**/__goose_page/**', route => {
+    const isResourcePage = new URL(route.request().url()).pathname.endsWith(resource.url)
+    return route.fulfill({
+      json: {
+        ...homePage,
+        url: isResourcePage ? resource.url : homePage.url,
+        layout: {
+          ...homePage.layout,
+          sidebar: {
+            ...homePage.layout.sidebar,
+            activeKey: isResourcePage ? resource.key : 'topics',
+            resources: [resource],
+          },
+        },
+      },
+    })
+  })
+
+  await page.goto('/?lang=en')
+  const desktop = page.viewportSize()!.width >= 1024
+  const sidebar = desktop ? page.getByRole('complementary', { name: 'Sidebar' }) : page.getByRole('dialog')
+  const openMenu = page.getByRole('button', { name: 'Open menu', exact: true })
+  if (!desktop) await openMenu.click()
+  await sidebar.getByRole('button', { name: 'More', exact: true }).press('Enter')
+  const list = sidebar.locator('.goose-sidebar-nav-list')
+  const links = list.getByRole('link')
+  await expect(list.getByRole('link', { name: 'Links', exact: true })).toBeFocused()
+  const selected = list.getByRole('link', { name: resource.label })
+  await expect(selected).toBeVisible()
+  const expandedOrder = await links.allTextContents()
+  expect(expandedOrder.slice(-3)).toEqual(['Links', 'Sponsors', resource.label])
+  await selected.click()
+  await expect(page).toHaveURL(/\/custom$/)
+  if (!desktop) {
+    await expect(sidebar).toBeHidden()
+    await openMenu.click()
+  }
+  await expect(selected).toHaveAttribute('aria-current', 'page')
+  await expect(links).toHaveText(expandedOrder)
+
+  await sidebar.getByRole('button', { name: 'Show less', exact: true }).click()
+  await expect(links).toHaveText(['Topics', 'All categories', 'Members', resource.label])
+  await expect(selected).toBeVisible()
+  await sidebar.getByRole('button', { name: 'More', exact: true }).click()
+  await expect(links).toHaveText(expandedOrder)
 })
 
 test('slow site navigation preserves the page and clears progress after success or failure', async ({ page }) => {

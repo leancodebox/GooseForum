@@ -2442,19 +2442,23 @@ describe("AppShell and static pages", () => {
     ).toBe(false);
     const sidebar = document.querySelector('aside[aria-label="Sidebar"]') as HTMLElement;
     const more = within(sidebar).getByRole('button', { name: '更多' });
-    expect(more.querySelector('.lucide-ellipsis-vertical')).toBeTruthy();
-    expect(more.querySelector('.lucide-chevron-right')).toBeNull();
-    if (more.getAttribute('aria-expanded') === 'true') await user.click(more);
+    expect(more.querySelector('.lucide-chevron-down')).toBeTruthy();
     expect(more.getAttribute('aria-expanded')).toBe('false');
-    await user.click(more);
+    expect(within(sidebar).queryByRole('link', { name: '版主管理' })).toBeNull();
+    more.focus();
+    await user.keyboard('{Enter}');
     expect(more.getAttribute('aria-expanded')).toBe('true');
-    expect(
-      screen.getByRole('menuitem', { name: '版主管理' }).querySelector('.lucide-scale'),
-    ).toBeTruthy();
-    expect(screen.getByRole('menuitem', { name: '访问组' })).toBeTruthy();
-    expect(screen.getByRole('menuitem', { name: '访问组' }).querySelector('.lucide-key-round')).toBeTruthy();
-    expect(screen.getByRole('menuitem', { name: '主题预览' })).toBeTruthy();
+    expect(within(sidebar).getByRole('button', { name: '收起' })).toBe(more);
+    const moderationLink = within(sidebar).getByRole('link', { name: '版主管理' });
+    expect(moderationLink.querySelector('.lucide-scale')).toBeTruthy();
+    expect(moderationLink.closest('ul')).toBe(
+      within(sidebar).getByRole('link', { name: '主题' }).closest('ul'),
+    );
+    expect(within(sidebar).getByRole('link', { name: '访问组' }).querySelector('.lucide-key-round')).toBeTruthy();
+    expect(within(sidebar).getByRole('link', { name: '主题预览' })).toBeTruthy();
     await user.click(more);
+    expect(more.getAttribute('aria-expanded')).toBe('false');
+    expect(within(sidebar).queryByRole('link', { name: '版主管理' })).toBeNull();
 
     await user.hover(screen.getByRole("button", { name: "切换语言" }));
     expect(
@@ -2476,7 +2480,7 @@ describe("AppShell and static pages", () => {
     ['hot', '主题', '/'],
     ['popular', '主题', '/'],
     ['access-groups', '访问组', '/access-groups'],
-  ])('promotes the selected %s menu and excludes it from More', async (key, label, href) => {
+  ])('keeps the selected %s item visible when the sidebar is collapsed', async (key, label, href) => {
     const current = payload('links.index', { totalCount: 0, groups: [] });
     current.layout = { ...current.layout, viewer: { ...current.layout.viewer, isAuthenticated: true }, sidebar: { ...current.layout.sidebar, activeKey: key } };
     const { user } = renderPage(current);
@@ -2485,15 +2489,19 @@ describe("AppShell and static pages", () => {
     expect(selected.getAttribute('href')).toBe(href);
     expect(selected.getAttribute('aria-current')).toBe('page');
     expect(within(sidebar).queryByRole('button', { name: '主题' })).toBeNull();
-    await user.click(within(sidebar).getByRole('button', { name: '更多' }));
-    expect(screen.queryByRole('menuitem', { name: label })).toBeNull();
-    expect(screen.queryByRole('menuitem', { name: '最新' })).toBeNull();
-    expect(screen.queryByRole('menuitem', { name: '热门' })).toBeNull();
-    expect(screen.queryByRole('menuitem', { name: '流行' })).toBeNull();
+    const more = within(sidebar).getByRole('button', { name: '更多' });
+    await user.click(more);
+    const links = within(document.getElementById(more.getAttribute('aria-controls')!)!);
+    expect(links.getAllByRole('link', { name: label })).toEqual([selected]);
+    expect(links.queryByRole('link', { name: '最新' })).toBeNull();
+    expect(links.queryByRole('link', { name: '热门' })).toBeNull();
+    expect(links.queryByRole('link', { name: '流行' })).toBeNull();
     expect(within(sidebar).getByRole('link', { name: '私信' })).toBeTruthy();
     expect(within(sidebar).getByRole('link', { name: '通知' })).toBeTruthy();
-    expect(screen.queryByRole('menuitem', { name: '私信' })).toBeNull();
-    expect(screen.queryByRole('menuitem', { name: '通知' })).toBeNull();
+    expect(links.getAllByRole('link', { name: '私信' })).toHaveLength(1);
+    expect(links.getAllByRole('link', { name: '通知' })).toHaveLength(1);
+    await user.click(more);
+    expect(links.getByRole('link', { name: label })).toBe(selected);
   });
 
   it("renders category identity, fallback copy, and compact topic counts", () => {

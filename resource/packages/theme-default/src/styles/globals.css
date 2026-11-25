@@ -12,15 +12,6 @@
   to { transform: translateX(400%); }
 }
 
-.site-more-trigger[data-state="open"],
-.site-more-menu[data-slot="dropdown-menu-content"] {
-  background-color: color-mix(in oklch, var(--muted) 94%, white);
-}
-
-.site-more-menu[data-slot="dropdown-menu-content"] {
-  box-shadow: 0 6px 24px -6px rgb(0 0 0 / 9%);
-}
-
 /* Surface overrides also apply to shared Card utility classes. */
 @media (width < 64rem) {
   .site-panel {
@@ -105,6 +96,25 @@
 @keyframes goose-announcement-close {
   from { height: var(--radix-collapsible-content-height); opacity: 1; }
   to { height: 0; opacity: 0; }
+}
+.goose-sidebar-nav-list > li {
+  block-size: calc(var(--spacing) * 8.5);
+}
+.goose-sidebar-nav-list > [data-collapsible] {
+  overflow: clip;
+}
+.goose-sidebar-nav-list > [data-collapsed] {
+  block-size: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .goose-sidebar-nav-list > [data-collapsible] {
+    transition: block-size 200ms ease-out, opacity 200ms ease-out;
+  }
+  .goose-sidebar-nav-list > [data-collapsed] {
+    transition-property: block-size, opacity, visibility;
+  }
 }
 /* One cadence for small floating surfaces, without changing their placement. */
 :is([data-slot="dialog-overlay"], [data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="tooltip-content"])[data-state="open"],

@@ -11,6 +11,7 @@ export default {
   lightTheme: "Light",
   darkTheme: "Dark",
   more: "More",
+  showLess: "Show less",
   openMenu: "Open menu",
   closeMenu: "Close menu",
   menu: "Menu",

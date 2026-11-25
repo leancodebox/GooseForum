@@ -11,6 +11,7 @@ export default {
   lightTheme: "Светлая",
   darkTheme: "Тёмная",
   more: "Ещё",
+  showLess: "Свернуть",
   openMenu: "Открыть меню",
   closeMenu: "Закрыть меню",
   menu: "Меню",
