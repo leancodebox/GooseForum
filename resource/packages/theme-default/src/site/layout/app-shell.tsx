@@ -3,11 +3,14 @@ import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import { DefaultBrand } from "./default-brand";
 
 import {
+  Suspense,
+  use,
   useEffect,
   useId,
   useLayoutEffect,
   useRef,
   useState,
+  useTransition,
   type ComponentType,
   type ReactNode,
   type SVGProps,
@@ -42,7 +45,8 @@ import {
   AvatarImage,
 } from "@gooseforum/ui/components/avatar";
 import { Button } from "@gooseforum/ui/components/button";
-import { NavigationIcon } from "@gooseforum/ui/components/navigation-icon";
+import { CategoryNavIcon } from "@gooseforum/ui/components/category-icon";
+import { PageNavigationIcons, NavigationIconContent, preloadNavigationIcons } from "@gooseforum/ui/components/navigation-icon";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,7 +88,7 @@ interface ShellNavItem {
   active: boolean;
   icon?: ComponentType<SVGProps<SVGSVGElement>>;
   iconName?: string;
-  color?: string;
+  category?: { icon?: string; color: string };
   attention?: boolean;
 }
 
@@ -189,7 +193,7 @@ export function AppShell({
     label: category.label,
     url: category.url,
     active: activeKey === `category_${category.id}`,
-    color: category.color,
+    category,
   }));
   const groups = (layout.sidebar.groups || [])
     .map((group) => ({
@@ -382,26 +386,28 @@ export function AppShell({
             </button>
           ) : null}
           {headerItems.length > 0 && (
-            <nav
-              className={cn(
-                "hidden items-center gap-1 lg:flex",
-                shellHeader.visible && "lg:hidden",
-              )}
-              aria-label="Header navigation"
-            >
-              {headerItems.map((item) => (
-                <GooseLink
-                  key={item.key}
-                  href={item.url}
-                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-foreground/75 hover:bg-accent"
-                >
-                  {item.iconName && item.key !== "links" && item.key !== "sponsors" && (
-                    <span className="size-4 shrink-0"><NavigationIcon name={item.iconName} /></span>
-                  )}
-                  {item.label}
-                </GooseLink>
-              ))}
-            </nav>
+            <Suspense fallback={null}>
+              <nav
+                className={cn(
+                  "hidden items-center gap-1 lg:flex",
+                  shellHeader.visible && "lg:hidden",
+                )}
+                aria-label="Header navigation"
+              >
+                {headerItems.map((item) => (
+                  <GooseLink
+                    key={item.key}
+                    href={item.url}
+                    className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-foreground/75 hover:bg-accent"
+                  >
+                    {item.iconName && item.key !== "links" && item.key !== "sponsors" && (
+                      <span className="size-4 shrink-0"><NavigationIconContent name={item.iconName} /></span>
+                    )}
+                    {item.label}
+                  </GooseLink>
+                ))}
+              </nav>
+            </Suspense>
           )}
 
           <div className="ml-auto flex min-w-0 items-center justify-end gap-0.5 lg:gap-1">
@@ -677,7 +683,9 @@ function ShellNavigation({
   onExpandedChange(expanded: boolean): void;
   onNavigate(): void;
 }) {
+  const pageIcons = use(PageNavigationIcons);
   const listId = useId();
+  const [opening, startOpening] = useTransition();
   const focusRevealedLink = useRef(false);
   useLayoutEffect(() => {
     if (!expanded || !focusRevealedLink.current) return;
@@ -695,6 +703,10 @@ function ShellNavigation({
     ...primary.filter(item => alwaysVisibleKeys.includes(item.key)),
   ];
   const moreItems = secondaryItems.filter(item => !item.active);
+  function preloadMoreIcons() {
+    if (pageIcons) return;
+    return preloadNavigationIcons(moreItems.map(item => item.iconName));
+  }
   return (
     <nav className="flex flex-col gap-2">
       <div className="flex flex-col">
@@ -710,9 +722,20 @@ function ShellNavigation({
             variant="ghost"
             aria-expanded={expanded}
             aria-controls={listId}
+            aria-busy={opening || undefined}
+            onPointerEnter={() => !expanded && void preloadMoreIcons()}
+            onFocus={() => !expanded && void preloadMoreIcons()}
             onClick={(event) => {
+              if (opening) return;
               focusRevealedLink.current = !expanded && event.detail === 0;
-              onExpandedChange(!expanded);
+              if (expanded || pageIcons) {
+                onExpandedChange(!expanded);
+                return;
+              }
+              startOpening(async () => {
+                await preloadMoreIcons();
+                startOpening(() => onExpandedChange(true));
+              });
             }}
             className="group h-8 w-full justify-start gap-2 text-[13px] leading-[18.5714px] text-foreground/75 transition-colors duration-150 aria-expanded:bg-accent aria-expanded:text-foreground"
           >
@@ -795,31 +818,35 @@ function NavList({
             inert={collapsed}
             aria-hidden={collapsed || undefined}
           >
-            <Button
-              asChild
-              variant="ghost"
-              className={cn(
-                "w-full justify-start gap-2 text-[13px] leading-[18.5714px] transition-none",
-                compact ? "h-7" : "h-8",
-                "sidebar-nav-link text-foreground/75 hover:bg-accent hover:text-foreground focus-visible:ring-2",
-                collapsible && "focus-visible:ring-inset",
-              )}
-            >
-              <GooseLink
-                href={item.url}
-                aria-current={item.active ? "page" : undefined}
-                onClick={onNavigate}
+            <Suspense fallback={<span aria-hidden="true" className={cn("block", compact ? "h-7" : "h-8")} />}>
+              <Button
+                asChild
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-2 text-[13px] leading-[18.5714px] transition-none",
+                  compact ? "h-7" : "h-8",
+                  "sidebar-nav-link text-foreground/75 hover:bg-accent hover:text-foreground focus-visible:ring-2",
+                  collapsible && "focus-visible:ring-inset",
+                )}
               >
-                <NavigationIcon
-                  name={!collapsed || disclosure?.hasExpanded ? item.iconName : undefined}
-                  fallback={Icon ? <Icon aria-hidden="true" /> : (
-                    <span className="size-2 rounded-sm" style={{ backgroundColor: item.color }} />
+                <GooseLink
+                  href={item.url}
+                  aria-current={item.active ? "page" : undefined}
+                  onClick={onNavigate}
+                >
+                  {item.category ? (
+                    <CategoryNavIcon icon={item.category.icon} color={item.category.color} suspend />
+                  ) : (
+                    <NavigationIconContent
+                      name={!collapsed || disclosure?.hasExpanded ? item.iconName : undefined}
+                      fallback={Icon ? <Icon aria-hidden="true" /> : undefined}
+                    />
                   )}
-                />
-                <span className="min-w-0 truncate">{item.label}</span>
-                {item.attention ? <MenuDot /> : null}
-              </GooseLink>
-            </Button>
+                  <span className="min-w-0 truncate">{item.label}</span>
+                  {item.attention ? <MenuDot /> : null}
+                </GooseLink>
+              </Button>
+            </Suspense>
           </li>
         );
       })}

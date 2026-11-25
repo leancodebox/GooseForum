@@ -1,17 +1,9 @@
-import type { ReactNode } from "react";
-import { DynamicIcon, dynamicIconImports, iconNames } from "lucide-react/dynamic";
+import type { LucideIconData } from "lucide-react";
 
-export { iconNames as navigationIconNames };
-
-export default function DynamicNavigationIcon({ name, fallback }: { name: string; fallback?: ReactNode }) {
-  if (!Object.hasOwn(dynamicIconImports, name)) return fallback ?? null;
-
-  return (
-    <DynamicIcon
-      name={name as keyof typeof dynamicIconImports}
-      aria-hidden="true"
-      className="size-4 shrink-0"
-      fallback={() => <>{fallback}</>}
-    />
-  );
+export async function fetchCatalog(): Promise<Record<string, LucideIconData>> {
+  const response = await fetch(new URL("../../../../icons/lucide.json", import.meta.url));
+  if (!response.ok) throw new Error("Could not load the navigation icon catalog");
+  const data = await response.json() as { icons: Record<string, LucideIconData>; aliases?: Record<string, string> };
+  for (const [alias, name] of Object.entries(data.aliases ?? {})) data.icons[alias] = data.icons[name];
+  return data.icons;
 }

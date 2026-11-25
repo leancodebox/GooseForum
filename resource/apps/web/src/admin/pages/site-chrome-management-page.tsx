@@ -1,6 +1,7 @@
 import { errorMessage } from "../error-message";
 import { AdminPage } from '../components/admin-page'
-import { lazy, Suspense, useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { NavigationIconField } from "../components/navigation-icon-field";
 import { createPortal } from "react-dom";
 import {
   closestCenter,
@@ -29,6 +30,7 @@ import type {
   SiteChromeItem,
 } from "@gooseforum/client";
 import { Button } from "@gooseforum/ui/components/button";
+import { CategoryNavIcon } from "@gooseforum/ui/components/category-icon";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@gooseforum/ui/components/collapsible";
 import { DefaultBrand } from "@gooseforum/ui/components/default-brand";
 import {
@@ -38,7 +40,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@gooseforum/ui/components/dialog";
 import {
   Empty,
@@ -63,7 +64,6 @@ import {
   Bell,
   FileText,
   ChevronDown,
-  ChevronRight,
   Eye,
   EyeOff,
   Heart,
@@ -85,7 +85,6 @@ import {
 import { toast } from "@gooseforum/ui/components/sonner";
 import type { SettingsTextKey } from "../settings-i18n";
 type Text = (k: SettingsTextKey) => string;
-const NavigationIconPicker = lazy(() => import("../components/navigation-icon-picker"));
 const fixedMain = [
   [MessageCircle, "topics"],
   [LayoutGrid, "categories"],
@@ -447,10 +446,7 @@ export function SiteChromeManagementPage({
                       key={c.id}
                       className="flex h-7 items-center gap-2 px-2 text-[13px]"
                     >
-                      <span
-                        className="size-2 rounded"
-                        style={{ backgroundColor: c.color }}
-                      />
+                      <CategoryNavIcon icon={c.icon} color={c.color} />
                       {c.label}
                     </div>
                   ))}
@@ -831,17 +827,11 @@ function ItemEditor({
   onSave(v: SiteChromeItem): void;
 }) {
   const [form, setForm] = useState(emptyItem());
-  const [iconPickerOpen, setIconPickerOpen] = useState(false);
-  const iconPickerId = useId();
   useEffect(() => {
     if (state) setForm(value ? { ...value } : emptyItem());
   }, [state, value]);
-  function close() {
-    setIconPickerOpen(false);
-    onClose();
-  }
   return (
-    <Dialog open={Boolean(state)} onOpenChange={(o) => !o && close()}>
+    <Dialog open={Boolean(state)} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{value ? text("edit") : text("add")}</DialogTitle>
@@ -873,29 +863,13 @@ function ItemEditor({
               onChange={(e) => setForm({ ...form, label: e.target.value })}
             />
           </Field>
-          <Field>
-            <FieldLabel htmlFor={iconPickerId}>{text("menuIcon")}</FieldLabel>
-            <Dialog open={iconPickerOpen} onOpenChange={setIconPickerOpen}>
-              <DialogTrigger asChild>
-                <Button id={iconPickerId} type="button" variant="outline" className="w-full justify-start">
-                  <NavigationIcon name={form.icon} fallback={state?.key === "header" ? null : <Link aria-hidden="true" />} />
-                  <span className="min-w-0 truncate">{form.icon ?? text("defaultMenuIcon")}</span>
-                  <ChevronRight aria-hidden="true" className="ml-auto" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent aria-describedby={undefined} className="flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden sm:max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>{text("menuIcon")}</DialogTitle>
-                </DialogHeader>
-                <Suspense fallback={<p role="status">{text("loading")}</p>}>
-                  <NavigationIconPicker value={form.icon} text={text} onSelect={name => {
-                    setForm({ ...form, icon: name });
-                    setIconPickerOpen(false);
-                  }} />
-                </Suspense>
-              </DialogContent>
-            </Dialog>
-          </Field>
+          <NavigationIconField
+            label={text("menuIcon")}
+            value={form.icon}
+            preview={<NavigationIcon name={form.icon} fallback={state?.key === "header" ? null : <Link aria-hidden="true" />} />}
+            onSelect={name => setForm(current => ({ ...current, icon: name }))}
+            text={text}
+          />
           <Field>
             <FieldLabel>URL</FieldLabel>
             <Input
@@ -912,13 +886,10 @@ function ItemEditor({
           </Field>
         </FieldGroup>
         <DialogFooter>
-          <Button variant="outline" onClick={close}>
+          <Button variant="outline" onClick={onClose}>
             {text("cancel")}
           </Button>
-          <Button onClick={() => {
-            setIconPickerOpen(false);
-            onSave(form);
-          }}>{text("save")}</Button>
+          <Button onClick={() => onSave(form)}>{text("save")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

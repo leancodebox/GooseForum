@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
+	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 )
 
@@ -59,6 +60,17 @@ func TestSidebarVisibilityIsIndependentOfHeader(t *testing.T) {
 	}
 }
 
+func TestSidebarCategoryPayloadCarriesSavedIcons(t *testing.T) {
+	sidebar := buildSidebarPayload(pageConfig.SiteChromeConfig{}, []*category.Entity{
+		{Id: 1, Name: "Coding", Slug: "coding", Color: "#41d641", Icon: "lucide:book-open"},
+		{Id: 2, Name: "General", Slug: "general", Color: "#8241d6"},
+	}, "topics")
+	if len(sidebar.Categories) != 2 || sidebar.Categories[0].Icon != "lucide:book-open" ||
+		sidebar.Categories[1].Icon != "" || sidebar.Categories[1].Color != "#8241d6" {
+		t.Fatalf("unexpected sidebar categories: %+v", sidebar.Categories)
+	}
+}
+
 func TestChromeNavPayloadPreservesOptionalIcon(t *testing.T) {
 	var chrome pageConfig.SiteChromeConfig
 	if err := json.Unmarshal([]byte(`{"resources":[
@@ -81,5 +93,29 @@ func TestChromeNavPayloadPreservesOptionalIcon(t *testing.T) {
 	}
 	if _, exists := legacy["icon"]; exists {
 		t.Fatalf("legacy resource unexpectedly includes an icon: %s", raw)
+	}
+}
+
+func TestPageIconsIncludesOnlyReferencedLucideDefinitions(t *testing.T) {
+	page := PagePayload{
+		Layout: LayoutPayload{
+			Header: []NavItemPayload{{Icon: "book-open"}},
+			Sidebar: SidebarPayload{
+				Groups:     []SidebarGroupPayload{{Items: []NavItemPayload{{Icon: "book-open"}, {Icon: "unknown-icon"}}}},
+				Resources:  []NavItemPayload{{Icon: "alarm-check"}},
+				Categories: []CategoryNavPayload{{Icon: "lucide:code"}, {Icon: "🎉"}, {Icon: "/avatar.png"}},
+			},
+		},
+		Props: CategoriesPageProps{Categories: []CategoryDirectoryPayload{{Icon: "lucide:star"}}},
+	}
+	result := pageIcons(page)
+	if len(result) != 4 {
+		t.Fatalf("got %d definitions, want 4", len(result))
+	}
+	for _, name := range []string{"book-open", "code", "alarm-check", "star"} {
+		var icon struct{ Node []json.RawMessage }
+		if err := json.Unmarshal(result[name], &icon); err != nil || len(icon.Node) == 0 {
+			t.Fatalf("missing SVG definition for %q", name)
+		}
 	}
 }

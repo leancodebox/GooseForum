@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import type { CategoryPageProps } from "@gooseforum/client";
 import { Plus, UsersRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@gooseforum/ui/components/button";
+import { CategoryIcon } from "@gooseforum/ui/components/category-icon";
 import { ListFilter, ListFilterItem } from "@gooseforum/ui/components/list-filter";
 import {
   Empty,
@@ -46,17 +48,22 @@ export function CategoryPageView({
         title={page.category.name}
         description={page.category.description}
         badge={
-          <span className="inline-flex items-center gap-2">
-            <span
-              className="size-1.5 rounded-full"
-              style={{
-                backgroundColor: page.category.color || "var(--primary)",
-              }}
-            />
-            <span className="text-xs font-semibold uppercase text-muted-foreground">
-              {t("categoryLabel")}
+          <Suspense fallback={null}>
+            <span className="inline-flex items-center gap-2">
+              {page.category.icon ? (
+                <CategoryIcon icon={page.category.icon} color={page.category.color || undefined} className="max-w-5 overflow-hidden" suspend />
+              ) : (
+                <span
+                  className="size-1.5 rounded-full"
+                  style={{ backgroundColor: page.category.color || "var(--primary)" }}
+                  aria-hidden="true"
+                />
+              )}
+              <span className="text-xs font-semibold uppercase text-muted-foreground">
+                {t("categoryLabel")}
+              </span>
             </span>
-          </span>
+          </Suspense>
         }
       />
       <SiteListPanel>

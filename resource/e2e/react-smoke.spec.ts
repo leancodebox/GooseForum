@@ -2323,6 +2323,228 @@ test('site appearance expands in place and saves a searchable navigation icon', 
   await expect(publicIcon).toHaveCount(1)
 })
 
+test('category editor reuses the searchable icon picker and preserves legacy icons until changed', async ({ page, isMobile }) => {
+  let category = { id: 1, category: 'Coding', desc: '', slug: 'coding', sort: 0, icon: '💻', color: '#41d641' }
+  const categoryUrl = '/c/coding/1'
+  const publicCategory = () => ({
+    id: category.id, name: category.category, description: category.desc, icon: category.icon,
+    color: category.color, url: categoryUrl,
+  })
+  const categoryLayout = (activeKey: string) => ({
+    ...homePage.layout,
+    sidebar: {
+      ...homePage.layout.sidebar,
+      activeKey,
+      categories: [
+        { id: category.id, label: category.category, color: category.color, url: categoryUrl, icon: category.icon },
+        { id: 2, label: 'General', color: '#8241d6', url: '/c/general/2' },
+      ],
+    },
+  })
+  await page.route('**/api/admin/category-list*', route => route.fulfill({ json: { code: 0, result: [category] } }))
+  await page.route('**/api/admin/global-moderator-list*', route => route.fulfill({ json: { code: 0, result: [] } }))
+  await page.route('**/api/admin/access-control/overview*', route => route.fulfill({ json: { code: 0, result: { groups: [], categories: [] } } }))
+  await page.route('**/api/admin/category-save*', route => {
+    category = route.request().postDataJSON()
+    return route.fulfill({ json: { code: 0, result: true } })
+  })
+  await page.route('**/__goose_page/categories*', route => route.fulfill({
+    json: {
+      ...homePage,
+      component: 'categories.index',
+      layout: categoryLayout('categories'),
+      url: '/categories',
+      props: { total: 1, categories: [{ ...publicCategory(), topicCount: 0 }] },
+    },
+  }))
+  await page.route('**/__goose_page/c/coding/1*', route => route.fulfill({
+    json: {
+      ...homePage,
+      component: 'category.index',
+      layout: categoryLayout('category_1'),
+      url: categoryUrl,
+      props: { category: publicCategory(), sort: 'latest', tabs: [], topics: [], pagination: homePage.props.pagination },
+    },
+  }))
+
+  await page.goto('/admin/categories?lang=en')
+  const editor = page.getByRole('dialog', { name: 'Edit', exact: true })
+  async function editCategory() {
+    if (isMobile) {
+      await page.getByRole('button', { name: 'Edit', exact: true }).click()
+    } else {
+      await page.getByRole('button', { name: 'Actions · Coding' }).click()
+      await page.getByRole('menuitem', { name: 'Edit', exact: true }).click()
+    }
+  }
+  await editCategory()
+  await expect(editor).toHaveAttribute('data-slot', 'dialog-content')
+  const icon = editor.getByRole('button', { name: 'Icon', exact: true })
+  await expect(icon).toContainText('💻')
+  await editor.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(editor).toBeHidden()
+  expect(category.icon).toBe('💻')
+
+  await editCategory()
+  await icon.click()
+  const picker = page.getByRole('dialog', { name: 'Icon', exact: true })
+  await picker.getByRole('button', { name: 'Default icon', exact: true }).click()
+  await expect(icon).toContainText('Default icon')
+  await expect(icon).not.toContainText('lucide:')
+  await icon.click()
+  await picker.getByRole('searchbox', { name: 'Search icons…' }).fill('book open')
+  await expect(picker.getByRole('button', { name: 'Default icon', exact: true })).toHaveCount(0)
+  await picker.getByRole('button', { name: 'book-open', exact: true }).click()
+  await expect(icon.locator('.lucide-book-open')).toBeVisible()
+  await editor.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(editor).toBeHidden()
+  expect(category.icon).toBe('lucide:book-open')
+  const row = page.locator(isMobile ? 'article' : 'tr').filter({ hasText: 'Coding', visible: true })
+  await expect(row.locator('.lucide-book-open')).toBeVisible()
+
+  await page.goto('/categories?lang=en')
+  const directory = page.locator('[data-slot="goose-page-content"]')
+  await expect(directory.getByRole('link', { name: /Coding/ }).locator('.lucide-book-open')).toBeVisible()
+  if (isMobile) await page.getByRole('button', { name: 'Open menu', exact: true }).click()
+  const sidebar = isMobile ? page.getByRole('dialog') : page.getByRole('complementary', { name: 'Sidebar' })
+  const categoryLink = sidebar.getByRole('link', { name: 'Coding', exact: true })
+  await expect(categoryLink.locator('.lucide-book-open')).toBeVisible()
+  const alignment = await sidebar.evaluate((element, url) => {
+    const iconRow = element.querySelector(`a[href="${url}"]`)!
+    const dotRow = element.querySelector('a[href="/c/general/2"]')!
+    const icon = iconRow.querySelector('svg')!.getBoundingClientRect()
+    const dot = dotRow.querySelector('span[style*="background-color"]')!.getBoundingClientRect()
+    return {
+      iconCenter: icon.x + icon.width / 2,
+      dotCenter: dot.x + dot.width / 2,
+      iconLabel: iconRow.lastElementChild!.getBoundingClientRect().x,
+      dotLabel: dotRow.lastElementChild!.getBoundingClientRect().x,
+    }
+  }, categoryUrl)
+  expect(alignment.dotCenter).toBeCloseTo(alignment.iconCenter)
+  expect(alignment.dotLabel).toBeCloseTo(alignment.iconLabel)
+  await categoryLink.click()
+  const heading = page.getByRole('heading', { name: 'Coding', level: 1 })
+  await expect(heading.locator('..').locator('.lucide-book-open')).toBeVisible()
+})
+
+test('first sidebar render includes custom menu and category icons', async ({ page, isMobile }) => {
+  const payload = {
+    ...homePage,
+    layout: {
+      ...homePage.layout,
+      icons: {
+        'book-open': { name: 'book-open', size: 24, node: [['path', { d: 'M12 5v16', key: 'a' }]] },
+        code: { name: 'code', size: 24, node: [['path', { d: 'm8 6-6 6 6 6', key: 'b' }]] },
+      },
+      sidebar: {
+        ...homePage.layout.sidebar,
+        groups: [{ key: 'guides', title: 'Guides', items: [{ key: 'docs', label: 'Docs', url: '/docs', icon: 'book-open' }] }],
+        categories: [{ id: 2, label: 'Coding', url: '/c/coding/2', color: '#8241d6', icon: 'lucide:code' }],
+      },
+    },
+  }
+  await page.route(url => url.pathname === '/', async route => {
+    const response = await route.fetch()
+    const html = (await response.text()).replace('</head>', `<script id="goose-payload" type="application/json">${JSON.stringify(payload)}</script></head>`)
+    await route.fulfill({ response, body: html })
+  })
+  const iconRequests: string[] = []
+  page.on('request', request => {
+    if (/navigation-icon-dynamic|lucide\.json/.test(request.url())) iconRequests.push(request.url())
+  })
+  await page.addInitScript(() => {
+    const observer = new MutationObserver(() => {
+      const sidebar = document.querySelector('#goose-desktop-sidebar')
+      if (!sidebar) return
+      const docs = sidebar.querySelector('a[href="/docs"]')
+      const coding = sidebar.querySelector('a[href="/c/coding/2"]')
+      document.documentElement.dataset.firstSidebarComplete = String(
+        docs?.textContent === 'Docs' && !!docs.querySelector('.lucide-book-open')
+        && coding?.textContent === 'Coding' && !!coding.querySelector('.lucide-code'),
+      )
+      observer.disconnect()
+    })
+    observer.observe(document, { childList: true, subtree: true })
+  })
+  await page.goto('/?lang=en')
+  await expect(page.locator('html')).toHaveAttribute('data-first-sidebar-complete', 'true')
+  if (isMobile) await page.getByRole('button', { name: 'Open menu', exact: true }).click()
+  const sidebar = isMobile ? page.getByRole('dialog') : page.locator('#goose-desktop-sidebar')
+  await expect(sidebar.getByRole('link', { name: 'Docs' }).locator('.lucide-book-open')).toBeVisible()
+  await expect(sidebar.getByRole('link', { name: 'Coding' }).locator('.lucide-code')).toBeVisible()
+  expect(iconRequests).toEqual([])
+})
+
+test('site avatars and custom navigation icons show fallbacks only when unavailable', async ({ page, isMobile }) => {
+  let avatarUrl = '/delayed-avatar.webp'
+  let releaseAvatar!: () => void
+  let releaseIcon!: () => void
+  const avatarReady = new Promise<void>(resolve => { releaseAvatar = resolve })
+  const iconReady = new Promise<void>(resolve => { releaseIcon = resolve })
+  const iconAsset = (url: URL) => url.pathname.endsWith('/navigation-icon-dynamic.tsx')
+  await page.route('**/delayed-avatar.webp', async route => {
+    await avatarReady
+    return route.fulfill({
+      path: fileURLToPath(new URL('../static/pic/1.webp', import.meta.url)),
+      contentType: 'image/webp',
+    })
+  })
+  await page.route('**/missing-avatar.webp', route => route.fulfill({ status: 404 }))
+  await page.route(iconAsset, async route => {
+    await iconReady
+    return route.continue()
+  })
+  await page.route(url => /^\/__goose_page\/?$/.test(url.pathname), route => route.fulfill({
+    json: {
+      ...homePage,
+      layout: {
+        ...homePage.layout,
+        viewer: { ...homePage.layout.viewer, id: 7, username: 'alice', isAuthenticated: true, avatarUrl },
+        sidebar: {
+          ...homePage.layout.sidebar,
+          resources: [
+            { key: 'docs', label: 'Documentation', url: '/docs', icon: 'book-open' },
+            { key: 'about', label: 'About', url: '/about', icon: 'missing-lucide-icon' },
+          ],
+        },
+      },
+    },
+  }))
+
+  try {
+    await page.goto('/?lang=en', { waitUntil: 'domcontentloaded' })
+    const userMenu = page.getByRole('button', { name: 'alice', exact: true })
+    const initial = userMenu.locator('[data-slot="avatar-fallback"]')
+    const photo = userMenu.locator('[data-slot="avatar-image"]')
+    await expect(userMenu.locator('[data-slot="avatar"]')).toBeVisible()
+    await expect(initial).toBeHidden()
+    releaseAvatar()
+    await expect(photo).toBeVisible()
+    await expect(initial).toBeHidden()
+
+    if (isMobile) await page.getByRole('button', { name: 'Open menu', exact: true }).click()
+    const sidebar = isMobile ? page.getByRole('dialog') : page.getByRole('complementary', { name: 'Sidebar' })
+    const iconRequested = page.waitForRequest(request => iconAsset(new URL(request.url())))
+    await sidebar.getByRole('button', { name: 'More', exact: true }).click()
+    const docs = sidebar.getByRole('link', { name: 'Documentation', exact: true })
+    await iconRequested
+    await expect(docs).toBeHidden()
+    await expect(sidebar.getByRole('link', { name: 'Topics', exact: true })).toBeVisible()
+    releaseIcon()
+    await expect(docs.locator('.lucide-book-open')).toBeVisible()
+    await expect(sidebar.getByRole('link', { name: 'About', exact: true }).locator('.lucide-link')).toBeVisible()
+
+    avatarUrl = '/missing-avatar.webp'
+    await page.reload()
+    await expect(initial).toHaveText('A')
+    await expect(photo).toBeHidden()
+  } finally {
+    releaseAvatar()
+    releaseIcon()
+  }
+})
+
 test('desktop sidebar remembers its width preference and leaves mobile navigation available', async ({ page }) => {
   const requests: string[] = []
   await page.route('**/__goose_page/**', route => route.fulfill({

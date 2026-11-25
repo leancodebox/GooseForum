@@ -5,9 +5,20 @@ import type { GooseAdminApi, LayoutPayload } from "@gooseforum/client";
 import messages from "../messages/zh-settings";
 import { SiteChromeManagementPage } from "./site-chrome-management-page";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 it("folds secondary navigation into More and preserves custom configuration when saving", async () => {
+  const fetch = globalThis.fetch;
+  vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === "string" ? input : "href" in input ? input.href : input.url;
+    if (url.endsWith("/lucide.json")) {
+      return Promise.resolve(Response.json({ icons: { "book-open": { name: "book-open", size: 24, node: [] } } }));
+    }
+    return fetch(input, init);
+  });
   const item = (id: string, label: string) => ({ id, label, type: "link" as const, enabled: true, url: `/${id}`, i18nLabel: "" });
   const config = {
     header: [],

@@ -1,6 +1,7 @@
 package forum
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -138,13 +139,14 @@ type ResetPasswordPageProps struct {
 }
 
 type LayoutPayload struct {
-	Site    SitePayload         `json:"site"`
-	Viewer  ViewerPayload       `json:"viewer"`
-	Header  []NavItemPayload    `json:"header"`
-	Sidebar SidebarPayload      `json:"sidebar"`
-	Footer  FooterPayload       `json:"footer"`
-	Unread  UnreadStatusPayload `json:"unread"`
-	Theme   ThemePayload        `json:"theme"`
+	Icons   map[string]json.RawMessage `json:"icons"`
+	Site    SitePayload                `json:"site"`
+	Viewer  ViewerPayload              `json:"viewer"`
+	Header  []NavItemPayload           `json:"header"`
+	Sidebar SidebarPayload             `json:"sidebar"`
+	Footer  FooterPayload              `json:"footer"`
+	Unread  UnreadStatusPayload        `json:"unread"`
+	Theme   ThemePayload               `json:"theme"`
 }
 
 type ThemePayload struct {
@@ -204,6 +206,7 @@ type CategoryNavPayload struct {
 	Label string `json:"label"`
 	URL   string `json:"url"`
 	Color string `json:"color"`
+	Icon  string `json:"icon,omitempty"`
 }
 
 type SidebarGroupPayload struct {
@@ -805,6 +808,7 @@ func buildSidebarPayload(chrome pageConfig.SiteChromeConfig, categories []*categ
 			Label: category.Name,
 			URL:   categoryURL(category),
 			Color: category.Color,
+			Icon:  category.Icon,
 		})
 	}
 

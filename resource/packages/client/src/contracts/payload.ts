@@ -69,7 +69,10 @@ export interface ResetPasswordPageProps {
   token: string
 }
 
+type NavigationIconNode = [string, Record<string, string | number>] | [string, Record<string, string | number>, NavigationIconNode[]]
+
 export interface LayoutPayload {
+  icons?: Record<string, { name: string; size: number; node: NavigationIconNode[] }>
   site: SitePayload
   viewer: ViewerPayload
   header?: NavItemPayload[]
@@ -258,6 +261,7 @@ export interface CategoryNavPayload {
   label: string
   url: string
   color: string
+  icon?: string
 }
 
 export interface NavItemPayload {

@@ -4,6 +4,11 @@ import * as React from "react"
 import { cn } from "cn"
 import { Avatar as AvatarPrimitive } from "radix-ui"
 
+const AvatarLoadingContext = React.createContext<{
+  loading: boolean
+  setLoading(loading: boolean): void
+} | null>(null)
+
 function Avatar({
   className,
   size = "default",
@@ -11,28 +16,46 @@ function Avatar({
 }: React.ComponentProps<typeof AvatarPrimitive.Root> & {
   size?: "default" | "sm" | "lg"
 }) {
+  const [loading, setLoading] = React.useState(false)
+  const state = React.useMemo(() => ({ loading, setLoading }), [loading])
+
   return (
-    <AvatarPrimitive.Root
-      data-slot="avatar"
-      data-size={size}
-      className={cn(
-        "group/avatar relative flex size-8 shrink-0 rounded-full select-none after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:border after:border-border/80 data-[size=lg]:size-10 data-[size=sm]:size-6",
-        className
-      )}
-      {...props}
-    />
+    <AvatarLoadingContext.Provider value={state}>
+      <AvatarPrimitive.Root
+        data-slot="avatar"
+        data-size={size}
+        className={cn(
+          "group/avatar relative flex size-8 shrink-0 rounded-full select-none after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:border after:border-border/80 data-[size=lg]:size-10 data-[size=sm]:size-6",
+          className
+        )}
+        {...props}
+      />
+    </AvatarLoadingContext.Provider>
   )
 }
 
 function AvatarImage({
   className,
   src,
+  onLoadingStatusChange,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Image>) {
+  const setLoading = React.useContext(AvatarLoadingContext)?.setLoading
+  const hasSource = Boolean(src)
+  React.useLayoutEffect(() => {
+    if (!hasSource) return
+    setLoading?.(true)
+    return () => setLoading?.(false)
+  }, [hasSource, setLoading])
+
   if (!src) return null
   return (
     <AvatarPrimitive.Image
       src={src}
+      onLoadingStatusChange={(status) => {
+        if (status !== "idle") setLoading?.(status === "loading")
+        onLoadingStatusChange?.(status)
+      }}
       data-slot="avatar-image"
       className={cn(
         "aspect-square size-full rounded-full object-cover",
@@ -48,6 +71,9 @@ function AvatarFallback({
   userId,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Fallback> & { userId?: number }) {
+  const loading = React.useContext(AvatarLoadingContext)?.loading
+  if (loading) return null
+
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"

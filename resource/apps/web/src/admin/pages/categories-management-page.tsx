@@ -1,6 +1,8 @@
 import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import { errorMessage } from '../error-message'
 import { AdminPage } from '../components/admin-page'
+import { NavigationIconField } from '../components/navigation-icon-field'
+import { CategoryIcon, categoryIconName, encodeCategoryIcon } from '@gooseforum/ui/components/category-icon'
 import { ColorPicker } from '@gooseforum/ui/components/color-picker'
 import { useLatestRequest } from '@gooseforum/runtime'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -9,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from '@gooseforum/ui/components/a
 import { Avatar, AvatarFallback, AvatarImage } from '@gooseforum/ui/components/avatar'
 import { Badge } from '@gooseforum/ui/components/badge'
 import { Button } from '@gooseforum/ui/components/button'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@gooseforum/ui/components/dialog'
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@gooseforum/ui/components/field'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@gooseforum/ui/components/empty'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@gooseforum/ui/components/dropdown-menu'
@@ -21,18 +24,21 @@ import { AlertTriangle, LoaderCircle, LockKeyhole, MoreHorizontal, Pencil, Plus,
 import { toast } from '@gooseforum/ui/components/sonner'
 import { AdminPermission, hasAdminPermission } from '../access'
 import type { AdminTextKey } from '../i18n'
+import type { SettingsTextKey } from '../settings-i18n'
 
 type Text = (key: AdminTextKey) => string
+type IconText = (key: SettingsTextKey) => string
 
 interface CategoriesManagementPageProps {
   api: GooseAdminApi
   permissions: number[]
   text: Text
+  iconText: IconText
 }
 
 const emptyCategory: AdminCategory = { id: 0, category: '', desc: '', icon: '', color: '#3b82f6', slug: '', sort: 0 }
 
-export function CategoriesManagementPage({ api, permissions, text }: CategoriesManagementPageProps) {
+export function CategoriesManagementPage({ api, permissions, text, iconText }: CategoriesManagementPageProps) {
   const canManageCategories = hasAdminPermission(permissions, AdminPermission.TopicsManager)
   const canManageAccess = hasAdminPermission(permissions, AdminPermission.RoleManager)
   const [categories, setCategories] = useState<AdminCategory[]>([])
@@ -152,7 +158,7 @@ export function CategoriesManagementPage({ api, permissions, text }: CategoriesM
                   const access = overview.categories.find((item) => item.id === category.id)
                   return <TableRow key={category.id}>
                     <TableCell className="py-2 font-mono text-xs text-muted-foreground">{category.id}</TableCell>
-                    <TableCell className="py-2"><div className="flex min-w-0 items-center gap-2">{category.icon ? <span style={{ color: category.color || undefined }}>{category.icon}</span> : <span className="size-2.5 shrink-0 rounded-[3px]" style={{ backgroundColor: category.color || '#64748b' }} />}<span className="truncate font-medium">{category.category}</span></div></TableCell>
+                    <TableCell className="py-2"><div className="flex min-w-0 items-center gap-2">{category.icon ? <CategoryIcon icon={category.icon} color={category.color || undefined} /> : <span className="size-2.5 shrink-0 rounded-[3px]" style={{ backgroundColor: category.color || '#64748b' }} />}<span className="truncate font-medium">{category.category}</span></div></TableCell>
                     {canManageAccess ? <TableCell className="py-2"><Badge variant={access?.isRestricted ? 'secondary' : 'outline'}>{access?.isRestricted ? <LockKeyhole data-icon="inline-start" /> : null}{access?.isRestricted ? text('restricted') : text('unrestricted')}</Badge></TableCell> : null}
                     {canManageCategories ? <TableCell className="truncate py-2 text-muted-foreground">{category.slug || '—'}</TableCell> : null}
                     {canManageCategories ? <TableCell className="truncate py-2 text-muted-foreground">{category.desc || '—'}</TableCell> : null}
@@ -182,7 +188,7 @@ export function CategoriesManagementPage({ api, permissions, text }: CategoriesM
           )}
       </section>
 
-      <CategoryEditor category={editor} api={api} text={text} onClose={() => setEditor(null)} onSaved={async () => { setEditor(null); await load() }} />
+      <CategoryEditor category={editor} api={api} text={text} iconText={iconText} onClose={() => setEditor(null)} onSaved={async () => { setEditor(null); await load() }} />
       <ModeratorSheet open={globalOpen} title={text('globalModerators')} description={text('globalHint')} moderators={globalModerators} api={api} text={text} onOpenChange={setGlobalOpen} onChanged={load} />
       <ModeratorSheet open={Boolean(moderatorCategory)} title={moderatorCategory?.category || text('moderators')} description={text('moderators')} moderators={moderatorCategory?.moderators || []} categoryId={moderatorCategory?.id} api={api} text={text} onOpenChange={(open) => !open && setModeratorCategory(null)} onChanged={load} />
       <AccessSheet category={accessCategory} overview={overview} api={api} text={text} onClose={() => setAccessCategory(null)} onSaved={load} />
@@ -216,7 +222,10 @@ function CategoryIdentity({ category, text }: { category: AdminCategory; text: T
   return <div className="flex min-w-0 items-start gap-2">
     <span className="mt-1 size-2.5 shrink-0 rounded-full ring-1 ring-foreground/10" style={{ backgroundColor: category.color || 'var(--muted)' }} />
     <div className="min-w-0">
-      <div className="truncate font-medium">{category.icon ? <span className="mr-1">{category.icon}</span> : null}{category.category}</div>
+      <div className="flex min-w-0 items-center gap-1 font-medium">
+        <CategoryIcon icon={category.icon} color={category.color || undefined} />
+        <span className="truncate">{category.category}</span>
+      </div>
       {category.desc ? <div className="line-clamp-1 text-xs text-muted-foreground">{category.desc}</div> : null}
       <div className="mt-1 flex flex-wrap gap-1">
         <Badge variant="outline" className="font-mono font-normal">{category.slug || '—'}</Badge>
@@ -226,11 +235,12 @@ function CategoryIdentity({ category, text }: { category: AdminCategory; text: T
   </div>
 }
 
-function CategoryEditor({ category, api, text, onClose, onSaved }: { category: AdminCategory | null; api: GooseAdminApi; text: Text; onClose(): void; onSaved(): Promise<void> }) {
+function CategoryEditor({ category, api, text, iconText, onClose, onSaved }: { category: AdminCategory | null; api: GooseAdminApi; text: Text; iconText: IconText; onClose(): void; onSaved(): Promise<void> }) {
   const [form, setForm] = useState(emptyCategory)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   useEffect(() => { if (category) { setForm({ ...emptyCategory, ...category }); setError('') } }, [category])
+  const iconName = categoryIconName(form.icon)
 
   async function submit(event: React.FormEvent) {
     event.preventDefault()
@@ -243,17 +253,59 @@ function CategoryEditor({ category, api, text, onClose, onSaved }: { category: A
     } catch (reason) { setError(errorMessage(reason, text('saveFailed'))) } finally { setSaving(false) }
   }
 
-  return <Sheet open={Boolean(category)} onOpenChange={(open) => !open && onClose()}><SheetContent className="w-full overflow-y-auto sm:max-w-md">
-    <SheetHeader><SheetTitle>{category?.id ? text('edit') : text('addCategory')}</SheetTitle><SheetDescription>{text('categoryFormHint')}</SheetDescription></SheetHeader>
-    <form id="category-form" onSubmit={submit} className="px-4"><FieldGroup>
-      <Field data-invalid={Boolean(error)}><FieldLabel htmlFor="category-name">{text('name')}</FieldLabel><Input id="category-name" autoFocus value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} /><FieldError>{error}</FieldError></Field>
-      <Field><FieldLabel htmlFor="category-slug">{text('slug')}</FieldLabel><Input id="category-slug" value={form.slug || ''} onChange={(event) => setForm({ ...form, slug: event.target.value })} /></Field>
-      <Field><FieldLabel htmlFor="category-description">{text('description')}</FieldLabel><Input id="category-description" value={form.desc || ''} onChange={(event) => setForm({ ...form, desc: event.target.value })} /></Field>
-      <div className="grid grid-cols-2 gap-4"><Field><FieldLabel htmlFor="category-icon">{text('icon')}</FieldLabel><Input id="category-icon" value={form.icon || ''} onChange={(event) => setForm({ ...form, icon: event.target.value })} /></Field><Field><FieldLabel htmlFor="category-color">{text('color')}</FieldLabel><ColorPicker id="category-color" label={text('color')} className="w-full" value={form.color || '#3b82f6'} onChange={(color) => setForm({ ...form, color })} /></Field></div>
-      <Field><FieldLabel htmlFor="category-sort">{text('sort')}</FieldLabel><Input id="category-sort" type="number" value={form.sort ?? 0} onChange={(event) => setForm({ ...form, sort: Number(event.target.value) || 0 })} /><FieldDescription>{text('categorySortHint')}</FieldDescription></Field>
-    </FieldGroup></form>
-    <SheetFooter className="flex-row justify-end"><Button variant="outline" onClick={onClose}>{text('cancel')}</Button><Button form="category-form" type="submit" disabled={saving}>{saving ? <Spinner data-icon="inline-start" /> : null}{saving ? text('saving') : text('save')}</Button></SheetFooter>
-  </SheetContent></Sheet>
+  return (
+    <Dialog open={Boolean(category)} onOpenChange={open => !open && onClose()}>
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{category?.id ? text('edit') : text('addCategory')}</DialogTitle>
+          <DialogDescription>{text('categoryFormHint')}</DialogDescription>
+        </DialogHeader>
+        <form id="category-form" onSubmit={submit}>
+          <FieldGroup>
+            <Field data-invalid={Boolean(error)}>
+              <FieldLabel htmlFor="category-name">{text('name')}</FieldLabel>
+              <Input id="category-name" autoFocus value={form.category} onChange={event => setForm({ ...form, category: event.target.value })} />
+              <FieldError>{error}</FieldError>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="category-slug">{text('slug')}</FieldLabel>
+              <Input id="category-slug" value={form.slug || ''} onChange={event => setForm({ ...form, slug: event.target.value })} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="category-description">{text('description')}</FieldLabel>
+              <Input id="category-description" value={form.desc || ''} onChange={event => setForm({ ...form, desc: event.target.value })} />
+            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <NavigationIconField
+                label={text('icon')}
+                value={iconName}
+                displayValue={iconName ?? form.icon}
+                preview={<CategoryIcon icon={form.icon} color={form.color || undefined} />}
+                onSelect={name => setForm(current => ({ ...current, icon: encodeCategoryIcon(name) }))}
+                text={iconText}
+              />
+              <Field>
+                <FieldLabel htmlFor="category-color">{text('color')}</FieldLabel>
+                <ColorPicker id="category-color" label={text('color')} className="w-full" value={form.color || '#3b82f6'} onChange={color => setForm({ ...form, color })} />
+              </Field>
+            </div>
+            <Field>
+              <FieldLabel htmlFor="category-sort">{text('sort')}</FieldLabel>
+              <Input id="category-sort" type="number" value={form.sort ?? 0} onChange={event => setForm({ ...form, sort: Number(event.target.value) || 0 })} />
+              <FieldDescription>{text('categorySortHint')}</FieldDescription>
+            </Field>
+          </FieldGroup>
+        </form>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onClose}>{text('cancel')}</Button>
+          <Button form="category-form" type="submit" disabled={saving}>
+            {saving ? <Spinner data-icon="inline-start" /> : null}
+            {saving ? text('saving') : text('save')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
 }
 
 function ModeratorSheet({ open, title, description, moderators, categoryId, api, text, onOpenChange, onChanged }: { open: boolean; title: string; description: string; moderators: AdminCategoryModerator[]; categoryId?: number; api: GooseAdminApi; text: Text; onOpenChange(open: boolean): void; onChanged(): Promise<void> }) {

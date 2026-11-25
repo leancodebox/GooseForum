@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Icon } from "lucide-react";
 import { Button } from "@gooseforum/ui/components/button";
 import { Input } from "@gooseforum/ui/components/input";
-import DynamicNavigationIcon, { navigationIconNames } from "@gooseforum/ui/components/navigation-icon-dynamic";
+import { loadNavigationIconCatalog } from "@gooseforum/ui/components/navigation-icon";
 import type { SettingsTextKey } from "../settings-i18n";
 
 const commonIcons = [
@@ -10,18 +10,34 @@ const commonIcons = [
   "star", "heart", "external-link", "rss", "file-text", "circle-help", "mail", "bookmark",
 ];
 const searchKey = (value: string) => value.toLowerCase().replace(/[\s_-]+/g, "");
-const iconNames = new Set<string>(navigationIconNames);
-const catalog = [
-  ...commonIcons.filter(name => iconNames.has(name)),
-  ...[...iconNames].sort().filter(name => !commonIcons.includes(name)),
-].map(name => ({ name, key: searchKey(name) }));
+async function loadPickerCatalog() {
+  const icons = await loadNavigationIconCatalog();
+  if (!icons) return null;
+  const names = Object.keys(icons);
+  const sorted = [
+    ...commonIcons.filter(name => Object.hasOwn(icons, name)),
+    ...names.sort().filter(name => !commonIcons.includes(name)),
+  ];
+  return sorted.map(name => ({ name, key: searchKey(name), icon: icons[name] }));
+}
+let catalogRequest: ReturnType<typeof loadPickerCatalog> | undefined;
 const pageSize = 40;
 
 export default function NavigationIconPicker({ value, onSelect, text }: {
   value?: string;
-  onSelect(name?: string): void;
+  onSelect(name: string): void;
   text(key: SettingsTextKey): string;
 }) {
+  const [catalog, setCatalog] = useState<Awaited<ReturnType<typeof loadPickerCatalog>>>();
+  useEffect(() => {
+    let active = true;
+    catalogRequest ??= loadPickerCatalog().then(items => {
+      if (!items) catalogRequest = undefined;
+      return items;
+    });
+    void catalogRequest.then(items => { if (active) setCatalog(items); });
+    return () => { active = false; };
+  }, []);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
   const searchInput = useRef<HTMLInputElement>(null);
@@ -33,7 +49,7 @@ export default function NavigationIconPicker({ value, onSelect, text }: {
   useEffect(() => {
     if (grid.current) grid.current.scrollTop = 0;
   }, [search, page]);
-  const matches = useMemo(() => search ? catalog.filter(icon => icon.key.includes(search)) : catalog, [search]);
+  const matches = useMemo(() => search ? catalog?.filter(icon => icon.key.includes(search)) ?? [] : catalog ?? [], [catalog, search]);
   const pageCount = Math.ceil(matches.length / pageSize);
 
   return (
@@ -49,13 +65,15 @@ export default function NavigationIconPicker({ value, onSelect, text }: {
           setPage(0);
         }}
       />
-      <Button type="button" size="sm" variant="ghost" aria-pressed={!value}
-        className="self-start" onClick={() => onSelect()}>
-        {text("defaultMenuIcon")}
-      </Button>
+      {!search && (
+        <Button type="button" size="sm" variant="ghost" aria-pressed={!value}
+          className="self-start" onClick={() => onSelect("")}>
+          {text("defaultMenuIcon")}
+        </Button>
+      )}
       {matches.length ? (
         <div ref={grid} className="grid min-h-0 grid-cols-4 content-start gap-1 overflow-y-auto p-1 sm:grid-cols-8">
-          {matches.slice(page * pageSize, (page + 1) * pageSize).map(({ name }) => (
+          {matches.slice(page * pageSize, (page + 1) * pageSize).map(({ name, icon }) => (
             <Button
               key={name}
               type="button"
@@ -65,12 +83,12 @@ export default function NavigationIconPicker({ value, onSelect, text }: {
               title={name}
               onClick={() => onSelect(name)}
             >
-              <DynamicNavigationIcon name={name} />
+              <Icon icon={icon} aria-hidden="true" className="size-4 shrink-0" />
               <span className="max-w-full truncate">{name}</span>
             </Button>
           ))}
         </div>
-      ) : <p role="status" className="px-2 py-1 text-muted-foreground">{text("noMenuIcons")}</p>}
+      ) : <p role="status" className="px-2 py-1 text-muted-foreground">{text(catalog === undefined ? "loading" : catalog ? "noMenuIcons" : "loadFailed")}</p>}
       {pageCount > 1 && (
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <Button type="button" variant="ghost" size="icon-sm" aria-label={text("previousIconPage")}

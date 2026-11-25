@@ -18,6 +18,8 @@ import type { Locale } from "@gooseforum/client/i18n/locale";
 import type { Resource } from "i18next";
 import { GoosePage, isStandalonePage } from "./root";
 import { AppShell } from "../site/layout/app-shell";
+import { categoryIconName } from "@gooseforum/ui/components/category-icon";
+import { PageNavigationIcons, preloadNavigationIcons } from "@gooseforum/ui/components/navigation-icon";
 import { BootstrapError, BootstrapLoading } from "@gooseforum/ui/bootstrap";
 import { prepareGoosePage } from "@gooseforum/runtime/prepared-page";
 import {
@@ -45,6 +47,24 @@ import type { PageSource } from "@gooseforum/runtime/page-source";
 import { GooseI18nProvider, prepareGooseTranslations, goosePageNamespaces } from "@gooseforum/runtime/i18n";
 
 const Toaster = lazy(() => import("@gooseforum/ui/components/sonner").then(module => ({ default: module.Toaster })));
+
+export function preloadPageIcons(page: AnyPagePayload) {
+  if (page.layout.icons || isStandalonePage(page)) return;
+  const { header, sidebar } = page.layout;
+  const names = [
+    ...(header || []).filter(item => item.key !== "links" && item.key !== "sponsors").map(item => item.icon),
+    ...(sidebar.main || []).filter(item => item.key === sidebar.activeKey).map(item => item.icon),
+    ...(sidebar.resources || []).filter(item => item.key === sidebar.activeKey).map(item => item.icon),
+    ...(sidebar.groups || []).flatMap(group => group.items.map(item => item.icon)),
+    ...(sidebar.categories || []).map(category => categoryIconName(category.icon)),
+  ];
+  if (page.component === "categories.index") {
+    names.push(...page.props.categories.map(category => categoryIconName(category.icon)));
+  } else if (page.component === "category.index") {
+    names.push(categoryIconName(page.props.category.icon));
+  }
+  return preloadNavigationIcons(names);
+}
 
 export interface SiteAppProps {
   pageSource: PageSource<AnyPagePayload>;
@@ -172,6 +192,7 @@ export function SiteApp({
         );
         let language = targetLanguage();
         await Promise.all([
+          preloadPageIcons(nextPage),
           prepareGoosePage(nextPage.component),
           prepareGooseTranslations(language, goosePageNamespaces(nextPage.component)),
         ]);
@@ -483,7 +504,9 @@ export function SiteApp({
           key={entry.key}
           mode={!error && entry.key === activeCacheKey ? "visible" : "hidden"}
         >
-          <GoosePage page={entry.page} onContentReady={handleContentReady} />
+          <PageNavigationIcons value={entry.page.layout.icons}>
+            <GoosePage page={entry.page} onContentReady={handleContentReady} />
+          </PageNavigationIcons>
         </Activity>
       ))}
       {error ? <BootstrapError error={error} description={errorDescription} onRetry={() => void refresh()} retrying={isNavigating} /> : !activeCacheKey ? <GoosePage page={page} onContentReady={handleContentReady} /> : null}
@@ -502,9 +525,11 @@ export function SiteApp({
             retrying={isNavigating}
           />
         ) : page ? (
-          <AppShell layout={page.layout} standalone={isStandalonePage(page)}>
-            {pageContent}
-          </AppShell>
+          <PageNavigationIcons value={page.layout.icons}>
+            <AppShell layout={page.layout} standalone={isStandalonePage(page)}>
+              {pageContent}
+            </AppShell>
+          </PageNavigationIcons>
         ) : (
           <BootstrapLoading />
         )}

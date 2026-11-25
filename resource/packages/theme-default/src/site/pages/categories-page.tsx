@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import {
   ChevronRightIcon,
   LayoutGridIcon,
@@ -9,6 +10,7 @@ import {
 } from "@gooseforum/client";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@gooseforum/ui/components/badge";
+import { CategoryIcon } from "@gooseforum/ui/components/category-icon";
 import {
   Empty,
   EmptyDescription,
@@ -45,12 +47,14 @@ export function CategoriesPageView({ page }: { page: CategoriesPageProps }) {
                 aria-hidden="true"
               />
               <div className="min-w-0 flex-1 py-0.5">
-                <div className="flex min-w-0 items-center gap-2">
-                  {category.icon ? <CategoryIcon icon={category.icon} /> : null}
-                  <h2 className="truncate text-[15px] font-bold transition-colors group-hover:text-primary">
-                    {category.name}
-                  </h2>
-                </div>
+                <Suspense fallback={<div aria-hidden="true" className="h-[22.5px]" />}>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <CategoryIcon icon={category.icon} color={category.color || undefined} suspend />
+                    <h2 className="truncate text-[15px] font-bold transition-colors group-hover:text-primary">
+                      {category.name}
+                    </h2>
+                  </div>
+                </Suspense>
                 <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
                   {category.description || t("noDescription")}
                 </p>
@@ -84,21 +88,5 @@ export function CategoriesPageView({ page }: { page: CategoriesPageProps }) {
         </Empty>
       )}
     </div>
-  );
-}
-
-function CategoryIcon({ icon }: { icon: string }) {
-  const isImage = /^(https?:\/\/|\/)/.test(icon);
-  return (
-    <span
-      className="inline-flex shrink-0 items-center justify-center text-base leading-none"
-      aria-hidden="true"
-    >
-      {isImage ? (
-        <img src={icon} alt="" className="size-5 rounded object-cover" />
-      ) : (
-        icon
-      )}
-    </span>
   );
 }

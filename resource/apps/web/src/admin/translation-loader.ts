@@ -45,7 +45,7 @@ export function getAdminDictionary<Dictionary>(
 export function adminPageNamespaces(path: string) {
   const pages: Record<string, string[]> = {
     "/admin": ["dashboard"],
-    "/admin/categories": ["shell", "access-groups"],
+    "/admin/categories": ["shell", "access-groups", "settings"],
     "/admin/access-groups": ["access-groups"],
     "/admin/roles": ["roles"],
     "/admin/users": ["users"],

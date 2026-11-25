@@ -2,7 +2,6 @@ import { fileURLToPath, URL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv, type Plugin, type ProxyOptions } from 'vite'
-import { navigationIconChunks } from './vite-navigation-icons'
 
 function adminSpaFallback(): Plugin {
   return {
@@ -61,7 +60,7 @@ export default defineConfig(({ command, mode }) => {
   }
 
   return {
-    plugins: [adminSpaFallback(), navigationIconChunks(), react(), tailwindcss()],
+    plugins: [adminSpaFallback(), react(), tailwindcss()],
     base: mode === 'production' ? '/assets/react/' : '/',
     resolve: {
       alias: [
@@ -81,6 +80,7 @@ export default defineConfig(({ command, mode }) => {
     },
     optimizeDeps: {
       include: [
+        'lucide-react',
         '@dnd-kit/core',
         '@dnd-kit/sortable',
         '@dnd-kit/utilities',
