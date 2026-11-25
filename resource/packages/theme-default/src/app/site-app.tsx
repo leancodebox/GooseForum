@@ -73,6 +73,7 @@ export interface SiteAppProps {
   initialTheme?: AnyPagePayload["layout"]["theme"]["current"];
   initialResources?: Resource;
   errorDescription?: string;
+  onInitialContentReady?: () => void;
 }
 
 interface CachedPage {
@@ -105,6 +106,7 @@ export function SiteApp({
   initialTheme,
   initialResources,
   errorDescription,
+  onInitialContentReady,
 }: SiteAppProps) {
   const [page, setPage] = useState<AnyPagePayload | undefined>(initialPage);
   const [cachedPages, setCachedPages] = useState<CachedPage[]>(() =>
@@ -159,6 +161,7 @@ export function SiteApp({
   }, []);
 
   const handleContentReady = useCallback((committedPage: AnyPagePayload) => {
+    onInitialContentReady?.();
     const target = pendingScroll.current;
     if (!target || target.page !== committedPage) return;
     pendingScroll.current = null;
@@ -168,7 +171,7 @@ export function SiteApp({
       target.hash,
       scrollPositions.current,
     );
-  }, []);
+  }, [onInitialContentReady]);
 
   const loadPage = useCallback(
     async (
@@ -509,7 +512,7 @@ export function SiteApp({
           </PageNavigationIcons>
         </Activity>
       ))}
-      {error ? <BootstrapError error={error} description={errorDescription} onRetry={() => void refresh()} retrying={isNavigating} /> : !activeCacheKey ? <GoosePage page={page} onContentReady={handleContentReady} /> : null}
+      {error ? <BootstrapError onReady={onInitialContentReady} error={error} description={errorDescription} onRetry={() => void refresh()} retrying={isNavigating} /> : !activeCacheKey ? <GoosePage page={page} onContentReady={handleContentReady} /> : null}
     </>
   ) : null;
 
@@ -519,6 +522,7 @@ export function SiteApp({
         {pageLoad === "navigation" && <NavigationProgress />}
         {!page && error ? (
           <BootstrapError
+            onReady={onInitialContentReady}
             error={error}
             description={errorDescription}
             onRetry={() => void refresh()}

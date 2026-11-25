@@ -1,0 +1,53 @@
+{{define "partials/site_splash.gohtml"}}
+<div id="goose-splash">
+<style>
+    #goose-splash {
+        --splash-bg: {{with index .Payload.Layout.Theme.Colors "gf-light"}}{{.}}{{else}}#fbfdff{{end}};
+        position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center;
+        background: var(--background, var(--splash-bg)); color: var(--gf-color-primary, #2563eb);
+    }
+    [data-theme="gf-dark"] #goose-splash {
+        --splash-bg: {{with index .Payload.Layout.Theme.Colors "gf-dark"}}{{.}}{{else}}#101010{{end}};
+        color: var(--gf-color-primary, #79aaff);
+    }
+    #goose-splash ~ #goose-app { visibility: hidden }
+    .gf-splash-dots { display: flex; gap: 6px; opacity: 0; animation: gf-splash-appear 150ms 200ms forwards }
+    .gf-splash-dots i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: gf-splash-pulse 1.2s ease-in-out infinite }
+    .gf-splash-dots i:nth-child(2) { animation-delay: 150ms }
+    .gf-splash-dots i:nth-child(3) { animation-delay: 300ms }
+    @keyframes gf-splash-appear { to { opacity: 1 } }
+    @keyframes gf-splash-pulse { 0%, 100% { opacity: .35 } 50% { opacity: 1 } }
+    @media (prefers-reduced-motion: reduce) {
+        .gf-splash-dots { animation-duration: 0s }
+        .gf-splash-dots i { animation: none }
+    }
+    .gf-splash-retry { position: absolute; top: calc(50% + 24px); color: inherit; visibility: hidden; animation: gf-splash-retry 0s 12s forwards }
+    @keyframes gf-splash-retry { to { visibility: visible } }
+    #goose-splash[data-failed] .gf-splash-retry { animation: none; visibility: visible }
+    #goose-splash[data-failed] .gf-splash-dots { visibility: hidden }
+</style>
+<noscript><style>#goose-splash { display: none }</style></noscript>
+    <span class="gf-splash-dots" role="status" aria-label="{{ t .Lang "splashLoading" }}"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></span>
+    <a class="gf-splash-retry" href="">{{ t .Lang "splashReload" }}</a>
+<script>
+    (() => {
+        const splash = document.getElementById("goose-splash");
+        let pref;
+        try {
+            pref = document.cookie.match(/(?:^|;\s*)goose-site-theme=(gf-dark|gf-light|system)(?:;|$)/)?.[1]
+                || localStorage.getItem("goose-site-theme");
+        } catch { /* Storage may be unavailable. */ }
+        const dark = pref === "gf-dark" || (pref !== "gf-light" && matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = dark ? "gf-dark" : "gf-light";
+        function onModuleError(event) {
+            if (event.target instanceof HTMLScriptElement && event.target.type === "module") {
+                document.getElementById("goose-splash")?.setAttribute("data-failed", "");
+            }
+        }
+        document.addEventListener("error", onModuleError, true);
+        window.addEventListener("load", () => document.removeEventListener("error", onModuleError, true), { once: true });
+        splash.querySelector("a").onclick = event => { event.preventDefault(); location.reload(); };
+    })();
+</script>
+</div>
+{{end}}

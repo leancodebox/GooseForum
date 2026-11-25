@@ -138,9 +138,12 @@ function applyThemeStylesheet(theme: ThemePayload) {
     link = document.createElement("link");
     link.id = "goose-site-theme-link";
     link.rel = "stylesheet";
-    document.head.appendChild(link);
+    // The site loads its base stylesheet after the splash, in the body.
+    const siteRoot = document.getElementById("goose-app");
+    if (siteRoot) siteRoot.before(link);
+    else document.head.appendChild(link);
   }
-  link.href = theme.href;
+  if (link.getAttribute("href") !== theme.href) link.href = theme.href;
 }
 
 function readCookie(name: string) {

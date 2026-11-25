@@ -36,10 +36,11 @@
     <link rel="icon" href="/favicon.ico">
     {{if .Payload.Layout.Site.ExternalLinks}}{{SafeHTML .Payload.Layout.Site.ExternalLinks}}{{end}}
     <noscript><link rel="stylesheet" href="/static/css/avatar-tones.css"></noscript>
-    {{ResourceEntry `site`}}
-    {{if .Payload.Layout.Theme.Href}}<link id="goose-site-theme-link" rel="stylesheet" href="{{.Payload.Layout.Theme.Href}}">{{end}}
 </head>
 <body class="bg-base-200 text-base-content antialiased">
+    {{template "partials/site_splash.gohtml" .}}
+    {{ResourceEntry `site`}}
+    {{if .Payload.Layout.Theme.Href}}<link id="goose-site-theme-link" rel="stylesheet" href="{{.Payload.Layout.Theme.Href}}">{{end}}
     <script id="goose-payload" type="application/json">{{json .Payload}}</script>
 
     <div id="goose-app" aria-live="polite"></div>

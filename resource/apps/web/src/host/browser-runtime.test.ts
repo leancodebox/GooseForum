@@ -76,6 +76,22 @@ describe('browser theme runtime', () => {
     expect(document.cookie).toContain('goose-site-theme=system')
   })
 
+  it('keeps a newly enabled site theme after the base stylesheet', () => {
+    const root = document.createElement('div')
+    root.id = 'goose-app'
+    document.body.append(root)
+    try {
+      prepareDocument({
+        meta: { title: 'Test' },
+        layout: { theme: { enabled: true, href: '/site-theme.css?v=2', current: 'gf-light' } },
+      } as PagePayload)
+      expect(root.previousElementSibling?.id).toBe('goose-site-theme-link')
+    } finally {
+      document.getElementById('goose-site-theme-link')?.remove()
+      root.remove()
+    }
+  })
+
   it('prefers a stored user theme over the static development HTML default', () => {
     localStorage.setItem('goose-site-theme', 'gf-dark')
 

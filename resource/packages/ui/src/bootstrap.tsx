@@ -1,3 +1,4 @@
+import { useLayoutEffect } from "react";
 import { Badge } from "./components/badge";
 import { Button } from "./components/button";
 import {
@@ -33,9 +34,11 @@ export function BootstrapLoading() {
 export function BootstrapError({
   error,
   onRetry,
+  onReady,
   retrying = false,
   description = "请稍后重试；如果问题持续存在，请联系站点管理员。",
 }: BootstrapErrorProps) {
+  useLayoutEffect(() => { onReady?.(); }, [onReady]);
   const message =
     error instanceof Error ? error.message : "Unknown bootstrap error";
 
@@ -69,6 +72,7 @@ export function BootstrapError({
 export interface BootstrapErrorProps {
   error: unknown;
   onRetry?: () => void;
+  onReady?: () => void;
   retrying?: boolean;
   description?: string;
 }

@@ -18,6 +18,11 @@ if (!rootElement) {
 const stopSiteStatus = startSiteStatus(sitePageSource.api, false)
 if (import.meta.hot) import.meta.hot.dispose(stopSiteStatus)
 
+let splash = document.getElementById('goose-splash')
+function dismissSplash() {
+  splash?.remove()
+  splash = null
+}
 const root = createRoot(rootElement)
 try {
   const initialPage = sitePageSource.readInitial?.()
@@ -29,9 +34,9 @@ try {
 
   root.render(
     <StrictMode>
-      <SiteApp pageSource={sitePageSource} initialPage={initialPage} />
+      <SiteApp pageSource={sitePageSource} initialPage={initialPage} onInitialContentReady={dismissSplash} />
     </StrictMode>,
   )
 } catch (error) {
-  root.render(<BrowserBootstrapError error={error} onRetry={() => window.location.reload()} />)
+  root.render(<BrowserBootstrapError onReady={dismissSplash} error={error} onRetry={() => window.location.reload()} />)
 }

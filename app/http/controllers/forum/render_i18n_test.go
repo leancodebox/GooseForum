@@ -24,6 +24,32 @@ func TestServerTemplatesParse(t *testing.T) {
 	}
 }
 
+func TestSiteSplashPrecedesApplicationAssets(t *testing.T) {
+	reg, err := newRegistry(resource.GetTemplateFS())
+	if err != nil {
+		t.Fatal(err)
+	}
+	page := PagePayload{Layout: LayoutPayload{Theme: ThemePayload{
+		Current: "gf-dark", Href: "/site-theme.css", Colors: map[string]string{"gf-dark": "#123456"},
+	}}}
+	var buf bytes.Buffer
+	if err := reg.render(&buf, "app_shell.gohtml", templateData{Payload: page, Lang: "en"}); err != nil {
+		t.Fatal(err)
+	}
+	html := buf.String()
+	splash := strings.Index(html, `id="goose-splash"`)
+	for _, marker := range []string{`<script type="module"`, `id="goose-site-theme-link"`, `id="goose-app"`} {
+		if splash < 0 || strings.Index(html, marker) <= splash {
+			t.Errorf("expected splash before %s", marker)
+		}
+	}
+	for _, marker := range []string{"--splash-bg: #123456", `aria-label="Loading"`, ">Reload page</a>"} {
+		if !strings.Contains(html, marker) {
+			t.Errorf("missing splash content %q", marker)
+		}
+	}
+}
+
 func TestAdminLayoutRendersSharedTheme(t *testing.T) {
 	reg, err := newRegistry(resource.GetTemplateFS())
 	if err != nil {

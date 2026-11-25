@@ -1,4 +1,6 @@
 {
+  "splashLoading": "Loading",
+  "splashReload": "Reload page",
   "search": "Search",
   "prevPage": "Previous",
   "nextPage": "Next",

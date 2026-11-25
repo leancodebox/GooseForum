@@ -1,4 +1,6 @@
 {
+  "splashLoading": "読み込み中",
+  "splashReload": "ページを再読み込み",
   "search": "検索",
   "prevPage": "前のページ",
   "nextPage": "次のページ",
