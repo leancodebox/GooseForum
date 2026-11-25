@@ -159,6 +159,7 @@ type ChromeItem struct {
 	Label     string `json:"label"`
 	I18nLabel string `json:"i18nLabel"`
 	URL       string `json:"url"`
+	Icon      string `json:"icon,omitempty"`
 }
 
 type ChromeGroup struct {

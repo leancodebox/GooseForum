@@ -1,6 +1,6 @@
 import { errorMessage } from "../error-message";
 import { AdminPage } from '../components/admin-page'
-import { useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   closestCenter,
@@ -29,6 +29,7 @@ import type {
   SiteChromeItem,
 } from "@gooseforum/client";
 import { Button } from "@gooseforum/ui/components/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@gooseforum/ui/components/collapsible";
 import { DefaultBrand } from "@gooseforum/ui/components/default-brand";
 import {
   Dialog,
@@ -37,6 +38,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@gooseforum/ui/components/dialog";
 import {
   Empty,
@@ -50,7 +52,7 @@ import {
   FieldLabel,
 } from "@gooseforum/ui/components/field";
 import { Input } from "@gooseforum/ui/components/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@gooseforum/ui/components/popover";
+import { NavigationIcon } from "@gooseforum/ui/components/navigation-icon";
 import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Switch } from "@gooseforum/ui/components/switch";
 import {
@@ -60,7 +62,8 @@ import {
 import {
   Bell,
   FileText,
-  EllipsisVertical,
+  ChevronDown,
+  ChevronRight,
   Eye,
   EyeOff,
   Heart,
@@ -82,6 +85,7 @@ import {
 import { toast } from "@gooseforum/ui/components/sonner";
 import type { SettingsTextKey } from "../settings-i18n";
 type Text = (k: SettingsTextKey) => string;
+const NavigationIconPicker = lazy(() => import("../components/navigation-icon-picker"));
 const fixedMain = [
   [MessageCircle, "topics"],
   [LayoutGrid, "categories"],
@@ -148,6 +152,7 @@ export function SiteChromeManagementPage({
   const [groupDialog, setGroupDialog] = useState<number | null | undefined>();
   const [brandOpen, setBrandOpen] = useState(false);
   const [footerOpen, setFooterOpen] = useState(false);
+  const [moreExpanded, setMoreExpanded] = useState(false);
   const [activeSidebarItem, setActiveSidebarItem] =
     useState<SiteChromeItem | null>(null);
   const textRef = useRef(text);
@@ -281,6 +286,7 @@ export function SiteChromeManagementPage({
               />
               <nav className="flex min-w-0 flex-1 items-center gap-1">
                 <ChromeList
+                  text={text}
                   items={config.header}
                   horizontal
                   visibilityLabel={(id) => isSystemHeader(id)
@@ -326,7 +332,7 @@ export function SiteChromeManagementPage({
                 onDragEnd={moveSidebarItem}
               >
                 <div className="flex flex-col">
-                  <div className="flex flex-col gap-0.5">
+                  <Collapsible open={moreExpanded} onOpenChange={setMoreExpanded} className="flex flex-col gap-0.5">
                     {fixedMain.map(([Icon, key], index) => (
                       <FixedNavRow
                         key={key}
@@ -336,18 +342,11 @@ export function SiteChromeManagementPage({
                         visibility={key === "members" ? sidebarVisibility(key) : undefined}
                       />
                     ))}
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-full justify-start gap-2 text-[13px] text-foreground/75 data-[state=open]:text-foreground">
-                          <EllipsisVertical data-icon="inline-start" />
-                          {text("more")}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent align="start" sideOffset={2} className="max-h-[min(70dvh,32rem)] w-64 max-w-[calc(100vw-2rem)] gap-0.5 overflow-y-auto rounded-md p-1">
+                    <CollapsibleContent inert={!moreExpanded} className="site-chrome-more-content flex flex-col gap-0.5">
                         <PreviewSection
                           title={text("mainMenu")}
                           hideTitle
-                          addLabel={text("add")}
+                          text={text}
                           scope={{ key: "mainMenu" }}
                           fixed={fixedSecondary.map(([icon, key]) => ({
                             icon,
@@ -369,7 +368,7 @@ export function SiteChromeManagementPage({
                         <PreviewSection
                           title={text("resources")}
                           hideTitle
-                          addLabel={text("add")}
+                          text={text}
                           fixed={fixedResources.map(([icon, key]) => ({
                             icon,
                             label: text(key),
@@ -390,14 +389,22 @@ export function SiteChromeManagementPage({
                           }
                           onAdd={() => setDialog({ key: "resources", index: null })}
                         />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                    </CollapsibleContent>
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="group h-8 w-full justify-start gap-2 text-[13px] leading-[18.5714px] text-foreground/75 transition-colors duration-150 aria-expanded:bg-accent aria-expanded:text-foreground"
+                      >
+                        <ChevronDown aria-hidden="true" className="group-aria-expanded:rotate-180 motion-safe:transition-transform motion-safe:duration-150" />
+                        {text(moreExpanded ? "showLess" : "more")}
+                      </Button>
+                    </CollapsibleTrigger>
+                  </Collapsible>
                   {config.sidebarGroups.map((group, groupIndex) => (
                     <PreviewSection
                       key={group.id}
                       title={group.title}
-                      addLabel={text("add")}
+                      text={text}
                       items={group.items}
                       scope={{ key: "sidebar", groupIndex }}
                       onChange={(items) =>
@@ -584,7 +591,7 @@ function FixedNavRow({ icon: Icon, label, active = false, visibility }: {
 
 function PreviewSection({
   title,
-  addLabel,
+  text,
   items,
   onChange,
   onEdit,
@@ -597,7 +604,7 @@ function PreviewSection({
   onDeleteGroup,
 }: {
   title: string;
-  addLabel: string;
+  text: Text;
   items: SiteChromeItem[];
   onChange(v: SiteChromeItem[]): void;
   onEdit(i: number): void;
@@ -634,6 +641,7 @@ function PreviewSection({
       </div> : null}
       {fixed.map((item) => <FixedNavRow key={item.label} {...item} />)}
       <ChromeList
+        text={text}
         items={items}
         standalone={false}
         scope={scope}
@@ -648,12 +656,13 @@ function PreviewSection({
         onClick={onAdd}
       >
         <Plus data-icon="inline-start" />
-        {addLabel}
+        {text("add")}
       </Button> : null}
     </section>
   );
 }
 function ChromeList({
+  text,
   items,
   onChange,
   onEdit,
@@ -663,6 +672,7 @@ function ChromeList({
   standalone = true,
   scope,
 }: {
+  text: Text;
   items: SiteChromeItem[];
   onChange(v: SiteChromeItem[]): void;
   onEdit(i: number): void;
@@ -694,6 +704,7 @@ function ChromeList({
         {items.map((item, index) => (
           <ChromeRow
             key={item.id}
+            text={text}
             item={item}
             onEdit={() => onEdit(index)}
             onDelete={() => onDelete(index)}
@@ -714,6 +725,7 @@ function ChromeList({
   );
 }
 function ChromeRow({
+  text,
   item,
   onEdit,
   onDelete,
@@ -721,6 +733,7 @@ function ChromeRow({
   visibilityLabel,
   dragData,
 }: {
+  text: Text;
   item: SiteChromeItem;
   onEdit(): void;
   onDelete(): void;
@@ -741,7 +754,10 @@ function ChromeRow({
       }}
       className={`group relative flex cursor-grab ${horizontal ? "h-7 max-w-56" : "h-8"} items-center gap-2 rounded-md px-2 text-[13px] font-medium text-foreground/75 transition-colors hover:bg-accent hover:text-foreground active:cursor-grabbing ${item.enabled ? "" : "opacity-40"}`}
     >
-      {horizontal ? null : <Link className="size-4" />}
+      <NavigationIcon
+        name={isSystemHeader(item.id) && horizontal ? undefined : item.icon}
+        fallback={horizontal ? null : <Link aria-hidden="true" className="size-4 shrink-0" />}
+      />
       <span className="min-w-0 flex-1 truncate transition-[padding] group-hover:pr-12 group-focus-within:pr-12">
         {item.label || item.i18nLabel || "Item"}
       </span>
@@ -754,6 +770,7 @@ function ChromeRow({
               variant="ghost"
               size="icon-xs"
               className="size-5 rounded-sm p-0"
+              aria-label={text("edit")}
               onClick={onEdit}
               onPointerDown={(e) => e.stopPropagation()}
             >
@@ -763,6 +780,7 @@ function ChromeRow({
               variant="ghost"
               size="icon-xs"
               className="size-5 rounded-sm p-0"
+              aria-label={text("delete")}
               onPointerDown={(e) => e.stopPropagation()}
               onClick={onDelete}
             >
@@ -794,7 +812,7 @@ function VisibilityToggle({ label, enabled, onToggle }: VisibilityControl) {
 function ChromeDragPreview({ item }: { item: SiteChromeItem }) {
   return (
     <div className="flex h-8 w-52 items-center gap-2 rounded-md border bg-background px-2 text-[13px] font-medium text-foreground shadow-lg">
-      <Link className="size-4 shrink-0" />
+      <NavigationIcon name={item.icon} fallback={<Link aria-hidden="true" className="size-4 shrink-0" />} />
       <span className="truncate">{item.label || item.i18nLabel || "Item"}</span>
     </div>
   );
@@ -813,12 +831,18 @@ function ItemEditor({
   onSave(v: SiteChromeItem): void;
 }) {
   const [form, setForm] = useState(emptyItem());
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
+  const iconPickerId = useId();
   useEffect(() => {
     if (state) setForm(value ? { ...value } : emptyItem());
   }, [state, value]);
+  function close() {
+    setIconPickerOpen(false);
+    onClose();
+  }
   return (
-    <Dialog open={Boolean(state)} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
+    <Dialog open={Boolean(state)} onOpenChange={(o) => !o && close()}>
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{value ? text("edit") : text("add")}</DialogTitle>
           <DialogDescription>{text("chromeHint")}</DialogDescription>
@@ -850,11 +874,27 @@ function ItemEditor({
             />
           </Field>
           <Field>
-            <FieldLabel>{text("i18nLabel")}</FieldLabel>
-            <Input
-              value={form.i18nLabel}
-              onChange={(e) => setForm({ ...form, i18nLabel: e.target.value })}
-            />
+            <FieldLabel htmlFor={iconPickerId}>{text("menuIcon")}</FieldLabel>
+            <Dialog open={iconPickerOpen} onOpenChange={setIconPickerOpen}>
+              <DialogTrigger asChild>
+                <Button id={iconPickerId} type="button" variant="outline" className="w-full justify-start">
+                  <NavigationIcon name={form.icon} fallback={state?.key === "header" ? null : <Link aria-hidden="true" />} />
+                  <span className="min-w-0 truncate">{form.icon ?? text("defaultMenuIcon")}</span>
+                  <ChevronRight aria-hidden="true" className="ml-auto" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent aria-describedby={undefined} className="flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden sm:max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{text("menuIcon")}</DialogTitle>
+                </DialogHeader>
+                <Suspense fallback={<p role="status">{text("loading")}</p>}>
+                  <NavigationIconPicker value={form.icon} text={text} onSelect={name => {
+                    setForm({ ...form, icon: name });
+                    setIconPickerOpen(false);
+                  }} />
+                </Suspense>
+              </DialogContent>
+            </Dialog>
           </Field>
           <Field>
             <FieldLabel>URL</FieldLabel>
@@ -872,10 +912,13 @@ function ItemEditor({
           </Field>
         </FieldGroup>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={close}>
             {text("cancel")}
           </Button>
-          <Button onClick={() => onSave(form)}>{text("save")}</Button>
+          <Button onClick={() => {
+            setIconPickerOpen(false);
+            onSave(form);
+          }}>{text("save")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -918,13 +961,6 @@ function GroupEditor({
             <Input
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-            />
-          </Field>
-          <Field>
-            <FieldLabel>{text("i18nLabel")}</FieldLabel>
-            <Input
-              value={form.i18nLabel}
-              onChange={(e) => setForm({ ...form, i18nLabel: e.target.value })}
             />
           </Field>
         </FieldGroup>
@@ -1198,9 +1234,10 @@ function normalize(v: Partial<SiteChromeConfig>): SiteChromeConfig {
     id: x.id || crypto.randomUUID(),
     enabled: x.enabled !== false,
     type: x.type === "text" ? "text" : "link",
-    label: x.label || "",
-    i18nLabel: x.i18nLabel || "",
+    label: x.label || x.i18nLabel || "",
+    i18nLabel: "",
     url: x.url || "",
+    ...(x.icon ? { icon: x.icon } : {}),
   });
   const headers = [
     {
@@ -1208,7 +1245,7 @@ function normalize(v: Partial<SiteChromeConfig>): SiteChromeConfig {
       enabled: true,
       type: "link",
       label: "Sponsors",
-      i18nLabel: "shell.nav.sponsors",
+      i18nLabel: "",
       url: "/sponsors",
     },
     {
@@ -1216,7 +1253,7 @@ function normalize(v: Partial<SiteChromeConfig>): SiteChromeConfig {
       enabled: true,
       type: "link",
       label: "Links",
-      i18nLabel: "shell.nav.links",
+      i18nLabel: "",
       url: "/links",
     },
   ] as SiteChromeItem[];
@@ -1231,8 +1268,8 @@ function normalize(v: Partial<SiteChromeConfig>): SiteChromeConfig {
     ),
     sidebarGroups: (v.sidebarGroups || []).map((g) => ({
       id: g.id || crypto.randomUUID(),
-      title: g.title || "Group",
-      i18nLabel: g.i18nLabel || "",
+      title: g.title || g.i18nLabel || "Group",
+      i18nLabel: "",
       items: (g.items || []).map(item),
     })),
     footerInfo: {

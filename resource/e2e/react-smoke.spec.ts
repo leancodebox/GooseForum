@@ -2245,6 +2245,84 @@ test('sidebar XML links open full documents', async ({ page }) => {
   }
 })
 
+test('site appearance expands in place and saves a searchable navigation icon', async ({ page }) => {
+  const docs = { id: 'docs', enabled: true, type: 'link', label: 'Documentation', url: '/docs', i18nLabel: 'legacy.docs', icon: '' }
+  let settings = { header: [], mainMenu: [], resources: [docs], sidebarGroups: [] }
+  await page.route('**/api/admin/site-chrome*', route => route.fulfill({
+    json: { code: 0, result: settings },
+  }))
+  await page.route('**/api/admin/save-site-chrome*', route => {
+    settings = route.request().postDataJSON().settings
+    return route.fulfill({ json: { code: 0 } })
+  })
+  await page.route(url => /^\/__goose_page\/?$/.test(url.pathname), route => route.fulfill({
+    json: {
+      ...homePage,
+      layout: {
+        ...homePage.layout,
+        sidebar: {
+          ...homePage.layout.sidebar,
+          resources: settings.resources.map(item => ({ key: item.id, label: item.label, url: item.url, icon: item.icon })),
+        },
+      },
+    },
+  }))
+
+  await page.goto('/admin/settings/site-chrome?lang=en')
+  const preview = page.locator('aside').filter({ has: page.getByRole('button', { name: /^(More|Show less)$/ }) })
+  const documentation = preview.getByText('Documentation', { exact: true })
+  await expect(documentation).toBeHidden()
+  await preview.getByRole('button', { name: 'More', exact: true }).click()
+  const less = preview.getByRole('button', { name: 'Show less', exact: true })
+  await expect(less).toHaveAttribute('aria-expanded', 'true')
+  const row = documentation.locator('..')
+  await expect(row.locator('.lucide-link')).toBeVisible()
+  await row.getByRole('button', { name: 'Edit', exact: true }).click()
+
+  const editor = page.getByRole('dialog', { name: 'Edit', exact: true })
+  const iconTrigger = editor.getByRole('button', { name: 'Icon', exact: true })
+  const iconPicker = page.getByRole('dialog', { name: 'Icon', exact: true })
+  await expect(editor.getByText('i18n key', { exact: true })).toBeHidden()
+  await iconTrigger.click()
+  const search = iconPicker.getByRole('searchbox', { name: 'Search icons…' })
+  await expect(search).toBeFocused()
+  await search.press('Escape')
+  await expect(iconPicker).toBeHidden()
+  await expect(iconTrigger).toBeFocused()
+  await iconTrigger.click()
+  await search.fill('book open')
+  await iconPicker.getByRole('button', { name: 'book-open', exact: true }).click()
+  await expect(iconPicker).toBeHidden()
+  await editor.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(row.locator('.lucide-book-open')).toBeVisible()
+  await less.click()
+  await expect(documentation).toBeHidden()
+
+  const saved = page.waitForResponse('**/api/admin/save-site-chrome*')
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  await saved
+  expect(settings.resources[0].icon).toBe('book-open')
+  expect(settings.resources[0].i18nLabel).toBe('')
+  await page.reload()
+  await preview.getByRole('button', { name: 'More', exact: true }).click()
+  await expect(row.locator('.lucide-book-open')).toBeVisible()
+
+  await page.goto('/?lang=en')
+  const desktop = page.viewportSize()!.width >= 1024
+  if (!desktop) {
+    await page.getByRole('button', { name: 'Open menu', exact: true }).click()
+  }
+  const publicSidebar = desktop ? page.getByRole('complementary', { name: 'Sidebar' }) : page.getByRole('dialog')
+  const publicMore = publicSidebar.getByRole('button', { name: 'More', exact: true })
+  await expect(publicMore).toBeVisible()
+  const publicIcon = publicSidebar.locator('a[href="/docs"] .lucide-book-open')
+  await expect(publicIcon).toHaveCount(0)
+  await publicMore.click()
+  await expect(publicIcon).toBeVisible()
+  await publicSidebar.getByRole('button', { name: 'Show less', exact: true }).click()
+  await expect(publicIcon).toHaveCount(1)
+})
+
 test('desktop sidebar remembers its width preference and leaves mobile navigation available', async ({ page }) => {
   const requests: string[] = []
   await page.route('**/__goose_page/**', route => route.fulfill({

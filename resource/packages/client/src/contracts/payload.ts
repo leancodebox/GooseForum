@@ -261,6 +261,7 @@ export interface CategoryNavPayload {
 }
 
 export interface NavItemPayload {
+  icon?: string
   key: string
   label: string
   i18nLabel?: string

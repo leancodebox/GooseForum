@@ -196,6 +196,7 @@ type NavItemPayload struct {
 	Label     string `json:"label"`
 	I18nLabel string `json:"i18nLabel,omitempty"`
 	URL       string `json:"url"`
+	Icon      string `json:"icon,omitempty"`
 }
 
 type CategoryNavPayload struct {
@@ -835,10 +836,23 @@ func buildChromeSidebarGroups(groups []pageConfig.ChromeGroup) []SidebarGroupPay
 }
 
 func buildHeaderNavItems(items []pageConfig.ChromeItem) []NavItemPayload {
+	defaults := defaultconfig.GetDefaultSiteChromeHeader()
 	if len(items) == 0 {
-		items = defaultconfig.GetDefaultSiteChromeHeader()
+		return buildChromeNavItems(defaults)
 	}
-	return buildChromeNavItems(items)
+	result := buildChromeNavItems(items)
+	for i := range result {
+		if result[i].I18nLabel != "" {
+			continue
+		}
+		for _, item := range defaults {
+			if result[i].Key == item.ID {
+				result[i].I18nLabel = item.I18nLabel
+				break
+			}
+		}
+	}
+	return result
 }
 
 func buildChromeNavItems(items []pageConfig.ChromeItem) []NavItemPayload {
@@ -856,6 +870,7 @@ func buildChromeNavItems(items []pageConfig.ChromeItem) []NavItemPayload {
 			Label:     item.Label,
 			I18nLabel: item.I18nLabel,
 			URL:       url,
+			Icon:      item.Icon,
 		})
 	}
 	return result

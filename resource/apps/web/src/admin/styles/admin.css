@@ -4,6 +4,25 @@
 @source "../../host/**/*.{ts,tsx}";
 @source "../../../../../packages/ui/src/**/*.{ts,tsx}";
 
+@media (prefers-reduced-motion: no-preference) {
+  .site-chrome-more-content[data-state="open"] {
+    animation: site-chrome-more-open 200ms ease-out;
+  }
+  .site-chrome-more-content[data-state="closed"] {
+    animation: site-chrome-more-close 200ms ease-out;
+  }
+}
+
+@keyframes site-chrome-more-open {
+  from { height: 0; opacity: 0; overflow: clip; }
+  to { height: var(--radix-collapsible-content-height); opacity: 1; overflow: clip; }
+}
+
+@keyframes site-chrome-more-close {
+  from { height: var(--radix-collapsible-content-height); opacity: 1; overflow: clip; }
+  to { height: 0; opacity: 0; overflow: clip; }
+}
+
 /* Keep the desktop sidebar in place while the content expands over it. */
 .admin-shell [data-slot="sidebar"][data-side="left"] > [data-slot="sidebar-container"][data-side="left"] {
   left: max(0px, calc((100% - 1600px) / 2));

@@ -42,6 +42,7 @@ import {
   AvatarImage,
 } from "@gooseforum/ui/components/avatar";
 import { Button } from "@gooseforum/ui/components/button";
+import { NavigationIcon } from "@gooseforum/ui/components/navigation-icon";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -82,6 +83,7 @@ interface ShellNavItem {
   url: string;
   active: boolean;
   icon?: ComponentType<SVGProps<SVGSVGElement>>;
+  iconName?: string;
   color?: string;
   attention?: boolean;
 }
@@ -103,7 +105,7 @@ export function AppShell({
     );
   }, [layout.viewer.id, layout.viewer.isAuthenticated]);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [moreExpanded, setMoreExpanded] = useState(false);
+  const [moreState, setMoreState] = useState<"initial" | "expanded" | "collapsed">("initial");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem("goose:shell-sidebar-collapsed") === "true"; }
     catch { return false; }
@@ -214,9 +216,10 @@ export function AppShell({
   }
 
   function serverItems(items?: NavItemPayload[]): ShellNavItem[] {
-    return (items || []).map((item) =>
-      nav(item.key, displayLabel(item, item.label), item.url, LinkIcon),
-    );
+    return (items || []).map((item) => ({
+      ...nav(item.key, displayLabel(item, item.label), item.url, LinkIcon),
+      iconName: item.icon,
+    }));
   }
 
   async function logout() {
@@ -292,8 +295,9 @@ export function AppShell({
       categories={categories}
       footer={layout.footer}
       labels={{ categories: t("categories"), more: t("more"), showLess: t("showLess") }}
-      expanded={moreExpanded}
-      onExpandedChange={setMoreExpanded}
+      expanded={moreState === "expanded"}
+      hasExpanded={moreState !== "initial"}
+      onExpandedChange={(expanded) => setMoreState(expanded ? "expanded" : "collapsed")}
       onNavigate={() => setMobileOpen(false)}
     />
   ); }
@@ -389,8 +393,11 @@ export function AppShell({
                 <GooseLink
                   key={item.key}
                   href={item.url}
-                  className="rounded-md px-2 py-1.5 text-sm font-medium text-foreground/75 hover:bg-accent"
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-foreground/75 hover:bg-accent"
                 >
+                  {item.iconName && item.key !== "links" && item.key !== "sponsors" && (
+                    <span className="size-4 shrink-0"><NavigationIcon name={item.iconName} /></span>
+                  )}
                   {item.label}
                 </GooseLink>
               ))}
@@ -655,6 +662,7 @@ function ShellNavigation({
   footer,
   labels,
   expanded,
+  hasExpanded,
   onExpandedChange,
   onNavigate,
 }: {
@@ -665,6 +673,7 @@ function ShellNavigation({
   footer: LayoutPayload["footer"];
   labels: { categories: string; more: string; showLess: string };
   expanded: boolean;
+  hasExpanded: boolean;
   onExpandedChange(expanded: boolean): void;
   onNavigate(): void;
 }) {
@@ -692,7 +701,7 @@ function ShellNavigation({
         <NavList
           id={listId}
           items={primaryItems}
-          disclosure={{ items: secondaryItems, expanded }}
+          disclosure={{ items: secondaryItems, expanded, hasExpanded }}
           onNavigate={onNavigate}
         />
         {moreItems.length > 0 && (
@@ -769,7 +778,7 @@ function NavList({
   items: ShellNavItem[];
   onNavigate(): void;
   compact?: boolean;
-  disclosure?: { items: ShellNavItem[]; expanded: boolean };
+  disclosure?: { items: ShellNavItem[]; expanded: boolean; hasExpanded: boolean };
 }) {
   const allItems = disclosure ? [...items, ...disclosure.items] : items;
   return (
@@ -801,14 +810,12 @@ function NavList({
                 aria-current={item.active ? "page" : undefined}
                 onClick={onNavigate}
               >
-                {Icon ? (
-                  <Icon aria-hidden="true" />
-                ) : (
-                  <span
-                    className="size-2 rounded-sm"
-                    style={{ backgroundColor: item.color }}
-                  />
-                )}
+                <NavigationIcon
+                  name={!collapsed || disclosure?.hasExpanded ? item.iconName : undefined}
+                  fallback={Icon ? <Icon aria-hidden="true" /> : (
+                    <span className="size-2 rounded-sm" style={{ backgroundColor: item.color }} />
+                  )}
+                />
                 <span className="min-w-0 truncate">{item.label}</span>
                 {item.attention ? <MenuDot /> : null}
               </GooseLink>
