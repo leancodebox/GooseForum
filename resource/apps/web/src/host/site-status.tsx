@@ -1,7 +1,6 @@
 import { Button } from "@gooseforum/ui/components/button"
 import { RefreshCw } from "lucide-react"
 import { useEffect, useState } from 'react'
-import { createRoot } from 'react-dom/client'
 import type { GooseSiteApi } from '@gooseforum/client'
 import { announceUnreadStatus, unreadStatusEvent, announcePublicTopicMax } from '@gooseforum/runtime'
 
@@ -15,8 +14,10 @@ export function SiteStatusNotice({ api, initialDeployment, admin = false }: {
   const [language, setLanguage] = useState(document.documentElement.lang)
   const zh = language.toLowerCase().startsWith('zh')
   useEffect(() => {
-    const observer = new MutationObserver(() => setLanguage(document.documentElement.lang))
+    const update = () => setLanguage(document.documentElement.lang)
+    const observer = new MutationObserver(update)
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] })
+    update()
     return () => observer.disconnect()
   }, [])
   useEffect(() => {
@@ -88,16 +89,4 @@ export function SiteStatusNotice({ api, initialDeployment, admin = false }: {
       <Button type="button" size="sm" onClick={refresh}>{zh ? '刷新页面' : 'Refresh page'}</Button>
     </div>
   </aside>
-}
-
-// Outside the page root so a failed lazy import or page boundary cannot hide
-// the recovery action. Both browser entry points use this one detector.
-export function startSiteStatus(api: GooseSiteApi, admin = false) {
-  const element = document.createElement('div')
-  element.id = 'goose-site-status'
-  document.body.append(element)
-  const root = createRoot(element)
-  const initialDeployment = document.querySelector<HTMLMetaElement>('meta[name="goose-deployment"]')?.content
-  root.render(<SiteStatusNotice api={api} initialDeployment={initialDeployment} admin={admin} />)
-  return () => { root.unmount(); element.remove() }
 }

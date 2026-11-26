@@ -16,7 +16,7 @@ import {
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
 import { PageHeader } from "../layout/page-header";
 import { SiteListPanel } from "../layout/site-panel";
-import { deleteLocalDraft, draftOwner, listenDraftChanges, listLocalDrafts, type LocalDraft } from "../drafts/local-draft-store";
+import { deleteLocalDraft, draftOwner, listenDraftChanges, listLocalDrafts, type LocalDraft } from "@gooseforum/runtime/local-draft-store";
 
 export function DraftsPageView({ page, layout }: { page: DraftsPageProps; layout?: LayoutPayload }) {
   const { t } = useTranslation("drafts");

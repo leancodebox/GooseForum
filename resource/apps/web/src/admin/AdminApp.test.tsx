@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import type { GooseAdminApi, PagePayload } from '@gooseforum/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
@@ -34,8 +33,6 @@ vi.mock('./page-registry', () => ({
 }))
 vi.mock('./components/app-sidebar', () => ({ AppSidebar: ({ onNavigate }: { onNavigate(path: string): void }) => <nav><button onClick={() => onNavigate('/admin/users')}>Users</button><button onClick={() => onNavigate('/admin/sponsors')}>Sponsors</button></nav> }))
 vi.mock('./components/site-header', () => ({ SiteHeader: ({ themePreference, onThemeChange }: { themePreference: string; onThemeChange(value: string): void }) => <div><span data-testid="theme-preference">{themePreference}</span>{['gf-light', 'gf-dark', 'system'].map(value => <button key={value} onClick={() => onThemeChange(value)}>{value}</button>)}</div> }))
-vi.mock('@gooseforum/ui/components/sidebar', () => ({ SidebarProvider: ({ children }: { children: ReactNode }) => <div>{children}</div>, SidebarInset: ({ children }: { children: ReactNode }) => <main>{children}</main> }))
-vi.mock('@gooseforum/ui/components/tooltip', () => ({ TooltipProvider: ({ children }: { children: ReactNode }) => <>{children}</> }))
 vi.mock('@gooseforum/ui/components/sonner', () => ({ Toaster: () => null }))
 vi.mock('../host/browser-runtime', () => ({ detectBrowserLocale: () => 'zh', detectBrowserTheme: () => 'gf-light', applyBrowserLocale: vi.fn(), applyBrowserTheme: vi.fn() }))
 

@@ -170,7 +170,7 @@ describe("SiteApp navigation lifecycle", () => {
       pagination: { page: 1, nextPage: 2, hasNext: false, nextUrl: "" },
       announcement: { enabled: false, html: "" },
     }, "/"), layout: { ...layout, viewer: { ...layout.viewer, isAuthenticated: false } } } as AnyPagePayload;
-    const login = { ...page("auth.login", { initialMode: "login", redirectUrl: "/", oauthProviders: [] }, "/login"), layout: home.layout } as AnyPagePayload;
+    const login = { ...page("auth.login", { initialMode: "login", redirectUrl: "/", oauthProviders: [] }, "/login"), layout: home.layout };
     const source: PageSource<AnyPagePayload> = {
       api: { auth: { captcha: vi.fn().mockResolvedValue({ captchaId: "id", captchaImg: "" }) } } as unknown as GooseSiteApi,
       load: vi.fn(async url => url.pathname === "/login" ? login : home),
@@ -261,14 +261,14 @@ describe("SiteApp navigation lifecycle", () => {
         ...layout,
         sidebar: { ...layout.sidebar, activeKey: "topics" },
       },
-    } as AnyPagePayload;
+    };
     const categories = {
       ...page("categories.index", { categories: [], total: 0 }, "/categories"),
       layout: {
         ...layout,
         sidebar: { ...layout.sidebar, activeKey: "categories" },
       },
-    } as AnyPagePayload;
+    };
     const source: PageSource<AnyPagePayload> = {
       api: { attachments: { policy: vi.fn().mockResolvedValue({ enabled: true, maxFileSizeKb: 5120, maxFilesPerPost: 5, extensions: [".txt"] }) } } as unknown as GooseSiteApi,
       load: vi.fn(async (url: URL) =>

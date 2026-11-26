@@ -6,7 +6,7 @@ import {
   detectBrowserTheme,
   prepareDocument,
   pageRequestPath,
-  sitePageSource,
+  browserPageSource,
 } from './browser-runtime'
 
 import type { PagePayload } from '@gooseforum/client'
@@ -126,7 +126,7 @@ describe('browser page host', () => {
 
   it('requires an embedded payload from the production Go host', () => {
     vi.stubEnv('DEV', false)
-    expect(() => sitePageSource.readInitial?.()).toThrow(
+    expect(() => browserPageSource.readInitial?.()).toThrow(
       'Missing embedded GooseForum page payload',
     )
   })

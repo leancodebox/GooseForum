@@ -3,7 +3,7 @@ import {
   deleteLocalDraft, draftFingerprint, draftGeneration, draftInstanceId, draftOwner,
   isEmptyDraft, listenDraftChanges, listLocalDrafts, writeLocalDraft,
   type DraftIdentity, type DraftKind, type DraftValues, type LocalDraft,
-} from "./local-draft-store";
+} from "@gooseforum/runtime/local-draft-store";
 
 export type DraftSaveStatus = "idle" | "saving" | "saved" | "storage" | "capacity" | "attachments";
 interface DraftOptions {

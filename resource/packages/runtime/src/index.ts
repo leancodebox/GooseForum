@@ -5,3 +5,4 @@ export * from "./unread-status";
 export * from "./use-latest-request";
 
 export * from "./public-topics";
+export * from "./browser-history";

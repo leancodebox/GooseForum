@@ -1,3 +1,4 @@
+import "@gooseforum/markdown/styles.css";
 import {
   useRef,
   useState,

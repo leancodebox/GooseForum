@@ -16,7 +16,7 @@ import { ListFilter, ListFilterItem } from "@gooseforum/ui/components/list-filte
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
 import { PageHeader } from "../layout/page-header";
 import { SiteListPanel } from "../layout/site-panel";
-import { searchUrl } from "../search-url";
+import { searchUrl } from "@gooseforum/runtime/search-url";
 import { compactNumber, TopicListToolbar, TopicTable } from "../topics/topic-list";
 
 export function SearchPageView({ page }: { page: SearchPageProps }) {

@@ -12,7 +12,7 @@ export async function prepareAdminTranslations(
   namespaces: readonly string[] = ["shell"],
 ) {
   await Promise.all(
-    [...new Set(["shell", ...namespaces])].map(async (namespace) => {
+    [...new Set(["shell", "site-header", ...namespaces])].map(async (namespace) => {
       const key = `${locale}/${namespace}`;
       if (dictionaries.has(key)) return;
       if (pending.has(key)) return pending.get(key);

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { GooseClientError, type GooseSiteApi, type PostPayload, type ReplyTargetPayload } from "@gooseforum/client";
-import type { LocalDraft } from "./local-draft-store";
+import type { LocalDraft } from "@gooseforum/runtime/local-draft-store";
 
 export type DraftTargetStatus = "available" | "checking" | "unavailable" | "error";
 type TargetResult = { status: DraftTargetStatus; post?: PostPayload };

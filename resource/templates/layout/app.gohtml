@@ -39,7 +39,8 @@
 </head>
 <body class="bg-base-200 text-base-content antialiased">
     {{template "partials/site_splash.gohtml" .}}
-    {{ResourceEntry `site`}}
+    {{with LayoutStylesheet "src/site/entry.tsx"}}<link id="goose-layout-style" rel="stylesheet" href="{{.}}" crossorigin>{{end}}
+    {{ResourceEntry "src/site/entry.tsx"}}
     {{if .Payload.Layout.Theme.Href}}<link id="goose-site-theme-link" rel="stylesheet" href="{{.Payload.Layout.Theme.Href}}">{{end}}
     <script id="goose-payload" type="application/json">{{json .Payload}}</script>
 

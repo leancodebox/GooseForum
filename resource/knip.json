@@ -3,7 +3,7 @@
   "workspaces": {
     "apps/web": {
       "entry": [
-        "src/admin/main.tsx"
+        "src/main.tsx"
       ],
       "project": [
         "src/**/*.{ts,tsx,css}"

@@ -1,5 +1,4 @@
 @import "@gooseforum/ui/styles/base.css";
-@import "@gooseforum/markdown/styles.css";
 @source "../**/*.{ts,tsx}";
 @source "../../host/**/*.{ts,tsx}";
 @source "../../../../../packages/ui/src/**/*.{ts,tsx}";
@@ -23,11 +22,6 @@
   to { height: 0; opacity: 0; overflow: clip; }
 }
 
-/* Keep the desktop sidebar in place while the content expands over it. */
-.admin-shell [data-slot="sidebar"][data-side="left"] > [data-slot="sidebar-container"][data-side="left"] {
-  left: max(0px, calc((100% - 1600px) / 2));
-}
-
 .admin-navigation-progress > div {
   animation: admin-navigation-progress 1.1s ease-in-out infinite;
 }
@@ -42,4 +36,8 @@
     animation: none;
     width: 100%;
   }
+}
+
+.goose-admin-document .sidebar-nav-link[aria-current="page"] {
+  color: color-mix(in srgb, var(--primary) 80%, var(--foreground));
 }

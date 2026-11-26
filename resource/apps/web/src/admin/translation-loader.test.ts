@@ -21,7 +21,7 @@ describe("on-demand admin translations", () => {
     const { createTrustSettingsText } = await import("./trust-settings-i18n");
     expect(createTrustSettingsText(locale)("orderInvalid", { higher: "H", lower: "L", field: "F" })).not.toMatch(/\{\w+\}/);
   });
-  it("loads only shell and dashboard for the home page and keeps other locales unloaded", async () => {
+  it("loads the shell, shared header and dashboard for the home page and keeps other locales unloaded", async () => {
     const loader = await import("./translation-loader");
     await loader.prepareAdminTranslations(
       "zh",
@@ -30,6 +30,7 @@ describe("on-demand admin translations", () => {
     expect(loader.loadedAdminNamespaces().sort()).toEqual([
       "dashboard",
       "shell",
+      "site-header",
     ]);
     expect(() => loader.getAdminDictionary("users", "zh")).toThrow(
       "not prepared",

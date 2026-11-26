@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@gooseforum/ui/components/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@gooseforum/ui/components/dialog";
 import { GooseLink, useGooseRuntime } from "@gooseforum/runtime";
-import type { LocalDraft } from "./local-draft-store";
+import type { LocalDraft } from "@gooseforum/runtime/local-draft-store";
 import type { DraftSaveStatus } from "./use-local-draft";
 
 export function LocalDraftPanel({ status, candidates, onRestore, onDiscard, onRetry, available, conflicts, checking, failed, onRetryTarget, compact = false }: {

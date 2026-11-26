@@ -1,28 +1,7 @@
 import { fileURLToPath, URL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig, loadEnv, type Plugin, type ProxyOptions } from 'vite'
-
-function adminSpaFallback(): Plugin {
-  return {
-    name: 'gooseforum-admin-spa-fallback',
-    configureServer(server) {
-      server.middlewares.use((request, _response, next) => {
-        if (request.method !== 'GET' || !request.url) {
-          next()
-          return
-        }
-
-        const accept = request.headers.accept || ''
-        const url = new URL(request.url, 'http://vite.local')
-        if (accept.includes('text/html') && (url.pathname === '/admin' || url.pathname.startsWith('/admin/'))) {
-          request.url = `/admin/index.html${url.search}`
-        }
-        next()
-      })
-    },
-  }
-}
+import { defineConfig, loadEnv, type ProxyOptions } from 'vite'
 
 function pagePayloadProxy(backendOrigin: string, backendProxy: ProxyOptions): ProxyOptions {
   return {
@@ -60,8 +39,9 @@ export default defineConfig(({ command, mode }) => {
   }
 
   return {
-    plugins: [adminSpaFallback(), react(), tailwindcss()],
-    base: mode === 'production' ? '/assets/react/' : '/',
+    plugins: [react(), tailwindcss()],
+    // Go may serve these chunks from a CDN with its own path prefix.
+    base: command === 'build' ? './' : '/',
     resolve: {
       alias: [
         { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
@@ -95,12 +75,6 @@ export default defineConfig(({ command, mode }) => {
       manifest: true,
       outDir: '../../static/dist/react',
       emptyOutDir: true,
-      rollupOptions: {
-        input: {
-          site: fileURLToPath(new URL('./index.html', import.meta.url)),
-          admin: fileURLToPath(new URL('./admin/index.html', import.meta.url)),
-        },
-      },
     },
     server: {
       port: 3011,

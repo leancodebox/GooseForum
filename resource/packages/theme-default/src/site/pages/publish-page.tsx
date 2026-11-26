@@ -34,7 +34,7 @@ import { MarkdownComposer } from "../editor/markdown-composer";
 import { PageHeader } from "../layout/page-header";
 import { SitePanel } from "../layout/site-panel";
 import { LocalDraftPanel } from "../drafts/local-draft-panel";
-import { clearAccountDrafts, draftOwner, draftFingerprint, type DraftValues, type LocalDraft } from "../drafts/local-draft-store";
+import { clearAccountDrafts, draftOwner, draftFingerprint, type DraftValues, type LocalDraft } from "@gooseforum/runtime/local-draft-store";
 import { GooseClientError } from "@gooseforum/client";
 import { useLocalDraft } from "../drafts/use-local-draft";
 

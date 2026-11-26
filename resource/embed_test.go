@@ -9,8 +9,9 @@ import (
 
 func TestAssetsFSMatchesViteManifestPaths(t *testing.T) {
 	type manifestItem struct {
-		File string   `json:"file"`
-		CSS  []string `json:"css"`
+		File   string   `json:"file"`
+		CSS    []string `json:"css"`
+		Assets []string `json:"assets"`
 	}
 
 	content, err := fs.ReadFile(GetTemplateFS(), "static/dist/react/.vite/manifest.json")
@@ -31,7 +32,7 @@ func TestAssetsFSMatchesViteManifestPaths(t *testing.T) {
 		t.Fatalf("get assets fs: %v", err)
 	}
 
-	for _, entryPath := range []string{"index.html", "admin/index.html"} {
+	for _, entryPath := range []string{"index.html", "src/site/entry.tsx", "src/admin/entry.tsx"} {
 		entry, ok := manifest[entryPath]
 		if !ok {
 			t.Fatalf("%s is missing from manifest", entryPath)
@@ -40,7 +41,7 @@ func TestAssetsFSMatchesViteManifestPaths(t *testing.T) {
 		if _, err := fs.Stat(assetsFS, "react/"+entry.File); err != nil {
 			t.Fatalf("entry file %q should be readable from assets fs: %v", entry.File, err)
 		}
-		for _, css := range entry.CSS {
+		for _, css := range append(entry.CSS, entry.Assets...) {
 			if _, err := fs.Stat(assetsFS, "react/"+css); err != nil {
 				t.Fatalf("css file %q should be readable from assets fs: %v", css, err)
 			}

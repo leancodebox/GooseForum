@@ -101,15 +101,14 @@ function CardPreview({ post, topic, site, url, onClose }: ShareProps & { url: st
   const fallbackTone = useRef<HTMLSpanElement>(null);
   const qr = useRef<HTMLCanvasElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const [file, setFile] = useState<File>();
-  const [failed, setFailed] = useState(false);
+  const [file, setFile] = useState<File | null>();
   const [copyStatus, setCopyStatus] = useState<"linkCopied" | "copyManually">();
   const filename = `topic-${post.topicId}-${post.postNo}.png`;
 
   useEffect(() => {
     const el = canvas.current;
     const ctx = el?.getContext("2d");
-    if (!el || !ctx || !qr.current) { setFailed(true); return; }
+    if (!el || !ctx || !qr.current) { setFile(null); return; }
     let active = true;
     const first = post.postNo === 1;
     const doc = new DOMParser().parseFromString(post.renderedContent, "text/html");
@@ -221,7 +220,7 @@ function CardPreview({ post, topic, site, url, onClose }: ShareProps & { url: st
       el.toBlob(blob => {
         if (!active) return;
         if (blob) setFile(new File([blob], filename, { type: "image/png" }));
-        else setFailed(true);
+        else setFile(null);
       }, "image/png");
     }
 
@@ -245,7 +244,9 @@ function CardPreview({ post, topic, site, url, onClose }: ShareProps & { url: st
       loadImage(first ? doc.querySelector("img")?.getAttribute("src") : undefined),
       loadImage(site.brandType === "text" ? undefined : logoSrc),
       loadImage(post.author.avatarUrl),
-    ]).then(([cover, logo, avatar]) => draw(cover, logo, avatar));
+    ]).then(([cover, logo, avatar]) => draw(cover, logo, avatar)).catch(() => {
+      if (active) setFile(null);
+    });
     return () => { active = false; };
   }, [post, topic, site, t, filename, url]);
 
@@ -281,7 +282,7 @@ function CardPreview({ post, topic, site, url, onClose }: ShareProps & { url: st
     <QRCodeCanvas ref={qr} value={url} size={240} marginSize={4} className="hidden" />
     <canvas ref={canvas} width={720} role="img" aria-label={`${topic.title} · #${post.postNo}`}
       className="mx-auto block h-auto max-h-[calc(100dvh-7rem)] w-auto max-w-full rounded-xl border-border bg-card text-card-foreground shadow-xl ring-1 ring-border md:max-h-[calc(100dvh-2rem)]" />
-    {failed && <p role="alert">{t("cardFailed")}</p>}
+    {file === null && <p role="alert">{t("cardFailed")}</p>}
     {copyStatus === "copyManually" && <label>{t("copyManually")}<Input autoFocus readOnly value={url} onFocus={event => event.target.select()} /></label>}
     <div className="flex justify-center gap-5 md:absolute md:left-full md:top-1/2 md:ml-4 md:-translate-y-1/2 md:flex-col md:gap-3">
       <PreviewAction label={t(native ? "shareCard" : "saveCard")} icon={native ? Share2 : Download}

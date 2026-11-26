@@ -12,7 +12,7 @@ import { Input } from '@gooseforum/ui/components/input';
 import { DateRangePicker } from '@gooseforum/ui/components/date-range-picker';
 import { Field, FieldLabel } from '@gooseforum/ui/components/field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@gooseforum/ui/components/select';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@gooseforum/ui/components/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@gooseforum/ui/components/tooltip';
 import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { AdminPage } from '../components/admin-page';
 import { getAdminDictionary } from '../translation-loader';
@@ -54,7 +54,7 @@ export function AuthLogsPage({ api, locale }: { api: GooseAdminApi; locale: Auth
       .finally(() => { if (isCurrent()) setLoading(false); });
   }, [api, cursor, result, method, userId, range, refresh, beginRequest]);
   const option = (value: string) => text[(value || 'all') as keyof typeof text] || value;
-  return <AdminPage className="min-w-0">
+  return <TooltipProvider><AdminPage className="min-w-0">
     <header><h2 className="text-xl font-semibold">{text.title}</h2></header>
     <div className="flex flex-wrap items-end gap-2 [&>[data-slot=field]]:w-[calc(50%-0.25rem)] sm:[&>[data-slot=field]]:w-36 [&>[data-slot=field]]:gap-1.5 [&>[data-slot=field]:nth-child(4)]:w-full sm:[&>[data-slot=field]:nth-child(4)]:w-64">
       <Field className="min-w-0"><FieldLabel htmlFor="auth-log-result">{text.result}</FieldLabel><Select value={result || 'all'} onValueChange={(value) => { setResult(value === 'all' ? '' : value); reset(); }}><SelectTrigger id="auth-log-result" className="w-full"><SelectValue /></SelectTrigger><SelectContent position="popper" align="start" className="w-(--radix-select-trigger-width) min-w-0">{['all', 'success', 'failure', 'challenge'].map((value) => <SelectItem key={value} value={value}>{option(value)}</SelectItem>)}</SelectContent></Select></Field>
@@ -81,7 +81,7 @@ export function AuthLogsPage({ api, locale }: { api: GooseAdminApi; locale: Auth
     </>}
     </section>
     <footer className="flex items-center justify-between gap-3 text-xs"><span className="text-muted-foreground">{loading || error ? '-' : <>{rows.length ? (cursors.length - 1) * 20 + 1 : 0}-{rows.length ? (cursors.length - 1) * 20 + rows.length : 0}</>}</span><nav aria-label={text.title} className="flex items-center gap-2"><span className="min-w-8 text-center tabular-nums">{cursors.length}</span><Button type="button" variant="outline" size="icon-sm" title={text.previous} aria-label={text.previous} disabled={loading || error || cursors.length <= 1} onClick={() => { setLoading(true); setCursors((history) => history.slice(0, -1)); }}><ChevronLeft /></Button><Button type="button" variant="outline" size="icon-sm" title={text.next} aria-label={text.next} disabled={loading || error || !hasMore || nextCursor <= 0} onClick={() => { setLoading(true); setCursors((history) => [...history, nextCursor]); }}><ChevronRight /></Button></nav></footer>
-  </AdminPage>;
+  </AdminPage></TooltipProvider>;
 }
 
 function LogText({ value, className = '' }: { value: string; className?: string }) {

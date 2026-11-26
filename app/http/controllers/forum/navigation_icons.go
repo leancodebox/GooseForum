@@ -10,7 +10,7 @@ import (
 func pageIcons(page PagePayload) map[string]json.RawMessage {
 	result := make(map[string]json.RawMessage)
 	switch page.Component {
-	case PageComponentAdmin, PageComponentLogin, PageComponentResetPassword, PageComponentOIDCConsent:
+	case PageComponentLogin, PageComponentResetPassword, PageComponentOIDCConsent:
 		return result
 	}
 	add := func(name string) {
@@ -30,6 +30,9 @@ func pageIcons(page PagePayload) map[string]json.RawMessage {
 	}
 	sidebar := page.Layout.Sidebar
 	addMenu(page.Layout.Header)
+	if page.Component == PageComponentAdmin {
+		return result
+	}
 	addMenu(sidebar.Main)
 	addMenu(sidebar.Resources)
 	for _, group := range sidebar.Groups {

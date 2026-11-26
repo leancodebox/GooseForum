@@ -1,3 +1,4 @@
+import "@gooseforum/markdown/styles.css";
 import { useMemo } from "react";
 import { renderMarkdown } from "@gooseforum/markdown";
 import type { AuthLocale } from "@gooseforum/runtime/i18n/auth";

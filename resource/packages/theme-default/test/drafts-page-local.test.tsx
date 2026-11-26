@@ -5,11 +5,11 @@ import type { DraftsPageProps, GooseSiteApi, LayoutPayload } from "@gooseforum/c
 import { GooseRuntimeProvider, type GooseRuntime } from "@gooseforum/runtime";
 import { GooseI18nProvider } from "@gooseforum/runtime/i18n";
 import { DraftsPageView } from "../src/site/pages/drafts-page";
-import { draftOwner, type LocalDraft } from "../src/site/drafts/local-draft-store";
+import { draftOwner, type LocalDraft } from "@gooseforum/runtime/local-draft-store";
 
 const storage = vi.hoisted(() => ({ list: vi.fn(), remove: vi.fn(), listen: vi.fn() }));
-vi.mock("../src/site/drafts/local-draft-store", async (original) => ({
-  ...await original<typeof import("../src/site/drafts/local-draft-store")>(),
+vi.mock("@gooseforum/runtime/local-draft-store", async (original) => ({
+  ...await original<typeof import("@gooseforum/runtime/local-draft-store")>(),
   listLocalDrafts: storage.list,
   deleteLocalDraft: storage.remove,
   listenDraftChanges: storage.listen,

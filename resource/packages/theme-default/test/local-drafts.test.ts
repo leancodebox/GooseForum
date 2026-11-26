@@ -6,7 +6,7 @@ import {
   draftByteLimit, draftCountLimit, draftGeneration, draftInstanceId, draftOwner,
   draftRetention, listLocalDrafts, writeLocalDraft,
   type DraftValues, type LocalDraft,
-} from "../src/site/drafts/local-draft-store";
+} from "@gooseforum/runtime/local-draft-store";
 import { DraftWriter, useLocalDraft } from "../src/site/drafts/use-local-draft";
 import { openDB } from "idb";
 

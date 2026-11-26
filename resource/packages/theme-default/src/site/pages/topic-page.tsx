@@ -77,7 +77,7 @@ import { TopicTable } from "../topics/topic-list";
 import { PostShare } from "../topics/post-share";
 import { ReplyReference } from "../topics/reply-reference";
 import { LocalDraftPanel } from "../drafts/local-draft-panel";
-import { clearAccountDrafts, draftOwner, draftFingerprint, type DraftValues, type LocalDraft } from "../drafts/local-draft-store";
+import { clearAccountDrafts, draftOwner, draftFingerprint, type DraftValues, type LocalDraft } from "@gooseforum/runtime/local-draft-store";
 import { GooseClientError } from "@gooseforum/client";
 import { useLocalDraft } from "../drafts/use-local-draft";
 import { useDraftReplyTargets } from "../drafts/use-draft-reply-targets";

@@ -74,28 +74,33 @@ func TestHomeSidebarActiveKeyMatchesSelectedSort(t *testing.T) {
 }
 
 func TestReactResourceEntryIncludesRefreshPreamble(t *testing.T) {
-	html := string(resourceEntry("site"))
+	html := string(resourceEntry("src/site/entry.tsx"))
 	if setting.IsProduction() {
 		if !strings.Contains(html, "/assets/react/") || strings.Contains(html, "@vite/client") {
 			t.Fatalf("invalid React production entry: %s", html)
 		}
 		return
 	}
-	if !strings.Contains(html, "__vite_plugin_react_preamble_installed__") || !strings.Contains(html, "/src/site/main.tsx") {
+	if !strings.Contains(html, "__vite_plugin_react_preamble_installed__") || !strings.Contains(html, "/src/main.tsx") {
 		t.Fatalf("missing React development entry: %s", html)
 	}
 }
 
 func TestReactProductionManifestEntry(t *testing.T) {
 	entries := map[string]manifestItem{
-		"index.html": {File: "assets/site.js", Imports: []string{"shared"}},
-		"shared":     {Css: []string{"assets/app.css"}},
+		"index.html":          {File: "assets/site.js", Imports: []string{"shared"}},
+		"src/site/entry.tsx":  {File: "assets/forum.js"},
+		"src/admin/entry.tsx": {File: "assets/admin.js"},
+		"shared":              {Css: []string{"assets/app.css"}},
 	}
-	html := string(manifestEntry(entries, "index.html", "react/"))
+	html := string(manifestEntry(entries, "index.html", "src/site/entry.tsx", "react/"))
 	for _, path := range []string{"/assets/react/assets/site.js", "/assets/react/assets/app.css"} {
 		if !strings.Contains(html, path) {
 			t.Fatalf("missing production resource %s: %s", path, html)
 		}
+	}
+	if !strings.Contains(html, `rel="modulepreload" href="`+resourceAsset("react/assets/forum.js")+`"`) || strings.Contains(html, "assets/admin.js") {
+		t.Fatalf("expected only the current layout to be preloaded: %s", html)
 	}
 	if strings.Contains(html, "@vite") {
 		t.Fatal("production entry contains Vite development script")
@@ -109,20 +114,5 @@ func TestResourceAssetUsesConfiguredCDN(t *testing.T) {
 
 	if got := resourceAsset("react/assets/site.js"); got != "https://cdn.example.com/forum/assets/react/assets/site.js" {
 		t.Fatalf("resource asset = %q", got)
-	}
-}
-
-func TestAdminResourceEntryUsesIndependentReactEntry(t *testing.T) {
-	html := string(resourceEntry("admin"))
-	if setting.IsProduction() {
-		item := reactManifest["admin/index.html"]
-		if item.File == "" || !strings.Contains(html, "/assets/react/"+item.File) {
-			t.Fatalf("missing React admin production entry: %s", html)
-		}
-	} else if !strings.Contains(html, "/src/admin/main.tsx") || !strings.Contains(html, "__vite_plugin_react_preamble_installed__") {
-		t.Fatalf("missing React admin development entry: %s", html)
-	}
-	if strings.Contains(html, "/src/site/main.tsx") {
-		t.Fatalf("admin must not load site entry: %s", html)
 	}
 }

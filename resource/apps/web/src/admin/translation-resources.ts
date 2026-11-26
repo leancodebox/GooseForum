@@ -2,6 +2,11 @@ export const translationLoaders: Record<
   string,
   () => Promise<{ default: unknown }>
 > = {
+  "zh/site-header": () => import("@gooseforum/client/i18n/messages/zh-site-shell"),
+  "en/site-header": () => import("@gooseforum/client/i18n/messages/en-site-shell"),
+  "ja/site-header": () => import("@gooseforum/client/i18n/messages/ja-site-shell"),
+  "ru/site-header": () => import("@gooseforum/client/i18n/messages/ru-site-shell"),
+  "it/site-header": () => import("@gooseforum/client/i18n/messages/it-site-shell"),
   "en/trust-settings": () => import("./messages/en-trust-settings"),
   "zh/trust-settings": () => import("./messages/zh-trust-settings"),
   "ja/trust-settings": () => import("./messages/ja-trust-settings"),

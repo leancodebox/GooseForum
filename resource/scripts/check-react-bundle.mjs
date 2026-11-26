@@ -12,12 +12,12 @@ const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
 // 212.5 KiB (shell) / 235.7 KiB (home); keep roughly 4% growth headroom.
 const scenarios = {
   'site shell': {
-    roots: ['index.html'],
+    roots: ['index.html', 'src/site/entry.tsx'],
     budget: 220 * 1024,
   },
   'home route (zh)': {
     roots: [
-      'index.html',
+      'index.html', 'src/site/entry.tsx',
       '../../packages/theme-default/src/site/pages/home-page.tsx',
       '../../packages/client/dist/i18n/messages/zh-auth.js',
       '../../packages/client/dist/i18n/messages/zh-site-shell.js',
@@ -29,14 +29,15 @@ const scenarios = {
     budget: 245 * 1024,
   },
   'admin shell': {
-    roots: ['admin/index.html'],
+    roots: ['index.html', 'src/admin/entry.tsx'],
     budget: 195 * 1024,
   },
   'dashboard route (zh, chart deferred)': {
     roots: [
-      'admin/index.html',
+      'index.html', 'src/admin/entry.tsx',
       'src/admin/pages/dashboard-page.tsx',
       'src/admin/messages/zh-shell.ts',
+      '../../packages/client/dist/i18n/messages/zh-site-shell.js',
       'src/admin/messages/zh-dashboard.ts',
     ],
     budget: 200 * 1024,
@@ -105,7 +106,9 @@ function collectInitialFiles(roots) {
     const chunk = manifest[key]
     if (!chunk) throw new Error(`Missing ${key} in ${manifestPath}`)
     files.add(chunk.file)
-    for (const css of chunk.css || []) files.add(css)
+    for (const file of [...chunk.css || [], ...chunk.assets || []]) {
+      if (file.endsWith('.css')) files.add(file)
+    }
     for (const imported of chunk.imports || []) visit(imported)
   }
 }

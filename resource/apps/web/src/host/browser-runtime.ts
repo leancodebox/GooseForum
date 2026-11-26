@@ -2,10 +2,9 @@ import {
   createGooseClient,
   GooseProtocolError,
   type AnyPagePayload,
-  type GooseAdminApi,
   type PagePayload,
 } from '@gooseforum/client'
-import type { PageSource as RuntimePageSource } from '@gooseforum/runtime/page-source'
+import type { PageSource } from '@gooseforum/runtime/page-source'
 export {
   applyBrowserLocale,
   applyBrowserTheme,
@@ -15,31 +14,29 @@ export {
   queueBrowserFlash,
 } from '@gooseforum/runtime/browser-host'
 
-export interface PageSource<TPage extends PagePayload>
-  extends RuntimePageSource<TPage> {
-  admin: GooseAdminApi
+type BrowserPage = AnyPagePayload | PagePayload<unknown, 'admin.shell'>
+const client = createGooseClient<BrowserPage>({ pages: { components: ['admin.shell'] } })
+
+export const browserPageSource = {
+  api: client.api,
+  admin: client.admin,
+  readInitial() {
+    if (hasEmbeddedPagePayload()) return client.readInitialPayload()
+    if (import.meta.env.DEV) return undefined
+    throw new GooseProtocolError('Missing embedded GooseForum page payload')
+  },
+  load(url: URL, signal?: AbortSignal) {
+    return client.pages.fetch(pageRequestPath(url.pathname + url.search), { signal })
+  },
 }
 
-function createBrowserPageSource<TPage extends PagePayload>(
-  components?: readonly string[],
-): PageSource<TPage> {
-  const client = createGooseClient<TPage>({
-    pages: components ? { components } : undefined,
-  })
-
-  return {
-    api: client.api,
-    admin: client.admin,
-    readInitial() {
-      if (hasEmbeddedPagePayload()) return client.readInitialPayload()
-      if (import.meta.env.DEV) return undefined
-      throw new GooseProtocolError('Missing embedded GooseForum page payload')
-    },
-    load(url, signal) {
-      const pageUrl = `${url.pathname}${url.search}`
-      return client.pages.fetch(pageRequestPath(pageUrl), { signal })
-    },
-  }
+export const sitePageSource: PageSource = {
+  api: client.api,
+  async load(url, signal) {
+    const page = await browserPageSource.load(url, signal)
+    if (page.component === 'admin.shell') throw new GooseProtocolError('Expected a forum page')
+    return page
+  },
 }
 
 function hasEmbeddedPagePayload() {
@@ -53,6 +50,3 @@ export function pageRequestPath(
 ) {
   return embedded || !development ? pageUrl : `/__goose_page${pageUrl}`
 }
-
-export const sitePageSource = createBrowserPageSource<AnyPagePayload>()
-export const adminPageSource = createBrowserPageSource<PagePayload>(['admin.shell'])

@@ -26,6 +26,8 @@ import {
   GooseRuntimeProvider,
   isSiteSpaPath,
   useLatestRequest,
+  commitHistory, historyIndex, listenToHistory, rememberScroll, restoreScroll,
+  type AreaNavigation,
   type GooseNavigateOptions,
   type GooseRuntime,
 } from "@gooseforum/runtime";
@@ -69,6 +71,7 @@ export function preloadPageIcons(page: AnyPagePayload) {
 export interface SiteAppProps {
   pageSource: PageSource<AnyPagePayload>;
   initialPage?: AnyPagePayload;
+  navigateArea?: AreaNavigation;
   initialLocale?: Locale;
   initialTheme?: AnyPagePayload["layout"]["theme"]["current"];
   initialResources?: Resource;
@@ -86,7 +89,7 @@ type ScrollAction = "preserve" | "reset" | "restore";
 interface PendingScroll {
   page: AnyPagePayload;
   action: Exclude<ScrollAction, "preserve">;
-  entryKey: string;
+  index: number;
   hash: string;
 }
 
@@ -96,11 +99,10 @@ const keepAliveComponents = new Set([
   "search.index",
 ]);
 const maxCachedPages = 10;
-const historyEntryKey = "gooseEntryKey";
-const historyEntryIndex = "gooseEntryIndex";
 
 export function SiteApp({
   pageSource,
+  navigateArea,
   initialPage,
   initialLocale,
   initialTheme,
@@ -137,11 +139,7 @@ export function SiteApp({
     ((href: string) => boolean | Promise<boolean>) | null
   >(null);
   const cachedPageRef = useRef(new Map(cachedPages.map(entry => [entry.key, entry.page])));
-  const scrollPositions = useRef(
-    new Map<string, { left: number; top: number }>(),
-  );
   const pendingScroll = useRef<PendingScroll | null>(null);
-  const activeHistoryEntry = useRef("");
   const activeHistoryIndex = useRef(0);
   const suppressNextPop = useRef(false);
 
@@ -165,12 +163,7 @@ export function SiteApp({
     const target = pendingScroll.current;
     if (!target || target.page !== committedPage) return;
     pendingScroll.current = null;
-    applyScroll(
-      target.action,
-      target.entryKey,
-      target.hash,
-      scrollPositions.current,
-    );
+    restoreScroll(target.action === "restore" ? target.index : undefined, target.hash);
   }, [onInitialContentReady]);
 
   const loadPage = useCallback(
@@ -178,7 +171,6 @@ export function SiteApp({
       url: URL,
       historyAction: "push" | "replace" | "none",
       scrollAction: ScrollAction = "preserve",
-      targetHistoryEntry?: string,
       targetHistoryIndex?: number,
     ) => {
       activeRequest.current?.abort();
@@ -205,42 +197,13 @@ export function SiteApp({
         }
         if (request.signal.aborted) return;
 
-        let nextHistoryEntry =
-          targetHistoryEntry ||
-          activeHistoryEntry.current ||
-          ensureHistoryEntry();
         let nextHistoryIndex = targetHistoryIndex ?? activeHistoryIndex.current;
         if (historyAction === "push") {
-          saveScrollPosition(
-            scrollPositions.current,
-            activeHistoryEntry.current,
-          );
-          nextHistoryEntry = createHistoryEntryKey();
-          nextHistoryIndex = activeHistoryIndex.current + 1;
-          window.history.pushState(
-            withHistoryEntry(
-              window.history.state,
-              nextHistoryEntry,
-              nextHistoryIndex,
-            ),
-            "",
-            nextUrl,
-          );
-        } else if (
-          historyAction === "replace" ||
-          nextUrl.href !== window.location.href
-        ) {
-          window.history.replaceState(
-            withHistoryEntry(
-              window.history.state,
-              nextHistoryEntry,
-              nextHistoryIndex,
-            ),
-            "",
-            nextUrl,
-          );
+          rememberScroll(activeHistoryIndex.current);
+          nextHistoryIndex = commitHistory(nextUrl, "push", nextHistoryIndex);
+        } else if (historyAction === "replace" || nextUrl.href !== window.location.href) {
+          commitHistory(nextUrl, "replace", nextHistoryIndex);
         }
-        activeHistoryEntry.current = nextHistoryEntry;
         activeHistoryIndex.current = nextHistoryIndex;
 
         activeComponent.current = nextPage.component;
@@ -251,7 +214,7 @@ export function SiteApp({
           : {
               page: nextPage,
               action: scrollAction,
-              entryKey: nextHistoryEntry,
+              index: nextHistoryIndex,
               hash: url.hash,
             };
         startTransition(() => {
@@ -282,13 +245,15 @@ export function SiteApp({
         return;
       }
       const url = new URL(href, window.location.href);
+      activeRequest.current?.abort();
+      if (navigateArea?.(url, options.replace ? "replace" : "push", activeHistoryIndex.current)) return;
       if (url.origin !== window.location.origin || !isSiteSpaPath(url.pathname)) {
         window.location.assign(url);
         return;
       }
       await loadPage(url, options.replace ? "replace" : "push", "reset");
     },
-    [loadPage],
+    [loadPage, navigateArea],
   );
 
   const refresh = useCallback(async () => {
@@ -387,10 +352,7 @@ export function SiteApp({
   }, [locale]);
 
   useEffect(() => {
-    const previousScrollRestoration = window.history.scrollRestoration;
-    window.history.scrollRestoration = "manual";
-    activeHistoryEntry.current = ensureHistoryEntry();
-    activeHistoryIndex.current = readHistoryIndex(window.history.state);
+    activeHistoryIndex.current = historyIndex();
     if (initialPage) prepareDocument(initialPage, themeRef.current);
     else void loadPage(new URL(window.location.href), "none");
 
@@ -399,7 +361,7 @@ export function SiteApp({
         suppressNextPop.current = false;
         return;
       }
-      const targetIndex = readHistoryIndex(event.state);
+      const targetIndex = historyIndex(event.state);
       const previousIndex = activeHistoryIndex.current;
       const url = new URL(window.location.href);
       if (
@@ -414,9 +376,8 @@ export function SiteApp({
         return;
       }
       activeRequest.current?.abort();
-      saveScrollPosition(scrollPositions.current, activeHistoryEntry.current);
-      const entryKey = readHistoryEntry(event.state) || ensureHistoryEntry();
-      activeHistoryEntry.current = entryKey;
+      if (navigateArea?.(url, "pop", previousIndex)) return;
+      rememberScroll(previousIndex);
       activeHistoryIndex.current = targetIndex;
       const cached = cachedPageRef.current.get(routeCacheKey(url));
       if (cached) {
@@ -428,7 +389,7 @@ export function SiteApp({
         pendingScroll.current = {
           page: cached,
           action: "restore",
-          entryKey,
+          index: targetIndex,
           hash: url.hash,
         };
         startTransition(() => {
@@ -437,19 +398,18 @@ export function SiteApp({
         });
         return;
       }
-      void loadPage(url, "none", "restore", entryKey, targetIndex);
+      void loadPage(url, "none", "restore", targetIndex);
     }
 
     const handlePopStateEvent = (event: PopStateEvent) => {
       void handlePopState(event);
     };
-    window.addEventListener("popstate", handlePopStateEvent);
+    const stopListening = listenToHistory(handlePopStateEvent);
     return () => {
-      window.removeEventListener("popstate", handlePopStateEvent);
-      window.history.scrollRestoration = previousScrollRestoration;
+      stopListening();
       activeRequest.current?.abort();
     };
-  }, [loadPage, initialPage, rememberPage]);
+  }, [loadPage, initialPage, rememberPage, navigateArea]);
 
   const fetchPage = useCallback(
     (href: string, signal?: AbortSignal) =>
@@ -582,75 +542,4 @@ function browserUrlForPage(pageUrl: string, requestedUrl: URL) {
 
 function routeCacheKey(url: URL) {
   return `${url.pathname}${url.search}`;
-}
-
-function createHistoryEntryKey() {
-  return (
-    globalThis.crypto?.randomUUID?.() ||
-    `${Date.now()}-${Math.random().toString(36).slice(2)}`
-  );
-}
-
-function readHistoryEntry(state: unknown) {
-  if (!state || typeof state !== "object") return "";
-  const value = (state as Record<string, unknown>)[historyEntryKey];
-  return typeof value === "string" ? value : "";
-}
-
-function readHistoryIndex(state: unknown) {
-  if (!state || typeof state !== "object") return 0;
-  const value = (state as Record<string, unknown>)[historyEntryIndex];
-  return typeof value === "number" && Number.isFinite(value) ? value : 0;
-}
-
-function withHistoryEntry(
-  state: unknown,
-  entryKey: string,
-  entryIndex = readHistoryIndex(state),
-) {
-  return {
-    ...(state && typeof state === "object" ? state : {}),
-    [historyEntryKey]: entryKey,
-    [historyEntryIndex]: entryIndex,
-  };
-}
-
-function ensureHistoryEntry() {
-  const existing = readHistoryEntry(window.history.state);
-  if (existing) return existing;
-  const entryKey = createHistoryEntryKey();
-  window.history.replaceState(
-    withHistoryEntry(window.history.state, entryKey),
-    "",
-    window.location.href,
-  );
-  return entryKey;
-}
-
-function saveScrollPosition(
-  positions: Map<string, { left: number; top: number }>,
-  entryKey: string,
-) {
-  if (!entryKey) return;
-  positions.set(entryKey, { left: window.scrollX, top: window.scrollY });
-}
-
-function applyScroll(
-  action: Exclude<ScrollAction, "preserve">,
-  entryKey: string,
-  hash: string,
-  positions: Map<string, { left: number; top: number }>,
-) {
-  if (hash) {
-    document
-      .getElementById(decodeURIComponent(hash.slice(1)))
-      ?.scrollIntoView({ behavior: "instant" });
-    return;
-  }
-  const saved = action === "restore" ? positions.get(entryKey) : undefined;
-  window.scrollTo({
-    left: saved?.left || 0,
-    top: saved?.top || 0,
-    behavior: "instant",
-  });
 }

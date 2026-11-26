@@ -2,7 +2,7 @@ import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { GooseClientError, type GooseSiteApi, type PostPayload, type PostWindowPayload } from "@gooseforum/client";
 import { useDraftReplyTargets } from "../src/site/drafts/use-draft-reply-targets";
-import type { LocalDraft } from "../src/site/drafts/local-draft-store";
+import type { LocalDraft } from "@gooseforum/runtime/local-draft-store";
 
 afterEach(cleanup);
 const distantPost: PostPayload = { id: 199, topicId: 60, postNo: 100, content: "Distant reply", renderedContent: "<p>Distant reply</p>", processStatus: 0, isHidden: false, canModerate: false, author: { id: 8, username: "bob", avatarUrl: "" }, createdAt: "2026-10-03T00:00:00Z", isOwnPost: false };

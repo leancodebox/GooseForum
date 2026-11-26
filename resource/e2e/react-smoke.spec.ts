@@ -965,8 +965,9 @@ test('prepares fresh admin lists before switching and restores their query on re
   await page.route('**/api/admin/topics/list', route => route.fulfill({ json: { code: 0, result: { list: [], total: 0, page: 1, hasNext: false } } }))
   await page.route('**/api/admin/category-list', route => route.fulfill({ json: { code: 0, result: [] } }))
   async function selectPage(path: string) {
-    if (isMobile) await page.getByRole('button', { name: 'Toggle Sidebar', exact: true }).click()
-    await page.locator(`[data-slot="sidebar"] a[href="${path}"]`).click()
+    if (isMobile) await page.getByRole('button', { name: 'Open menu', exact: true }).click()
+    const sidebar = isMobile ? page.getByRole('dialog') : page.locator('#goose-desktop-sidebar')
+    await sidebar.locator(`a[href="${path}"]`).click()
   }
   await page.goto('/admin?lang=en')
   await expect(page.getByRole('heading', { level: 2, name: 'Dashboard' })).toBeVisible()
@@ -1103,6 +1104,37 @@ test('cold-loads the badges route after preparing its assets translations', asyn
   await expect(page).toHaveTitle('Badges - GooseForum')
   await expect(page.getByRole('heading', { level: 2, name: 'Badges' })).toBeVisible()
   await expect(page.getByText('Manage system and custom badges.')).toBeVisible()
+  expect(errors).toEqual([])
+})
+
+test('shows a share card export error and can save the card after reopening', async ({ page }) => {
+  await page.goto('/p/test/60?lang=en')
+  const share = page.getByRole('button', { name: 'Share topic', exact: true })
+  await share.waitFor()
+  await page.evaluate(() => {
+    const original = HTMLCanvasElement.prototype.toBlob
+    HTMLCanvasElement.prototype.toBlob = function (...args) {
+      if (this.width === 720) {
+        HTMLCanvasElement.prototype.toBlob = original
+        throw new DOMException('Canvas export failed', 'SecurityError')
+      }
+      original.apply(this, args)
+    }
+  })
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  await share.click()
+  const dialog = page.getByRole('dialog', { name: 'Share topic' })
+  await expect(dialog.getByRole('alert')).toHaveText('Could not create the image. Please try again.')
+  const save = dialog.getByRole('button', { name: 'Save card' })
+  await expect(save).toBeDisabled()
+  await expect(dialog.getByRole('button', { name: 'Copy link' })).toBeEnabled()
+  await dialog.getByRole('button', { name: 'Close' }).click()
+  await expect(dialog).toBeHidden()
+  await share.click()
+  const download = page.waitForEvent('download')
+  await save.click()
+  expect((await download).suggestedFilename()).toBe('topic-60-1.png')
   expect(errors).toEqual([])
 })
 
@@ -2250,6 +2282,57 @@ test('shows one announcement at a time in order and reopens the panel after a to
   })
 })
 
+test('admin uses the forum header for navigation, preferences and search', async ({ page, isMobile }, testInfo) => {
+  await page.route('**/__goose_page/admin*', route => route.fulfill({ json: {
+    ...adminPage, layout: { ...adminPage.layout, header: [
+      ...systemHeaderLinks, { key: 'custom', label: 'Community', url: '/community' },
+    ] },
+  } }))
+  await page.route('**/__goose_page/search?*', route => route.fulfill({ json: {
+    ...homePage, component: 'search.index', url: '/search?q=GooseForum',
+    props: { query: 'GooseForum', sort: 'relevance', topics: [], matches: {}, total: 0, totalPages: 0, pagination: homePage.props.pagination },
+  } }))
+  await page.goto('/admin?lang=en')
+  const header = page.getByRole('banner')
+  await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toHaveCount(1)
+  await expect(header.getByRole('link', { name: 'Open site' })).toHaveAttribute('href', '/')
+  const toggle = header.getByRole('button', { name: isMobile ? 'Open menu' : /Collapse sidebar|Expand sidebar/ })
+  await expect(toggle.locator('svg')).toHaveClass(/lucide-menu/)
+  await expect(page.getByRole('navigation', { name: 'Header navigation' }).getByText('Community')).toBeVisible({ visible: !isMobile })
+  await page.screenshot({ path: testInfo.outputPath('shared-admin-header.png') })
+  await toggle.click()
+  if (isMobile) {
+    const drawer = page.getByRole('dialog')
+    await expect(drawer.getByRole('link', { name: 'Users', exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(drawer).toBeHidden()
+  } else {
+    await expect(page.locator('.goose-shell-grid[data-sidebar-collapsed="true"]')).toBeAttached()
+    await toggle.click()
+    await expect(page.locator('.goose-shell-grid[data-sidebar-collapsed="false"]')).toBeAttached()
+  }
+  await header.getByRole('button', { name: 'Choose theme' }).press('Enter')
+  await page.getByRole('menuitemradio', { name: 'Dark', exact: true }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-dark')
+  await header.getByRole('button', { name: 'Switch language' }).press('Enter')
+  await page.getByRole('menuitemradio', { name: 'Italiano' }).click()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'it')
+  await header.getByRole('button', { name: 'Cambia lingua' }).press('Enter')
+  await page.getByRole('menuitemradio', { name: 'English' }).click()
+  await header.getByRole('button', { name: 'admin', exact: true }).press('Enter')
+  await expect(page.getByRole('menuitem', { name: 'My profile' })).toHaveAttribute('href', '/u/1')
+  await page.keyboard.press('Escape')
+  await header.getByRole('button', { name: 'Open search' }).click()
+  const search = page.getByRole('searchbox', { name: 'Search topics…' })
+  await expect(search).toBeFocused()
+  await search.fill('GooseForum')
+  await search.press('Enter')
+  await expect(page).toHaveURL(/\/search\?q=GooseForum$/)
+  await expect(page.getByRole('heading', { name: 'Search', exact: true })).toBeVisible()
+  await page.goBack()
+  await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible()
+})
+
 test('header search opens a popover and submits a keyword', async ({ page, isMobile }) => {
   const queries: string[] = []
   await page.route('**/__goose_page/?*', route => route.fulfill({ json: {
@@ -2925,10 +3008,138 @@ test('site update refresh respects an unfinished reply', async ({ page }) => {
   await expect(panel.locator('textarea')).toHaveValue('Keep my unfinished reply')
 })
 
+test('moves between the forum and admin in one document and restores browser history', async ({ page, isMobile }) => {
+  await page.route('**/__goose_page/?*', route => route.fulfill({
+    json: { ...homePage, layout: { ...homePage.layout, viewer: adminPage.layout.viewer } },
+  }))
+  await page.goto('/?lang=en')
+  const banner = page.getByRole('banner')
+  await expect(banner).toBeVisible()
+  const originalHeader = await banner.elementHandle()
+  const bodyColumn = page.locator('[data-slot="goose-page-content"]')
+  async function columnEdges() {
+    return bodyColumn.evaluate(el => {
+      const { left, right } = el.getBoundingClientRect()
+      return [left, right]
+    })
+  }
+  const expanded = await columnEdges()
+  if (!isMobile) {
+    await banner.getByRole('button', { name: 'Collapse sidebar' }).click()
+    await expect.poll(async () => (await columnEdges())[0]).toBe(24)
+  }
+  const expected = await columnEdges()
+  async function checkFrame() {
+    expect(await banner.evaluate((el, original) => el === original, originalHeader)).toBe(true)
+    expect(await columnEdges()).toEqual(expected)
+  }
+  await page.getByRole('button', { name: 'admin', exact: true }).press('Enter')
+  const entryDocument = await page.evaluateHandle(() => document)
+  await page.locator('[role="menuitem"][href="/admin"]').press('Enter')
+  await expect(page.locator('.admin-shell')).toBeVisible()
+  await expect(page).toHaveURL(/\/admin$/)
+  await expect(page.locator('html')).toHaveAttribute('data-goose-admin', '')
+  await checkFrame()
+  if (!isMobile) {
+    await banner.getByRole('button', { name: 'Expand sidebar' }).click()
+    await expect.poll(columnEdges).toEqual(expanded)
+    await banner.getByRole('button', { name: 'Collapse sidebar' }).click()
+    await expect.poll(columnEdges).toEqual(expected)
+  } else {
+    await banner.getByRole('button', { name: 'Open menu' }).click()
+    await expect(page.getByRole('dialog').getByRole('link', { name: 'Users', exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
+  }
+  await page.getByRole('banner').getByRole('link', { name: 'Open site' }).click()
+  await expect(page).toHaveURL(/\/$/)
+  await expect(page.locator('html')).toHaveAttribute('data-goose-resource', '')
+  await checkFrame()
+  await page.goBack()
+  await expect(page.locator('.admin-shell')).toBeVisible()
+  await checkFrame()
+  await page.goBack()
+  await expect(page.getByRole('button', { name: 'admin', exact: true })).toBeVisible()
+  await checkFrame()
+  await page.goForward()
+  await expect(page.locator('.admin-shell')).toBeVisible()
+  await checkFrame()
+  expect(await page.evaluate(original => document === original, entryDocument)).toBe(true)
+  const sheets = await page.locator('link[rel="stylesheet"]').evaluateAll(links => links.map(link => link.getAttribute('href')))
+  expect(sheets.filter(href => href?.includes('/styles/admin.css'))).toHaveLength(1)
+  expect(sheets.some(href => href?.includes('/styles/site.css'))).toBe(false)
+})
+
+test('back from admin restores the scrolled topic and its compact header', async ({ page, isMobile }) => {
+  const payload = structuredClone(topicPage)
+  payload.props.postStream.posts[0].renderedContent = '<p>A long readable topic.</p>'.repeat(90)
+  await page.route('**/__goose_page/p/test/60*', route => route.fulfill({ json: {
+    ...payload, layout: { ...payload.layout, viewer: adminPage.layout.viewer, sidebar: {
+      ...payload.layout.sidebar, groups: [{ key: 'staff', title: 'Staff', items: [{ key: 'admin', label: 'Administration', url: '/admin' }] }],
+    } },
+  } }))
+  await page.goto('/p/test/60?lang=en')
+  const header = page.getByRole('banner')
+  const title = header.getByRole('button', { name: 'Topic detail', exact: true })
+  await expect(page.getByRole('heading', { name: 'Topic detail', exact: true })).toBeVisible()
+  await page.evaluate(() => scrollTo(0, 800))
+  await expect(title).toBeVisible()
+  const original = await header.elementHandle()
+  if (isMobile) await header.getByRole('button', { name: 'Open menu' }).click()
+  const sidebar = isMobile ? page.getByRole('dialog') : page.locator('#goose-desktop-sidebar')
+  await sidebar.getByRole('link', { name: 'Administration' }).click()
+  await expect(page.locator('.admin-shell')).toBeVisible()
+  await expect(title).toHaveCount(0)
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await page.goBack()
+  await expect(title).toBeVisible()
+  expect(await page.evaluate(() => scrollY)).toBe(800)
+  expect(await header.evaluate((node, previous) => node === previous, original)).toBe(true)
+})
+
+test('can cancel leaving a dirty forum reply for admin', async ({ page }) => {
+  await page.route('**/__goose_page/p/test/60*', route => route.fulfill({
+    json: { ...topicPage, layout: { ...topicPage.layout, viewer: adminPage.layout.viewer } },
+  }))
+  await page.goto('/p/test/60?lang=en')
+  await page.getByRole('button', { name: 'Reply to topic', exact: true }).click()
+  const panel = page.locator('.goose-composer-surface[data-state="open"] section')
+  await panel.getByRole('radio', { name: 'Markdown', exact: true }).click()
+  await panel.locator('textarea').fill('Unsent reply')
+  await page.getByRole('button', { name: 'admin', exact: true }).press('Enter')
+  const cancel = page.waitForEvent('dialog').then(async dialog => {
+    expect(dialog.type()).toBe('confirm')
+    await dialog.dismiss()
+  })
+  await page.locator('[role="menuitem"][href="/admin"]').press('Enter')
+  await cancel
+  await expect(page).toHaveURL(/\/p\/test\/60\?lang=en$/)
+  await expect(panel.locator('textarea')).toHaveValue('Unsent reply')
+})
+
+test('uses the embedded forum error page for a denied admin deep link', async ({ page }) => {
+  let extraPageRequests = 0
+  page.on('request', request => {
+    if (request.headers()['x-goose-page']) extraPageRequests++
+  })
+  await page.route('**/admin/users?lang=en', async route => {
+    const response = await route.fetch()
+    const payload = {
+      ...homePage, component: 'error.index', url: '/admin/users?lang=en',
+      props: { code: '404', title: 'Not found', messageCode: 'page.notFound' },
+    }
+    const body = (await response.text()).replace('<div id="goose-app">', `<script type="application/json" id="goose-payload">${JSON.stringify(payload)}</script><div id="goose-app">`)
+    await route.fulfill({ response, status: 404, body })
+  })
+  await page.goto('/admin/users?lang=en')
+  await expect(page.getByText(/^404 · /)).toBeVisible()
+  await expect(page.locator('html')).toHaveAttribute('data-goose-resource', '')
+  expect(extraPageRequests).toBe(0)
+})
+
 test('admin uses the shared update notice with a save reminder', async ({ page }) => {
   await page.route('**/api/forum/status', route => route.fulfill({ json: { code: 0, result: { deploymentId: 'old' } } }))
   await page.goto('/admin?lang=en')
-  await expect(page.locator('#goose-admin-app')).not.toBeEmpty()
+  await expect(page.locator('#goose-app .admin-shell')).not.toBeEmpty()
   await page.evaluate(() => window.dispatchEvent(new Event('vite:preloadError')))
   const dialog = page.waitForEvent('dialog').then(async warning => {
     expect(warning.type()).toBe('confirm')

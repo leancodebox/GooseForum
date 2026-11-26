@@ -10,7 +10,7 @@ import { PublishPageView } from "../src/site/pages/publish-page";
 import {
   activateDraftAccount, clearAccountDrafts, draftChangeEvent, draftFingerprint, draftGeneration, draftOwner,
   listLocalDrafts, writeLocalDraft, type DraftValues, type LocalDraft,
-} from "../src/site/drafts/local-draft-store";
+} from "@gooseforum/runtime/local-draft-store";
 
 vi.mock("../src/site/editor/markdown-composer", () => ({
   MarkdownComposer: ({ value, onChange, sourceVersion }: { value: string; onChange(value: string): void; sourceVersion: number }) => <textarea aria-label="Body" value={value} data-version={sourceVersion} onChange={(event) => onChange(event.target.value)} />,

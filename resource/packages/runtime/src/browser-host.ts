@@ -140,7 +140,7 @@ function applyThemeStylesheet(theme: ThemePayload) {
     link.rel = "stylesheet";
     // The site loads its base stylesheet after the splash, in the body.
     const siteRoot = document.getElementById("goose-app");
-    if (siteRoot) siteRoot.before(link);
+    if (siteRoot && !document.documentElement.hasAttribute("data-goose-admin")) siteRoot.before(link);
     else document.head.appendChild(link);
   }
   if (link.getAttribute("href") !== theme.href) link.href = theme.href;

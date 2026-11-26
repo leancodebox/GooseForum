@@ -4,7 +4,7 @@ import { GooseLink, GooseRuntimeProvider, isSiteSpaPath, type GooseRuntime } fro
 
 afterEach(cleanup);
 describe("site navigation boundary", () => {
-  it.each(["/admin", "/admin/", "/admin/users?page=2", "http://localhost:3000/admin/settings#mail", "/rss.xml", "/sitemap.xml?fresh=1"])("leaves %s to native navigation", href => {
+  it.each(["/rss.xml", "/sitemap.xml?fresh=1", "/file/attachments/1", "/api/auth/github", "/oauth2/authorize"])("leaves %s to native navigation", href => {
     const navigate = vi.fn();
     render(<GooseRuntimeProvider runtime={{ navigate } as unknown as GooseRuntime}><GooseLink href={href}>Destination</GooseLink></GooseRuntimeProvider>);
     const link = screen.getByRole("link", { name: "Destination" });

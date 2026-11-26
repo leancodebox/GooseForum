@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@gooseforum/client": "workspace:*",
+    "idb": "^8.0.4",
     "i18next": "^27.1.2",
     "react": "^19.3.1",
     "react-i18next": "^18.0.1"
@@ -19,6 +20,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./browser-host": "./src/browser-host.ts",
+    "./local-draft-store": "./src/local-draft-store.ts",
+    "./account": "./src/account.ts",
+    "./search-url": "./src/search-url.ts",
     "./page-source": "./src/page-source.ts",
     "./unread-status": "./src/unread-status.ts",
     "./prepared-page": "./src/prepared-page.tsx",

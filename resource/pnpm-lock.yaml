@@ -348,6 +348,9 @@ importers:
       i18next:
         specifier: ^27.1.2
         version: 27.1.2(typescript@6.0.3)
+      idb:
+        specifier: ^8.0.4
+        version: 8.0.4
       react:
         specifier: ^19.3.1
         version: 19.3.1
@@ -391,9 +394,6 @@ importers:
       i18next:
         specifier: ^27.1.2
         version: 27.1.2(typescript@6.0.3)
-      idb:
-        specifier: ^8.0.4
-        version: 8.0.4
       lucide-react:
         specifier: ^1.73.0
         version: 1.73.0(@types/react@19.3.0)(react@19.3.1)
@@ -437,6 +437,9 @@ importers:
       '@types/react-google-recaptcha':
         specifier: ^2.1.9
         version: 2.1.9
+      idb:
+        specifier: ^8.0.4
+        version: 8.0.4
       fake-indexeddb:
         specifier: ^6.2.8
         version: 6.2.8

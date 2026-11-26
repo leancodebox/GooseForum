@@ -1,15 +1,14 @@
 import { readLocalePreference } from "@gooseforum/runtime/browser-host";
-import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
-import { useLatestRequest } from '@gooseforum/runtime'
+import { commitHistory, historyIndex, listenToHistory, rememberScroll, restoreScroll, useLatestRequest, type AreaNavigation } from '@gooseforum/runtime'
 import { applyBrowserTheme, createThemeTransition, detectBrowserTheme, detectBrowserThemePreference, resolveBrowserTheme, saveBrowserThemePreference, type BrowserThemePreference } from '@gooseforum/runtime/browser-host'
 import type { GooseAdminApi, PagePayload } from '@gooseforum/client'
-import { SidebarInset, SidebarProvider } from '@gooseforum/ui/components/sidebar'
-import { TooltipProvider } from '@gooseforum/ui/components/tooltip'
-import { applyBrowserLocale, detectBrowserLocale } from '../host/browser-runtime'
+import { ShellGrid, useShellSidebar } from '@gooseforum/ui/components/shell-layout'
+import { logout } from '@gooseforum/runtime/account'
+import { applyBrowserLocale, browserPageSource, detectBrowserLocale } from '../host/browser-runtime'
 import { AppSidebar } from './components/app-sidebar'
 import { SiteHeader } from './components/site-header'
-import { SettingsSectionLayout } from './components/settings-section-layout'
 import { createAdminText } from './i18n'
 import { createAccessGroupText } from './access-groups-i18n'
 import { createRoleText } from './roles-i18n'
@@ -37,31 +36,19 @@ import { AdminPermission, hasAdminPermission } from './access'
 
 import { DashboardPage, CategoriesManagementPage, AccessGroupsManagementPage, RolesManagementPage, UsersManagementPage, RegistrationInvitationsPage, PostsManagementPage, LinksManagementPage, SponsorsManagementPage, BadgesManagementPage, FileResourcesManagementPage, OptRecordsManagementPage, SiteInfoManagementPage, SiteChromeManagementPage, MailSettingsPage, SecuritySettingsPage, PostingSettingsPage, AnnouncementSettingsPage, HttpNotifySettingsPage, SensitiveWordsSettingsPage, OAuthSettingsPage, OIDCProviderSettingsPage, prepareAdminPage } from './page-registry'
 
+const SettingsSectionLayout = lazy(() => import('./components/settings-section-layout').then(module => ({ default: module.SettingsSectionLayout })))
 const Toaster = lazy(() => import('@gooseforum/ui/components/sonner').then(module => ({ default: module.Toaster })))
 
-const shellVariables = {
-  '--sidebar-width': 'calc(var(--spacing) * 72)',
-  '--header-height': 'calc(var(--spacing) * 12)',
-} as CSSProperties
-
-const historyIndexKey = 'gooseAdminIndex'
-function readHistoryIndex() {
-  const state: unknown = window.history.state
-  if (!state || typeof state !== 'object') return 0
-  const index = (state as Record<string, unknown>)[historyIndexKey]
-  return typeof index === 'number' && Number.isSafeInteger(index) && index >= 0 ? index : 0
-}
-
-export function AdminApp({ page, api, initialListData }: { page: PagePayload; api: GooseAdminApi; initialListData?: AdminListData }) {
+export function AdminApp({ page, api, initialListData, navigateArea }: { navigateArea?: AreaNavigation; page: PagePayload; api: GooseAdminApi; initialListData?: AdminListData }) {
+  const sidebar = useShellSidebar({ keyboardShortcut: true })
   const [pathname, setPathname] = useState(() => normalizeAdminPath(window.location.pathname))
-  const [routeKey, setRouteKey] = useState(() => `${readHistoryIndex()}:${window.location.pathname}${window.location.search}`)
+  const [routeKey, setRouteKey] = useState(() => `${historyIndex()}:${window.location.pathname}${window.location.search}`)
   const [listData, setListData] = useState(initialListData)
   const rememberedUrls = useRef(new Map<string, string>())
-  const scrollPositions = useRef(new Map<number, number>())
-  const activeHistoryIndex = useRef(readHistoryIndex())
+  const activeHistoryIndex = useRef(historyIndex())
   const restoringHistory = useRef(false)
   const committedUrl = useRef(window.location.pathname + window.location.search)
-  const pendingScroll = useRef<number | undefined>(undefined)
+  const pendingScroll = useRef<{ index?: number } | undefined>(undefined)
   const beginNavigationRequest = useLatestRequest()
   const [isNavigating, setIsNavigating] = useState(false)
   const [navigationError, setNavigationError] = useState('')
@@ -105,14 +92,15 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
     document.title = `${text(titleKey)} - ${page.layout.site.name || 'GooseForum'}`
   }, [page.layout.site.name, text, titleKey])
 
-  const navigate = useCallback(async (path: string, updateHistory = true, targetHistoryIndex = readHistoryIndex()) => {
+  const navigate = useCallback(async (path: string, updateHistory = true, targetHistoryIndex = historyIndex()) => {
     const isCurrent = beginNavigationRequest()
     const requestedUrl = new URL(path, window.location.href)
+    if (navigateArea?.(requestedUrl, updateHistory ? "push" : "pop", activeHistoryIndex.current)) return
     const nextPath = normalizeAdminPath(requestedUrl.pathname)
     // A popstate already changed the address; remember the page being left separately.
     const leavingUrl = committedUrl.current
     rememberedUrls.current.set(pathname, leavingUrl)
-    scrollPositions.current.set(activeHistoryIndex.current, window.scrollY)
+    rememberScroll(activeHistoryIndex.current)
     const nextUrl = updateHistory && !requestedUrl.search
       ? new URL(rememberedUrls.current.get(nextPath) || requestedUrl.href, window.location.href)
       : requestedUrl
@@ -120,12 +108,12 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
     const nextKey = nextUrl.pathname + nextUrl.search
     setNavigationError('')
     function restoreHistory() {
-      const delta = activeHistoryIndex.current - readHistoryIndex()
+      const delta = activeHistoryIndex.current - historyIndex()
       if (delta) {
         restoringHistory.current = true
         window.history.go(delta)
       } else if (window.location.pathname + window.location.search !== committedUrl.current) {
-        window.history.replaceState(window.history.state, '', committedUrl.current)
+        commitHistory(committedUrl.current, 'replace', activeHistoryIndex.current)
       }
     }
     if (updateHistory && nextKey === leavingUrl) { restoreHistory(); setIsNavigating(false); return }
@@ -135,10 +123,9 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
       const [, , nextData] = await Promise.all([prepareAdminPage(nextPath), prepareAdminTranslations(language, adminPageNamespaces(nextPath)), prepareAdminListData(api, nextUrl)])
       if (language !== localeRef.current) await prepareAdminTranslations(localeRef.current, adminPageNamespaces(nextPath))
       if (!isCurrent()) return
-      const nextHistoryIndex = updateHistory ? readHistoryIndex() + 1 : targetHistoryIndex
-      if (updateHistory) window.history.pushState({ ...window.history.state, [historyIndexKey]: nextHistoryIndex }, '', nextKey)
+      const nextHistoryIndex = updateHistory ? commitHistory(nextKey, 'push') : targetHistoryIndex
       committedUrl.current = nextKey
-      pendingScroll.current = updateHistory ? 0 : scrollPositions.current.get(nextHistoryIndex) || 0
+      pendingScroll.current = { index: updateHistory ? undefined : nextHistoryIndex }
       activeHistoryIndex.current = nextHistoryIndex
       pathnameRef.current = nextPath
       setListData(nextData)
@@ -152,33 +139,23 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
     } finally {
       if (isCurrent()) setIsNavigating(false)
     }
-  }, [api, beginNavigationRequest, pathname])
+  }, [api, beginNavigationRequest, pathname, navigateArea])
 
   useLayoutEffect(() => {
     if (pendingScroll.current === undefined) return
-    window.scrollTo({ top: pendingScroll.current, behavior: 'instant' })
+    restoreScroll(pendingScroll.current.index)
     pendingScroll.current = undefined
   }, [routeKey])
 
   useEffect(() => {
-    window.history.replaceState({ ...window.history.state, [historyIndexKey]: activeHistoryIndex.current }, '', window.location.href)
-  }, [])
-
-  useEffect(() => {
-    const previousRestoration = window.history.scrollRestoration
-    window.history.scrollRestoration = 'manual'
     const handlePopState = () => {
       if (restoringHistory.current) {
         restoringHistory.current = false
-        if (readHistoryIndex() === activeHistoryIndex.current) return
+        if (historyIndex() === activeHistoryIndex.current) return
       }
-      void navigate(window.location.pathname + window.location.search, false, readHistoryIndex())
+      void navigate(window.location.pathname + window.location.search, false, historyIndex())
     }
-    window.addEventListener('popstate', handlePopState)
-    return () => {
-      window.removeEventListener('popstate', handlePopState)
-      window.history.scrollRestoration = previousRestoration
-    }
+    return listenToHistory(handlePopState)
   }, [navigate])
 
   const prefetch = useCallback((path: string) => {
@@ -303,5 +280,30 @@ export function AdminApp({ page, api, initialListData }: { page: PagePayload; ap
                         ? <DashboardPage api={api} text={dashboardText} locale={locale} />
                         : <div className="flex flex-1 items-center justify-center p-6"><div className="max-w-md rounded-xl border bg-card p-6 text-center"><h2 className="text-lg font-semibold">{text(titleKey)}</h2><p className="mt-2 text-sm text-muted-foreground">{text('notAvailable')}</p></div></div>
 
-  return <TooltipProvider><SidebarProvider className="admin-shell mx-auto max-w-[1600px]" style={shellVariables}>{isNavigating ? <div role="progressbar" aria-label={text('loading')} className="admin-navigation-progress fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden bg-primary/15"><div className="h-full w-1/3 bg-primary" /></div> : null}<AppSidebar layout={page.layout} pathname={isCommunityRules ? '/admin/settings/security' : isIdentitySettings ? '/admin/settings/oauth' : pathname} text={text} onNavigate={navigate} onPrefetch={prefetch} variant="inset" /><SidebarInset className="z-20 min-w-0 overflow-clip" aria-busy={isNavigating}><SiteHeader title={text(titleKey)} locale={locale} themePreference={themePreference} onLocaleChange={changeLocale} onThemeChange={changeTheme} /><div className="flex min-w-0 flex-1 flex-col">{navigationError ? <p role="alert" className="px-4 py-2 text-sm text-destructive">{navigationError}</p> : null}<Suspense fallback={<div className="flex min-h-48 items-center justify-center text-sm text-muted-foreground">{text('loading')}</div>}>{isCommunityRules || isIdentitySettings ? <SettingsSectionLayout section={isIdentitySettings ? 'identity' : 'community'} pathname={pathname} permissions={page.layout.viewer.adminPermissions} text={text} navigate={navigate}>{content}</SettingsSectionLayout> : content}</Suspense></div></SidebarInset></SidebarProvider><Suspense fallback={null}><Toaster position="bottom-right" /></Suspense></TooltipProvider>
+  const navigation = <AppSidebar layout={page.layout}
+    pathname={isCommunityRules ? '/admin/settings/security' : isIdentitySettings ? '/admin/settings/oauth' : pathname}
+    text={text} onPrefetch={prefetch} onNavigate={path => {
+      sidebar.setMobileOpen(false)
+      void navigate(path)
+    }} />
+
+  return <>
+    <div className="admin-shell min-h-[calc(100svh-4rem)] bg-muted text-foreground">
+      <SiteHeader layout={page.layout} homeLabel={text('openSite')} sidebar={sidebar} navigation={navigation}
+        onLogout={() => logout(browserPageSource.api, page.layout.viewer.id, () => window.location.assign('/'))}
+        navigate={navigate} locale={locale} themePreference={themePreference} onLocaleChange={changeLocale} onThemeChange={changeTheme} />
+      {isNavigating && <div role="progressbar" aria-label={text('loading')} className="admin-navigation-progress fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden bg-primary/15"><div className="h-full w-1/3 bg-primary" /></div>}
+      <ShellGrid as="div" sidebar={sidebar} navigation={navigation}>
+        <div className="flex min-w-0 flex-col rounded-xl bg-background shadow-sm" aria-busy={isNavigating}>
+          {navigationError && <p role="alert" className="px-4 py-2 text-sm text-destructive">{navigationError}</p>}
+          <Suspense fallback={<div className="flex min-h-48 items-center justify-center text-sm text-muted-foreground">{text('loading')}</div>}>
+            {isCommunityRules || isIdentitySettings
+              ? <SettingsSectionLayout section={isIdentitySettings ? 'identity' : 'community'} pathname={pathname} permissions={page.layout.viewer.adminPermissions} text={text} navigate={navigate}>{content}</SettingsSectionLayout>
+              : content}
+          </Suspense>
+        </div>
+      </ShellGrid>
+    </div>
+    <Suspense fallback={null}><Toaster position="bottom-right" /></Suspense>
+  </>
 }

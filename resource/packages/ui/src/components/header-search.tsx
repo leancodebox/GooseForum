@@ -1,18 +1,13 @@
 import { useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { SearchIcon, XIcon } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { useGooseRuntime } from "@gooseforum/runtime";
 import { Button } from "@gooseforum/ui/components/button";
 import { Input } from "@gooseforum/ui/components/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@gooseforum/ui/components/popover";
-import { searchUrl } from "../search-url";
 
 const innerButtonFocus = "focus-visible:ring-inset focus-visible:ring-muted-foreground/40";
 
-export function HeaderSearch() {
-  const { t } = useTranslation("shell");
-  const { navigate } = useGooseRuntime();
+export function HeaderSearch({ t, onSearch }: { t(key: string): string; onSearch(query: string): void }) {
   const [open, setOpen] = useState(false);
   const input = useRef<HTMLInputElement>(null);
 
@@ -62,7 +57,7 @@ export function HeaderSearch() {
               return;
             }
             setOpen(false);
-            void navigate(searchUrl(query));
+            onSearch(query);
           }}
         >
           <Input

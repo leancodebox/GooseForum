@@ -18,26 +18,20 @@ type manifestItem struct {
 	File    string   `json:"file"`
 	IsEntry bool     `json:"isEntry"`
 	Css     []string `json:"css"`
+	Assets  []string `json:"assets"`
 	Imports []string `json:"imports"`
 }
 
 // React assets and their manifest are embedded in production; rebuild Go after the frontend build.
 var reactManifest = loadManifestAt("static/dist/react/.vite/manifest.json")
 
-func resourceEntry(origin string) template.HTML {
-	entry, source := "", ""
-	switch origin {
-	case "site":
-		entry, source = "index.html", "src/site/main.tsx"
-	case "admin":
-		entry, source = "admin/index.html", "src/admin/main.tsx"
+func resourceEntry(layout string) template.HTML {
+	const entry, source = "index.html", "src/main.tsx"
+	if setting.IsProduction() {
+		return manifestEntry(reactManifest, entry, layout, "react/")
 	}
-	if entry != "" {
-		if setting.IsProduction() {
-			return manifestEntry(reactManifest, entry, "react/")
-		}
-		server := strings.TrimRight(preferences.GetString("resource.reactDevServer", "http://localhost:3011"), "/")
-		return template.HTML(fmt.Sprintf(`<script type="module">
+	server := strings.TrimRight(preferences.GetString("resource.reactDevServer", "http://localhost:3011"), "/")
+	return template.HTML(fmt.Sprintf(`<script type="module">
 import RefreshRuntime from "%s/@react-refresh";
 RefreshRuntime.injectIntoGlobalHook(window);
 window.$RefreshReg$ = () => {};
@@ -46,11 +40,21 @@ window.__vite_plugin_react_preamble_installed__ = true;
 </script>
 <script type="module" src="%s/@vite/client"></script>
 <script type="module" src="%s/%s"></script>`, server, server, server, source))
+}
+
+// Vite records each layout's CSS URL in the lazy entry's assets.
+func layoutStylesheet(entry string) string {
+	if setting.IsProduction() {
+		for _, asset := range reactManifest[entry].Assets {
+			if strings.HasSuffix(asset, ".css") {
+				return resourceAsset("react/" + asset)
+			}
+		}
 	}
 	return ""
 }
 
-func manifestEntry(entries map[string]manifestItem, origin, prefix string) template.HTML {
+func manifestEntry(entries map[string]manifestItem, origin, layout, prefix string) template.HTML {
 	item, ok := entries[origin]
 	if !ok {
 		return template.HTML(fmt.Sprintf(`<script type="module" src="%s"></script>`, resourceAsset(origin)))
@@ -59,6 +63,11 @@ func manifestEntry(entries map[string]manifestItem, origin, prefix string) templ
 	var sb strings.Builder
 	for _, css := range collectManifestCSS(entries, origin, map[string]bool{}) {
 		fmt.Fprintf(&sb, `<link rel="stylesheet" href="%s" crossorigin>`, resourceAsset(prefix+css))
+		sb.WriteByte('\n')
+	}
+	// The server already knows which lazy layout the bootstrap will import.
+	if chunk := entries[layout]; chunk.File != "" {
+		fmt.Fprintf(&sb, `<link rel="modulepreload" href="%s" crossorigin>`, resourceAsset(prefix+chunk.File))
 		sb.WriteByte('\n')
 	}
 	fmt.Fprintf(&sb, `<script type="module" src="%s" crossorigin></script>`, resourceAsset(prefix+item.File))
@@ -120,6 +129,7 @@ func templateFuncs() template.FuncMap {
 	funcs := template.FuncMap{}
 	maps.Copy(funcs, templateFuncMap)
 	funcs["ResourceEntry"] = resourceEntry
+	funcs["LayoutStylesheet"] = layoutStylesheet
 	funcs["ResourceAsset"] = resourceAsset
 	return funcs
 }

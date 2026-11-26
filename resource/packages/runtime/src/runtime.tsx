@@ -39,6 +39,7 @@ export type GooseFlashType = "success" | "info" | "warning" | "error";
 
 const GooseRuntimeContext = createContext<GooseRuntime | null>(null);
 const GooseNavigationContext = createContext<GooseRuntime["navigate"] | null>(null);
+export const GooseNavigationProvider = GooseNavigationContext.Provider;
 const GooseApiContext = createContext<GooseSiteApi | null>(null);
 const GooseLocaleContext = createContext<AuthLocale>("zh");
 const GoosePageFetcherContext = createContext<GooseRuntime["fetchPage"]>(undefined);
@@ -124,7 +125,7 @@ function shouldNavigateInApp(
     event.ctrlKey ||
     event.shiftKey ||
     event.altKey ||
-    event.currentTarget.target === "_blank" ||
+    (event.currentTarget.target && event.currentTarget.target !== "_self") ||
     event.currentTarget.hasAttribute("download") ||
     href.startsWith("#")
   ) {
@@ -133,12 +134,19 @@ function shouldNavigateInApp(
 
   const document = event.currentTarget.ownerDocument;
   const target = new URL(href, document.baseURI);
-  return target.origin === document.location.origin && isSiteSpaPath(target.pathname);
+  return target.origin === document.location.origin && (isAdminPath(target.pathname) || isSiteSpaPath(target.pathname));
 }
 
+export function isAdminPath(pathname: string) {
+  return pathname === "/admin" || pathname.startsWith("/admin/");
+}
+
+export type AreaNavigation = (url: URL, mode: "push" | "replace" | "pop", leavingIndex: number) => boolean;
+
 export function isSiteSpaPath(pathname: string) {
-  return pathname !== "/admin" &&
-    !pathname.startsWith("/admin/") &&
+  if (pathname.startsWith("/api/") || pathname.startsWith("/file/")) return false;
+  if (pathname.startsWith("/oauth2/") && pathname !== "/oauth2/consent") return false;
+  return !isAdminPath(pathname) &&
     pathname !== "/rss.xml" &&
     pathname !== "/sitemap.xml";
 }
