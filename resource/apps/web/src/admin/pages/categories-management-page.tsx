@@ -26,6 +26,9 @@ import { AdminPermission, hasAdminPermission } from '../access'
 import type { AdminTextKey } from '../i18n'
 import type { SettingsTextKey } from '../settings-i18n'
 
+import { accessGroupName, type AccessGroupTextKey } from '../access-groups-i18n'
+
+type GroupText = (key: AccessGroupTextKey) => string
 type Text = (key: AdminTextKey) => string
 type IconText = (key: SettingsTextKey) => string
 
@@ -34,11 +37,12 @@ interface CategoriesManagementPageProps {
   permissions: number[]
   text: Text
   iconText: IconText
+  groupText: GroupText
 }
 
 const emptyCategory: AdminCategory = { id: 0, category: '', desc: '', icon: '', color: '#3b82f6', slug: '', sort: 0 }
 
-export function CategoriesManagementPage({ api, permissions, text, iconText }: CategoriesManagementPageProps) {
+export function CategoriesManagementPage({ api, permissions, text, iconText, groupText }: CategoriesManagementPageProps) {
   const canManageCategories = hasAdminPermission(permissions, AdminPermission.TopicsManager)
   const canManageAccess = hasAdminPermission(permissions, AdminPermission.RoleManager)
   const [categories, setCategories] = useState<AdminCategory[]>([])
@@ -191,7 +195,7 @@ export function CategoriesManagementPage({ api, permissions, text, iconText }: C
       <CategoryEditor category={editor} api={api} text={text} iconText={iconText} onClose={() => setEditor(null)} onSaved={async () => { setEditor(null); await load() }} />
       <ModeratorSheet open={globalOpen} title={text('globalModerators')} description={text('globalHint')} moderators={globalModerators} api={api} text={text} onOpenChange={setGlobalOpen} onChanged={load} />
       <ModeratorSheet open={Boolean(moderatorCategory)} title={moderatorCategory?.category || text('moderators')} description={text('moderators')} moderators={moderatorCategory?.moderators || []} categoryId={moderatorCategory?.id} api={api} text={text} onOpenChange={(open) => !open && setModeratorCategory(null)} onChanged={load} />
-      <AccessSheet category={accessCategory} overview={overview} api={api} text={text} onClose={() => setAccessCategory(null)} onSaved={load} />
+      <AccessSheet groupText={groupText} category={accessCategory} overview={overview} api={api} text={text} onClose={() => setAccessCategory(null)} onSaved={load} />
     </AdminPage>
   )
 }
@@ -349,7 +353,7 @@ function ModeratorSheet({ open, title, description, moderators, categoryId, api,
   </div></SheetContent></Sheet>
 }
 
-function AccessSheet({ category, overview, api, text, onClose, onSaved }: { category: AdminCategory | null; overview: AccessControlOverview; api: GooseAdminApi; text: Text; onClose(): void; onSaved(): Promise<void> }) {
+function AccessSheet({ category, overview, api, text, groupText, onClose, onSaved }: { category: AdminCategory | null; overview: AccessControlOverview; api: GooseAdminApi; text: Text; groupText: GroupText; onClose(): void; onSaved(): Promise<void> }) {
   const [levels, setLevels] = useState<Record<number, number>>({})
   const [saving, setSaving] = useState(false)
   const accessMeta = overview.categories.find((item) => item.id === category?.id)
@@ -377,7 +381,7 @@ function AccessSheet({ category, overview, api, text, onClose, onSaved }: { cate
     {conflict && <Alert variant="destructive"><AlertTriangle /><AlertTitle>{text('restricted')}</AlertTitle><AlertDescription>{text('accessConflict')}</AlertDescription></Alert>}
     {becomingRestricted && !conflict && <Alert><AlertTriangle /><AlertTitle>{text('restricted')}</AlertTitle><AlertDescription>{text('legacyImages')}</AlertDescription></Alert>}
     {noAudience && <Alert variant="destructive"><AlertTriangle /><AlertDescription>{text('noAudience')}</AlertDescription></Alert>}
-    {groups.map((group) => <div key={group.id} className={`flex items-center justify-between gap-4 rounded-lg border p-3 ${group.status !== 1 ? 'opacity-55' : ''}`}><div className="min-w-0"><div className="truncate text-sm font-medium">{group.name || (group.systemKey === 'everyone' ? text('everyone') : group.systemKey)}</div><div className="mt-0.5 text-xs text-muted-foreground">{group.systemKey || group.joinMode}</div></div><Select disabled={group.status !== 1} value={String(levels[group.id] || 0)} onValueChange={(value) => setLevels({ ...levels, [group.id]: Number(value) })}><SelectTrigger className="w-36"><SelectValue /></SelectTrigger><SelectContent>{[[0, 'none'], [1, 'read'], [2, 'reply'], [3, 'create'], [4, 'manage']].map(([level, key]) => <SelectItem key={level} value={String(level)}>{text(key as AdminTextKey)}</SelectItem>)}</SelectContent></Select></div>)}
+    {groups.map((group) => <div key={group.id} className={`flex items-center justify-between gap-4 rounded-lg border p-3 ${group.status !== 1 ? 'opacity-55' : ''}`}><div className="min-w-0"><div className="truncate text-sm font-medium">{accessGroupName(group, groupText) || group.systemKey}</div><div className="mt-0.5 text-xs text-muted-foreground">{group.systemKey || group.joinMode}</div></div><Select disabled={group.status !== 1} value={String(levels[group.id] || 0)} onValueChange={(value) => setLevels({ ...levels, [group.id]: Number(value) })}><SelectTrigger className="w-36"><SelectValue /></SelectTrigger><SelectContent>{[[0, 'none'], [1, 'read'], [2, 'reply'], [3, 'create'], [4, 'manage']].map(([level, key]) => <SelectItem key={level} value={String(level)}>{text(key as AdminTextKey)}</SelectItem>)}</SelectContent></Select></div>)}
   </div><SheetFooter className="flex-row justify-end"><Button variant="outline" onClick={onClose}>{text('cancel')}</Button><Button disabled={saving || conflict || !everyone || !dirty} onClick={() => void save()}>{saving ? <Spinner data-icon="inline-start" /> : null}{saving ? text('saving') : text('save')}</Button></SheetFooter></SheetContent></Sheet>
 }
 

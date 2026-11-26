@@ -1,4 +1,7 @@
 export default {
+  memberAndAbove: "成员及以上",
+  regularAndAbove: "稳定成员及以上",
+  communityLeaderAndAbove: "社区骨干及以上",
   title: "访问组",
   description: "通过可复用的用户组管理分类可见范围和成员。",
   create: "新建访问组",

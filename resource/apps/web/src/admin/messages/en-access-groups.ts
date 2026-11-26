@@ -1,4 +1,7 @@
 export default {
+  memberAndAbove: "Member and above",
+  regularAndAbove: "Regular and above",
+  communityLeaderAndAbove: "Community leader and above",
   title: "Access groups",
   description:
     "Control category visibility and membership with reusable groups.",

@@ -229,7 +229,7 @@ export function AdminApp({ page, api, initialListData, navigateArea }: { navigat
   }, [themePreference, page.layout.theme.colors, themeTransition])
 
   const content = pathname === '/admin/categories'
-    ? <CategoriesManagementPage api={api} permissions={page.layout.viewer.adminPermissions} text={text} iconText={settingsText} />
+    ? <CategoriesManagementPage groupText={accessGroupText} api={api} permissions={page.layout.viewer.adminPermissions} text={text} iconText={settingsText} />
     : pathname === '/admin/access-groups'
       ? <AccessGroupsManagementPage api={api} text={accessGroupText} onNavigate={navigate} />
       : pathname === '/admin/roles'

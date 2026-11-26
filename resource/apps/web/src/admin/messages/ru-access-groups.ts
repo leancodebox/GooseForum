@@ -1,4 +1,7 @@
 export default {
+  memberAndAbove: "Участник и выше",
+  regularAndAbove: "Постоянный участник и выше",
+  communityLeaderAndAbove: "Лидер сообщества и выше",
   title: "Группы доступа",
   description:
     "Управляйте видимостью категорий и членством с помощью переиспользуемых групп.",

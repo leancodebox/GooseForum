@@ -19,7 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@gooseforum/ui/components/tabs'
 import { AlertTriangle, Check, Clock3, LockKeyhole, Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2, UserPlus, UsersRound } from 'lucide-react'
 import { toast } from '@gooseforum/ui/components/sonner'
-import type { AccessGroupTextKey } from '../access-groups-i18n'
+import { accessGroupName, type AccessGroupTextKey } from '../access-groups-i18n'
 import { shouldUseClientNavigation } from '../navigation'
 
 type Text = (key: AccessGroupTextKey) => string
@@ -34,7 +34,7 @@ export function AccessGroupsManagementPage({ api, text, onNavigate }: { api: Goo
   const [panel, setPanel] = useState<'permissions' | 'members'>('permissions')
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const [groupForm, setGroupForm] = useState<GroupForm | null>(null)
   const [deletingGroup, setDeletingGroup] = useState<AccessGroup | null>(null)
   const [deletingMember, setDeletingMember] = useState<AccessGroupMember | null>(null)
@@ -43,7 +43,7 @@ export function AccessGroupsManagementPage({ api, text, onNavigate }: { api: Goo
   const load = useCallback(async (preferredGroupId = 0) => {
     const isCurrent = beginRequest();
     setLoading(true)
-    setError('')
+    setError(null)
     try {
       const result = await api.accessGroups.overview()
       if (!isCurrent()) return;
@@ -53,11 +53,11 @@ export function AccessGroupsManagementPage({ api, text, onNavigate }: { api: Goo
       if (result.groups.find((group) => group.id === nextGroupId)?.systemKey) setPanel('permissions')
     } catch (reason) {
       if (!isCurrent()) return;
-      setError(errorMessage(reason, text('loadFailed')))
+      setError(errorMessage(reason, ''))
     } finally {
       if (isCurrent()) setLoading(false)
     }
-  }, [beginRequest, api, text])
+  }, [beginRequest, api])
 
   useEffect(() => { void load() }, [load])
 
@@ -65,8 +65,8 @@ export function AccessGroupsManagementPage({ api, text, onNavigate }: { api: Goo
   const filteredGroups = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase()
     if (!needle) return overview.groups
-    return overview.groups.filter((group) => `${group.name} ${group.systemKey || group.joinMode}`.toLocaleLowerCase().includes(needle))
-  }, [overview.groups, query])
+    return overview.groups.filter((group) => `${accessGroupName(group, text)} ${group.name} ${group.systemKey || group.joinMode}`.toLocaleLowerCase().includes(needle))
+  }, [overview.groups, query, text])
   const selectedMembers = useMemo(() => [...(selectedGroup?.members || [])].sort((left, right) => {
     if (left.status !== right.status) return right.status - left.status
     if (left.memberRole !== right.memberRole) return left.memberRole === 'manager' ? -1 : 1
@@ -84,7 +84,7 @@ export function AccessGroupsManagementPage({ api, text, onNavigate }: { api: Goo
       <Button size="sm" onClick={() => setGroupForm({ ...emptyGroupForm })}><Plus data-icon="inline-start" />{text('create')}</Button>
     </header>
 
-    {error ? <Alert variant="destructive"><AlertTriangle /><AlertTitle>{text('loadFailed')}</AlertTitle><AlertDescription className="flex items-center justify-between gap-3"><span>{error}</span><Button variant="outline" size="sm" onClick={() => void load(selectedGroupId)}>{text('retry')}</Button></AlertDescription></Alert> : null}
+    {error !== null ? <Alert variant="destructive"><AlertTriangle /><AlertTitle>{text('loadFailed')}</AlertTitle><AlertDescription className="flex items-center justify-between gap-3"><span>{error || text('loadFailed')}</span><Button variant="outline" size="sm" onClick={() => void load(selectedGroupId)}>{text('retry')}</Button></AlertDescription></Alert> : null}
 
     <div className="grid items-start gap-3 xl:grid-cols-[15rem_minmax(0,1fr)]">
       <section className="overflow-hidden rounded-lg border bg-background">
@@ -95,7 +95,7 @@ export function AccessGroupsManagementPage({ api, text, onNavigate }: { api: Goo
         </div>
         {loading && !overview.groups.length ? <GroupListEmpty icon={<Spinner />} title={text('loading')} /> : !filteredGroups.length ? <GroupListEmpty icon={<Search />} title={overview.groups.length ? text('noMatchingGroups') : text('noGroups')} /> : <nav className="divide-y" aria-label={text('groups')}>{filteredGroups.map((group) => <Button key={group.id} type="button" variant="ghost" data-disabled={group.status !== 1} aria-current={selectedGroupId === group.id ? 'true' : undefined} onClick={() => selectGroup(group)} className="h-auto w-full justify-start rounded-none px-3 py-2 text-left font-normal shadow-none hover:bg-muted/60 aria-[current=true]:bg-primary/10 aria-[current=true]:text-primary data-[disabled=true]:opacity-60">
           <span className="grid size-7 shrink-0 place-items-center rounded-md border bg-background">{group.systemKey ? <ShieldCheck className="size-3.5" /> : <UsersRound className="size-3.5" />}</span>
-          <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{group.name}</span><span className="block truncate text-[11px] text-muted-foreground">{groupTypeLabel(group, text)}</span></span>
+          <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{accessGroupName(group, text)}</span><span className="block truncate text-[11px] text-muted-foreground">{groupTypeLabel(group, text)}</span></span>
           <Badge variant="outline">{activeMemberCount(group)}</Badge>
         </Button>)}</nav>}
       </section>
@@ -113,7 +113,7 @@ function GroupDetails({ group, members, overview, panel, api, text, loading, onP
   const pendingCount = group.members.filter((member) => member.status === 2).length
   return <section className="min-w-0 rounded-lg border bg-background p-3">
     <div className="flex flex-col gap-2 border-b pb-3 sm:flex-row sm:items-start sm:justify-between">
-      <div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h2 className="truncate text-lg font-semibold">{group.name}</h2>{group.systemKey ? <Badge variant="secondary"><ShieldCheck data-icon="inline-start" />{text('systemGroup')}</Badge> : null}<Badge variant={group.status === 1 ? 'outline' : 'destructive'}>{group.status === 1 ? text('enabled') : text('disabled')}</Badge></div>
+      <div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h2 className="truncate text-lg font-semibold">{accessGroupName(group, text)}</h2>{group.systemKey ? <Badge variant="secondary"><ShieldCheck data-icon="inline-start" />{text('systemGroup')}</Badge> : null}<Badge variant={group.status === 1 ? 'outline' : 'destructive'}>{group.status === 1 ? text('enabled') : text('disabled')}</Badge></div>
         <p className="mt-1 text-sm text-muted-foreground">{group.systemKey ? text('systemImmutable') : group.joinMode === 'application' ? text('joinApplicationDescription') : text('joinInviteDescription')}</p>
         <div className="mt-1.5 flex flex-wrap gap-3 text-xs text-muted-foreground"><span>{activeMemberCount(group)} {text('memberCount')}</span>{pendingCount ? <span>{pendingCount} {text('pendingCount')}</span> : null}<span>{group.grants.filter((grant) => grant.level > 0).length} {text('grantCount')}</span><span className="font-mono">ID {group.id}</span></div>
       </div>
