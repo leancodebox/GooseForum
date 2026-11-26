@@ -12,7 +12,6 @@ import { Badge } from "@gooseforum/ui/components/badge";
 import { Button } from "@gooseforum/ui/components/button";
 import {
   Card,
-  CardAction,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -139,27 +138,24 @@ export default function DashboardPage({
           ) : null}
         </div>
       </header>
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
         {cards.map(({ label, value, delta, icon: Icon }) => (
-          <Card
-            key={label}
-            className="min-h-32 bg-gradient-to-t from-primary/5 to-card py-4"
-          >
-            <CardHeader>
+          <Card key={label} className="min-h-20 py-3">
+            <CardHeader className="gap-1 px-3 sm:px-4">
               <CardDescription className="flex items-center gap-2 font-medium">
-                <Icon className="size-4" />
+                <Icon className="size-4 shrink-0" />
                 {label}
               </CardDescription>
-              <CardTitle className="text-3xl tabular-nums">
-                {statsLoading || value === undefined
-                  ? "…"
-                  : value.toLocaleString(locale)}
-              </CardTitle>
-              {delta !== undefined ? (
-                <CardAction>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <CardTitle className="text-2xl tabular-nums">
+                  {statsLoading || value === undefined
+                    ? "…"
+                    : value.toLocaleString(locale)}
+                </CardTitle>
+                {delta !== undefined ? (
                   <Badge variant="outline">+{delta}</Badge>
-                </CardAction>
-              ) : null}
+                ) : null}
+              </div>
             </CardHeader>
           </Card>
         ))}
@@ -175,7 +171,7 @@ export default function DashboardPage({
             onRangeChange={setRange}
           />
         </Suspense>
-        <section className="min-w-0 self-start overflow-hidden rounded-xl border bg-background">
+        <section className="min-w-0 self-start overflow-hidden rounded-xl border bg-background xl:self-stretch">
           <div className="flex items-start justify-between border-b p-4">
             <div>
               <h3 className="flex items-center gap-2 font-semibold">
@@ -231,9 +227,9 @@ export default function DashboardPage({
 
 function TrafficOverviewSkeleton() {
   return (
-    <Card className="h-[430px] gap-4 overflow-hidden p-5">
+    <Card className="h-[430px] gap-4 overflow-hidden p-5 sm:h-[464px]">
       <Skeleton className="h-6 w-40" />
-      <Skeleton className="h-14 w-full" />
+      <Skeleton className="h-10 w-full" />
       <Skeleton className="min-h-0 flex-1 w-full" />
     </Card>
   );

@@ -12,6 +12,7 @@ export default {
   last30Days: "Last 30 days",
   last90Days: "Last 90 days",
   selectRange: "Select a date range",
+  selectEndDate: "Select an end date",
   apply: "Apply",
   cancel: "Cancel",
   version: "Version",

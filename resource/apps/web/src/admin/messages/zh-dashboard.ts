@@ -12,6 +12,7 @@ export default {
   last30Days: "近 30 天",
   last90Days: "近 90 天",
   selectRange: "请选择日期范围",
+  selectEndDate: "请选择结束日期",
   apply: "应用",
   cancel: "取消",
   version: "版本",

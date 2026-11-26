@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { format, parseISO, subMonths } from "date-fns";
+import { useId, useState } from "react";
+import { format, parseISO, startOfDay } from "date-fns";
 import { enUS, ru, it, ja, zhCN } from "date-fns/locale";
 import { CalendarDays } from "lucide-react";
 import type { DateRange } from "react-day-picker";
@@ -10,10 +10,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@gooseforum/ui/components/popover";
+import { useIsMobile } from "@gooseforum/ui/hooks/use-mobile";
 import type { DashboardTextKey } from "../dashboard-i18n";
 import { presetDateRange, type DashboardDateRange } from "./date-range";
 
-type Text = (key: DashboardTextKey) => string;
+const presets = [
+  { days: 7, label: "last7Days" },
+  { days: 30, label: "last30Days" },
+  { days: 90, label: "last90Days" },
+] as const;
 
 export function DateRangePicker({
   value,
@@ -23,30 +28,28 @@ export function DateRangePicker({
 }: {
   value: DashboardDateRange;
   locale: string;
-  text: Text;
+  text(key: DashboardTextKey): string;
   onChange(value: DashboardDateRange): void;
 }) {
+  const triggerId = useId();
+  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState<DateRange>(() => toDateRange(value));
-  const today = startOfLocalDay(new Date());
+  const [draft, setDraft] = useState<DateRange>();
+  const today = startOfDay(new Date());
+  const from = parseISO(value.start);
+  const to = parseISO(value.end);
+  const formatter = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+  const draftValue = draft?.from && draft.to
+    ? { start: format(draft.from, "yyyy-MM-dd"), end: format(draft.to, "yyyy-MM-dd") }
+    : undefined;
+  const canApply = draftValue && (draftValue.start !== value.start || draftValue.end !== value.end);
 
   function changeOpen(next: boolean) {
-    if (next) setDraft(toDateRange(value));
+    if (next) setDraft({ from, to });
     setOpen(next);
   }
 
-  function apply() {
-    if (!draft.from || !draft.to) return;
-    onChange({
-      start: format(draft.from, "yyyy-MM-dd"),
-      end: format(draft.to, "yyyy-MM-dd"),
-    });
-    setOpen(false);
-  }
-
-  function applyPreset(days: number) {
-    const next = presetDateRange(days, today);
-    setDraft(toDateRange(next));
+  function commit(next: DashboardDateRange) {
     onChange(next);
     setOpen(false);
   }
@@ -55,71 +58,71 @@ export function DateRangePicker({
     <Popover open={open} onOpenChange={changeOpen}>
       <PopoverTrigger asChild>
         <Button
+          id={triggerId}
+          data-slot="dashboard-date-range-trigger"
+          type="button"
           variant="outline"
-          className="w-full justify-start font-normal sm:w-auto"
+          className="w-full min-w-0 justify-start text-left font-normal sm:w-auto"
         >
           <CalendarDays data-icon="inline-start" />
-          <span>{rangeLabel(value, locale)}</span>
+          <span className="truncate">{formatter.formatRange(from, to)}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent
+        aria-labelledby={triggerId}
         align="end"
-        className="max-h-[min(82vh,44rem)] w-auto max-w-[calc(100vw-2rem)] overflow-y-auto p-0"
+        className="max-h-[var(--radix-popover-content-available-height)] w-auto max-w-[calc(100vw-2rem)] gap-0 overflow-y-auto p-0"
       >
-        <div className="flex flex-wrap gap-2 border-b p-3">
-          {[
-            [7, text("last7Days")],
-            [30, text("last30Days")],
-            [90, text("last90Days")],
-          ].map(([days, label]) => (
-            <Button
-              key={days}
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => applyPreset(Number(days))}
-            >
-              {label}
-            </Button>
-          ))}
+        <div className="flex flex-wrap gap-1 border-b p-2">
+          {presets.map(({ days, label }) => {
+            const preset = presetDateRange(days, today);
+            const active = draftValue?.start === preset.start && draftValue.end === preset.end;
+            return (
+              <Button
+                key={days}
+                type="button"
+                variant={active ? "secondary" : "ghost"}
+                aria-pressed={active}
+                size="sm"
+                onClick={() => commit(preset)}
+              >
+                {text(label)}
+              </Button>
+            );
+          })}
         </div>
         <Calendar
+          autoFocus
           mode="range"
+          required
+          resetOnSelect
           selected={draft}
-          onSelect={(range) =>
-            setDraft(range || { from: undefined, to: undefined })
-          }
-          defaultMonth={subMonths(draft.to || today, 1)}
-          numberOfMonths={2}
+          onSelect={setDraft}
+          defaultMonth={from}
+          endMonth={today}
+          numberOfMonths={isMobile ? 1 : 2}
+          fixedWeeks
+          showOutsideDays={false}
           locale={calendarLocale(locale)}
           disabled={{ after: today }}
         />
-        <div className="flex items-center justify-between gap-3 border-t p-3">
-          <p className="text-xs text-muted-foreground">
-            {draft.from && draft.to
-              ? rangeLabel(
-                  {
-                    start: format(draft.from, "yyyy-MM-dd"),
-                    end: format(draft.to, "yyyy-MM-dd"),
-                  },
-                  locale,
-                )
-              : text("selectRange")}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t p-2">
+          <p className="text-xs text-muted-foreground" aria-live="polite">
+            {draft?.from && draft.to
+              ? formatter.formatRange(draft.from, draft.to)
+              : draft?.from
+                ? <>{formatter.format(draft.from)} · {text("selectEndDate")}</>
+                : text("selectRange")}
           </p>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setOpen(false)}
-            >
+          <div className="ml-auto flex gap-1">
+            <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
               {text("cancel")}
             </Button>
             <Button
               type="button"
               size="sm"
-              disabled={!draft.from || !draft.to}
-              onClick={apply}
+              disabled={!canApply}
+              onClick={() => { if (canApply) commit(draftValue); }}
             >
               {text("apply")}
             </Button>
@@ -130,27 +133,10 @@ export function DateRangePicker({
   );
 }
 
-function toDateRange(value: DashboardDateRange): DateRange {
-  return { from: parseISO(value.start), to: parseISO(value.end) };
-}
-
-function rangeLabel(value: DashboardDateRange, locale: string) {
-  const formatter = new Intl.DateTimeFormat(locale, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-  return `${formatter.format(parseISO(value.start))} – ${formatter.format(parseISO(value.end))}`;
-}
-
 function calendarLocale(locale: string) {
   if (locale.startsWith("zh")) return zhCN;
   if (locale.startsWith("ja")) return ja;
   if (locale.startsWith("ru")) return ru;
   if (locale.startsWith("it")) return it;
   return enUS;
-}
-
-function startOfLocalDay(value: Date) {
-  return new Date(value.getFullYear(), value.getMonth(), value.getDate());
 }

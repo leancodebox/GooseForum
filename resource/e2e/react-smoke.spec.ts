@@ -1034,6 +1034,64 @@ test('loads the admin dashboard shell and deferred chart without accessibility r
   })
 })
 
+test('dashboard date picker applies only complete ranges and reopens on the selected month', async ({ page, isMobile }) => {
+  await page.clock.setFixedTime(new Date(2026, 11, 15, 12))
+  await page.route('https://api.github.com/repos/leancodebox/GooseForum/releases', route =>
+    route.fulfill({ json: [] }),
+  )
+  const requests: Array<{ startDate: string; endDate: string }> = []
+  await page.route('**/api/admin/traffic-overview', route => {
+    requests.push(route.request().postDataJSON())
+    return route.fulfill({ json: { code: 0, result: [] } })
+  })
+  await page.goto('/admin?lang=en')
+  const trigger = page.locator('[data-slot="dashboard-date-range-trigger"]')
+  const dialog = page.getByRole('dialog')
+  const apply = dialog.getByRole('button', { name: 'Apply' })
+  const day = (date: string) => dialog.locator(`[data-day="${date}"]`).getByRole('button')
+  await expect.poll(() => requests.length).toBe(1)
+  await trigger.click()
+  await expect(dialog.getByRole('grid')).toHaveCount(isMobile ? 1 : 2)
+  await expect(dialog.getByRole('button', { name: 'Last 7 days' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(dialog.getByRole('button', { name: 'Go to the Next Month' })).toBeDisabled()
+  await expect(day('2026-12-16')).toBeDisabled()
+  await expect(apply).toBeDisabled()
+  if (isMobile) await dialog.getByRole('button', { name: 'Go to the Previous Month' }).click()
+  await day('2026-11-10').click()
+  await expect(dialog.getByText(/Select an end date/)).toBeVisible()
+  await expect(apply).toBeDisabled()
+  await day('2026-11-07').click()
+  await expect(apply).toBeEnabled()
+  expect(requests).toHaveLength(1)
+  await dialog.getByRole('button', { name: 'Cancel' }).click()
+  await expect(dialog).toBeHidden()
+  expect(requests).toHaveLength(1)
+
+  await trigger.click()
+  await expect(dialog.getByRole('button', { name: 'Last 7 days' })).toHaveAttribute('aria-pressed', 'true')
+  if (isMobile) await dialog.getByRole('button', { name: 'Go to the Previous Month' }).click()
+  await day('2026-11-10').click()
+  await day('2026-11-07').click()
+  await apply.click()
+  await expect.poll(() => requests.at(-1)).toEqual({ startDate: '2026-11-07', endDate: '2026-11-10' })
+  expect(requests).toHaveLength(2)
+  await trigger.click()
+  await expect(dialog.getByRole('grid').first()).toHaveAccessibleName('November 2026')
+
+  await day('2026-11-12').click()
+  await expect(apply).toBeDisabled()
+  await day('2026-11-12').click()
+  await apply.click()
+  await expect.poll(() => requests.at(-1)).toEqual({ startDate: '2026-11-12', endDate: '2026-11-12' })
+  expect(requests).toHaveLength(3)
+
+  await trigger.click()
+  await dialog.getByRole('button', { name: 'Last 30 days' }).click()
+  await expect(dialog).toBeHidden()
+  await expect.poll(() => requests.at(-1)).toEqual({ startDate: '2026-11-16', endDate: '2026-12-15' })
+  expect(requests).toHaveLength(4)
+})
+
 test('cold-loads the badges route after preparing its assets translations', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))

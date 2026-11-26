@@ -96,34 +96,32 @@ export function TrafficOverview({
         ).map(([key, label]) => (
           <div
             key={key}
-            className="flex min-w-0 flex-col gap-1 px-3 py-3 sm:px-5"
+            className="flex min-w-0 items-center gap-1.5 px-2 py-2 sm:gap-2 sm:px-4 sm:py-2.5"
           >
-            <div className="flex items-center gap-2 text-xs text-muted-foreground sm:text-sm">
-              <span
-                className="size-2 shrink-0 rounded-full bg-(--metric-color)"
-                style={{ "--metric-color": config[key].color } as CSSProperties}
-              />
-              <span className="truncate">{label}</span>
-            </div>
+            <span
+              className="size-1.5 shrink-0 rounded-full bg-(--metric-color) sm:size-2"
+              style={{ "--metric-color": config[key].color } as CSSProperties}
+            />
+            <span className="truncate text-xs text-muted-foreground sm:text-sm">{label}</span>
             {loading ? (
-              <Skeleton className="h-7 w-16" />
+              <Skeleton className="h-6 w-4 shrink-0 sm:h-7 sm:w-6" />
             ) : (
-              <strong className="text-xl tabular-nums tracking-tight sm:text-2xl">
+              <strong className="shrink-0 text-base tabular-nums tracking-tight sm:text-xl">
                 {totals[key].toLocaleString(locale)}
               </strong>
             )}
           </div>
         ))}
       </div>
-      <CardContent className="px-2 pb-4 pt-5 sm:px-4">
+      <CardContent className="h-[306px] px-2 pb-4 pt-5 sm:h-[336px] sm:px-4">
         {loading ? (
-          <div className="flex h-[290px] flex-col gap-4 px-4 py-3 sm:h-[330px]">
+          <div className="h-full px-4 py-3">
             <Skeleton className="h-full w-full" />
           </div>
         ) : data.length ? (
           <ChartContainer
             config={config}
-            className="h-[290px] w-full sm:h-[330px]"
+            className="h-full w-full"
           >
             <AreaChart
               accessibilityLayer
@@ -206,7 +204,7 @@ export function TrafficOverview({
             </AreaChart>
           </ChartContainer>
         ) : (
-          <div className="grid h-[290px] place-items-center text-sm text-muted-foreground sm:h-[330px]">
+          <div className="grid h-full place-items-center text-sm text-muted-foreground">
             {text("empty")}
           </div>
         )}

@@ -12,6 +12,7 @@ export default {
   last30Days: "Последние 30 дней",
   last90Days: "Последние 90 дней",
   selectRange: "Выберите диапазон дат",
+  selectEndDate: "Выберите дату окончания",
   apply: "Применить",
   cancel: "Отмена",
   version: "Версия",
