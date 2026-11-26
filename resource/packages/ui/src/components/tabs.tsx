@@ -86,7 +86,7 @@ function TabsList({
     })
     observeTriggers()
     mutation.observe(list, { subtree: true, childList: true, attributes: true, attributeFilter: ["data-state"] })
-    schedule()
+    measure()
     return () => {
       cancelAnimationFrame(frame)
       resize.disconnect()

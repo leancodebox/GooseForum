@@ -6,7 +6,7 @@
 @import "./theme-transition.css";
 @custom-variant dark (&:where([data-theme="gf-dark"], [data-theme="gf-dark"] *));
 [data-sliding-indicator="true"] [data-slot="tabs-trigger"]::after {
-  opacity: 0 !important;
+  visibility: hidden;
 }
 .sidebar-nav-link[aria-current="page"] {
   @apply bg-primary/10 text-primary;

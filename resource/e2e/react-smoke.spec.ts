@@ -1512,6 +1512,39 @@ test('loads post edit history only after the history action is opened', async ({
   await expect(dialog).toHaveCount(0)
 })
 
+test('moderation shows a single underline while switching tabs', async ({ page }) => {
+  await page.route('**/__goose_page/moderation**', route => route.fulfill({ json: {
+    ...homePage,
+    component: 'moderation.index',
+    props: { categoryTabs: [], topics: [], pagination: homePage.props.pagination },
+    layout: adminPage.layout,
+    url: '/moderation?lang=en',
+  } }))
+  await page.route('**/api/forum/moderation/**', route => route.fulfill({
+    json: { code: 0, result: { items: [], nextCursor: 0, hasNext: false } },
+  }))
+  await page.goto('/moderation?lang=en')
+  const list = page.getByRole('tablist', { name: 'Moderator workspace' })
+  const indicator = list.locator(':scope > span[aria-hidden="true"]')
+  const reports = list.getByRole('tab', { name: 'Reports' })
+  const blocked = list.getByRole('tab', { name: 'Blocked posts' })
+  const fallbackVisibility = () => list.evaluate(element =>
+    Array.from(element.querySelectorAll('[role="tab"]'), tab => getComputedStyle(tab, '::after').visibility),
+  )
+  await expect(indicator).toBeVisible()
+  expect(await fallbackVisibility()).toEqual(['hidden', 'hidden', 'hidden', 'hidden'])
+  await blocked.click()
+  await expect(blocked).toHaveAttribute('aria-selected', 'true')
+  expect(await fallbackVisibility()).toEqual(['hidden', 'hidden', 'hidden', 'hidden'])
+  await expect.poll(async () => {
+    const underline = (await indicator.boundingBox())!
+    const tab = (await blocked.boundingBox())!
+    return underline.height === 2 && Math.abs(underline.x - tab.x) < 1 && Math.abs(underline.width - tab.width) < 1
+  }).toBe(true)
+  await blocked.press('ArrowLeft')
+  await expect(reports).toHaveAttribute('aria-selected', 'true')
+})
+
 test('settings underline follows variable-width tabs, keyboard selection and resize', async ({ page }) => {
   await page.route('**/__goose_page/settings**', route => route.fulfill({ json: {
     ...homePage,
