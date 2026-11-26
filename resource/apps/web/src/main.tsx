@@ -61,6 +61,26 @@ async function prepareArea(url: URL, initial: boolean, signal: AbortSignal) {
   return { stylesheet: entry.stylesheet, page, prepare: () => entry.prepare(page, url) }
 }
 
+async function fadeArea(direction: 'out' | 'in', signal: AbortSignal) {
+  if (signal.aborted || document.hidden || !window.matchMedia('(prefers-reduced-motion: no-preference)').matches) return
+  const leaving = direction === 'out'
+  const animations = Array.from(document.querySelectorAll('[data-area-fade]'))
+    .filter(element => element.getClientRects().length > 0)
+    .map(element => element.animate(
+      { opacity: leaving ? [1, 0] : [0, 1] },
+      { duration: leaving ? 90 : 140, easing: leaving ? 'ease-in' : 'ease-out' },
+    ))
+  function cancel() {
+    for (const animation of animations) animation.cancel()
+  }
+  signal.addEventListener('abort', cancel, { once: true })
+  try {
+    await Promise.allSettled(animations.map(animation => animation.finished))
+  } finally {
+    signal.removeEventListener('abort', cancel)
+  }
+}
+
 async function openArea(url: URL, mode: 'initial' | 'push' | 'replace' | 'pop') {
   const request = new AbortController()
   pending = request
@@ -95,6 +115,11 @@ async function openArea(url: URL, mode: 'initial' | 'push' | 'replace' | 'pop') 
     }
     const [content] = await Promise.all([area.prepare(), styleReady])
     if (request.signal.aborted) return
+    const changingArea = mode !== 'initial' && admin !== activeAdmin
+    if (changingArea) {
+      await fadeArea('out', request.signal)
+      if (request.signal.aborted) return
+    }
     const index = historyIndex()
     if (mode === 'push' || mode === 'replace') commitHistory(url, mode)
     else if (url.href !== location.href) commitHistory(url, 'replace')
@@ -122,6 +147,7 @@ async function openArea(url: URL, mode: 'initial' | 'push' | 'replace' | 'pop') 
     }
     render(content(navigateArea, contentReady))
     if (admin) contentReady()
+    if (changingArea) await fadeArea('in', request.signal)
   } catch (error) {
     if (request.signal.aborted) return
     if (mode !== 'initial') {

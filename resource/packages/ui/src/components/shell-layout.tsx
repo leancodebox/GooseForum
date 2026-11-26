@@ -110,7 +110,7 @@ export function ShellGrid({ as: Container = "main", sidebar, standalone = false,
 }) {
   const { sidebarCollapsed, sidebarAnimate } = sidebar;
   return (
-    <Container data-sidebar-collapsed={sidebarCollapsed} data-sidebar-animate={sidebarAnimate}
+    <Container data-area-fade="" data-sidebar-collapsed={sidebarCollapsed} data-sidebar-animate={sidebarAnimate}
       className={standalone ? "w-full" : "goose-shell-grid mx-auto grid w-full max-w-[1600px] grid-cols-1 lg:px-6 lg:py-3"}>
       <aside
         id="goose-desktop-sidebar"

@@ -201,6 +201,7 @@ export function AppShell({
                 sidebarTrigger={<ShellMenuTrigger sidebar={sidebar} navigation={renderNavigation()} t={t} />}
                 contextTitle={shellHeader.visible ? (
                     <button
+                      data-area-fade=""
                       type="button"
                       className="flex min-w-0 flex-1 flex-col items-start justify-center gap-0.5 self-stretch text-left"
                       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
