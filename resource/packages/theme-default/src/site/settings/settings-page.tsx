@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type {
   LayoutPayload,
   PrivacySettingsPayload,
@@ -6,6 +6,8 @@ import type {
   SettingsPageProps,
 } from "@gooseforum/client";
 import {
+  BadgeMinus,
+  Ban,
   CalendarDays,
   Camera,
   Check,
@@ -41,6 +43,8 @@ import { useAvatarCrop } from "./use-avatar-crop";
 import { useGooseRuntime } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
 import { cn } from "@gooseforum/ui/lib/utils";
+
+const badgeChoiceClass = "flex h-16 w-15 shrink-0 flex-col items-center justify-center gap-1 rounded-md focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring";
 
 const tabKeys = [
   "profile",
@@ -92,6 +96,7 @@ export function SettingsPageView({
   const [savingPreset, setSavingPreset] = useState(false);
   const [wornCode, setWornCode] = useState(page.user.wornBadgeCode || "");
   const [savingBadge, setSavingBadge] = useState(false);
+  const badgeNotWearableId = useId();
   useEffect(() => {
     if (!status) return;
     const timer = window.setTimeout(() => setStatus(""), 3000);
@@ -178,9 +183,9 @@ export function SettingsPageView({
     setSavingBadge(true);
     try {
       await runtime.api.users.wearBadge(wornCode);
-      showStatus(t("status.badgeSaved"));
+      toast.success(t("status.badgeSaved"));
     } catch (reason) {
-      showError(serverError(reason, t("errors.badge")));
+      toast.error(serverError(reason, t("errors.badge")));
     } finally {
       setSavingBadge(false);
     }
@@ -353,38 +358,65 @@ export function SettingsPageView({
                   {t("avatar.applyWornBadge")}
                 </Button>
               </div>
-              <div className="-mx-1 flex gap-2 overflow-x-auto p-1">
+              <span id={badgeNotWearableId} className="sr-only">
+                {t("avatar.badgeNotWearable")}
+              </span>
+              <div className="-mx-1 flex gap-1 overflow-x-auto p-1">
                 <button
                   type="button"
-                  className={cn(
-                    "grid size-16 shrink-0 place-items-center rounded-md border text-xs",
-                    wornCode === "" && "border-primary ring-2 ring-primary/15",
-                  )}
+                  disabled={savingBadge}
+                  aria-pressed={wornCode === ""}
+                  className={cn(badgeChoiceClass, "enabled:cursor-pointer enabled:hover:text-primary")}
                   onClick={() => setWornCode("")}
                 >
-                  {t("avatar.noWornBadge")}
+                  <span aria-hidden="true" className="relative grid size-10 place-items-center">
+                    <BadgeMinus className="size-6 text-muted-foreground" strokeWidth={1.75} />
+                    {wornCode === "" ? (
+                      <span className="absolute -right-1 -bottom-0.5 grid size-4 place-items-center rounded-full bg-primary text-primary-foreground ring-2 ring-background">
+                        <Check className="size-3" />
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="max-w-full truncate px-1 text-[10px]">
+                    {t("avatar.noWornBadge")}
+                  </span>
                 </button>
-                {page.user.badges.map((badge) => (
-                  <button
-                    key={badge.code}
-                    type="button"
-                    disabled={!badge.isWearable || savingBadge}
-                    title={badge.description}
-                    className={cn(
-                      "relative flex size-16 shrink-0 flex-col items-center justify-center gap-1 rounded-md border",
-                      !badge.isWearable &&
-                        "cursor-not-allowed opacity-45 grayscale",
-                      wornCode === badge.code &&
-                        "border-primary ring-2 ring-primary/15",
-                    )}
-                    onClick={() => badge.isWearable && setWornCode(badge.code)}
-                  >
-                    <ProfileBadge badge={badge} compact />
-                    <span className="max-w-full truncate px-1 text-[10px]">
-                      {badge.name}
-                    </span>
-                  </button>
-                ))}
+                {page.user.badges.map((badge) => {
+                  const selected = badge.isWearable && wornCode === badge.code;
+                  return (
+                    <button
+                      key={badge.code}
+                      type="button"
+                      disabled={savingBadge}
+                      aria-label={badge.name}
+                      aria-pressed={selected}
+                      aria-disabled={!badge.isWearable || undefined}
+                      aria-describedby={badge.isWearable ? undefined : badgeNotWearableId}
+                      title={badge.isWearable ? badge.description : t("avatar.badgeNotWearable")}
+                      className={cn(
+                        badgeChoiceClass,
+                        badge.isWearable ? "enabled:cursor-pointer enabled:hover:text-primary" : "cursor-not-allowed",
+                      )}
+                      onClick={() => badge.isWearable && setWornCode(badge.code)}
+                    >
+                      <span className="relative flex">
+                        <ProfileBadge badge={badge} compact />
+                        {selected ? (
+                          <span aria-hidden="true" className="absolute -right-1 -bottom-0.5 grid size-4 place-items-center rounded-full bg-primary text-primary-foreground ring-2 ring-background">
+                            <Check className="size-3" />
+                          </span>
+                        ) : !badge.isWearable ? (
+                          <span aria-hidden="true" className="absolute -right-1 -bottom-0.5 grid size-4 place-items-center rounded-full bg-background text-muted-foreground ring-1 ring-border">
+                            <Ban className="size-3" />
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="max-w-full truncate px-1 text-[10px]">
+                        {badge.name}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </section>
           ) : null}

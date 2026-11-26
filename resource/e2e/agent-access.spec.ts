@@ -76,6 +76,9 @@ test("creates and revokes a fallback token without retaining its secret", async 
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.context().route("**/api/agent/SKILL.md", (route) =>
+    route.fulfill({ contentType: "text/markdown; charset=utf-8", body: "# GooseForum Skill" }),
+  );
   await page.route("**/__goose_page/**", (route) =>
     route.fulfill({
       json: {
@@ -178,9 +181,18 @@ test("creates and revokes a fallback token without retaining its secret", async 
   });
   await page.goto("/settings?tab=agent-tokens&lang=en");
   await expect(page).toHaveTitle(/Agent Tokens/);
-  await expect(
-    page.getByRole("heading", { name: "Agent Tokens", exact: true }),
-  ).toBeVisible();
+  const heading = page.getByRole("heading", { name: "Agent Tokens", exact: true });
+  await expect(heading).toBeVisible();
+  const guide = heading.locator("..").getByRole("link", { name: "Skill guide" });
+  const [refreshBox, revokeBox] = await Promise.all([
+    page.getByRole("button", { name: "Refresh", exact: true }).boundingBox(),
+    page.getByRole("button", { name: "Revoke all", exact: true }).boundingBox(),
+  ]);
+  expect(refreshBox).toMatchObject({ y: revokeBox!.y, height: revokeBox!.height });
+  const [docs] = await Promise.all([page.waitForEvent("popup"), guide.click()]);
+  await expect(docs).toHaveURL(/\/api\/agent\/SKILL\.md$/);
+  await expect(docs.locator("body")).toContainText("# GooseForum Skill");
+  await docs.close();
   await expect(
     page.getByRole("button", { name: "Create token", exact: true }),
   ).toBeDisabled();

@@ -34,6 +34,7 @@ export default {
     limitHint: "These are limits, not remaining daily allowances. Category access and account status still apply.",
   },
   agentTokens: {
+    skillGuide: "Skill guide",
     delete: "Delete", confirmDelete: "Delete this token? Access will stop immediately.",
     title: "Agent Tokens", name: "Name", permissions: "Permissions", expiry: "Validity", days: "{count} days", password: "Current password", create: "Create token", revokeAll: "Revoke all", confirmRevoke: "Revoke access?", revoked: "Revoked", expires: "Expires: {date}", empty: "No tokens", failed: "Token operation failed", secret: "Token", secretOnce: "This token is shown only once. Store it securely.", copy: "Copy", copied: "Copied", dismiss: "Dismiss", scopes: { "forum:read": "Read forum", "topics:create": "Publish topics", "topics:edit": "Edit your topics", "posts:edit": "Edit your replies", "posts:create": "Reply to topics", "images:upload": "Upload images" },
   },
@@ -158,6 +159,7 @@ export default {
     wornBadgeDescription: "Shown at the bottom-right of your avatar.",
     applyWornBadge: "Save badge",
     noWornBadge: "No badge",
+    badgeNotWearable: "Cannot be worn",
     cropTitle: "Crop avatar",
     cropDescription: "Move or resize the crop area before uploading.",
     cropAlt: "Avatar being cropped",

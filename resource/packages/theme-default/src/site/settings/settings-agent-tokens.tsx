@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { AgentTokenPayload } from "@gooseforum/client";
-import { Ban, Check, Copy, KeyRound, Plus, RefreshCw, Trash2, X } from "lucide-react";
+import { Ban, Check, Copy, ExternalLink, KeyRound, Plus, RefreshCw, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useGooseRuntime, useLatestRequest } from "@gooseforum/runtime";
 import { useServerErrorMessage } from "@gooseforum/runtime/i18n/server-error";
@@ -115,12 +115,20 @@ export function AgentTokenSettings() {
       <SettingsSectionHeader
         icon={KeyRound}
         title={t("agentTokens.title")}
+        titleAction={
+          <Button asChild variant="outline" size="sm">
+            <a href="/api/agent/SKILL.md" target="_blank" rel="noreferrer">
+              {t("agentTokens.skillGuide")}
+              <ExternalLink data-icon="inline-end" aria-hidden="true" />
+            </a>
+          </Button>
+        }
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
               variant="ghost"
-              size="icon-sm"
+              size="icon"
               title={t("binding.refresh")}
               aria-label={t("binding.refresh")}
               disabled={busy}

@@ -1332,8 +1332,10 @@ test('keeps the avatar edit overlay below the worn badge', async ({ page }, test
   const badge = {
     code: 'early-member', name: 'Early member', description: 'Early forum member',
     iconUrl: '/static/badges/early-member.svg', color: 'green', level: 'normal',
-    grantedAt: '2026-01-01T00:00:00Z',
+    grantedAt: '2026-01-01T00:00:00Z', isWearable: true,
   }
+  const contributor = { ...badge, code: 'contributor', name: 'Contributor', iconUrl: '/static/badges/contributor.svg' }
+  const firstPost = { ...badge, code: 'first-post', name: 'First post', iconUrl: '/static/badges/first-post.svg', isWearable: false }
   await page.route('**/__goose_page/settings**', route => route.fulfill({ json: {
     ...homePage,
     component: 'settings.index',
@@ -1348,7 +1350,7 @@ test('keeps the avatar edit overlay below the worn badge', async ({ page }, test
         locale: 'en', avatarUrl: '/static/pic/1.webp?t=1791244800', profileCoverUrl: '',
         bio: '', signature: '', websiteName: '', website: '', prestige: 0,
         createdAt: '2026-01-01T00:00:00Z', externalInformation: {},
-        wornBadgeCode: badge.code, badges: [badge], wearableBadges: [badge], wornBadge: badge,
+        wornBadgeCode: badge.code, badges: [badge, contributor, firstPost], wearableBadges: [badge, contributor], wornBadge: badge,
       },
       stats: {
         topicCount: 0, replyCount: 0, followerCount: 0, followingCount: 0,
@@ -1371,6 +1373,12 @@ test('keeps the avatar edit overlay below the worn badge', async ({ page }, test
     expect(route.request().postDataJSON()).toEqual({ avatarUrl: '2026/goose.webp' })
     return route.fulfill({ json: { code: 0, result: { avatarUrl: '/file/img/2026/goose.webp' } } })
   })
+  await page.route('**/api/wear-badge', route => {
+    const { badgeCode } = route.request().postDataJSON()
+    if (badgeCode === '') return route.fulfill({ json: { code: 1, message: 'Badge update failed.' } })
+    expect(badgeCode).toBe(contributor.code)
+    return route.fulfill({ json: { code: 0, result: true } })
+  })
   await page.goto('/settings?lang=en')
   await expect(page).toHaveTitle(/Avatar settings/)
   const button = page.getByRole('button', { name: 'Change avatar', exact: true })
@@ -1379,6 +1387,54 @@ test('keeps the avatar edit overlay below the worn badge', async ({ page }, test
   const badgeImage = button.getByRole('img', { name: badge.name, exact: true })
   await expect(badgeImage).toBeVisible()
   await expect.poll(() => badgeImage.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0)
+  const wornChoice = page.getByRole('button', { name: badge.name, exact: true })
+  const availableChoice = page.getByRole('button', { name: contributor.name, exact: true })
+  const unavailableChoice = page.getByRole('button', { name: firstPost.name, exact: true })
+  const noBadgeChoice = page.getByRole('button', { name: 'No badge', exact: true })
+  const noBadgeIcon = noBadgeChoice.locator('svg.lucide-badge-minus')
+  await expect(noBadgeIcon).toBeVisible()
+  await expect(noBadgeIcon.locator('..')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  await expect(noBadgeChoice.locator('..')).toHaveCSS('column-gap', '4px')
+  for (const [choice, name] of [[wornChoice, badge.name], [availableChoice, contributor.name], [unavailableChoice, firstPost.name]] as const) {
+    const icon = choice.getByRole('img', { name }).locator('..')
+    await expect(icon).toHaveCSS('clip-path', /^polygon\(/)
+    await expect(icon).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  }
+  for (const choice of [wornChoice, availableChoice, unavailableChoice, noBadgeChoice]) {
+    await expect(choice).toHaveCSS('border-top-width', '0px')
+  }
+  await expect(wornChoice).toHaveAttribute('aria-pressed', 'true')
+  await expect(wornChoice.locator('svg.lucide-check')).toBeVisible()
+  await expect(wornChoice).toHaveCSS('box-shadow', 'none')
+  await expect(availableChoice).toHaveAttribute('aria-pressed', 'false')
+  await expect(availableChoice).toBeEnabled()
+  await expect(unavailableChoice).toBeDisabled()
+  await expect(unavailableChoice).toHaveAccessibleDescription('Cannot be worn')
+  await expect(unavailableChoice).toHaveCSS('filter', 'none')
+  await expect(unavailableChoice).toHaveCSS('opacity', '1')
+  await expect(unavailableChoice.locator('svg.lucide-ban')).toBeVisible()
+  await unavailableChoice.press('Enter')
+  await expect(wornChoice).toHaveAttribute('aria-pressed', 'true')
+  await availableChoice.click()
+  await expect(availableChoice.locator('svg.lucide-check')).toBeVisible()
+  await expect(wornChoice).toHaveAttribute('aria-pressed', 'false')
+  const saveBadge = page.getByRole('button', { name: 'Save badge', exact: true })
+  await saveBadge.click()
+  await expect(page.locator('[data-sonner-toast][data-type="success"]')).toHaveText('Display badge updated.')
+  await expect(page.getByRole('main').getByText('Display badge updated.')).toHaveCount(0)
+  await noBadgeChoice.click()
+  await expect(noBadgeChoice).toHaveAttribute('aria-pressed', 'true')
+  await expect(noBadgeChoice.locator('svg.lucide-check')).toBeVisible()
+  await expect(noBadgeChoice).toHaveCSS('box-shadow', 'none')
+  await expect(noBadgeChoice).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  await saveBadge.click()
+  await expect(page.locator('[data-sonner-toast][data-type="error"]')).toHaveText('Badge update failed.')
+  await expect(page.getByRole('main').getByText('Badge update failed.')).toHaveCount(0)
+  await testInfo.attach('badge-selection', {
+    body: await noBadgeChoice.locator('..').screenshot(),
+    contentType: 'image/png',
+  })
+  await wornChoice.click()
   const presets = page.getByRole('button', { name: 'Select preset avatar' })
   await expect(presets).toHaveCount(2)
   await expect(presets.first()).toHaveAttribute('aria-pressed', 'true')
