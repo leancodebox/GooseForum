@@ -10,7 +10,8 @@
     <title>{{.Payload.Meta.Title}}</title>
     {{if .Payload.Meta.Robots}}<meta name="robots" content="{{.Payload.Meta.Robots}}">{{end}}
     <link rel="icon" href="/favicon.ico">
-    {{with LayoutStylesheet "src/admin/entry.tsx"}}<link id="goose-layout-style" rel="stylesheet" href="{{.}}" crossorigin>{{end}}
+    {{if .Payload.Layout.Site.ExternalLinks}}{{SafeHTML .Payload.Layout.Site.ExternalLinks}}{{end}}
+    <link id="goose-layout-style"{{with LayoutStylesheet "src/admin/entry.tsx"}} rel="stylesheet" href="{{.}}" crossorigin{{end}}>
     {{ResourceEntry "src/admin/entry.tsx"}}
     {{if .Payload.Layout.Theme.Href}}<link id="goose-site-theme-link" rel="stylesheet" href="{{.Payload.Layout.Theme.Href}}">{{end}}
 </head>

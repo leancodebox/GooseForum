@@ -3008,13 +3008,26 @@ test('site update refresh respects an unfinished reply', async ({ page }) => {
   await expect(panel.locator('textarea')).toHaveValue('Keep my unfinished reply')
 })
 
-test('moves between the forum and admin in one document and restores browser history', async ({ page, isMobile }) => {
-  await page.route('**/__goose_page/?*', route => route.fulfill({
-    json: { ...homePage, layout: { ...homePage.layout, viewer: adminPage.layout.viewer } },
+test('keeps one document and restores history across forum and admin with external head tags', async ({ page, isMobile }) => {
+  const customStyle = '<style>:root { --radius: 99px }</style>'
+  let adminStylesheet = ''
+  await page.route(url => url.pathname === '/' || url.pathname === '/admin', async route => {
+    const response = await route.fetch()
+    const link = adminStylesheet ? ` rel="stylesheet" href="${adminStylesheet}" crossorigin` : ''
+    const head = `${customStyle}<link id="goose-layout-style"${link}></head>`
+    await route.fulfill({ response, body: (await response.text()).replace('</head>', head) })
+  })
+  const radius = () => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--radius').trim())
+  await page.route(url => url.pathname === '/__goose_page/', route => route.fulfill({
+    json: { ...homePage, layout: { ...homePage.layout, viewer: adminPage.layout.viewer,
+      site: { ...homePage.layout.site, externalLinks: customStyle } } },
   }))
   await page.goto('/?lang=en')
   const banner = page.getByRole('banner')
   await expect(banner).toBeVisible()
+  const layoutRadius = await radius()
+  expect(layoutRadius).not.toBe('99px')
+  expect(layoutRadius).not.toBe('')
   const originalHeader = await banner.elementHandle()
   const bodyColumn = page.locator('[data-slot="goose-page-content"]')
   async function columnEdges() {
@@ -3031,6 +3044,7 @@ test('moves between the forum and admin in one document and restores browser his
   const expected = await columnEdges()
   async function checkFrame() {
     expect(await banner.evaluate((el, original) => el === original, originalHeader)).toBe(true)
+    expect(await radius()).toBe(layoutRadius)
     expect(await columnEdges()).toEqual(expected)
   }
   await page.getByRole('button', { name: 'admin', exact: true }).press('Enter')
@@ -3058,7 +3072,8 @@ test('moves between the forum and admin in one document and restores browser his
   await expect(page.locator('.admin-shell')).toBeVisible()
   await checkFrame()
   await page.goBack()
-  await expect(page.getByRole('button', { name: 'admin', exact: true })).toBeVisible()
+  await expect(page.locator('html')).toHaveAttribute('data-goose-resource', '')
+  await expect(bodyColumn).toBeVisible()
   await checkFrame()
   await page.goForward()
   await expect(page.locator('.admin-shell')).toBeVisible()
@@ -3067,6 +3082,10 @@ test('moves between the forum and admin in one document and restores browser his
   const sheets = await page.locator('link[rel="stylesheet"]').evaluateAll(links => links.map(link => link.getAttribute('href')))
   expect(sheets.filter(href => href?.includes('/styles/admin.css'))).toHaveLength(1)
   expect(sheets.some(href => href?.includes('/styles/site.css'))).toBe(false)
+  adminStylesheet = await page.locator('#goose-layout-style').evaluate(el => (el as HTMLLinkElement).href)
+  await page.reload()
+  await expect(page.locator('.admin-shell')).toBeVisible()
+  expect(await radius()).toBe(layoutRadius)
 })
 
 test('back from admin restores the scrolled topic and its compact header', async ({ page, isMobile }) => {

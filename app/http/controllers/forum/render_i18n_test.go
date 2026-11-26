@@ -50,6 +50,28 @@ func TestSiteSplashPrecedesApplicationAssets(t *testing.T) {
 	}
 }
 
+func TestExternalTagsRenderOnceInBothDocumentHeads(t *testing.T) {
+	reg, err := newRegistry(resource.GetTemplateFS())
+	if err != nil {
+		t.Fatal(err)
+	}
+	const tag = `<script defer src="/site-script.js"></script>`
+	page := PagePayload{Layout: LayoutPayload{Site: SitePayload{ExternalLinks: tag}}}
+	for _, name := range []string{"app_shell.gohtml", "admin.gohtml"} {
+		var buf bytes.Buffer
+		if err := reg.render(&buf, name, templateData{Payload: page, Lang: "en"}); err != nil {
+			t.Fatal(err)
+		}
+		head, _, ok := strings.Cut(buf.String(), "</head>")
+		if slot := strings.Index(buf.String(), `id="goose-layout-style"`); slot <= strings.Index(head, tag) {
+			t.Errorf("%s: expected layout stylesheet slot after external tags", name)
+		}
+		if !ok || strings.Count(head, tag) != 1 {
+			t.Errorf("%s: expected one configured script in head", name)
+		}
+	}
+}
+
 func TestAdminLayoutRendersSharedTheme(t *testing.T) {
 	reg, err := newRegistry(resource.GetTemplateFS())
 	if err != nil {

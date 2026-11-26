@@ -11,7 +11,7 @@ cd resource
 pnpm --filter @gooseforum/web dev
 ```
 
-主站和管理后台共用 `index.html` 和 `src/main.tsx`，按 URL 加载 `src/site/` 或 `src/admin/`。Go 模板注入首屏 payload；独立 Vite 开发时通过 `/__goose_page/*` 请求页面。后台使用 `admin.shell` 获取 viewer、权限和主题。主站和后台在同一文档内切换，按目标页面加载布局、字典和样式；配置了自定义 head HTML 时跨区使用整页导航，让脚本和样式随文档卸载。
+主站和管理后台共用 `index.html` 和 `src/main.tsx`，按 URL 加载 `src/site/` 或 `src/admin/`。Go 模板注入首屏 payload；独立 Vite 开发时通过 `/__goose_page/*` 请求页面。后台使用 `admin.shell` 获取 viewer、权限和主题。主站和后台在同一文档内切换，按目标页面加载布局、字典和样式。自定义 head HTML 由 Go 在主站和后台的首屏文档中注入一次，站内切换时继续生效。
 
 Vite 宿主负责页面接口请求、History 和浏览器 metadata；`@gooseforum/theme-default` 只接收页面 payload 与导航/API runtime，不依赖 Vite 或 Go 模板。Go 模板与独立 Vite 页面共用浏览器宿主适配。
 

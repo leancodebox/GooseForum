@@ -12,7 +12,6 @@ if (!mount) throw new Error('Missing #goose-app mount element')
 const root = createRoot(mount)
 const deployment = document.querySelector<HTMLMetaElement>('meta[name="goose-deployment"]')?.content
 let activeAdmin = isAdminPath(location.pathname)
-let forumHasCustomHead = false
 let pending: AbortController | undefined
 let activeStyle = document.querySelector<HTMLLinkElement>('#goose-layout-style')
 
@@ -31,12 +30,7 @@ const navigateArea: AreaNavigation = (url, mode, leavingIndex) => {
   pending?.abort()
   if (url.origin !== location.origin || isAdminPath(url.pathname) === activeAdmin) return false
   rememberScroll(leavingIndex)
-  // Custom head HTML may install scripts that live for the entire document.
-  if (forumHasCustomHead) {
-    navigateDocument(url, mode)
-  } else {
-    void openArea(url, mode)
-  }
+  void openArea(url, mode)
   return true
 }
 
@@ -94,10 +88,6 @@ async function openArea(url: URL, mode: 'initial' | 'push' | 'replace' | 'pop') 
     }
     const { page, stylesheet } = area
     const admin = page.component === 'admin.shell'
-    if (!admin && mode !== 'initial' && page.layout.site.externalLinks) {
-      navigateDocument(url, mode)
-      return
-    }
     const href = new URL(stylesheet, import.meta.url).href
     const sheet = activeStyle?.href === href && activeStyle.sheet ? activeStyle : document.createElement('link')
     let styleReady: Promise<void> | undefined
@@ -110,7 +100,9 @@ async function openArea(url: URL, mode: 'initial' | 'push' | 'replace' | 'pop') 
       styleReady = new Promise<void>((resolve, reject) => {
         sheet.onload = () => resolve()
         sheet.onerror = () => reject(new Error('Failed to load ' + sheet.href))
-        document.head.prepend(sheet)
+        // Keep the cascade order chosen by the initial document.
+        if (activeStyle) activeStyle.before(sheet)
+        else document.head.append(sheet)
       })
     }
     const [content] = await Promise.all([area.prepare(), styleReady])
@@ -124,7 +116,6 @@ async function openArea(url: URL, mode: 'initial' | 'push' | 'replace' | 'pop') 
     if (mode === 'push' || mode === 'replace') commitHistory(url, mode)
     else if (url.href !== location.href) commitHistory(url, 'replace')
     activeAdmin = admin
-    forumHasCustomHead = !admin && Boolean(page.layout.site.externalLinks)
     document.documentElement.toggleAttribute('data-goose-admin', admin)
     document.documentElement.toggleAttribute('data-goose-resource', !admin)
     document.documentElement.classList.toggle('goose-admin-document', admin)
@@ -134,7 +125,10 @@ async function openArea(url: URL, mode: 'initial' | 'push' | 'replace' | 'pop') 
     if (admin) mount?.removeAttribute('aria-live')
     else mount?.setAttribute('aria-live', 'polite')
     sheet.media = 'all'
-    if (activeStyle !== sheet) activeStyle?.remove()
+    if (activeStyle !== sheet) {
+      activeStyle?.remove()
+      sheet.id = 'goose-layout-style'
+    }
     activeStyle = sheet
     prepareDocument(page)
     let ready = false
