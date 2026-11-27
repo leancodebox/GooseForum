@@ -68,6 +68,15 @@ archives:
       - README*
       - src: scripts/windows/start.bat
         dst: start.bat
+  - id: frontend
+    meta: true
+    formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_frontend"
+    files:
+      - src: resource/static/dist/react
+        dst: assets/react
+      - src: resource/static/pic
+        dst: static/pic
 
 changelog:
   sort: asc
