@@ -1,9 +1,9 @@
-import { getAdminDictionary } from "./translation-loader";
-type EnglishDictionary = typeof import("./messages/en-settings").default;
+import { adminText, type AdminText } from "@gooseforum/i18n/admin";
+import type { SimpleKey } from "@gooseforum/i18n";
 import type { AuthLocale } from "@gooseforum/runtime/i18n/auth";
 
-export type SettingsTextKey = keyof EnglishDictionary;
-export function createSettingsText(locale: AuthLocale) {
-  return (k: SettingsTextKey) =>
-    getAdminDictionary<EnglishDictionary>("settings", locale)[k];
+export type SettingsTextKey = SimpleKey<"admin.settings">;
+export type SettingsText = AdminText<"admin.settings">;
+export function createSettingsText(locale: AuthLocale): SettingsText {
+  return adminText(locale, "admin.settings");
 }

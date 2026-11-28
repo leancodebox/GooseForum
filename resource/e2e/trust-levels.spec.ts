@@ -1,7 +1,24 @@
 import { expect, test } from './fixtures'
 import type { TrustProgress, TrustHistory } from '@gooseforum/client'
-import jaTrust from '../apps/web/src/admin/messages/ja-trust-settings'
-import itTrust from '../apps/web/src/admin/messages/it-trust-settings'
+
+const trustLabels = {
+  "ja": {
+    "promotion": "昇格条件",
+    "grantedByAdmin": "管理者が付与",
+    "cooldown": "待機時間",
+    "minUploadAccountAgeMinutes": "アップロード待機（分）",
+    "maxDailyTopics": "トピック/日",
+    "unlimited": "無制限"
+  },
+  "it": {
+    "promotion": "Promozione",
+    "grantedByAdmin": "Assegnato da un amministratore",
+    "cooldown": "Attesa",
+    "minUploadAccountAgeMinutes": "Attesa caricamenti (min)",
+    "maxDailyTopics": "Argomenti/giorno",
+    "unlimited": "Illimitato"
+  }
+}
 
 const layout = {
   site: { name: 'GooseForum', description: '', logo: '', favicon: '', brandType: 'default', brandText: '', brandImage: '' },
@@ -47,7 +64,7 @@ for (const [locale, label, limitsTab] of [
   ['it', 'Allegati', 'Limiti'],
 ] as const) {
   test(`localizes attachment permissions in ${locale}`, async ({ page }, info) => {
-    const dictionary = locale === 'ja' ? jaTrust : itTrust
+    const dictionary = trustLabels[locale]
     await page.route('**/__goose_page/**', route => route.fulfill({ json: { component: 'admin.shell', props: {}, layout, meta: { title: 'Trust levels' }, url: `/admin/settings/trust?lang=${locale}`, version: '1.0' } }))
     await page.route('**/api/admin/get-trust-settings', route => route.fulfill({ json: { code: 0, result: {
       schemaVersion: 3, registrationCooldown: { minPostAccountAgeMinutes: 0, minUploadAccountAgeMinutes: 1440 }, promotionRules: [],

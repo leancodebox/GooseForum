@@ -1,3 +1,4 @@
+import { runtimeText } from "@gooseforum/i18n";
 import { ExternalLinkIcon, HeartHandshakeIcon, MailIcon, ShieldCheckIcon } from 'lucide-react'
 import type { SponsorSectionPayload, SponsorsPageProps } from '@gooseforum/client'
 import { useTranslation } from 'react-i18next'
@@ -9,7 +10,7 @@ import { InfoPanel } from '../layout/info-panel'
 import { PageHeader } from '../layout/page-header'
 
 export function SponsorsPageView({ page }: { page: SponsorsPageProps }) {
-  const { t } = useTranslation('sponsors')
+  const { t } = useTranslation('site.sponsors')
   return (
     <div className="pb-12">
       <PageHeader compact divided={false} title={page.content.title} description={page.content.description} badge={<Badge variant="secondary">{page.totalCount}</Badge>} />
@@ -26,7 +27,7 @@ export function SponsorsPageView({ page }: { page: SponsorsPageProps }) {
                       section.tone === 'gold' && 'bg-warning/10 text-warning',
                     )}
                   >
-                    {t(`tiers.${section.key}`, { defaultValue: section.label })}
+                    {runtimeText(t, `tiers.${section.key}`, { defaultValue: section.label })}
                   </Badge>
                 </h2>
                 <Badge variant="secondary">{section.sponsors.length}</Badge>

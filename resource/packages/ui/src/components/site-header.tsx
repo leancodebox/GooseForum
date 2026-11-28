@@ -1,3 +1,4 @@
+import type { SimpleKey } from "@gooseforum/i18n";
 import { useEffect, useRef, useState, Suspense, type ComponentType, type ReactNode, type AnchorHTMLAttributes } from "react";
 import { BellIcon, FileTextIcon, InboxIcon, LanguagesIcon, LogOutIcon, PenSquareIcon, SettingsIcon, ShieldIcon, UserRoundIcon } from "lucide-react";
 import { DefaultBrand } from "./default-brand";
@@ -21,7 +22,8 @@ interface SiteHeaderProps<L extends string> {
   hidden?: boolean;
   homeLabel?: string;
   Link: ComponentType<AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }>;
-  t(key: string, fallback?: string): string;
+  t(key: SimpleKey<"shared.shell">): string;
+  navLabel(key: string, fallback: string): string;
   locale: L;
   locales: readonly L[];
   localeLabels: Record<L, { label: string }>;
@@ -34,7 +36,7 @@ interface SiteHeaderProps<L extends string> {
 const headerMenuKeys = ["theme", "language", "user"] as const;
 type HeaderMenu = (typeof headerMenuKeys)[number];
 
-export function SiteHeader<L extends string>({ site, viewer, header, unread, sidebarTrigger, contextTitle, hidden, homeLabel, Link, t, locale, locales, localeLabels, onLocaleChange, themePreference, onThemeChange, onSearch, onLogout }: SiteHeaderProps<L>) {
+export function SiteHeader<L extends string>({ site, viewer, header, unread, sidebarTrigger, contextTitle, hidden, homeLabel, Link, t, navLabel, locale, locales, localeLabels, onLocaleChange, themePreference, onThemeChange, onSearch, onLogout }: SiteHeaderProps<L>) {
   const headerItems = header ?? [
     { key: "links", url: "/links", label: t("nav.links") },
     { key: "sponsors", url: "/sponsors", label: t("nav.sponsors") },
@@ -129,7 +131,7 @@ export function SiteHeader<L extends string>({ site, viewer, header, unread, sid
                   {item.icon && item.key !== "links" && item.key !== "sponsors" && (
                     <span className="size-4 shrink-0"><NavigationIconContent name={item.icon} /></span>
                   )}
-                  {item.i18nLabel?.startsWith("shell.") ? t(item.i18nLabel.slice(6), item.label) : item.label}
+                  {item.i18nLabel?.startsWith("shell.") ? navLabel(item.i18nLabel.slice(6), item.label) : item.label}
                 </Link>
               ))}
             </nav>

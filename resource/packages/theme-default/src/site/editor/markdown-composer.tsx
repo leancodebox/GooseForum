@@ -88,7 +88,7 @@ export function MarkdownComposer({
   sourceVersion?: 0 | 1;
   attachmentEditor?: AttachmentEditorProps;
 }) {
-  const { t } = useTranslation("publish");
+  const { t } = useTranslation("site.publish");
   const runtime = useGooseRuntime();
   const beginMentionRequest = useLatestRequest();
   const serverError = useServerErrorMessage();
@@ -405,7 +405,7 @@ export function MarkdownComposer({
                 type="button"
                 variant="ghost"
                 size="icon-sm"
-                aria-label={t("toolbar.heading")}
+                aria-label={t("toolbar.headingMenu")}
               >
                 <Heading />
               </Button>

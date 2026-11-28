@@ -41,14 +41,6 @@
     "./i18n/locale": {
       "types": "./dist/i18n/locale.d.ts",
       "import": "./dist/i18n/locale.js"
-    },
-    "./i18n/messages/*": {
-      "types": "./dist/i18n/messages/*.d.ts",
-      "import": "./dist/i18n/messages/*.js"
-    },
-    "./i18n": {
-      "types": "./dist/i18n/index.d.ts",
-      "import": "./dist/i18n/index.js"
     }
   },
   "scripts": {

@@ -21,7 +21,7 @@ export function ResetPasswordPageView({
   layout: LayoutPayload
   page: ResetPasswordPageProps
 }) {
-  const { t } = useTranslation('auth')
+  const { t } = useTranslation('site.auth')
   const runtime = useGooseRuntime()
   const serverError = useServerErrorMessage()
   const [password, setPassword] = useState('')

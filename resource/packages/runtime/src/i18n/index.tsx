@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
-import i18next, { type i18n, type Resource } from "i18next";
+import type { i18n, Resource } from "i18next";
 import { I18nextProvider, initReactI18next } from "react-i18next";
-import { supportedLocales, type Locale } from "@gooseforum/client/i18n/locale";
+import type { Locale } from "@gooseforum/client/i18n/locale";
+import { createI18n } from "@gooseforum/i18n/react-runtime";
 import {
   goosePageNamespaces,
   cachedGooseResources,
@@ -18,26 +19,11 @@ export {
   prepareGooseTranslations,
 } from "./loader";
 export { useServerErrorMessage } from "./server-error";
-export const defaultNamespace = "auth";
-
 export function createGooseI18n(
   locale: Locale,
   initialResources: Resource = cachedGooseResources(),
 ): i18n {
-  const instance = i18next.createInstance();
-  void instance.use(initReactI18next).init({
-    lng: locale,
-    fallbackLng: "zh",
-    supportedLngs: [...supportedLocales],
-    load: "languageOnly",
-    defaultNS: defaultNamespace,
-    ns: [],
-    resources: initialResources,
-    interpolation: { escapeValue: false, prefix: "{", suffix: "}" },
-    initAsync: false,
-    react: { useSuspense: false, bindI18nStore: "added" },
-  });
-  return instance;
+  return createI18n(locale, initialResources, initReactI18next);
 }
 
 export function GooseI18nProvider({

@@ -1,8 +1,8 @@
+import { adminText } from "@gooseforum/i18n/admin";
 import { afterEach, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { GooseAdminApi, LayoutPayload } from "@gooseforum/client";
-import messages from "../messages/zh-settings";
 import { SiteChromeManagementPage } from "./site-chrome-management-page";
 
 afterEach(() => {
@@ -30,7 +30,7 @@ it("folds secondary navigation into More and preserves custom configuration when
   const api = { settings: { chrome: vi.fn().mockResolvedValue(config), saveChrome } } as unknown as GooseAdminApi;
   const layout = { site: { name: "GooseForum" }, sidebar: { categories: [] } } as unknown as LayoutPayload;
   const user = userEvent.setup();
-  render(<SiteChromeManagementPage api={api} layout={layout} text={key => messages[key]} />);
+  render(<SiteChromeManagementPage api={api} layout={layout} text={adminText("zh", "admin.settings")} />);
 
   const more = await screen.findByRole("button", { name: "更多" });
   const sidebar = within(document.querySelector("aside")!);
@@ -70,7 +70,7 @@ it("folds secondary navigation into More and preserves custom configuration when
   await user.click(addEditor.getByRole("button", { name: "图标" }));
   const picker = within(await screen.findByRole("dialog", { name: "图标" }));
   await user.type(await picker.findByRole("searchbox", { name: "搜索图标…" }), "book open");
-  await user.click(picker.getByRole("button", { name: "book-open" }));
+  await user.click(await picker.findByRole("button", { name: "book-open" }));
   expect(screen.queryByRole("dialog", { name: "图标" })).toBeNull();
   expect(addEditor.getByRole("button", { name: "图标" }).textContent).toBe("book-open");
   await user.click(addEditor.getByRole("button", { name: "保存" }));

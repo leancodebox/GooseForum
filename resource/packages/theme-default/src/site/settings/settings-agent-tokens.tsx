@@ -1,3 +1,4 @@
+import { runtimeText } from "@gooseforum/i18n";
 import { useEffect, useRef, useState } from "react";
 import type { AgentTokenPayload } from "@gooseforum/client";
 import { Ban, Check, Copy, ExternalLink, KeyRound, Plus, RefreshCw, Trash2, X } from "lucide-react";
@@ -29,7 +30,7 @@ import { SettingsSectionHeader } from "./settings-section-header";
 import { useMFAEnabled } from "./use-mfa-enabled";
 
 export function AgentTokenSettings() {
-  const { t } = useTranslation("settings");
+  const { t } = useTranslation("site.settings");
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
   const [rows, setRows] = useState<AgentTokenPayload[]>([]);
@@ -246,9 +247,8 @@ export function AgentTokenSettings() {
                         }
                       />
                       <FieldLabel htmlFor={`agent-${scope}`}>
-                        {t(`agentTokens.scopes.${scope}`, {
-                          nsSeparator: false,
-                        })}
+                        {runtimeText(t, `agentTokens.scopes.${scope.replace(":", ".")}`, {
+                          })}
                       </FieldLabel>
                     </Field>
                   ),
@@ -388,9 +388,8 @@ export function AgentTokenSettings() {
                   <div className="my-2 flex flex-wrap gap-1">
                     {row.scopes.map((scope) => (
                       <Badge key={scope} variant="outline">
-                        {t(`agentTokens.scopes.${scope}`, {
-                          nsSeparator: false,
-                        })}
+                        {runtimeText(t, `agentTokens.scopes.${scope.replace(":", ".")}`, {
+                          })}
                       </Badge>
                     ))}
                   </div>

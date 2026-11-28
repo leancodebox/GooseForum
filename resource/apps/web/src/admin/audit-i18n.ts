@@ -1,6 +1,7 @@
-import { getAdminDictionary } from "./translation-loader";
-type EnglishDictionary = typeof import("./messages/en-audit").default;
-type AuditExtra = typeof import("./messages/en-audit-extra").default;
+import { runtimeText } from "@gooseforum/i18n";
+import { adminText, getAdminDictionary, type Dictionary } from "@gooseforum/i18n/admin";
+type Messages = Dictionary<"admin.audit">;
+type AuditExtra = Dictionary<"admin.audit-extra">;
 import type { AuthLocale } from "@gooseforum/runtime/i18n/auth";
 
 type MessageKey = keyof AuditExtra["messages"];
@@ -18,11 +19,11 @@ export const adminAuditMessageCodes = {
   "admin.opt.category.moderatorAdded": "categoryModeratorAdded",
   "admin.opt.category.moderatorRemoved": "categoryModeratorRemoved",
 } as const satisfies Record<string, MessageKey>;
-export type AuditTextKey = Exclude<keyof EnglishDictionary, 'authLogs' | 'authLogActions'>;
+export type AuditTextKey = Exclude<keyof Messages, 'authLogs' | 'authLogActions'>;
 
 export function createAuditText(locale: AuthLocale) {
   return (key: AuditTextKey) =>
-    getAdminDictionary<EnglishDictionary>("audit", locale)[key];
+    adminText(locale, "admin.audit")(key);
 }
 
 export function formatAuditMessage(
@@ -36,9 +37,12 @@ export function formatAuditMessage(
   ];
   if (!key) return fallback || messageCode;
   const values = normalizeParams(locale, params);
-  return getAdminDictionary<AuditExtra>("audit-extra", locale).messages[
-    key
-  ].replace(/\{(\w+)\}/g, (_match, name: string) => values[name] ?? "");
+  // API audit messages use heterogeneous parameter sets. Normalize the payload
+  // before the runtime formats the checked catalog key.
+  return runtimeText(adminText(locale, "admin.audit-extra"), "messages." + key, {
+    replace: values,
+    defaultValue: fallback || messageCode,
+  });
 }
 
 function normalizeParams(locale: AuthLocale, params: Record<string, unknown>) {
@@ -52,12 +56,9 @@ function normalizeParams(locale: AuthLocale, params: Record<string, unknown>) {
   if (
     typeof params.status === "string" &&
     params.status in
-      getAdminDictionary<AuditExtra>("audit-extra", locale).statusLabels
+      getAdminDictionary("admin.audit-extra", locale).statusLabels
   )
-    values.status = getAdminDictionary<AuditExtra>(
-      "audit-extra",
-      locale,
-    ).statusLabels[params.status as keyof AuditExtra["statusLabels"]];
+    values.status = getAdminDictionary("admin.audit-extra", locale).statusLabels[params.status as keyof AuditExtra["statusLabels"]];
   if (typeof params.type === "string")
     values.type = localizedParam(
       locale,
@@ -74,7 +75,7 @@ function normalizeParams(locale: AuthLocale, params: Record<string, unknown>) {
     values.changedFields = params.changes
       .map(
         (field) =>
-          getAdminDictionary<AuditExtra>("audit-extra", locale).fieldLabels[
+          getAdminDictionary("admin.audit-extra", locale).fieldLabels[
             String(field) as keyof AuditExtra["fieldLabels"]
           ] || String(field),
       )
@@ -98,6 +99,6 @@ function localizedParam(
   group: "contentTypes" | "actions",
   value: string,
 ) {
-  const labels = getAdminDictionary<AuditExtra>("audit-extra", locale)[group];
+  const labels = getAdminDictionary("admin.audit-extra", locale)[group];
   return value in labels ? labels[value as keyof typeof labels] : value;
 }

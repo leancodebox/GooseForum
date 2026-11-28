@@ -21,9 +21,9 @@ import { PageHeader } from "../layout/page-header";
 import { SitePanel } from "../layout/site-panel";
 
 export function AccessGroupsPageView() {
-  const { t } = useTranslation("accessGroups");
+  const { t } = useTranslation("site.accessGroups");
   const serverError = useServerErrorMessage();
-  const { t: commonT } = useTranslation("contentCommon");
+  const { t: commonT } = useTranslation("site.contentCommon");
   const { api } = useGooseRuntime();
   const [groups, setGroups] = useState<JoinableAccessGroup[]>([]);
   const [managed, setManaged] = useState<ManagedAccessGroup[]>([]);

@@ -18,7 +18,7 @@ export function AvatarCropDialog({
   crop: AvatarCropController;
   cover?: boolean;
 }) {
-  const { t } = useTranslation("settings");
+  const { t } = useTranslation("site.settings");
   return (
     <Dialog
       open={crop.open}

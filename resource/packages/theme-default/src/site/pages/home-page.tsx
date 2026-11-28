@@ -30,7 +30,7 @@ export function HomePageView({
   page: HomeProps;
   pageUrl: string;
 }) {
-  const { t } = useTranslation("home");
+  const { t } = useTranslation("site.home");
   const list = useTopicList(page, pageUrl);
   const runtime = useGooseRuntime();
   const latestPublicID = usePublicTopicMax();

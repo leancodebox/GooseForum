@@ -1,0 +1,20 @@
+{
+  "loading": {
+    "source": "加载中…",
+    "translations": {
+      "en": {"text":"Loading…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true},
+      "ja": {"text":"読み込み中…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true},
+      "it": {"text":"Caricamento…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true},
+      "ru": {"text":"Загрузка…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true}
+    }
+  },
+  "saving": {
+    "source": "保存中…",
+    "translations": {
+      "en": {"text":"Saving…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
+      "ja": {"text":"保存中…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
+      "it": {"text":"Salvataggio…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
+      "ru": {"text":"Сохранение…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true}
+    }
+  }
+}

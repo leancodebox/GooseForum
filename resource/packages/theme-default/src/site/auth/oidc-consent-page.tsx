@@ -1,5 +1,6 @@
 "use client"
 
+import { runtimeText } from "@gooseforum/i18n";
 import { useEffect, useState } from 'react'
 import { ArrowRightIcon, CheckIcon, KeyRoundIcon, XIcon } from 'lucide-react'
 import type { LayoutPayload, OIDCConsentDetails, OIDCConsentPageProps } from '@gooseforum/client'
@@ -22,7 +23,7 @@ export function OIDCConsentPageView({
   layout: LayoutPayload
   page: OIDCConsentPageProps
 }) {
-  const { t } = useTranslation('oidcConsent')
+  const { t } = useTranslation('site.oidcConsent')
   const runtime = useGooseRuntime()
   const serverError = useServerErrorMessage()
   const [details, setDetails] = useState<OIDCConsentDetails>()
@@ -111,7 +112,7 @@ export function OIDCConsentPageView({
                           {details.scopes.map((scope) => (
                             <li key={scope} className="flex items-center gap-3 px-4 py-3 text-sm">
                               <CheckIcon className="shrink-0 text-primary" aria-hidden="true" />
-                              <span>{t(`scopes.${scope}`, { defaultValue: scope, nsSeparator: false })}</span>
+                              <span>{runtimeText(t, `scopes.${scope.replace(":", ".")}`, { defaultValue: scope })}</span>
                             </li>
                           ))}
                         </ul>

@@ -180,7 +180,7 @@ export function TopicListModeSwitch({
   onClick,
 }: {
   mode: TopicListMode;
-  t: TFunction;
+  t: TFunction<"site.home">;
   onClick(): void;
 }) {
   const target = mode === "waterfall" ? "pagination" : "waterfall";
@@ -212,7 +212,7 @@ export const TopicTable = memo(function TopicTable({
   showCategories?: boolean;
   showHot?: boolean;
   renderDescription?: (topic: TopicPayload) => ReactNode;
-  t: TFunction;
+  t: TFunction<"site.home">;
 }) {
   return (
     <div role="table" aria-label={t("topic")}>
@@ -254,7 +254,7 @@ const TopicRow = memo(function TopicRow({
   showCategories: boolean;
   showHot: boolean;
   renderDescription?: (topic: TopicPayload) => ReactNode;
-  t: TFunction;
+  t: TFunction<"site.home">;
 }) {
   const isHot = showHot && topic.viewCount > 500;
   const hasMobileLabels =
@@ -468,7 +468,7 @@ export function TopicListFooter({
   pagination: TopicPagination;
   loading: boolean;
   error: string;
-  t: TFunction;
+  t: TFunction<"site.home">;
   onLoad(): Promise<void>;
   previousUrl?: string;
   pageUrl?: string;
@@ -566,7 +566,7 @@ function topicDescription(topic: TopicPayload) {
   );
 }
 
-function relativeTime(value: string, t: TFunction) {
+function relativeTime(value: string, t: TFunction<"site.home">) {
   const time = new Date(
     value.includes("T") ? value : value.replace(" ", "T"),
   ).getTime();

@@ -112,7 +112,7 @@ export function TopicComposer({
   onClearTarget(): void;
   draftPanel?: ReactNode;
 }) {
-  const { t } = useTranslation("topic");
+  const { t } = useTranslation("site.topic");
   return (
     <>
       <ComposerSurface present={open && minimized} className="pointer-events-none fixed inset-x-0 bottom-3 z-40 flex justify-center px-3">

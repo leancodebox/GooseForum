@@ -5,7 +5,6 @@ import {
   formatCompactNumber,
   GooseClientError,
   GooseProtocolError,
-  authResources,
   normalizeLocale,
   pageComponents,
 } from '../src/index.js'
@@ -41,11 +40,6 @@ describe('i18n contracts', () => {
     expect(normalizeLocale(input)).toBe(expected)
   })
 
-  it('keeps every auth locale structurally complete', () => {
-    expect(Object.keys(authResources)).toEqual(['zh', 'en', 'ja', 'it', 'ru'])
-    expect(authResources.en.validation.loginRequired).toBeTruthy()
-    expect(authResources.ja.server.passwordResetMailQueued).toBeTruthy()
-  })
 })
 
 describe('format contracts', () => {

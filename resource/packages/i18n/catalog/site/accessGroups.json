@@ -1,0 +1,812 @@
+{
+  "actions": {
+    "source": "操作",
+    "translations": {
+      "en": {"text":"Actions","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true},
+      "ja": {"text":"操作","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true},
+      "it": {"text":"Azioni","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true},
+      "ru": {"text":"Действия","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true}
+    }
+  },
+  "active": {
+    "source": "已加入",
+    "translations": {
+      "en": {"text":"Active","sourceRevision":"8701e21b6c6306ad7c69a50fcd658f456e581b2192b82550869a69c42555c9aa","reviewed":true},
+      "ja": {"text":"参加済み","sourceRevision":"8701e21b6c6306ad7c69a50fcd658f456e581b2192b82550869a69c42555c9aa","reviewed":true},
+      "it": {"text":"Attivo","sourceRevision":"8701e21b6c6306ad7c69a50fcd658f456e581b2192b82550869a69c42555c9aa","reviewed":true},
+      "ru": {"text":"Активна","sourceRevision":"8701e21b6c6306ad7c69a50fcd658f456e581b2192b82550869a69c42555c9aa","reviewed":true}
+    }
+  },
+  "addMember": {
+    "source": "添加成员",
+    "translations": {
+      "en": {"text":"Add member","sourceRevision":"f975438e715d90308a8a4b36236fd826259fe092dd857ef3c20c95dc80c9d23e","reviewed":true},
+      "ja": {"text":"メンバーを追加","sourceRevision":"f975438e715d90308a8a4b36236fd826259fe092dd857ef3c20c95dc80c9d23e","reviewed":true},
+      "it": {"text":"Aggiungi membro","sourceRevision":"f975438e715d90308a8a4b36236fd826259fe092dd857ef3c20c95dc80c9d23e","reviewed":true},
+      "ru": {"text":"Добавить участника","sourceRevision":"f975438e715d90308a8a4b36236fd826259fe092dd857ef3c20c95dc80c9d23e","reviewed":true}
+    }
+  },
+  "applicationApproved": {
+    "source": "申请已批准",
+    "translations": {
+      "en": {"text":"Application approved","sourceRevision":"1e37b18258ebf735f261496207a590a40d46e46b40e3260538ffe1c3bf20dcd2","reviewed":true},
+      "ja": {"text":"申請を承認しました","sourceRevision":"1e37b18258ebf735f261496207a590a40d46e46b40e3260538ffe1c3bf20dcd2","reviewed":true},
+      "it": {"text":"Richiesta approvata","sourceRevision":"1e37b18258ebf735f261496207a590a40d46e46b40e3260538ffe1c3bf20dcd2","reviewed":true},
+      "ru": {"text":"Заявка одобрена","sourceRevision":"1e37b18258ebf735f261496207a590a40d46e46b40e3260538ffe1c3bf20dcd2","reviewed":true}
+    }
+  },
+  "applicationFailed": {
+    "source": "提交加入申请失败",
+    "translations": {
+      "en": {"text":"Failed to submit the application","sourceRevision":"26707e5c234c0dd3d8a4cd0ae57fc0e9857113182a0d5cc54f3aadab358444da","reviewed":true},
+      "ja": {"text":"申請の送信に失敗しました","sourceRevision":"26707e5c234c0dd3d8a4cd0ae57fc0e9857113182a0d5cc54f3aadab358444da","reviewed":true},
+      "it": {"text":"Invio della richiesta non riuscito","sourceRevision":"26707e5c234c0dd3d8a4cd0ae57fc0e9857113182a0d5cc54f3aadab358444da","reviewed":true},
+      "ru": {"text":"Не удалось отправить заявку","sourceRevision":"26707e5c234c0dd3d8a4cd0ae57fc0e9857113182a0d5cc54f3aadab358444da","reviewed":true}
+    }
+  },
+  "applicationRejected": {
+    "source": "申请已拒绝",
+    "translations": {
+      "en": {"text":"Application rejected","sourceRevision":"89cda8ac5423139fb73495b786315ea548154fc666f2fa82c1c34ce6fd108635","reviewed":true},
+      "ja": {"text":"申請を却下しました","sourceRevision":"89cda8ac5423139fb73495b786315ea548154fc666f2fa82c1c34ce6fd108635","reviewed":true},
+      "it": {"text":"Richiesta rifiutata","sourceRevision":"89cda8ac5423139fb73495b786315ea548154fc666f2fa82c1c34ce6fd108635","reviewed":true},
+      "ru": {"text":"Заявка отклонена","sourceRevision":"89cda8ac5423139fb73495b786315ea548154fc666f2fa82c1c34ce6fd108635","reviewed":true}
+    }
+  },
+  "applicationsToReview": {
+    "source": "待审核申请",
+    "translations": {
+      "en": {"text":"Applications to review","sourceRevision":"c8440bd5dfd56da7172908b26a58333283470eab0fcaa675e32074e4fac8aabe","reviewed":true},
+      "ja": {"text":"審査待ちの申請","sourceRevision":"c8440bd5dfd56da7172908b26a58333283470eab0fcaa675e32074e4fac8aabe","reviewed":true},
+      "it": {"text":"Richieste da esaminare","sourceRevision":"c8440bd5dfd56da7172908b26a58333283470eab0fcaa675e32074e4fac8aabe","reviewed":true},
+      "ru": {"text":"Заявки на рассмотрение","sourceRevision":"c8440bd5dfd56da7172908b26a58333283470eab0fcaa675e32074e4fac8aabe","reviewed":true}
+    }
+  },
+  "apply": {
+    "source": "申请加入",
+    "translations": {
+      "en": {"text":"Apply to join","sourceRevision":"771f70a7de7ff2969cb64b75411023d151bd151b18ba7d66a8d5ee68ad5aae6b","reviewed":true},
+      "ja": {"text":"参加を申請","sourceRevision":"771f70a7de7ff2969cb64b75411023d151bd151b18ba7d66a8d5ee68ad5aae6b","reviewed":true},
+      "it": {"text":"Richiedi accesso","sourceRevision":"771f70a7de7ff2969cb64b75411023d151bd151b18ba7d66a8d5ee68ad5aae6b","reviewed":true},
+      "ru": {"text":"Подать заявку на вступление","sourceRevision":"771f70a7de7ff2969cb64b75411023d151bd151b18ba7d66a8d5ee68ad5aae6b","reviewed":true}
+    }
+  },
+  "approve": {
+    "source": "批准",
+    "translations": {
+      "en": {"text":"Approve","sourceRevision":"57c36814ed7f4521a90cf3e0f9e1b8c2604408e45b1a627dad334588956acc53","reviewed":true},
+      "ja": {"text":"承認","sourceRevision":"57c36814ed7f4521a90cf3e0f9e1b8c2604408e45b1a627dad334588956acc53","reviewed":true},
+      "it": {"text":"Approva","sourceRevision":"57c36814ed7f4521a90cf3e0f9e1b8c2604408e45b1a627dad334588956acc53","reviewed":true},
+      "ru": {"text":"Одобрить","sourceRevision":"57c36814ed7f4521a90cf3e0f9e1b8c2604408e45b1a627dad334588956acc53","reviewed":true}
+    }
+  },
+  "capability": {
+    "source": "当前能力",
+    "translations": {
+      "en": {"text":"Capability","sourceRevision":"ef76287d9df018524824a32d18c8144387b01cc07d3f4bc948e09545dc95edc8","reviewed":true},
+      "ja": {"text":"現在の権限","sourceRevision":"ef76287d9df018524824a32d18c8144387b01cc07d3f4bc948e09545dc95edc8","reviewed":true},
+      "it": {"text":"Capacità","sourceRevision":"ef76287d9df018524824a32d18c8144387b01cc07d3f4bc948e09545dc95edc8","reviewed":true},
+      "ru": {"text":"Возможность","sourceRevision":"ef76287d9df018524824a32d18c8144387b01cc07d3f4bc948e09545dc95edc8","reviewed":true}
+    }
+  },
+  "category": {
+    "source": "分类",
+    "translations": {
+      "en": {"text":"Category","sourceRevision":"6e4ccd367a39a23420b02171938835f2b6d055d78b9422eababbeece913381c9","reviewed":true},
+      "ja": {"text":"カテゴリ","sourceRevision":"6e4ccd367a39a23420b02171938835f2b6d055d78b9422eababbeece913381c9","reviewed":true},
+      "it": {"text":"Categoria","sourceRevision":"6e4ccd367a39a23420b02171938835f2b6d055d78b9422eababbeece913381c9","reviewed":true},
+      "ru": {"text":"Категория","sourceRevision":"6e4ccd367a39a23420b02171938835f2b6d055d78b9422eababbeece913381c9","reviewed":true}
+    }
+  },
+  "categoryPermissions": {
+    "source": "分类权限",
+    "translations": {
+      "en": {"text":"Category permissions","sourceRevision":"1731ec1388d08e91c5d9b4e37bd98f72f07952ecfffa0c5e4c6d0921d917cfb6","reviewed":true},
+      "ja": {"text":"カテゴリ権限","sourceRevision":"1731ec1388d08e91c5d9b4e37bd98f72f07952ecfffa0c5e4c6d0921d917cfb6","reviewed":true},
+      "it": {"text":"Permessi categoria","sourceRevision":"1731ec1388d08e91c5d9b4e37bd98f72f07952ecfffa0c5e4c6d0921d917cfb6","reviewed":true},
+      "ru": {"text":"Права категорий","sourceRevision":"1731ec1388d08e91c5d9b4e37bd98f72f07952ecfffa0c5e4c6d0921d917cfb6","reviewed":true}
+    }
+  },
+  "create": {
+    "source": "新建访问组",
+    "translations": {
+      "en": {"text":"Create group","sourceRevision":"a16a909d4e6ad1254f4a7dd44445a7861f253c3a903ff94a20bf44cd2919cbed","reviewed":true},
+      "ja": {"text":"グループを作成","sourceRevision":"a16a909d4e6ad1254f4a7dd44445a7861f253c3a903ff94a20bf44cd2919cbed","reviewed":true},
+      "it": {"text":"Crea gruppo","sourceRevision":"a16a909d4e6ad1254f4a7dd44445a7861f253c3a903ff94a20bf44cd2919cbed","reviewed":true},
+      "ru": {"text":"Создать группу","sourceRevision":"a16a909d4e6ad1254f4a7dd44445a7861f253c3a903ff94a20bf44cd2919cbed","reviewed":true}
+    }
+  },
+  "deleteConfirm": {
+    "source": "确定删除访问组“{name}”及其全部成员关系和授权吗？",
+    "translations": {
+      "en": {"text":"Delete “{name}”, including all memberships and grants?","sourceRevision":"beea99a5f84a13a028b092fa9d6242b690a2aa0c3ad1cd4d452a44e2f075e72d","reviewed":true},
+      "ja": {"text":"「{name}」とすべてのメンバー・権限を削除しますか？","sourceRevision":"beea99a5f84a13a028b092fa9d6242b690a2aa0c3ad1cd4d452a44e2f075e72d","reviewed":true},
+      "it": {"text":"Eliminare “{name}” con tutti i membri e permessi?","sourceRevision":"beea99a5f84a13a028b092fa9d6242b690a2aa0c3ad1cd4d452a44e2f075e72d","reviewed":true},
+      "ru": {"text":"Удалить «{name}», включая все членства и предоставленные права?","sourceRevision":"beea99a5f84a13a028b092fa9d6242b690a2aa0c3ad1cd4d452a44e2f075e72d","reviewed":true}
+    }
+  },
+  "deleteFailed": {
+    "source": "删除访问组失败",
+    "translations": {
+      "en": {"text":"Failed to delete access group","sourceRevision":"dfb88ae130db23d6dcfa84b18fd0fe4ae7e2157b1f84d941151d1b8c0dd4cce8","reviewed":true},
+      "ja": {"text":"グループの削除に失敗しました","sourceRevision":"dfb88ae130db23d6dcfa84b18fd0fe4ae7e2157b1f84d941151d1b8c0dd4cce8","reviewed":true},
+      "it": {"text":"Eliminazione del gruppo non riuscita","sourceRevision":"dfb88ae130db23d6dcfa84b18fd0fe4ae7e2157b1f84d941151d1b8c0dd4cce8","reviewed":true},
+      "ru": {"text":"Не удалось удалить группу доступа","sourceRevision":"dfb88ae130db23d6dcfa84b18fd0fe4ae7e2157b1f84d941151d1b8c0dd4cce8","reviewed":true}
+    }
+  },
+  "deleteGroupTitle": {
+    "source": "删除访问组",
+    "translations": {
+      "en": {"text":"Delete access group","sourceRevision":"f05cae014ab014e187dad17669cd5526060ea4a67b1cc67bdcadc35163e66698","reviewed":true},
+      "ja": {"text":"アクセスグループを削除","sourceRevision":"f05cae014ab014e187dad17669cd5526060ea4a67b1cc67bdcadc35163e66698","reviewed":true},
+      "it": {"text":"Elimina gruppo di accesso","sourceRevision":"f05cae014ab014e187dad17669cd5526060ea4a67b1cc67bdcadc35163e66698","reviewed":true},
+      "ru": {"text":"Удалить группу доступа","sourceRevision":"f05cae014ab014e187dad17669cd5526060ea4a67b1cc67bdcadc35163e66698","reviewed":true}
+    }
+  },
+  "deleted": {
+    "source": "访问组已删除",
+    "translations": {
+      "en": {"text":"Access group deleted","sourceRevision":"df901fa83e89f003b59f1cfefa2f6ac017b7c161cdc5452eba37a783c4f2021d","reviewed":true},
+      "ja": {"text":"グループを削除しました","sourceRevision":"df901fa83e89f003b59f1cfefa2f6ac017b7c161cdc5452eba37a783c4f2021d","reviewed":true},
+      "it": {"text":"Gruppo eliminato","sourceRevision":"df901fa83e89f003b59f1cfefa2f6ac017b7c161cdc5452eba37a783c4f2021d","reviewed":true},
+      "ru": {"text":"Группа доступа удалена","sourceRevision":"df901fa83e89f003b59f1cfefa2f6ac017b7c161cdc5452eba37a783c4f2021d","reviewed":true}
+    }
+  },
+  "description": {
+    "source": "用访问组集中管理分类的读取、回复、发帖与管理能力。",
+    "translations": {
+      "en": {"text":"Manage category read, reply, create, and manage capabilities through access groups.","sourceRevision":"6cf39510686570f966e439f9eef2f8bf8bb435733e2fcaa9cccd73713d73a56c","reviewed":true},
+      "ja": {"text":"アクセスグループでカテゴリの閲覧・返信・投稿・管理権限を管理します。","sourceRevision":"6cf39510686570f966e439f9eef2f8bf8bb435733e2fcaa9cccd73713d73a56c","reviewed":true},
+      "it": {"text":"Gestisci lettura, risposte, creazione e moderazione delle categorie tramite gruppi.","sourceRevision":"6cf39510686570f966e439f9eef2f8bf8bb435733e2fcaa9cccd73713d73a56c","reviewed":true},
+      "ru": {"text":"Управляйте правами на чтение, ответ, создание и модерацию в категориях через группы доступа.","sourceRevision":"6cf39510686570f966e439f9eef2f8bf8bb435733e2fcaa9cccd73713d73a56c","reviewed":true}
+    }
+  },
+  "disabled": {
+    "source": "已停用",
+    "translations": {
+      "en": {"text":"Disabled","sourceRevision":"f741e20fc339f30d656e140f7240e6126364bfcbe6a8ca329521e5a4d38fde56","reviewed":true},
+      "ja": {"text":"無効","sourceRevision":"f741e20fc339f30d656e140f7240e6126364bfcbe6a8ca329521e5a4d38fde56","reviewed":true},
+      "it": {"text":"Disattivato","sourceRevision":"f741e20fc339f30d656e140f7240e6126364bfcbe6a8ca329521e5a4d38fde56","reviewed":true},
+      "ru": {"text":"Отключена","sourceRevision":"f741e20fc339f30d656e140f7240e6126364bfcbe6a8ca329521e5a4d38fde56","reviewed":true}
+    }
+  },
+  "edit": {
+    "source": "编辑访问组",
+    "translations": {
+      "en": {"text":"Edit group","sourceRevision":"3897d4f607f21bd82ef7cdce6f97183f56f4c32a8713d6f018cc38fd06f13367","reviewed":true},
+      "ja": {"text":"グループを編集","sourceRevision":"3897d4f607f21bd82ef7cdce6f97183f56f4c32a8713d6f018cc38fd06f13367","reviewed":true},
+      "it": {"text":"Modifica gruppo","sourceRevision":"3897d4f607f21bd82ef7cdce6f97183f56f4c32a8713d6f018cc38fd06f13367","reviewed":true},
+      "ru": {"text":"Редактировать группу","sourceRevision":"3897d4f607f21bd82ef7cdce6f97183f56f4c32a8713d6f018cc38fd06f13367","reviewed":true}
+    }
+  },
+  "enabled": {
+    "source": "启用",
+    "translations": {
+      "en": {"text":"Enabled","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
+      "ja": {"text":"有効","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
+      "it": {"text":"Attivo","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
+      "ru": {"text":"Включена","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true}
+    }
+  },
+  "enabledHint": {
+    "source": "停用后，所有成员会立即失去该组授予的分类能力。",
+    "translations": {
+      "en": {"text":"Disabling the group immediately revokes the category capabilities it grants.","sourceRevision":"a4cd053e66c571f8e8d4dd3beb2f358c64052c0c55e920d6c304d8ba8e3b1e77","reviewed":true},
+      "ja": {"text":"無効にすると、このグループが付与したカテゴリ権限は直ちに失効します。","sourceRevision":"a4cd053e66c571f8e8d4dd3beb2f358c64052c0c55e920d6c304d8ba8e3b1e77","reviewed":true},
+      "it": {"text":"La disattivazione revoca immediatamente le capacità concesse dal gruppo.","sourceRevision":"a4cd053e66c571f8e8d4dd3beb2f358c64052c0c55e920d6c304d8ba8e3b1e77","reviewed":true},
+      "ru": {"text":"Отключение группы немедленно отзывает предоставляемые ею права в категориях.","sourceRevision":"a4cd053e66c571f8e8d4dd3beb2f358c64052c0c55e920d6c304d8ba8e3b1e77","reviewed":true}
+    }
+  },
+  "grantCount": {
+    "source": "{count} 项分类授权",
+    "translations": {
+      "en": {"text":"{count} category grants","sourceRevision":"e56ed18619f6f228e47e965e4f1454d1ac1729ef70241fc1faa554422cd7c079","reviewed":true},
+      "ja": {"text":"カテゴリ権限 {count} 件","sourceRevision":"e56ed18619f6f228e47e965e4f1454d1ac1729ef70241fc1faa554422cd7c079","reviewed":true},
+      "it": {"text":"{count} permessi categoria","sourceRevision":"e56ed18619f6f228e47e965e4f1454d1ac1729ef70241fc1faa554422cd7c079","reviewed":true},
+      "ru": {"text":"Разрешений для категорий: {count}","sourceRevision":"e56ed18619f6f228e47e965e4f1454d1ac1729ef70241fc1faa554422cd7c079","reviewed":true}
+    }
+  },
+  "group": {
+    "source": "访问组",
+    "translations": {
+      "en": {"text":"Access group","sourceRevision":"c943e76fb884f377861b27af3b6c679c46285ec3c8eae8ab26386bb20c49d130","reviewed":true},
+      "ja": {"text":"アクセスグループ","sourceRevision":"c943e76fb884f377861b27af3b6c679c46285ec3c8eae8ab26386bb20c49d130","reviewed":true},
+      "it": {"text":"Gruppo di accesso","sourceRevision":"c943e76fb884f377861b27af3b6c679c46285ec3c8eae8ab26386bb20c49d130","reviewed":true},
+      "ru": {"text":"Группа доступа","sourceRevision":"c943e76fb884f377861b27af3b6c679c46285ec3c8eae8ab26386bb20c49d130","reviewed":true}
+    }
+  },
+  "groupFormHint": {
+    "source": "访问组可以仅邀请加入，也可以开放申请。",
+    "translations": {
+      "en": {"text":"Groups can be invitation-only or accept applications.","sourceRevision":"3ea999f07225ae92057835bd745d96d30537604723fb03da3c7c500ca6370c19","reviewed":true},
+      "ja": {"text":"招待制または申請制を選択できます。","sourceRevision":"3ea999f07225ae92057835bd745d96d30537604723fb03da3c7c500ca6370c19","reviewed":true},
+      "it": {"text":"I gruppi possono essere solo su invito o accettare richieste.","sourceRevision":"3ea999f07225ae92057835bd745d96d30537604723fb03da3c7c500ca6370c19","reviewed":true},
+      "ru": {"text":"Группы могут быть только по приглашениям или принимать заявки.","sourceRevision":"3ea999f07225ae92057835bd745d96d30537604723fb03da3c7c500ca6370c19","reviewed":true}
+    }
+  },
+  "groupName": {
+    "source": "访问组名称",
+    "translations": {
+      "en": {"text":"Group name","sourceRevision":"2a2e867fc3a8b546cf598f0d0dbc66cb9959eb6b5506d02376e6cec97316356d","reviewed":true},
+      "ja": {"text":"グループ名","sourceRevision":"2a2e867fc3a8b546cf598f0d0dbc66cb9959eb6b5506d02376e6cec97316356d","reviewed":true},
+      "it": {"text":"Nome del gruppo","sourceRevision":"2a2e867fc3a8b546cf598f0d0dbc66cb9959eb6b5506d02376e6cec97316356d","reviewed":true},
+      "ru": {"text":"Название группы","sourceRevision":"2a2e867fc3a8b546cf598f0d0dbc66cb9959eb6b5506d02376e6cec97316356d","reviewed":true}
+    }
+  },
+  "groupNamePlaceholder": {
+    "source": "例如：内部成员",
+    "translations": {
+      "en": {"text":"For example: Internal members","sourceRevision":"0703f8043d9f9f762e98bab065bb4d4fcf0224d055848b964d4fc1cdb6b1d6aa","reviewed":true},
+      "ja": {"text":"例：社内メンバー","sourceRevision":"0703f8043d9f9f762e98bab065bb4d4fcf0224d055848b964d4fc1cdb6b1d6aa","reviewed":true},
+      "it": {"text":"Ad esempio: Membri interni","sourceRevision":"0703f8043d9f9f762e98bab065bb4d4fcf0224d055848b964d4fc1cdb6b1d6aa","reviewed":true},
+      "ru": {"text":"Например: Внутренние участники","sourceRevision":"0703f8043d9f9f762e98bab065bb4d4fcf0224d055848b964d4fc1cdb6b1d6aa","reviewed":true}
+    }
+  },
+  "groupNameRequired": {
+    "source": "请输入访问组名称",
+    "translations": {
+      "en": {"text":"Enter an access group name","sourceRevision":"5ec29abf15261e5b469534bbc88cedf4fda7246c906b801056881f50a2d4bd05","reviewed":true},
+      "ja": {"text":"アクセスグループ名を入力してください","sourceRevision":"5ec29abf15261e5b469534bbc88cedf4fda7246c906b801056881f50a2d4bd05","reviewed":true},
+      "it": {"text":"Inserisci il nome del gruppo","sourceRevision":"5ec29abf15261e5b469534bbc88cedf4fda7246c906b801056881f50a2d4bd05","reviewed":true},
+      "ru": {"text":"Введите название группы доступа","sourceRevision":"5ec29abf15261e5b469534bbc88cedf4fda7246c906b801056881f50a2d4bd05","reviewed":true}
+    }
+  },
+  "groups": {
+    "source": "访问组",
+    "translations": {
+      "en": {"text":"Access groups","sourceRevision":"c943e76fb884f377861b27af3b6c679c46285ec3c8eae8ab26386bb20c49d130","reviewed":true},
+      "ja": {"text":"アクセスグループ","sourceRevision":"c943e76fb884f377861b27af3b6c679c46285ec3c8eae8ab26386bb20c49d130","reviewed":true},
+      "it": {"text":"Gruppi di accesso","sourceRevision":"c943e76fb884f377861b27af3b6c679c46285ec3c8eae8ab26386bb20c49d130","reviewed":true},
+      "ru": {"text":"Группы доступа","sourceRevision":"c943e76fb884f377861b27af3b6c679c46285ec3c8eae8ab26386bb20c49d130","reviewed":true}
+    }
+  },
+  "joinDescription": {
+    "source": "加入后可以访问该组获授权的受限分类。",
+    "translations": {
+      "en": {"text":"Join a group to access the restricted categories granted to it.","sourceRevision":"fb8b49c2b66673b1bd4edea3773d201e69b75efcc4c14d9e7f30e2e596579dbc","reviewed":true},
+      "ja": {"text":"グループに参加すると、許可された制限付きカテゴリにアクセスできます。","sourceRevision":"fb8b49c2b66673b1bd4edea3773d201e69b75efcc4c14d9e7f30e2e596579dbc","reviewed":true},
+      "it": {"text":"Unisciti a un gruppo per accedere alle categorie riservate autorizzate.","sourceRevision":"fb8b49c2b66673b1bd4edea3773d201e69b75efcc4c14d9e7f30e2e596579dbc","reviewed":true},
+      "ru": {"text":"Вступите в группу, чтобы получить доступ к закрытым категориям, которые ей предоставлены.","sourceRevision":"fb8b49c2b66673b1bd4edea3773d201e69b75efcc4c14d9e7f30e2e596579dbc","reviewed":true}
+    }
+  },
+  "joinMode.application": {
+    "source": "允许申请",
+    "translations": {
+      "en": {"text":"Applications allowed","sourceRevision":"c07d6ab31705919346b40ff7afa6639e3b6211ca344aaf837cc2915d922d607f","reviewed":true},
+      "ja": {"text":"申請可能","sourceRevision":"c07d6ab31705919346b40ff7afa6639e3b6211ca344aaf837cc2915d922d607f","reviewed":true},
+      "it": {"text":"Richieste abilitate","sourceRevision":"c07d6ab31705919346b40ff7afa6639e3b6211ca344aaf837cc2915d922d607f","reviewed":true},
+      "ru": {"text":"Принимаются заявки","sourceRevision":"c07d6ab31705919346b40ff7afa6639e3b6211ca344aaf837cc2915d922d607f","reviewed":true}
+    }
+  },
+  "joinMode.invite_only": {
+    "source": "仅邀请",
+    "translations": {
+      "en": {"text":"Invitation only","sourceRevision":"b2654e9dc19bc55c74034d19b9a5a7a970507d6c19cddd99ccc52e3dfdc5ac84","reviewed":true},
+      "ja": {"text":"招待のみ","sourceRevision":"b2654e9dc19bc55c74034d19b9a5a7a970507d6c19cddd99ccc52e3dfdc5ac84","reviewed":true},
+      "it": {"text":"Solo invito","sourceRevision":"b2654e9dc19bc55c74034d19b9a5a7a970507d6c19cddd99ccc52e3dfdc5ac84","reviewed":true},
+      "ru": {"text":"Только по приглашениям","sourceRevision":"b2654e9dc19bc55c74034d19b9a5a7a970507d6c19cddd99ccc52e3dfdc5ac84","reviewed":true}
+    }
+  },
+  "joinMode.system": {
+    "source": "系统成员",
+    "translations": {
+      "en": {"text":"System membership","sourceRevision":"191e31cdeb9b51095d31f4e4604bf9117fc3a369f07a4e301c47f947a59264dd","reviewed":true},
+      "ja": {"text":"システム","sourceRevision":"191e31cdeb9b51095d31f4e4604bf9117fc3a369f07a4e301c47f947a59264dd","reviewed":true},
+      "it": {"text":"Sistema","sourceRevision":"191e31cdeb9b51095d31f4e4604bf9117fc3a369f07a4e301c47f947a59264dd","reviewed":true},
+      "ru": {"text":"Системное членство","sourceRevision":"191e31cdeb9b51095d31f4e4604bf9117fc3a369f07a4e301c47f947a59264dd","reviewed":true}
+    }
+  },
+  "joinModeDescription.application": {
+    "source": "用户可以提交申请，由组经理或管理员审核。",
+    "translations": {
+      "en": {"text":"Users can apply and group managers or administrators review the request.","sourceRevision":"bbd712e2c5cf2afcc835c0a39bb0908a6ae05379617681bc74f89dfdb5321ffc","reviewed":true},
+      "ja": {"text":"ユーザーが申請し、グループ管理者または管理者が審査します。","sourceRevision":"bbd712e2c5cf2afcc835c0a39bb0908a6ae05379617681bc74f89dfdb5321ffc","reviewed":true},
+      "it": {"text":"Gli utenti possono richiedere l’accesso; gestori e amministratori esaminano la richiesta.","sourceRevision":"bbd712e2c5cf2afcc835c0a39bb0908a6ae05379617681bc74f89dfdb5321ffc","reviewed":true},
+      "ru": {"text":"Пользователи могут подать заявку, а менеджеры группы или администраторы рассматривают запрос.","sourceRevision":"bbd712e2c5cf2afcc835c0a39bb0908a6ae05379617681bc74f89dfdb5321ffc","reviewed":true}
+    }
+  },
+  "joinModeDescription.invite_only": {
+    "source": "仅管理员可以直接添加成员。",
+    "translations": {
+      "en": {"text":"Only administrators can add members directly.","sourceRevision":"1fe1bc69f7b9de769db5574ef9d8b5076960d5f8f6a9dcd91cb8645f51c0f335","reviewed":true},
+      "ja": {"text":"管理者だけがメンバーを直接追加できます。","sourceRevision":"1fe1bc69f7b9de769db5574ef9d8b5076960d5f8f6a9dcd91cb8645f51c0f335","reviewed":true},
+      "it": {"text":"Solo gli amministratori possono aggiungere membri.","sourceRevision":"1fe1bc69f7b9de769db5574ef9d8b5076960d5f8f6a9dcd91cb8645f51c0f335","reviewed":true},
+      "ru": {"text":"Только администраторы могут напрямую добавлять участников.","sourceRevision":"1fe1bc69f7b9de769db5574ef9d8b5076960d5f8f6a9dcd91cb8645f51c0f335","reviewed":true}
+    }
+  },
+  "joinTitle": {
+    "source": "申请加入访问组",
+    "translations": {
+      "en": {"text":"Apply to access groups","sourceRevision":"d8fea4ad05a981e852f3d6686dd552051ddbe97bfdca3161f04a246a96a1cf25","reviewed":true},
+      "ja": {"text":"アクセスグループへの参加申請","sourceRevision":"d8fea4ad05a981e852f3d6686dd552051ddbe97bfdca3161f04a246a96a1cf25","reviewed":true},
+      "it": {"text":"Richiedi accesso ai gruppi","sourceRevision":"d8fea4ad05a981e852f3d6686dd552051ddbe97bfdca3161f04a246a96a1cf25","reviewed":true},
+      "ru": {"text":"Подать заявку на доступ к группам","sourceRevision":"d8fea4ad05a981e852f3d6686dd552051ddbe97bfdca3161f04a246a96a1cf25","reviewed":true}
+    }
+  },
+  "joined": {
+    "source": "已加入",
+    "translations": {
+      "en": {"text":"Joined","sourceRevision":"8701e21b6c6306ad7c69a50fcd658f456e581b2192b82550869a69c42555c9aa","reviewed":true},
+      "ja": {"text":"参加済み","sourceRevision":"8701e21b6c6306ad7c69a50fcd658f456e581b2192b82550869a69c42555c9aa","reviewed":true},
+      "it": {"text":"Iscritto","sourceRevision":"8701e21b6c6306ad7c69a50fcd658f456e581b2192b82550869a69c42555c9aa","reviewed":true},
+      "ru": {"text":"Вступил","sourceRevision":"8701e21b6c6306ad7c69a50fcd658f456e581b2192b82550869a69c42555c9aa","reviewed":true}
+    }
+  },
+  "level.create": {
+    "source": "可发布主题",
+    "translations": {
+      "en": {"text":"Publish topics","sourceRevision":"0c8a82937c8ee792cd42bd572a1e7a4ae736313b97fdd102dea7908ebd14a5b9","reviewed":true},
+      "ja": {"text":"トピックを公開","sourceRevision":"0c8a82937c8ee792cd42bd572a1e7a4ae736313b97fdd102dea7908ebd14a5b9","reviewed":true},
+      "it": {"text":"Pubblica argomenti","sourceRevision":"0c8a82937c8ee792cd42bd572a1e7a4ae736313b97fdd102dea7908ebd14a5b9","reviewed":true},
+      "ru": {"text":"Публиковать темы","sourceRevision":"0c8a82937c8ee792cd42bd572a1e7a4ae736313b97fdd102dea7908ebd14a5b9","reviewed":true}
+    }
+  },
+  "level.manage": {
+    "source": "内容管理",
+    "translations": {
+      "en": {"text":"Moderate content","sourceRevision":"45a0b66902b2ed1cf86218670a472cbc70aa498a688889780209063203ad1b2e","reviewed":true},
+      "ja": {"text":"コンテンツ管理","sourceRevision":"45a0b66902b2ed1cf86218670a472cbc70aa498a688889780209063203ad1b2e","reviewed":true},
+      "it": {"text":"Modera contenuti","sourceRevision":"45a0b66902b2ed1cf86218670a472cbc70aa498a688889780209063203ad1b2e","reviewed":true},
+      "ru": {"text":"Модерировать контент","sourceRevision":"45a0b66902b2ed1cf86218670a472cbc70aa498a688889780209063203ad1b2e","reviewed":true}
+    }
+  },
+  "level.none": {
+    "source": "不可访问",
+    "translations": {
+      "en": {"text":"No access","sourceRevision":"b9ab9cff26648eb7867f0bfa78f09e6c91bc842ceb0539564053ea09586da4a5","reviewed":true},
+      "ja": {"text":"アクセス不可","sourceRevision":"b9ab9cff26648eb7867f0bfa78f09e6c91bc842ceb0539564053ea09586da4a5","reviewed":true},
+      "it": {"text":"Nessun accesso","sourceRevision":"b9ab9cff26648eb7867f0bfa78f09e6c91bc842ceb0539564053ea09586da4a5","reviewed":true},
+      "ru": {"text":"Нет доступа","sourceRevision":"b9ab9cff26648eb7867f0bfa78f09e6c91bc842ceb0539564053ea09586da4a5","reviewed":true}
+    }
+  },
+  "level.read": {
+    "source": "仅查看",
+    "translations": {
+      "en": {"text":"View only","sourceRevision":"a821ba05f94ba02173859b2420b273ea6d5b2f430185557b7c79d86ef88f6246","reviewed":true},
+      "ja": {"text":"閲覧のみ","sourceRevision":"a821ba05f94ba02173859b2420b273ea6d5b2f430185557b7c79d86ef88f6246","reviewed":true},
+      "it": {"text":"Solo visualizzazione","sourceRevision":"a821ba05f94ba02173859b2420b273ea6d5b2f430185557b7c79d86ef88f6246","reviewed":true},
+      "ru": {"text":"Только просмотр","sourceRevision":"a821ba05f94ba02173859b2420b273ea6d5b2f430185557b7c79d86ef88f6246","reviewed":true}
+    }
+  },
+  "level.reply": {
+    "source": "可参与讨论",
+    "translations": {
+      "en": {"text":"Join discussions","sourceRevision":"9e529730347aa6770ecdbb8aa8ec0a599ccb334072b889182acc53a30fdc6e25","reviewed":true},
+      "ja": {"text":"議論に参加","sourceRevision":"9e529730347aa6770ecdbb8aa8ec0a599ccb334072b889182acc53a30fdc6e25","reviewed":true},
+      "it": {"text":"Partecipa","sourceRevision":"9e529730347aa6770ecdbb8aa8ec0a599ccb334072b889182acc53a30fdc6e25","reviewed":true},
+      "ru": {"text":"Участвовать в обсуждениях","sourceRevision":"9e529730347aa6770ecdbb8aa8ec0a599ccb334072b889182acc53a30fdc6e25","reviewed":true}
+    }
+  },
+  "levelHint.create": {
+    "source": "含查看、回复、发帖",
+    "translations": {
+      "en": {"text":"view, reply, and post","sourceRevision":"88fc404ef9cd9e4a57b36847ed31a68d43ebce4c5f1adee901bf51389d22a520","reviewed":true},
+      "ja": {"text":"閲覧・返信・投稿","sourceRevision":"88fc404ef9cd9e4a57b36847ed31a68d43ebce4c5f1adee901bf51389d22a520","reviewed":true},
+      "it": {"text":"visualizza, rispondi e pubblica","sourceRevision":"88fc404ef9cd9e4a57b36847ed31a68d43ebce4c5f1adee901bf51389d22a520","reviewed":true},
+      "ru": {"text":"просмотр, ответы и публикации","sourceRevision":"88fc404ef9cd9e4a57b36847ed31a68d43ebce4c5f1adee901bf51389d22a520","reviewed":true}
+    }
+  },
+  "levelHint.manage": {
+    "source": "等同版主、全部权限",
+    "translations": {
+      "en": {"text":"all permissions","sourceRevision":"1f7e7835ac74d18ff87990cfc9928581b196dd0736de3729a3897338105832e7","reviewed":true},
+      "ja": {"text":"すべての権限","sourceRevision":"1f7e7835ac74d18ff87990cfc9928581b196dd0736de3729a3897338105832e7","reviewed":true},
+      "it": {"text":"tutti i permessi","sourceRevision":"1f7e7835ac74d18ff87990cfc9928581b196dd0736de3729a3897338105832e7","reviewed":true},
+      "ru": {"text":"все права","sourceRevision":"1f7e7835ac74d18ff87990cfc9928581b196dd0736de3729a3897338105832e7","reviewed":true}
+    }
+  },
+  "levelHint.none": {
+    "source": "无权限",
+    "translations": {
+      "en": {"text":"no permissions","sourceRevision":"a547162a4f57c933dd6ff6249d055550637dcf9896f6f7d7eec2384d45cee524","reviewed":true},
+      "ja": {"text":"権限なし","sourceRevision":"a547162a4f57c933dd6ff6249d055550637dcf9896f6f7d7eec2384d45cee524","reviewed":true},
+      "it": {"text":"nessun permesso","sourceRevision":"a547162a4f57c933dd6ff6249d055550637dcf9896f6f7d7eec2384d45cee524","reviewed":true},
+      "ru": {"text":"нет прав","sourceRevision":"a547162a4f57c933dd6ff6249d055550637dcf9896f6f7d7eec2384d45cee524","reviewed":true}
+    }
+  },
+  "levelHint.read": {
+    "source": "查看内容",
+    "translations": {
+      "en": {"text":"view content","sourceRevision":"d5c63b542629fc9e259de5ef6690d9008d7321a8118e13d1362fc14180de587b","reviewed":true},
+      "ja": {"text":"コンテンツ閲覧","sourceRevision":"d5c63b542629fc9e259de5ef6690d9008d7321a8118e13d1362fc14180de587b","reviewed":true},
+      "it": {"text":"visualizza contenuti","sourceRevision":"d5c63b542629fc9e259de5ef6690d9008d7321a8118e13d1362fc14180de587b","reviewed":true},
+      "ru": {"text":"просмотр контента","sourceRevision":"d5c63b542629fc9e259de5ef6690d9008d7321a8118e13d1362fc14180de587b","reviewed":true}
+    }
+  },
+  "levelHint.reply": {
+    "source": "含查看、回复",
+    "translations": {
+      "en": {"text":"view and reply","sourceRevision":"b0461baff34cbb5db7f473ea2f91219e29fe2c3a93acf383590eee432ef813ef","reviewed":true},
+      "ja": {"text":"閲覧・返信","sourceRevision":"b0461baff34cbb5db7f473ea2f91219e29fe2c3a93acf383590eee432ef813ef","reviewed":true},
+      "it": {"text":"visualizza e rispondi","sourceRevision":"b0461baff34cbb5db7f473ea2f91219e29fe2c3a93acf383590eee432ef813ef","reviewed":true},
+      "ru": {"text":"просмотр и ответы","sourceRevision":"b0461baff34cbb5db7f473ea2f91219e29fe2c3a93acf383590eee432ef813ef","reviewed":true}
+    }
+  },
+  "loadFailed": {
+    "source": "加载访问控制失败",
+    "translations": {
+      "en": {"text":"Failed to load access control","sourceRevision":"01053dd8567494ff34aada8a356158824fdaf058f19a9d7eaa189b16be1684a7","reviewed":true},
+      "ja": {"text":"アクセス制御の読み込みに失敗しました","sourceRevision":"01053dd8567494ff34aada8a356158824fdaf058f19a9d7eaa189b16be1684a7","reviewed":true},
+      "it": {"text":"Caricamento del controllo accessi non riuscito","sourceRevision":"01053dd8567494ff34aada8a356158824fdaf058f19a9d7eaa189b16be1684a7","reviewed":true},
+      "ru": {"text":"Не удалось загрузить настройки контроля доступа","sourceRevision":"01053dd8567494ff34aada8a356158824fdaf058f19a9d7eaa189b16be1684a7","reviewed":true}
+    }
+  },
+  "manageCategoryPermissions": {
+    "source": "按分类管理",
+    "translations": {
+      "en": {"text":"Manage by category","sourceRevision":"f35d89ae876c88906b0026481b41acd115fc34a7804aea29df7d82c94052dc50","reviewed":true},
+      "ja": {"text":"カテゴリー別に管理","sourceRevision":"f35d89ae876c88906b0026481b41acd115fc34a7804aea29df7d82c94052dc50","reviewed":true},
+      "it": {"text":"Gestisci per categoria","sourceRevision":"f35d89ae876c88906b0026481b41acd115fc34a7804aea29df7d82c94052dc50","reviewed":true},
+      "ru": {"text":"Управлять по категориям","sourceRevision":"f35d89ae876c88906b0026481b41acd115fc34a7804aea29df7d82c94052dc50","reviewed":true}
+    }
+  },
+  "managerReviewHint": {
+    "source": "你是这些访问组的组经理。",
+    "translations": {
+      "en": {"text":"You manage these access groups.","sourceRevision":"dc8f33f2457e52514c870cedfe3f765a455bed4749506ee30e9ae020b995a9b9","reviewed":true},
+      "ja": {"text":"あなたが管理するアクセスグループです。","sourceRevision":"dc8f33f2457e52514c870cedfe3f765a455bed4749506ee30e9ae020b995a9b9","reviewed":true},
+      "it": {"text":"Gestisci questi gruppi di accesso.","sourceRevision":"dc8f33f2457e52514c870cedfe3f765a455bed4749506ee30e9ae020b995a9b9","reviewed":true},
+      "ru": {"text":"Вы управляете этими группами доступа.","sourceRevision":"dc8f33f2457e52514c870cedfe3f765a455bed4749506ee30e9ae020b995a9b9","reviewed":true}
+    }
+  },
+  "member": {
+    "source": "成员",
+    "translations": {
+      "en": {"text":"Member","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true},
+      "ja": {"text":"メンバー","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true},
+      "it": {"text":"Membro","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true},
+      "ru": {"text":"Участник","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true}
+    }
+  },
+  "memberCount": {
+    "source": "{count} 位成员",
+    "translations": {
+      "en": {"text":"{count} members","sourceRevision":"4d582d2da1d3925bf3d576129d9a161cbf461b338f0d079500538db6d7ce1d09","reviewed":true},
+      "ja": {"text":"メンバー {count} 人","sourceRevision":"4d582d2da1d3925bf3d576129d9a161cbf461b338f0d079500538db6d7ce1d09","reviewed":true},
+      "it": {"text":"{count} membri","sourceRevision":"4d582d2da1d3925bf3d576129d9a161cbf461b338f0d079500538db6d7ce1d09","reviewed":true},
+      "ru": {"text":"Участников: {count}","sourceRevision":"4d582d2da1d3925bf3d576129d9a161cbf461b338f0d079500538db6d7ce1d09","reviewed":true}
+    }
+  },
+  "memberDeleted": {
+    "source": "成员已移除",
+    "translations": {
+      "en": {"text":"Member removed","sourceRevision":"c21154617910c8fdf199be90606b5a46e63de6e98d446aef66958eb11acc0cf5","reviewed":true},
+      "ja": {"text":"メンバーを削除しました","sourceRevision":"c21154617910c8fdf199be90606b5a46e63de6e98d446aef66958eb11acc0cf5","reviewed":true},
+      "it": {"text":"Membro rimosso","sourceRevision":"c21154617910c8fdf199be90606b5a46e63de6e98d446aef66958eb11acc0cf5","reviewed":true},
+      "ru": {"text":"Участник удалён","sourceRevision":"c21154617910c8fdf199be90606b5a46e63de6e98d446aef66958eb11acc0cf5","reviewed":true}
+    }
+  },
+  "memberHint": {
+    "source": "成员获得该组的分类能力；组经理额外可以审核入组申请，但不能修改组设置、成员、分类授权或管理社区内容。",
+    "translations": {
+      "en": {"text":"Members receive the group’s category capabilities. Group managers can also review join applications, but cannot change group settings, members, category grants, or moderate content.","sourceRevision":"f0e3c2dc5063b9fdf04a5327a202eb6fa7d8277cdfaf204a8405428adb935840","reviewed":true},
+      "ja": {"text":"メンバーはグループのカテゴリ権限を取得します。グループ管理者は参加申請も審査できますが、グループ設定・メンバー・カテゴリ権限の変更やコンテンツ管理はできません。","sourceRevision":"f0e3c2dc5063b9fdf04a5327a202eb6fa7d8277cdfaf204a8405428adb935840","reviewed":true},
+      "it": {"text":"I membri ricevono le capacità del gruppo. I gestori possono anche esaminare le richieste di adesione, ma non possono modificare gruppo, membri, permessi o moderare contenuti.","sourceRevision":"f0e3c2dc5063b9fdf04a5327a202eb6fa7d8277cdfaf204a8405428adb935840","reviewed":true},
+      "ru": {"text":"Участники получают возможности группы в категориях. Менеджеры группы могут также рассматривать заявки на вступление, но не могут менять настройки группы, список участников, права категорий или модерировать контент.","sourceRevision":"f0e3c2dc5063b9fdf04a5327a202eb6fa7d8277cdfaf204a8405428adb935840","reviewed":true}
+    }
+  },
+  "memberRole.manager": {
+    "source": "组经理（审核申请）",
+    "translations": {
+      "en": {"text":"Group manager (reviews)","sourceRevision":"f88c5086a442a432e0f1295067b1fb55c86321639d963aabc54c62086a47ce96","reviewed":true},
+      "ja": {"text":"グループ管理者（申請審査）","sourceRevision":"f88c5086a442a432e0f1295067b1fb55c86321639d963aabc54c62086a47ce96","reviewed":true},
+      "it": {"text":"Gestore (revisioni)","sourceRevision":"f88c5086a442a432e0f1295067b1fb55c86321639d963aabc54c62086a47ce96","reviewed":true},
+      "ru": {"text":"Менеджер группы (рассмотрение заявок)","sourceRevision":"f88c5086a442a432e0f1295067b1fb55c86321639d963aabc54c62086a47ce96","reviewed":true}
+    }
+  },
+  "memberRole.member": {
+    "source": "成员",
+    "translations": {
+      "en": {"text":"Member","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true},
+      "ja": {"text":"メンバー","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true},
+      "it": {"text":"Membro","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true},
+      "ru": {"text":"Участник","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true}
+    }
+  },
+  "memberSaveFailed": {
+    "source": "保存成员失败",
+    "translations": {
+      "en": {"text":"Failed to save member","sourceRevision":"8ed54566b1fde04c92f67de048e9ee160ec6e05e0ef3bdfcab1d21e29581a281","reviewed":true},
+      "ja": {"text":"メンバーの保存に失敗しました","sourceRevision":"8ed54566b1fde04c92f67de048e9ee160ec6e05e0ef3bdfcab1d21e29581a281","reviewed":true},
+      "it": {"text":"Salvataggio membro non riuscito","sourceRevision":"8ed54566b1fde04c92f67de048e9ee160ec6e05e0ef3bdfcab1d21e29581a281","reviewed":true},
+      "ru": {"text":"Не удалось сохранить участника","sourceRevision":"8ed54566b1fde04c92f67de048e9ee160ec6e05e0ef3bdfcab1d21e29581a281","reviewed":true}
+    }
+  },
+  "memberSaved": {
+    "source": "成员已保存",
+    "translations": {
+      "en": {"text":"Member saved","sourceRevision":"07495b2ec37a11856e626941b5f84cdf8fead698332cbaa79d319ceb5811fe40","reviewed":true},
+      "ja": {"text":"メンバーを保存しました","sourceRevision":"07495b2ec37a11856e626941b5f84cdf8fead698332cbaa79d319ceb5811fe40","reviewed":true},
+      "it": {"text":"Membro salvato","sourceRevision":"07495b2ec37a11856e626941b5f84cdf8fead698332cbaa79d319ceb5811fe40","reviewed":true},
+      "ru": {"text":"Участник сохранён","sourceRevision":"07495b2ec37a11856e626941b5f84cdf8fead698332cbaa79d319ceb5811fe40","reviewed":true}
+    }
+  },
+  "members": {
+    "source": "成员",
+    "translations": {
+      "en": {"text":"Members","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true},
+      "ja": {"text":"メンバー","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true},
+      "it": {"text":"Membri","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true},
+      "ru": {"text":"Участники","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true}
+    }
+  },
+  "noCategoryGrants": {
+    "source": "该组暂未关联分类",
+    "translations": {
+      "en": {"text":"This group has no category grants yet","sourceRevision":"5d12b5dde5af09b060ca0a6c42045ac6f1755398c31005cd96ebeff0cf658088","reviewed":true},
+      "ja": {"text":"このグループにはカテゴリ権限がありません","sourceRevision":"5d12b5dde5af09b060ca0a6c42045ac6f1755398c31005cd96ebeff0cf658088","reviewed":true},
+      "it": {"text":"Questo gruppo non ha ancora permessi categoria","sourceRevision":"5d12b5dde5af09b060ca0a6c42045ac6f1755398c31005cd96ebeff0cf658088","reviewed":true},
+      "ru": {"text":"У этой группы пока нет предоставленных категорий","sourceRevision":"5d12b5dde5af09b060ca0a6c42045ac6f1755398c31005cd96ebeff0cf658088","reviewed":true}
+    }
+  },
+  "noGroups": {
+    "source": "暂无访问组",
+    "translations": {
+      "en": {"text":"No access groups","sourceRevision":"7d95f1e2b5886167e1ce18c90f8b3eb147283528414aa865a711d75e34316671","reviewed":true},
+      "ja": {"text":"アクセスグループはありません","sourceRevision":"7d95f1e2b5886167e1ce18c90f8b3eb147283528414aa865a711d75e34316671","reviewed":true},
+      "it": {"text":"Nessun gruppo di accesso","sourceRevision":"7d95f1e2b5886167e1ce18c90f8b3eb147283528414aa865a711d75e34316671","reviewed":true},
+      "ru": {"text":"Нет групп доступа","sourceRevision":"7d95f1e2b5886167e1ce18c90f8b3eb147283528414aa865a711d75e34316671","reviewed":true}
+    }
+  },
+  "noJoinableGroups": {
+    "source": "暂无可申请的访问组",
+    "translations": {
+      "en": {"text":"No groups accept applications","sourceRevision":"5db6d9f28fcb288bdb9d0f7ed0edabf8a91d283689005d0e36ddba2e0cfd1d60","reviewed":true},
+      "ja": {"text":"申請可能なグループはありません","sourceRevision":"5db6d9f28fcb288bdb9d0f7ed0edabf8a91d283689005d0e36ddba2e0cfd1d60","reviewed":true},
+      "it": {"text":"Nessun gruppo accetta richieste","sourceRevision":"5db6d9f28fcb288bdb9d0f7ed0edabf8a91d283689005d0e36ddba2e0cfd1d60","reviewed":true},
+      "ru": {"text":"Нет групп, принимающих заявки","sourceRevision":"5db6d9f28fcb288bdb9d0f7ed0edabf8a91d283689005d0e36ddba2e0cfd1d60","reviewed":true}
+    }
+  },
+  "noJoinableGroupsHint": {
+    "source": "仅邀请访问组需要由管理员添加成员。",
+    "translations": {
+      "en": {"text":"Invitation-only groups require an administrator to add you.","sourceRevision":"315ee068f69c4b005f9893da9bb1d6efa9f9f19e1055b29a952fecbef960aac2","reviewed":true},
+      "ja": {"text":"招待制グループは管理者による追加が必要です。","sourceRevision":"315ee068f69c4b005f9893da9bb1d6efa9f9f19e1055b29a952fecbef960aac2","reviewed":true},
+      "it": {"text":"I gruppi solo su invito richiedono l’aggiunta da parte di un amministratore.","sourceRevision":"315ee068f69c4b005f9893da9bb1d6efa9f9f19e1055b29a952fecbef960aac2","reviewed":true},
+      "ru": {"text":"Группы только по приглашениям: вас должен добавить администратор.","sourceRevision":"315ee068f69c4b005f9893da9bb1d6efa9f9f19e1055b29a952fecbef960aac2","reviewed":true}
+    }
+  },
+  "noMatchingGroups": {
+    "source": "没有匹配的访问组，请尝试其他关键词。",
+    "translations": {
+      "en": {"text":"No matching access groups. Try another keyword.","sourceRevision":"96e9e93ce7b7c6fc41db9913f0418a78968454e39dbc3cab6b34a6294f7eace3","reviewed":true},
+      "ja": {"text":"一致するアクセスグループがありません。別のキーワードをお試しください。","sourceRevision":"96e9e93ce7b7c6fc41db9913f0418a78968454e39dbc3cab6b34a6294f7eace3","reviewed":true},
+      "it": {"text":"Nessun gruppo corrispondente. Prova un’altra parola chiave.","sourceRevision":"96e9e93ce7b7c6fc41db9913f0418a78968454e39dbc3cab6b34a6294f7eace3","reviewed":true},
+      "ru": {"text":"Нет подходящих групп доступа. Попробуйте другой поисковый запрос.","sourceRevision":"96e9e93ce7b7c6fc41db9913f0418a78968454e39dbc3cab6b34a6294f7eace3","reviewed":true}
+    }
+  },
+  "noMembers": {
+    "source": "暂无成员",
+    "translations": {
+      "en": {"text":"No members","sourceRevision":"958e46fdb16f64dc8bc2f62b0ae2dd58e9b630f5b8d770888072269e260e18e0","reviewed":true},
+      "ja": {"text":"メンバーはいません","sourceRevision":"958e46fdb16f64dc8bc2f62b0ae2dd58e9b630f5b8d770888072269e260e18e0","reviewed":true},
+      "it": {"text":"Nessun membro","sourceRevision":"958e46fdb16f64dc8bc2f62b0ae2dd58e9b630f5b8d770888072269e260e18e0","reviewed":true},
+      "ru": {"text":"Нет участников","sourceRevision":"958e46fdb16f64dc8bc2f62b0ae2dd58e9b630f5b8d770888072269e260e18e0","reviewed":true}
+    }
+  },
+  "noPendingApplications": {
+    "source": "暂无待审核申请",
+    "translations": {
+      "en": {"text":"No pending applications","sourceRevision":"1f33061b8a58f9b407b82436a8bbc90a6eb841404fd9f4b743150e180495c62f","reviewed":true},
+      "ja": {"text":"審査待ちの申請はありません","sourceRevision":"1f33061b8a58f9b407b82436a8bbc90a6eb841404fd9f4b743150e180495c62f","reviewed":true},
+      "it": {"text":"Nessuna richiesta in attesa","sourceRevision":"1f33061b8a58f9b407b82436a8bbc90a6eb841404fd9f4b743150e180495c62f","reviewed":true},
+      "ru": {"text":"Нет заявок на рассмотрении","sourceRevision":"1f33061b8a58f9b407b82436a8bbc90a6eb841404fd9f4b743150e180495c62f","reviewed":true}
+    }
+  },
+  "pending": {
+    "source": "等待审核",
+    "translations": {
+      "en": {"text":"Awaiting review","sourceRevision":"8f92d6b1c17d05421080eef8ada69548c7e3a001e6bd9a834f8d222ec7eae795","reviewed":true},
+      "ja": {"text":"審査待ち","sourceRevision":"8f92d6b1c17d05421080eef8ada69548c7e3a001e6bd9a834f8d222ec7eae795","reviewed":true},
+      "it": {"text":"In attesa di revisione","sourceRevision":"8f92d6b1c17d05421080eef8ada69548c7e3a001e6bd9a834f8d222ec7eae795","reviewed":true},
+      "ru": {"text":"На рассмотрении","sourceRevision":"8f92d6b1c17d05421080eef8ada69548c7e3a001e6bd9a834f8d222ec7eae795","reviewed":true}
+    }
+  },
+  "pendingCount": {
+    "source": "{count} 项待审核",
+    "translations": {
+      "en": {"text":"{count} pending","sourceRevision":"d60fef57d585349335b2ba2f3dda4852a31a821f3758db684571cfb8feb0a870","reviewed":true},
+      "ja": {"text":"承認待ち {count} 人","sourceRevision":"d60fef57d585349335b2ba2f3dda4852a31a821f3758db684571cfb8feb0a870","reviewed":true},
+      "it": {"text":"{count} in attesa","sourceRevision":"d60fef57d585349335b2ba2f3dda4852a31a821f3758db684571cfb8feb0a870","reviewed":true},
+      "ru": {"text":"{count} на рассмотрении","sourceRevision":"d60fef57d585349335b2ba2f3dda4852a31a821f3758db684571cfb8feb0a870","reviewed":true}
+    }
+  },
+  "permissionSummaryHint": {
+    "source": "权限统一在分类管理页配置；此处仅显示只读授权摘要。",
+    "translations": {
+      "en": {"text":"Permissions are configured from the Categories page; this table is a read-only summary.","sourceRevision":"575d55338e1cbc291029aa634406738bf09a20b48e5010617c7bd89f77cf9915","reviewed":true},
+      "ja": {"text":"権限はカテゴリーページで設定します。この表は読み取り専用の概要です。","sourceRevision":"575d55338e1cbc291029aa634406738bf09a20b48e5010617c7bd89f77cf9915","reviewed":true},
+      "it": {"text":"I permessi si configurano nella pagina Categorie; questa tabella è un riepilogo in sola lettura.","sourceRevision":"575d55338e1cbc291029aa634406738bf09a20b48e5010617c7bd89f77cf9915","reviewed":true},
+      "ru": {"text":"Права настраиваются на странице «Категории»; эта таблица — только сводный обзор (только для чтения).","sourceRevision":"575d55338e1cbc291029aa634406738bf09a20b48e5010617c7bd89f77cf9915","reviewed":true}
+    }
+  },
+  "public": {
+    "source": "公开",
+    "translations": {
+      "en": {"text":"Public","sourceRevision":"a42dd3c83fad5625e60e50f4666567fd63bd6b6b18dfb523c664c7b2e1b62c54","reviewed":true},
+      "ja": {"text":"公開","sourceRevision":"a42dd3c83fad5625e60e50f4666567fd63bd6b6b18dfb523c664c7b2e1b62c54","reviewed":true},
+      "it": {"text":"Pubblica","sourceRevision":"a42dd3c83fad5625e60e50f4666567fd63bd6b6b18dfb523c664c7b2e1b62c54","reviewed":true},
+      "ru": {"text":"Публичная","sourceRevision":"a42dd3c83fad5625e60e50f4666567fd63bd6b6b18dfb523c664c7b2e1b62c54","reviewed":true}
+    }
+  },
+  "reject": {
+    "source": "拒绝",
+    "translations": {
+      "en": {"text":"Reject","sourceRevision":"1589091ee1f24e8cf0235578086de647a61c854370f414627b9d97bc4b914594","reviewed":true},
+      "ja": {"text":"却下","sourceRevision":"1589091ee1f24e8cf0235578086de647a61c854370f414627b9d97bc4b914594","reviewed":true},
+      "it": {"text":"Rifiuta","sourceRevision":"1589091ee1f24e8cf0235578086de647a61c854370f414627b9d97bc4b914594","reviewed":true},
+      "ru": {"text":"Отклонить","sourceRevision":"1589091ee1f24e8cf0235578086de647a61c854370f414627b9d97bc4b914594","reviewed":true}
+    }
+  },
+  "removeMember": {
+    "source": "移除成员",
+    "translations": {
+      "en": {"text":"Remove member","sourceRevision":"60d955f14558ac9ac1e4d94959ea2aa40d91865fbf9a8bd07ea42c76fd663b4e","reviewed":true},
+      "ja": {"text":"メンバーを削除","sourceRevision":"60d955f14558ac9ac1e4d94959ea2aa40d91865fbf9a8bd07ea42c76fd663b4e","reviewed":true},
+      "it": {"text":"Rimuovi membro","sourceRevision":"60d955f14558ac9ac1e4d94959ea2aa40d91865fbf9a8bd07ea42c76fd663b4e","reviewed":true},
+      "ru": {"text":"Удалить участника","sourceRevision":"60d955f14558ac9ac1e4d94959ea2aa40d91865fbf9a8bd07ea42c76fd663b4e","reviewed":true}
+    }
+  },
+  "removeMemberConfirm": {
+    "source": "确定从当前访问组移除“{name}”吗？该用户会立即失去对应权限。",
+    "translations": {
+      "en": {"text":"Remove “{name}” from this access group? Their associated permissions are revoked immediately.","sourceRevision":"1ffbfd7da36c10b3d02ae08b1549af1cfcc81bac1e2a0197c077c6bb57fe73bd","reviewed":true},
+      "ja": {"text":"「{name}」をこのグループから削除しますか？関連する権限は直ちに失効します。","sourceRevision":"1ffbfd7da36c10b3d02ae08b1549af1cfcc81bac1e2a0197c077c6bb57fe73bd","reviewed":true},
+      "it": {"text":"Rimuovere “{name}” da questo gruppo? I permessi associati verranno revocati immediatamente.","sourceRevision":"1ffbfd7da36c10b3d02ae08b1549af1cfcc81bac1e2a0197c077c6bb57fe73bd","reviewed":true},
+      "ru": {"text":"Удалить «{name}» из этой группы доступа? Его права будут отозваны немедленно.","sourceRevision":"1ffbfd7da36c10b3d02ae08b1549af1cfcc81bac1e2a0197c077c6bb57fe73bd","reviewed":true}
+    }
+  },
+  "removeMemberTitle": {
+    "source": "移除访问组成员",
+    "translations": {
+      "en": {"text":"Remove group member","sourceRevision":"d2e41108f5af14d7e5113bb51326611baf3de7c5d2eb4897f9bde58cfed435eb","reviewed":true},
+      "ja": {"text":"グループメンバーを削除","sourceRevision":"d2e41108f5af14d7e5113bb51326611baf3de7c5d2eb4897f9bde58cfed435eb","reviewed":true},
+      "it": {"text":"Rimuovi membro dal gruppo","sourceRevision":"d2e41108f5af14d7e5113bb51326611baf3de7c5d2eb4897f9bde58cfed435eb","reviewed":true},
+      "ru": {"text":"Удалить участника группы","sourceRevision":"d2e41108f5af14d7e5113bb51326611baf3de7c5d2eb4897f9bde58cfed435eb","reviewed":true}
+    }
+  },
+  "restricted": {
+    "source": "受限",
+    "translations": {
+      "en": {"text":"Restricted","sourceRevision":"59244cc9eb202b2f710c54455f60ef4e0a2bb41a53508813f548df4b6ecfe8cc","reviewed":true},
+      "ja": {"text":"制限付き","sourceRevision":"59244cc9eb202b2f710c54455f60ef4e0a2bb41a53508813f548df4b6ecfe8cc","reviewed":true},
+      "it": {"text":"Riservata","sourceRevision":"59244cc9eb202b2f710c54455f60ef4e0a2bb41a53508813f548df4b6ecfe8cc","reviewed":true},
+      "ru": {"text":"Ограниченная","sourceRevision":"59244cc9eb202b2f710c54455f60ef4e0a2bb41a53508813f548df4b6ecfe8cc","reviewed":true}
+    }
+  },
+  "role": {
+    "source": "组内角色",
+    "translations": {
+      "en": {"text":"Group role","sourceRevision":"ecb19034c62f5bc422eff2b4586358ab29ad1a476bf18328b1e3378e3df6a5ed","reviewed":true},
+      "ja": {"text":"グループ内の役割","sourceRevision":"ecb19034c62f5bc422eff2b4586358ab29ad1a476bf18328b1e3378e3df6a5ed","reviewed":true},
+      "it": {"text":"Ruolo nel gruppo","sourceRevision":"ecb19034c62f5bc422eff2b4586358ab29ad1a476bf18328b1e3378e3df6a5ed","reviewed":true},
+      "ru": {"text":"Роль в группе","sourceRevision":"ecb19034c62f5bc422eff2b4586358ab29ad1a476bf18328b1e3378e3df6a5ed","reviewed":true}
+    }
+  },
+  "saveFailed": {
+    "source": "保存访问控制失败",
+    "translations": {
+      "en": {"text":"Failed to save access control","sourceRevision":"270b4b7090243af4452864e91d4db33c6d98fc1ea30b3dfc4e3da444522796ee","reviewed":true},
+      "ja": {"text":"アクセス制御の保存に失敗しました","sourceRevision":"270b4b7090243af4452864e91d4db33c6d98fc1ea30b3dfc4e3da444522796ee","reviewed":true},
+      "it": {"text":"Salvataggio del controllo accessi non riuscito","sourceRevision":"270b4b7090243af4452864e91d4db33c6d98fc1ea30b3dfc4e3da444522796ee","reviewed":true},
+      "ru": {"text":"Не удалось сохранить настройки контроля доступа","sourceRevision":"270b4b7090243af4452864e91d4db33c6d98fc1ea30b3dfc4e3da444522796ee","reviewed":true}
+    }
+  },
+  "saved": {
+    "source": "已保存",
+    "translations": {
+      "en": {"text":"Saved","sourceRevision":"985cc0bbe42a14fe5b9a5e3eaecc4b197462453385afb30dcc3a2e13f69aca0a","reviewed":true},
+      "ja": {"text":"保存しました","sourceRevision":"985cc0bbe42a14fe5b9a5e3eaecc4b197462453385afb30dcc3a2e13f69aca0a","reviewed":true},
+      "it": {"text":"Salvato","sourceRevision":"985cc0bbe42a14fe5b9a5e3eaecc4b197462453385afb30dcc3a2e13f69aca0a","reviewed":true},
+      "ru": {"text":"Сохранено","sourceRevision":"985cc0bbe42a14fe5b9a5e3eaecc4b197462453385afb30dcc3a2e13f69aca0a","reviewed":true}
+    }
+  },
+  "selectGroup": {
+    "source": "请选择一个访问组查看详情。",
+    "translations": {
+      "en": {"text":"Select an access group to view its details.","sourceRevision":"36e104948553196c6a140809534a0f1f1a2d5ed33c6af3d81e04855e720cdf3f","reviewed":true},
+      "ja": {"text":"詳細を表示するアクセスグループを選択してください。","sourceRevision":"36e104948553196c6a140809534a0f1f1a2d5ed33c6af3d81e04855e720cdf3f","reviewed":true},
+      "it": {"text":"Seleziona un gruppo di accesso per visualizzarne i dettagli.","sourceRevision":"36e104948553196c6a140809534a0f1f1a2d5ed33c6af3d81e04855e720cdf3f","reviewed":true},
+      "ru": {"text":"Выберите группу доступа, чтобы просмотреть её сведения.","sourceRevision":"36e104948553196c6a140809534a0f1f1a2d5ed33c6af3d81e04855e720cdf3f","reviewed":true}
+    }
+  },
+  "status": {
+    "source": "状态",
+    "translations": {
+      "en": {"text":"Status","sourceRevision":"24fd8532ed6ccaef3b2303f8ce2adbb2183437c369fe784713abdb039dac810e","reviewed":true},
+      "ja": {"text":"状態","sourceRevision":"24fd8532ed6ccaef3b2303f8ce2adbb2183437c369fe784713abdb039dac810e","reviewed":true},
+      "it": {"text":"Stato","sourceRevision":"24fd8532ed6ccaef3b2303f8ce2adbb2183437c369fe784713abdb039dac810e","reviewed":true},
+      "ru": {"text":"Статус","sourceRevision":"24fd8532ed6ccaef3b2303f8ce2adbb2183437c369fe784713abdb039dac810e","reviewed":true}
+    }
+  },
+  "systemGroup": {
+    "source": "系统组",
+    "translations": {
+      "en": {"text":"System group","sourceRevision":"17ba2b2b752dbd5fbefe82704cdf127a72a73c9d53f34643ef52287c800fcb23","reviewed":true},
+      "ja": {"text":"システムグループ","sourceRevision":"17ba2b2b752dbd5fbefe82704cdf127a72a73c9d53f34643ef52287c800fcb23","reviewed":true},
+      "it": {"text":"Gruppo di sistema","sourceRevision":"17ba2b2b752dbd5fbefe82704cdf127a72a73c9d53f34643ef52287c800fcb23","reviewed":true},
+      "ru": {"text":"Системная группа","sourceRevision":"17ba2b2b752dbd5fbefe82704cdf127a72a73c9d53f34643ef52287c800fcb23","reviewed":true}
+    }
+  },
+  "systemGroupHint": {
+    "source": "everyone 与 registered 是系统组，不保存成员记录。",
+    "translations": {
+      "en": {"text":"everyone and registered are system groups without stored memberships.","sourceRevision":"97e21dd6142d857d2b0c6d131686391b3729d291c3f0e6d91f0d56c72e865f1b","reviewed":true},
+      "ja": {"text":"everyone と registered はメンバー行を持たないシステムグループです。","sourceRevision":"97e21dd6142d857d2b0c6d131686391b3729d291c3f0e6d91f0d56c72e865f1b","reviewed":true},
+      "it": {"text":"everyone e registered sono gruppi di sistema senza membri memorizzati.","sourceRevision":"97e21dd6142d857d2b0c6d131686391b3729d291c3f0e6d91f0d56c72e865f1b","reviewed":true},
+      "ru": {"text":"everyone и registered — системные группы без хранимого списка участников.","sourceRevision":"97e21dd6142d857d2b0c6d131686391b3729d291c3f0e6d91f0d56c72e865f1b","reviewed":true}
+    }
+  },
+  "systemImmutable": {
+    "source": "系统组名称和加入方式不可修改。",
+    "translations": {
+      "en": {"text":"System group names and join modes are immutable.","sourceRevision":"aba61771f81809bdb13b1a1996f8028bd923c62488628a8fa1b94cec08807aae","reviewed":true},
+      "ja": {"text":"システムグループは変更できません。","sourceRevision":"aba61771f81809bdb13b1a1996f8028bd923c62488628a8fa1b94cec08807aae","reviewed":true},
+      "it": {"text":"I gruppi di sistema non possono essere modificati.","sourceRevision":"aba61771f81809bdb13b1a1996f8028bd923c62488628a8fa1b94cec08807aae","reviewed":true},
+      "ru": {"text":"Названия системных групп и режимы вступления нельзя изменить.","sourceRevision":"aba61771f81809bdb13b1a1996f8028bd923c62488628a8fa1b94cec08807aae","reviewed":true}
+    }
+  },
+  "systemKey.everyone": {
+    "source": "所有访客与成员",
+    "translations": {
+      "en": {"text":"All visitors and members","sourceRevision":"ca0b28b48d7853b2a3dc4e104e2478989e4eebc84ce0eb6b8c6e3f16871fa8ad","reviewed":true},
+      "ja": {"text":"すべての訪問者とメンバー","sourceRevision":"ca0b28b48d7853b2a3dc4e104e2478989e4eebc84ce0eb6b8c6e3f16871fa8ad","reviewed":true},
+      "it": {"text":"Tutti i visitatori e membri","sourceRevision":"ca0b28b48d7853b2a3dc4e104e2478989e4eebc84ce0eb6b8c6e3f16871fa8ad","reviewed":true},
+      "ru": {"text":"Все посетители и участники","sourceRevision":"ca0b28b48d7853b2a3dc4e104e2478989e4eebc84ce0eb6b8c6e3f16871fa8ad","reviewed":true}
+    }
+  },
+  "systemKey.registered": {
+    "source": "已登录成员",
+    "translations": {
+      "en": {"text":"Signed-in members","sourceRevision":"0182ee5020f67ff1cc98464b9e8925bbe8bedf583c9d0061f30543663311f55f","reviewed":true},
+      "ja": {"text":"ログイン済みメンバー","sourceRevision":"0182ee5020f67ff1cc98464b9e8925bbe8bedf583c9d0061f30543663311f55f","reviewed":true},
+      "it": {"text":"Membri autenticati","sourceRevision":"0182ee5020f67ff1cc98464b9e8925bbe8bedf583c9d0061f30543663311f55f","reviewed":true},
+      "ru": {"text":"Авторизованные участники","sourceRevision":"0182ee5020f67ff1cc98464b9e8925bbe8bedf583c9d0061f30543663311f55f","reviewed":true}
+    }
+  },
+  "title": {
+    "source": "访问组与分类权限",
+    "translations": {
+      "en": {"text":"Access groups and category permissions","sourceRevision":"373da394a84b2107a0ac79b732a0faab7968767748a5eb778c5a2a2d3f97ff21","reviewed":true},
+      "ja": {"text":"アクセスグループとカテゴリ権限","sourceRevision":"373da394a84b2107a0ac79b732a0faab7968767748a5eb778c5a2a2d3f97ff21","reviewed":true},
+      "it": {"text":"Gruppi di accesso e permessi","sourceRevision":"373da394a84b2107a0ac79b732a0faab7968767748a5eb778c5a2a2d3f97ff21","reviewed":true},
+      "ru": {"text":"Группы доступа и права категорий","sourceRevision":"373da394a84b2107a0ac79b732a0faab7968767748a5eb778c5a2a2d3f97ff21","reviewed":true}
+    }
+  },
+  "unlocksCategories": {
+    "source": "可访问分类：{categories}",
+    "translations": {
+      "en": {"text":"Provides access to: {categories}","sourceRevision":"545fcc09f155e3a4d7b2a2ac32a44940dff079dfad27e34134a662fb24ac6e75","reviewed":true},
+      "ja": {"text":"アクセス可能：{categories}","sourceRevision":"545fcc09f155e3a4d7b2a2ac32a44940dff079dfad27e34134a662fb24ac6e75","reviewed":true},
+      "it": {"text":"Consente accesso a: {categories}","sourceRevision":"545fcc09f155e3a4d7b2a2ac32a44940dff079dfad27e34134a662fb24ac6e75","reviewed":true},
+      "ru": {"text":"Даёт доступ к: {categories}","sourceRevision":"545fcc09f155e3a4d7b2a2ac32a44940dff079dfad27e34134a662fb24ac6e75","reviewed":true}
+    }
+  },
+  "username": {
+    "source": "用户名或用户 ID",
+    "translations": {
+      "en": {"text":"Username or user ID","sourceRevision":"6f009039a68d0337bb7683290692d095ea9acbb6d1e79ffcbb660e000a7696f7","reviewed":true},
+      "ja": {"text":"ユーザー名または ID","sourceRevision":"6f009039a68d0337bb7683290692d095ea9acbb6d1e79ffcbb660e000a7696f7","reviewed":true},
+      "it": {"text":"Nome utente o ID","sourceRevision":"6f009039a68d0337bb7683290692d095ea9acbb6d1e79ffcbb660e000a7696f7","reviewed":true},
+      "ru": {"text":"Имя пользователя или ID","sourceRevision":"6f009039a68d0337bb7683290692d095ea9acbb6d1e79ffcbb660e000a7696f7","reviewed":true}
+    }
+  },
+  "usernamePlaceholder": {
+    "source": "输入用户名",
+    "translations": {
+      "en": {"text":"Enter a username","sourceRevision":"7a69d2d6145b0d0655c7dc198921f1ea1b26fa217a1b5a94e9768ac892261d3c","reviewed":true},
+      "ja": {"text":"ユーザー名を入力","sourceRevision":"7a69d2d6145b0d0655c7dc198921f1ea1b26fa217a1b5a94e9768ac892261d3c","reviewed":true},
+      "it": {"text":"Inserisci un nome utente","sourceRevision":"7a69d2d6145b0d0655c7dc198921f1ea1b26fa217a1b5a94e9768ac892261d3c","reviewed":true},
+      "ru": {"text":"Введите имя пользователя","sourceRevision":"7a69d2d6145b0d0655c7dc198921f1ea1b26fa217a1b5a94e9768ac892261d3c","reviewed":true}
+    }
+  },
+  "visibility": {
+    "source": "可见范围",
+    "translations": {
+      "en": {"text":"Visibility","sourceRevision":"ee4e22b5f382122ed55645b926bd2feff4a257fbb3f15b7851b5b6d6a06b49e3","reviewed":true},
+      "ja": {"text":"公開範囲","sourceRevision":"ee4e22b5f382122ed55645b926bd2feff4a257fbb3f15b7851b5b6d6a06b49e3","reviewed":true},
+      "it": {"text":"Visibilità","sourceRevision":"ee4e22b5f382122ed55645b926bd2feff4a257fbb3f15b7851b5b6d6a06b49e3","reviewed":true},
+      "ru": {"text":"Видимость","sourceRevision":"ee4e22b5f382122ed55645b926bd2feff4a257fbb3f15b7851b5b6d6a06b49e3","reviewed":true}
+    }
+  }
+}

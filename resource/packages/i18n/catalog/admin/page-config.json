@@ -1,0 +1,500 @@
+{
+  "add": {
+    "source": "添加",
+    "translations": {
+      "en": {"text":"Add","sourceRevision":"752f72d69f94884fc6d70f7d148a58ce8b7e8f621f1dce57bb2c40249ccb4016","reviewed":true},
+      "ru": {"text":"Добавить","sourceRevision":"752f72d69f94884fc6d70f7d148a58ce8b7e8f621f1dce57bb2c40249ccb4016","reviewed":true}
+    }
+  },
+  "addRule": {
+    "source": "添加规则",
+    "translations": {
+      "en": {"text":"Add rule","sourceRevision":"743cc941ee96a7092ccea6bc891f2a742b09a257b3a5dc85651b5fc0559575ac","reviewed":true},
+      "ru": {"text":"Добавить правило","sourceRevision":"743cc941ee96a7092ccea6bc891f2a742b09a257b3a5dc85651b5fc0559575ac","reviewed":true}
+    }
+  },
+  "buttonLink": {
+    "source": "按钮链接",
+    "translations": {
+      "en": {"text":"Button link","sourceRevision":"789d8ea9bf0d9b68522acce3bc92cc3e77e60f4693297407986dea9770e1522e","reviewed":true},
+      "ru": {"text":"Ссылка кнопки","sourceRevision":"789d8ea9bf0d9b68522acce3bc92cc3e77e60f4693297407986dea9770e1522e","reviewed":true}
+    }
+  },
+  "buttonText": {
+    "source": "按钮文字",
+    "translations": {
+      "en": {"text":"Button text","sourceRevision":"4e3b979b56c725fe4a418ba5bad9216de82b0e3bfbad30ba30dc41e55a2a78a5","reviewed":true},
+      "ru": {"text":"Текст кнопки","sourceRevision":"4e3b979b56c725fe4a418ba5bad9216de82b0e3bfbad30ba30dc41e55a2a78a5","reviewed":true}
+    }
+  },
+  "cancel": {
+    "source": "取消",
+    "translations": {
+      "en": {"text":"Cancel","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
+      "ja": {"text":"キャンセル","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
+      "it": {"text":"Annulla","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
+      "ru": {"text":"Отмена","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true}
+    }
+  },
+  "color": {
+    "source": "颜色",
+    "translations": {
+      "en": {"text":"Color","sourceRevision":"0606a89064a9440735709dfb5ac2aaa439ddeaec6e441f590de76443ad736d79","reviewed":true},
+      "ru": {"text":"Цвет","sourceRevision":"0606a89064a9440735709dfb5ac2aaa439ddeaec6e441f590de76443ad736d79","reviewed":true}
+    }
+  },
+  "contact": {
+    "source": "联系区域",
+    "translations": {
+      "en": {"text":"Contact section","sourceRevision":"28394037b03a2c795c57a9709270a6e963f0bc03c7f04d91e7348ab4bdbc339b","reviewed":true},
+      "ru": {"text":"Блок контактов","sourceRevision":"28394037b03a2c795c57a9709270a6e963f0bc03c7f04d91e7348ab4bdbc339b","reviewed":true}
+    }
+  },
+  "contactDescription": {
+    "source": "联系描述",
+    "translations": {
+      "en": {"text":"Contact description","sourceRevision":"0fac1949cf5e57b4cfb6f957a9917f3729c6760548c679ddf15d195cfe2e4c27","reviewed":true},
+      "ru": {"text":"Описание контактов","sourceRevision":"0fac1949cf5e57b4cfb6f957a9917f3729c6760548c679ddf15d195cfe2e4c27","reviewed":true}
+    }
+  },
+  "contactTitle": {
+    "source": "联系标题",
+    "translations": {
+      "en": {"text":"Contact title","sourceRevision":"72f2e6c6046f43c495902027450191fffc6b3db7fe9d91e191d7668f4af11f6c","reviewed":true},
+      "ru": {"text":"Заголовок контактов","sourceRevision":"72f2e6c6046f43c495902027450191fffc6b3db7fe9d91e191d7668f4af11f6c","reviewed":true}
+    }
+  },
+  "contentDescription": {
+    "source": "页面描述",
+    "translations": {
+      "en": {"text":"Page description","sourceRevision":"33b3417862f8f8ea6b2db43ffc2dda14d0a57f636334a78977401cb2215e8227","reviewed":true},
+      "ru": {"text":"Описание страницы","sourceRevision":"33b3417862f8f8ea6b2db43ffc2dda14d0a57f636334a78977401cb2215e8227","reviewed":true}
+    }
+  },
+  "contentTitle": {
+    "source": "页面标题",
+    "translations": {
+      "en": {"text":"Page title","sourceRevision":"cf180da1c19dc39620842588ce545a1c14b4632796e7f245c92fa8818c496b24","reviewed":true},
+      "ru": {"text":"Заголовок страницы","sourceRevision":"cf180da1c19dc39620842588ce545a1c14b4632796e7f245c92fa8818c496b24","reviewed":true}
+    }
+  },
+  "delete": {
+    "source": "删除",
+    "translations": {
+      "en": {"text":"Delete","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
+      "ru": {"text":"Удалить","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true}
+    }
+  },
+  "deleteGroup": {
+    "source": "删除分组？",
+    "translations": {
+      "en": {"text":"Delete group?","sourceRevision":"8e79e4ca060d2319f5d765805e4466d4b97e93122209758f6921972d3478c5f3","reviewed":true},
+      "ru": {"text":"Удалить группу?","sourceRevision":"8e79e4ca060d2319f5d765805e4466d4b97e93122209758f6921972d3478c5f3","reviewed":true}
+    }
+  },
+  "deleteGroupHint": {
+    "source": "该分组中的全部链接也会被移除。",
+    "translations": {
+      "en": {"text":"All links in this group will also be removed.","sourceRevision":"2828a195c43825a094f6d91f6935d821172ce52a1ef6695e93fac5c43ae216a3","reviewed":true},
+      "ru": {"text":"Все ссылки в этой группе также будут удалены.","sourceRevision":"2828a195c43825a094f6d91f6935d821172ce52a1ef6695e93fac5c43ae216a3","reviewed":true}
+    }
+  },
+  "deleteLink": {
+    "source": "删除链接？",
+    "translations": {
+      "en": {"text":"Delete link?","sourceRevision":"50f6c0ba446e0fd409829f3fe9ea3df35f9e6ef3a6f8d0ea3280400704254c68","reviewed":true},
+      "ru": {"text":"Удалить ссылку?","sourceRevision":"50f6c0ba446e0fd409829f3fe9ea3df35f9e6ef3a6f8d0ea3280400704254c68","reviewed":true}
+    }
+  },
+  "deleteLinkHint": {
+    "source": "该链接将从分组中移除。",
+    "translations": {
+      "en": {"text":"This link will be removed from the group.","sourceRevision":"33aa0598cd945355858e15c27a45bcc673f77329be85fbced458adc948520ddf","reviewed":true},
+      "ru": {"text":"Эта ссылка будет удалена из группы.","sourceRevision":"33aa0598cd945355858e15c27a45bcc673f77329be85fbced458adc948520ddf","reviewed":true}
+    }
+  },
+  "description": {
+    "source": "描述",
+    "translations": {
+      "en": {"text":"Description","sourceRevision":"a8dd206ed65fd978fa4192ee8a0cc450af19e2fc6af6270b5be614fb8981d15a","reviewed":true},
+      "ru": {"text":"Описание","sourceRevision":"a8dd206ed65fd978fa4192ee8a0cc450af19e2fc6af6270b5be614fb8981d15a","reviewed":true}
+    }
+  },
+  "edit": {
+    "source": "编辑",
+    "translations": {
+      "en": {"text":"Edit","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true},
+      "ru": {"text":"Редактировать","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true}
+    }
+  },
+  "editSponsor": {
+    "source": "编辑赞助者",
+    "translations": {
+      "en": {"text":"Edit sponsor","sourceRevision":"f23e39cdebca9f52664a577e9b1b6e982f5e7a83975890dbca7e8cea7c8f7efc","reviewed":true},
+      "ru": {"text":"Редактировать спонсора","sourceRevision":"f23e39cdebca9f52664a577e9b1b6e982f5e7a83975890dbca7e8cea7c8f7efc","reviewed":true}
+    }
+  },
+  "emoji": {
+    "source": "Emoji",
+    "translations": {
+      "en": {"text":"Emoji","sourceRevision":"2e2ae6a841de2828811b32f64118637ed787552cefc12a0a949e1ec5402ad944","reviewed":true},
+      "ru": {"text":"Эмодзи","sourceRevision":"2e2ae6a841de2828811b32f64118637ed787552cefc12a0a949e1ec5402ad944","reviewed":true}
+    }
+  },
+  "emptyGroup": {
+    "source": "暂无链接，添加第一个链接。",
+    "translations": {
+      "en": {"text":"No links yet. Add the first link.","sourceRevision":"0c1bc4856b70f74e0a1f2475a4dec2e4c031d31388774def255c896ca57cfadc","reviewed":true},
+      "ru": {"text":"Пока нет ссылок. Добавьте первую.","sourceRevision":"0c1bc4856b70f74e0a1f2475a4dec2e4c031d31388774def255c896ca57cfadc","reviewed":true}
+    }
+  },
+  "emptyLevel": {
+    "source": "该等级暂无赞助者。",
+    "translations": {
+      "en": {"text":"No sponsors in this tier.","sourceRevision":"6f29953f87ee402478fe614c1e0be1d900eaf72d822d161ae136d27e1863d9c2","reviewed":true},
+      "ru": {"text":"В этом уровне нет спонсоров.","sourceRevision":"6f29953f87ee402478fe614c1e0be1d900eaf72d822d161ae136d27e1863d9c2","reviewed":true}
+    }
+  },
+  "groupHint": {
+    "source": "设置分组名称、Emoji 和强调色。",
+    "translations": {
+      "en": {"text":"Choose a name, emoji, and accent color.","sourceRevision":"9c0c32670b910c33bb056291d9caca42ee4195a30f6742d39175175eb36dc395","reviewed":true},
+      "ru": {"text":"Выберите название, эмодзи и акцентный цвет.","sourceRevision":"9c0c32670b910c33bb056291d9caca42ee4195a30f6742d39175175eb36dc395","reviewed":true}
+    }
+  },
+  "groupName": {
+    "source": "分组名称",
+    "translations": {
+      "en": {"text":"Group name","sourceRevision":"4563d819d2feb4b7b83e8e9a3ed9ac0279b3154cdb1be2752af32e5572dc7aae","reviewed":true},
+      "ru": {"text":"Название группы","sourceRevision":"4563d819d2feb4b7b83e8e9a3ed9ac0279b3154cdb1be2752af32e5572dc7aae","reviewed":true}
+    }
+  },
+  "level0": {
+    "source": "钻石",
+    "translations": {
+      "en": {"text":"Diamond","sourceRevision":"77fd73d7a7ed40edda7260b7b2d95e29e9124ad9e9a3f5522fcf105cbfe0d59b","reviewed":true},
+      "ru": {"text":"Бриллиантовый","sourceRevision":"77fd73d7a7ed40edda7260b7b2d95e29e9124ad9e9a3f5522fcf105cbfe0d59b","reviewed":true}
+    }
+  },
+  "level1": {
+    "source": "黄金",
+    "translations": {
+      "en": {"text":"Gold","sourceRevision":"37de5f448e6279ad2d4a1aa2d85e17e4be0dcc061ae67bdfa747ae596bb4ce56","reviewed":true},
+      "ru": {"text":"Золотой","sourceRevision":"37de5f448e6279ad2d4a1aa2d85e17e4be0dcc061ae67bdfa747ae596bb4ce56","reviewed":true}
+    }
+  },
+  "level2": {
+    "source": "白银",
+    "translations": {
+      "en": {"text":"Silver","sourceRevision":"ae7ba022046d69fd34bf5c061e8b6bcf441138f74e70b1bf1ef31ea1f7abf7ed","reviewed":true},
+      "ru": {"text":"Серебряный","sourceRevision":"ae7ba022046d69fd34bf5c061e8b6bcf441138f74e70b1bf1ef31ea1f7abf7ed","reviewed":true}
+    }
+  },
+  "level3": {
+    "source": "青铜",
+    "translations": {
+      "en": {"text":"Bronze","sourceRevision":"98495f2548a28b298a1d8e63df674f07fcefee5472a3d84dda29dad2990f4d70","reviewed":true},
+      "ru": {"text":"Бронзовый","sourceRevision":"98495f2548a28b298a1d8e63df674f07fcefee5472a3d84dda29dad2990f4d70","reviewed":true}
+    }
+  },
+  "linkGuide": {
+    "source": "链接发布",
+    "translations": {
+      "en": {"text":"Link publishing","sourceRevision":"d5c881d5cc8f731a6c3c7f98a7594a1cf23941b13d2e1077a84920f955c82f93","reviewed":true},
+      "ru": {"text":"Публикация ссылок","sourceRevision":"d5c881d5cc8f731a6c3c7f98a7594a1cf23941b13d2e1077a84920f955c82f93","reviewed":true}
+    }
+  },
+  "linkGuideText": {
+    "source": "分组和启用的链接会显示在公开友情链接页面。",
+    "translations": {
+      "en": {"text":"Groups and enabled links appear on the public links page.","sourceRevision":"16179afabef51961719539c86843146babd94a46ecd9b5cbad5f8238d28bff68","reviewed":true},
+      "ru": {"text":"Группы и активные ссылки отображаются на публичной странице ссылок.","sourceRevision":"16179afabef51961719539c86843146babd94a46ecd9b5cbad5f8238d28bff68","reviewed":true}
+    }
+  },
+  "linkHint": {
+    "source": "填写目标地址和可选的展示信息。",
+    "translations": {
+      "en": {"text":"Enter the destination and optional presentation details.","sourceRevision":"b6c68dfed75eb29a5a548cdb5e2f458eaac64dc76c803a625438c9295f9d200c","reviewed":true},
+      "ru": {"text":"Укажите адрес назначения и дополнительные данные для отображения.","sourceRevision":"b6c68dfed75eb29a5a548cdb5e2f458eaac64dc76c803a625438c9295f9d200c","reviewed":true}
+    }
+  },
+  "linkName": {
+    "source": "链接名称",
+    "translations": {
+      "en": {"text":"Link name","sourceRevision":"dc1e1d05cc7012bd79635da105526cfa63ae4783a023ae4a09146098398e5ea2","reviewed":true},
+      "ru": {"text":"Название ссылки","sourceRevision":"dc1e1d05cc7012bd79635da105526cfa63ae4783a023ae4a09146098398e5ea2","reviewed":true}
+    }
+  },
+  "linksDescription": {
+    "source": "管理公开展示的链接分组和条目。",
+    "translations": {
+      "en": {"text":"Manage public link groups and entries.","sourceRevision":"1f233ff2f35a51bcdc6cb8671388f83ca6755017e2dec61a16992db9e25528f4","reviewed":true},
+      "ru": {"text":"Управляйте группами публичных ссылок и отдельными записями.","sourceRevision":"1f233ff2f35a51bcdc6cb8671388f83ca6755017e2dec61a16992db9e25528f4","reviewed":true}
+    }
+  },
+  "linksTitle": {
+    "source": "友情链接",
+    "translations": {
+      "en": {"text":"Links","sourceRevision":"4e3ddf8192fbcc92277eca13ca647c3c585e5828505a7ac7224cf92f3fe013cc","reviewed":true},
+      "ja": {"text":"リンク","sourceRevision":"4e3ddf8192fbcc92277eca13ca647c3c585e5828505a7ac7224cf92f3fe013cc","reviewed":true},
+      "it": {"text":"Link","sourceRevision":"4e3ddf8192fbcc92277eca13ca647c3c585e5828505a7ac7224cf92f3fe013cc","reviewed":true},
+      "ru": {"text":"Ссылки","sourceRevision":"4e3ddf8192fbcc92277eca13ca647c3c585e5828505a7ac7224cf92f3fe013cc","reviewed":true}
+    }
+  },
+  "loadFailed": {
+    "source": "配置加载失败",
+    "translations": {
+      "en": {"text":"Failed to load configuration","sourceRevision":"09c87615917e8fa25928a64417489e3bec520406f595330d856c937a7dd92222","reviewed":true},
+      "ru": {"text":"Не удалось загрузить конфигурацию","sourceRevision":"09c87615917e8fa25928a64417489e3bec520406f595330d856c937a7dd92222","reviewed":true}
+    }
+  },
+  "loading": {
+    "source": "正在加载…",
+    "translations": {
+      "en": {"text":"Loading…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
+      "ru": {"text":"Загрузка…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true}
+    }
+  },
+  "logoUrl": {
+    "source": "Logo URL",
+    "translations": {
+      "en": {"text":"Logo URL","sourceRevision":"858f206b063514b79f2c81077a7e36c7c0d8be79365b2cd8e3ae4bc689c26eac","reviewed":true},
+      "ru": {"text":"URL логотипа","sourceRevision":"858f206b063514b79f2c81077a7e36c7c0d8be79365b2cd8e3ae4bc689c26eac","reviewed":true}
+    }
+  },
+  "newGroup": {
+    "source": "新建分组",
+    "translations": {
+      "en": {"text":"New group","sourceRevision":"74a8efd04f87996a6db346dff0395679e890d86ee5de3535d26fabf43b407b9e","reviewed":true},
+      "ru": {"text":"Новая группа","sourceRevision":"74a8efd04f87996a6db346dff0395679e890d86ee5de3535d26fabf43b407b9e","reviewed":true}
+    }
+  },
+  "newSponsor": {
+    "source": "添加赞助者",
+    "translations": {
+      "en": {"text":"Add sponsor","sourceRevision":"6c79ee3223dfc82434b73749b66a8c29a41def12e9a8ea6bc08fb5a2f8ae6fbc","reviewed":true},
+      "ru": {"text":"Добавить спонсора","sourceRevision":"6c79ee3223dfc82434b73749b66a8c29a41def12e9a8ea6bc08fb5a2f8ae6fbc","reviewed":true}
+    }
+  },
+  "noRules": {
+    "source": "暂无规则",
+    "translations": {
+      "en": {"text":"No rules configured","sourceRevision":"8fca1932acdabd082e3205be8cbdc154ce86733c306d5f5bca0586627ca479a7","reviewed":true},
+      "ru": {"text":"Правила не настроены","sourceRevision":"8fca1932acdabd082e3205be8cbdc154ce86733c306d5f5bca0586627ca479a7","reviewed":true}
+    }
+  },
+  "openPublish": {
+    "source": "打开发布页",
+    "translations": {
+      "en": {"text":"Open publish page","sourceRevision":"e8f20f12bdd30d3bff16a35cb7d0532625858c300a21f42a3da156d8ef038f7f","reviewed":true},
+      "ru": {"text":"Открыть страницу публикации","sourceRevision":"e8f20f12bdd30d3bff16a35cb7d0532625858c300a21f42a3da156d8ef038f7f","reviewed":true}
+    }
+  },
+  "refresh": {
+    "source": "刷新",
+    "translations": {
+      "en": {"text":"Refresh","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true},
+      "ru": {"text":"Обновить","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true}
+    }
+  },
+  "removeRule": {
+    "source": "删除规则",
+    "translations": {
+      "en": {"text":"Remove rule","sourceRevision":"70369d75cb75bb78b5b1713200b2a3c8bc2e9cb7f27de178c6704910528fc230","reviewed":true},
+      "ru": {"text":"Удалить правило","sourceRevision":"70369d75cb75bb78b5b1713200b2a3c8bc2e9cb7f27de178c6704910528fc230","reviewed":true}
+    }
+  },
+  "requiredGroup": {
+    "source": "请输入分组名称",
+    "translations": {
+      "en": {"text":"Enter a group name","sourceRevision":"742060b55c5ee58461e7043710f42024f989a62b9882f253ad23085b224aea5b","reviewed":true},
+      "ru": {"text":"Введите название группы","sourceRevision":"742060b55c5ee58461e7043710f42024f989a62b9882f253ad23085b224aea5b","reviewed":true}
+    }
+  },
+  "requiredLink": {
+    "source": "请输入链接名称和 URL",
+    "translations": {
+      "en": {"text":"Enter both a link name and URL","sourceRevision":"bf4c6bc8385bc924342ae852c8246df7f334413625d69b3b9d4ac00b7ce7ae2d","reviewed":true},
+      "ru": {"text":"Введите название ссылки и URL","sourceRevision":"bf4c6bc8385bc924342ae852c8246df7f334413625d69b3b9d4ac00b7ce7ae2d","reviewed":true}
+    }
+  },
+  "requiredSponsor": {
+    "source": "请输入赞助者名称",
+    "translations": {
+      "en": {"text":"Enter a sponsor name","sourceRevision":"dafbdbc6126f6ad6a268c7e4f5917a2092bdc05f6ca6f6dca3518e9c8e52dcc0","reviewed":true},
+      "ru": {"text":"Введите имя спонсора","sourceRevision":"dafbdbc6126f6ad6a268c7e4f5917a2092bdc05f6ca6f6dca3518e9c8e52dcc0","reviewed":true}
+    }
+  },
+  "retry": {
+    "source": "重试",
+    "translations": {
+      "en": {"text":"Retry","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true},
+      "ru": {"text":"Повторить","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true}
+    }
+  },
+  "rules": {
+    "source": "规则",
+    "translations": {
+      "en": {"text":"Rules","sourceRevision":"d7a51bd2eb542151ad9e8f62c68e87b6107b3570886058f6efc97cb08bded0a4","reviewed":true},
+      "ru": {"text":"Правила","sourceRevision":"d7a51bd2eb542151ad9e8f62c68e87b6107b3570886058f6efc97cb08bded0a4","reviewed":true}
+    }
+  },
+  "safety": {
+    "source": "注意事项",
+    "translations": {
+      "en": {"text":"Notes","sourceRevision":"3e6ea260039ef184771480d43fbe730f78cad813537eb22ba4a43dd2952d5a0e","reviewed":true},
+      "ru": {"text":"Рекомендации","sourceRevision":"3e6ea260039ef184771480d43fbe730f78cad813537eb22ba4a43dd2952d5a0e","reviewed":true}
+    }
+  },
+  "safety1": {
+    "source": "尽量使用完整的 HTTPS 地址。",
+    "translations": {
+      "en": {"text":"Use complete HTTPS URLs when possible.","sourceRevision":"512071dbf273150e94aa43f48d0c239a946ade9c53fe20f71096beddbd3bd8b7","reviewed":true},
+      "ru": {"text":"По возможности используйте полные HTTPS‑адреса.","sourceRevision":"512071dbf273150e94aa43f48d0c239a946ade9c53fe20f71096beddbd3bd8b7","reviewed":true}
+    }
+  },
+  "safety2": {
+    "source": "隐藏链接在保存时仍会保留。",
+    "translations": {
+      "en": {"text":"Hidden links are retained when saving.","sourceRevision":"b598eb2cd3eaa6cc5407e0a6406c0e3af26f86f47e205a4be6851d536ac13696","reviewed":true},
+      "ru": {"text":"Скрытые ссылки сохраняются при сохранении конфигурации.","sourceRevision":"b598eb2cd3eaa6cc5407e0a6406c0e3af26f86f47e205a4be6851d536ac13696","reviewed":true}
+    }
+  },
+  "safety3": {
+    "source": "拖动分组和链接可以调整顺序。",
+    "translations": {
+      "en": {"text":"Drag groups and links to change their order.","sourceRevision":"eb2f1d15c1d2170d5e4546dc0de37aca40904dd52d40cabb4f421869de82a302","reviewed":true},
+      "ru": {"text":"Меняйте порядок групп и ссылок с помощью перетаскивания.","sourceRevision":"eb2f1d15c1d2170d5e4546dc0de37aca40904dd52d40cabb4f421869de82a302","reviewed":true}
+    }
+  },
+  "save": {
+    "source": "保存",
+    "translations": {
+      "en": {"text":"Save","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "ja": {"text":"保存","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "it": {"text":"Salva","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "ru": {"text":"Сохранить","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true}
+    }
+  },
+  "saveAll": {
+    "source": "保存全部",
+    "translations": {
+      "en": {"text":"Save all","sourceRevision":"df6a80908ba3579c10e5b1fd3c5821760519e741aafa6f8f184d5876d67a8194","reviewed":true},
+      "ru": {"text":"Сохранить всё","sourceRevision":"df6a80908ba3579c10e5b1fd3c5821760519e741aafa6f8f184d5876d67a8194","reviewed":true}
+    }
+  },
+  "saveFailed": {
+    "source": "配置保存失败",
+    "translations": {
+      "en": {"text":"Failed to save configuration","sourceRevision":"801a71a2b0bd7d0478dda57e4fa997018977cb3c383c8db7068e2d78bb40f6a7","reviewed":true},
+      "ru": {"text":"Не удалось сохранить конфигурацию","sourceRevision":"801a71a2b0bd7d0478dda57e4fa997018977cb3c383c8db7068e2d78bb40f6a7","reviewed":true}
+    }
+  },
+  "saved": {
+    "source": "配置已保存",
+    "translations": {
+      "en": {"text":"Configuration saved","sourceRevision":"51d3e28b3009993dc80f2c521a87653b45089d98828f0e132db8aa2c671e113a","reviewed":true},
+      "ru": {"text":"Конфигурация сохранена","sourceRevision":"51d3e28b3009993dc80f2c521a87653b45089d98828f0e132db8aa2c671e113a","reviewed":true}
+    }
+  },
+  "saving": {
+    "source": "保存中…",
+    "translations": {
+      "en": {"text":"Saving…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
+      "ru": {"text":"Сохранение…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true}
+    }
+  },
+  "sponsorHint": {
+    "source": "填写赞助者的展示信息。",
+    "translations": {
+      "en": {"text":"Enter sponsor presentation details.","sourceRevision":"e3c90e1828d6298d83c61519c2e6c2723c9202752f6bf30141ac2e330dc7478d","reviewed":true},
+      "ru": {"text":"Укажите данные для представления спонсора.","sourceRevision":"e3c90e1828d6298d83c61519c2e6c2723c9202752f6bf30141ac2e330dc7478d","reviewed":true}
+    }
+  },
+  "sponsorLink": {
+    "source": "赞助者链接",
+    "translations": {
+      "en": {"text":"Sponsor link","sourceRevision":"37454154c6b5780e4c0267a09371ee35bf558e62df586628fa0390a81d2ec319","reviewed":true},
+      "ru": {"text":"Ссылка спонсора","sourceRevision":"37454154c6b5780e4c0267a09371ee35bf558e62df586628fa0390a81d2ec319","reviewed":true}
+    }
+  },
+  "sponsorMessage": {
+    "source": "留言",
+    "translations": {
+      "en": {"text":"Message","sourceRevision":"0bb7bb5e2f9c521bef41239c0120c5715e74759da600318d3dbd71f3c6cf3b5f","reviewed":true},
+      "ru": {"text":"Сообщение","sourceRevision":"0bb7bb5e2f9c521bef41239c0120c5715e74759da600318d3dbd71f3c6cf3b5f","reviewed":true}
+    }
+  },
+  "sponsorName": {
+    "source": "赞助者名称",
+    "translations": {
+      "en": {"text":"Sponsor name","sourceRevision":"e91b9a73e90139d9cfdc4774ac54f0c87296f107d040dbeb1fc5ff3937071b36","reviewed":true},
+      "ru": {"text":"Имя спонсора","sourceRevision":"e91b9a73e90139d9cfdc4774ac54f0c87296f107d040dbeb1fc5ff3937071b36","reviewed":true}
+    }
+  },
+  "sponsorsDescription": {
+    "source": "管理赞助等级及公开赞助页面内容。",
+    "translations": {
+      "en": {"text":"Manage sponsor tiers and public sponsor-page content.","sourceRevision":"d850637c145465ea5551d8a4643958a890a5506220c4d0777b61acbe5c20c038","reviewed":true},
+      "ru": {"text":"Настройте уровни спонсорства и содержимое публичной страницы спонсоров.","sourceRevision":"d850637c145465ea5551d8a4643958a890a5506220c4d0777b61acbe5c20c038","reviewed":true}
+    }
+  },
+  "sponsorsTitle": {
+    "source": "赞助者",
+    "translations": {
+      "en": {"text":"Sponsors","sourceRevision":"4810d5a4c73a445cf60bafc3a9d57037a92ac551e21f547aee910397e021a0b1","reviewed":true},
+      "ja": {"text":"スポンサー","sourceRevision":"4810d5a4c73a445cf60bafc3a9d57037a92ac551e21f547aee910397e021a0b1","reviewed":true},
+      "it": {"text":"Sponsor","sourceRevision":"4810d5a4c73a445cf60bafc3a9d57037a92ac551e21f547aee910397e021a0b1","reviewed":true},
+      "ru": {"text":"Спонсоры","sourceRevision":"4810d5a4c73a445cf60bafc3a9d57037a92ac551e21f547aee910397e021a0b1","reviewed":true}
+    }
+  },
+  "totalLinks": {
+    "source": "个链接",
+    "translations": {
+      "en": {"text":"links total","sourceRevision":"2367e6df057ca3dd30da1e15c406e2e3d0716e8febf41bdad8916d2c52469130","reviewed":true},
+      "ru": {"text":"всего ссылок","sourceRevision":"2367e6df057ca3dd30da1e15c406e2e3d0716e8febf41bdad8916d2c52469130","reviewed":true}
+    }
+  },
+  "totalSponsors": {
+    "source": "位赞助者",
+    "translations": {
+      "en": {"text":"sponsors total","sourceRevision":"1556a5df80136add18ab0c74739f262a7ac037bcaa0b6b2cc5b9f7eed3a81d6b","reviewed":true},
+      "ru": {"text":"всего спонсоров","sourceRevision":"1556a5df80136add18ab0c74739f262a7ac037bcaa0b6b2cc5b9f7eed3a81d6b","reviewed":true}
+    }
+  },
+  "upload": {
+    "source": "上传图片",
+    "translations": {
+      "en": {"text":"Upload image","sourceRevision":"5b21720f5a909f1f93cbd1937a9ce8bbb37752671c3c1430b27a9591ae1fd778","reviewed":true},
+      "ru": {"text":"Загрузить изображение","sourceRevision":"5b21720f5a909f1f93cbd1937a9ce8bbb37752671c3c1430b27a9591ae1fd778","reviewed":true}
+    }
+  },
+  "uploadFailed": {
+    "source": "图片上传失败",
+    "translations": {
+      "en": {"text":"Image upload failed","sourceRevision":"fb9cc32abbd2338f533b00facb48cabb6b4fb32e0504db2fdc0bc62b886c8b0b","reviewed":true},
+      "ru": {"text":"Не удалось загрузить изображение","sourceRevision":"fb9cc32abbd2338f533b00facb48cabb6b4fb32e0504db2fdc0bc62b886c8b0b","reviewed":true}
+    }
+  },
+  "url": {
+    "source": "URL",
+    "translations": {
+      "en": {"text":"URL","sourceRevision":"45d040c6556fb4fb079b2040aac22e0afefeaea123fc21603ed2c404309ca517","reviewed":true},
+      "ru": {"text":"URL","sourceRevision":"45d040c6556fb4fb079b2040aac22e0afefeaea123fc21603ed2c404309ca517","reviewed":true}
+    }
+  },
+  "visible": {
+    "source": "公开显示",
+    "translations": {
+      "en": {"text":"Visible","sourceRevision":"9073cfa0f2ce72dad976c47a2e3cbda78c696492f11826c36d4bc26ce8c8f730","reviewed":true},
+      "ru": {"text":"Видима","sourceRevision":"9073cfa0f2ce72dad976c47a2e3cbda78c696492f11826c36d4bc26ce8c8f730","reviewed":true}
+    }
+  },
+  "visibleHint": {
+    "source": "隐藏的链接仍会保留配置，但不会在公开页面展示。",
+    "translations": {
+      "en": {"text":"Hidden links remain configured but do not appear publicly.","sourceRevision":"3259f82438f1568c8d871714cf63b5455290eb57b87d9589fd7c0ec136a237a5","reviewed":true},
+      "ru": {"text":"Скрытые ссылки остаются в конфигурации, но не отображаются публично.","sourceRevision":"3259f82438f1568c8d871714cf63b5455290eb57b87d9589fd7c0ec136a237a5","reviewed":true}
+    }
+  }
+}

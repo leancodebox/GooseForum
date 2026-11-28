@@ -18,6 +18,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@gooseforum/client": "workspace:*",
+    "@gooseforum/i18n": "workspace:*",
     "@gooseforum/markdown": "workspace:*",
     "@gooseforum/runtime": "workspace:*",
     "@gooseforum/theme-default": "workspace:*",

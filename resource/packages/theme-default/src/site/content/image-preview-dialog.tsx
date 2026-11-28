@@ -9,7 +9,7 @@ export default function ImagePreviewDialog({ images, index, onIndexChange, onClo
   onIndexChange: (index: number) => void;
   onClose: () => void;
 }) {
-  const { t } = useTranslation("topic");
+  const { t } = useTranslation("site.topic");
   const step = (direction: number) => onIndexChange(Math.max(0, Math.min(images.length - 1, index + direction)));
   return <Dialog open onOpenChange={open => { if (!open) onClose(); }}>
     <DialogContent className="sm:max-w-4xl" onKeyDown={event => {

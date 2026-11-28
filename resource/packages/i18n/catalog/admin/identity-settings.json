@@ -1,0 +1,750 @@
+{
+  "add": {
+    "source": "添加",
+    "translations": {
+      "en": {"text":"Add","sourceRevision":"752f72d69f94884fc6d70f7d148a58ce8b7e8f621f1dce57bb2c40249ccb4016","reviewed":true},
+      "ru": {"text":"Добавить","sourceRevision":"752f72d69f94884fc6d70f7d148a58ce8b7e8f621f1dce57bb2c40249ccb4016","reviewed":true}
+    }
+  },
+  "addProvider": {
+    "source": "添加提供方",
+    "translations": {
+      "en": {"text":"Add provider","sourceRevision":"9e129fdffa85ba4e55638120ed9aa90e400e19e9956522ce2800ab48d77f5f6e","reviewed":true},
+      "ru": {"text":"Добавить провайдер","sourceRevision":"9e129fdffa85ba4e55638120ed9aa90e400e19e9956522ce2800ab48d77f5f6e","reviewed":true}
+    }
+  },
+  "addScope": {
+    "source": "添加 Scope",
+    "translations": {
+      "en": {"text":"Add scope","sourceRevision":"86b8dfbeb3daa0244e76e2c631949ccf8d6561f43fa2d6d5a9b5b76866d501f5","reviewed":true},
+      "ja": {"text":"Scope を追加","sourceRevision":"86b8dfbeb3daa0244e76e2c631949ccf8d6561f43fa2d6d5a9b5b76866d501f5","reviewed":true},
+      "it": {"text":"Aggiungi scope","sourceRevision":"86b8dfbeb3daa0244e76e2c631949ccf8d6561f43fa2d6d5a9b5b76866d501f5","reviewed":true},
+      "ru": {"text":"Добавить область доступа","sourceRevision":"86b8dfbeb3daa0244e76e2c631949ccf8d6561f43fa2d6d5a9b5b76866d501f5","reviewed":true}
+    }
+  },
+  "appName": {
+    "source": "应用名称",
+    "translations": {
+      "en": {"text":"Application name","sourceRevision":"975a54f62a7f97090e29ace0f067b5c36b3bfb8d1c365f035eb64a8749f0f817","reviewed":true},
+      "ru": {"text":"Название приложения","sourceRevision":"975a54f62a7f97090e29ace0f067b5c36b3bfb8d1c365f035eb64a8749f0f817","reviewed":true}
+    }
+  },
+  "apps": {
+    "source": "OIDC 应用",
+    "translations": {
+      "en": {"text":"OIDC applications","sourceRevision":"e1c75f8321d1f973224e933c9cebf00980e0a98d81194e9f0f453f0e0805d137","reviewed":true},
+      "ru": {"text":"OIDC‑приложения","sourceRevision":"e1c75f8321d1f973224e933c9cebf00980e0a98d81194e9f0f453f0e0805d137","reviewed":true}
+    }
+  },
+  "builtin": {
+    "source": "内置",
+    "translations": {
+      "en": {"text":"Built in","sourceRevision":"c94662e1149690e0d50335ae27654824cc240ac189da1de8fd526bed5556a2c0","reviewed":true},
+      "ru": {"text":"Встроенный","sourceRevision":"c94662e1149690e0d50335ae27654824cc240ac189da1de8fd526bed5556a2c0","reviewed":true}
+    }
+  },
+  "callback": {
+    "source": "回调地址",
+    "translations": {
+      "en": {"text":"Callback URL","sourceRevision":"95a543f488c038d1a3c2cd09fb5b3dc2cb6d225a94346e7238c988850da48670","reviewed":true},
+      "ru": {"text":"Callback URL","sourceRevision":"95a543f488c038d1a3c2cd09fb5b3dc2cb6d225a94346e7238c988850da48670","reviewed":true}
+    }
+  },
+  "callbackCopied": {
+    "source": "回调地址已复制",
+    "translations": {
+      "en": {"text":"Callback URL copied","sourceRevision":"4d3c21cc0a8904be8fcfadc2b092c7b794422f9b8a23ee7d79137a2334227940","reviewed":true},
+      "ja": {"text":"コールバック URL をコピーしました","sourceRevision":"4d3c21cc0a8904be8fcfadc2b092c7b794422f9b8a23ee7d79137a2334227940","reviewed":true},
+      "it": {"text":"URL di callback copiato","sourceRevision":"4d3c21cc0a8904be8fcfadc2b092c7b794422f9b8a23ee7d79137a2334227940","reviewed":true},
+      "ru": {"text":"URL обратного вызова скопирован","sourceRevision":"4d3c21cc0a8904be8fcfadc2b092c7b794422f9b8a23ee7d79137a2334227940","reviewed":true}
+    }
+  },
+  "callbackHint": {
+    "source": "在 OAuth 提供方后台登记完整回调地址。悬停各段可查看来源。",
+    "translations": {
+      "en": {"text":"Register the complete callback URL with the OAuth provider. Hover over each segment to see its source.","sourceRevision":"852436321264188131033a55e0560c4c5e3460245bb52d9e605cf1f27807342b","reviewed":true},
+      "ja": {"text":"OAuth プロバイダーに完全なコールバック URL を登録してください。各部分にカーソルを合わせると生成元を確認できます。","sourceRevision":"852436321264188131033a55e0560c4c5e3460245bb52d9e605cf1f27807342b","reviewed":true},
+      "it": {"text":"Registra l'URL di callback completo nel provider OAuth. Passa il mouse sui segmenti per vederne l'origine.","sourceRevision":"852436321264188131033a55e0560c4c5e3460245bb52d9e605cf1f27807342b","reviewed":true},
+      "ru": {"text":"Зарегистрируйте полный URL обратного вызова у провайдера OAuth. Наведите указатель на часть адреса, чтобы узнать её источник.","sourceRevision":"852436321264188131033a55e0560c4c5e3460245bb52d9e605cf1f27807342b","reviewed":true}
+    }
+  },
+  "callbackProviderHint": {
+    "source": "由当前提供方标识生成。",
+    "translations": {
+      "en": {"text":"Generated from the current provider key.","sourceRevision":"a4559653517ff43e1ebc8b09397fb0d90bb2af1dcfd0bc69aef0ef79245f1cc5","reviewed":true},
+      "ja": {"text":"現在のプロバイダーキーから生成されます。","sourceRevision":"a4559653517ff43e1ebc8b09397fb0d90bb2af1dcfd0bc69aef0ef79245f1cc5","reviewed":true},
+      "it": {"text":"Generato dalla chiave del provider corrente.","sourceRevision":"a4559653517ff43e1ebc8b09397fb0d90bb2af1dcfd0bc69aef0ef79245f1cc5","reviewed":true},
+      "ru": {"text":"Формируется из текущего ключа провайдера.","sourceRevision":"a4559653517ff43e1ebc8b09397fb0d90bb2af1dcfd0bc69aef0ef79245f1cc5","reviewed":true}
+    }
+  },
+  "callbackProviderPlaceholder": {
+    "source": "提供方标识/callback",
+    "translations": {
+      "en": {"text":"provider-key/callback","sourceRevision":"228853346f383cb725f7e4f05abd34b9630023e6a59aa580ee0b5162fc15a809","reviewed":true},
+      "ru": {"text":"provider-key/callback","sourceRevision":"228853346f383cb725f7e4f05abd34b9630023e6a59aa580ee0b5162fc15a809","reviewed":true}
+    }
+  },
+  "callbackRouteHint": {
+    "source": "GooseForum 固定的 OAuth 回调路径。",
+    "translations": {
+      "en": {"text":"The fixed GooseForum OAuth callback path.","sourceRevision":"030e811d8a54514d70273e0d273ab58442648446c495856b4eef7f8437f94f1a","reviewed":true},
+      "ja": {"text":"GooseForum 固定の OAuth コールバックパスです。","sourceRevision":"030e811d8a54514d70273e0d273ab58442648446c495856b4eef7f8437f94f1a","reviewed":true},
+      "it": {"text":"Percorso di callback OAuth fisso di GooseForum.","sourceRevision":"030e811d8a54514d70273e0d273ab58442648446c495856b4eef7f8437f94f1a","reviewed":true},
+      "ru": {"text":"Постоянный путь обратного вызова OAuth в GooseForum.","sourceRevision":"030e811d8a54514d70273e0d273ab58442648446c495856b4eef7f8437f94f1a","reviewed":true}
+    }
+  },
+  "callbackSiteHint": {
+    "source": "来自“站点信息”中配置的站点地址。",
+    "translations": {
+      "en": {"text":"Comes from the site URL configured under Site information.","sourceRevision":"49c3efe1d7afb5c3cb63db6d04b7e5aff7ee77816e2e3a9ed9100ed696425eab","reviewed":true},
+      "ja": {"text":"サイト情報で設定されたサイト URL です。","sourceRevision":"49c3efe1d7afb5c3cb63db6d04b7e5aff7ee77816e2e3a9ed9100ed696425eab","reviewed":true},
+      "it": {"text":"Proviene dall'URL configurato nelle informazioni del sito.","sourceRevision":"49c3efe1d7afb5c3cb63db6d04b7e5aff7ee77816e2e3a9ed9100ed696425eab","reviewed":true},
+      "ru": {"text":"Берётся из URL сайта в разделе сведений о сайте.","sourceRevision":"49c3efe1d7afb5c3cb63db6d04b7e5aff7ee77816e2e3a9ed9100ed696425eab","reviewed":true}
+    }
+  },
+  "cancel": {
+    "source": "取消",
+    "translations": {
+      "en": {"text":"Cancel","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
+      "ru": {"text":"Отмена","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true}
+    }
+  },
+  "clearSecret": {
+    "source": "清除 Secret",
+    "translations": {
+      "en": {"text":"Clear secret","sourceRevision":"bec975cb9b74bb0bef251302d54cf19360ffc824c08c460ca88bd907d9c9a1c8","reviewed":true},
+      "ru": {"text":"Очистить секрет","sourceRevision":"bec975cb9b74bb0bef251302d54cf19360ffc824c08c460ca88bd907d9c9a1c8","reviewed":true}
+    }
+  },
+  "clearWarning": {
+    "source": "保存后将移除已存储的 Secret。",
+    "translations": {
+      "en": {"text":"The stored secret will be removed on save.","sourceRevision":"2c6f1ced554ee77b5f163bd21564c3bc87c96a62de61ea1d334535140c4efc8d","reviewed":true},
+      "ru": {"text":"Сохранённый секрет будет удалён при сохранении.","sourceRevision":"2c6f1ced554ee77b5f163bd21564c3bc87c96a62de61ea1d334535140c4efc8d","reviewed":true}
+    }
+  },
+  "clientEnabled": {
+    "source": "启用客户端",
+    "translations": {
+      "en": {"text":"Enable client","sourceRevision":"2035e25a7370ec39c64f5449e691288910cf20157d7a7d772d935f4fae2d93b7","reviewed":true},
+      "ru": {"text":"Включить клиент","sourceRevision":"2035e25a7370ec39c64f5449e691288910cf20157d7a7d772d935f4fae2d93b7","reviewed":true}
+    }
+  },
+  "clientId": {
+    "source": "Client ID",
+    "translations": {
+      "en": {"text":"Client ID","sourceRevision":"29b5943aff2b3fc0daaa245cdc9ef071e8d38d2bc9ed6183153c360093802327","reviewed":true},
+      "ru": {"text":"Client ID","sourceRevision":"29b5943aff2b3fc0daaa245cdc9ef071e8d38d2bc9ed6183153c360093802327","reviewed":true}
+    }
+  },
+  "clientSecret": {
+    "source": "Client Secret",
+    "translations": {
+      "en": {"text":"Client secret","sourceRevision":"e59bf0bcbc432369384657cc46e27c456ac39061df286e3d79c6cc05e56dc58e","reviewed":true},
+      "ru": {"text":"Client secret","sourceRevision":"e59bf0bcbc432369384657cc46e27c456ac39061df286e3d79c6cc05e56dc58e","reviewed":true}
+    }
+  },
+  "clientType": {
+    "source": "客户端类型",
+    "translations": {
+      "en": {"text":"Client type","sourceRevision":"c4727ef2606e91b225bfb1039859322ac033d4411925b06a0be7da39bf536c9b","reviewed":true},
+      "ru": {"text":"Тип клиента","sourceRevision":"c4727ef2606e91b225bfb1039859322ac033d4411925b06a0be7da39bf536c9b","reviewed":true}
+    }
+  },
+  "close": {
+    "source": "关闭",
+    "translations": {
+      "en": {"text":"Close","sourceRevision":"cd359a6a768eb1e10e9d6c7a6594aa7bb1e997582cceaa75e81bb1493c20bbff","reviewed":true},
+      "ru": {"text":"Закрыть","sourceRevision":"cd359a6a768eb1e10e9d6c7a6594aa7bb1e997582cceaa75e81bb1493c20bbff","reviewed":true}
+    }
+  },
+  "confidential": {
+    "source": "机密客户端",
+    "translations": {
+      "en": {"text":"Confidential","sourceRevision":"3cb8f7ce2ad0d20be44a9028022289c331db086b68faba2a651eab6184ca1341","reviewed":true},
+      "ru": {"text":"Конфиденциальный","sourceRevision":"3cb8f7ce2ad0d20be44a9028022289c331db086b68faba2a651eab6184ca1341","reviewed":true}
+    }
+  },
+  "configError": {
+    "source": "配置错误",
+    "translations": {
+      "en": {"text":"Configuration error","sourceRevision":"f9d1ecdddef38c0e054cdc5ba3068dec041685fe6ae5cebbf818ce5a8dd5a8f7","reviewed":true},
+      "ru": {"text":"Ошибка конфигурации","sourceRevision":"f9d1ecdddef38c0e054cdc5ba3068dec041685fe6ae5cebbf818ce5a8dd5a8f7","reviewed":true}
+    }
+  },
+  "confirm": {
+    "source": "确认",
+    "translations": {
+      "en": {"text":"Confirm","sourceRevision":"1f6b65dcf4774b032610c6695095bf0640b8ef9927f9445316f0949a6487c1d8","reviewed":true},
+      "ru": {"text":"Подтвердить","sourceRevision":"1f6b65dcf4774b032610c6695095bf0640b8ef9927f9445316f0949a6487c1d8","reviewed":true}
+    }
+  },
+  "copied": {
+    "source": "已复制",
+    "translations": {
+      "en": {"text":"Copied","sourceRevision":"7ba67a9c90baf6e22a04c819f47e08114688d0e18241ee11268ccb0aee3bdd31","reviewed":true},
+      "ru": {"text":"Скопировано","sourceRevision":"7ba67a9c90baf6e22a04c819f47e08114688d0e18241ee11268ccb0aee3bdd31","reviewed":true}
+    }
+  },
+  "copy": {
+    "source": "复制",
+    "translations": {
+      "en": {"text":"Copy","sourceRevision":"74575c0614afa32ccbb9a7e329efc5fc49141f0094f5614bd789e383e6497d4e","reviewed":true},
+      "ru": {"text":"Копировать","sourceRevision":"74575c0614afa32ccbb9a7e329efc5fc49141f0094f5614bd789e383e6497d4e","reviewed":true}
+    }
+  },
+  "copyCallback": {
+    "source": "复制完整回调地址",
+    "translations": {
+      "en": {"text":"Copy complete callback URL","sourceRevision":"9a89af866d055e13b569863a711b6c64c3a15ac55e030ca8e8225f9b7d98e529","reviewed":true},
+      "ja": {"text":"完全なコールバック URL をコピー","sourceRevision":"9a89af866d055e13b569863a711b6c64c3a15ac55e030ca8e8225f9b7d98e529","reviewed":true},
+      "it": {"text":"Copia l'URL di callback completo","sourceRevision":"9a89af866d055e13b569863a711b6c64c3a15ac55e030ca8e8225f9b7d98e529","reviewed":true},
+      "ru": {"text":"Скопировать полный URL обратного вызова","sourceRevision":"9a89af866d055e13b569863a711b6c64c3a15ac55e030ca8e8225f9b7d98e529","reviewed":true}
+    }
+  },
+  "copyFailed": {
+    "source": "复制失败",
+    "translations": {
+      "en": {"text":"Copy failed","sourceRevision":"2f793a03184f2cf4e3d3eb2bc9b7cc9d697917aa1d68cf3700079b61ccf514eb","reviewed":true},
+      "ja": {"text":"コピーに失敗しました","sourceRevision":"2f793a03184f2cf4e3d3eb2bc9b7cc9d697917aa1d68cf3700079b61ccf514eb","reviewed":true},
+      "it": {"text":"Copia non riuscita","sourceRevision":"2f793a03184f2cf4e3d3eb2bc9b7cc9d697917aa1d68cf3700079b61ccf514eb","reviewed":true},
+      "ru": {"text":"Не удалось скопировать","sourceRevision":"2f793a03184f2cf4e3d3eb2bc9b7cc9d697917aa1d68cf3700079b61ccf514eb","reviewed":true}
+    }
+  },
+  "create": {
+    "source": "创建客户端",
+    "translations": {
+      "en": {"text":"Create client","sourceRevision":"e0aad092630b606251f94780620b0ad3e549d1bad276b0ce7926c56fe5ac6ba9","reviewed":true},
+      "ru": {"text":"Создать клиент","sourceRevision":"e0aad092630b606251f94780620b0ad3e549d1bad276b0ce7926c56fe5ac6ba9","reviewed":true}
+    }
+  },
+  "credentialsRequired": {
+    "source": "启用提供方前，请填写 Client ID 和 Client Secret。",
+    "translations": {
+      "en": {"text":"Enter a client ID and client secret before enabling the provider.","sourceRevision":"4d0536e52ed102da94be5ee5bcaa04eb66eb8c5461a10563f7eb519325b9677e","reviewed":true},
+      "ru": {"text":"Перед включением укажите ID и секрет клиента.","sourceRevision":"4d0536e52ed102da94be5ee5bcaa04eb66eb8c5461a10563f7eb519325b9677e","reviewed":true}
+    }
+  },
+  "custom": {
+    "source": "自定义 OIDC",
+    "translations": {
+      "en": {"text":"Custom OIDC","sourceRevision":"f81faa13ac4a5c35508fd085fa87ae369f6c0f691c763e5a7b7c9abd50623364","reviewed":true},
+      "ru": {"text":"Пользовательский OIDC","sourceRevision":"f81faa13ac4a5c35508fd085fa87ae369f6c0f691c763e5a7b7c9abd50623364","reviewed":true}
+    }
+  },
+  "deleteClient": {
+    "source": "删除客户端",
+    "translations": {
+      "en": {"text":"Delete client","sourceRevision":"50c71f3d8f189fcbb3800e890a7ee7e6a973e2064dd5c81c5a7c72f8cbf89adc","reviewed":true},
+      "ru": {"text":"Удалить клиент","sourceRevision":"50c71f3d8f189fcbb3800e890a7ee7e6a973e2064dd5c81c5a7c72f8cbf89adc","reviewed":true}
+    }
+  },
+  "deleteClientHint": {
+    "source": "停用并删除此客户端，撤销其授权和凭据。第三方应用已经建立的登录会话不会因此退出。",
+    "translations": {
+      "en": {"text":"Disable and delete this registration, revoke its grants and tokens. This cannot end sessions already created by the external application.","sourceRevision":"18bd216294fd260e2c1cc0c6d4ec179b4178e61882edbfb8dafbbefc6008536d","reviewed":true},
+      "ru": {"text":"Отключить и удалить регистрацию, отозвать разрешения и токены. Сеансы, созданные внешним приложением, останутся активны.","sourceRevision":"18bd216294fd260e2c1cc0c6d4ec179b4178e61882edbfb8dafbbefc6008536d","reviewed":true}
+    }
+  },
+  "discovery": {
+    "source": "Discovery URL",
+    "translations": {
+      "en": {"text":"Discovery URL","sourceRevision":"355819da3f0e67f7ea6474cdc7ff1530bc38261f586a66a46977f458c86d9ca4","reviewed":true},
+      "ru": {"text":"Discovery URL","sourceRevision":"355819da3f0e67f7ea6474cdc7ff1530bc38261f586a66a46977f458c86d9ca4","reviewed":true}
+    }
+  },
+  "discoveryRequired": {
+    "source": "启用自定义提供方前，请填写 Discovery URL。",
+    "translations": {
+      "en": {"text":"Enter a discovery URL before enabling the custom provider.","sourceRevision":"934a22485f4afbbc6ffbca7d96e1353bf885aac627e80d739a99fb0b1d635a70","reviewed":true},
+      "ru": {"text":"Перед включением провайдера укажите URL обнаружения.","sourceRevision":"934a22485f4afbbc6ffbca7d96e1353bf885aac627e80d739a99fb0b1d635a70","reviewed":true}
+    }
+  },
+  "displayName": {
+    "source": "显示名称",
+    "translations": {
+      "en": {"text":"Display name","sourceRevision":"272cb132977c188ff54179f75ba1174c08fa87f3926d8723fbebbcc34341160e","reviewed":true},
+      "ru": {"text":"Отображаемое имя","sourceRevision":"272cb132977c188ff54179f75ba1174c08fa87f3926d8723fbebbcc34341160e","reviewed":true}
+    }
+  },
+  "displayNameRequired": {
+    "source": "请输入自定义提供方的显示名称。",
+    "translations": {
+      "en": {"text":"Enter a display name for the custom provider.","sourceRevision":"5ee731a8ce872695bf41adcfad6e94f9887ee41314f0d23b26622fffaffaa112","reviewed":true},
+      "ru": {"text":"Введите отображаемое имя провайдера.","sourceRevision":"5ee731a8ce872695bf41adcfad6e94f9887ee41314f0d23b26622fffaffaa112","reviewed":true}
+    }
+  },
+  "edit": {
+    "source": "编辑",
+    "translations": {
+      "en": {"text":"Edit","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true},
+      "ru": {"text":"Редактировать","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true}
+    }
+  },
+  "empty": {
+    "source": "暂无 OIDC 客户端",
+    "translations": {
+      "en": {"text":"No OIDC clients","sourceRevision":"6b6b4747f405dbdd2ebaa3c63cbce243b9850451652f66bb4f389ac64df8cb55","reviewed":true},
+      "ru": {"text":"Нет OIDC‑клиентов","sourceRevision":"6b6b4747f405dbdd2ebaa3c63cbce243b9850451652f66bb4f389ac64df8cb55","reviewed":true}
+    }
+  },
+  "enabled": {
+    "source": "启用",
+    "translations": {
+      "en": {"text":"Enabled","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
+      "ru": {"text":"Включён","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true}
+    }
+  },
+  "endpoints": {
+    "source": "接入地址",
+    "translations": {
+      "en": {"text":"Connection endpoints","sourceRevision":"83665206daf42bd9c5ae59dea219a5ecc8fd4763f643e9e367af86ee7bcdc5a0","reviewed":true},
+      "ru": {"text":"Адреса подключения","sourceRevision":"83665206daf42bd9c5ae59dea219a5ecc8fd4763f643e9e367af86ee7bcdc5a0","reviewed":true}
+    }
+  },
+  "grantedAt": {
+    "source": "授权时间",
+    "translations": {
+      "en": {"text":"Granted at","sourceRevision":"be6f105a86b1748ae5ada6efcfb1381d12719a80fd03ff56711fbbd34fea7703","reviewed":true},
+      "ru": {"text":"Разрешение выдано","sourceRevision":"be6f105a86b1748ae5ada6efcfb1381d12719a80fd03ff56711fbbd34fea7703","reviewed":true}
+    }
+  },
+  "grants": {
+    "source": "用户授权",
+    "translations": {
+      "en": {"text":"User grants","sourceRevision":"e98c94feee936a1e2f77dcaf6321eea53d26d580bd6bd0eb7cb4187e033858f8","reviewed":true},
+      "ru": {"text":"Разрешения пользователей","sourceRevision":"e98c94feee936a1e2f77dcaf6321eea53d26d580bd6bd0eb7cb4187e033858f8","reviewed":true}
+    }
+  },
+  "issuerHint": {
+    "source": "签名配置就绪后可启用提供方。",
+    "translations": {
+      "en": {"text":"Enable the provider after its signing configuration is ready.","sourceRevision":"89a41dbeace9e727302077f3f85619e9c3950a0c0908106a331c3c6260f58663","reviewed":true},
+      "ru": {"text":"Включите провайдер после того, как будет готова конфигурация подписи.","sourceRevision":"89a41dbeace9e727302077f3f85619e9c3950a0c0908106a331c3c6260f58663","reviewed":true}
+    }
+  },
+  "keepSecret": {
+    "source": "留空将保留当前 Secret。",
+    "translations": {
+      "en": {"text":"Leave blank to keep the current secret.","sourceRevision":"44f12261bea03a699ec21e47bf869363c64aef61274146fbed14b0f23d7e62ac","reviewed":true},
+      "ru": {"text":"Оставьте пустым, чтобы сохранить текущий секрет.","sourceRevision":"44f12261bea03a699ec21e47bf869363c64aef61274146fbed14b0f23d7e62ac","reviewed":true}
+    }
+  },
+  "key": {
+    "source": "提供方标识",
+    "translations": {
+      "en": {"text":"Provider key","sourceRevision":"94827db6413ce89dbbd7bbb1b54de7754cf90d40202f595737f79a4029ad49dc","reviewed":true},
+      "ru": {"text":"Ключ провайдера","sourceRevision":"94827db6413ce89dbbd7bbb1b54de7754cf90d40202f595737f79a4029ad49dc","reviewed":true}
+    }
+  },
+  "keyDuplicate": {
+    "source": "提供方标识不能重复。",
+    "translations": {
+      "en": {"text":"Provider keys must be unique.","sourceRevision":"1f8ee15373a51b7d6891f532df4633cd86e2a9644fe5519db18db71a3191f036","reviewed":true},
+      "ru": {"text":"Ключи провайдеров должны быть уникальны.","sourceRevision":"1f8ee15373a51b7d6891f532df4633cd86e2a9644fe5519db18db71a3191f036","reviewed":true}
+    }
+  },
+  "keyInvalid": {
+    "source": "提供方标识必须以字母开头，只能包含小写字母、数字和连字符，长度为 2–32 个字符。",
+    "translations": {
+      "en": {"text":"Provider keys must start with a letter and contain only lowercase letters, numbers, and hyphens (2–32 characters).","sourceRevision":"6869badb5ca065e8b59935e7b32101a4655124821bf7d5ec3bb0aba07b6af336","reviewed":true},
+      "ru": {"text":"Ключ провайдера должен начинаться с буквы и содержать только строчные латинские буквы, цифры и дефисы (2–32 символа).","sourceRevision":"6869badb5ca065e8b59935e7b32101a4655124821bf7d5ec3bb0aba07b6af336","reviewed":true}
+    }
+  },
+  "loadFailed": {
+    "source": "设置加载失败",
+    "translations": {
+      "en": {"text":"Failed to load settings","sourceRevision":"ab287d561a9abdee4c1d1e411c69f5645ddd5b999e6867d6fdcf5a3e46e4523e","reviewed":true},
+      "ru": {"text":"Не удалось загрузить настройки","sourceRevision":"ab287d561a9abdee4c1d1e411c69f5645ddd5b999e6867d6fdcf5a3e46e4523e","reviewed":true}
+    }
+  },
+  "loadFailedHint": {
+    "source": "暂时无法读取 OAuth 设置，请检查网络或服务状态后重试。",
+    "translations": {
+      "en": {"text":"OAuth settings are temporarily unavailable. Check the network or server status and retry.","sourceRevision":"9068f77229dc56f9f5114487d5ff531fb109e50f066884d4410d06f18bbe5123","reviewed":true},
+      "ja": {"text":"OAuth 設定を読み込めません。ネットワークまたはサーバーの状態を確認して再試行してください。","sourceRevision":"9068f77229dc56f9f5114487d5ff531fb109e50f066884d4410d06f18bbe5123","reviewed":true},
+      "it": {"text":"Le impostazioni OAuth non sono temporaneamente disponibili. Controlla la rete o lo stato del server e riprova.","sourceRevision":"9068f77229dc56f9f5114487d5ff531fb109e50f066884d4410d06f18bbe5123","reviewed":true},
+      "ru": {"text":"Настройки OAuth временно недоступны. Проверьте соединение или состояние сервера и повторите попытку.","sourceRevision":"9068f77229dc56f9f5114487d5ff531fb109e50f066884d4410d06f18bbe5123","reviewed":true}
+    }
+  },
+  "loading": {
+    "source": "正在加载…",
+    "translations": {
+      "en": {"text":"Loading…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
+      "ru": {"text":"Загрузка…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true}
+    }
+  },
+  "nameRequired": {
+    "source": "请输入应用名称",
+    "translations": {
+      "en": {"text":"Enter an application name","sourceRevision":"ded3b7164aaec302be6bc36035161d471d29d415099f42b755f806d4f726fabb","reviewed":true},
+      "ru": {"text":"Введите название приложения","sourceRevision":"ded3b7164aaec302be6bc36035161d471d29d415099f42b755f806d4f726fabb","reviewed":true}
+    }
+  },
+  "next": {
+    "source": "下一页",
+    "translations": {
+      "en": {"text":"Next page","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
+      "ru": {"text":"Следующая страница","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true}
+    }
+  },
+  "notEnabled": {
+    "source": "未启用",
+    "translations": {
+      "en": {"text":"Disabled","sourceRevision":"d0236c608c46fe138eb13e45926f496d3489f2d759ba4210d9915ba836f4d0d1","reviewed":true},
+      "ru": {"text":"Отключён","sourceRevision":"d0236c608c46fe138eb13e45926f496d3489f2d759ba4210d9915ba836f4d0d1","reviewed":true}
+    }
+  },
+  "oauth": {
+    "source": "OAuth 登录",
+    "translations": {
+      "en": {"text":"OAuth login","sourceRevision":"da03289c53c4407878e5e56e54d4f9f122d2a9c15ed237172dfbd1636ab9b8b7","reviewed":true},
+      "ja": {"text":"OAuth ログイン","sourceRevision":"da03289c53c4407878e5e56e54d4f9f122d2a9c15ed237172dfbd1636ab9b8b7","reviewed":true},
+      "it": {"text":"Accesso OAuth","sourceRevision":"da03289c53c4407878e5e56e54d4f9f122d2a9c15ed237172dfbd1636ab9b8b7","reviewed":true},
+      "ru": {"text":"Вход через OAuth","sourceRevision":"da03289c53c4407878e5e56e54d4f9f122d2a9c15ed237172dfbd1636ab9b8b7","reviewed":true}
+    }
+  },
+  "oidc": {
+    "source": "OIDC 提供方",
+    "translations": {
+      "en": {"text":"OIDC Provider","sourceRevision":"c4543c6763dcb357974802e471d52d50512dd8e5f0d64c79b4d65fd7eeda2334","reviewed":true},
+      "ja": {"text":"OIDC プロバイダー","sourceRevision":"c4543c6763dcb357974802e471d52d50512dd8e5f0d64c79b4d65fd7eeda2334","reviewed":true},
+      "it": {"text":"Provider OIDC","sourceRevision":"c4543c6763dcb357974802e471d52d50512dd8e5f0d64c79b4d65fd7eeda2334","reviewed":true},
+      "ru": {"text":"OIDC‑провайдер","sourceRevision":"c4543c6763dcb357974802e471d52d50512dd8e5f0d64c79b4d65fd7eeda2334","reviewed":true}
+    }
+  },
+  "oidcHint": {
+    "source": "让 GooseForum 作为 OpenID Connect 身份提供方运行。",
+    "translations": {
+      "en": {"text":"Run GooseForum as an OpenID Connect identity provider.","sourceRevision":"b94da7dd2ae9b2c3ab4c4772d65204daaaf6757e7fbb0844b103e40daeb3e9e3","reviewed":true},
+      "ru": {"text":"Запустите GooseForum как провайдер идентификации OpenID Connect.","sourceRevision":"b94da7dd2ae9b2c3ab4c4772d65204daaaf6757e7fbb0844b103e40daeb3e9e3","reviewed":true}
+    }
+  },
+  "pkce": {
+    "source": "要求 PKCE",
+    "translations": {
+      "en": {"text":"Require PKCE","sourceRevision":"91c74f7305956fbccc8839f0ea4ccca80ffb5cb450fd46370780202a048bc3fc","reviewed":true},
+      "ru": {"text":"Требовать PKCE","sourceRevision":"91c74f7305956fbccc8839f0ea4ccca80ffb5cb450fd46370780202a048bc3fc","reviewed":true}
+    }
+  },
+  "pkceHint": {
+    "source": "建议所有授权码客户端启用。",
+    "translations": {
+      "en": {"text":"Recommended for every authorization-code client.","sourceRevision":"3ede1125806dbcb221296b1619066cab440b1fa8d80509ccf47242476629d52d","reviewed":true},
+      "ru": {"text":"Рекомендуется для каждого клиента с авторизационным кодом.","sourceRevision":"3ede1125806dbcb221296b1619066cab440b1fa8d80509ccf47242476629d52d","reviewed":true}
+    }
+  },
+  "previous": {
+    "source": "上一页",
+    "translations": {
+      "en": {"text":"Previous page","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
+      "ru": {"text":"Предыдущая страница","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true}
+    }
+  },
+  "provider": {
+    "source": "提供方",
+    "translations": {
+      "en": {"text":"Provider","sourceRevision":"8c2a693f5ec7c282aea73aadd5175368cf1d3ca4fad3f3800dfabf349d9ef35c","reviewed":true},
+      "ru": {"text":"Провайдер","sourceRevision":"8c2a693f5ec7c282aea73aadd5175368cf1d3ca4fad3f3800dfabf349d9ef35c","reviewed":true}
+    }
+  },
+  "providerCheckFailed": {
+    "source": "无法验证提供方配置，请检查凭据、Discovery URL 和网络连接。",
+    "translations": {
+      "en": {"text":"The provider configuration could not be verified. Check the credentials, discovery URL, and network connection.","sourceRevision":"94145185a4d4b2f6e08c7beb637f82030431ff7f4b2c108ab6aa653b66250388","reviewed":true},
+      "ja": {"text":"プロバイダー設定を確認できません。認証情報、Discovery URL、ネットワーク接続を確認してください。","sourceRevision":"94145185a4d4b2f6e08c7beb637f82030431ff7f4b2c108ab6aa653b66250388","reviewed":true},
+      "it": {"text":"Impossibile verificare la configurazione del provider. Controlla le credenziali, l'URL Discovery e la connessione di rete.","sourceRevision":"94145185a4d4b2f6e08c7beb637f82030431ff7f4b2c108ab6aa653b66250388","reviewed":true},
+      "ru": {"text":"Не удалось проверить настройки провайдера. Проверьте учётные данные, URL обнаружения и соединение.","sourceRevision":"94145185a4d4b2f6e08c7beb637f82030431ff7f4b2c108ab6aa653b66250388","reviewed":true}
+    }
+  },
+  "public": {
+    "source": "公共客户端",
+    "translations": {
+      "en": {"text":"Public","sourceRevision":"4d203a9e4991331638648a0e306b9aee197b8d2233c6862eb80b49a7e9621c2d","reviewed":true},
+      "ru": {"text":"Публичный","sourceRevision":"4d203a9e4991331638648a0e306b9aee197b8d2233c6862eb80b49a7e9621c2d","reviewed":true}
+    }
+  },
+  "publicClientIdHint": {
+    "source": "公共客户端没有 Client Secret，Client ID 也可随时从客户端列表获取。",
+    "translations": {
+      "en": {"text":"Public clients have no Client Secret. The Client ID is also available in the client list.","sourceRevision":"2efba31a22d8a9141b06a9ab200c1bd9f86353d094fcabbab5e6989c1e9afdd3","reviewed":true},
+      "ru": {"text":"У публичных клиентов нет секрета. ID клиента также доступен в списке клиентов.","sourceRevision":"2efba31a22d8a9141b06a9ab200c1bd9f86353d094fcabbab5e6989c1e9afdd3","reviewed":true}
+    }
+  },
+  "redirectInvalid": {
+    "source": "回调地址必须使用 HTTP 或 HTTPS",
+    "translations": {
+      "en": {"text":"Redirect URIs must use HTTP or HTTPS","sourceRevision":"29696fe359449a96ba54014d47fb0ec2a9d17738683626efed65b2a170b64b40","reviewed":true},
+      "ru": {"text":"Redirect URI должны использовать HTTP или HTTPS","sourceRevision":"29696fe359449a96ba54014d47fb0ec2a9d17738683626efed65b2a170b64b40","reviewed":true}
+    }
+  },
+  "redirectRequired": {
+    "source": "请至少填写一个回调地址",
+    "translations": {
+      "en": {"text":"Enter at least one redirect URI","sourceRevision":"c7cb99c6a80168f9e2566c53e35df7fd96360fa86a160b755933ba6c9a596814","reviewed":true},
+      "ru": {"text":"Укажите хотя бы один redirect URI","sourceRevision":"c7cb99c6a80168f9e2566c53e35df7fd96360fa86a160b755933ba6c9a596814","reviewed":true}
+    }
+  },
+  "redirects": {
+    "source": "回调地址，每行一个",
+    "translations": {
+      "en": {"text":"Redirect URIs, one per line","sourceRevision":"2192abeec972255147eb6f6b83fbb0330daceb23057c415293e8aa6cb14ae315","reviewed":true},
+      "ru": {"text":"Redirect URIs, по одному на строку","sourceRevision":"2192abeec972255147eb6f6b83fbb0330daceb23057c415293e8aa6cb14ae315","reviewed":true}
+    }
+  },
+  "refresh": {
+    "source": "刷新",
+    "translations": {
+      "en": {"text":"Refresh","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true},
+      "ru": {"text":"Обновить","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true}
+    }
+  },
+  "remove": {
+    "source": "删除",
+    "translations": {
+      "en": {"text":"Remove","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
+      "ru": {"text":"Удалить","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true}
+    }
+  },
+  "removeProvider": {
+    "source": "删除提供方",
+    "translations": {
+      "en": {"text":"Remove provider","sourceRevision":"339b7d96b97e9fe89e26ebc528b7ff194a1c4ecc710a84e36f6099fd264c700b","reviewed":true},
+      "ja": {"text":"プロバイダーを削除","sourceRevision":"339b7d96b97e9fe89e26ebc528b7ff194a1c4ecc710a84e36f6099fd264c700b","reviewed":true},
+      "it": {"text":"Rimuovi provider","sourceRevision":"339b7d96b97e9fe89e26ebc528b7ff194a1c4ecc710a84e36f6099fd264c700b","reviewed":true},
+      "ru": {"text":"Удалить провайдера","sourceRevision":"339b7d96b97e9fe89e26ebc528b7ff194a1c4ecc710a84e36f6099fd264c700b","reviewed":true}
+    }
+  },
+  "removeProviderHint": {
+    "source": "保存设置后，该提供方将被移除：",
+    "translations": {
+      "en": {"text":"The provider will be removed when the settings are saved:","sourceRevision":"f1b87e0eb68709feca3072bc17ca91f5c7ad6d854f48046eacd51e16f0e560ed","reviewed":true},
+      "ja": {"text":"設定を保存すると、このプロバイダーは削除されます：","sourceRevision":"f1b87e0eb68709feca3072bc17ca91f5c7ad6d854f48046eacd51e16f0e560ed","reviewed":true},
+      "it": {"text":"Il provider verrà rimosso al salvataggio delle impostazioni:","sourceRevision":"f1b87e0eb68709feca3072bc17ca91f5c7ad6d854f48046eacd51e16f0e560ed","reviewed":true},
+      "ru": {"text":"Провайдер будет удалён после сохранения настроек:","sourceRevision":"f1b87e0eb68709feca3072bc17ca91f5c7ad6d854f48046eacd51e16f0e560ed","reviewed":true}
+    }
+  },
+  "removeProviderTitle": {
+    "source": "删除这个 OAuth 提供方？",
+    "translations": {
+      "en": {"text":"Remove this OAuth provider?","sourceRevision":"83f5bcb1ee6abea6d1fe949eab5ff64bc3d3e35556a26ada9c232ff0841ec841","reviewed":true},
+      "ja": {"text":"この OAuth プロバイダーを削除しますか？","sourceRevision":"83f5bcb1ee6abea6d1fe949eab5ff64bc3d3e35556a26ada9c232ff0841ec841","reviewed":true},
+      "it": {"text":"Rimuovere questo provider OAuth?","sourceRevision":"83f5bcb1ee6abea6d1fe949eab5ff64bc3d3e35556a26ada9c232ff0841ec841","reviewed":true},
+      "ru": {"text":"Удалить этого провайдера OAuth?","sourceRevision":"83f5bcb1ee6abea6d1fe949eab5ff64bc3d3e35556a26ada9c232ff0841ec841","reviewed":true}
+    }
+  },
+  "removeScope": {
+    "source": "移除 Scope",
+    "translations": {
+      "en": {"text":"Remove scope","sourceRevision":"f07acca31b22de770fcdc58e4348b621367b1d9773710d577a0bcc3201bc3d82","reviewed":true},
+      "ja": {"text":"Scope を削除","sourceRevision":"f07acca31b22de770fcdc58e4348b621367b1d9773710d577a0bcc3201bc3d82","reviewed":true},
+      "it": {"text":"Rimuovi scope","sourceRevision":"f07acca31b22de770fcdc58e4348b621367b1d9773710d577a0bcc3201bc3d82","reviewed":true},
+      "ru": {"text":"Удалить область доступа","sourceRevision":"f07acca31b22de770fcdc58e4348b621367b1d9773710d577a0bcc3201bc3d82","reviewed":true}
+    }
+  },
+  "resetSigning": {
+    "source": "重置签名密钥",
+    "translations": {
+      "en": {"text":"Reset signing key","sourceRevision":"83128d578c305225de0b3303a48454fe33a0f2b5936c7f27b7344ed7a38594ca","reviewed":true},
+      "ru": {"text":"Сбросить ключ подписи","sourceRevision":"83128d578c305225de0b3303a48454fe33a0f2b5936c7f27b7344ed7a38594ca","reviewed":true}
+    }
+  },
+  "resetSigningHint": {
+    "source": "替换无法恢复的签名密钥，并撤销所有 OIDC 授权和凭据。已签发的 ID Token 无法收回。如仍有原系统密钥，应优先恢复原密钥。",
+    "translations": {
+      "en": {"text":"Replace the unrecoverable signing key and revoke all OIDC grants and tokens. Existing ID tokens cannot be recalled. Restore the original system key instead if available.","sourceRevision":"dc8a773f317a1c11b935dd6a4ebdbf8eae30dac125ded5e6beac10396a091a33","reviewed":true},
+      "ru": {"text":"Заменить утраченный ключ подписи и отозвать все разрешения и токены OIDC. Уже выданные ID-токены отозвать нельзя. Если исходный системный ключ доступен, восстановите его.","sourceRevision":"dc8a773f317a1c11b935dd6a4ebdbf8eae30dac125ded5e6beac10396a091a33","reviewed":true}
+    }
+  },
+  "retry": {
+    "source": "重试",
+    "translations": {
+      "en": {"text":"Retry","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true},
+      "ja": {"text":"再試行","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true},
+      "it": {"text":"Riprova","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true},
+      "ru": {"text":"Повторить","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true}
+    }
+  },
+  "revokeAllGrants": {
+    "source": "撤销全部授权",
+    "translations": {
+      "en": {"text":"Revoke all grants","sourceRevision":"b1f5bad5fb572b6d013f4fcf80ae94037b2db875d64029430bc042a9a546292f","reviewed":true},
+      "ru": {"text":"Отозвать все разрешения","sourceRevision":"b1f5bad5fb572b6d013f4fcf80ae94037b2db875d64029430bc042a9a546292f","reviewed":true}
+    }
+  },
+  "revokeGrant": {
+    "source": "撤销授权",
+    "translations": {
+      "en": {"text":"Revoke grant","sourceRevision":"c05ae846613a49d20f65e1ac5624b75f2035aa875a94ae2ea83341c82e469b61","reviewed":true},
+      "ru": {"text":"Отозвать разрешение","sourceRevision":"c05ae846613a49d20f65e1ac5624b75f2035aa875a94ae2ea83341c82e469b61","reviewed":true}
+    }
+  },
+  "revokeGrantHint": {
+    "source": "使授权码、访问令牌和刷新令牌失效，并移除授权记录。第三方应用已经建立的登录会话不受影响。",
+    "translations": {
+      "en": {"text":"Invalidate authorization codes, access tokens and refresh tokens, and remove consent. Sessions already created by the external application are unaffected.","sourceRevision":"54bbcd3141c4195072580a7f7a37788aa5415c0083e94e15f87f17462e0139e3","reviewed":true},
+      "ru": {"text":"Коды авторизации, токены доступа и обновления будут аннулированы, а согласие отозвано. Сеансы внешнего приложения останутся активны.","sourceRevision":"54bbcd3141c4195072580a7f7a37788aa5415c0083e94e15f87f17462e0139e3","reviewed":true}
+    }
+  },
+  "rotateSecret": {
+    "source": "轮换 Secret",
+    "translations": {
+      "en": {"text":"Rotate secret","sourceRevision":"a048e7be62d9c1d5681c5af1285cf27c31e1515f424305a04efe396730751465","reviewed":true},
+      "ru": {"text":"Сменить секрет","sourceRevision":"a048e7be62d9c1d5681c5af1285cf27c31e1515f424305a04efe396730751465","reviewed":true}
+    }
+  },
+  "rotateSecretHint": {
+    "source": "原有 Client Secret 将立即失效。",
+    "translations": {
+      "en": {"text":"The previous client secret will stop working.","sourceRevision":"22aa20979063b6ad727a8639446036d1898ab8b618c5c2a37be0c62cc29599d3","reviewed":true},
+      "ru": {"text":"Предыдущий client secret перестанет работать.","sourceRevision":"22aa20979063b6ad727a8639446036d1898ab8b618c5c2a37be0c62cc29599d3","reviewed":true}
+    }
+  },
+  "rotateSigning": {
+    "source": "轮换签名密钥",
+    "translations": {
+      "en": {"text":"Rotate signing key","sourceRevision":"dd891c5001a2dad5b2851189ee35fe6362ddda334d0a1a703c2b4f5ff6524a80","reviewed":true},
+      "ru": {"text":"Сменить ключ подписи","sourceRevision":"dd891c5001a2dad5b2851189ee35fe6362ddda334d0a1a703c2b4f5ff6524a80","reviewed":true}
+    }
+  },
+  "rotateSigningHint": {
+    "source": "轮换后，已有令牌可能无法继续验证。",
+    "translations": {
+      "en": {"text":"New ID tokens use a new signing key. The old public key remains available until existing ID tokens expire. The system secret key is unchanged.","sourceRevision":"b0caeed0421579ba3c1f2eb2b2b624d282fe077cbff0602c93e682db75d6c245","reviewed":true},
+      "ru": {"text":"После смены ключа существующие токены могут перестать проходить валидацию.","sourceRevision":"b0caeed0421579ba3c1f2eb2b2b624d282fe077cbff0602c93e682db75d6c245","reviewed":true}
+    }
+  },
+  "rotateSigningTitle": {
+    "source": "轮换签名密钥？",
+    "translations": {
+      "en": {"text":"Rotate signing key?","sourceRevision":"dee8e28fb6d09445f40d3bd5ee2575ef242e4e29765f62b8b39d99998116637f","reviewed":true},
+      "ru": {"text":"Сменить ключ подписи?","sourceRevision":"dee8e28fb6d09445f40d3bd5ee2575ef242e4e29765f62b8b39d99998116637f","reviewed":true}
+    }
+  },
+  "running": {
+    "source": "运行中",
+    "translations": {
+      "en": {"text":"Running","sourceRevision":"61b0d0682287d1d4cec3ca9a4ec04d890523dd647c803a1fd38ed948c1ed4829","reviewed":true},
+      "ru": {"text":"Работает","sourceRevision":"61b0d0682287d1d4cec3ca9a4ec04d890523dd647c803a1fd38ed948c1ed4829","reviewed":true}
+    }
+  },
+  "save": {
+    "source": "保存",
+    "translations": {
+      "en": {"text":"Save","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "ru": {"text":"Сохранить","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true}
+    }
+  },
+  "saveFailed": {
+    "source": "保存失败",
+    "translations": {
+      "en": {"text":"Save failed","sourceRevision":"766db787b83f4470a9b40f6e498d418ac5b042ef78f0442f2d6e238e6eea04ad","reviewed":true},
+      "ru": {"text":"Не удалось сохранить","sourceRevision":"766db787b83f4470a9b40f6e498d418ac5b042ef78f0442f2d6e238e6eea04ad","reviewed":true}
+    }
+  },
+  "saved": {
+    "source": "已保存",
+    "translations": {
+      "en": {"text":"Saved","sourceRevision":"985cc0bbe42a14fe5b9a5e3eaecc4b197462453385afb30dcc3a2e13f69aca0a","reviewed":true},
+      "ru": {"text":"Сохранено","sourceRevision":"985cc0bbe42a14fe5b9a5e3eaecc4b197462453385afb30dcc3a2e13f69aca0a","reviewed":true}
+    }
+  },
+  "saving": {
+    "source": "保存中…",
+    "translations": {
+      "en": {"text":"Saving…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
+      "ru": {"text":"Сохранение…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true}
+    }
+  },
+  "scopeInvalid": {
+    "source": "Scope 不能为空或包含空格。",
+    "translations": {
+      "en": {"text":"Scopes cannot be empty or contain spaces.","sourceRevision":"a1cfcb9be3d36fa6b498f5569015be71ecae47eba9dceda07e012a71585981b5","reviewed":true},
+      "ru": {"text":"Области доступа не должны быть пустыми или содержать пробелы.","sourceRevision":"a1cfcb9be3d36fa6b498f5569015be71ecae47eba9dceda07e012a71585981b5","reviewed":true}
+    }
+  },
+  "scopes": {
+    "source": "Scopes",
+    "translations": {
+      "en": {"text":"Scopes","sourceRevision":"93a5cc006ec659ce0e53c0db1729016138d6f721c3a8ab18c7f82911bad09484","reviewed":true},
+      "ru": {"text":"Scopes","sourceRevision":"93a5cc006ec659ce0e53c0db1729016138d6f721c3a8ab18c7f82911bad09484","reviewed":true}
+    }
+  },
+  "search": {
+    "source": "搜索",
+    "translations": {
+      "en": {"text":"Search","sourceRevision":"c9d48d8826d481e47f3011549f9671a2edb1b1ae74e0440c2495c9d3f5852710","reviewed":true},
+      "ru": {"text":"Поиск","sourceRevision":"c9d48d8826d481e47f3011549f9671a2edb1b1ae74e0440c2495c9d3f5852710","reviewed":true}
+    }
+  },
+  "secretConfigured": {
+    "source": "Secret 已配置",
+    "translations": {
+      "en": {"text":"Secret configured","sourceRevision":"090f2c6de73de9a40576b254e0184ca02ec78948729395c70ce30eac302d3244","reviewed":true},
+      "ru": {"text":"Секрет настроен","sourceRevision":"090f2c6de73de9a40576b254e0184ca02ec78948729395c70ce30eac302d3244","reviewed":true}
+    }
+  },
+  "secretHint": {
+    "source": "请立即复制，关闭后不会再次显示。",
+    "translations": {
+      "en": {"text":"Copy this secret now. It will not be shown again.","sourceRevision":"df0e35ecb5fc7a59283a19754b416d69d17e31900e2cb3647b9c257c450d3ad2","reviewed":true},
+      "ru": {"text":"Скопируйте секрет сейчас. Он больше не будет показан.","sourceRevision":"df0e35ecb5fc7a59283a19754b416d69d17e31900e2cb3647b9c257c450d3ad2","reviewed":true}
+    }
+  },
+  "secretMissing": {
+    "source": "Secret 未配置",
+    "translations": {
+      "en": {"text":"Secret missing","sourceRevision":"4eb7e5fe3285c475870b1d1cbf007910304b4c25d069f41e154756b87e063fbb","reviewed":true},
+      "ru": {"text":"Секрет отсутствует","sourceRevision":"4eb7e5fe3285c475870b1d1cbf007910304b4c25d069f41e154756b87e063fbb","reviewed":true}
+    }
+  },
+  "secretTitle": {
+    "source": "客户端凭据",
+    "translations": {
+      "en": {"text":"Client credentials","sourceRevision":"2c1f9323ddc5987431949df547af02a0af82c8d4d8f34745748c336cea885da9","reviewed":true},
+      "ru": {"text":"Учётные данные клиента","sourceRevision":"2c1f9323ddc5987431949df547af02a0af82c8d4d8f34745748c336cea885da9","reviewed":true}
+    }
+  },
+  "status": {
+    "source": "提供方状态",
+    "translations": {
+      "en": {"text":"Provider status","sourceRevision":"451db1e88bedf76bdac0477ec0bbe4394d28f843279e202e7f93780a49bb2e1c","reviewed":true},
+      "ru": {"text":"Статус провайдера","sourceRevision":"451db1e88bedf76bdac0477ec0bbe4394d28f843279e202e7f93780a49bb2e1c","reviewed":true}
+    }
+  },
+  "stored": {
+    "source": "我已保存",
+    "translations": {
+      "en": {"text":"I have stored it","sourceRevision":"7d743d872e8d353e18b6d36304e238fc2e91aa675b4e8016e55714b8e9373403","reviewed":true},
+      "ru": {"text":"Сохранено","sourceRevision":"7d743d872e8d353e18b6d36304e238fc2e91aa675b4e8016e55714b8e9373403","reviewed":true}
+    }
+  },
+  "tokenAuth": {
+    "source": "Token 认证方式",
+    "translations": {
+      "en": {"text":"Token authentication","sourceRevision":"b8fe4058bc47ad870de775e269e18f1776e18d460cc475f4bc8ef871a580b9f2","reviewed":true},
+      "ru": {"text":"Аутентификация по токену","sourceRevision":"b8fe4058bc47ad870de775e269e18f1776e18d460cc475f4bc8ef871a580b9f2","reviewed":true}
+    }
+  },
+  "undoClear": {
+    "source": "保留 Secret",
+    "translations": {
+      "en": {"text":"Keep secret","sourceRevision":"a30623825202c0eb0b620516b44f55c7be4ee50785f06078cc0221ca0a472036","reviewed":true},
+      "ru": {"text":"Оставить секрет","sourceRevision":"a30623825202c0eb0b620516b44f55c7be4ee50785f06078cc0221ca0a472036","reviewed":true}
+    }
+  },
+  "updatedAt": {
+    "source": "更新时间",
+    "translations": {
+      "en": {"text":"Updated at","sourceRevision":"543d99e853be64a95bcebf08f686b9dda5c2c85c6f8639973d8ddb4f9619c1fe","reviewed":true},
+      "ru": {"text":"Обновлено","sourceRevision":"543d99e853be64a95bcebf08f686b9dda5c2c85c6f8639973d8ddb4f9619c1fe","reviewed":true}
+    }
+  },
+  "userId": {
+    "source": "用户 ID",
+    "translations": {
+      "en": {"text":"User ID","sourceRevision":"107957840ef77f095a474d248b55a985370a39fe688b5a49173988dc720794ef","reviewed":true},
+      "ru": {"text":"ID пользователя","sourceRevision":"107957840ef77f095a474d248b55a985370a39fe688b5a49173988dc720794ef","reviewed":true}
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "back": {
+    "source": "返回",
+    "translations": {
+      "en": {"text":"Back","sourceRevision":"14e287267db59b71c23f3d0b793e55d516adaabb83b3cec0da1aee732b044fe6","reviewed":true},
+      "ja": {"text":"戻る","sourceRevision":"14e287267db59b71c23f3d0b793e55d516adaabb83b3cec0da1aee732b044fe6","reviewed":true},
+      "it": {"text":"Indietro","sourceRevision":"14e287267db59b71c23f3d0b793e55d516adaabb83b3cec0da1aee732b044fe6","reviewed":true},
+      "ru": {"text":"Назад","sourceRevision":"14e287267db59b71c23f3d0b793e55d516adaabb83b3cec0da1aee732b044fe6","reviewed":true}
+    }
+  },
+  "fallbackMessage": {
+    "source": "页面加载失败。",
+    "translations": {
+      "en": {"text":"The page could not be loaded.","sourceRevision":"19e66b427fca9126da6f7e39e360a0dd6bb32d7f6d0069f762c4a8d9dec9949b","reviewed":true},
+      "ru": {"text":"Не удалось загрузить страницу.","sourceRevision":"19e66b427fca9126da6f7e39e360a0dd6bb32d7f6d0069f762c4a8d9dec9949b","reviewed":true}
+    }
+  },
+  "home": {
+    "source": "回到首页",
+    "translations": {
+      "en": {"text":"Home","sourceRevision":"bfc649bf4fef368bce8d1e688a6e5395c3a2103f57765f9167af5015e3bb141e","reviewed":true},
+      "ja": {"text":"ホーム","sourceRevision":"bfc649bf4fef368bce8d1e688a6e5395c3a2103f57765f9167af5015e3bb141e","reviewed":true},
+      "ru": {"text":"Главная","sourceRevision":"bfc649bf4fef368bce8d1e688a6e5395c3a2103f57765f9167af5015e3bb141e","reviewed":true}
+    }
+  },
+  "messages.page.notFound": {
+    "source": "页面不存在，或已经被删除。",
+    "translations": {
+      "en": {"text":"This page does not exist or has been removed.","sourceRevision":"c0840e4535758437270063ad45cf7b13d5533b5d4f318337e12b05225e716e3d","reviewed":true},
+      "ru": {"text":"Эта страница не существует или была удалена.","sourceRevision":"c0840e4535758437270063ad45cf7b13d5533b5d4f318337e12b05225e716e3d","reviewed":true}
+    }
+  },
+  "messages.route.notFound": {
+    "source": "路由未定义，请确认 URL 和请求方法是否正确。",
+    "translations": {
+      "en": {"text":"The route is not defined. Check the URL and request method.","sourceRevision":"ad6c3d01b892fe45b39fb5b2e73a7728f0cd19eb86021117beae18a18ab74c69","reviewed":true},
+      "ru": {"text":"Маршрут не определён. Проверьте URL и метод запроса.","sourceRevision":"ad6c3d01b892fe45b39fb5b2e73a7728f0cd19eb86021117beae18a18ab74c69","reviewed":true}
+    }
+  },
+  "notFoundTitle": {
+    "source": "页面不存在",
+    "translations": {
+      "en": {"text":"Page not found","sourceRevision":"013e98a8175cf5e25eb286836cefd7cc60c4c59a4327b8a1a9e547ea7aaa6ef8","reviewed":true},
+      "ja": {"text":"ページが見つかりません","sourceRevision":"013e98a8175cf5e25eb286836cefd7cc60c4c59a4327b8a1a9e547ea7aaa6ef8","reviewed":true},
+      "it": {"text":"Pagina non trovata","sourceRevision":"013e98a8175cf5e25eb286836cefd7cc60c4c59a4327b8a1a9e547ea7aaa6ef8","reviewed":true},
+      "ru": {"text":"Страница не найдена","sourceRevision":"013e98a8175cf5e25eb286836cefd7cc60c4c59a4327b8a1a9e547ea7aaa6ef8","reviewed":true}
+    }
+  }
+}

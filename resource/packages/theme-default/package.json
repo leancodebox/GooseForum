@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@gooseforum/client": "workspace:*",
+    "@gooseforum/i18n": "workspace:*",
     "@gooseforum/markdown": "workspace:*",
     "@gooseforum/runtime": "workspace:*",
     "@gooseforum/ui": "workspace:*",
@@ -17,7 +18,7 @@
     "altcha": "^3.7.0",
     "compressorjs": "^1.4.0",
     "cropperjs": "^2.3.1",
-    "i18next": "^27.1.2",
+    "i18next": "^27.2.2",
     "lucide-react": "^1.73.0",
     "mermaid": "12.3.0",
     "qrcode.react": "^4.2.0",
@@ -25,7 +26,7 @@
     "react-dom": "^19.3.1",
     "react-google-recaptcha": "^3.1.0",
     "react-google-recaptcha-v3": "^1.11.0",
-    "react-i18next": "^18.0.1",
+    "react-i18next": "^18.0.3",
     "simple-icons": "^16.38.0"
   },
   "devDependencies": {

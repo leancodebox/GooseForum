@@ -506,7 +506,7 @@ export function SiteApp({
 }
 
 function NavigationProgress() {
-  const { t } = useTranslation("contentCommon");
+  const { t } = useTranslation("site.contentCommon");
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const timer = window.setTimeout(() => setVisible(true), 200);

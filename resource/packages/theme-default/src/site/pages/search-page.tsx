@@ -21,8 +21,8 @@ import { compactNumber, TopicListToolbar, TopicTable } from "../topics/topic-lis
 
 export function SearchPageView({ page }: { page: SearchPageProps }) {
   const queryInputId = useId();
-  const { t: searchT } = useTranslation("search");
-  const { t: topicT } = useTranslation("home");
+  const { t: searchT } = useTranslation("site.search");
+  const { t: topicT } = useTranslation("site.home");
   const runtime = useGooseRuntime();
   const [query, setQuery] = useState(page.query);
   const payloadQuery = useRef(page.query);
@@ -41,7 +41,7 @@ export function SearchPageView({ page }: { page: SearchPageProps }) {
   }
 
   const description = hasQuery
-    ? `${page.query} · ${searchT("resultCount", { count: compactNumber(page.total) })}`
+    ? `${page.query} · ${searchT("resultCount", { total: compactNumber(page.total) })}`
     : searchT("emptyPrompt");
 
   return (

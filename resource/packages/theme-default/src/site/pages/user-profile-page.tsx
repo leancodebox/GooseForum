@@ -1,6 +1,8 @@
+import { runtimeText, trustLevelLabel } from "@gooseforum/i18n";
+import type { TFunction } from "i18next";
 import { useState, type ReactNode } from "react";
 import type { TopicPayload, UserProfileProps } from "@gooseforum/client";
-import { formatCompactNumber, trustLevelName } from "@gooseforum/client";
+import { formatCompactNumber } from "@gooseforum/client";
 import {
   Award,
   Bird,
@@ -51,7 +53,9 @@ const socialProfiles = {
 } as const;
 
 export function UserProfilePageView({ page }: { page: UserProfileProps }) {
-  const { t } = useTranslation("user");
+  const { t } = useTranslation("site.user");
+  const { t: sharedText } = useTranslation("shared.shell");
+  const { t: homeText } = useTranslation("site.home");
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
   const [following, setFollowing] = useState(page.user.isFollowing);
@@ -104,7 +108,7 @@ export function UserProfilePageView({ page }: { page: UserProfileProps }) {
                 description={page.user.bio || page.user.signature || t("emptyBio")}
                 badges={
                   <>
-                    {page.user.trustLevel !== undefined ? <Badge variant="outline">{trustLevelName(page.user.trustLevel, runtime.locale)}</Badge> : null}
+                    {page.user.trustLevel !== undefined ? <Badge variant="outline">{trustLevelLabel(page.user.trustLevel, sharedText)}</Badge> : null}
                     {page.user.isAdmin ? (
                       <Badge variant="secondary" className="text-warning">
                         Admin
@@ -173,7 +177,7 @@ export function UserProfilePageView({ page }: { page: UserProfileProps }) {
                     time: relativeTime(
                       page.user.lastActiveTime,
                       runtime.locale,
-                      t("home:justNow"),
+                      homeText("justNow"),
                     ),
                   })}
                 </span>
@@ -205,7 +209,7 @@ export function UserProfilePageView({ page }: { page: UserProfileProps }) {
                 )}
               >
                 <Icon className="size-4 shrink-0" />
-                {t(`tabs.${tab.key}`)}
+                {runtimeText(t, `tabs.${tab.key}`)}
               </GooseLink>
             );
           })}
@@ -233,7 +237,7 @@ function ProfileSummary({
 }: {
   page: UserProfileProps;
   locale: string;
-  t: ReturnType<typeof useTranslation>["t"];
+  t: TFunction<"site.user">;
 }) {
   const stats = [
     ["reputation", page.user.prestige],
@@ -377,7 +381,7 @@ function BadgeDirectory({
   t,
 }: {
   page: UserProfileProps;
-  t: ReturnType<typeof useTranslation>["t"];
+  t: TFunction<"site.user">;
 }) {
   return page.badges.length ? (
     <div className="grid lg:grid-cols-4 lg:gap-3 lg:p-4">

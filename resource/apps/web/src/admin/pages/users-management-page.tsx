@@ -1,9 +1,11 @@
+import { trustLevelName } from '@gooseforum/i18n/admin'
+import type { AuthLocale } from '@gooseforum/runtime/i18n/auth'
 import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import { errorMessage } from '../error-message'
 import { AdminPage } from '../components/admin-page'
 import { UserMFAReset } from '../components/user-mfa-reset'
 import { UserTrust } from '../components/user-trust'
-import { trustLevelName, trustLevels } from '@gooseforum/client'
+import { trustLevels } from '@gooseforum/client'
 import { RestrictionFields, RestrictionHistory } from '../components/user-restriction'
 import { type RestrictionForm, restrictionForm } from '../components/user-restriction-form'
 import { useLatestRequest } from '@gooseforum/runtime'
@@ -30,7 +32,7 @@ import { loadUsers, useAdminListQuery, usersQuery, type UsersPageData } from '..
 
 type Text = (key: UserTextKey) => string
 
-export function UsersManagementPage({ api, text, locale = 'en', canResetMFA = false, currentUserId, initialData, onUrlChange }: { api: GooseAdminApi; text: Text; locale?: string; canResetMFA?: boolean; currentUserId?: number; initialData?: UsersPageData; onUrlChange?: (url: string) => void }) {
+export function UsersManagementPage({ api, text, locale = 'en', canResetMFA = false, currentUserId, initialData, onUrlChange }: { api: GooseAdminApi; text: Text; locale?: AuthLocale; canResetMFA?: boolean; currentUserId?: number; initialData?: UsersPageData; onUrlChange?: (url: string) => void }) {
   const [query, updateQuery] = useAdminListQuery('/admin/users', initialData?.query || usersQuery(window.location.search), onUrlChange)
   const { page, pageSize, search: appliedSearch } = query
   const [users, setUsers] = useState<AdminUser[]>(initialData?.result.list || [])
@@ -90,7 +92,7 @@ export function UsersManagementPage({ api, text, locale = 'en', canResetMFA = fa
         {search || appliedSearch ? <Button variant="ghost" size="sm" type="button" onClick={() => { setSearch(''); updateQuery({ search: '' }) }}>{text('clear')}</Button> : null}
       </form>
       <UserIconButton label={text('refresh')} disabled={loading} onClick={() => void load()}><RefreshCw className={loading ? 'animate-spin motion-reduce:animate-none' : undefined} /></UserIconButton>
-      <Select value={query.trustLevel || 'all'} onValueChange={value => updateQuery({ trustLevel: value })}><SelectTrigger aria-label={locale.startsWith('zh') ? '信任等级' : 'Trust level'} className="w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">{locale.startsWith('zh') ? '所有等级' : 'All levels'}</SelectItem>{trustLevels.map(level => <SelectItem key={level} value={String(level)}>{trustLevelName(level, locale)}</SelectItem>)}</SelectContent></Select>
+      <Select value={query.trustLevel || 'all'} onValueChange={value => updateQuery({ trustLevel: value })}><SelectTrigger aria-label={text('trustLevel')} className="w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">{text('allTrustLevels')}</SelectItem>{trustLevels.map(level => <SelectItem key={level} value={String(level)}>{trustLevelName(level, locale)}</SelectItem>)}</SelectContent></Select>
     </div>
     <section aria-label={text('title')} aria-busy={loading} className="relative overflow-hidden rounded-md border bg-background">
       {loading && users.length ? <div role="status" className="absolute inset-x-0 top-0 z-10 flex h-8 items-center justify-center gap-2 bg-background/95 text-xs text-muted-foreground"><Spinner />{text('loading')}</div> : null}
@@ -121,7 +123,7 @@ function UserIconButton({ label, children, variant = 'outline', ...props }: Omit
   return <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant={variant} size="icon-sm" aria-label={label} {...props}>{children}</Button></TooltipTrigger><TooltipContent>{label}</TooltipContent></Tooltip></TooltipProvider>
 }
 
-function UserIdentity({ user, text, compact = false, locale = 'en' }: { user: AdminUser; text: Text; compact?: boolean; locale?: string }) {
+function UserIdentity({ user, text, compact = false, locale = 'en' }: { user: AdminUser; text: Text; compact?: boolean; locale?: AuthLocale }) {
   return <div className="flex min-w-0 flex-1 items-start gap-2.5">
     <a href={`/u/${user.userId}`} target="_blank" rel="noreferrer" className="shrink-0"><Avatar className={compact ? 'size-10' : 'size-9'}><AvatarImage src={user.avatarUrl || undefined} alt={user.username} /><AvatarFallback userId={user.userId}>{avatarInitial(user.nickname, user.username)}</AvatarFallback></Avatar></a>
     <div className="min-w-0 flex-1">
@@ -141,7 +143,7 @@ function UserIdentity({ user, text, compact = false, locale = 'en' }: { user: Ad
   </div>
 }
 
-function UserEditor({ user, api, text, locale, canResetMFA, onClose, onSaved }: { user: AdminUser | null; api: GooseAdminApi; text: Text; locale: string; canResetMFA: boolean; onClose(): void; onSaved(): Promise<void> }) {
+function UserEditor({ user, api, text, locale, canResetMFA, onClose, onSaved }: { user: AdminUser | null; api: GooseAdminApi; text: Text; locale: AuthLocale; canResetMFA: boolean; onClose(): void; onSaved(): Promise<void> }) {
   const [form, setForm] = useState(() => ({ validate: user?.validate || 0, roleId: user?.roleId || 0 }))
   const [restriction, setRestriction] = useState<RestrictionForm>(() => restrictionForm(user))
   const [roles, setRoles] = useState<{ name: string; value: number }[]>([])
@@ -239,7 +241,7 @@ function UserEditor({ user, api, text, locale, canResetMFA, onClose, onSaved }: 
             <TabsTrigger type="button" value="account">{text('account')}</TabsTrigger>
             <TabsTrigger type="button" value="badges">{text('badges')}</TabsTrigger>
             <TabsTrigger type="button" value="history">{text('historyTab')}</TabsTrigger>
-            {canResetMFA ? <TabsTrigger type="button" value="trust">{locale.startsWith('zh') ? '信任等级' : 'Trust level'}</TabsTrigger> : null}
+            {canResetMFA ? <TabsTrigger type="button" value="trust">{text('trustLevel')}</TabsTrigger> : null}
           </TabsList>
           <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:min-h-[min(20rem,calc(100dvh-13rem))]">
             <TabsContent value="account">
@@ -291,7 +293,7 @@ function UserEditor({ user, api, text, locale, canResetMFA, onClose, onSaved }: 
           </div>
         </Tabs>
         <DialogFooter className="mx-0 mb-0 rounded-b-none">
-          <Button variant="outline" type="button" disabled={saving} onClick={onClose}>{editorTab === 'trust' ? (locale.startsWith('zh') ? '关闭' : 'Close') : text('cancel')}</Button>
+          <Button variant="outline" type="button" disabled={saving} onClick={onClose}>{editorTab === 'trust' ? text('close') : text('cancel')}</Button>
           {editorTab !== 'trust' ? <Button type="submit" disabled={saving}>{saving ? <Spinner data-icon="inline-start" /> : null}{saving ? text('saving') : text('save')}</Button> : null}
         </DialogFooter>
       </form>

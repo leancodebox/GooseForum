@@ -1,0 +1,101 @@
+{
+  "applyAction": {
+    "source": "去发帖申请",
+    "translations": {
+      "en": {"text":"Post an application","sourceRevision":"9abe44c03c4c8202ef7741105d8000d05b7e938becb85f3b80f0e66a0ad509b8","reviewed":true},
+      "ja": {"text":"申請を投稿","sourceRevision":"9abe44c03c4c8202ef7741105d8000d05b7e938becb85f3b80f0e66a0ad509b8","reviewed":true},
+      "it": {"text":"Invia una proposta","sourceRevision":"9abe44c03c4c8202ef7741105d8000d05b7e938becb85f3b80f0e66a0ad509b8","reviewed":true},
+      "ru": {"text":"Отправить заявку","sourceRevision":"9abe44c03c4c8202ef7741105d8000d05b7e938becb85f3b80f0e66a0ad509b8","reviewed":true}
+    }
+  },
+  "applyDescription": {
+    "source": "发帖提交网站名称、描述、地址和 Logo，管理员审核后会出现在这里。",
+    "translations": {
+      "en": {"text":"Post your site name, description, URL, and logo. It will appear here after admin review.","sourceRevision":"2b931e89a9820805454f525fd4bb229177f85fb2f75d849253d5ab08b3ddc1c5","reviewed":true},
+      "ja": {"text":"サイト名、説明、URL、ロゴを投稿してください。審査後に掲載されます。","sourceRevision":"2b931e89a9820805454f525fd4bb229177f85fb2f75d849253d5ab08b3ddc1c5","reviewed":true},
+      "it": {"text":"Pubblica nome, descrizione, URL e logo del sito. Apparirà dopo la revisione.","sourceRevision":"2b931e89a9820805454f525fd4bb229177f85fb2f75d849253d5ab08b3ddc1c5","reviewed":true},
+      "ru": {"text":"Укажите название сайта, описание, URL и логотип. Ссылка появится здесь после проверки администратором.","sourceRevision":"2b931e89a9820805454f525fd4bb229177f85fb2f75d849253d5ab08b3ddc1c5","reviewed":true}
+    }
+  },
+  "applyTitle": {
+    "source": "申请友链",
+    "translations": {
+      "en": {"text":"Apply for a link","sourceRevision":"f721918058122074b56237af0e30ba03894715f32680a61a2ca504c973d10d27","reviewed":true},
+      "ja": {"text":"リンクを申請","sourceRevision":"f721918058122074b56237af0e30ba03894715f32680a61a2ca504c973d10d27","reviewed":true},
+      "it": {"text":"Proponi un link","sourceRevision":"f721918058122074b56237af0e30ba03894715f32680a61a2ca504c973d10d27","reviewed":true},
+      "ru": {"text":"Подать заявку на добавление ссылки","sourceRevision":"f721918058122074b56237af0e30ba03894715f32680a61a2ca504c973d10d27","reviewed":true}
+    }
+  },
+  "emptyDescription": {
+    "source": "站点还没有配置友情链接。",
+    "translations": {
+      "en": {"text":"No friendly links have been configured yet.","sourceRevision":"e05fca6c228478f924b8ebba8125b5afd7ba3f139166b35c7b9999ad27f6d30c","reviewed":true},
+      "ja": {"text":"リンクはまだ設定されていません。","sourceRevision":"e05fca6c228478f924b8ebba8125b5afd7ba3f139166b35c7b9999ad27f6d30c","reviewed":true},
+      "it": {"text":"Non sono ancora stati configurati link.","sourceRevision":"e05fca6c228478f924b8ebba8125b5afd7ba3f139166b35c7b9999ad27f6d30c","reviewed":true},
+      "ru": {"text":"Дружественные ссылки пока не настроены.","sourceRevision":"e05fca6c228478f924b8ebba8125b5afd7ba3f139166b35c7b9999ad27f6d30c","reviewed":true}
+    }
+  },
+  "emptyTitle": {
+    "source": "暂无链接",
+    "translations": {
+      "en": {"text":"No links","sourceRevision":"46314c3c40d6164efb1700c53531f59c4393afff97d04bd99dc2dbc0d0bd8432","reviewed":true},
+      "ja": {"text":"リンクはありません","sourceRevision":"46314c3c40d6164efb1700c53531f59c4393afff97d04bd99dc2dbc0d0bd8432","reviewed":true},
+      "it": {"text":"Nessun link","sourceRevision":"46314c3c40d6164efb1700c53531f59c4393afff97d04bd99dc2dbc0d0bd8432","reviewed":true},
+      "ru": {"text":"Нет ссылок","sourceRevision":"46314c3c40d6164efb1700c53531f59c4393afff97d04bd99dc2dbc0d0bd8432","reviewed":true}
+    }
+  },
+  "principles.healthy": {
+    "source": "内容健康、长期可访问。",
+    "translations": {
+      "en": {"text":"Healthy content and long-term availability.","sourceRevision":"9c9fdb147c8a5acdd196ea43e3cc676fdaf673b276c66c8467fc5398c0c6137b","reviewed":true},
+      "ja": {"text":"健全なコンテンツで長期間アクセスできること。","sourceRevision":"9c9fdb147c8a5acdd196ea43e3cc676fdaf673b276c66c8467fc5398c0c6137b","reviewed":true},
+      "it": {"text":"Contenuti sicuri e disponibilità a lungo termine.","sourceRevision":"9c9fdb147c8a5acdd196ea43e3cc676fdaf673b276c66c8467fc5398c0c6137b","reviewed":true},
+      "ru": {"text":"Полезный контент и долгосрочная доступность сайта.","sourceRevision":"9c9fdb147c8a5acdd196ea43e3cc676fdaf673b276c66c8467fc5398c0c6137b","reviewed":true}
+    }
+  },
+  "principles.relevant": {
+    "source": "优先技术、开源、社区相关站点。",
+    "translations": {
+      "en": {"text":"Tech, open-source, and community sites are preferred.","sourceRevision":"ce7590e410dfe657f6b5f680f974245912d46331e2ab92c3d295a25faabb0e24","reviewed":true},
+      "ja": {"text":"技術、オープンソース、コミュニティ関連を優先します。","sourceRevision":"ce7590e410dfe657f6b5f680f974245912d46331e2ab92c3d295a25faabb0e24","reviewed":true},
+      "it": {"text":"Preferenza per tecnologia, open source e comunità.","sourceRevision":"ce7590e410dfe657f6b5f680f974245912d46331e2ab92c3d295a25faabb0e24","reviewed":true},
+      "ru": {"text":"Приоритет — технические, open‑source и сообщественные сайты.","sourceRevision":"ce7590e410dfe657f6b5f680f974245912d46331e2ab92c3d295a25faabb0e24","reviewed":true}
+    }
+  },
+  "principles.stable": {
+    "source": "站点信息清晰，Logo 可稳定加载。",
+    "translations": {
+      "en": {"text":"Clear site information and a stable logo URL.","sourceRevision":"051bd09fdd72ca6949633c5ef64b4cb0429cf37386c91a38337c35c399f79f49","reviewed":true},
+      "ja": {"text":"サイト情報が明確でロゴを安定して読み込めること。","sourceRevision":"051bd09fdd72ca6949633c5ef64b4cb0429cf37386c91a38337c35c399f79f49","reviewed":true},
+      "it": {"text":"Informazioni chiare e URL del logo stabile.","sourceRevision":"051bd09fdd72ca6949633c5ef64b4cb0429cf37386c91a38337c35c399f79f49","reviewed":true},
+      "ru": {"text":"Чёткая информация о сайте и стабильный URL логотипа.","sourceRevision":"051bd09fdd72ca6949633c5ef64b4cb0429cf37386c91a38337c35c399f79f49","reviewed":true}
+    }
+  },
+  "principlesTitle": {
+    "source": "收录原则",
+    "translations": {
+      "en": {"text":"Listing principles","sourceRevision":"28d9840c3d91515c7cab5a1ee4ff3b290f001d2ed0bef42b5fc83235eb484483","reviewed":true},
+      "ja": {"text":"掲載基準","sourceRevision":"28d9840c3d91515c7cab5a1ee4ff3b290f001d2ed0bef42b5fc83235eb484483","reviewed":true},
+      "it": {"text":"Criteri di pubblicazione","sourceRevision":"28d9840c3d91515c7cab5a1ee4ff3b290f001d2ed0bef42b5fc83235eb484483","reviewed":true},
+      "ru": {"text":"Принципы размещения","sourceRevision":"28d9840c3d91515c7cab5a1ee4ff3b290f001d2ed0bef42b5fc83235eb484483","reviewed":true}
+    }
+  },
+  "subtitle": {
+    "source": "社区伙伴、开源项目和值得访问的友好站点。",
+    "translations": {
+      "en": {"text":"Community partners, open-source projects, and friendly sites worth visiting.","sourceRevision":"119b83e6679d8c7970f8bc3cdd063eaa634158754f47a9880d9977f52ce09207","reviewed":true},
+      "ja": {"text":"コミュニティパートナー、オープンソースプロジェクト、おすすめサイト。","sourceRevision":"119b83e6679d8c7970f8bc3cdd063eaa634158754f47a9880d9977f52ce09207","reviewed":true},
+      "it": {"text":"Partner della comunità, progetti open source e siti consigliati.","sourceRevision":"119b83e6679d8c7970f8bc3cdd063eaa634158754f47a9880d9977f52ce09207","reviewed":true},
+      "ru": {"text":"Партнёры сообщества, open‑source‑проекты и дружественные сайты, которые стоит посетить.","sourceRevision":"119b83e6679d8c7970f8bc3cdd063eaa634158754f47a9880d9977f52ce09207","reviewed":true}
+    }
+  },
+  "title": {
+    "source": "友情链接",
+    "translations": {
+      "en": {"text":"Links","sourceRevision":"4e3ddf8192fbcc92277eca13ca647c3c585e5828505a7ac7224cf92f3fe013cc","reviewed":true},
+      "ja": {"text":"リンク","sourceRevision":"4e3ddf8192fbcc92277eca13ca647c3c585e5828505a7ac7224cf92f3fe013cc","reviewed":true},
+      "it": {"text":"Link","sourceRevision":"4e3ddf8192fbcc92277eca13ca647c3c585e5828505a7ac7224cf92f3fe013cc","reviewed":true},
+      "ru": {"text":"Ссылки","sourceRevision":"4e3ddf8192fbcc92277eca13ca647c3c585e5828505a7ac7224cf92f3fe013cc","reviewed":true}
+    }
+  }
+}

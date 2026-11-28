@@ -5,7 +5,9 @@ import type { GooseSiteApi } from '@gooseforum/client';
 import { GooseI18nProvider } from '@gooseforum/runtime/i18n';
 import { GooseRuntimeProvider, type GooseRuntime } from '@gooseforum/runtime';
 import { AuthLogSettings } from '../src/site/settings/settings-auth-logs';
-import settings from '../../client/src/i18n/messages/en-settings';
+import { createGooseI18n } from '@gooseforum/runtime/i18n';
+
+const settings = createGooseI18n('en').getResourceBundle('en', 'site.settings');
 
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 function setup(authLogs: unknown) {

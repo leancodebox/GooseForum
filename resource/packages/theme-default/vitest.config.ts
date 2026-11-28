@@ -9,7 +9,7 @@ export default defineConfig({
     setupFiles: ['./theme-default/test/setup.ts'],
     coverage: {
       provider: 'v8',
-      include: ['{theme-default,runtime,ui}/src/**/*.{ts,tsx}'],
+      include: ['{i18n,theme-default,runtime,ui}/src/**/*.{ts,tsx}'],
       reporter: ['text-summary', 'json-summary', 'lcov'],
       reportsDirectory: '../coverage/react-package',
       thresholds: {

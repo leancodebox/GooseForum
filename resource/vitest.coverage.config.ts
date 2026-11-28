@@ -17,11 +17,10 @@ export default defineConfig({
       provider: "v8",
       include: [
         "apps/web/src/**/*.{ts,tsx}",
-        "packages/{theme-default,runtime,ui}/src/**/*.{ts,tsx}",
+        "packages/{i18n,theme-default,runtime,ui}/src/**/*.{ts,tsx}",
       ],
       exclude: [
         "apps/web/src/**/*.test.{ts,tsx}",
-        "apps/web/src/**/messages/**",
         "apps/web/src/test/**",
       ],
       reporter: ["text-summary", "json-summary", "lcov"],

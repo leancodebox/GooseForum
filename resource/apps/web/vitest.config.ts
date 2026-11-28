@@ -6,7 +6,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],
-      exclude: ["src/**/*.test.{ts,tsx}", "src/**/messages/**", "src/test/**"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/test/**"],
       reporter: ["text-summary", "json-summary", "lcov"],
       reportsDirectory: "../../coverage/react-app",
       thresholds: {

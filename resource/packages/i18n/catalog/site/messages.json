@@ -1,0 +1,210 @@
+{
+  "back": {
+    "source": "返回",
+    "translations": {
+      "en": {"text":"Back","sourceRevision":"14e287267db59b71c23f3d0b793e55d516adaabb83b3cec0da1aee732b044fe6","reviewed":true},
+      "ja": {"text":"戻る","sourceRevision":"14e287267db59b71c23f3d0b793e55d516adaabb83b3cec0da1aee732b044fe6","reviewed":true},
+      "it": {"text":"Indietro","sourceRevision":"14e287267db59b71c23f3d0b793e55d516adaabb83b3cec0da1aee732b044fe6","reviewed":true},
+      "ru": {"text":"Назад","sourceRevision":"14e287267db59b71c23f3d0b793e55d516adaabb83b3cec0da1aee732b044fe6","reviewed":true}
+    }
+  },
+  "close": {
+    "source": "关闭",
+    "translations": {
+      "en": {"text":"Close","sourceRevision":"cd359a6a768eb1e10e9d6c7a6594aa7bb1e997582cceaa75e81bb1493c20bbff","reviewed":true},
+      "ja": {"text":"閉じる","sourceRevision":"cd359a6a768eb1e10e9d6c7a6594aa7bb1e997582cceaa75e81bb1493c20bbff","reviewed":true},
+      "it": {"text":"Chiudi","sourceRevision":"cd359a6a768eb1e10e9d6c7a6594aa7bb1e997582cceaa75e81bb1493c20bbff","reviewed":true},
+      "ru": {"text":"Закрыть","sourceRevision":"cd359a6a768eb1e10e9d6c7a6594aa7bb1e997582cceaa75e81bb1493c20bbff","reviewed":true}
+    }
+  },
+  "conversation": {
+    "source": "私信对话",
+    "translations": {
+      "en": {"text":"Private conversation","sourceRevision":"86e9de63962c3b39da9569c4f1bef9e6f1074b935034135398813b194089c25f","reviewed":true},
+      "ru": {"text":"Приватная беседа","sourceRevision":"86e9de63962c3b39da9569c4f1bef9e6f1074b935034135398813b194089c25f","reviewed":true}
+    }
+  },
+  "emoji": {
+    "source": "表情",
+    "translations": {
+      "en": {"text":"Emoji","sourceRevision":"203f6ba6d50b681cec0cce6733ebd828e96a3e79b49529988f631ba7000c9ad8","reviewed":true},
+      "ru": {"text":"Эмодзи","sourceRevision":"203f6ba6d50b681cec0cce6733ebd828e96a3e79b49529988f631ba7000c9ad8","reviewed":true}
+    }
+  },
+  "emptyConversationsDescription": {
+    "source": "开始一次私信聊天。",
+    "translations": {
+      "en": {"text":"Start a private conversation.","sourceRevision":"014dff13565da01b363bb6385733b20412a6d29a57441739fff02a5dd6c97c23","reviewed":true},
+      "ru": {"text":"Начните приватную беседу.","sourceRevision":"014dff13565da01b363bb6385733b20412a6d29a57441739fff02a5dd6c97c23","reviewed":true}
+    }
+  },
+  "emptyConversationsTitle": {
+    "source": "暂无会话",
+    "translations": {
+      "en": {"text":"No conversations","sourceRevision":"e7777c45659293d58ad809856efa9ce56b1bd0fc5a9022fd97d7593a66d9f535","reviewed":true},
+      "ru": {"text":"Нет бесед","sourceRevision":"e7777c45659293d58ad809856efa9ce56b1bd0fc5a9022fd97d7593a66d9f535","reviewed":true}
+    }
+  },
+  "enterHint": {
+    "source": "Enter 发送，Shift + Enter 换行",
+    "translations": {
+      "en": {"text":"Enter to send, Shift + Enter for a new line","sourceRevision":"0e3c86a93ae2a90be402e041af0559bbc41d3a7b4d4fdcde448e98a491c76e41","reviewed":true},
+      "ru": {"text":"Enter — отправить, Shift + Enter — новая строка","sourceRevision":"0e3c86a93ae2a90be402e041af0559bbc41d3a7b4d4fdcde448e98a491c76e41","reviewed":true}
+    }
+  },
+  "firstMessageTo": {
+    "source": "给 {user} 发第一条消息。",
+    "translations": {
+      "en": {"text":"Send the first message to {user}.","sourceRevision":"1bf0bb6a2238036a4bf05522df66da433e6f5f53f0cd11783e7cc3b3c8c6c63e","reviewed":true},
+      "ru": {"text":"Отправьте первое сообщение пользователю {user}.","sourceRevision":"1bf0bb6a2238036a4bf05522df66da433e6f5f53f0cd11783e7cc3b3c8c6c63e","reviewed":true}
+    }
+  },
+  "inputPlaceholder": {
+    "source": "输入消息…",
+    "translations": {
+      "en": {"text":"Type a message…","sourceRevision":"afcc0142c27ae5ce0312af998dc9dfe3fea285f940270cdf13ec23b98748b025","reviewed":true},
+      "ru": {"text":"Введите сообщение…","sourceRevision":"afcc0142c27ae5ce0312af998dc9dfe3fea285f940270cdf13ec23b98748b025","reviewed":true}
+    }
+  },
+  "loadFailed": {
+    "source": "消息加载失败。",
+    "translations": {
+      "en": {"text":"Could not load messages.","sourceRevision":"4f7302b2eb105c0677509b92a905f09085d31cde8b2523653cb4fa07aa9c06bc","reviewed":true},
+      "ru": {"text":"Не удалось загрузить сообщения.","sourceRevision":"4f7302b2eb105c0677509b92a905f09085d31cde8b2523653cb4fa07aa9c06bc","reviewed":true}
+    }
+  },
+  "loadOlder": {
+    "source": "加载更早消息",
+    "translations": {
+      "en": {"text":"Load earlier messages","sourceRevision":"51b36bb145ace3ed4c3c4dd46bac7a5cca97ceaf9b22d95eedef5c50bcc100f9","reviewed":true},
+      "ru": {"text":"Загрузить более ранние сообщения","sourceRevision":"51b36bb145ace3ed4c3c4dd46bac7a5cca97ceaf9b22d95eedef5c50bcc100f9","reviewed":true}
+    }
+  },
+  "loading": {
+    "source": "消息加载中…",
+    "translations": {
+      "en": {"text":"Loading messages…","sourceRevision":"83f9a0ea0b9f3470057e34740dede36828ed603b52e8033dd0f1817082141b2e","reviewed":true},
+      "ru": {"text":"Загрузка сообщений…","sourceRevision":"83f9a0ea0b9f3470057e34740dede36828ed603b52e8033dd0f1817082141b2e","reviewed":true}
+    }
+  },
+  "more": {
+    "source": "更多",
+    "translations": {
+      "en": {"text":"More","sourceRevision":"628854dce9fb504ec61daaa4ea053338c9c722828a1b63dc0d20a057a48276db","reviewed":true},
+      "ru": {"text":"Ещё","sourceRevision":"628854dce9fb504ec61daaa4ea053338c9c722828a1b63dc0d20a057a48276db","reviewed":true}
+    }
+  },
+  "newMessage": {
+    "source": "新私信",
+    "translations": {
+      "en": {"text":"New message","sourceRevision":"ae99aef16efb6ad9b603d3ca6db634a6c5d4aeee02d3540835a9047f9700cd03","reviewed":true},
+      "ja": {"text":"新規メッセージ","sourceRevision":"ae99aef16efb6ad9b603d3ca6db634a6c5d4aeee02d3540835a9047f9700cd03","reviewed":true},
+      "it": {"text":"Nuovo messaggio","sourceRevision":"ae99aef16efb6ad9b603d3ca6db634a6c5d4aeee02d3540835a9047f9700cd03","reviewed":true},
+      "ru": {"text":"Новое сообщение","sourceRevision":"ae99aef16efb6ad9b603d3ca6db634a6c5d4aeee02d3540835a9047f9700cd03","reviewed":true}
+    }
+  },
+  "noContactableUsers": {
+    "source": "暂无可联系用户。",
+    "translations": {
+      "en": {"text":"No contactable users.","sourceRevision":"d102ee6f5de7e800d3662cd2414a9b3d70bf42146bb72e58e8051591bed99c82","reviewed":true},
+      "ru": {"text":"Нет пользователей для переписки.","sourceRevision":"d102ee6f5de7e800d3662cd2414a9b3d70bf42146bb72e58e8051591bed99c82","reviewed":true}
+    }
+  },
+  "noMessagesYet": {
+    "source": "还没有消息",
+    "translations": {
+      "en": {"text":"No messages yet","sourceRevision":"14f0a8ad258798797653d2fe7d0cbeb65cd9ec79d7bf7bdc4606094c14e9e18e","reviewed":true},
+      "ru": {"text":"Пока нет сообщений","sourceRevision":"14f0a8ad258798797653d2fe7d0cbeb65cd9ec79d7bf7bdc4606094c14e9e18e","reviewed":true}
+    }
+  },
+  "retryLoad": {
+    "source": "重试加载",
+    "translations": {
+      "en": {"text":"Retry loading","sourceRevision":"01481fd1cf9f24ed85dfe57ed56336afda360795589c03b560dbbf89f801d38d","reviewed":true},
+      "ru": {"text":"Повторить загрузку","sourceRevision":"01481fd1cf9f24ed85dfe57ed56336afda360795589c03b560dbbf89f801d38d","reviewed":true}
+    }
+  },
+  "scrollToLatest": {
+    "source": "滚动到最新消息",
+    "translations": {
+      "en": {"text":"Scroll to latest message","sourceRevision":"ab826a3b1cb5fc3ac2ef9dc48b524fcb65a3537313baa9d0e7488d62f9c3aaa8","reviewed":true},
+      "ru": {"text":"Прокрутить к последнему сообщению","sourceRevision":"ab826a3b1cb5fc3ac2ef9dc48b524fcb65a3537313baa9d0e7488d62f9c3aaa8","reviewed":true}
+    }
+  },
+  "searchConversations": {
+    "source": "搜索会话…",
+    "translations": {
+      "en": {"text":"Search conversations…","sourceRevision":"22b2e8a7522ce6ba6021ddb6ec3709d3f272a493e612bc6a93bab223b84902a3","reviewed":true},
+      "ru": {"text":"Поиск бесед…","sourceRevision":"22b2e8a7522ce6ba6021ddb6ec3709d3f272a493e612bc6a93bab223b84902a3","reviewed":true}
+    }
+  },
+  "searchUsers": {
+    "source": "搜索用户…",
+    "translations": {
+      "en": {"text":"Search users…","sourceRevision":"08e6b517d6c529e8d52c5e3f7af2eb7fb967e9053402ca74f6f21b76d580f504","reviewed":true},
+      "ru": {"text":"Поиск пользователей…","sourceRevision":"08e6b517d6c529e8d52c5e3f7af2eb7fb967e9053402ca74f6f21b76d580f504","reviewed":true}
+    }
+  },
+  "selectConversation": {
+    "source": "选择一个会话",
+    "translations": {
+      "en": {"text":"Select a conversation","sourceRevision":"c4bfb61454fa609196df51082753d19c88076ea05a7d5805dc155d4546fdfb75","reviewed":true},
+      "ru": {"text":"Выберите беседу","sourceRevision":"c4bfb61454fa609196df51082753d19c88076ea05a7d5805dc155d4546fdfb75","reviewed":true}
+    }
+  },
+  "selectConversationDescription": {
+    "source": "从左侧选择会话，或开始新的私信。",
+    "translations": {
+      "en": {"text":"Choose a conversation on the left, or start a new one.","sourceRevision":"b6a811ed2dc38da0fe1943bb7935d84a9f04e0badde0d56c42f84eefea7a098c","reviewed":true},
+      "ru": {"text":"Выберите беседу слева или начните новую.","sourceRevision":"b6a811ed2dc38da0fe1943bb7935d84a9f04e0badde0d56c42f84eefea7a098c","reviewed":true}
+    }
+  },
+  "send": {
+    "source": "发送",
+    "translations": {
+      "en": {"text":"Send","sourceRevision":"18ad7b3e7d99e4790ae879a72ec09741fec8753f9292d1609b180f799d416181","reviewed":true},
+      "ja": {"text":"送信","sourceRevision":"18ad7b3e7d99e4790ae879a72ec09741fec8753f9292d1609b180f799d416181","reviewed":true},
+      "it": {"text":"Invia","sourceRevision":"18ad7b3e7d99e4790ae879a72ec09741fec8753f9292d1609b180f799d416181","reviewed":true},
+      "ru": {"text":"Отправить","sourceRevision":"18ad7b3e7d99e4790ae879a72ec09741fec8753f9292d1609b180f799d416181","reviewed":true}
+    }
+  },
+  "sendFailed": {
+    "source": "消息发送失败。",
+    "translations": {
+      "en": {"text":"Could not send the message.","sourceRevision":"7de1fe19e1759b6f25ae55e5f2ba38794d02c63561fe6c134b5175c8eec2d9c8","reviewed":true},
+      "ru": {"text":"Не удалось отправить сообщение.","sourceRevision":"7de1fe19e1759b6f25ae55e5f2ba38794d02c63561fe6c134b5175c8eec2d9c8","reviewed":true}
+    }
+  },
+  "sending": {
+    "source": "发送中…",
+    "translations": {
+      "en": {"text":"Sending…","sourceRevision":"dc412279c612ec7abc2f0a32a42446d6aeb9904b02a99cc5812d2b05540b742d","reviewed":true},
+      "ja": {"text":"送信中…","sourceRevision":"dc412279c612ec7abc2f0a32a42446d6aeb9904b02a99cc5812d2b05540b742d","reviewed":true},
+      "it": {"text":"Invio…","sourceRevision":"dc412279c612ec7abc2f0a32a42446d6aeb9904b02a99cc5812d2b05540b742d","reviewed":true},
+      "ru": {"text":"Отправка…","sourceRevision":"dc412279c612ec7abc2f0a32a42446d6aeb9904b02a99cc5812d2b05540b742d","reviewed":true}
+    }
+  },
+  "startChat": {
+    "source": "开始聊天",
+    "translations": {
+      "en": {"text":"Start chatting","sourceRevision":"54f4789774f93205bda138178b1d56447de3c157abae361cb402c26381bdeed8","reviewed":true},
+      "ru": {"text":"Начать чат","sourceRevision":"54f4789774f93205bda138178b1d56447de3c157abae361cb402c26381bdeed8","reviewed":true}
+    }
+  },
+  "title": {
+    "source": "私信",
+    "translations": {
+      "en": {"text":"Messages","sourceRevision":"640a8ce5612eff0efdf1b4f6c0aef12b78ae67614955b09804042f06039db22a","reviewed":true},
+      "ja": {"text":"メッセージ","sourceRevision":"640a8ce5612eff0efdf1b4f6c0aef12b78ae67614955b09804042f06039db22a","reviewed":true},
+      "it": {"text":"Messaggi","sourceRevision":"640a8ce5612eff0efdf1b4f6c0aef12b78ae67614955b09804042f06039db22a","reviewed":true},
+      "ru": {"text":"Сообщения","sourceRevision":"640a8ce5612eff0efdf1b4f6c0aef12b78ae67614955b09804042f06039db22a","reviewed":true}
+    }
+  },
+  "today": {
+    "source": "今天",
+    "translations": {
+      "en": {"text":"Today","sourceRevision":"08e25934e521f360401675b884d6267ac10fbc59e8e6a5cd7652412197efbc12","reviewed":true},
+      "ru": {"text":"Сегодня","sourceRevision":"08e25934e521f360401675b884d6267ac10fbc59e8e6a5cd7652412197efbc12","reviewed":true}
+    }
+  }
+}

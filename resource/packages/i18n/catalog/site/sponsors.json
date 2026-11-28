@@ -1,0 +1,74 @@
+{
+  "defaultMessage": {
+    "source": "感谢支持 GooseForum。",
+    "translations": {
+      "en": {"text":"Thanks for supporting GooseForum.","sourceRevision":"2742309801e73e4f27c416a9e1d56c0203aecfd7438e4a29565b41073be6ed49","reviewed":true},
+      "ja": {"text":"GooseForum へのご支援ありがとうございます。","sourceRevision":"2742309801e73e4f27c416a9e1d56c0203aecfd7438e4a29565b41073be6ed49","reviewed":true},
+      "it": {"text":"Grazie per il supporto a GooseForum.","sourceRevision":"2742309801e73e4f27c416a9e1d56c0203aecfd7438e4a29565b41073be6ed49","reviewed":true},
+      "ru": {"text":"Спасибо за поддержку GooseForum.","sourceRevision":"2742309801e73e4f27c416a9e1d56c0203aecfd7438e4a29565b41073be6ed49","reviewed":true}
+    }
+  },
+  "emptyDescription": {
+    "source": "站点还没有配置赞助信息。",
+    "translations": {
+      "en": {"text":"Sponsor information has not been configured yet.","sourceRevision":"a0c20896bdc25f35621d5d87078817cacf39ca98d5e3b3916fe68267acbc5394","reviewed":true},
+      "ja": {"text":"スポンサー情報はまだ設定されていません。","sourceRevision":"a0c20896bdc25f35621d5d87078817cacf39ca98d5e3b3916fe68267acbc5394","reviewed":true},
+      "it": {"text":"Le informazioni sugli sponsor non sono ancora configurate.","sourceRevision":"a0c20896bdc25f35621d5d87078817cacf39ca98d5e3b3916fe68267acbc5394","reviewed":true},
+      "ru": {"text":"Информация о спонсорах ещё не настроена.","sourceRevision":"a0c20896bdc25f35621d5d87078817cacf39ca98d5e3b3916fe68267acbc5394","reviewed":true}
+    }
+  },
+  "emptyTitle": {
+    "source": "暂无赞助商",
+    "translations": {
+      "en": {"text":"No sponsors yet","sourceRevision":"364bfb3e2d1d821ac8dab26653297cd27d7068ed83114eb5b37304797a2f4735","reviewed":true},
+      "ja": {"text":"スポンサーはいません","sourceRevision":"364bfb3e2d1d821ac8dab26653297cd27d7068ed83114eb5b37304797a2f4735","reviewed":true},
+      "it": {"text":"Nessuno sponsor","sourceRevision":"364bfb3e2d1d821ac8dab26653297cd27d7068ed83114eb5b37304797a2f4735","reviewed":true},
+      "ru": {"text":"Пока нет спонсоров","sourceRevision":"364bfb3e2d1d821ac8dab26653297cd27d7068ed83114eb5b37304797a2f4735","reviewed":true}
+    }
+  },
+  "rulesTitle": {
+    "source": "展示规则",
+    "translations": {
+      "en": {"text":"Display rules","sourceRevision":"8c1c189eb900bb204e9166a650399377c4db3cd08a2e17b162c61bc993b0c4db","reviewed":true},
+      "ja": {"text":"掲載ルール","sourceRevision":"8c1c189eb900bb204e9166a650399377c4db3cd08a2e17b162c61bc993b0c4db","reviewed":true},
+      "it": {"text":"Regole di visualizzazione","sourceRevision":"8c1c189eb900bb204e9166a650399377c4db3cd08a2e17b162c61bc993b0c4db","reviewed":true},
+      "ru": {"text":"Правила отображения","sourceRevision":"8c1c189eb900bb204e9166a650399377c4db3cd08a2e17b162c61bc993b0c4db","reviewed":true}
+    }
+  },
+  "tiers.diamond": {
+    "source": "钻石合作伙伴",
+    "translations": {
+      "en": {"text":"Diamond Partners","sourceRevision":"c1ccda134315e391bada689fa015dfd4d9b5484901ba8d55d75ee68984af3d40","reviewed":true},
+      "ja": {"text":"ダイヤモンドパートナー","sourceRevision":"c1ccda134315e391bada689fa015dfd4d9b5484901ba8d55d75ee68984af3d40","reviewed":true},
+      "it": {"text":"Partner diamante","sourceRevision":"c1ccda134315e391bada689fa015dfd4d9b5484901ba8d55d75ee68984af3d40","reviewed":true},
+      "ru": {"text":"Бриллиантовые партнёры","sourceRevision":"c1ccda134315e391bada689fa015dfd4d9b5484901ba8d55d75ee68984af3d40","reviewed":true}
+    }
+  },
+  "tiers.gold": {
+    "source": "金牌赞助商",
+    "translations": {
+      "en": {"text":"Gold Sponsors","sourceRevision":"1e61e5c4adbf09e468171b03b8cbe7bf2150b21291fdaf075d3135f80fc9fa33","reviewed":true},
+      "ja": {"text":"ゴールドスポンサー","sourceRevision":"1e61e5c4adbf09e468171b03b8cbe7bf2150b21291fdaf075d3135f80fc9fa33","reviewed":true},
+      "it": {"text":"Sponsor oro","sourceRevision":"1e61e5c4adbf09e468171b03b8cbe7bf2150b21291fdaf075d3135f80fc9fa33","reviewed":true},
+      "ru": {"text":"Золотые спонсоры","sourceRevision":"1e61e5c4adbf09e468171b03b8cbe7bf2150b21291fdaf075d3135f80fc9fa33","reviewed":true}
+    }
+  },
+  "tiers.silver": {
+    "source": "银牌赞助商",
+    "translations": {
+      "en": {"text":"Silver Sponsors","sourceRevision":"4573d81d80cda94660e5290676560c3353ba6f9592912b1e17bf51d3361a5443","reviewed":true},
+      "ja": {"text":"シルバースポンサー","sourceRevision":"4573d81d80cda94660e5290676560c3353ba6f9592912b1e17bf51d3361a5443","reviewed":true},
+      "it": {"text":"Sponsor argento","sourceRevision":"4573d81d80cda94660e5290676560c3353ba6f9592912b1e17bf51d3361a5443","reviewed":true},
+      "ru": {"text":"Серебряные спонсоры","sourceRevision":"4573d81d80cda94660e5290676560c3353ba6f9592912b1e17bf51d3361a5443","reviewed":true}
+    }
+  },
+  "tiers.supporter": {
+    "source": "支持者",
+    "translations": {
+      "en": {"text":"Supporters","sourceRevision":"266e72a80f0e1b5d14f65504123cf20f6af83c308335ed7f77cb57b14ce22387","reviewed":true},
+      "ja": {"text":"サポーター","sourceRevision":"266e72a80f0e1b5d14f65504123cf20f6af83c308335ed7f77cb57b14ce22387","reviewed":true},
+      "it": {"text":"Sostenitori","sourceRevision":"266e72a80f0e1b5d14f65504123cf20f6af83c308335ed7f77cb57b14ce22387","reviewed":true},
+      "ru": {"text":"Сторонники","sourceRevision":"266e72a80f0e1b5d14f65504123cf20f6af83c308335ed7f77cb57b14ce22387","reviewed":true}
+    }
+  }
+}

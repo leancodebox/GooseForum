@@ -59,7 +59,7 @@ export function ProfileSettings({
   showStatus(message: string): void;
   showError(message: string): void;
 }) {
-  const { t } = useTranslation("settings");
+  const { t } = useTranslation("site.settings");
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
   const [editingUsername, setEditingUsername] = useState(false);

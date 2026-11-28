@@ -4,12 +4,12 @@ import { ThemeMenuOptions as Options, ThemeMenuTrigger as Trigger } from "@goose
 
 export function ThemeMenuTrigger() {
   const runtime = useGooseRuntime();
-  const { t } = useTranslation("shell");
+  const { t } = useTranslation("shared.shell");
   return <Trigger preference={runtime.themePreference ?? "system"} label={t("chooseTheme")} />;
 }
 
 export function ThemeMenuOptions() {
   const runtime = useGooseRuntime();
-  const { t } = useTranslation("shell");
+  const { t } = useTranslation("shared.shell");
   return <Options preference={runtime.themePreference ?? "system"} onChange={value => runtime.setThemePreference?.(value)} t={t} />;
 }

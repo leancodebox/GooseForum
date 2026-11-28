@@ -1,8 +1,9 @@
+import { trustLevelLabel } from "@gooseforum/i18n";
 import { useRef, useState, type MouseEvent, type ReactElement } from "react";
 import type {
   UserBadgePayload,
 } from "@gooseforum/client";
-import { formatCompactNumber, trustLevelName } from "@gooseforum/client";
+import { formatCompactNumber } from "@gooseforum/client";
 import { CalendarDays, Radio, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@gooseforum/ui/components/badge";
@@ -34,7 +35,8 @@ export function UserCardPopover({
   user: UserCardTarget;
   children: ReactElement;
 }) {
-  const { t } = useTranslation("userCard");
+  const { t } = useTranslation("site.userCard");
+  const { t: sharedText } = useTranslation("shared.shell");
   const api = useGooseApi();
   const locale = useGooseLocale();
   const [open, setOpen] = useState(false);
@@ -124,7 +126,7 @@ export function UserCardPopover({
                     Admin
                   </Badge>
                 ) : null}
-                {card?.trustLevel !== undefined ? <Badge variant="outline">{trustLevelName(card.trustLevel, locale)}</Badge> : null}
+                {card?.trustLevel !== undefined ? <Badge variant="outline">{trustLevelLabel(card.trustLevel, sharedText)}</Badge> : null}
               </div>
               <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
                 <span className="truncate">@{username}</span>
@@ -164,12 +166,12 @@ export function UserCardPopover({
                 </div>
               ) : null}
               <div className="mt-3 grid grid-cols-4 divide-x border-y py-2">
-                {[
+                {([
                   ["topics", card.topicCount],
                   ["replies", card.replyCount],
                   ["likes", card.likeReceivedCount],
                   ["followers", card.followerCount],
-                ].map(([key, value]) => (
+                ] as const).map(([key, value]) => (
                   <div key={key} className="px-1 text-center">
                     <div className="text-sm font-bold tabular-nums">
                       {formatCompactNumber(Number(value))}

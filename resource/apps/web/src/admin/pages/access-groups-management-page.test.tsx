@@ -14,7 +14,7 @@ it('uses translated system names in the list, details and search, and preserves 
     ['trust:1000', '社区骨干及以上'], ['', '社区骨干及以上'],
   ].map(([systemKey, name], id) => ({ id: id + 1, systemKey, name, members: [], grants: [], status: 1 }))
   const overview = vi.fn().mockResolvedValue({ groups, categories: [] })
-  await prepareAdminTranslations('en', ['access-groups'])
+  await prepareAdminTranslations('en', ["admin.access-groups"])
   const api = { accessGroups: { overview } } as unknown as GooseAdminApi
   const onNavigate = vi.fn()
   const { rerender } = render(<AccessGroupsManagementPage api={api} text={createAccessGroupText('en')} onNavigate={onNavigate} />)
@@ -26,7 +26,7 @@ it('uses translated system names in the list, details and search, and preserves 
   expect(list.getAllByRole('button')).toHaveLength(1)
   await userEvent.click(list.getByText('Regular and above'))
   expect(screen.getByRole('heading', { name: 'Regular and above' })).toBeTruthy()
-  await prepareAdminTranslations('zh', ['access-groups'])
+  await prepareAdminTranslations('zh', ["admin.access-groups"])
   rerender(<AccessGroupsManagementPage api={api} text={createAccessGroupText('zh')} onNavigate={onNavigate} />)
   expect(screen.getByRole('heading', { name: '稳定成员及以上' })).toBeTruthy()
   expect(overview).toHaveBeenCalledTimes(1)

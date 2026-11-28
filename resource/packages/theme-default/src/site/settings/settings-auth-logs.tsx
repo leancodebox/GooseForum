@@ -1,3 +1,4 @@
+import { runtimeText } from "@gooseforum/i18n";
 import { useEffect, useState } from 'react';
 import type { AuthLogPayload } from '@gooseforum/client';
 import { useGooseRuntime, useLatestRequest } from '@gooseforum/runtime';
@@ -16,7 +17,7 @@ import { SettingsSectionHeader } from './settings-section-header';
 
 export function AuthLogSettings() {
   const runtime = useGooseRuntime();
-  const { t } = useTranslation('settings');
+  const { t } = useTranslation('site.settings');
   const [rows, setRows] = useState<AuthLogPayload[]>([]);
   const [cursors, setCursors] = useState([0]);
   const [nextCursor, setNextCursor] = useState(0);
@@ -49,7 +50,7 @@ export function AuthLogSettings() {
       .catch(() => { if (isCurrent()) setError(true); })
       .finally(() => { if (isCurrent()) setLoading(false); });
   }, [runtime.api.users, cursor, result, method, range, refresh, beginRequest]);
-  const label = (key: string) => t(`authLogs.${key}`, { defaultValue: key });
+  const label = (key: string) => runtimeText(t, `authLogs.${key}`, { defaultValue: key });
   return <section className="min-w-0">
     <SettingsSectionHeader icon={History} title={label('title')} actions={<Button type="button" variant="outline" size="icon" title={label('refresh')} aria-label={label('refresh')} disabled={loading} onClick={reset}><RefreshCw className="size-4" /></Button>} />
     <div className="min-w-0 space-y-3 p-4">
@@ -63,7 +64,7 @@ export function AuthLogSettings() {
           <TableHeader><TableRow><TableHead className="w-40">{label('time')}</TableHead><TableHead className="w-56">{label('event')}</TableHead><TableHead className="w-36">{label('method')}</TableHead><TableHead className="w-24">{label('result')}</TableHead><TableHead className="w-56">{label('device')}</TableHead></TableRow></TableHeader>
           <TableBody>{rows.map((row) => <TableRow key={row.id}>
             <TableCell className="whitespace-normal text-xs"><time dateTime={row.createdAt}>{new Date(row.createdAt).toLocaleString(runtime.locale)}</time></TableCell>
-            <TableCell className="whitespace-normal break-words font-medium">{t(`authLogActions.${row.action}`, { defaultValue: row.action })}</TableCell>
+            <TableCell className="whitespace-normal break-words font-medium">{runtimeText(t, `authLogActions.${row.action}`, { defaultValue: row.action })}</TableCell>
             <TableCell className="whitespace-normal break-words">{row.oauthProvider || label(row.authMethod || 'all')}</TableCell>
             <TableCell><Badge variant={row.result === 'success' ? 'secondary' : 'outline'}>{label(row.result || 'success')}</Badge></TableCell>
             <TableCell className="whitespace-normal break-all text-xs"><p>{row.clientIp || '-'}</p>{row.userAgent && <p className="mt-1 text-muted-foreground">{row.userAgent}</p>}</TableCell>

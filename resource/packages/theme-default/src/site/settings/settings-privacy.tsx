@@ -20,7 +20,7 @@ export function PrivacySettings({
   saving: boolean;
   onChange(key: keyof PrivacySettingsPayload, checked: boolean): void;
 }) {
-  const { t } = useTranslation("settings");
+  const { t } = useTranslation("site.settings");
   return (
     <section>
       <SettingsSectionHeader icon={Shield} title={t("privacy.title")} />

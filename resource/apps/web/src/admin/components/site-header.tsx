@@ -9,9 +9,8 @@ import { HeaderSlot } from '@gooseforum/ui/components/header-host'
 import { ShellMenuTrigger, type useShellSidebar } from '@gooseforum/ui/components/shell-layout'
 import type { ReactNode } from 'react'
 import { PageNavigationIcons } from '@gooseforum/ui/components/navigation-icon'
-import { getAdminDictionary } from '../translation-loader'
-
-type HeaderDictionary = Record<string, string | Record<string, string>>
+import { runtimeText } from '@gooseforum/i18n'
+import { adminText } from '@gooseforum/i18n/admin'
 
 export function SiteHeader({ layout, locale, navigate, themePreference, onLocaleChange, onThemeChange, homeLabel, onLogout, sidebar, navigation }: {
   sidebar: ReturnType<typeof useShellSidebar>
@@ -25,19 +24,17 @@ export function SiteHeader({ layout, locale, navigate, themePreference, onLocale
   onLocaleChange(locale: AuthLocale): void
   onThemeChange(preference: BrowserThemePreference): void
 }) {
-  const dictionary = getAdminDictionary<HeaderDictionary>('site-header', locale)
+  const text = adminText(locale, 'shared.shell')
   const unread = useUnreadStatus(layout.unread)
-  function translate(key: string, fallback = key) {
-    const [group, item] = key.split('.')
-    const value = dictionary[group]
-    return typeof value === 'string' ? value : value?.[item] ?? fallback
+  function navLabel(key: string, fallback: string) {
+    return runtimeText(text, key, { defaultValue: fallback })
   }
   return <HeaderSlot>
     <GooseNavigationProvider value={href => navigate(href)}>
       <PageNavigationIcons value={layout.icons}>
         <SharedSiteHeader site={layout.site} viewer={layout.viewer} header={layout.header} unread={unread}
-          homeLabel={homeLabel} Link={GooseLink} sidebarTrigger={<ShellMenuTrigger sidebar={sidebar} navigation={navigation} t={translate} />}
-          t={translate} locale={locale} locales={authLocales} localeLabels={localeLabels} onLocaleChange={onLocaleChange}
+          homeLabel={homeLabel} Link={GooseLink} sidebarTrigger={<ShellMenuTrigger sidebar={sidebar} navigation={navigation} t={text} />}
+          t={text} navLabel={navLabel} locale={locale} locales={authLocales} localeLabels={localeLabels} onLocaleChange={onLocaleChange}
           themePreference={themePreference} onThemeChange={onThemeChange} onSearch={query => void navigate(searchUrl(query))}
           onLogout={onLogout} />
       </PageNavigationIcons>

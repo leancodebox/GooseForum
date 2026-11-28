@@ -1,9 +1,9 @@
-import { getAdminDictionary } from "./translation-loader";
-type EnglishDictionary = typeof import("./messages/en-roles").default;
+import { adminText, type Dictionary } from "@gooseforum/i18n/admin";
+type Messages = Dictionary<"admin.roles">;
 import type { AuthLocale } from "@gooseforum/runtime/i18n/auth";
 
-export type RoleTextKey = keyof EnglishDictionary;
+export type RoleTextKey = keyof Messages;
 export function createRoleText(locale: AuthLocale) {
   return (key: RoleTextKey) =>
-    getAdminDictionary<EnglishDictionary>("roles", locale)[key];
+    adminText(locale, "admin.roles")(key);
 }

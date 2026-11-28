@@ -10,7 +10,7 @@ import { useGooseRuntime } from '@gooseforum/runtime'
 
 export function AuthLocaleSwitcher() {
   const runtime = useGooseRuntime()
-  const { t } = useTranslation('shell')
+  const { t } = useTranslation('shared.shell')
   const [open, setOpen] = useState(false)
 
   return (

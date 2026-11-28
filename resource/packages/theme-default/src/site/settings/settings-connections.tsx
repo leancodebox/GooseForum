@@ -32,7 +32,7 @@ export function ConnectionsSettings({
   showStatus(message: string): void;
   showError(message: string): void;
 }) {
-  const { t } = useTranslation("settings");
+  const { t } = useTranslation("site.settings");
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
   const [bindings, setBindings] = useState<OAuthBindingsPayload>([]);

@@ -1,10 +1,11 @@
+import { trustLevelLabel } from "@gooseforum/i18n";
+import type { TFunction } from "i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   NotificationFilter,
   NotificationPayload,
   NotificationsPageProps,
 } from "@gooseforum/client";
-import { trustLevelName } from '@gooseforum/client'
 import { formatDate } from "../date-format";
 import {
   Award,
@@ -49,7 +50,7 @@ export function NotificationsPageView({
 }: {
   page: NotificationsPageProps;
 }) {
-  const { t } = useTranslation("notifications");
+  const { t } = useTranslation("site.notifications");
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
   const [filter, setFilter] = useState<NotificationFilter>("all");
@@ -336,7 +337,7 @@ function NotificationRow({
 }: {
   item: NotificationPayload;
   locale: string;
-  t: ReturnType<typeof useTranslation>["t"];
+  t: TFunction<"site.notifications">;
   onRead(): void;
 }) {
   const Icon =
@@ -347,7 +348,8 @@ function NotificationRow({
         : item.eventType === "system"
           ? Info
           : MessageCircle;
-  const actor = actorName(item, t, locale);
+  const { t: sharedText } = useTranslation("shared.shell");
+  const actor = actorName(item, t, sharedText);
   const actorUrl = item.actor.id ? `/u/${item.actor.id}` : "";
   const target = targetUrl(item, actorUrl);
   return (
@@ -388,7 +390,7 @@ function NotificationRow({
           )}
           {item.actor.id || item.eventType === "follow" ? (
             <span className="shrink-0 text-muted-foreground">
-              {verb(item, t, locale)}
+              {verb(item, t, sharedText)}
             </span>
           ) : null}
           {target ? (
@@ -397,18 +399,18 @@ function NotificationRow({
               className="min-w-0 truncate font-semibold text-primary"
               onClick={onRead}
             >
-              {notificationText(item, t, locale)}
+              {notificationText(item, t, sharedText)}
             </GooseLink>
           ) : (
             <span className="min-w-0 truncate font-medium">
-              {notificationText(item, t, locale)}
+              {notificationText(item, t, sharedText)}
             </span>
           )}
           {!item.isRead ? (
             <span className="size-1.5 rounded-full bg-primary" />
           ) : null}
         </div>
-        {item.content && item.content !== notificationText(item, t, locale) ? (
+        {item.content && item.content !== notificationText(item, t, sharedText) ? (
           <p className="line-clamp-1 text-xs text-muted-foreground">
             {item.content}
           </p>
@@ -497,27 +499,34 @@ function initialCursor(page: NotificationsPageProps) {
 }
 function template(
   item: NotificationPayload,
-  t: ReturnType<typeof useTranslation>["t"],
-  locale = 'en',
+  t: TFunction<"site.notifications">,
+  sharedText: TFunction<"shared.shell">,
 ) {
   const key = item.payload.templateKey?.replace("notifications.templates.", "");
-  return key
-    ? t(`templates.${key}`, {
-        badge:
-          item.payload.templateParams?.badgeName ||
-          item.payload.metadata?.badgeName ||
-          "",
-        level: trustLevelName(item.payload.templateParams?.trustLevel ?? 0, locale),
-      })
-    : "";
+  switch (key) {
+    case "badge":
+      return t("templates.badge", {
+        badge: item.payload.templateParams?.badgeName || item.payload.metadata?.badgeName || "",
+      });
+    case "trustPromotion":
+      return t("templates.trustPromotion", {
+        level: trustLevelLabel(item.payload.templateParams?.trustLevel ?? 0, sharedText),
+      });
+    case "comment": return t("templates.comment");
+    case "follow": return t("templates.follow");
+    case "mention": return t("templates.mention");
+    case "postReply": return t("templates.postReply");
+    case "topicPost": return t("templates.topicPost");
+    default: return "";
+  }
 }
 function actorName(
   item: NotificationPayload,
-  t: ReturnType<typeof useTranslation>["t"],
-  locale = 'en',
+  t: TFunction<"site.notifications">,
+  sharedText: TFunction<"shared.shell">,
 ) {
   return item.eventType === "badge"
-    ? template(item, t, locale) || item.title || t("actorFallback")
+    ? template(item, t, sharedText) || item.title || t("actorFallback")
     : item.actor.username ||
         item.payload.actorName ||
         item.payload.metadata?.followerName ||
@@ -525,17 +534,17 @@ function actorName(
 }
 function titleText(
   item: NotificationPayload,
-  t: ReturnType<typeof useTranslation>["t"],
+  t: TFunction<"site.notifications">,
 ) {
   if (item.payload.templateKey === 'notifications.templates.trustPromotion') return t('trustLevel');
   return item.title || t("fallback");
 }
 function notificationText(
   item: NotificationPayload,
-  t: ReturnType<typeof useTranslation>["t"],
-  locale = 'en',
+  t: TFunction<"site.notifications">,
+  sharedText: TFunction<"shared.shell">,
 ) {
-  const translated = template(item, t, locale);
+  const translated = template(item, t, sharedText);
   if (item.eventType === "badge")
     return (
       translated ||
@@ -548,7 +557,7 @@ function notificationText(
       translated ||
       item.content ||
       item.payload.content ||
-      t("followDescription", { actor: actorName(item, t, locale) })
+      t("followDescription", { actor: actorName(item, t, sharedText) })
     );
   return (
     item.topic?.title ||
@@ -560,10 +569,10 @@ function notificationText(
 }
 function verb(
   item: NotificationPayload,
-  t: ReturnType<typeof useTranslation>["t"],
-  locale = 'en',
+  t: TFunction<"site.notifications">,
+  sharedText: TFunction<"shared.shell">,
 ) {
-  const translated = template(item, t, locale);
+  const translated = template(item, t, sharedText);
   if (translated && item.eventType !== "badge") return translated;
   if (item.eventType === "follow") return t("verb.follow");
   if (item.eventType === "post_reply") return t("verb.reply");

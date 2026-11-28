@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import {
   useCallback,
@@ -42,8 +43,8 @@ import { appendUniqueById } from "../collection-utils";
 import { useIntersectionSentinel } from "../use-intersection-sentinel";
 
 export function UserActivity({ page }: { page: UserProfileProps }) {
-  const { t } = useTranslation("user");
-  const { t: topicT } = useTranslation("home");
+  const { t } = useTranslation("site.user");
+  const { t: topicT } = useTranslation("site.home");
   const serverError = useServerErrorMessage();
   const locale = useGooseLocale();
   const fetchPage = useGoosePageFetcher();
@@ -344,7 +345,7 @@ function FeedFooter({
   pagination: UserProfileProps["pagination"];
   loading: boolean;
   error: string;
-  topicT: ReturnType<typeof useTranslation>["t"];
+  topicT: TFunction<"site.home">;
   loadMore(): Promise<void>;
   sentinel: RefObject<HTMLDivElement | null>;
 }) {

@@ -128,7 +128,7 @@ export function MessagesPageView({
   layout: LayoutPayload;
   page: MessagesPageProps;
 }) {
-  const { t } = useTranslation("messages");
+  const { t } = useTranslation("site.messages");
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
   const [conversations, setConversations] = useState<Conversation[]>(() =>

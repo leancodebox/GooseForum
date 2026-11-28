@@ -1,3 +1,5 @@
+import { runtimeText } from "@gooseforum/i18n";
+import type { TFunction } from "i18next";
 import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import { formatDate } from "../date-format";
 import { AttachmentList } from "../editor/attachment-editor";
@@ -110,8 +112,8 @@ export function TopicPageView({
   layout: LayoutPayload;
   page: TopicDetailProps;
 }) {
-  const { t } = useTranslation("topic");
-  const { t: homeT } = useTranslation("home");
+  const { t } = useTranslation("site.topic");
+  const { t: homeT } = useTranslation("site.home");
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
   const setShellHeader = useShellHeader();
@@ -252,11 +254,11 @@ export function TopicPageView({
     };
     window.addEventListener("beforeunload", beforeUnload);
     const beforeLogout = (event: Event) => {
-      if (composerDirtyRef.current && !window.confirm(t("localDraft.leave", { ns: "publish" }))) event.preventDefault();
+      if (composerDirtyRef.current && !window.confirm(t("localDraft.leave", { ns: "site.publish" }))) event.preventDefault();
       else allowComposerLeave.current = true;
     };
     window.addEventListener("goose:before-logout", beforeLogout);
-    const remove = registerNavigationBlocker?.(() => !composerDirtyRef.current || window.confirm(t("localDraft.leave", { ns: "publish" })));
+    const remove = registerNavigationBlocker?.(() => !composerDirtyRef.current || window.confirm(t("localDraft.leave", { ns: "site.publish" })));
     return () => { window.removeEventListener("beforeunload", beforeUnload); window.removeEventListener("goose:before-logout", beforeLogout); remove?.(); };
   }, [registerNavigationBlocker, t]);
   const openedLocalCopy = useRef(false);
@@ -489,7 +491,7 @@ export function TopicPageView({
       void runtime.navigate(loginUrl(runtime.currentUrl));
       return;
     }
-    if (composerDirty && !window.confirm(t("localDraft.leave", { ns: "publish" }))) return;
+    if (composerDirty && !window.confirm(t("localDraft.leave", { ns: "site.publish" }))) return;
     setEditingId(0);
     setReplyTargetId(post?.id || 0);
     setComposerContent(""); setEditVersion(undefined);
@@ -505,7 +507,7 @@ export function TopicPageView({
       void runtime.navigate(`/publish?id=${page.topic.id}`);
       return;
     }
-    if (composerDirty && !window.confirm(t("localDraft.leave", { ns: "publish" }))) return;
+    if (composerDirty && !window.confirm(t("localDraft.leave", { ns: "site.publish" }))) return;
     setEditingId(post.id);
     setReplyTargetId(0);
     setComposerContent(post.content); setEditVersion(post.version);
@@ -663,7 +665,7 @@ export function TopicPageView({
   function restoreDraft(draft: LocalDraft) {
     if (composerSubmitting.current) return false;
     if (!availableDraft(draft)) return false;
-    if (composerDirty && !window.confirm(t("localDraft.confirmRestore", { ns: "publish" }))) return false;
+    if (composerDirty && !window.confirm(t("localDraft.confirmRestore", { ns: "site.publish" }))) return false;
     localDraft.restore(draft);
     setEditVersion(draft.version ?? composerBase.version); setComposerContent(draft.content); setReplyTargetId(draft.replyTargetId);
     return true;
@@ -1107,7 +1109,7 @@ export function TopicPageView({
             {["spam", "abuse", "illegal", "irrelevant", "other"].map(
               (reason) => (
                 <ToggleGroupItem key={reason} value={reason}>
-                  {t(`reportReasons.${reason}`)}
+                  {runtimeText(t, `reportReasons.${reason}`)}
                 </ToggleGroupItem>
               ),
             )}
@@ -1286,7 +1288,7 @@ export function TopicPageView({
   );
 }
 
-type Translate = ReturnType<typeof useTranslation>["t"];
+type Translate = TFunction<"site.topic">;
 
 function PostActionGroup({
   placement,
@@ -2041,7 +2043,7 @@ function ConfirmDialog({
   onClose(): void;
   onConfirm(): void;
 }) {
-  const { t } = useTranslation("topic");
+  const { t } = useTranslation("site.topic");
   return (
     <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
       <DialogContent showCloseButton={false}>

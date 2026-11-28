@@ -1,3 +1,4 @@
+import type { SimpleKey } from "@gooseforum/i18n";
 import { useEffect, useEffectEvent, useState, type ReactNode } from "react";
 import { MenuIcon, XIcon } from "lucide-react";
 import { Button } from "./button";
@@ -49,7 +50,7 @@ type SidebarState = ReturnType<typeof useShellSidebar>;
 export function ShellMenuTrigger({ sidebar, navigation, t }: {
   sidebar: SidebarState;
   navigation: ReactNode;
-  t(key: string): string;
+  t(key: SimpleKey<"shared.shell">): string;
 }) {
   const { mobileOpen, setMobileOpen, sidebarCollapsed, toggleSidebar } = sidebar;
   return (

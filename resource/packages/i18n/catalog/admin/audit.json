@@ -1,0 +1,686 @@
+{
+  "authLogActions.challenge_failure": {
+    "source": "双因素验证失败",
+    "translations": {
+      "en": {"text":"Second factor rejected","sourceRevision":"66af35d3362265f220882fdbd5cd5736ea69eb0250a6598ee6c2784a52e5c52c","reviewed":true},
+      "ja": {"text":"二要素認証失敗","sourceRevision":"66af35d3362265f220882fdbd5cd5736ea69eb0250a6598ee6c2784a52e5c52c","reviewed":true},
+      "it": {"text":"Secondo fattore rifiutato","sourceRevision":"66af35d3362265f220882fdbd5cd5736ea69eb0250a6598ee6c2784a52e5c52c","reviewed":true},
+      "ru": {"text":"Второй фактор отклонён","sourceRevision":"66af35d3362265f220882fdbd5cd5736ea69eb0250a6598ee6c2784a52e5c52c","reviewed":true}
+    }
+  },
+  "authLogActions.email_change": {
+    "source": "修改邮箱",
+    "translations": {
+      "en": {"text":"Email changed","sourceRevision":"c0acedad03ad1e76c2d05f1bf8dd6999fef3b2e5bf451125690f98a75d04f489","reviewed":true},
+      "ja": {"text":"メールアドレス変更","sourceRevision":"c0acedad03ad1e76c2d05f1bf8dd6999fef3b2e5bf451125690f98a75d04f489","reviewed":true},
+      "it": {"text":"Email modificata","sourceRevision":"c0acedad03ad1e76c2d05f1bf8dd6999fef3b2e5bf451125690f98a75d04f489","reviewed":true},
+      "ru": {"text":"Изменён адрес почты","sourceRevision":"c0acedad03ad1e76c2d05f1bf8dd6999fef3b2e5bf451125690f98a75d04f489","reviewed":true}
+    }
+  },
+  "authLogActions.generate": {
+    "source": "登录",
+    "translations": {
+      "en": {"text":"Login","sourceRevision":"dab0205b478fcad412751b5fb01bd076ac5bbcba43f7757a59386fa1703ab588","reviewed":true},
+      "ja": {"text":"ログイン","sourceRevision":"dab0205b478fcad412751b5fb01bd076ac5bbcba43f7757a59386fa1703ab588","reviewed":true},
+      "it": {"text":"Accesso","sourceRevision":"dab0205b478fcad412751b5fb01bd076ac5bbcba43f7757a59386fa1703ab588","reviewed":true},
+      "ru": {"text":"Вход","sourceRevision":"dab0205b478fcad412751b5fb01bd076ac5bbcba43f7757a59386fa1703ab588","reviewed":true}
+    }
+  },
+  "authLogActions.limit": {
+    "source": "会话数量限制",
+    "translations": {
+      "en": {"text":"Session limit","sourceRevision":"097259f1840753244aed13a1f10f1bd3a3fa9f664128f4ea28df527b4730f600","reviewed":true},
+      "ja": {"text":"セッション数制限","sourceRevision":"097259f1840753244aed13a1f10f1bd3a3fa9f664128f4ea28df527b4730f600","reviewed":true},
+      "it": {"text":"Limite sessioni","sourceRevision":"097259f1840753244aed13a1f10f1bd3a3fa9f664128f4ea28df527b4730f600","reviewed":true},
+      "ru": {"text":"Лимит сеансов","sourceRevision":"097259f1840753244aed13a1f10f1bd3a3fa9f664128f4ea28df527b4730f600","reviewed":true}
+    }
+  },
+  "authLogActions.login_failure": {
+    "source": "登录失败",
+    "translations": {
+      "en": {"text":"Login rejected","sourceRevision":"a5ae7d8b076b256a202548b2233121a590744ec0fdff36e8085063b96a4c4bb8","reviewed":true},
+      "ja": {"text":"ログイン失敗","sourceRevision":"a5ae7d8b076b256a202548b2233121a590744ec0fdff36e8085063b96a4c4bb8","reviewed":true},
+      "it": {"text":"Accesso rifiutato","sourceRevision":"a5ae7d8b076b256a202548b2233121a590744ec0fdff36e8085063b96a4c4bb8","reviewed":true},
+      "ru": {"text":"Попытка входа отклонена","sourceRevision":"a5ae7d8b076b256a202548b2233121a590744ec0fdff36e8085063b96a4c4bb8","reviewed":true}
+    }
+  },
+  "authLogActions.login_success": {
+    "source": "登录",
+    "translations": {
+      "en": {"text":"Login","sourceRevision":"dab0205b478fcad412751b5fb01bd076ac5bbcba43f7757a59386fa1703ab588","reviewed":true},
+      "ja": {"text":"ログイン","sourceRevision":"dab0205b478fcad412751b5fb01bd076ac5bbcba43f7757a59386fa1703ab588","reviewed":true},
+      "it": {"text":"Accesso","sourceRevision":"dab0205b478fcad412751b5fb01bd076ac5bbcba43f7757a59386fa1703ab588","reviewed":true},
+      "ru": {"text":"Вход","sourceRevision":"dab0205b478fcad412751b5fb01bd076ac5bbcba43f7757a59386fa1703ab588","reviewed":true}
+    }
+  },
+  "authLogActions.logout": {
+    "source": "退出登录",
+    "translations": {
+      "en": {"text":"Logout","sourceRevision":"1428e0fdc15132630cdd20dca7c4b99099e66c29a44b14290fb2ff914034ed30","reviewed":true},
+      "ja": {"text":"ログアウト","sourceRevision":"1428e0fdc15132630cdd20dca7c4b99099e66c29a44b14290fb2ff914034ed30","reviewed":true},
+      "it": {"text":"Uscita","sourceRevision":"1428e0fdc15132630cdd20dca7c4b99099e66c29a44b14290fb2ff914034ed30","reviewed":true},
+      "ru": {"text":"Выход","sourceRevision":"1428e0fdc15132630cdd20dca7c4b99099e66c29a44b14290fb2ff914034ed30","reviewed":true}
+    }
+  },
+  "authLogActions.mfa_admin_reset": {
+    "source": "管理员重置双因素认证",
+    "translations": {
+      "en": {"text":"Two-factor authentication reset by administrator","sourceRevision":"fe2825b576a94e7a34cce34e4cdb77eb036a5307949a4b32535f244ae510f1f4","reviewed":true},
+      "ja": {"text":"管理者が二要素認証をリセット","sourceRevision":"fe2825b576a94e7a34cce34e4cdb77eb036a5307949a4b32535f244ae510f1f4","reviewed":true},
+      "it": {"text":"Due fattori ripristinati dall’amministratore","sourceRevision":"fe2825b576a94e7a34cce34e4cdb77eb036a5307949a4b32535f244ae510f1f4","reviewed":true},
+      "ru": {"text":"Администратор сбросил двухфакторную аутентификацию","sourceRevision":"fe2825b576a94e7a34cce34e4cdb77eb036a5307949a4b32535f244ae510f1f4","reviewed":true}
+    }
+  },
+  "authLogActions.mfa_challenge": {
+    "source": "等待双因素验证",
+    "translations": {
+      "en": {"text":"Second factor requested","sourceRevision":"94027b0fc929274c4ba8c5dc74f9f269882f573954f343814e2bb9cdb73b012d","reviewed":true},
+      "ja": {"text":"二要素認証待機","sourceRevision":"94027b0fc929274c4ba8c5dc74f9f269882f573954f343814e2bb9cdb73b012d","reviewed":true},
+      "it": {"text":"Secondo fattore richiesto","sourceRevision":"94027b0fc929274c4ba8c5dc74f9f269882f573954f343814e2bb9cdb73b012d","reviewed":true},
+      "ru": {"text":"Запрошен второй фактор","sourceRevision":"94027b0fc929274c4ba8c5dc74f9f269882f573954f343814e2bb9cdb73b012d","reviewed":true}
+    }
+  },
+  "authLogActions.mfa_disable": {
+    "source": "关闭双因素认证",
+    "translations": {
+      "en": {"text":"Two-factor authentication disabled","sourceRevision":"c53e6c88e28455bb671f4b417177353d34ddf72398cf7dfbe344cd7957273e50","reviewed":true},
+      "ja": {"text":"二要素認証無効","sourceRevision":"c53e6c88e28455bb671f4b417177353d34ddf72398cf7dfbe344cd7957273e50","reviewed":true},
+      "it": {"text":"Due fattori disattivati","sourceRevision":"c53e6c88e28455bb671f4b417177353d34ddf72398cf7dfbe344cd7957273e50","reviewed":true},
+      "ru": {"text":"Двухфакторная аутентификация отключена","sourceRevision":"c53e6c88e28455bb671f4b417177353d34ddf72398cf7dfbe344cd7957273e50","reviewed":true}
+    }
+  },
+  "authLogActions.mfa_enable": {
+    "source": "开启双因素认证",
+    "translations": {
+      "en": {"text":"Two-factor authentication enabled","sourceRevision":"b0ed0d55dae643ae790b92bc649c4115ac7e4855be1c7864ca3cebd79285352a","reviewed":true},
+      "ja": {"text":"二要素認証有効","sourceRevision":"b0ed0d55dae643ae790b92bc649c4115ac7e4855be1c7864ca3cebd79285352a","reviewed":true},
+      "it": {"text":"Due fattori attivati","sourceRevision":"b0ed0d55dae643ae790b92bc649c4115ac7e4855be1c7864ca3cebd79285352a","reviewed":true},
+      "ru": {"text":"Двухфакторная аутентификация включена","sourceRevision":"b0ed0d55dae643ae790b92bc649c4115ac7e4855be1c7864ca3cebd79285352a","reviewed":true}
+    }
+  },
+  "authLogActions.mfa_regenerate": {
+    "source": "重新生成恢复码",
+    "translations": {
+      "en": {"text":"Recovery codes regenerated","sourceRevision":"5dc2b081bad44c4940f7e7060a5792bc26a91517ec2b9600e88f9a48cf2b40f5","reviewed":true},
+      "ja": {"text":"復旧コード再生成","sourceRevision":"5dc2b081bad44c4940f7e7060a5792bc26a91517ec2b9600e88f9a48cf2b40f5","reviewed":true},
+      "it": {"text":"Codici di recupero rigenerati","sourceRevision":"5dc2b081bad44c4940f7e7060a5792bc26a91517ec2b9600e88f9a48cf2b40f5","reviewed":true},
+      "ru": {"text":"Резервные коды заменены","sourceRevision":"5dc2b081bad44c4940f7e7060a5792bc26a91517ec2b9600e88f9a48cf2b40f5","reviewed":true}
+    }
+  },
+  "authLogActions.oauth_bind": {
+    "source": "绑定 OAuth 账号",
+    "translations": {
+      "en": {"text":"OAuth account connected","sourceRevision":"6c62e5da0e493c366f42f577cbfce1a8a84497c83460f47582402f6568b870ba","reviewed":true},
+      "ja": {"text":"OAuth アカウント接続","sourceRevision":"6c62e5da0e493c366f42f577cbfce1a8a84497c83460f47582402f6568b870ba","reviewed":true},
+      "it": {"text":"Account OAuth collegato","sourceRevision":"6c62e5da0e493c366f42f577cbfce1a8a84497c83460f47582402f6568b870ba","reviewed":true},
+      "ru": {"text":"Подключена учётная запись OAuth","sourceRevision":"6c62e5da0e493c366f42f577cbfce1a8a84497c83460f47582402f6568b870ba","reviewed":true}
+    }
+  },
+  "authLogActions.oauth_unbind": {
+    "source": "解绑 OAuth 账号",
+    "translations": {
+      "en": {"text":"OAuth account disconnected","sourceRevision":"150d1cad65a8b973e9c4aed801431ae675b11e3a40e9f24810372d330bd394f3","reviewed":true},
+      "ja": {"text":"OAuth アカウント解除","sourceRevision":"150d1cad65a8b973e9c4aed801431ae675b11e3a40e9f24810372d330bd394f3","reviewed":true},
+      "it": {"text":"Account OAuth scollegato","sourceRevision":"150d1cad65a8b973e9c4aed801431ae675b11e3a40e9f24810372d330bd394f3","reviewed":true},
+      "ru": {"text":"Отключена учётная запись OAuth","sourceRevision":"150d1cad65a8b973e9c4aed801431ae675b11e3a40e9f24810372d330bd394f3","reviewed":true}
+    }
+  },
+  "authLogActions.password_change": {
+    "source": "修改密码",
+    "translations": {
+      "en": {"text":"Password changed","sourceRevision":"e1158d586a2881233672cdfcce66932924e27d70944d397cdbc30ec139ed534f","reviewed":true},
+      "ja": {"text":"パスワード変更","sourceRevision":"e1158d586a2881233672cdfcce66932924e27d70944d397cdbc30ec139ed534f","reviewed":true},
+      "it": {"text":"Password modificata","sourceRevision":"e1158d586a2881233672cdfcce66932924e27d70944d397cdbc30ec139ed534f","reviewed":true},
+      "ru": {"text":"Пароль изменён","sourceRevision":"e1158d586a2881233672cdfcce66932924e27d70944d397cdbc30ec139ed534f","reviewed":true}
+    }
+  },
+  "authLogActions.revoke": {
+    "source": "撤销会话",
+    "translations": {
+      "en": {"text":"Session revoked","sourceRevision":"9e1470ea9c9d6960c8c55a6a7546852ce3e5b5c73a6836dea6a93c58e186fce9","reviewed":true},
+      "ja": {"text":"セッション解除","sourceRevision":"9e1470ea9c9d6960c8c55a6a7546852ce3e5b5c73a6836dea6a93c58e186fce9","reviewed":true},
+      "it": {"text":"Sessione revocata","sourceRevision":"9e1470ea9c9d6960c8c55a6a7546852ce3e5b5c73a6836dea6a93c58e186fce9","reviewed":true},
+      "ru": {"text":"Сеанс завершён","sourceRevision":"9e1470ea9c9d6960c8c55a6a7546852ce3e5b5c73a6836dea6a93c58e186fce9","reviewed":true}
+    }
+  },
+  "authLogActions.revoke_others": {
+    "source": "撤销其他会话",
+    "translations": {
+      "en": {"text":"Other sessions revoked","sourceRevision":"8a7682c83383ece31b9b0092b47b596632c738bf504ced66f1e16ca74160df9f","reviewed":true},
+      "ja": {"text":"他のセッションを解除","sourceRevision":"8a7682c83383ece31b9b0092b47b596632c738bf504ced66f1e16ca74160df9f","reviewed":true},
+      "it": {"text":"Altre sessioni revocate","sourceRevision":"8a7682c83383ece31b9b0092b47b596632c738bf504ced66f1e16ca74160df9f","reviewed":true},
+      "ru": {"text":"Остальные сеансы завершены","sourceRevision":"8a7682c83383ece31b9b0092b47b596632c738bf504ced66f1e16ca74160df9f","reviewed":true}
+    }
+  },
+  "authLogActions.role_change": {
+    "source": "修改角色",
+    "translations": {
+      "en": {"text":"Role changed","sourceRevision":"cab7bc3b8fd39a6b67df8abc93984c9b3e0ccacb1d876efcb6bcdc26e0cf769b","reviewed":true},
+      "ja": {"text":"役割変更","sourceRevision":"cab7bc3b8fd39a6b67df8abc93984c9b3e0ccacb1d876efcb6bcdc26e0cf769b","reviewed":true},
+      "it": {"text":"Ruolo modificato","sourceRevision":"cab7bc3b8fd39a6b67df8abc93984c9b3e0ccacb1d876efcb6bcdc26e0cf769b","reviewed":true},
+      "ru": {"text":"Изменена роль","sourceRevision":"cab7bc3b8fd39a6b67df8abc93984c9b3e0ccacb1d876efcb6bcdc26e0cf769b","reviewed":true}
+    }
+  },
+  "authLogActions.security_failure": {
+    "source": "安全设置变更失败",
+    "translations": {
+      "en": {"text":"Security change rejected","sourceRevision":"49a9b679b8db32d9527d8f92053b2f3f894b2c3a28cd8047566aaaee474623ad","reviewed":true},
+      "ja": {"text":"セキュリティ設定変更失敗","sourceRevision":"49a9b679b8db32d9527d8f92053b2f3f894b2c3a28cd8047566aaaee474623ad","reviewed":true},
+      "it": {"text":"Modifica di sicurezza rifiutata","sourceRevision":"49a9b679b8db32d9527d8f92053b2f3f894b2c3a28cd8047566aaaee474623ad","reviewed":true},
+      "ru": {"text":"Изменение параметров безопасности отклонено","sourceRevision":"49a9b679b8db32d9527d8f92053b2f3f894b2c3a28cd8047566aaaee474623ad","reviewed":true}
+    }
+  },
+  "authLogs.all": {
+    "source": "全部",
+    "translations": {
+      "en": {"text":"All","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true},
+      "ja": {"text":"すべて","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true},
+      "it": {"text":"Tutti","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true},
+      "ru": {"text":"Все","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true}
+    }
+  },
+  "authLogs.challenge": {
+    "source": "验证中",
+    "translations": {
+      "en": {"text":"Challenge","sourceRevision":"5472576ce838a878319346e89dbc337ea9c0acb5a4a3d4745b44d88e1af00215","reviewed":true},
+      "ja": {"text":"確認中","sourceRevision":"5472576ce838a878319346e89dbc337ea9c0acb5a4a3d4745b44d88e1af00215","reviewed":true},
+      "it": {"text":"Verifica","sourceRevision":"5472576ce838a878319346e89dbc337ea9c0acb5a4a3d4745b44d88e1af00215","reviewed":true},
+      "ru": {"text":"Проверка","sourceRevision":"5472576ce838a878319346e89dbc337ea9c0acb5a4a3d4745b44d88e1af00215","reviewed":true}
+    }
+  },
+  "authLogs.clearDate": {
+    "source": "清除日期",
+    "translations": {
+      "en": {"text":"Clear date","sourceRevision":"a6dbf7086c3168250ea866ab335dd1978ceef0a83df828676e6753991aba909d","reviewed":true},
+      "ja": {"text":"日付をクリア","sourceRevision":"a6dbf7086c3168250ea866ab335dd1978ceef0a83df828676e6753991aba909d","reviewed":true},
+      "it": {"text":"Cancella data","sourceRevision":"a6dbf7086c3168250ea866ab335dd1978ceef0a83df828676e6753991aba909d","reviewed":true},
+      "ru": {"text":"Очистить дату","sourceRevision":"a6dbf7086c3168250ea866ab335dd1978ceef0a83df828676e6753991aba909d","reviewed":true}
+    }
+  },
+  "authLogs.clearRange": {
+    "source": "清除日期范围",
+    "translations": {
+      "en": {"text":"Clear date range","sourceRevision":"88714a2ddb8fbdb3b50838dd3fefdad4436c9388e653b1dfd6d6c83586cf68ff","reviewed":true},
+      "ja": {"text":"日付範囲をクリア","sourceRevision":"88714a2ddb8fbdb3b50838dd3fefdad4436c9388e653b1dfd6d6c83586cf68ff","reviewed":true},
+      "it": {"text":"Cancella intervallo","sourceRevision":"88714a2ddb8fbdb3b50838dd3fefdad4436c9388e653b1dfd6d6c83586cf68ff","reviewed":true},
+      "ru": {"text":"Очистить диапазон дат","sourceRevision":"88714a2ddb8fbdb3b50838dd3fefdad4436c9388e653b1dfd6d6c83586cf68ff","reviewed":true}
+    }
+  },
+  "authLogs.dateRange": {
+    "source": "日期范围",
+    "translations": {
+      "en": {"text":"Date range","sourceRevision":"8b285452ec1037bde99f2f23975f58cbdb3c84c216b6064a5e020e9ed62626d1","reviewed":true},
+      "ja": {"text":"日付範囲","sourceRevision":"8b285452ec1037bde99f2f23975f58cbdb3c84c216b6064a5e020e9ed62626d1","reviewed":true},
+      "it": {"text":"Intervallo date","sourceRevision":"8b285452ec1037bde99f2f23975f58cbdb3c84c216b6064a5e020e9ed62626d1","reviewed":true},
+      "ru": {"text":"Диапазон дат","sourceRevision":"8b285452ec1037bde99f2f23975f58cbdb3c84c216b6064a5e020e9ed62626d1","reviewed":true}
+    }
+  },
+  "authLogs.device": {
+    "source": "设备",
+    "translations": {
+      "en": {"text":"Device","sourceRevision":"6434e51be8d1fc81c8213c0a5608f4c9ef4722adf5069381998f6ab97cbe4bec","reviewed":true},
+      "ja": {"text":"端末","sourceRevision":"6434e51be8d1fc81c8213c0a5608f4c9ef4722adf5069381998f6ab97cbe4bec","reviewed":true},
+      "it": {"text":"Dispositivo","sourceRevision":"6434e51be8d1fc81c8213c0a5608f4c9ef4722adf5069381998f6ab97cbe4bec","reviewed":true},
+      "ru": {"text":"Устройство","sourceRevision":"6434e51be8d1fc81c8213c0a5608f4c9ef4722adf5069381998f6ab97cbe4bec","reviewed":true}
+    }
+  },
+  "authLogs.empty": {
+    "source": "暂无安全记录",
+    "translations": {
+      "en": {"text":"No security events","sourceRevision":"576e1b170a39fce6fcb614d3583cf6018b23894dd80b5b8cc50204fdf0fcc425","reviewed":true},
+      "ja": {"text":"履歴はありません","sourceRevision":"576e1b170a39fce6fcb614d3583cf6018b23894dd80b5b8cc50204fdf0fcc425","reviewed":true},
+      "it": {"text":"Nessun evento di sicurezza","sourceRevision":"576e1b170a39fce6fcb614d3583cf6018b23894dd80b5b8cc50204fdf0fcc425","reviewed":true},
+      "ru": {"text":"Событий безопасности нет","sourceRevision":"576e1b170a39fce6fcb614d3583cf6018b23894dd80b5b8cc50204fdf0fcc425","reviewed":true}
+    }
+  },
+  "authLogs.error": {
+    "source": "加载记录失败",
+    "translations": {
+      "en": {"text":"Failed to load history","sourceRevision":"bc6524386f92aa2e6ff01bcd6847cb25fd678a55ea705d4fc90593ccc571dc8b","reviewed":true},
+      "ja": {"text":"履歴の読み込みに失敗しました","sourceRevision":"bc6524386f92aa2e6ff01bcd6847cb25fd678a55ea705d4fc90593ccc571dc8b","reviewed":true},
+      "it": {"text":"Impossibile caricare la cronologia","sourceRevision":"bc6524386f92aa2e6ff01bcd6847cb25fd678a55ea705d4fc90593ccc571dc8b","reviewed":true},
+      "ru": {"text":"Не удалось загрузить историю","sourceRevision":"bc6524386f92aa2e6ff01bcd6847cb25fd678a55ea705d4fc90593ccc571dc8b","reviewed":true}
+    }
+  },
+  "authLogs.event": {
+    "source": "事件",
+    "translations": {
+      "en": {"text":"Event","sourceRevision":"3e2a418ebdb866c23ca9bc5ba5ab466bd0d44a5dc1ef53b9b9e529db5f014909","reviewed":true},
+      "ja": {"text":"イベント","sourceRevision":"3e2a418ebdb866c23ca9bc5ba5ab466bd0d44a5dc1ef53b9b9e529db5f014909","reviewed":true},
+      "it": {"text":"Evento","sourceRevision":"3e2a418ebdb866c23ca9bc5ba5ab466bd0d44a5dc1ef53b9b9e529db5f014909","reviewed":true},
+      "ru": {"text":"Событие","sourceRevision":"3e2a418ebdb866c23ca9bc5ba5ab466bd0d44a5dc1ef53b9b9e529db5f014909","reviewed":true}
+    }
+  },
+  "authLogs.failure": {
+    "source": "失败",
+    "translations": {
+      "en": {"text":"Failure","sourceRevision":"0cc18b181912bd909378c731d1e4066803bc5c0f281502551926942bec62a48c","reviewed":true},
+      "ja": {"text":"失敗","sourceRevision":"0cc18b181912bd909378c731d1e4066803bc5c0f281502551926942bec62a48c","reviewed":true},
+      "it": {"text":"Fallito","sourceRevision":"0cc18b181912bd909378c731d1e4066803bc5c0f281502551926942bec62a48c","reviewed":true},
+      "ru": {"text":"Ошибка","sourceRevision":"0cc18b181912bd909378c731d1e4066803bc5c0f281502551926942bec62a48c","reviewed":true}
+    }
+  },
+  "authLogs.ip": {
+    "source": "IP 地址",
+    "translations": {
+      "en": {"text":"IP address","sourceRevision":"233301e0a87035fb777ea14e0ba50737d5bd71a08558139b673f2d07298e13b6","reviewed":true},
+      "ja": {"text":"IP アドレス","sourceRevision":"233301e0a87035fb777ea14e0ba50737d5bd71a08558139b673f2d07298e13b6","reviewed":true},
+      "it": {"text":"Indirizzo IP","sourceRevision":"233301e0a87035fb777ea14e0ba50737d5bd71a08558139b673f2d07298e13b6","reviewed":true},
+      "ru": {"text":"IP-адрес","sourceRevision":"233301e0a87035fb777ea14e0ba50737d5bd71a08558139b673f2d07298e13b6","reviewed":true}
+    }
+  },
+  "authLogs.loading": {
+    "source": "加载中",
+    "translations": {
+      "en": {"text":"Loading","sourceRevision":"b6b9380859d6cb58b248c6d3cff549aa5d6965a248fef8e2f615b6ef434c03c7","reviewed":true},
+      "ja": {"text":"読み込み中","sourceRevision":"b6b9380859d6cb58b248c6d3cff549aa5d6965a248fef8e2f615b6ef434c03c7","reviewed":true},
+      "it": {"text":"Caricamento","sourceRevision":"b6b9380859d6cb58b248c6d3cff549aa5d6965a248fef8e2f615b6ef434c03c7","reviewed":true},
+      "ru": {"text":"Загрузка","sourceRevision":"b6b9380859d6cb58b248c6d3cff549aa5d6965a248fef8e2f615b6ef434c03c7","reviewed":true}
+    }
+  },
+  "authLogs.method": {
+    "source": "认证方式",
+    "translations": {
+      "en": {"text":"Method","sourceRevision":"4d02c9373456551b8f6869007a9538a9f51026b4f1d3835b13d5ee243a178caa","reviewed":true},
+      "ja": {"text":"認証方法","sourceRevision":"4d02c9373456551b8f6869007a9538a9f51026b4f1d3835b13d5ee243a178caa","reviewed":true},
+      "it": {"text":"Metodo","sourceRevision":"4d02c9373456551b8f6869007a9538a9f51026b4f1d3835b13d5ee243a178caa","reviewed":true},
+      "ru": {"text":"Способ","sourceRevision":"4d02c9373456551b8f6869007a9538a9f51026b4f1d3835b13d5ee243a178caa","reviewed":true}
+    }
+  },
+  "authLogs.mfa": {
+    "source": "双因素认证",
+    "translations": {
+      "en": {"text":"Two-factor authentication","sourceRevision":"5ef8ac31c030fbf23e517d389f7b7c40df9472850f12011715640ac204bca592","reviewed":true},
+      "ja": {"text":"二要素認証","sourceRevision":"5ef8ac31c030fbf23e517d389f7b7c40df9472850f12011715640ac204bca592","reviewed":true},
+      "it": {"text":"Autenticazione a due fattori","sourceRevision":"5ef8ac31c030fbf23e517d389f7b7c40df9472850f12011715640ac204bca592","reviewed":true},
+      "ru": {"text":"Двухфакторная аутентификация","sourceRevision":"5ef8ac31c030fbf23e517d389f7b7c40df9472850f12011715640ac204bca592","reviewed":true}
+    }
+  },
+  "authLogs.next": {
+    "source": "下一页",
+    "translations": {
+      "en": {"text":"Next","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
+      "ja": {"text":"次へ","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
+      "it": {"text":"Successivo","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
+      "ru": {"text":"Далее","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true}
+    }
+  },
+  "authLogs.oauth": {
+    "source": "OAuth",
+    "translations": {
+      "en": {"text":"OAuth","sourceRevision":"eb11ad473c3ac34d733c1bbc8ad0b5a88c655cbe7467c1707e0243ae7f8aca29","reviewed":true},
+      "ja": {"text":"OAuth","sourceRevision":"eb11ad473c3ac34d733c1bbc8ad0b5a88c655cbe7467c1707e0243ae7f8aca29","reviewed":true},
+      "it": {"text":"OAuth","sourceRevision":"eb11ad473c3ac34d733c1bbc8ad0b5a88c655cbe7467c1707e0243ae7f8aca29","reviewed":true},
+      "ru": {"text":"OAuth","sourceRevision":"eb11ad473c3ac34d733c1bbc8ad0b5a88c655cbe7467c1707e0243ae7f8aca29","reviewed":true}
+    }
+  },
+  "authLogs.operator": {
+    "source": "管理员操作",
+    "translations": {
+      "en": {"text":"Administrator","sourceRevision":"514f7340f930e85e3880baf1c7315a153ea7991e6982df97e2251cd11011f0ac","reviewed":true},
+      "ja": {"text":"管理者操作","sourceRevision":"514f7340f930e85e3880baf1c7315a153ea7991e6982df97e2251cd11011f0ac","reviewed":true},
+      "it": {"text":"Operazione amministratore","sourceRevision":"514f7340f930e85e3880baf1c7315a153ea7991e6982df97e2251cd11011f0ac","reviewed":true},
+      "ru": {"text":"Администратор","sourceRevision":"514f7340f930e85e3880baf1c7315a153ea7991e6982df97e2251cd11011f0ac","reviewed":true}
+    }
+  },
+  "authLogs.password": {
+    "source": "密码",
+    "translations": {
+      "en": {"text":"Password","sourceRevision":"e22dca658398f0bf287fa1343c495861b836631e2f0489ab30ca9a5de56bd127","reviewed":true},
+      "ja": {"text":"パスワード","sourceRevision":"e22dca658398f0bf287fa1343c495861b836631e2f0489ab30ca9a5de56bd127","reviewed":true},
+      "it": {"text":"Password","sourceRevision":"e22dca658398f0bf287fa1343c495861b836631e2f0489ab30ca9a5de56bd127","reviewed":true},
+      "ru": {"text":"Пароль","sourceRevision":"e22dca658398f0bf287fa1343c495861b836631e2f0489ab30ca9a5de56bd127","reviewed":true}
+    }
+  },
+  "authLogs.previous": {
+    "source": "上一页",
+    "translations": {
+      "en": {"text":"Previous","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
+      "ja": {"text":"前へ","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
+      "it": {"text":"Precedente","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
+      "ru": {"text":"Назад","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true}
+    }
+  },
+  "authLogs.rangePlaceholder": {
+    "source": "选择日期范围",
+    "translations": {
+      "en": {"text":"Choose date range","sourceRevision":"f1412b24e7ee107fd2136c784940d1f23ac241e6ed99a09cb943f2ff363b7613","reviewed":true},
+      "ja": {"text":"日付範囲を選択","sourceRevision":"f1412b24e7ee107fd2136c784940d1f23ac241e6ed99a09cb943f2ff363b7613","reviewed":true},
+      "it": {"text":"Seleziona intervallo","sourceRevision":"f1412b24e7ee107fd2136c784940d1f23ac241e6ed99a09cb943f2ff363b7613","reviewed":true},
+      "ru": {"text":"Выбрать диапазон дат","sourceRevision":"f1412b24e7ee107fd2136c784940d1f23ac241e6ed99a09cb943f2ff363b7613","reviewed":true}
+    }
+  },
+  "authLogs.reason": {
+    "source": "原因",
+    "translations": {
+      "en": {"text":"Reason","sourceRevision":"28c9fe4ab6131b90728fcd790f29189f9e17931e301face41ba1f71cb79420a6","reviewed":true},
+      "ja": {"text":"理由","sourceRevision":"28c9fe4ab6131b90728fcd790f29189f9e17931e301face41ba1f71cb79420a6","reviewed":true},
+      "it": {"text":"Motivo","sourceRevision":"28c9fe4ab6131b90728fcd790f29189f9e17931e301face41ba1f71cb79420a6","reviewed":true},
+      "ru": {"text":"Причина","sourceRevision":"28c9fe4ab6131b90728fcd790f29189f9e17931e301face41ba1f71cb79420a6","reviewed":true}
+    }
+  },
+  "authLogs.refresh": {
+    "source": "刷新",
+    "translations": {
+      "en": {"text":"Refresh","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true},
+      "ja": {"text":"更新","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true},
+      "it": {"text":"Aggiorna","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true},
+      "ru": {"text":"Обновить","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true}
+    }
+  },
+  "authLogs.result": {
+    "source": "结果",
+    "translations": {
+      "en": {"text":"Result","sourceRevision":"975ebef1c9ea3d2c5cb62062cd28b6aa6436f5fcfb1f9f25fa30a6607ae1e386","reviewed":true},
+      "ja": {"text":"結果","sourceRevision":"975ebef1c9ea3d2c5cb62062cd28b6aa6436f5fcfb1f9f25fa30a6607ae1e386","reviewed":true},
+      "it": {"text":"Esito","sourceRevision":"975ebef1c9ea3d2c5cb62062cd28b6aa6436f5fcfb1f9f25fa30a6607ae1e386","reviewed":true},
+      "ru": {"text":"Результат","sourceRevision":"975ebef1c9ea3d2c5cb62062cd28b6aa6436f5fcfb1f9f25fa30a6607ae1e386","reviewed":true}
+    }
+  },
+  "authLogs.selectDate": {
+    "source": "选择日期",
+    "translations": {
+      "en": {"text":"Select date","sourceRevision":"2a879f26ec84b9cd2ac5c15adddbf77d387e719d790247bb347629d6b45a5f78","reviewed":true},
+      "ja": {"text":"日付を選択","sourceRevision":"2a879f26ec84b9cd2ac5c15adddbf77d387e719d790247bb347629d6b45a5f78","reviewed":true},
+      "it": {"text":"Seleziona data","sourceRevision":"2a879f26ec84b9cd2ac5c15adddbf77d387e719d790247bb347629d6b45a5f78","reviewed":true},
+      "ru": {"text":"Выбрать дату","sourceRevision":"2a879f26ec84b9cd2ac5c15adddbf77d387e719d790247bb347629d6b45a5f78","reviewed":true}
+    }
+  },
+  "authLogs.since": {
+    "source": "开始日期",
+    "translations": {
+      "en": {"text":"From","sourceRevision":"708e628d795b8a2c25d46ad296d0f80597e08b1d62563f4baa7ff20000d37cdd","reviewed":true},
+      "ja": {"text":"開始日","sourceRevision":"708e628d795b8a2c25d46ad296d0f80597e08b1d62563f4baa7ff20000d37cdd","reviewed":true},
+      "it": {"text":"Dal","sourceRevision":"708e628d795b8a2c25d46ad296d0f80597e08b1d62563f4baa7ff20000d37cdd","reviewed":true},
+      "ru": {"text":"С","sourceRevision":"708e628d795b8a2c25d46ad296d0f80597e08b1d62563f4baa7ff20000d37cdd","reviewed":true}
+    }
+  },
+  "authLogs.success": {
+    "source": "成功",
+    "translations": {
+      "en": {"text":"Success","sourceRevision":"500c057602339d026827b879fed7ca874b3617c52a1c914fba30076ea4d974b3","reviewed":true},
+      "ja": {"text":"成功","sourceRevision":"500c057602339d026827b879fed7ca874b3617c52a1c914fba30076ea4d974b3","reviewed":true},
+      "it": {"text":"Riuscito","sourceRevision":"500c057602339d026827b879fed7ca874b3617c52a1c914fba30076ea4d974b3","reviewed":true},
+      "ru": {"text":"Успешно","sourceRevision":"500c057602339d026827b879fed7ca874b3617c52a1c914fba30076ea4d974b3","reviewed":true}
+    }
+  },
+  "authLogs.time": {
+    "source": "时间",
+    "translations": {
+      "en": {"text":"Time","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true},
+      "ja": {"text":"日時","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true},
+      "it": {"text":"Data","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true},
+      "ru": {"text":"Время","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true}
+    }
+  },
+  "authLogs.title": {
+    "source": "登录与安全记录",
+    "translations": {
+      "en": {"text":"Login and security history","sourceRevision":"638663ab10d9f55c4374871b7e3f5f1b6545dbb8c02fcfd53952dceba6a5ea88","reviewed":true},
+      "ja": {"text":"ログインとセキュリティ履歴","sourceRevision":"638663ab10d9f55c4374871b7e3f5f1b6545dbb8c02fcfd53952dceba6a5ea88","reviewed":true},
+      "it": {"text":"Cronologia accessi e sicurezza","sourceRevision":"638663ab10d9f55c4374871b7e3f5f1b6545dbb8c02fcfd53952dceba6a5ea88","reviewed":true},
+      "ru": {"text":"История входов и событий безопасности","sourceRevision":"638663ab10d9f55c4374871b7e3f5f1b6545dbb8c02fcfd53952dceba6a5ea88","reviewed":true}
+    }
+  },
+  "authLogs.until": {
+    "source": "结束日期",
+    "translations": {
+      "en": {"text":"Until","sourceRevision":"433f1f208cadf84a457856152372974ba281a9ea119c956eed73fca72ed1d869","reviewed":true},
+      "ja": {"text":"終了日","sourceRevision":"433f1f208cadf84a457856152372974ba281a9ea119c956eed73fca72ed1d869","reviewed":true},
+      "it": {"text":"Al","sourceRevision":"433f1f208cadf84a457856152372974ba281a9ea119c956eed73fca72ed1d869","reviewed":true},
+      "ru": {"text":"По","sourceRevision":"433f1f208cadf84a457856152372974ba281a9ea119c956eed73fca72ed1d869","reviewed":true}
+    }
+  },
+  "authLogs.user": {
+    "source": "用户 ID",
+    "translations": {
+      "en": {"text":"User ID","sourceRevision":"107957840ef77f095a474d248b55a985370a39fe688b5a49173988dc720794ef","reviewed":true},
+      "ja": {"text":"ユーザー ID","sourceRevision":"107957840ef77f095a474d248b55a985370a39fe688b5a49173988dc720794ef","reviewed":true},
+      "it": {"text":"ID utente","sourceRevision":"107957840ef77f095a474d248b55a985370a39fe688b5a49173988dc720794ef","reviewed":true},
+      "ru": {"text":"ID пользователя","sourceRevision":"107957840ef77f095a474d248b55a985370a39fe688b5a49173988dc720794ef","reviewed":true}
+    }
+  },
+  "category": {
+    "source": "分类",
+    "translations": {
+      "en": {"text":"Category","sourceRevision":"6e4ccd367a39a23420b02171938835f2b6d055d78b9422eababbeece913381c9","reviewed":true},
+      "ja": {"text":"カテゴリ","sourceRevision":"6e4ccd367a39a23420b02171938835f2b6d055d78b9422eababbeece913381c9","reviewed":true},
+      "it": {"text":"Categoria","sourceRevision":"6e4ccd367a39a23420b02171938835f2b6d055d78b9422eababbeece913381c9","reviewed":true},
+      "ru": {"text":"Категория","sourceRevision":"6e4ccd367a39a23420b02171938835f2b6d055d78b9422eababbeece913381c9","reviewed":true}
+    }
+  },
+  "description": {
+    "source": "查看管理员操作及其影响的资源。",
+    "translations": {
+      "en": {"text":"Review administrator operations and affected resources.","sourceRevision":"3e06e4576f4f6573f4d28b474dd1c8ed85bce9786b1a605abd01ce361995bb51","reviewed":true},
+      "ja": {"text":"管理者の操作と影響を受けたリソースを確認します。","sourceRevision":"3e06e4576f4f6573f4d28b474dd1c8ed85bce9786b1a605abd01ce361995bb51","reviewed":true},
+      "it": {"text":"Consulta le operazioni degli amministratori e le risorse interessate.","sourceRevision":"3e06e4576f4f6573f4d28b474dd1c8ed85bce9786b1a605abd01ce361995bb51","reviewed":true},
+      "ru": {"text":"Просматривайте операции администраторов и затронутые ресурсы.","sourceRevision":"3e06e4576f4f6573f4d28b474dd1c8ed85bce9786b1a605abd01ce361995bb51","reviewed":true}
+    }
+  },
+  "details": {
+    "source": "操作详情",
+    "translations": {
+      "en": {"text":"Details","sourceRevision":"e3371fac030a1b370f3494cfe6fef65558c041e6bce6a3fd51994aefed4950d5","reviewed":true},
+      "ja": {"text":"操作内容","sourceRevision":"e3371fac030a1b370f3494cfe6fef65558c041e6bce6a3fd51994aefed4950d5","reviewed":true},
+      "it": {"text":"Dettagli","sourceRevision":"e3371fac030a1b370f3494cfe6fef65558c041e6bce6a3fd51994aefed4950d5","reviewed":true},
+      "ru": {"text":"Подробности","sourceRevision":"e3371fac030a1b370f3494cfe6fef65558c041e6bce6a3fd51994aefed4950d5","reviewed":true}
+    }
+  },
+  "docContent": {
+    "source": "文档内容",
+    "translations": {
+      "en": {"text":"Document content","sourceRevision":"c6df27a6ec3399335ac5a73cdae82b292b93c2c6cdaed03454dffed375938d41","reviewed":true},
+      "ja": {"text":"ドキュメント内容","sourceRevision":"c6df27a6ec3399335ac5a73cdae82b292b93c2c6cdaed03454dffed375938d41","reviewed":true},
+      "it": {"text":"Contenuto documento","sourceRevision":"c6df27a6ec3399335ac5a73cdae82b292b93c2c6cdaed03454dffed375938d41","reviewed":true},
+      "ru": {"text":"Содержимое документа","sourceRevision":"c6df27a6ec3399335ac5a73cdae82b292b93c2c6cdaed03454dffed375938d41","reviewed":true}
+    }
+  },
+  "docProject": {
+    "source": "文档项目",
+    "translations": {
+      "en": {"text":"Document project","sourceRevision":"0673ad0fbf0c34372f9c467c68184d29b33d7c6bae04529a8e796c3d11bbb1e5","reviewed":true},
+      "ja": {"text":"ドキュメントプロジェクト","sourceRevision":"0673ad0fbf0c34372f9c467c68184d29b33d7c6bae04529a8e796c3d11bbb1e5","reviewed":true},
+      "it": {"text":"Progetto documento","sourceRevision":"0673ad0fbf0c34372f9c467c68184d29b33d7c6bae04529a8e796c3d11bbb1e5","reviewed":true},
+      "ru": {"text":"Проект документа","sourceRevision":"0673ad0fbf0c34372f9c467c68184d29b33d7c6bae04529a8e796c3d11bbb1e5","reviewed":true}
+    }
+  },
+  "docVersion": {
+    "source": "文档版本",
+    "translations": {
+      "en": {"text":"Document version","sourceRevision":"68753cde684ad635148c4f14d42ea290785630be3ac22899aed7d867feb1f4da","reviewed":true},
+      "ja": {"text":"ドキュメントバージョン","sourceRevision":"68753cde684ad635148c4f14d42ea290785630be3ac22899aed7d867feb1f4da","reviewed":true},
+      "it": {"text":"Versione documento","sourceRevision":"68753cde684ad635148c4f14d42ea290785630be3ac22899aed7d867feb1f4da","reviewed":true},
+      "ru": {"text":"Версия документа","sourceRevision":"68753cde684ad635148c4f14d42ea290785630be3ac22899aed7d867feb1f4da","reviewed":true}
+    }
+  },
+  "editCategory": {
+    "source": "编辑分类",
+    "translations": {
+      "en": {"text":"Edit category","sourceRevision":"29a26587d5882aed09811004a22aa2060f9816e2416356556eb4f59ea119f941","reviewed":true},
+      "ja": {"text":"カテゴリ編集","sourceRevision":"29a26587d5882aed09811004a22aa2060f9816e2416356556eb4f59ea119f941","reviewed":true},
+      "it": {"text":"Modifica categoria","sourceRevision":"29a26587d5882aed09811004a22aa2060f9816e2416356556eb4f59ea119f941","reviewed":true},
+      "ru": {"text":"Редактирование категории","sourceRevision":"29a26587d5882aed09811004a22aa2060f9816e2416356556eb4f59ea119f941","reviewed":true}
+    }
+  },
+  "editTopic": {
+    "source": "编辑主题",
+    "translations": {
+      "en": {"text":"Edit topic","sourceRevision":"fd9b42f8683978189bf080ea8910ecde6d8711ce179be5fb8044cb2bdde599b0","reviewed":true},
+      "ja": {"text":"トピック編集","sourceRevision":"fd9b42f8683978189bf080ea8910ecde6d8711ce179be5fb8044cb2bdde599b0","reviewed":true},
+      "it": {"text":"Modifica topic","sourceRevision":"fd9b42f8683978189bf080ea8910ecde6d8711ce179be5fb8044cb2bdde599b0","reviewed":true},
+      "ru": {"text":"Редактирование темы","sourceRevision":"fd9b42f8683978189bf080ea8910ecde6d8711ce179be5fb8044cb2bdde599b0","reviewed":true}
+    }
+  },
+  "editUser": {
+    "source": "操作用户",
+    "translations": {
+      "en": {"text":"User operation","sourceRevision":"39a6796251f4491e09ab1c18ea89bea1adff52277ca5677a9faf2924184c19b7","reviewed":true},
+      "ja": {"text":"ユーザー操作","sourceRevision":"39a6796251f4491e09ab1c18ea89bea1adff52277ca5677a9faf2924184c19b7","reviewed":true},
+      "it": {"text":"Operazione utente","sourceRevision":"39a6796251f4491e09ab1c18ea89bea1adff52277ca5677a9faf2924184c19b7","reviewed":true},
+      "ru": {"text":"Операция над пользователем","sourceRevision":"39a6796251f4491e09ab1c18ea89bea1adff52277ca5677a9faf2924184c19b7","reviewed":true}
+    }
+  },
+  "empty": {
+    "source": "暂无操作记录",
+    "translations": {
+      "en": {"text":"No audit records","sourceRevision":"627ca9227b341424df0ffdee0ead42ddc0bd0f8e407dbdeefe1ef040e03a4090","reviewed":true},
+      "ja": {"text":"操作履歴はありません","sourceRevision":"627ca9227b341424df0ffdee0ead42ddc0bd0f8e407dbdeefe1ef040e03a4090","reviewed":true},
+      "it": {"text":"Nessuna operazione registrata","sourceRevision":"627ca9227b341424df0ffdee0ead42ddc0bd0f8e407dbdeefe1ef040e03a4090","reviewed":true},
+      "ru": {"text":"Записей журнала аудита нет","sourceRevision":"627ca9227b341424df0ffdee0ead42ddc0bd0f8e407dbdeefe1ef040e03a4090","reviewed":true}
+    }
+  },
+  "loadFailed": {
+    "source": "操作记录加载失败",
+    "translations": {
+      "en": {"text":"Failed to load audit records","sourceRevision":"7374cba1673b4fb7b4c498f8474a6469b69aef3edfd5825f67687f112b5a54de","reviewed":true},
+      "ja": {"text":"操作履歴の読み込みに失敗しました","sourceRevision":"7374cba1673b4fb7b4c498f8474a6469b69aef3edfd5825f67687f112b5a54de","reviewed":true},
+      "it": {"text":"Impossibile caricare il registro operazioni","sourceRevision":"7374cba1673b4fb7b4c498f8474a6469b69aef3edfd5825f67687f112b5a54de","reviewed":true},
+      "ru": {"text":"Не удалось загрузить записи журнала аудита","sourceRevision":"7374cba1673b4fb7b4c498f8474a6469b69aef3edfd5825f67687f112b5a54de","reviewed":true}
+    }
+  },
+  "loading": {
+    "source": "正在加载…",
+    "translations": {
+      "en": {"text":"Loading…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
+      "ja": {"text":"読み込み中…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
+      "it": {"text":"Caricamento…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
+      "ru": {"text":"Загрузка…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true}
+    }
+  },
+  "manageOIDC": {
+    "source": "OIDC 管理",
+    "translations": {
+      "en": {"text":"OIDC management","sourceRevision":"eec6da996826c3bd821918da2127d556bde42dc08acec6b9afe1cac3e7842a55","reviewed":true},
+      "ja": {"text":"OIDC 管理","sourceRevision":"eec6da996826c3bd821918da2127d556bde42dc08acec6b9afe1cac3e7842a55","reviewed":true},
+      "it": {"text":"Gestione OIDC","sourceRevision":"eec6da996826c3bd821918da2127d556bde42dc08acec6b9afe1cac3e7842a55","reviewed":true},
+      "ru": {"text":"Управление OIDC","sourceRevision":"eec6da996826c3bd821918da2127d556bde42dc08acec6b9afe1cac3e7842a55","reviewed":true}
+    }
+  },
+  "next": {
+    "source": "下一页",
+    "translations": {
+      "en": {"text":"Next","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
+      "ja": {"text":"次へ","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
+      "it": {"text":"Successiva","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
+      "ru": {"text":"Следующая","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true}
+    }
+  },
+  "operation": {
+    "source": "操作类型",
+    "translations": {
+      "en": {"text":"Operation","sourceRevision":"fd22fdd98063eb90fc269e1664d724e081b81307d8e3c5b343689ae1e7a10d6d","reviewed":true},
+      "ja": {"text":"操作","sourceRevision":"fd22fdd98063eb90fc269e1664d724e081b81307d8e3c5b343689ae1e7a10d6d","reviewed":true},
+      "it": {"text":"Operazione","sourceRevision":"fd22fdd98063eb90fc269e1664d724e081b81307d8e3c5b343689ae1e7a10d6d","reviewed":true},
+      "ru": {"text":"Операция","sourceRevision":"fd22fdd98063eb90fc269e1664d724e081b81307d8e3c5b343689ae1e7a10d6d","reviewed":true}
+    }
+  },
+  "operator": {
+    "source": "操作人",
+    "translations": {
+      "en": {"text":"Operator","sourceRevision":"3d2b799efe27617488586dadfc761583dec4f05626ed3360a0ca4bd90475527a","reviewed":true},
+      "ja": {"text":"操作者","sourceRevision":"3d2b799efe27617488586dadfc761583dec4f05626ed3360a0ca4bd90475527a","reviewed":true},
+      "it": {"text":"Operatore","sourceRevision":"3d2b799efe27617488586dadfc761583dec4f05626ed3360a0ca4bd90475527a","reviewed":true},
+      "ru": {"text":"Оператор","sourceRevision":"3d2b799efe27617488586dadfc761583dec4f05626ed3360a0ca4bd90475527a","reviewed":true}
+    }
+  },
+  "page": {
+    "source": "第",
+    "translations": {
+      "en": {"text":"Page","sourceRevision":"7f8ba8bedbabac70cdab7f059889a898acc48b70afe5c1d4a0fc92ae84c3764a","reviewed":true},
+      "ja": {"text":"ページ","sourceRevision":"7f8ba8bedbabac70cdab7f059889a898acc48b70afe5c1d4a0fc92ae84c3764a","reviewed":true},
+      "it": {"text":"Pagina","sourceRevision":"7f8ba8bedbabac70cdab7f059889a898acc48b70afe5c1d4a0fc92ae84c3764a","reviewed":true},
+      "ru": {"text":"Страница","sourceRevision":"7f8ba8bedbabac70cdab7f059889a898acc48b70afe5c1d4a0fc92ae84c3764a","reviewed":true}
+    }
+  },
+  "previous": {
+    "source": "上一页",
+    "translations": {
+      "en": {"text":"Previous","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
+      "ja": {"text":"前へ","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
+      "it": {"text":"Precedente","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
+      "ru": {"text":"Предыдущая","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true}
+    }
+  },
+  "refresh": {
+    "source": "刷新",
+    "translations": {
+      "en": {"text":"Refresh","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true},
+      "ja": {"text":"更新","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true},
+      "it": {"text":"Aggiorna","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true},
+      "ru": {"text":"Обновить","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true}
+    }
+  },
+  "system": {
+    "source": "系统",
+    "translations": {
+      "en": {"text":"System","sourceRevision":"16d77858ad0c4d282f8a8a74e3a4c17a14f49e9ef790e1ccea5e068c92021b5d","reviewed":true},
+      "ja": {"text":"システム","sourceRevision":"16d77858ad0c4d282f8a8a74e3a4c17a14f49e9ef790e1ccea5e068c92021b5d","reviewed":true},
+      "it": {"text":"Sistema","sourceRevision":"16d77858ad0c4d282f8a8a74e3a4c17a14f49e9ef790e1ccea5e068c92021b5d","reviewed":true},
+      "ru": {"text":"Система","sourceRevision":"16d77858ad0c4d282f8a8a74e3a4c17a14f49e9ef790e1ccea5e068c92021b5d","reviewed":true}
+    }
+  },
+  "targetId": {
+    "source": "目标 ID",
+    "translations": {
+      "en": {"text":"Target ID","sourceRevision":"4ba80f4e4cedee9361cdf4d5a1cf5e0a61afc3ecadd7d1b2798067d5348ea9cc","reviewed":true},
+      "ja": {"text":"対象 ID","sourceRevision":"4ba80f4e4cedee9361cdf4d5a1cf5e0a61afc3ecadd7d1b2798067d5348ea9cc","reviewed":true},
+      "it": {"text":"ID destinatario","sourceRevision":"4ba80f4e4cedee9361cdf4d5a1cf5e0a61afc3ecadd7d1b2798067d5348ea9cc","reviewed":true},
+      "ru": {"text":"ID ресурса","sourceRevision":"4ba80f4e4cedee9361cdf4d5a1cf5e0a61afc3ecadd7d1b2798067d5348ea9cc","reviewed":true}
+    }
+  },
+  "targetType": {
+    "source": "目标类型",
+    "translations": {
+      "en": {"text":"Target type","sourceRevision":"3fe8572aca2cb9f62b9dc2d346da4a040f6398efc84c22cf6e682e2183889899","reviewed":true},
+      "ja": {"text":"対象種別","sourceRevision":"3fe8572aca2cb9f62b9dc2d346da4a040f6398efc84c22cf6e682e2183889899","reviewed":true},
+      "it": {"text":"Tipo destinatario","sourceRevision":"3fe8572aca2cb9f62b9dc2d346da4a040f6398efc84c22cf6e682e2183889899","reviewed":true},
+      "ru": {"text":"Тип ресурса","sourceRevision":"3fe8572aca2cb9f62b9dc2d346da4a040f6398efc84c22cf6e682e2183889899","reviewed":true}
+    }
+  },
+  "time": {
+    "source": "时间",
+    "translations": {
+      "en": {"text":"Time","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true},
+      "ja": {"text":"時刻","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true},
+      "it": {"text":"Ora","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true},
+      "ru": {"text":"Время","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true}
+    }
+  },
+  "title": {
+    "source": "操作记录",
+    "translations": {
+      "en": {"text":"Audit log","sourceRevision":"6b6f7b79988d966ab9681d641d2d8c5f8171256e0c569a46915224bec4361785","reviewed":true},
+      "ja": {"text":"操作履歴","sourceRevision":"6b6f7b79988d966ab9681d641d2d8c5f8171256e0c569a46915224bec4361785","reviewed":true},
+      "it": {"text":"Registro operazioni","sourceRevision":"6b6f7b79988d966ab9681d641d2d8c5f8171256e0c569a46915224bec4361785","reviewed":true},
+      "ru": {"text":"Журнал аудита","sourceRevision":"6b6f7b79988d966ab9681d641d2d8c5f8171256e0c569a46915224bec4361785","reviewed":true}
+    }
+  },
+  "topic": {
+    "source": "主题",
+    "translations": {
+      "en": {"text":"Topic","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
+      "ja": {"text":"トピック","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
+      "it": {"text":"Topic","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
+      "ru": {"text":"Тема","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true}
+    }
+  },
+  "unknown": {
+    "source": "未知",
+    "translations": {
+      "en": {"text":"Unknown","sourceRevision":"530f5f61ac53cdc28cafe8d7c065a1d227c49ae0bd254d8e2bb0dc0157dfbebf","reviewed":true},
+      "ja": {"text":"不明","sourceRevision":"530f5f61ac53cdc28cafe8d7c065a1d227c49ae0bd254d8e2bb0dc0157dfbebf","reviewed":true},
+      "it": {"text":"Sconosciuto","sourceRevision":"530f5f61ac53cdc28cafe8d7c065a1d227c49ae0bd254d8e2bb0dc0157dfbebf","reviewed":true},
+      "ru": {"text":"Неизвестно","sourceRevision":"530f5f61ac53cdc28cafe8d7c065a1d227c49ae0bd254d8e2bb0dc0157dfbebf","reviewed":true}
+    }
+  },
+  "user": {
+    "source": "用户",
+    "translations": {
+      "en": {"text":"User","sourceRevision":"1408a574ea81e4fdc7598d19e865fb4d857f9bdad2bc171d9146c35c9a285026","reviewed":true},
+      "ja": {"text":"ユーザー","sourceRevision":"1408a574ea81e4fdc7598d19e865fb4d857f9bdad2bc171d9146c35c9a285026","reviewed":true},
+      "it": {"text":"Utente","sourceRevision":"1408a574ea81e4fdc7598d19e865fb4d857f9bdad2bc171d9146c35c9a285026","reviewed":true},
+      "ru": {"text":"Пользователь","sourceRevision":"1408a574ea81e4fdc7598d19e865fb4d857f9bdad2bc171d9146c35c9a285026","reviewed":true}
+    }
+  }
+}

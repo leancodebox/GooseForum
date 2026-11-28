@@ -18,7 +18,7 @@ interface ShareProps {
 }
 
 export function PostShare(props: ShareProps) {
-  const { t } = useTranslation("topic");
+  const { t } = useTranslation("site.topic");
   const [open, setOpen] = useState(false);
   const first = props.post.postNo === 1;
   const label = t(first ? "shareTopic" : "shareReply");
@@ -96,7 +96,7 @@ function shareExcerpt(body: HTMLElement) {
 }
 
 function CardPreview({ post, topic, site, url, onClose }: ShareProps & { url: string; onClose(): void }) {
-  const { t } = useTranslation("topic");
+  const { t } = useTranslation("site.topic");
   const brand = useRef<HTMLSpanElement>(null);
   const fallbackTone = useRef<HTMLSpanElement>(null);
   const qr = useRef<HTMLCanvasElement>(null);

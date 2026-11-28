@@ -1,9 +1,12 @@
+import { getAdminDictionary } from "@gooseforum/i18n/admin";
 import { afterEach, expect, it, vi } from 'vitest'
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { GooseAdminApi } from '@gooseforum/client'
-import messages from '../messages/en-users'
+
 import { UserMFAReset } from './user-mfa-reset'
+
+const messages = getAdminDictionary("admin.users", "en");
 afterEach(cleanup)
 
 it('requires a reason and explicit confirmation before resetting MFA', async () => {

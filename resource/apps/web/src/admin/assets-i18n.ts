@@ -1,9 +1,9 @@
-import { getAdminDictionary } from "./translation-loader";
-type EnglishDictionary = typeof import("./messages/en-assets").default;
+import { adminText, type AdminText } from "@gooseforum/i18n/admin";
+import type { SimpleKey } from "@gooseforum/i18n";
 import type { AuthLocale } from "@gooseforum/runtime/i18n/auth";
 
-export type AssetTextKey = keyof EnglishDictionary;
-export function createAssetText(locale: AuthLocale) {
-  return (key: AssetTextKey) =>
-    getAdminDictionary<EnglishDictionary>("assets", locale)[key];
+export type AssetTextKey = SimpleKey<"admin.assets">;
+export type AssetText = AdminText<"admin.assets">;
+export function createAssetText(locale: AuthLocale): AssetText {
+  return adminText(locale, "admin.assets");
 }

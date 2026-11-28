@@ -1,8 +1,4 @@
 export const trustLevels = [0, 100, 200, 1000] as const
-export function trustLevelName(level: number, locale = 'en') {
-  const names = locale.startsWith('zh') ? ['新用户', '成员', '稳定成员', '社区骨干'] : locale.startsWith('ja') ? ['新規ユーザー', 'メンバー', '常連メンバー', 'コミュニティリーダー'] : locale.startsWith('it') ? ['Nuovo utente', 'Membro', 'Membro abituale', 'Leader della comunità'] : locale.startsWith('ru') ? ['Новичок', 'Участник', 'Постоянный участник', 'Лидер сообщества'] : ['New user', 'Member', 'Regular', 'Community leader']
-  return names[trustLevels.indexOf(level as typeof trustLevels[number])] || String(level)
-}
 export interface TrustRule { level: number; enabled: boolean; minAccountAgeHours: number; minVisitDays: number; minTopicsVisited: number }
 export interface RegistrationCooldown { minPostAccountAgeMinutes: number; minUploadAccountAgeMinutes: number }
 export interface TrustLimits { level: number; allowImageUpload: boolean; allowAttachmentUpload?: boolean; allowProfileCover?: boolean; maxDailyUploads: number | null; maxDailyTopics: number | null; maxDailyReplies: number | null; maxImagesPerPost: number | null; maxExternalLinksPerPost: number | null; maxMentionsPerPost: number | null }

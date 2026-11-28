@@ -1,5 +1,7 @@
 /// <reference types="node" />
 
+import { getAdminDictionary } from "@gooseforum/i18n/admin";
+
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
@@ -8,14 +10,13 @@ import {
   formatAuditMessage,
 } from "./audit-i18n";
 import {
-  getAdminDictionary,
   prepareAdminTranslations,
 } from "./translation-loader";
 
 beforeAll(async () => {
   await Promise.all(
     (["zh", "en", "ja", "it", "ru"] as const).map((locale) =>
-      prepareAdminTranslations(locale, ["audit", "audit-extra"]),
+      prepareAdminTranslations(locale, ["admin.audit", "admin.audit-extra"]),
     ),
   );
 });
@@ -55,16 +56,13 @@ describe("admin audit i18n", () => {
 
   it("keeps every audit dictionary structurally complete across locales", () => {
     const locales = ["zh", "en", "ja", "it", "ru"] as const;
-    const baseKeys = sortedKeys(getAdminDictionary("audit", "en"));
-    const extra = getAdminDictionary<Record<string, Record<string, unknown>>>(
-      "audit-extra",
+    const baseKeys = sortedKeys(getAdminDictionary("admin.audit", "en"));
+    const extra = getAdminDictionary("admin.audit-extra",
       "en",
     );
     for (const locale of locales) {
-      expect(sortedKeys(getAdminDictionary("audit", locale))).toEqual(baseKeys);
-      const dictionary = getAdminDictionary<
-        Record<string, Record<string, unknown>>
-      >("audit-extra", locale);
+      expect(sortedKeys(getAdminDictionary("admin.audit", locale))).toEqual(baseKeys);
+      const dictionary = getAdminDictionary("admin.audit-extra", locale);
       expect(sortedKeys(dictionary)).toEqual(sortedKeys(extra));
       for (const group of sortedKeys(extra))
         expect(sortedKeys(dictionary[group])).toEqual(sortedKeys(extra[group]));
@@ -161,8 +159,8 @@ function collectGoFiles(directory: string): string[] {
   });
 }
 
-function sortedKeys(value: object) {
-  return Object.keys(value).sort();
+function sortedKeys<T extends object>(value: T) {
+  return (Object.keys(value) as (keyof T)[]).sort();
 }
 
 function templateParams(value: unknown) {

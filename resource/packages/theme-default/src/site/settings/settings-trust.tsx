@@ -1,6 +1,7 @@
+import { trustLevelLabel } from "@gooseforum/i18n";
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
-import { trustLevelName, type TrustProgress, type TrustLimits } from '@gooseforum/client'
+import { type TrustProgress, type TrustLimits } from '@gooseforum/client'
 import { trustQuotaFields } from '@gooseforum/client/trust-limits'
 import { useGooseRuntime, useLatestRequest } from '@gooseforum/runtime'
 import { useServerErrorMessage } from '@gooseforum/runtime/i18n/server-error'
@@ -11,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 export function useTrustProgress() {
   const { api } = useGooseRuntime()
-  const { t } = useTranslation('settings')
+  const { t } = useTranslation('site.settings')
   const [data, setData] = useState<TrustProgress>()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -28,14 +29,15 @@ export function useTrustProgress() {
 
 export function TrustProgressSection({ progress }: { progress: ReturnType<typeof useTrustProgress> }) {
   const { locale } = useGooseRuntime()
-  const { t } = useTranslation('settings')
+  const { t } = useTranslation('site.settings')
+  const { t: sharedText } = useTranslation('shared.shell')
   const { data, error, loading, retry } = progress
   return <section className="space-y-3 border-t p-4">
     <h3 className="text-sm font-semibold">{t('trustProgress.level')}</h3>
     {loading ? <Spinner /> : error ? <div role="alert" className="flex items-center gap-2 text-sm">{error}<Button type="button" size="icon-sm" variant="outline" aria-label={t('trustProgress.retry')} title={t('trustProgress.retry')} onClick={retry}><RefreshCw /></Button></div> : data ? <>
-      <div className="text-sm font-medium">{trustLevelName(data.level, locale)}</div>
+      <div className="text-sm font-medium">{trustLevelLabel(data.level, sharedText)}</div>
       {data.locked ? <p className="text-xs text-muted-foreground">{t('trustProgress.locked')}</p> : data.next ? <dl className="grid gap-3 text-sm sm:grid-cols-3">
-        <div><dt className="text-xs text-muted-foreground">{t('trustProgress.next')}</dt><dd>{trustLevelName(data.next.level, locale)}</dd></div>
+        <div><dt className="text-xs text-muted-foreground">{t('trustProgress.next')}</dt><dd>{trustLevelLabel(data.next.level, sharedText)}</dd></div>
         <div><dt className="text-xs text-muted-foreground">{t('trustProgress.visits')}</dt><dd>{data.visitDays} / {data.next.minVisitDays}</dd></div>
         <div><dt className="text-xs text-muted-foreground">{t('trustProgress.topics')}</dt><dd>{data.topicsVisited} / {data.next.minTopicsVisited}</dd></div>
         <div className="sm:col-span-3"><dt className="text-xs text-muted-foreground">{t('trustProgress.ageMet')}</dt><dd>{new Date(new Date(data.createdAt).getTime() + data.next.minAccountAgeHours * 3600000).toLocaleString(locale)}</dd></div>
@@ -47,7 +49,8 @@ export function TrustProgressSection({ progress }: { progress: ReturnType<typeof
 
 function TrustCapabilities({ data, limits, locale }: { data: TrustProgress; limits: TrustLimits; locale: string }) {
   const [viewedAt] = useState(() => Date.now())
-  const { t } = useTranslation('settings')
+  const { t } = useTranslation('site.settings')
+  const { t: sharedText } = useTranslation('shared.shell')
   const next = !data.locked ? data.nextLimits : null
   const labels = {
     maxDailyTopics: t('trustProgress.dailyTopics'),
@@ -68,7 +71,7 @@ function TrustCapabilities({ data, limits, locale }: { data: TrustProgress; limi
     <h4 className="text-sm font-medium">{t('trustProgress.capabilities')}</h4>
     {data.restrictionStatus && data.restrictionStatus !== 'normal' ? <p className="text-sm text-destructive">{t('trustProgress.restricted')}</p> : null}
     <Table className="w-full table-fixed text-xs">
-      <TableHeader><TableRow><TableHead className="w-1/2 whitespace-normal">{t('trustProgress.capability')}</TableHead><TableHead className="whitespace-normal">{trustLevelName(data.level, locale)}</TableHead>{next ? <TableHead className="whitespace-normal">{trustLevelName(next.level, locale)}</TableHead> : null}</TableRow></TableHeader>
+      <TableHeader><TableRow><TableHead className="w-1/2 whitespace-normal">{t('trustProgress.capability')}</TableHead><TableHead className="whitespace-normal">{trustLevelLabel(data.level, sharedText)}</TableHead>{next ? <TableHead className="whitespace-normal">{trustLevelLabel(next.level, sharedText)}</TableHead> : null}</TableRow></TableHeader>
       <TableBody>
         <TableRow><TableCell className="whitespace-normal">{t('trustProgress.communityUploads')}</TableCell><TableCell>{upload(limits)}</TableCell>{next ? <TableCell>{upload(next) === upload(limits) && next.allowProfileCover === limits.allowProfileCover ? (t('trustProgress.unchanged')) : upload(next)}</TableCell> : null}</TableRow>
         <TableRow><TableCell className="whitespace-normal">{t('trustProgress.cover')}</TableCell><TableCell>{limits.allowProfileCover ? (t('trustProgress.allowed')) : (t('trustProgress.denied'))}</TableCell>{next ? <TableCell>{next.allowProfileCover === limits.allowProfileCover ? (t('trustProgress.unchanged')) : next.allowProfileCover ? (t('trustProgress.allowed')) : (t('trustProgress.denied'))}</TableCell> : null}</TableRow>

@@ -101,7 +101,7 @@ export function RenderedContent({
 }
 
 function GalleryControls({ gallery }: { gallery: HTMLElement }) {
-  const { t } = useTranslation("topic");
+  const { t } = useTranslation("site.topic");
   const [index, setIndex] = useState(0);
   const items = Array.from(gallery.children) as HTMLElement[];
   useEffect(() => {
@@ -127,7 +127,7 @@ function GalleryControls({ gallery }: { gallery: HTMLElement }) {
 }
 
 function ImageInfo({ image }: { image: HTMLImageElement }) {
-  const { t } = useTranslation("topic");
+  const { t } = useTranslation("site.topic");
   const [info, setInfo] = useState(() => readImageMetadata(image));
   useEffect(() => {
     const update = () => setInfo(readImageMetadata(image));

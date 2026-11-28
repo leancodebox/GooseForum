@@ -5,7 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
-const reactFiles = ['apps/web/**/*.{ts,tsx}', 'packages/{markdown,runtime,ui,theme-default}/{src,test}/**/*.{ts,tsx}']
+const reactFiles = ['apps/web/**/*.{ts,tsx}', 'packages/{i18n,markdown,runtime,ui,theme-default}/{src,test}/**/*.{ts,tsx}']
 const testFiles = ['apps/web/**/*.{test,spec}.{ts,tsx}', 'packages/theme-default/test/**/*.{ts,tsx}']
 const reactHookRules = Object.fromEntries(
   Object.keys(reactHooks.configs.flat.recommended.rules).map(rule => [

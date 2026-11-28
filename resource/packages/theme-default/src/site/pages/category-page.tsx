@@ -30,7 +30,7 @@ export function CategoryPageView({
   page: CategoryPageProps;
   pageUrl: string;
 }) {
-  const { t } = useTranslation("home");
+  const { t } = useTranslation("site.home");
   const list = useTopicList(page, pageUrl);
 
   function tabLabel(key: string, fallback?: string) {

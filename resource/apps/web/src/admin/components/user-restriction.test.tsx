@@ -1,9 +1,12 @@
+import { getAdminDictionary } from "@gooseforum/i18n/admin";
 import { afterEach, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { AdminUser, GooseAdminApi } from '@gooseforum/client'
-import messages from '../messages/en-users'
+
 import { UsersManagementPage } from '../pages/users-management-page'
+
+const messages = getAdminDictionary("admin.users", "en");
 
 afterEach(() => { cleanup(); vi.useRealTimers() })
 vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} })

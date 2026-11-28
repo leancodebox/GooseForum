@@ -12,7 +12,7 @@ import { SettingsSectionHeader } from './settings-section-header'
 import { useServerErrorMessage } from '@gooseforum/runtime/i18n/server-error'
 
 export function MFASettings({ showError, onEnabled }: { showError(message: string): void; onEnabled?(enabled: boolean): void }) {
-  const { t } = useTranslation('settings')
+  const { t } = useTranslation('site.settings')
   const runtime = useGooseRuntime()
   const serverError = useServerErrorMessage()
   const [status, setStatus] = useState<{ enabled: boolean; available: boolean; remainingCodes: number } | null>(null)

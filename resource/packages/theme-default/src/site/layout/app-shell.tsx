@@ -1,5 +1,6 @@
 "use client";
 
+import { runtimeText } from "@gooseforum/i18n";
 import {
   Suspense,
   use,
@@ -68,7 +69,7 @@ export function AppShell({
   children: ReactNode;
   standalone?: boolean;
 }) {
-  const { t, i18n } = useTranslation("shell");
+  const { t, i18n } = useTranslation("shared.shell");
   const runtime = useGooseRuntime();
   useEffect(() => {
     void import("@gooseforum/runtime/local-draft-store").then(({ activateDraftAccount }) =>
@@ -161,7 +162,7 @@ export function AppShell({
     const key = item.i18nLabel?.startsWith("shell.")
       ? item.i18nLabel.slice("shell.".length)
       : "";
-    return key && i18n.exists(key, { ns: "shell" }) ? t(key) : fallback;
+    return key && i18n.exists(key, { ns: "shared.shell" }) ? runtimeText(t, key) : fallback;
   }
 
   function serverItems(items?: NavItemPayload[]): ShellNavItem[] {
@@ -193,7 +194,7 @@ export function AppShell({
           <GooseNavigationProvider value={runtime.navigate}>
             <PageNavigationIcons value={layout.icons}>
               <SiteHeader site={layout.site} viewer={layout.viewer} header={layout.header} unread={unread}
-                hidden={standalone} Link={GooseLink} t={(key, fallback) => t(key, { defaultValue: fallback ?? key })}
+                hidden={standalone} Link={GooseLink} t={t} navLabel={(key, fallback) => runtimeText(t, key, { defaultValue: fallback })}
                 locale={runtime.locale} locales={authLocales} localeLabels={localeLabels}
                 onLocaleChange={runtime.setLocale} themePreference={runtime.themePreference ?? "system"}
                 onThemeChange={value => runtime.setThemePreference?.(value)}

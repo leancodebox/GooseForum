@@ -1,3 +1,5 @@
+import { runtimeText } from "@gooseforum/i18n";
+import type { TFunction } from "i18next";
 import { avatarInitial } from "@gooseforum/ui/lib/avatar-initial";
 import { formatDate } from "../date-format";
 import {
@@ -62,7 +64,7 @@ const consoleTabs: Array<{ key: ConsoleTab; icon: ComponentType<{ className?: st
 ];
 
 export function ModerationPageView({ page }: { page: ModerationPageProps }) {
-  const { t } = useTranslation("moderation");
+  const { t } = useTranslation("site.moderation");
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
   const [tab, setTab] = useState<ConsoleTab>("reports");
@@ -287,7 +289,7 @@ export function ModerationPageView({ page }: { page: ModerationPageProps }) {
   );
 }
 
-type Translate = ReturnType<typeof useTranslation>["t"];
+type Translate = TFunction<"site.moderation">;
 function ReportsPanel({
   status,
   items,
@@ -367,7 +369,7 @@ function ReportsPanel({
                       {t(`reports.targetTypes.${item.targetType}`)}
                     </span>
                     <Badge variant="secondary" className="text-xs">
-                      {t(`reports.reasons.${item.reason}`, { defaultValue: item.reason })}
+                      {runtimeText(t, `reports.reasons.${item.reason}`, { defaultValue: item.reason })}
                     </Badge>
                     {item.categories.map((category) => (
                       <GooseLink
@@ -615,7 +617,7 @@ function LogsPanel({
                   <div className="flex min-h-7 flex-wrap items-center gap-1.5 text-sm leading-7">
                     <Person user={item.actor} inline />
                     <span className="text-muted-foreground">
-                      {t(`logs.actions.${item.action}`, {
+                      {runtimeText(t, `logs.actions.${item.action}`, {
                         defaultValue: t("logs.actions.operation"),
                       })}
                     </span>{" "}
@@ -757,7 +759,7 @@ function PanelEmpty({
 function resolution(item: ModerationReportItem, t: Translate) {
   const value =
     item.resolution || (item.status === "rejected" ? "ignored" : "resolved");
-  return t(`reports.resolutions.${value}`, { defaultValue: value });
+  return runtimeText(t, `reports.resolutions.${value}`, { defaultValue: value });
 }
 function merge<T extends { id: number }>(current: T[], incoming: T[]) {
   const ids = new Set(current.map((item) => item.id));

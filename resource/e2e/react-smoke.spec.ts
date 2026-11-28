@@ -732,9 +732,13 @@ test('loads the destination topic dictionary in the URL language during SPA navi
     if (!loader) throw new Error('Vite translation loader was not loaded')
     const { cachedGooseResources } = await import(/* @vite-ignore */ loader.name)
     const resources = cachedGooseResources()
-    return { japanese: Boolean(resources.ja?.topic), english: Boolean(resources.en?.topic) }
+    return {
+      japanese: Boolean(resources.ja?.['site.topic']),
+      englishFallback: Boolean(resources.en?.['site.topic']),
+      unrelatedLocales: Boolean(resources.it?.['site.topic'] || resources.ru?.['site.topic']),
+    }
   })
-  expect(prepared).toEqual({ japanese: true, english: false })
+  expect(prepared).toEqual({ japanese: true, englishFallback: true, unrelatedLocales: false })
 })
 
 test('requests role and permission labels in the page language', async ({ page }) => {

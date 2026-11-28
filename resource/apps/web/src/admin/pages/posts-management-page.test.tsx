@@ -1,9 +1,12 @@
+import { getAdminDictionary } from "@gooseforum/i18n/admin";
 import { afterEach, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { AdminTopic, GooseAdminApi } from "@gooseforum/client";
-import messages from "../messages/zh-posts";
+
 import { PostsManagementPage } from "./posts-management-page";
+
+const messages = getAdminDictionary("admin.posts", "zh");
 
 afterEach(() => {
   cleanup();

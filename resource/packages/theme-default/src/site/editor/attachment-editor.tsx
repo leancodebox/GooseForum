@@ -12,7 +12,7 @@ export interface AttachmentEditorProps {
   disabled?: boolean;
 }
 export function AttachmentList({ files }: { files: AttachmentInfo[] }) {
-  const { t } = useTranslation("publish");
+  const { t } = useTranslation("site.publish");
   if (!files.length) return null;
   return <ul aria-label={t("attachmentsTitle")} className="my-3 grid gap-2 text-sm">
     {files.map((file) => <li key={file.id} className="min-w-0 rounded-lg border px-3 py-2">
@@ -23,7 +23,7 @@ export function AttachmentList({ files }: { files: AttachmentInfo[] }) {
 }
 export function AttachmentEditor({ files, onChange, onBusy, disabled }: AttachmentEditorProps) {
   const runtime = useGooseRuntime();
-  const { t } = useTranslation("publish");
+  const { t } = useTranslation("site.publish");
   const serverError = useServerErrorMessage();
   const [policy, setPolicy] = useState<AttachmentPolicy>();
   const [unavailable, setUnavailable] = useState(false);

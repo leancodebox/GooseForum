@@ -41,3 +41,6 @@ dist/
 /resource/static/admin/dict
 tmp_app
 tmp_refs/
+
+/resource/packages/i18n/generated/
+/resource/packages/i18n/.catalog-lock/

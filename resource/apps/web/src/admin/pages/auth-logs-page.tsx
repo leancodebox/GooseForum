@@ -15,10 +15,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@gooseforum/ui/components/tooltip';
 import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { AdminPage } from '../components/admin-page';
-import { getAdminDictionary } from '../translation-loader';
+import { getAdminDictionary } from '@gooseforum/i18n/admin';
 
 export function AuthLogsPage({ api, locale }: { api: GooseAdminApi; locale: AuthLocale }) {
-  const dictionary = getAdminDictionary<typeof import('../messages/en-audit').default>('audit', locale);
+  const dictionary = getAdminDictionary('admin.audit', locale);
   const text = dictionary.authLogs;
   const [rows, setRows] = useState<AuthLogPayload[]>([]);
   const [cursors, setCursors] = useState([0]);

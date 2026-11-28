@@ -20,7 +20,7 @@ import { InfoPanel } from "../layout/info-panel";
 import { PageHeader } from "../layout/page-header";
 
 export function LinksPageView({ page }: { page: LinksPageProps }) {
-  const { t } = useTranslation("links");
+  const { t } = useTranslation("site.links");
   return (
     <div className="pb-12">
       <PageHeader

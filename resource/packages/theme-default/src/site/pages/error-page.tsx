@@ -1,3 +1,4 @@
+import { runtimeText } from "@gooseforum/i18n";
 import type { ErrorPageProps } from "@gooseforum/client";
 import { ArrowLeft, Home } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -13,12 +14,12 @@ import { GooseLink } from "@gooseforum/runtime";
 import { SitePanel } from "../layout/site-panel";
 
 export function ErrorPageView({ page }: { page: ErrorPageProps }) {
-  const { t } = useTranslation("error");
-  const { t: serverT, i18n } = useTranslation("serverMessages");
+  const { t } = useTranslation("site.error");
+  const { t: serverT, i18n } = useTranslation("shared.serverMessages");
   const title = page.code === "404" ? t("notFoundTitle") : page.title;
   const knownMessage =
-    page.messageCode && i18n.exists(page.messageCode, { ns: "serverMessages" })
-      ? serverT(page.messageCode, page.params ?? {})
+    page.messageCode && i18n.exists(page.messageCode, { ns: "shared.serverMessages" })
+      ? runtimeText(serverT, page.messageCode, { replace: page.params ?? {} })
       : page.messageCode === "page.notFound" ||
           page.messageCode === "route.notFound"
         ? t(`messages.${page.messageCode}`, page.params ?? {})

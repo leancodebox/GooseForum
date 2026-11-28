@@ -1,0 +1,622 @@
+{
+  "accessGroups": {
+    "source": "访问组",
+    "translations": {
+      "en": {"text":"Access groups","sourceRevision":"c943e76fb884f377861b27af3b6c679c46285ec3c8eae8ab26386bb20c49d130","reviewed":true},
+      "ja": {"text":"アクセスグループ","sourceRevision":"c943e76fb884f377861b27af3b6c679c46285ec3c8eae8ab26386bb20c49d130","reviewed":true},
+      "it": {"text":"Gruppi di accesso","sourceRevision":"c943e76fb884f377861b27af3b6c679c46285ec3c8eae8ab26386bb20c49d130","reviewed":true},
+      "ru": {"text":"Группы доступа","sourceRevision":"c943e76fb884f377861b27af3b6c679c46285ec3c8eae8ab26386bb20c49d130","reviewed":true}
+    }
+  },
+  "add": {
+    "source": "添加",
+    "translations": {
+      "en": {"text":"Add","sourceRevision":"752f72d69f94884fc6d70f7d148a58ce8b7e8f621f1dce57bb2c40249ccb4016","reviewed":true},
+      "ru": {"text":"Добавить","sourceRevision":"752f72d69f94884fc6d70f7d148a58ce8b7e8f621f1dce57bb2c40249ccb4016","reviewed":true}
+    }
+  },
+  "assignAvatar": {
+    "source": "自动分配",
+    "translations": {
+      "en": {"text":"Auto-assign","sourceRevision":"4c31342fb4dde99b24cb3551ab3791efda94ee39dc20ff6dcd6dacfe92c985d1","reviewed":true},
+      "ja": {"text":"自動割り当て","sourceRevision":"4c31342fb4dde99b24cb3551ab3791efda94ee39dc20ff6dcd6dacfe92c985d1","reviewed":true},
+      "it": {"text":"Assegnazione automatica","sourceRevision":"4c31342fb4dde99b24cb3551ab3791efda94ee39dc20ff6dcd6dacfe92c985d1","reviewed":true},
+      "ru": {"text":"Назначать автоматически","sourceRevision":"4c31342fb4dde99b24cb3551ab3791efda94ee39dc20ff6dcd6dacfe92c985d1","reviewed":true}
+    }
+  },
+  "avatarEnabled": {
+    "source": "已启用",
+    "translations": {
+      "en": {"text":"Enabled","sourceRevision":"cccfa9597028b805f5265bab8528aebe9e95738362f9cbe715b2c9c2e0142faa","reviewed":true},
+      "ja": {"text":"有効","sourceRevision":"cccfa9597028b805f5265bab8528aebe9e95738362f9cbe715b2c9c2e0142faa","reviewed":true},
+      "it": {"text":"Attivi","sourceRevision":"cccfa9597028b805f5265bab8528aebe9e95738362f9cbe715b2c9c2e0142faa","reviewed":true},
+      "ru": {"text":"Включено","sourceRevision":"cccfa9597028b805f5265bab8528aebe9e95738362f9cbe715b2c9c2e0142faa","reviewed":true}
+    }
+  },
+  "avatarEnabledCount": {
+    "source": "已启用 {count} 张",
+    "translations": {
+      "en": {"text":"Enabled: {count}","sourceRevision":"ec51cc61e753bae4535c0cf279d64a4f5d517b3a35ef86e803dfda64b912a56d","reviewed":true},
+      "ja": {"text":"有効 {count} 件","sourceRevision":"ec51cc61e753bae4535c0cf279d64a4f5d517b3a35ef86e803dfda64b912a56d","reviewed":true},
+      "it": {"text":"Attivi: {count}","sourceRevision":"ec51cc61e753bae4535c0cf279d64a4f5d517b3a35ef86e803dfda64b912a56d","reviewed":true},
+      "ru": {"text":"Включено: {count}","sourceRevision":"ec51cc61e753bae4535c0cf279d64a4f5d517b3a35ef86e803dfda64b912a56d","reviewed":true}
+    }
+  },
+  "avatarOff": {
+    "source": "关闭后，个人设置隐藏预设头像。没有来源头像的新用户将显示文字头像。",
+    "translations": {
+      "en": {"text":"Preset avatars are hidden in personal settings. New users without an image see their initial.","sourceRevision":"7bf4c76957cec227ef1c4a17b0b139ea726f36cec943ab2383291a74ee76f2ec","reviewed":true},
+      "ja": {"text":"個人設定のプリセットアバターを非表示にします。画像のない新規ユーザーには表示名の先頭文字を表示します。","sourceRevision":"7bf4c76957cec227ef1c4a17b0b139ea726f36cec943ab2383291a74ee76f2ec","reviewed":true},
+      "it": {"text":"Gli avatar predefiniti sono nascosti nelle impostazioni personali. I nuovi utenti senza immagine vedono la loro iniziale.","sourceRevision":"7bf4c76957cec227ef1c4a17b0b139ea726f36cec943ab2383291a74ee76f2ec","reviewed":true},
+      "ru": {"text":"Стандартные аватары скрыты в личных настройках. У новых пользователей без изображения показывается первая буква имени.","sourceRevision":"7bf4c76957cec227ef1c4a17b0b139ea726f36cec943ab2383291a74ee76f2ec","reviewed":true}
+    }
+  },
+  "avatarPoolTitle": {
+    "source": "预设头像库",
+    "translations": {
+      "en": {"text":"Preset avatar library","sourceRevision":"43cd84931305938def74ab61733e5be3126b7bfe4446b67656faa94e15e67a9f","reviewed":true},
+      "ja": {"text":"プリセットアバター","sourceRevision":"43cd84931305938def74ab61733e5be3126b7bfe4446b67656faa94e15e67a9f","reviewed":true},
+      "it": {"text":"Raccolta di avatar predefiniti","sourceRevision":"43cd84931305938def74ab61733e5be3126b7bfe4446b67656faa94e15e67a9f","reviewed":true},
+      "ru": {"text":"Библиотека стандартных аватаров","sourceRevision":"43cd84931305938def74ab61733e5be3126b7bfe4446b67656faa94e15e67a9f","reviewed":true}
+    }
+  },
+  "avatarRandom": {
+    "source": "用户可以从已启用的头像中选择；没有来源头像的新用户会随机获得一张。",
+    "translations": {
+      "en": {"text":"Members can choose an enabled avatar. New users without an image receive one at random.","sourceRevision":"dcb5ba050be0560b435d23e542127cdc5e5425875c7cdbbb8e986f4e70315d9c","reviewed":true},
+      "ja": {"text":"ユーザーは有効なアバターを選べます。画像のない新規ユーザーにはその中からランダムに割り当てます。","sourceRevision":"dcb5ba050be0560b435d23e542127cdc5e5425875c7cdbbb8e986f4e70315d9c","reviewed":true},
+      "it": {"text":"Gli utenti possono scegliere un avatar attivo. Ai nuovi utenti senza immagine ne viene assegnato uno a caso.","sourceRevision":"dcb5ba050be0560b435d23e542127cdc5e5425875c7cdbbb8e986f4e70315d9c","reviewed":true},
+      "ru": {"text":"Участники могут выбрать доступный аватар. Новым пользователям один из них назначается случайно.","sourceRevision":"dcb5ba050be0560b435d23e542127cdc5e5425875c7cdbbb8e986f4e70315d9c","reviewed":true}
+    }
+  },
+  "basic": {
+    "source": "基本信息",
+    "translations": {
+      "en": {"text":"Basic information","sourceRevision":"25c6b616f3a08547401e6b81fb81005ddb6a4428f22ed8b4d55c8b2b1d64a8fd","reviewed":true},
+      "ru": {"text":"Базовая информация","sourceRevision":"25c6b616f3a08547401e6b81fb81005ddb6a4428f22ed8b4d55c8b2b1d64a8fd","reviewed":true}
+    }
+  },
+  "brand": {
+    "source": "品牌",
+    "translations": {
+      "en": {"text":"Brand","sourceRevision":"5b7bcc4e60dacd8d26b33875ec796f104dd041596f23aee856736a1d4d94f50b","reviewed":true},
+      "ru": {"text":"Бренд","sourceRevision":"5b7bcc4e60dacd8d26b33875ec796f104dd041596f23aee856736a1d4d94f50b","reviewed":true}
+    }
+  },
+  "brandDefault": {
+    "source": "默认",
+    "translations": {
+      "en": {"text":"Default","sourceRevision":"e60f7822e5537851d132840cccff573679567e20f7ecb396d8b4cc9b50012980","reviewed":true},
+      "ru": {"text":"По умолчанию","sourceRevision":"e60f7822e5537851d132840cccff573679567e20f7ecb396d8b4cc9b50012980","reviewed":true}
+    }
+  },
+  "brandImage": {
+    "source": "图片",
+    "translations": {
+      "en": {"text":"Image","sourceRevision":"6aa42b9337cc9857a39dd41e662980c9507ae08013c412814f4241d29d9eeae5","reviewed":true},
+      "ru": {"text":"Изображение","sourceRevision":"6aa42b9337cc9857a39dd41e662980c9507ae08013c412814f4241d29d9eeae5","reviewed":true}
+    }
+  },
+  "brandText": {
+    "source": "文字",
+    "translations": {
+      "en": {"text":"Text","sourceRevision":"3a5cc719fa60399eb58b0cea42420707dfe0a4628337cf3ef929f55740d3cc1f","reviewed":true},
+      "ru": {"text":"Текст","sourceRevision":"3a5cc719fa60399eb58b0cea42420707dfe0a4628337cf3ef929f55740d3cc1f","reviewed":true}
+    }
+  },
+  "brandType": {
+    "source": "品牌类型",
+    "translations": {
+      "en": {"text":"Brand type","sourceRevision":"305161687b2a8795a4f73754b424f494fcb19a42e785c5d4f5959f4b2771a817","reviewed":true},
+      "ru": {"text":"Тип бренда","sourceRevision":"305161687b2a8795a4f73754b424f494fcb19a42e785c5d4f5959f4b2771a817","reviewed":true}
+    }
+  },
+  "builtinAvatars": {
+    "source": "内置头像",
+    "translations": {
+      "en": {"text":"Built-in avatars","sourceRevision":"404def308187cf0c9063d768cd85adcf62d821baad964941aa56931f94895205","reviewed":true},
+      "ja": {"text":"内蔵アバター","sourceRevision":"404def308187cf0c9063d768cd85adcf62d821baad964941aa56931f94895205","reviewed":true},
+      "it": {"text":"Avatar integrati","sourceRevision":"404def308187cf0c9063d768cd85adcf62d821baad964941aa56931f94895205","reviewed":true},
+      "ru": {"text":"Встроенные аватары","sourceRevision":"404def308187cf0c9063d768cd85adcf62d821baad964941aa56931f94895205","reviewed":true}
+    }
+  },
+  "cancel": {
+    "source": "取消",
+    "translations": {
+      "en": {"text":"Cancel","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
+      "ru": {"text":"Отмена","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true}
+    }
+  },
+  "categories": {
+    "source": "分类",
+    "translations": {
+      "en": {"text":"Categories","sourceRevision":"6e4ccd367a39a23420b02171938835f2b6d055d78b9422eababbeece913381c9","reviewed":true},
+      "ru": {"text":"Категории","sourceRevision":"6e4ccd367a39a23420b02171938835f2b6d055d78b9422eababbeece913381c9","reviewed":true}
+    }
+  },
+  "chrome": {
+    "source": "站点外观",
+    "translations": {
+      "en": {"text":"Site chrome","sourceRevision":"8d19d9c89ba4e727101c724421ceebad5eabe93e80776ae7fed09cac3e927868","reviewed":true},
+      "ja": {"text":"サイト表示","sourceRevision":"8d19d9c89ba4e727101c724421ceebad5eabe93e80776ae7fed09cac3e927868","reviewed":true},
+      "it": {"text":"Aspetto sito","sourceRevision":"8d19d9c89ba4e727101c724421ceebad5eabe93e80776ae7fed09cac3e927868","reviewed":true},
+      "ru": {"text":"Оформление сайта","sourceRevision":"8d19d9c89ba4e727101c724421ceebad5eabe93e80776ae7fed09cac3e927868","reviewed":true}
+    }
+  },
+  "chromeHint": {
+    "source": "配置品牌、顶部导航、侧栏、资源区和页脚内容。",
+    "translations": {
+      "en": {"text":"Configure brand, header, sidebar, resources, and footer content.","sourceRevision":"b6060c430cb0d127c0921d3252ce90e9f01139580810a44763c3917ebfe3cec3","reviewed":true},
+      "ru": {"text":"Настройте бренд, ссылки в шапке, сайдбар, ресурсы и содержимое футера.","sourceRevision":"b6060c430cb0d127c0921d3252ce90e9f01139580810a44763c3917ebfe3cec3","reviewed":true}
+    }
+  },
+  "content": {
+    "source": "内容与元数据",
+    "translations": {
+      "en": {"text":"Content and metadata","sourceRevision":"0ceb87dc257f54156b0ac36495fd968179176387c0f43d9b02a61b260807fc0b","reviewed":true},
+      "ru": {"text":"Контент и метаданные","sourceRevision":"0ceb87dc257f54156b0ac36495fd968179176387c0f43d9b02a61b260807fc0b","reviewed":true}
+    }
+  },
+  "customAvatars": {
+    "source": "自定义头像",
+    "translations": {
+      "en": {"text":"Custom avatars","sourceRevision":"57d6adb87aa5a09397c5d208234525f9f4f0a658fccef0562b22158b77ad7fbb","reviewed":true},
+      "ja": {"text":"カスタムアバター","sourceRevision":"57d6adb87aa5a09397c5d208234525f9f4f0a658fccef0562b22158b77ad7fbb","reviewed":true},
+      "it": {"text":"Avatar personalizzati","sourceRevision":"57d6adb87aa5a09397c5d208234525f9f4f0a658fccef0562b22158b77ad7fbb","reviewed":true},
+      "ru": {"text":"Пользовательские аватары","sourceRevision":"57d6adb87aa5a09397c5d208234525f9f4f0a658fccef0562b22158b77ad7fbb","reviewed":true}
+    }
+  },
+  "defaultLocale": {
+    "source": "站点默认语言",
+    "translations": {
+      "en": {"text":"Default site language","sourceRevision":"f4b71b52a151f4fdc01cdeeba6a94069a1ab8c619b9b9561e4c3dc7d1835a364","reviewed":true},
+      "ja": {"text":"サイトの既定の言語","sourceRevision":"f4b71b52a151f4fdc01cdeeba6a94069a1ab8c619b9b9561e4c3dc7d1835a364","reviewed":true},
+      "it": {"text":"Lingua predefinita del sito","sourceRevision":"f4b71b52a151f4fdc01cdeeba6a94069a1ab8c619b9b9561e4c3dc7d1835a364","reviewed":true},
+      "ru": {"text":"Язык сайта по умолчанию","sourceRevision":"f4b71b52a151f4fdc01cdeeba6a94069a1ab8c619b9b9561e4c3dc7d1835a364","reviewed":true}
+    }
+  },
+  "defaultMenuIcon": {
+    "source": "默认图标",
+    "translations": {
+      "en": {"text":"Default icon","sourceRevision":"c551dea37ee6b9994728623ce3d9e1b0ad60e04104f0f4ead9f8e044842d5fe7","reviewed":true},
+      "ja": {"text":"既定のアイコン","sourceRevision":"c551dea37ee6b9994728623ce3d9e1b0ad60e04104f0f4ead9f8e044842d5fe7","reviewed":true},
+      "it": {"text":"Icona predefinita","sourceRevision":"c551dea37ee6b9994728623ce3d9e1b0ad60e04104f0f4ead9f8e044842d5fe7","reviewed":true},
+      "ru": {"text":"Значок по умолчанию","sourceRevision":"c551dea37ee6b9994728623ce3d9e1b0ad60e04104f0f4ead9f8e044842d5fe7","reviewed":true}
+    }
+  },
+  "delete": {
+    "source": "删除",
+    "translations": {
+      "en": {"text":"Delete","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
+      "ru": {"text":"Удалить","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true}
+    }
+  },
+  "description": {
+    "source": "站点描述",
+    "translations": {
+      "en": {"text":"Site description","sourceRevision":"84392b97777e5eed4be6c46872343e0bfaa95656ea8bf09d6b0e56d8cb0d535d","reviewed":true},
+      "ru": {"text":"Описание сайта","sourceRevision":"84392b97777e5eed4be6c46872343e0bfaa95656ea8bf09d6b0e56d8cb0d535d","reviewed":true}
+    }
+  },
+  "disableAll": {
+    "source": "全部停用",
+    "translations": {
+      "en": {"text":"Disable all","sourceRevision":"758b422cb1763236a6ef0ec291c2fdbb5e7aa7f7731daaae777adcf80df84fc0","reviewed":true},
+      "ja": {"text":"すべて無効","sourceRevision":"758b422cb1763236a6ef0ec291c2fdbb5e7aa7f7731daaae777adcf80df84fc0","reviewed":true},
+      "it": {"text":"Disattiva tutti","sourceRevision":"758b422cb1763236a6ef0ec291c2fdbb5e7aa7f7731daaae777adcf80df84fc0","reviewed":true},
+      "ru": {"text":"Отключить все","sourceRevision":"758b422cb1763236a6ef0ec291c2fdbb5e7aa7f7731daaae777adcf80df84fc0","reviewed":true}
+    }
+  },
+  "drafts": {
+    "source": "草稿",
+    "translations": {
+      "en": {"text":"Drafts","sourceRevision":"53f2aa44b0f1ebcbd767769482580456bce31ce1b2344c86f36ab58abbb7d615","reviewed":true},
+      "ru": {"text":"Черновики","sourceRevision":"53f2aa44b0f1ebcbd767769482580456bce31ce1b2344c86f36ab58abbb7d615","reviewed":true}
+    }
+  },
+  "edit": {
+    "source": "编辑",
+    "translations": {
+      "en": {"text":"Edit","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true},
+      "ru": {"text":"Редактировать","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true}
+    }
+  },
+  "email": {
+    "source": "联系邮箱",
+    "translations": {
+      "en": {"text":"Contact email","sourceRevision":"d62e688fed579b3b9aea1c106fbfd2f7bb3d4bc7df29a15f7dbe305873493318","reviewed":true},
+      "ru": {"text":"Контактный email","sourceRevision":"d62e688fed579b3b9aea1c106fbfd2f7bb3d4bc7df29a15f7dbe305873493318","reviewed":true}
+    }
+  },
+  "enableAll": {
+    "source": "全部启用",
+    "translations": {
+      "en": {"text":"Enable all","sourceRevision":"89369b3d13d9fc0fd8ea03a9d0e1bf03549f64fd404d5acb4b7676aa7ee24f18","reviewed":true},
+      "ja": {"text":"すべて有効","sourceRevision":"89369b3d13d9fc0fd8ea03a9d0e1bf03549f64fd404d5acb4b7676aa7ee24f18","reviewed":true},
+      "it": {"text":"Attiva tutti","sourceRevision":"89369b3d13d9fc0fd8ea03a9d0e1bf03549f64fd404d5acb4b7676aa7ee24f18","reviewed":true},
+      "ru": {"text":"Включить все","sourceRevision":"89369b3d13d9fc0fd8ea03a9d0e1bf03549f64fd404d5acb4b7676aa7ee24f18","reviewed":true}
+    }
+  },
+  "enabled": {
+    "source": "启用",
+    "translations": {
+      "en": {"text":"Enabled","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
+      "ru": {"text":"Включено","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true}
+    }
+  },
+  "external": {
+    "source": "自定义 HTML",
+    "translations": {
+      "en": {"text":"Custom HTML","sourceRevision":"9b8cb9b525de318bda834f716fe7248bfd8f81ab8beea08da029bb36f7758da0","reviewed":true},
+      "ru": {"text":"JSON внешних ссылок","sourceRevision":"9b8cb9b525de318bda834f716fe7248bfd8f81ab8beea08da029bb36f7758da0","reviewed":true}
+    }
+  },
+  "footer": {
+    "source": "页脚",
+    "translations": {
+      "en": {"text":"Footer","sourceRevision":"4f55ed33ec27ded1bdfaab6dd0216b7ef5c1879fc231c351ec276ee40cb7cc39","reviewed":true},
+      "ru": {"text":"Футер","sourceRevision":"4f55ed33ec27ded1bdfaab6dd0216b7ef5c1879fc231c351ec276ee40cb7cc39","reviewed":true}
+    }
+  },
+  "group": {
+    "source": "分组",
+    "translations": {
+      "en": {"text":"Group","sourceRevision":"e7791f3083f1ebd17785177664216ffb8efd522914b19f1d0b7a242d132c2554","reviewed":true},
+      "ru": {"text":"Группа","sourceRevision":"e7791f3083f1ebd17785177664216ffb8efd522914b19f1d0b7a242d132c2554","reviewed":true}
+    }
+  },
+  "header": {
+    "source": "顶部链接",
+    "translations": {
+      "en": {"text":"Header links","sourceRevision":"2e3f78d6c805e4151cea70d625819f4729be211426688c4d2761e03c9bb8de92","reviewed":true},
+      "ru": {"text":"Ссылки в шапке","sourceRevision":"2e3f78d6c805e4151cea70d625819f4729be211426688c4d2761e03c9bb8de92","reviewed":true}
+    }
+  },
+  "hot": {
+    "source": "热门",
+    "translations": {
+      "en": {"text":"Hot","sourceRevision":"3cad43213bfa16d20b243814d4bd8b46a9ca36cc751bb7fd320d76a3bd5a995b","reviewed":true},
+      "ru": {"text":"Горячие","sourceRevision":"3cad43213bfa16d20b243814d4bd8b46a9ca36cc751bb7fd320d76a3bd5a995b","reviewed":true}
+    }
+  },
+  "i18nLabel": {
+    "source": "i18n 键",
+    "translations": {
+      "en": {"text":"i18n key","sourceRevision":"b95920448a9f51b74e9b742b3d9008cb09388bdeb2473de7413db4b43d273a49","reviewed":true},
+      "ru": {"text":"Ключ локализации","sourceRevision":"b95920448a9f51b74e9b742b3d9008cb09388bdeb2473de7413db4b43d273a49","reviewed":true}
+    }
+  },
+  "keywords": {
+    "source": "关键词",
+    "translations": {
+      "en": {"text":"Keywords","sourceRevision":"602eeaee8f32720370065b8dd265f7bcde95a1993c0fab8a834eee222273f45a","reviewed":true},
+      "ru": {"text":"Ключевые слова","sourceRevision":"602eeaee8f32720370065b8dd265f7bcde95a1993c0fab8a834eee222273f45a","reviewed":true}
+    }
+  },
+  "label": {
+    "source": "名称",
+    "translations": {
+      "en": {"text":"Label","sourceRevision":"5077a45534f909fcb5a2af2bf0b2367ffee856a4ef4d23fc7e393830af91a4ee","reviewed":true},
+      "ru": {"text":"Метка","sourceRevision":"5077a45534f909fcb5a2af2bf0b2367ffee856a4ef4d23fc7e393830af91a4ee","reviewed":true}
+    }
+  },
+  "link": {
+    "source": "链接",
+    "translations": {
+      "en": {"text":"Link","sourceRevision":"d27708509dd76b2f3fe89d69be0e48693c6bffa928b5508cf1400cf4058797a6","reviewed":true},
+      "ru": {"text":"Ссылка","sourceRevision":"d27708509dd76b2f3fe89d69be0e48693c6bffa928b5508cf1400cf4058797a6","reviewed":true}
+    }
+  },
+  "links": {
+    "source": "友情链接",
+    "translations": {
+      "en": {"text":"Links","sourceRevision":"4e3ddf8192fbcc92277eca13ca647c3c585e5828505a7ac7224cf92f3fe013cc","reviewed":true},
+      "ru": {"text":"Ссылки","sourceRevision":"4e3ddf8192fbcc92277eca13ca647c3c585e5828505a7ac7224cf92f3fe013cc","reviewed":true}
+    }
+  },
+  "loadFailed": {
+    "source": "设置加载失败",
+    "translations": {
+      "en": {"text":"Failed to load settings","sourceRevision":"ab287d561a9abdee4c1d1e411c69f5645ddd5b999e6867d6fdcf5a3e46e4523e","reviewed":true},
+      "ru": {"text":"Не удалось загрузить настройки","sourceRevision":"ab287d561a9abdee4c1d1e411c69f5645ddd5b999e6867d6fdcf5a3e46e4523e","reviewed":true}
+    }
+  },
+  "loading": {
+    "source": "正在加载…",
+    "translations": {
+      "en": {"text":"Loading…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
+      "ru": {"text":"Загрузка…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true}
+    }
+  },
+  "logo": {
+    "source": "站点 Logo",
+    "translations": {
+      "en": {"text":"Site logo","sourceRevision":"41bd445ae57040352aa5282c741b46421d756f4975893ae93951ded74e41bcd8","reviewed":true},
+      "ru": {"text":"Логотип сайта","sourceRevision":"41bd445ae57040352aa5282c741b46421d756f4975893ae93951ded74e41bcd8","reviewed":true}
+    }
+  },
+  "mainMenu": {
+    "source": "主菜单",
+    "translations": {
+      "en": {"text":"Main menu","sourceRevision":"73ba035023b3b5b1ede6c012c42f038ad74deeac5be3800b6ebf2c3c60a4dcc1","reviewed":true},
+      "ru": {"text":"Главное меню","sourceRevision":"73ba035023b3b5b1ede6c012c42f038ad74deeac5be3800b6ebf2c3c60a4dcc1","reviewed":true}
+    }
+  },
+  "manageAvatars": {
+    "source": "管理头像",
+    "translations": {
+      "en": {"text":"Manage avatars","sourceRevision":"1d2a4fb67cbafe8cd47e277fde8dbf63d447be9f40a04de4b0b7de2de8d9707e","reviewed":true},
+      "ja": {"text":"アバターを管理","sourceRevision":"1d2a4fb67cbafe8cd47e277fde8dbf63d447be9f40a04de4b0b7de2de8d9707e","reviewed":true},
+      "it": {"text":"Gestisci avatar","sourceRevision":"1d2a4fb67cbafe8cd47e277fde8dbf63d447be9f40a04de4b0b7de2de8d9707e","reviewed":true},
+      "ru": {"text":"Управление аватарами","sourceRevision":"1d2a4fb67cbafe8cd47e277fde8dbf63d447be9f40a04de4b0b7de2de8d9707e","reviewed":true}
+    }
+  },
+  "members": {
+    "source": "成员",
+    "translations": {
+      "en": {"text":"Members","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true},
+      "ja": {"text":"メンバー","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true},
+      "it": {"text":"Membri","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true},
+      "ru": {"text":"Участники","sourceRevision":"e5d59c5ab15e9da8a8fb37c3614cd140b8134502ef6ecb3e7be0590ca965c0dc","reviewed":true}
+    }
+  },
+  "menuIcon": {
+    "source": "图标",
+    "translations": {
+      "en": {"text":"Icon","sourceRevision":"a490405e25c78c7dc931864503d90384635d1c1e9c207a546b69ca070a7699e7","reviewed":true},
+      "ja": {"text":"アイコン","sourceRevision":"a490405e25c78c7dc931864503d90384635d1c1e9c207a546b69ca070a7699e7","reviewed":true},
+      "it": {"text":"Icona","sourceRevision":"a490405e25c78c7dc931864503d90384635d1c1e9c207a546b69ca070a7699e7","reviewed":true},
+      "ru": {"text":"Значок","sourceRevision":"a490405e25c78c7dc931864503d90384635d1c1e9c207a546b69ca070a7699e7","reviewed":true}
+    }
+  },
+  "messages": {
+    "source": "消息",
+    "translations": {
+      "en": {"text":"Messages","sourceRevision":"1f03537881641a291d042bbe45c0c0cac7551fa4cd2182ee83e8d7575a211432","reviewed":true},
+      "ru": {"text":"Сообщения","sourceRevision":"1f03537881641a291d042bbe45c0c0cac7551fa4cd2182ee83e8d7575a211432","reviewed":true}
+    }
+  },
+  "moderation": {
+    "source": "审核",
+    "translations": {
+      "en": {"text":"Moderation","sourceRevision":"0ff16c4cd444517218feaf34042aa187dd6367d166609cab9973413e73e04ce5","reviewed":true},
+      "ru": {"text":"Модерация","sourceRevision":"0ff16c4cd444517218feaf34042aa187dd6367d166609cab9973413e73e04ce5","reviewed":true}
+    }
+  },
+  "more": {
+    "source": "更多",
+    "translations": {
+      "en": {"text":"More","sourceRevision":"628854dce9fb504ec61daaa4ea053338c9c722828a1b63dc0d20a057a48276db","reviewed":true},
+      "ja": {"text":"もっと見る","sourceRevision":"628854dce9fb504ec61daaa4ea053338c9c722828a1b63dc0d20a057a48276db","reviewed":true},
+      "it": {"text":"Altro","sourceRevision":"628854dce9fb504ec61daaa4ea053338c9c722828a1b63dc0d20a057a48276db","reviewed":true},
+      "ru": {"text":"Ещё","sourceRevision":"628854dce9fb504ec61daaa4ea053338c9c722828a1b63dc0d20a057a48276db","reviewed":true}
+    }
+  },
+  "name": {
+    "source": "站点名称",
+    "translations": {
+      "en": {"text":"Site name","sourceRevision":"98666249033f7c29e834235d9239c6cf019297faa1cf6a955759170bfdad5eb3","reviewed":true},
+      "ru": {"text":"Название сайта","sourceRevision":"98666249033f7c29e834235d9239c6cf019297faa1cf6a955759170bfdad5eb3","reviewed":true}
+    }
+  },
+  "nextIconPage": {
+    "source": "下一页图标",
+    "translations": {
+      "en": {"text":"Next icon page","sourceRevision":"957722ccd9c7d1a0443838a1ec9e5717e5f36d2cfde9192370e84cabb5c324eb","reviewed":true},
+      "ja": {"text":"アイコンの次のページ","sourceRevision":"957722ccd9c7d1a0443838a1ec9e5717e5f36d2cfde9192370e84cabb5c324eb","reviewed":true},
+      "it": {"text":"Pagina successiva di icone","sourceRevision":"957722ccd9c7d1a0443838a1ec9e5717e5f36d2cfde9192370e84cabb5c324eb","reviewed":true},
+      "ru": {"text":"Следующая страница значков","sourceRevision":"957722ccd9c7d1a0443838a1ec9e5717e5f36d2cfde9192370e84cabb5c324eb","reviewed":true}
+    }
+  },
+  "noMenuIcons": {
+    "source": "没有匹配的图标",
+    "translations": {
+      "en": {"text":"No matching icons","sourceRevision":"43bf0be6f7235779fc57c10c9eb9c0b51bcbeeeace57f84da387f37eeadf9114","reviewed":true},
+      "ja": {"text":"一致するアイコンがありません","sourceRevision":"43bf0be6f7235779fc57c10c9eb9c0b51bcbeeeace57f84da387f37eeadf9114","reviewed":true},
+      "it": {"text":"Nessuna icona corrispondente","sourceRevision":"43bf0be6f7235779fc57c10c9eb9c0b51bcbeeeace57f84da387f37eeadf9114","reviewed":true},
+      "ru": {"text":"Значки не найдены","sourceRevision":"43bf0be6f7235779fc57c10c9eb9c0b51bcbeeeace57f84da387f37eeadf9114","reviewed":true}
+    }
+  },
+  "notifications": {
+    "source": "通知",
+    "translations": {
+      "en": {"text":"Notifications","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true},
+      "ru": {"text":"Уведомления","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true}
+    }
+  },
+  "popular": {
+    "source": "流行",
+    "translations": {
+      "en": {"text":"Popular","sourceRevision":"073c57f014d2500409653f2c4070b751d809e7276d794f1cc12e378dddb01ff4","reviewed":true},
+      "ru": {"text":"Популярные","sourceRevision":"073c57f014d2500409653f2c4070b751d809e7276d794f1cc12e378dddb01ff4","reviewed":true}
+    }
+  },
+  "previousIconPage": {
+    "source": "上一页图标",
+    "translations": {
+      "en": {"text":"Previous icon page","sourceRevision":"f77529a13b45586392c9d1444105c3696805ea0b03d957de14049f81d86a6fa4","reviewed":true},
+      "ja": {"text":"アイコンの前のページ","sourceRevision":"f77529a13b45586392c9d1444105c3696805ea0b03d957de14049f81d86a6fa4","reviewed":true},
+      "it": {"text":"Pagina precedente di icone","sourceRevision":"f77529a13b45586392c9d1444105c3696805ea0b03d957de14049f81d86a6fa4","reviewed":true},
+      "ru": {"text":"Предыдущая страница значков","sourceRevision":"f77529a13b45586392c9d1444105c3696805ea0b03d957de14049f81d86a6fa4","reviewed":true}
+    }
+  },
+  "primary": {
+    "source": "主要文字",
+    "translations": {
+      "en": {"text":"Primary text","sourceRevision":"d38277eebc456cb3c9a92a24fbca9b2ea9aa6ccc06db14c8d1db58e2a2cb1fda","reviewed":true},
+      "ru": {"text":"Основной текст","sourceRevision":"d38277eebc456cb3c9a92a24fbca9b2ea9aa6ccc06db14c8d1db58e2a2cb1fda","reviewed":true}
+    }
+  },
+  "removeAvatar": {
+    "source": "从头像库移除",
+    "translations": {
+      "en": {"text":"Remove from avatar library","sourceRevision":"7a0bfef6682b2eb0b3c2e4dc5debb5e4d0fcc4749e3aa102813b3a8bbd7676c2","reviewed":true},
+      "ja": {"text":"アバター一覧から外す","sourceRevision":"7a0bfef6682b2eb0b3c2e4dc5debb5e4d0fcc4749e3aa102813b3a8bbd7676c2","reviewed":true},
+      "it": {"text":"Rimuovi dalla raccolta","sourceRevision":"7a0bfef6682b2eb0b3c2e4dc5debb5e4d0fcc4749e3aa102813b3a8bbd7676c2","reviewed":true},
+      "ru": {"text":"Удалить из библиотеки аватаров","sourceRevision":"7a0bfef6682b2eb0b3c2e4dc5debb5e4d0fcc4749e3aa102813b3a8bbd7676c2","reviewed":true}
+    }
+  },
+  "resources": {
+    "source": "资源",
+    "translations": {
+      "en": {"text":"Resources","sourceRevision":"9558acf38ada50b3a72d5591a2fcf1d1ea1be79652604eeacc40b139359dcff0","reviewed":true},
+      "ru": {"text":"Ресурсы","sourceRevision":"9558acf38ada50b3a72d5591a2fcf1d1ea1be79652604eeacc40b139359dcff0","reviewed":true}
+    }
+  },
+  "save": {
+    "source": "保存",
+    "translations": {
+      "en": {"text":"Save","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "ru": {"text":"Сохранить","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true}
+    }
+  },
+  "saveFailed": {
+    "source": "设置保存失败",
+    "translations": {
+      "en": {"text":"Failed to save settings","sourceRevision":"c819884576e7b5c3ad71d8d8b95c8bd5e96931b6f2cc8631a40f68d3d2303fa5","reviewed":true},
+      "ru": {"text":"Не удалось сохранить настройки","sourceRevision":"c819884576e7b5c3ad71d8d8b95c8bd5e96931b6f2cc8631a40f68d3d2303fa5","reviewed":true}
+    }
+  },
+  "saved": {
+    "source": "设置已保存",
+    "translations": {
+      "en": {"text":"Settings saved","sourceRevision":"ba622ac9b055d8eedb88c50e8b93a246f078b1cf8764e25d882a443f1b3dfd81","reviewed":true},
+      "ru": {"text":"Настройки сохранены","sourceRevision":"ba622ac9b055d8eedb88c50e8b93a246f078b1cf8764e25d882a443f1b3dfd81","reviewed":true}
+    }
+  },
+  "saving": {
+    "source": "保存中…",
+    "translations": {
+      "en": {"text":"Saving…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
+      "ru": {"text":"Сохранение…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true}
+    }
+  },
+  "searchMenuIcons": {
+    "source": "搜索图标…",
+    "translations": {
+      "en": {"text":"Search icons…","sourceRevision":"ab212816b361946c5a5bde82b9303d22812d40583c2fc5dd2f2fe184c279d342","reviewed":true},
+      "ja": {"text":"アイコンを検索…","sourceRevision":"ab212816b361946c5a5bde82b9303d22812d40583c2fc5dd2f2fe184c279d342","reviewed":true},
+      "it": {"text":"Cerca icone…","sourceRevision":"ab212816b361946c5a5bde82b9303d22812d40583c2fc5dd2f2fe184c279d342","reviewed":true},
+      "ru": {"text":"Поиск значков…","sourceRevision":"ab212816b361946c5a5bde82b9303d22812d40583c2fc5dd2f2fe184c279d342","reviewed":true}
+    }
+  },
+  "selectAvatar": {
+    "source": "请至少启用一个头像。",
+    "translations": {
+      "en": {"text":"Enable at least one avatar.","sourceRevision":"aef095e8d46c2d45541b7ee5e7cd2ba22d66d698c8fed4d7737590f8722d549b","reviewed":true},
+      "ja": {"text":"アバターを一つ以上有効にしてください。","sourceRevision":"aef095e8d46c2d45541b7ee5e7cd2ba22d66d698c8fed4d7737590f8722d549b","reviewed":true},
+      "it": {"text":"Attiva almeno un avatar.","sourceRevision":"aef095e8d46c2d45541b7ee5e7cd2ba22d66d698c8fed4d7737590f8722d549b","reviewed":true},
+      "ru": {"text":"Включите хотя бы один аватар.","sourceRevision":"aef095e8d46c2d45541b7ee5e7cd2ba22d66d698c8fed4d7737590f8722d549b","reviewed":true}
+    }
+  },
+  "showInHeader": {
+    "source": "在顶部导航中显示{item}",
+    "translations": {
+      "en": {"text":"Show {item} in header navigation","sourceRevision":"e70979dc9260f415e455bedc4be5c98d68bf532b39905fb971534f334fe04fa4","reviewed":true},
+      "ja": {"text":"ヘッダーに{item}を表示","sourceRevision":"e70979dc9260f415e455bedc4be5c98d68bf532b39905fb971534f334fe04fa4","reviewed":true},
+      "it": {"text":"Mostra {item} nella navigazione in alto","sourceRevision":"e70979dc9260f415e455bedc4be5c98d68bf532b39905fb971534f334fe04fa4","reviewed":true},
+      "ru": {"text":"Показывать «{item}» в верхнем меню","sourceRevision":"e70979dc9260f415e455bedc4be5c98d68bf532b39905fb971534f334fe04fa4","reviewed":true}
+    }
+  },
+  "showInSidebar": {
+    "source": "在侧栏中显示{item}",
+    "translations": {
+      "en": {"text":"Show {item} in the sidebar","sourceRevision":"43cba3c70cdbc49288cb23d4d15d9cbcc3b2918255a0a19613da157f94f3bb7d","reviewed":true},
+      "ja": {"text":"サイドバーに{item}を表示","sourceRevision":"43cba3c70cdbc49288cb23d4d15d9cbcc3b2918255a0a19613da157f94f3bb7d","reviewed":true},
+      "it": {"text":"Mostra {item} nella barra laterale","sourceRevision":"43cba3c70cdbc49288cb23d4d15d9cbcc3b2918255a0a19613da157f94f3bb7d","reviewed":true},
+      "ru": {"text":"Показывать «{item}» в боковом меню","sourceRevision":"43cba3c70cdbc49288cb23d4d15d9cbcc3b2918255a0a19613da157f94f3bb7d","reviewed":true}
+    }
+  },
+  "showLess": {
+    "source": "收起",
+    "translations": {
+      "en": {"text":"Show less","sourceRevision":"279f61901f83dc4939d6bc36fa91c58b5204edbe0798fa19aa814a95af8286f5","reviewed":true},
+      "ja": {"text":"折りたたむ","sourceRevision":"279f61901f83dc4939d6bc36fa91c58b5204edbe0798fa19aa814a95af8286f5","reviewed":true},
+      "it": {"text":"Mostra meno","sourceRevision":"279f61901f83dc4939d6bc36fa91c58b5204edbe0798fa19aa814a95af8286f5","reviewed":true},
+      "ru": {"text":"Свернуть","sourceRevision":"279f61901f83dc4939d6bc36fa91c58b5204edbe0798fa19aa814a95af8286f5","reviewed":true}
+    }
+  },
+  "sidebarGroups": {
+    "source": "侧栏分组",
+    "translations": {
+      "en": {"text":"Sidebar groups","sourceRevision":"abef25dd8976796a689df0d1180c2b4242b1d62f99b8099f0e2c1166dc0019fd","reviewed":true},
+      "ru": {"text":"Группы в сайдбаре","sourceRevision":"abef25dd8976796a689df0d1180c2b4242b1d62f99b8099f0e2c1166dc0019fd","reviewed":true}
+    }
+  },
+  "site": {
+    "source": "站点信息",
+    "translations": {
+      "en": {"text":"Site information","sourceRevision":"da79a0e67e2362ee0d0b50e95af97e7cedec07dae78928d1fd67cb690b0b5501","reviewed":true},
+      "ja": {"text":"サイト情報","sourceRevision":"da79a0e67e2362ee0d0b50e95af97e7cedec07dae78928d1fd67cb690b0b5501","reviewed":true},
+      "it": {"text":"Informazioni sito","sourceRevision":"da79a0e67e2362ee0d0b50e95af97e7cedec07dae78928d1fd67cb690b0b5501","reviewed":true},
+      "ru": {"text":"Информация о сайте","sourceRevision":"da79a0e67e2362ee0d0b50e95af97e7cedec07dae78928d1fd67cb690b0b5501","reviewed":true}
+    }
+  },
+  "siteHint": {
+    "source": "配置站点标识、公开地址、联系方式与元数据。",
+    "translations": {
+      "en": {"text":"Configure identity, public URL, contact, and metadata.","sourceRevision":"cc46fd52f1d3ec81e10c12092a5d95017776767ac4df5de7dae14542c4e4bc7a","reviewed":true},
+      "ru": {"text":"Настройте идентификацию, публичный URL, контакты и метаданные.","sourceRevision":"cc46fd52f1d3ec81e10c12092a5d95017776767ac4df5de7dae14542c4e4bc7a","reviewed":true}
+    }
+  },
+  "sponsors": {
+    "source": "赞助者",
+    "translations": {
+      "en": {"text":"Sponsors","sourceRevision":"4810d5a4c73a445cf60bafc3a9d57037a92ac551e21f547aee910397e021a0b1","reviewed":true},
+      "ru": {"text":"Спонсоры","sourceRevision":"4810d5a4c73a445cf60bafc3a9d57037a92ac551e21f547aee910397e021a0b1","reviewed":true}
+    }
+  },
+  "text": {
+    "source": "文本",
+    "translations": {
+      "en": {"text":"Text","sourceRevision":"c9968eb66864c9115a183a8c0aa57c29df28ca4d767725355af034a2e8138656","reviewed":true},
+      "ru": {"text":"Текст","sourceRevision":"c9968eb66864c9115a183a8c0aa57c29df28ca4d767725355af034a2e8138656","reviewed":true}
+    }
+  },
+  "themePreview": {
+    "source": "主题预览",
+    "translations": {
+      "en": {"text":"Theme preview","sourceRevision":"a5d08ccf67c34df3e57049b47e44cb742a48eea40b542298fe17fa14067789dc","reviewed":true},
+      "ja": {"text":"テーマプレビュー","sourceRevision":"a5d08ccf67c34df3e57049b47e44cb742a48eea40b542298fe17fa14067789dc","reviewed":true},
+      "it": {"text":"Anteprima tema","sourceRevision":"a5d08ccf67c34df3e57049b47e44cb742a48eea40b542298fe17fa14067789dc","reviewed":true},
+      "ru": {"text":"Предпросмотр темы","sourceRevision":"a5d08ccf67c34df3e57049b47e44cb742a48eea40b542298fe17fa14067789dc","reviewed":true}
+    }
+  },
+  "topics": {
+    "source": "主题",
+    "translations": {
+      "en": {"text":"Topics","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
+      "ru": {"text":"Темы","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true}
+    }
+  },
+  "type": {
+    "source": "类型",
+    "translations": {
+      "en": {"text":"Type","sourceRevision":"86e89d0698c8d14571e17c86aef97b6356db0ecd31f3e1f9aee321adf7ad16fb","reviewed":true},
+      "ru": {"text":"Тип","sourceRevision":"86e89d0698c8d14571e17c86aef97b6356db0ecd31f3e1f9aee321adf7ad16fb","reviewed":true}
+    }
+  },
+  "upload": {
+    "source": "上传图片",
+    "translations": {
+      "en": {"text":"Upload image","sourceRevision":"5b21720f5a909f1f93cbd1937a9ce8bbb37752671c3c1430b27a9591ae1fd778","reviewed":true},
+      "ru": {"text":"Загрузить изображение","sourceRevision":"5b21720f5a909f1f93cbd1937a9ce8bbb37752671c3c1430b27a9591ae1fd778","reviewed":true}
+    }
+  },
+  "uploadAvatars": {
+    "source": "上传头像",
+    "translations": {
+      "en": {"text":"Upload avatars","sourceRevision":"b4ba32f831ceb6591ea21072cb14aba949a4e49b51a9f569fe5e62b5df447fa4","reviewed":true},
+      "ja": {"text":"アバターをアップロード","sourceRevision":"b4ba32f831ceb6591ea21072cb14aba949a4e49b51a9f569fe5e62b5df447fa4","reviewed":true},
+      "it": {"text":"Carica avatar","sourceRevision":"b4ba32f831ceb6591ea21072cb14aba949a4e49b51a9f569fe5e62b5df447fa4","reviewed":true},
+      "ru": {"text":"Загрузить аватары","sourceRevision":"b4ba32f831ceb6591ea21072cb14aba949a4e49b51a9f569fe5e62b5df447fa4","reviewed":true}
+    }
+  },
+  "url": {
+    "source": "站点地址",
+    "translations": {
+      "en": {"text":"Site URL","sourceRevision":"c094a28b4be7e03ff7f91ad3be80134c148aaecab1dfbe3a9c4a66d86ec4a395","reviewed":true},
+      "ru": {"text":"URL сайта","sourceRevision":"c094a28b4be7e03ff7f91ad3be80134c148aaecab1dfbe3a9c4a66d86ec4a395","reviewed":true}
+    }
+  }
+}

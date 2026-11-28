@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import { formatDate } from "../date-format";
 import { useEffect, useState } from "react";
 import type { DraftPayload, DraftsPageProps, LayoutPayload } from "@gooseforum/client";
@@ -19,8 +20,8 @@ import { SiteListPanel } from "../layout/site-panel";
 import { deleteLocalDraft, draftOwner, listenDraftChanges, listLocalDrafts, type LocalDraft } from "@gooseforum/runtime/local-draft-store";
 
 export function DraftsPageView({ page, layout }: { page: DraftsPageProps; layout?: LayoutPayload }) {
-  const { t } = useTranslation("drafts");
-  const { t: publishT } = useTranslation("publish");
+  const { t } = useTranslation("site.drafts");
+  const { t: publishT } = useTranslation("site.publish");
   const { locale } = useGooseRuntime();
   const [localEntry, setLocalEntry] = useState<{ owner: string; copies: LocalDraft[]; error: boolean }>({ owner: "", copies: [], error: false });
   const userId = layout?.viewer.id || 0;
@@ -121,7 +122,7 @@ function DraftRow({
 }: {
   draft: DraftPayload;
   locale: string;
-  t: ReturnType<typeof useTranslation>["t"];
+  t: TFunction<"site.drafts">;
 }) {
   return (
     <article className="grid gap-3 px-4 py-3 transition-colors hover:bg-muted/50 lg:grid-cols-[minmax(0,1fr)_152px_132px] lg:items-center lg:gap-4">

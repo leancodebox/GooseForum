@@ -22,7 +22,7 @@ import { GooseLink } from "@gooseforum/runtime";
 import { PageHeader } from "../layout/page-header";
 
 export function CategoriesPageView({ page }: { page: CategoriesPageProps }) {
-  const { t } = useTranslation("categories");
+  const { t } = useTranslation("site.categories");
   return (
     <div className="pb-12">
       <PageHeader
@@ -63,7 +63,7 @@ export function CategoriesPageView({ page }: { page: CategoriesPageProps }) {
                 <Badge variant="secondary" className="gap-1 text-[10px]">
                   <MessageCircleIcon data-icon="inline-start" />
                   {t("topicCount", {
-                    count: formatCompactNumber(category.topicCount),
+                    total: formatCompactNumber(category.topicCount),
                   })}
                 </Badge>
                 <ChevronRightIcon

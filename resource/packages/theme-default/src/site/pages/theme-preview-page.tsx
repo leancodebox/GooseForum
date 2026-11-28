@@ -1,3 +1,5 @@
+import { runtimeText } from "@gooseforum/i18n";
+import type { TFunction } from "i18next";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import type { ReactNode } from "react";
@@ -99,7 +101,7 @@ export function ThemePreviewPageView({
   layout: LayoutPayload;
   page: ThemePreviewProps;
 }) {
-  const { t } = useTranslation("themePreview");
+  const { t } = useTranslation("site.themePreview");
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
   const [draft, setDraft] = useState(() => fromPrepublish(page.theme));
@@ -287,7 +289,7 @@ export function ThemePreviewPageView({
                   className="h-auto justify-between px-2 py-2"
                   onClick={() => applyPreset(preset.key)}
                 >
-                  <span className="truncate">{t(`presets.${preset.key}`)}</span>
+                  <span className="truncate">{runtimeText(t, `presets.${preset.key}`)}</span>
                   <span className="flex -space-x-1">
                     {preset.swatches.map((color) => (
                       <span
@@ -474,7 +476,7 @@ export function ThemePreviewPageView({
   );
 }
 
-type Translate = ReturnType<typeof useTranslation>["t"];
+type Translate = TFunction<"site.themePreview">;
 function ColorToken({
   label,
   value,
@@ -518,12 +520,12 @@ function ForumPreview({ t }: { t: Translate }) {
               {t("samplePublish")}
             </Button>
           </header>
-          {[1, 2, 3].map((index) => (
+          {(["sampleTopic1", "sampleTopic2", "sampleTopic3"] as const).map((key) => (
             <article
-              key={index}
+              key={key}
               className="border-b px-3 py-3 last:border-0 hover:bg-muted/50"
             >
-              <h3 className="font-semibold">{t(`sampleTopic${index}`)}</h3>
+              <h3 className="font-semibold">{t(key)}</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 {t("sampleTopicExcerpt")}
               </p>

@@ -1,0 +1,1149 @@
+{
+  "admin.badge.codeRequired": {
+    "source": "徽章编码不能为空。",
+    "translations": {
+      "en": {"text":"Badge code is required.","sourceRevision":"3162aef211943090269e32b683e1206b7cb47539907ccaeb0b8eb826dad85c78","reviewed":true},
+      "ru": {"text":"Необходимо указать код значка.","sourceRevision":"3162aef211943090269e32b683e1206b7cb47539907ccaeb0b8eb826dad85c78","reviewed":true}
+    }
+  },
+  "admin.badge.deleteFailed": {
+    "source": "删除徽章失败。",
+    "translations": {
+      "en": {"text":"Failed to delete the badge.","sourceRevision":"82e4318c0a640599b49b10ad22b7a4e9925e2e5eaeb3988ce56fbe80ffca2313","reviewed":true},
+      "ru": {"text":"Не удалось удалить значок.","sourceRevision":"82e4318c0a640599b49b10ad22b7a4e9925e2e5eaeb3988ce56fbe80ffca2313","reviewed":true}
+    }
+  },
+  "admin.badge.grantModeInvalid": {
+    "source": "徽章授予方式不合法。",
+    "translations": {
+      "en": {"text":"The badge grant mode is invalid.","sourceRevision":"c44d9b16139a0a75eb265301d7cf5e7b0997968414f602085fe66d8f35cb3089","reviewed":true},
+      "ru": {"text":"Недопустимый режим выдачи значка.","sourceRevision":"c44d9b16139a0a75eb265301d7cf5e7b0997968414f602085fe66d8f35cb3089","reviewed":true}
+    }
+  },
+  "admin.badge.inUse": {
+    "source": "此徽章已有授予记录，无法删除。可改为停用。",
+    "translations": {
+      "en": {"text":"This badge has award history and cannot be deleted. Disable it instead.","sourceRevision":"646b84b4af7bbff55123486cf26fd3b9ff362012b61bd078a588cf9939c11007","reviewed":true},
+      "ja": {"text":"このバッジには付与記録があるため削除できません。無効化してください。","sourceRevision":"646b84b4af7bbff55123486cf26fd3b9ff362012b61bd078a588cf9939c11007","reviewed":true},
+      "it": {"text":"Questo distintivo ha uno storico di assegnazioni e non può essere eliminato. Disabilitalo.","sourceRevision":"646b84b4af7bbff55123486cf26fd3b9ff362012b61bd078a588cf9939c11007","reviewed":true},
+      "ru": {"text":"Этот значок ранее выдавался. Удаление недоступно, но его можно отключить.","sourceRevision":"646b84b4af7bbff55123486cf26fd3b9ff362012b61bd078a588cf9939c11007","reviewed":true}
+    }
+  },
+  "admin.badge.nameRequired": {
+    "source": "徽章名称不能为空。",
+    "translations": {
+      "en": {"text":"Badge name is required.","sourceRevision":"c773cbbd5ae33cd187469b67543c7697101b475fcec17c9fc04789981bb13c22","reviewed":true},
+      "ru": {"text":"Необходимо указать название значка.","sourceRevision":"c773cbbd5ae33cd187469b67543c7697101b475fcec17c9fc04789981bb13c22","reviewed":true}
+    }
+  },
+  "admin.badge.saveFailed": {
+    "source": "保存徽章失败。",
+    "translations": {
+      "en": {"text":"Failed to save the badge.","sourceRevision":"e8c1f709b6ce8d61dba6de6efbe772895d78e358bf5239055cf1f5b97f6713fd","reviewed":true},
+      "ru": {"text":"Не удалось сохранить значок.","sourceRevision":"e8c1f709b6ce8d61dba6de6efbe772895d78e358bf5239055cf1f5b97f6713fd","reviewed":true}
+    }
+  },
+  "admin.badge.systemDeleteBlocked": {
+    "source": "系统默认徽章不可删除。",
+    "translations": {
+      "en": {"text":"Default system badges cannot be deleted.","sourceRevision":"06a2ccd5d35e5bf35855c8ca4cb3bd6528c65f1af26669ec97306cc6b7f430d7","reviewed":true},
+      "ru": {"text":"Стандартные системные значки нельзя удалить.","sourceRevision":"06a2ccd5d35e5bf35855c8ca4cb3bd6528c65f1af26669ec97306cc6b7f430d7","reviewed":true}
+    }
+  },
+  "admin.badge.systemNotFound": {
+    "source": "系统徽章不存在。",
+    "translations": {
+      "en": {"text":"System badge not found.","sourceRevision":"48ffa4403f0ece1abc76d4ea1e88bdd48fe277226cafa5883aa2b63318d51a5f","reviewed":true},
+      "ru": {"text":"Системный значок не найден.","sourceRevision":"48ffa4403f0ece1abc76d4ea1e88bdd48fe277226cafa5883aa2b63318d51a5f","reviewed":true}
+    }
+  },
+  "admin.badge.typeInvalid": {
+    "source": "徽章类型不合法。",
+    "translations": {
+      "en": {"text":"The badge type is invalid.","sourceRevision":"010054cc0c9919c12f4032c1a34e15c359121e8a6c2ad38ee697fd539092a9cf","reviewed":true},
+      "ru": {"text":"Недопустимый тип значка.","sourceRevision":"010054cc0c9919c12f4032c1a34e15c359121e8a6c2ad38ee697fd539092a9cf","reviewed":true}
+    }
+  },
+  "admin.category.dataNotFound": {
+    "source": "分类数据不存在。",
+    "translations": {
+      "en": {"text":"Category data not found.","sourceRevision":"e968f4c06a9d2a64b8532e0c93ca32effdb369a0ed8e561be35a2f362c9861d5","reviewed":true},
+      "ru": {"text":"Данные категории не найдены.","sourceRevision":"e968f4c06a9d2a64b8532e0c93ca32effdb369a0ed8e561be35a2f362c9861d5","reviewed":true}
+    }
+  },
+  "admin.category.hasTopics": {
+    "source": "该分类下仍有有效主题。",
+    "translations": {
+      "en": {"text":"This category still contains active topics.","sourceRevision":"ba65e3b8e51a518882fda01f8f61b5c1b0b12efdf44b082da4b73f74406c3c6f","reviewed":true},
+      "ru": {"text":"В этой категории всё ещё есть активные темы.","sourceRevision":"ba65e3b8e51a518882fda01f8f61b5c1b0b12efdf44b082da4b73f74406c3c6f","reviewed":true}
+    }
+  },
+  "admin.category.keepOne": {
+    "source": "至少需要保留一个分类。",
+    "translations": {
+      "en": {"text":"At least one category must remain.","sourceRevision":"c82fa9d5c4dbca3b6a2bc2d66371ea59e1683e2b5ae0bb86b51aec9d4163138d","reviewed":true},
+      "ru": {"text":"Должна остаться хотя бы одна категория.","sourceRevision":"c82fa9d5c4dbca3b6a2bc2d66371ea59e1683e2b5ae0bb86b51aec9d4163138d","reviewed":true}
+    }
+  },
+  "admin.category.nameRequired": {
+    "source": "分类名称不能为空。",
+    "translations": {
+      "en": {"text":"Category name is required.","sourceRevision":"f28248ea5c3ca17e0b2a58b86ba8ce93897aa63bdcf0669123474e79d2441df9","reviewed":true},
+      "ru": {"text":"Необходимо указать название категории.","sourceRevision":"f28248ea5c3ca17e0b2a58b86ba8ce93897aa63bdcf0669123474e79d2441df9","reviewed":true}
+    }
+  },
+  "admin.category.notFound": {
+    "source": "分类不存在。",
+    "translations": {
+      "en": {"text":"Category not found.","sourceRevision":"19ad15aa3e84488075aa1b2ca7415b2581292bd10e9cac3c0cf74348590d086e","reviewed":true},
+      "ru": {"text":"Категория не найдена.","sourceRevision":"19ad15aa3e84488075aa1b2ca7415b2581292bd10e9cac3c0cf74348590d086e","reviewed":true}
+    }
+  },
+  "admin.category.restrictionConflict": {
+    "source": "仍有 {count} 个多分类主题引用该分类。",
+    "translations": {
+      "en": {"text":"This category is still used by {count} multi-category topics.","sourceRevision":"e7a03c95493f05d52b3d5abb120de756888007bd3b121af4edd0e285a5adb10a","reviewed":true},
+      "ru": {"text":"Эта категория используется в темах с несколькими категориями. Число таких тем: {count}.","sourceRevision":"e7a03c95493f05d52b3d5abb120de756888007bd3b121af4edd0e285a5adb10a","reviewed":true}
+    }
+  },
+  "admin.mail.testEmailRequired": {
+    "source": "请输入测试邮箱。",
+    "translations": {
+      "en": {"text":"Enter a test email address.","sourceRevision":"ec51c9b1feba094528a02b0eb9519fcdc5a07299aa1504b25696871560ea3ff4","reviewed":true},
+      "ru": {"text":"Введите адрес тестовой электронной почты.","sourceRevision":"ec51c9b1feba094528a02b0eb9519fcdc5a07299aa1504b25696871560ea3ff4","reviewed":true}
+    }
+  },
+  "admin.mail.testFailed": {
+    "source": "测试邮件发送失败。",
+    "translations": {
+      "en": {"text":"Failed to send the test email.","sourceRevision":"e0bc7cc2ca6a60c39a88dfb36a44b181779ed58ed8b158b907fbc1a0759c4112","reviewed":true},
+      "ru": {"text":"Не удалось отправить тестовое письмо.","sourceRevision":"e0bc7cc2ca6a60c39a88dfb36a44b181779ed58ed8b158b907fbc1a0759c4112","reviewed":true}
+    }
+  },
+  "admin.mail.testSuccess": {
+    "source": "测试邮件已发送至 {email}。",
+    "translations": {
+      "en": {"text":"Test email sent to {email}.","sourceRevision":"6900f3a21e7ceeef19c0f263f3a08548264ad87d90a7e1091e468ea4844172c0","reviewed":true},
+      "ru": {"text":"Тестовое письмо отправлено на {email}.","sourceRevision":"6900f3a21e7ceeef19c0f263f3a08548264ad87d90a7e1091e468ea4844172c0","reviewed":true}
+    }
+  },
+  "admin.moderator.notFound": {
+    "source": "版主记录不存在。",
+    "translations": {
+      "en": {"text":"Moderator record not found.","sourceRevision":"290b1dce3d3119ae56c4e71edc644a195be67e2cbc40d310432f2e66b8121aba","reviewed":true},
+      "ja": {"text":"モデレーターの登録が見つかりません。","sourceRevision":"290b1dce3d3119ae56c4e71edc644a195be67e2cbc40d310432f2e66b8121aba","reviewed":true},
+      "it": {"text":"Record del moderatore non trovato.","sourceRevision":"290b1dce3d3119ae56c4e71edc644a195be67e2cbc40d310432f2e66b8121aba","reviewed":true},
+      "ru": {"text":"Запись о модераторе не найдена.","sourceRevision":"290b1dce3d3119ae56c4e71edc644a195be67e2cbc40d310432f2e66b8121aba","reviewed":true}
+    }
+  },
+  "admin.moderator.userNotFound": {
+    "source": "版主用户不存在。",
+    "translations": {
+      "en": {"text":"Moderator user not found.","sourceRevision":"d0570ad41656eca64fbf1e1ee917fdff0e0e4d5f7dacca54578fafe6230bdf69","reviewed":true},
+      "ja": {"text":"モデレーターのユーザーが見つかりません。","sourceRevision":"d0570ad41656eca64fbf1e1ee917fdff0e0e4d5f7dacca54578fafe6230bdf69","reviewed":true},
+      "it": {"text":"Utente moderatore non trovato.","sourceRevision":"d0570ad41656eca64fbf1e1ee917fdff0e0e4d5f7dacca54578fafe6230bdf69","reviewed":true},
+      "ru": {"text":"Пользователь‑модератор не найден.","sourceRevision":"d0570ad41656eca64fbf1e1ee917fdff0e0e4d5f7dacca54578fafe6230bdf69","reviewed":true}
+    }
+  },
+  "admin.moderator.userRequired": {
+    "source": "请输入版主用户。",
+    "translations": {
+      "en": {"text":"Please enter a moderator user.","sourceRevision":"2c8d235005faffd01e848c514aa4ec0322e0e7afdd0806989b4fdac93a85499a","reviewed":true},
+      "ja": {"text":"モデレーターのユーザーを指定してください。","sourceRevision":"2c8d235005faffd01e848c514aa4ec0322e0e7afdd0806989b4fdac93a85499a","reviewed":true},
+      "it": {"text":"Inserisci un utente moderatore.","sourceRevision":"2c8d235005faffd01e848c514aa4ec0322e0e7afdd0806989b4fdac93a85499a","reviewed":true},
+      "ru": {"text":"Укажите пользователя для назначения модератором.","sourceRevision":"2c8d235005faffd01e848c514aa4ec0322e0e7afdd0806989b4fdac93a85499a","reviewed":true}
+    }
+  },
+  "admin.restriction.invalid": {
+    "source": "请填写有效的限制状态、将来的截止时间以及变更原因。",
+    "translations": {
+      "en": {"text":"Enter a valid status, future expiration time, and a reason for changing the restriction.","sourceRevision":"9324312cc906f1ba892d3b417418ed725f4a1f0f38cb03c4707c1f1fc7c5e582","reviewed":true},
+      "ja": {"text":"有効な制限状態、将来の終了日時と変更理由を入力してください。","sourceRevision":"9324312cc906f1ba892d3b417418ed725f4a1f0f38cb03c4707c1f1fc7c5e582","reviewed":true},
+      "it": {"text":"Inserire uno stato valido, una scadenza futura e un motivo per la modifica della limitazione.","sourceRevision":"9324312cc906f1ba892d3b417418ed725f4a1f0f38cb03c4707c1f1fc7c5e582","reviewed":true},
+      "ru": {"text":"Укажите допустимый статус, дату окончания в будущем и причину изменения ограничения.","sourceRevision":"9324312cc906f1ba892d3b417418ed725f4a1f0f38cb03c4707c1f1fc7c5e582","reviewed":true}
+    }
+  },
+  "admin.restriction.protected": {
+    "source": "不能限制自己、修改更高权限账号，或限制、降权最后一个管理员。",
+    "translations": {
+      "en": {"text":"You cannot restrict yourself, change an account with higher privileges, or remove the last administrator.","sourceRevision":"be5972df7aac15631f5a84c1ba12f8cae2a695db1f3dec6707f1c38bd5031ceb","reviewed":true},
+      "ja": {"text":"自分自身や上位権限のアカウントを制限したり、最後の管理者を制限・降格したりすることはできません。","sourceRevision":"be5972df7aac15631f5a84c1ba12f8cae2a695db1f3dec6707f1c38bd5031ceb","reviewed":true},
+      "it": {"text":"Non puoi limitare te stesso, modificare account con privilegi superiori o rimuovere l'ultimo amministratore.","sourceRevision":"be5972df7aac15631f5a84c1ba12f8cae2a695db1f3dec6707f1c38bd5031ceb","reviewed":true},
+      "ru": {"text":"Нельзя ограничить собственную учётную запись, изменить учётную запись с более высокими правами или удалить последнего администратора.","sourceRevision":"be5972df7aac15631f5a84c1ba12f8cae2a695db1f3dec6707f1c38bd5031ceb","reviewed":true}
+    }
+  },
+  "admin.role.notFound": {
+    "source": "角色不存在。",
+    "translations": {
+      "en": {"text":"Role not found.","sourceRevision":"353edc29458c218186a4614c326762a6c48beef6bd0bc9bf6cc92a35e64709a8","reviewed":true},
+      "ru": {"text":"Роль не найдена.","sourceRevision":"353edc29458c218186a4614c326762a6c48beef6bd0bc9bf6cc92a35e64709a8","reviewed":true}
+    }
+  },
+  "admin.stats.fetchFailed": {
+    "source": "读取管理后台统计数据失败。",
+    "translations": {
+      "en": {"text":"Failed to load administration statistics.","sourceRevision":"60e10a27f0ca841b423a03540ac457f80177ba3852c63ecd1fc80ed9aaf01be4","reviewed":true},
+      "ru": {"text":"Не удалось загрузить статистику администрирования.","sourceRevision":"60e10a27f0ca841b423a03540ac457f80177ba3852c63ecd1fc80ed9aaf01be4","reviewed":true}
+    }
+  },
+  "admin.topic.categoryRequired": {
+    "source": "主题至少需要一个分类。",
+    "translations": {
+      "en": {"text":"A topic must have at least one category.","sourceRevision":"46af866716a3af4e90b1691d5791bf5c220280f5b96242c9eca5573db3d550a3","reviewed":true},
+      "ru": {"text":"У темы должна быть хотя бы одна категория.","sourceRevision":"46af866716a3af4e90b1691d5791bf5c220280f5b96242c9eca5573db3d550a3","reviewed":true}
+    }
+  },
+  "admin.topic.categoryTooMany": {
+    "source": "主题最多可以选择三个分类。",
+    "translations": {
+      "en": {"text":"A topic can have at most three categories.","sourceRevision":"6cc7b1afeb69c7d142caaf2187a7e9abcdbbe894e8782b5362d0505db1507b87","reviewed":true},
+      "ru": {"text":"У темы может быть не более трёх категорий.","sourceRevision":"6cc7b1afeb69c7d142caaf2187a7e9abcdbbe894e8782b5362d0505db1507b87","reviewed":true}
+    }
+  },
+  "admin.topic.deleteFailed": {
+    "source": "删除主题失败。",
+    "translations": {
+      "en": {"text":"Failed to delete the topic.","sourceRevision":"a392f106553072c62b064c8cae382ab039d3a126a79704fcc79261493aa55f75","reviewed":true},
+      "ru": {"text":"Не удалось удалить тему.","sourceRevision":"a392f106553072c62b064c8cae382ab039d3a126a79704fcc79261493aa55f75","reviewed":true}
+    }
+  },
+  "admin.user.targetFetchFailed": {
+    "source": "查询目标用户失败。",
+    "translations": {
+      "en": {"text":"Failed to find the target user.","sourceRevision":"c8b092a09360e0aff7f51e9123f5c058a069609dbce8b9aa3c6da9e239e4cedb","reviewed":true},
+      "ru": {"text":"Не удалось найти целевого пользователя.","sourceRevision":"c8b092a09360e0aff7f51e9123f5c058a069609dbce8b9aa3c6da9e239e4cedb","reviewed":true}
+    }
+  },
+  "attachment.conflict": {
+    "source": "内容已被修改，请刷新后重新编辑。",
+    "translations": {
+      "en": {"text":"Content changed. Reload before editing again.","sourceRevision":"cbf430e089875a9d49e06d9e2c7e574d50b60da76636f6e40116380df94be21a","reviewed":true},
+      "ja": {"text":"内容が変更されました。再読み込みしてから編集してください。","sourceRevision":"cbf430e089875a9d49e06d9e2c7e574d50b60da76636f6e40116380df94be21a","reviewed":true},
+      "it": {"text":"Il contenuto è cambiato. Ricarica prima di modificarlo.","sourceRevision":"cbf430e089875a9d49e06d9e2c7e574d50b60da76636f6e40116380df94be21a","reviewed":true},
+      "ru": {"text":"Содержимое изменилось. Обновите страницу перед редактированием.","sourceRevision":"cbf430e089875a9d49e06d9e2c7e574d50b60da76636f6e40116380df94be21a","reviewed":true}
+    }
+  },
+  "attachment.invalidFile": {
+    "source": "文件类型不支持，或文件名、内容不合法。",
+    "translations": {
+      "en": {"text":"Unsupported file type or invalid filename/content.","sourceRevision":"9c882fe78378a6450e517edebe774201ddc74d1d292047d7f33be213f37e733a","reviewed":true},
+      "ja": {"text":"未対応のファイル形式、または無効なファイル名・内容です。","sourceRevision":"9c882fe78378a6450e517edebe774201ddc74d1d292047d7f33be213f37e733a","reviewed":true},
+      "it": {"text":"Tipo di file non supportato o nome/contenuto non valido.","sourceRevision":"9c882fe78378a6450e517edebe774201ddc74d1d292047d7f33be213f37e733a","reviewed":true},
+      "ru": {"text":"Неподдерживаемый тип файла, неверное имя или содержимое.","sourceRevision":"9c882fe78378a6450e517edebe774201ddc74d1d292047d7f33be213f37e733a","reviewed":true}
+    }
+  },
+  "attachment.invalidReference": {
+    "source": "附件已失效，请移除后重新上传。",
+    "translations": {
+      "en": {"text":"An attachment is unavailable. Remove it and upload again.","sourceRevision":"6e616252086f10121c79f5bc466018b568fa8f9cb73ca73259ab9791f7e830fc","reviewed":true},
+      "ja": {"text":"利用できない添付ファイルがあります。削除して再アップロードしてください。","sourceRevision":"6e616252086f10121c79f5bc466018b568fa8f9cb73ca73259ab9791f7e830fc","reviewed":true},
+      "it": {"text":"Un allegato non è disponibile. Rimuovilo e caricalo di nuovo.","sourceRevision":"6e616252086f10121c79f5bc466018b568fa8f9cb73ca73259ab9791f7e830fc","reviewed":true},
+      "ru": {"text":"Вложение недоступно. Удалите его и загрузите заново.","sourceRevision":"6e616252086f10121c79f5bc466018b568fa8f9cb73ca73259ab9791f7e830fc","reviewed":true}
+    }
+  },
+  "attachment.limit": {
+    "source": "附件数量超过限制。",
+    "translations": {
+      "en": {"text":"Too many attachments.","sourceRevision":"02222965141a6b70db52f4adb8593a2b3670555e8361a8a703ced45081ad80c3","reviewed":true},
+      "ja": {"text":"添付ファイル数が上限を超えています。","sourceRevision":"02222965141a6b70db52f4adb8593a2b3670555e8361a8a703ced45081ad80c3","reviewed":true},
+      "it": {"text":"Troppi allegati.","sourceRevision":"02222965141a6b70db52f4adb8593a2b3670555e8361a8a703ced45081ad80c3","reviewed":true},
+      "ru": {"text":"Слишком много вложений.","sourceRevision":"02222965141a6b70db52f4adb8593a2b3670555e8361a8a703ced45081ad80c3","reviewed":true}
+    }
+  },
+  "attachment.tooLarge": {
+    "source": "文件为空或超过附件大小限制。",
+    "translations": {
+      "en": {"text":"The file is empty or exceeds the attachment size limit.","sourceRevision":"52f9cd5dc832c81cc47e69aad847de3a1d4fe6ceae52fb24841ea500a5a869ed","reviewed":true},
+      "ja": {"text":"ファイルが空か、サイズ上限を超えています。","sourceRevision":"52f9cd5dc832c81cc47e69aad847de3a1d4fe6ceae52fb24841ea500a5a869ed","reviewed":true},
+      "it": {"text":"Il file è vuoto o supera il limite di dimensione.","sourceRevision":"52f9cd5dc832c81cc47e69aad847de3a1d4fe6ceae52fb24841ea500a5a869ed","reviewed":true},
+      "ru": {"text":"Файл пуст или превышает допустимый размер.","sourceRevision":"52f9cd5dc832c81cc47e69aad847de3a1d4fe6ceae52fb24841ea500a5a869ed","reviewed":true}
+    }
+  },
+  "auth.account.banned": {
+    "source": "账号已被封禁。{reason}",
+    "translations": {
+      "en": {"text":"This account is banned. {reason}","sourceRevision":"ee86aab2b8b9595294ff87f8c62e4ce8be6badb4fba45e16b85a0b912de9493a","reviewed":true},
+      "ja": {"text":"このアカウントはログイン禁止です。{reason}","sourceRevision":"ee86aab2b8b9595294ff87f8c62e4ce8be6badb4fba45e16b85a0b912de9493a","reviewed":true},
+      "it": {"text":"Questo account è bloccato. {reason}","sourceRevision":"ee86aab2b8b9595294ff87f8c62e4ce8be6badb4fba45e16b85a0b912de9493a","reviewed":true},
+      "ru": {"text":"Учётная запись заблокирована. {reason}","sourceRevision":"ee86aab2b8b9595294ff87f8c62e4ce8be6badb4fba45e16b85a0b912de9493a","reviewed":true}
+    }
+  },
+  "auth.account.frozen": {
+    "source": "账号已被冻结。",
+    "translations": {
+      "en": {"text":"This account has been suspended.","sourceRevision":"5bbe9df8795886ab9d6c59fd6f410b2771c333fdd6754c56bc3b57fc21c204fb","reviewed":true},
+      "ja": {"text":"このアカウントは停止されています。","sourceRevision":"5bbe9df8795886ab9d6c59fd6f410b2771c333fdd6754c56bc3b57fc21c204fb","reviewed":true},
+      "it": {"text":"Questo account è sospeso.","sourceRevision":"5bbe9df8795886ab9d6c59fd6f410b2771c333fdd6754c56bc3b57fc21c204fb","reviewed":true},
+      "ru": {"text":"Ваша учётная запись заблокирована.","sourceRevision":"5bbe9df8795886ab9d6c59fd6f410b2771c333fdd6754c56bc3b57fc21c204fb","reviewed":true}
+    }
+  },
+  "auth.activation.alreadyVerified": {
+    "source": "当前账号已完成邮箱验证。",
+    "translations": {
+      "en": {"text":"This account is already verified.","sourceRevision":"6c61a95675d3379d4d4a6e7d16e78cc1f7bd87483683ef8064e0907a22e76ba1","reviewed":true},
+      "ru": {"text":"Эта учётная запись уже подтверждена.","sourceRevision":"6c61a95675d3379d4d4a6e7d16e78cc1f7bd87483683ef8064e0907a22e76ba1","reviewed":true}
+    }
+  },
+  "auth.activation.disabled": {
+    "source": "当前站点未启用邮箱验证。",
+    "translations": {
+      "en": {"text":"Email verification is not enabled on this site.","sourceRevision":"3703153422222b619a71068b6760ca87a457111fda6ee5f19e02fc80c9475225","reviewed":true},
+      "ru": {"text":"Подтверждение по электронной почте на этом сайте не включено.","sourceRevision":"3703153422222b619a71068b6760ca87a457111fda6ee5f19e02fc80c9475225","reviewed":true}
+    }
+  },
+  "auth.activation.resendCooldown": {
+    "source": "发送过于频繁，请在 {retryAfterSeconds} 秒后重试。",
+    "translations": {
+      "en": {"text":"Too many requests. Try again in {retryAfterSeconds} seconds.","sourceRevision":"d7e061be81a565af07bdfdcd42db3cb25996e39be6d45f81f2583bc3bdf7fe2d","reviewed":true},
+      "ru": {"text":"Слишком много запросов. Попробуйте снова через {retryAfterSeconds} секунд.","sourceRevision":"d7e061be81a565af07bdfdcd42db3cb25996e39be6d45f81f2583bc3bdf7fe2d","reviewed":true}
+    }
+  },
+  "auth.activation.resendDaily": {
+    "source": "今日发送次数已达到上限（{limit} 次）。",
+    "translations": {
+      "en": {"text":"The daily limit of {limit} verification emails has been reached.","sourceRevision":"8a3d9684edd754c51958b76d1b597f3379d38de96dc426eabfc090cef2c2ea41","reviewed":true},
+      "ru": {"text":"Достигнут дневной лимит: можно отправить не более {limit} писем для подтверждения.","sourceRevision":"8a3d9684edd754c51958b76d1b597f3379d38de96dc426eabfc090cef2c2ea41","reviewed":true}
+    }
+  },
+  "auth.activation.resendFailed": {
+    "source": "重新发送验证邮件失败。",
+    "translations": {
+      "en": {"text":"Failed to resend the verification email.","sourceRevision":"5e53fa8ec597f254de891d5a1658f634002a03384f86dd9b67c02ff62e233bb1","reviewed":true},
+      "ru": {"text":"Не удалось повторно отправить письмо для подтверждения.","sourceRevision":"5e53fa8ec597f254de891d5a1658f634002a03384f86dd9b67c02ff62e233bb1","reviewed":true}
+    }
+  },
+  "auth.activation.resendSuccess": {
+    "source": "验证邮件已重新发送。",
+    "translations": {
+      "en": {"text":"Verification email sent again.","sourceRevision":"39c732abe20ff047505bddef0c78ff3913d6cfd0f8256f4273d4e04a893c3da3","reviewed":true},
+      "ru": {"text":"Письмо для подтверждения отправлено повторно.","sourceRevision":"39c732abe20ff047505bddef0c78ff3913d6cfd0f8256f4273d4e04a893c3da3","reviewed":true}
+    }
+  },
+  "auth.captcha.invalid": {
+    "source": "验证码错误或已过期。",
+    "translations": {
+      "en": {"text":"The verification code is incorrect or expired.","sourceRevision":"620e5d128ea05f433ba995f15ec2e03d3b581869a2000c4e3b4c4537a4a3720b","reviewed":true},
+      "ja": {"text":"認証コードが正しくないか、有効期限が切れています。","sourceRevision":"620e5d128ea05f433ba995f15ec2e03d3b581869a2000c4e3b4c4537a4a3720b","reviewed":true},
+      "it": {"text":"Il codice di verifica è errato o scaduto.","sourceRevision":"620e5d128ea05f433ba995f15ec2e03d3b581869a2000c4e3b4c4537a4a3720b","reviewed":true},
+      "ru": {"text":"Код подтверждения неверен или истёк.","sourceRevision":"620e5d128ea05f433ba995f15ec2e03d3b581869a2000c4e3b4c4537a4a3720b","reviewed":true}
+    }
+  },
+  "auth.credentials.invalid": {
+    "source": "用户名、邮箱或密码错误。",
+    "translations": {
+      "en": {"text":"The username, email address, or password is incorrect.","sourceRevision":"3b233e8f24ab791efe880c72abd4a3693d00d01f536e8c81befadabfc7301d68","reviewed":true},
+      "ja": {"text":"ユーザー名、メールアドレス、またはパスワードが正しくありません。","sourceRevision":"3b233e8f24ab791efe880c72abd4a3693d00d01f536e8c81befadabfc7301d68","reviewed":true},
+      "it": {"text":"Nome utente, email o password non corretti.","sourceRevision":"3b233e8f24ab791efe880c72abd4a3693d00d01f536e8c81befadabfc7301d68","reviewed":true},
+      "ru": {"text":"Неверное имя пользователя, адрес электронной почты или пароль.","sourceRevision":"3b233e8f24ab791efe880c72abd4a3693d00d01f536e8c81befadabfc7301d68","reviewed":true}
+    }
+  },
+  "auth.email.exists": {
+    "source": "邮箱已被使用。",
+    "translations": {
+      "en": {"text":"This email address is already in use.","sourceRevision":"f10f9b035add4efa04fac0cd5fbb3a7084de53673d5e81e3659902c2cd6db1c3","reviewed":true},
+      "ja": {"text":"このメールアドレスはすでに使用されています。","sourceRevision":"f10f9b035add4efa04fac0cd5fbb3a7084de53673d5e81e3659902c2cd6db1c3","reviewed":true},
+      "it": {"text":"Questo indirizzo email è già in uso.","sourceRevision":"f10f9b035add4efa04fac0cd5fbb3a7084de53673d5e81e3659902c2cd6db1c3","reviewed":true},
+      "ru": {"text":"Этот адрес электронной почты уже используется.","sourceRevision":"f10f9b035add4efa04fac0cd5fbb3a7084de53673d5e81e3659902c2cd6db1c3","reviewed":true}
+    }
+  },
+  "auth.email.unverified": {
+    "source": "请先完成邮箱验证。",
+    "translations": {
+      "en": {"text":"Please verify your email address first.","sourceRevision":"e71279bed83ecf97cd0c307b171cd199046ac7f302a719313dafc8c30fadf0bb","reviewed":true},
+      "ja": {"text":"先にメールアドレスを確認してください。","sourceRevision":"e71279bed83ecf97cd0c307b171cd199046ac7f302a719313dafc8c30fadf0bb","reviewed":true},
+      "it": {"text":"Verifica prima il tuo indirizzo email.","sourceRevision":"e71279bed83ecf97cd0c307b171cd199046ac7f302a719313dafc8c30fadf0bb","reviewed":true},
+      "ru": {"text":"Сначала подтвердите адрес электронной почты.","sourceRevision":"e71279bed83ecf97cd0c307b171cd199046ac7f302a719313dafc8c30fadf0bb","reviewed":true}
+    }
+  },
+  "auth.emailDomain.invalid": {
+    "source": "邮箱格式不正确。",
+    "translations": {
+      "en": {"text":"The email address is invalid.","sourceRevision":"4a995aaf89d46a635535d24a3dcff7c3f2a55a0a7286d3fecaab5d5c7cb0790e","reviewed":true},
+      "ja": {"text":"メールアドレスの形式が正しくありません。","sourceRevision":"4a995aaf89d46a635535d24a3dcff7c3f2a55a0a7286d3fecaab5d5c7cb0790e","reviewed":true},
+      "it": {"text":"L’indirizzo email non è valido.","sourceRevision":"4a995aaf89d46a635535d24a3dcff7c3f2a55a0a7286d3fecaab5d5c7cb0790e","reviewed":true},
+      "ru": {"text":"Адрес электронной почты некорректен.","sourceRevision":"4a995aaf89d46a635535d24a3dcff7c3f2a55a0a7286d3fecaab5d5c7cb0790e","reviewed":true}
+    }
+  },
+  "auth.emailDomain.notAllowed": {
+    "source": "该邮箱域名不允许注册。",
+    "translations": {
+      "en": {"text":"This email domain is not allowed.","sourceRevision":"a22ee8e0e55232055998fac4023636f21c4562b1da24e9fc498464b8015cc606","reviewed":true},
+      "ja": {"text":"このメールドメインは使用できません。","sourceRevision":"a22ee8e0e55232055998fac4023636f21c4562b1da24e9fc498464b8015cc606","reviewed":true},
+      "it": {"text":"Questo dominio email non è consentito.","sourceRevision":"a22ee8e0e55232055998fac4023636f21c4562b1da24e9fc498464b8015cc606","reviewed":true},
+      "ru": {"text":"Этот домен электронной почты не разрешён.","sourceRevision":"a22ee8e0e55232055998fac4023636f21c4562b1da24e9fc498464b8015cc606","reviewed":true}
+    }
+  },
+  "auth.invitation.invalid": {
+    "source": "邀请码无效、已过期、已撤销或已用尽。",
+    "translations": {
+      "en": {"text":"The invitation code is invalid, expired, revoked, or already used.","sourceRevision":"fb32ddf291703df0a760f74d22e0f3b489ff12faa0f32ea1cf6de96272c448d2","reviewed":true},
+      "ja": {"text":"招待コードが無効、期限切れ、取り消し済み、または使用済みです。","sourceRevision":"fb32ddf291703df0a760f74d22e0f3b489ff12faa0f32ea1cf6de96272c448d2","reviewed":true},
+      "it": {"text":"Il codice d’invito non è valido, è scaduto, revocato o già esaurito.","sourceRevision":"fb32ddf291703df0a760f74d22e0f3b489ff12faa0f32ea1cf6de96272c448d2","reviewed":true},
+      "ru": {"text":"Код приглашения недействителен, просрочен, отозван или уже использован.","sourceRevision":"fb32ddf291703df0a760f74d22e0f3b489ff12faa0f32ea1cf6de96272c448d2","reviewed":true}
+    }
+  },
+  "auth.invitation.required": {
+    "source": "当前站点需要邀请码才能注册。",
+    "translations": {
+      "en": {"text":"This site requires an invitation code to register.","sourceRevision":"41c3c406846d41358be85366185e4f25c4d2643ad3705c0c5cafab75b13eba8e","reviewed":true},
+      "ja": {"text":"このサイトでは登録に招待コードが必要です。","sourceRevision":"41c3c406846d41358be85366185e4f25c4d2643ad3705c0c5cafab75b13eba8e","reviewed":true},
+      "it": {"text":"Questo sito richiede un codice d’invito per registrarsi.","sourceRevision":"41c3c406846d41358be85366185e4f25c4d2643ad3705c0c5cafab75b13eba8e","reviewed":true},
+      "ru": {"text":"Для регистрации на этом сайте нужен код приглашения.","sourceRevision":"41c3c406846d41358be85366185e4f25c4d2643ad3705c0c5cafab75b13eba8e","reviewed":true}
+    }
+  },
+  "auth.login.failed": {
+    "source": "登录失败，请稍后重试。",
+    "translations": {
+      "en": {"text":"Login failed. Please try again later.","sourceRevision":"3f3b44c2b08ba1fdccd4dccae3e9d60e0cd608ff9dab2edac1dee8ed75fd0b1d","reviewed":true},
+      "ja": {"text":"ログインに失敗しました。","sourceRevision":"3f3b44c2b08ba1fdccd4dccae3e9d60e0cd608ff9dab2edac1dee8ed75fd0b1d","reviewed":true},
+      "it": {"text":"Accesso non riuscito.","sourceRevision":"3f3b44c2b08ba1fdccd4dccae3e9d60e0cd608ff9dab2edac1dee8ed75fd0b1d","reviewed":true},
+      "ru": {"text":"Не удалось войти. Попробуйте позже.","sourceRevision":"3f3b44c2b08ba1fdccd4dccae3e9d60e0cd608ff9dab2edac1dee8ed75fd0b1d","reviewed":true}
+    }
+  },
+  "auth.login.invalidRequest": {
+    "source": "登录请求已失效，请刷新页面后重试。",
+    "translations": {
+      "en": {"text":"The login request expired. Refresh the page and try again.","sourceRevision":"3a3057bb12a3a6b0f18b175d2dd95d9c3fb1bf25f45d86be9c385d61e77e5de5","reviewed":true},
+      "ja": {"text":"ログイン要求の有効期限が切れました。ページを更新してください。","sourceRevision":"3a3057bb12a3a6b0f18b175d2dd95d9c3fb1bf25f45d86be9c385d61e77e5de5","reviewed":true},
+      "it": {"text":"La richiesta di accesso è scaduta. Aggiorna la pagina.","sourceRevision":"3a3057bb12a3a6b0f18b175d2dd95d9c3fb1bf25f45d86be9c385d61e77e5de5","reviewed":true},
+      "ru": {"text":"Срок действия запроса на вход истёк. Обновите страницу и попробуйте снова.","sourceRevision":"3a3057bb12a3a6b0f18b175d2dd95d9c3fb1bf25f45d86be9c385d61e77e5de5","reviewed":true}
+    }
+  },
+  "auth.login.rateLimited": {
+    "source": "请求过于频繁，请稍后重试。",
+    "translations": {
+      "en": {"text":"Too many requests. Please try again later.","sourceRevision":"edf45680895db3e771349816de47ad8893bec03aa6dc218074de6fb5b96e119f","reviewed":true},
+      "ja": {"text":"リクエストが多すぎます。しばらくしてから再試行してください。","sourceRevision":"edf45680895db3e771349816de47ad8893bec03aa6dc218074de6fb5b96e119f","reviewed":true},
+      "it": {"text":"Troppe richieste. Riprova più tardi.","sourceRevision":"edf45680895db3e771349816de47ad8893bec03aa6dc218074de6fb5b96e119f","reviewed":true},
+      "ru": {"text":"Слишком много запросов. Повторите попытку позже.","sourceRevision":"edf45680895db3e771349816de47ad8893bec03aa6dc218074de6fb5b96e119f","reviewed":true}
+    }
+  },
+  "auth.login.success": {
+    "source": "登录成功。",
+    "translations": {
+      "en": {"text":"Logged in successfully.","sourceRevision":"bd155b9566eb2dfd3ed6461c33f28a9686ec6133c58d9eed5da015e3f296976a","reviewed":true},
+      "ja": {"text":"ログインしました。","sourceRevision":"bd155b9566eb2dfd3ed6461c33f28a9686ec6133c58d9eed5da015e3f296976a","reviewed":true},
+      "it": {"text":"Accesso eseguito.","sourceRevision":"bd155b9566eb2dfd3ed6461c33f28a9686ec6133c58d9eed5da015e3f296976a","reviewed":true},
+      "ru": {"text":"Вы успешно вошли в систему.","sourceRevision":"bd155b9566eb2dfd3ed6461c33f28a9686ec6133c58d9eed5da015e3f296976a","reviewed":true}
+    }
+  },
+  "auth.password.invalidFormat": {
+    "source": "密码格式不正确。",
+    "translations": {
+      "en": {"text":"The password format is invalid.","sourceRevision":"a602a402a5d607853917f8f2a4aaba6d9b1814908830fedca037cce280558883","reviewed":true},
+      "ja": {"text":"パスワードの形式が正しくありません。","sourceRevision":"a602a402a5d607853917f8f2a4aaba6d9b1814908830fedca037cce280558883","reviewed":true},
+      "it": {"text":"Il formato della password non è valido.","sourceRevision":"a602a402a5d607853917f8f2a4aaba6d9b1814908830fedca037cce280558883","reviewed":true},
+      "ru": {"text":"Недопустимый формат пароля.","sourceRevision":"a602a402a5d607853917f8f2a4aaba6d9b1814908830fedca037cce280558883","reviewed":true}
+    }
+  },
+  "auth.password.needsLetterNumber": {
+    "source": "密码必须同时包含字母和数字。",
+    "translations": {
+      "en": {"text":"The password must contain both letters and numbers.","sourceRevision":"5a63de0a38a80124293438279687d90f93317b12ecdc110a9adb4a6fe083a467","reviewed":true},
+      "ja": {"text":"パスワードには英字と数字の両方が必要です。","sourceRevision":"5a63de0a38a80124293438279687d90f93317b12ecdc110a9adb4a6fe083a467","reviewed":true},
+      "it": {"text":"La password deve contenere lettere e numeri.","sourceRevision":"5a63de0a38a80124293438279687d90f93317b12ecdc110a9adb4a6fe083a467","reviewed":true},
+      "ru": {"text":"Пароль должен содержать и буквы, и цифры.","sourceRevision":"5a63de0a38a80124293438279687d90f93317b12ecdc110a9adb4a6fe083a467","reviewed":true}
+    }
+  },
+  "auth.password.oldInvalid": {
+    "source": "原密码错误。",
+    "translations": {
+      "en": {"text":"The current password is incorrect.","sourceRevision":"380fd21a6438b11559d62808851599678816d011583744ac4708305d8c096b6b","reviewed":true},
+      "ru": {"text":"Текущий пароль неверен.","sourceRevision":"380fd21a6438b11559d62808851599678816d011583744ac4708305d8c096b6b","reviewed":true}
+    }
+  },
+  "auth.password.tooLong": {
+    "source": "密码长度超过限制。",
+    "translations": {
+      "en": {"text":"The password is too long.","sourceRevision":"9dcef5668bb980861eedb3f8319656ffb2e1b327b6fc6284d1d730175ea87a69","reviewed":true},
+      "ja": {"text":"パスワードが長すぎます。","sourceRevision":"9dcef5668bb980861eedb3f8319656ffb2e1b327b6fc6284d1d730175ea87a69","reviewed":true},
+      "it": {"text":"La password è troppo lunga.","sourceRevision":"9dcef5668bb980861eedb3f8319656ffb2e1b327b6fc6284d1d730175ea87a69","reviewed":true},
+      "ru": {"text":"Пароль слишком длинный.","sourceRevision":"9dcef5668bb980861eedb3f8319656ffb2e1b327b6fc6284d1d730175ea87a69","reviewed":true}
+    }
+  },
+  "auth.password.tooShort": {
+    "source": "密码至少需要 {minLength} 位。",
+    "translations": {
+      "en": {"text":"The password must be at least {minLength} characters.","sourceRevision":"8f7fe7fae6b7363ed99501ad6828f2a168f53205a466cec19ba02a5ae52bec20","reviewed":true},
+      "ja": {"text":"パスワードは {minLength} 文字以上にしてください。","sourceRevision":"8f7fe7fae6b7363ed99501ad6828f2a168f53205a466cec19ba02a5ae52bec20","reviewed":true},
+      "it": {"text":"La password deve contenere almeno {minLength} caratteri.","sourceRevision":"8f7fe7fae6b7363ed99501ad6828f2a168f53205a466cec19ba02a5ae52bec20","reviewed":true},
+      "ru": {"text":"Пароль должен содержать не менее {minLength} символов.","sourceRevision":"8f7fe7fae6b7363ed99501ad6828f2a168f53205a466cec19ba02a5ae52bec20","reviewed":true}
+    }
+  },
+  "auth.password.updateFailed": {
+    "source": "修改密码失败。",
+    "translations": {
+      "en": {"text":"Failed to update the password.","sourceRevision":"959419db372a5054a9cc16cb08e01b063d09b444a18c0ac3a80404808d6a3cf3","reviewed":true},
+      "ru": {"text":"Не удалось обновить пароль.","sourceRevision":"959419db372a5054a9cc16cb08e01b063d09b444a18c0ac3a80404808d6a3cf3","reviewed":true}
+    }
+  },
+  "auth.password.updateSuccess": {
+    "source": "密码已更新。",
+    "translations": {
+      "en": {"text":"Password updated.","sourceRevision":"aed519caa65513e092a006d85d1b421ca425e1706d7247bbe5a2edcbd1a637c5","reviewed":true},
+      "ru": {"text":"Пароль обновлён.","sourceRevision":"aed519caa65513e092a006d85d1b421ca425e1706d7247bbe5a2edcbd1a637c5","reviewed":true}
+    }
+  },
+  "auth.passwordReset.failed": {
+    "source": "重置密码失败。",
+    "translations": {
+      "en": {"text":"Failed to reset the password.","sourceRevision":"2a40efe4e60b5be0bb910abc252735beee0bb5c00ac658062d66f3ae547001fb","reviewed":true},
+      "ru": {"text":"Не удалось сбросить пароль.","sourceRevision":"2a40efe4e60b5be0bb910abc252735beee0bb5c00ac658062d66f3ae547001fb","reviewed":true}
+    }
+  },
+  "auth.passwordReset.mailFailed": {
+    "source": "发送密码重置邮件失败。",
+    "translations": {
+      "en": {"text":"Failed to send the password reset email.","sourceRevision":"c42869cda77457e1162d1f39a54af08486e540efaaee472b98327386d4f64dcb","reviewed":true},
+      "ru": {"text":"Не удалось отправить письмо для сброса пароля.","sourceRevision":"c42869cda77457e1162d1f39a54af08486e540efaaee472b98327386d4f64dcb","reviewed":true}
+    }
+  },
+  "auth.passwordReset.mailQueued": {
+    "source": "如果该邮箱已注册，您将收到密码重置邮件。",
+    "translations": {
+      "en": {"text":"If the email address is registered, you will receive a password reset email.","sourceRevision":"8d71f99a143e3ba787c5139b1b4790d82efa06b11c2aa4f32b835f9d95629c19","reviewed":true},
+      "ru": {"text":"Если этот адрес электронной почты зарегистрирован, вы получите письмо для сброса пароля.","sourceRevision":"8d71f99a143e3ba787c5139b1b4790d82efa06b11c2aa4f32b835f9d95629c19","reviewed":true}
+    }
+  },
+  "auth.passwordReset.success": {
+    "source": "密码重置成功。",
+    "translations": {
+      "en": {"text":"Password reset successfully.","sourceRevision":"6034e6528c6a108b38a1faf822c621d2bba2b4d9fb00f41cff02a71179964b39","reviewed":true},
+      "ru": {"text":"Пароль успешно сброшен.","sourceRevision":"6034e6528c6a108b38a1faf822c621d2bba2b4d9fb00f41cff02a71179964b39","reviewed":true}
+    }
+  },
+  "auth.passwordReset.tokenFailed": {
+    "source": "生成密码重置链接失败。",
+    "translations": {
+      "en": {"text":"Failed to create a password reset link.","sourceRevision":"bdad8c77f04005a0cdc3f7d0494a2ba0e731fc962c1285fdd3da48c0199a1122","reviewed":true},
+      "ru": {"text":"Не удалось создать ссылку для сброса пароля.","sourceRevision":"bdad8c77f04005a0cdc3f7d0494a2ba0e731fc962c1285fdd3da48c0199a1122","reviewed":true}
+    }
+  },
+  "auth.passwordReset.tokenInvalid": {
+    "source": "密码重置链接已过期或无效。",
+    "translations": {
+      "en": {"text":"The password reset link is invalid or expired.","sourceRevision":"849dd67e4b9942d336dca8e781aa8e39291470ff8b328d7fc51f315c6d6bc0d3","reviewed":true},
+      "ru": {"text":"Ссылка для сброса пароля недействительна или истекла.","sourceRevision":"849dd67e4b9942d336dca8e781aa8e39291470ff8b328d7fc51f315c6d6bc0d3","reviewed":true}
+    }
+  },
+  "auth.register.emailVerify": {
+    "source": "注册成功，请查收邮件并完成邮箱验证。",
+    "translations": {
+      "en": {"text":"Registration succeeded. Please verify your email address.","sourceRevision":"872fa75cbfe849f5daa98336a49b71b8a6cb1a7ec5b115907e7f4ca97efc8153","reviewed":true},
+      "ja": {"text":"登録が完了しました。メールアドレスを確認してください。","sourceRevision":"872fa75cbfe849f5daa98336a49b71b8a6cb1a7ec5b115907e7f4ca97efc8153","reviewed":true},
+      "it": {"text":"Registrazione completata. Verifica il tuo indirizzo email.","sourceRevision":"872fa75cbfe849f5daa98336a49b71b8a6cb1a7ec5b115907e7f4ca97efc8153","reviewed":true},
+      "ru": {"text":"Регистрация успешна. Пожалуйста, подтвердите адрес электронной почты.","sourceRevision":"872fa75cbfe849f5daa98336a49b71b8a6cb1a7ec5b115907e7f4ca97efc8153","reviewed":true}
+    }
+  },
+  "auth.register.failed": {
+    "source": "注册失败，请稍后重试。",
+    "translations": {
+      "en": {"text":"Registration failed. Please try again later.","sourceRevision":"e08ade23ba77a9a8ee074a76f8e559a4e1024d887116c54c9eba91899882166e","reviewed":true},
+      "ja": {"text":"登録に失敗しました。しばらくしてから再試行してください。","sourceRevision":"e08ade23ba77a9a8ee074a76f8e559a4e1024d887116c54c9eba91899882166e","reviewed":true},
+      "it": {"text":"Registrazione non riuscita. Riprova più tardi.","sourceRevision":"e08ade23ba77a9a8ee074a76f8e559a4e1024d887116c54c9eba91899882166e","reviewed":true},
+      "ru": {"text":"Не удалось выполнить регистрацию. Попробуйте позже.","sourceRevision":"e08ade23ba77a9a8ee074a76f8e559a4e1024d887116c54c9eba91899882166e","reviewed":true}
+    }
+  },
+  "auth.register.retryLogin": {
+    "source": "注册成功，但自动登录失败，请手动登录。",
+    "translations": {
+      "en": {"text":"Registration succeeded, but automatic login failed. Please log in manually.","sourceRevision":"9f65330c7d6db04d2624d4776b480e55fda61712c0a05e45d4f798fe5faa31d4","reviewed":true},
+      "ja": {"text":"登録は完了しましたが、自動ログインに失敗しました。手動でログインしてください。","sourceRevision":"9f65330c7d6db04d2624d4776b480e55fda61712c0a05e45d4f798fe5faa31d4","reviewed":true},
+      "it": {"text":"Registrazione completata, ma l’accesso automatico non è riuscito. Accedi manualmente.","sourceRevision":"9f65330c7d6db04d2624d4776b480e55fda61712c0a05e45d4f798fe5faa31d4","reviewed":true},
+      "ru": {"text":"Регистрация прошла успешно, но автоматический вход не сработал. Пожалуйста, войдите вручную.","sourceRevision":"9f65330c7d6db04d2624d4776b480e55fda61712c0a05e45d4f798fe5faa31d4","reviewed":true}
+    }
+  },
+  "auth.registration.rateLimited": {
+    "source": "请求过于频繁，请稍后重试。",
+    "translations": {
+      "en": {"text":"Too many requests. Please try again later.","sourceRevision":"edf45680895db3e771349816de47ad8893bec03aa6dc218074de6fb5b96e119f","reviewed":true},
+      "ja": {"text":"リクエストが多すぎます。しばらくしてから再試行してください。","sourceRevision":"edf45680895db3e771349816de47ad8893bec03aa6dc218074de6fb5b96e119f","reviewed":true},
+      "it": {"text":"Troppe richieste. Riprova più tardi.","sourceRevision":"edf45680895db3e771349816de47ad8893bec03aa6dc218074de6fb5b96e119f","reviewed":true},
+      "ru": {"text":"Слишком много запросов. Повторите попытку позже.","sourceRevision":"edf45680895db3e771349816de47ad8893bec03aa6dc218074de6fb5b96e119f","reviewed":true}
+    }
+  },
+  "auth.required": {
+    "source": "请登录后继续操作。",
+    "translations": {
+      "en": {"text":"Please log in to continue.","sourceRevision":"3622a75999203bcddf7c08d03e95b6e6b9db03bacaf6ba8171a0b5032ebe2694","reviewed":true},
+      "ja": {"text":"続行するにはログインしてください。","sourceRevision":"3622a75999203bcddf7c08d03e95b6e6b9db03bacaf6ba8171a0b5032ebe2694","reviewed":true},
+      "it": {"text":"Accedi per continuare.","sourceRevision":"3622a75999203bcddf7c08d03e95b6e6b9db03bacaf6ba8171a0b5032ebe2694","reviewed":true},
+      "ru": {"text":"Пожалуйста, войдите в систему, чтобы продолжить.","sourceRevision":"3622a75999203bcddf7c08d03e95b6e6b9db03bacaf6ba8171a0b5032ebe2694","reviewed":true}
+    }
+  },
+  "auth.signupDisabled": {
+    "source": "当前站点已关闭注册。",
+    "translations": {
+      "en": {"text":"Registration is currently disabled.","sourceRevision":"749b382d74bcee1b64887aa4b52c2416d4fa6705e53f65aed443ed2b47e07490","reviewed":true},
+      "ja": {"text":"現在、新規登録は無効になっています。","sourceRevision":"749b382d74bcee1b64887aa4b52c2416d4fa6705e53f65aed443ed2b47e07490","reviewed":true},
+      "it": {"text":"La registrazione è attualmente disabilitata.","sourceRevision":"749b382d74bcee1b64887aa4b52c2416d4fa6705e53f65aed443ed2b47e07490","reviewed":true},
+      "ru": {"text":"Регистрация временно отключена.","sourceRevision":"749b382d74bcee1b64887aa4b52c2416d4fa6705e53f65aed443ed2b47e07490","reviewed":true}
+    }
+  },
+  "auth.username.exists": {
+    "source": "用户名已存在。",
+    "translations": {
+      "en": {"text":"This username is already taken.","sourceRevision":"2ab1726818dd6c0b9e1e5e5f4fcba29a19f978fca8b4dce1fe2f0bdbb8bcc5ab","reviewed":true},
+      "ja": {"text":"このユーザー名はすでに使用されています。","sourceRevision":"2ab1726818dd6c0b9e1e5e5f4fcba29a19f978fca8b4dce1fe2f0bdbb8bcc5ab","reviewed":true},
+      "it": {"text":"Questo nome utente è già in uso.","sourceRevision":"2ab1726818dd6c0b9e1e5e5f4fcba29a19f978fca8b4dce1fe2f0bdbb8bcc5ab","reviewed":true},
+      "ru": {"text":"Это имя пользователя уже занято.","sourceRevision":"2ab1726818dd6c0b9e1e5e5f4fcba29a19f978fca8b4dce1fe2f0bdbb8bcc5ab","reviewed":true}
+    }
+  },
+  "auth.username.invalid": {
+    "source": "用户名格式不符合要求。",
+    "translations": {
+      "en": {"text":"The username format is invalid.","sourceRevision":"4114c3bff9df9422533025fb0d33b89afd0d699f57210970f7f0abb40a15f96f","reviewed":true},
+      "ja": {"text":"ユーザー名の形式が正しくありません。","sourceRevision":"4114c3bff9df9422533025fb0d33b89afd0d699f57210970f7f0abb40a15f96f","reviewed":true},
+      "it": {"text":"Il formato del nome utente non è valido.","sourceRevision":"4114c3bff9df9422533025fb0d33b89afd0d699f57210970f7f0abb40a15f96f","reviewed":true},
+      "ru": {"text":"Недопустимый формат имени пользователя.","sourceRevision":"4114c3bff9df9422533025fb0d33b89afd0d699f57210970f7f0abb40a15f96f","reviewed":true}
+    }
+  },
+  "chat.markRead.failed": {
+    "source": "标记私信已读失败。",
+    "translations": {
+      "en": {"text":"Failed to mark messages as read.","sourceRevision":"1589ab64199f660cc522c504724f2db480c830946eabd74b651c01b110de6fc9","reviewed":true},
+      "ru": {"text":"Не удалось отметить сообщения как прочитанные.","sourceRevision":"1589ab64199f660cc522c504724f2db480c830946eabd74b651c01b110de6fc9","reviewed":true}
+    }
+  },
+  "chat.messages.failed": {
+    "source": "获取私信列表失败。",
+    "translations": {
+      "en": {"text":"Failed to load messages.","sourceRevision":"09a8b78be12d2d7b4d04e746c9767bc7b0de058a88a7de69883206d59e8a71ab","reviewed":true},
+      "ru": {"text":"Не удалось загрузить сообщения.","sourceRevision":"09a8b78be12d2d7b4d04e746c9767bc7b0de058a88a7de69883206d59e8a71ab","reviewed":true}
+    }
+  },
+  "chat.send.failed": {
+    "source": "发送私信失败。",
+    "translations": {
+      "en": {"text":"Failed to send the message.","sourceRevision":"fca26df8f540e9a7c08dd8512bdd2b3f58f8efc9cb695a396eca7dc6d2829ab0","reviewed":true},
+      "ru": {"text":"Не удалось отправить сообщение.","sourceRevision":"fca26df8f540e9a7c08dd8512bdd2b3f58f8efc9cb695a396eca7dc6d2829ab0","reviewed":true}
+    }
+  },
+  "comment.content.tooLong": {
+    "source": "回复不能超过 {maxLength} 个字符。",
+    "translations": {
+      "en": {"text":"The reply must not exceed {maxLength} characters.","sourceRevision":"ccacf1104df9d6d5c81327b89cc2ec2bc1422882166b3b14d74c82ef12fadfc4","reviewed":true},
+      "ru": {"text":"Ответ не должен превышать {maxLength} символов.","sourceRevision":"ccacf1104df9d6d5c81327b89cc2ec2bc1422882166b3b14d74c82ef12fadfc4","reviewed":true}
+    }
+  },
+  "comment.content.tooShort": {
+    "source": "回复至少需要 {minLength} 个字符。",
+    "translations": {
+      "en": {"text":"The reply must be at least {minLength} characters.","sourceRevision":"c8218af398a74acd6b6077218bee45981df219bab7beef04a15cad51e0073d03","reviewed":true},
+      "ru": {"text":"Ответ должен содержать не менее {minLength} символов.","sourceRevision":"c8218af398a74acd6b6077218bee45981df219bab7beef04a15cad51e0073d03","reviewed":true}
+    }
+  },
+  "comment.createFailed": {
+    "source": "发布回复失败。",
+    "translations": {
+      "en": {"text":"Failed to publish the reply.","sourceRevision":"ce4bf71947ec725ab5474910d1f48891f170d6d7d5bd6d7f77a340684b954c10","reviewed":true},
+      "ru": {"text":"Не удалось опубликовать ответ.","sourceRevision":"ce4bf71947ec725ab5474910d1f48891f170d6d7d5bd6d7f77a340684b954c10","reviewed":true}
+    }
+  },
+  "comment.parentPostMissing": {
+    "source": "被回复的内容不存在。",
+    "translations": {
+      "en": {"text":"The post being replied to does not exist.","sourceRevision":"b939e0df71d0f74e813e22c633c94f178b121a779e0e612760f50a17bdb7f8e6","reviewed":true},
+      "ru": {"text":"Сообщение, на которое вы отвечаете, не существует.","sourceRevision":"b939e0df71d0f74e813e22c633c94f178b121a779e0e612760f50a17bdb7f8e6","reviewed":true}
+    }
+  },
+  "comment.post.cooldown": {
+    "source": "新用户暂时无法回复，请在 {minutes} 分钟后重试。",
+    "translations": {
+      "en": {"text":"New users cannot reply yet. Try again in {minutes} minutes.","sourceRevision":"e4d42627499e7d8bdd9586eae0e772e4d05b513329ef43037e8b3908467895e2","reviewed":true},
+      "ru": {"text":"Новые пользователи пока не могут отвечать. Попробуйте снова через {minutes} минут.","sourceRevision":"e4d42627499e7d8bdd9586eae0e772e4d05b513329ef43037e8b3908467895e2","reviewed":true}
+    }
+  },
+  "common.operation.failed": {
+    "source": "操作失败，请稍后重试。",
+    "translations": {
+      "en": {"text":"Operation failed. Please try again later.","sourceRevision":"5ecb19f7ecd54d19c7524c37b8149383cae4719980996b5b5815db5fcbba1a5b","reviewed":true},
+      "ru": {"text":"Операция не удалась. Попробуйте позже.","sourceRevision":"5ecb19f7ecd54d19c7524c37b8149383cae4719980996b5b5815db5fcbba1a5b","reviewed":true}
+    }
+  },
+  "common.operation.success": {
+    "source": "操作成功。",
+    "translations": {
+      "en": {"text":"Operation completed successfully.","sourceRevision":"e868f826e171d8234788d467eb4df53fcd7b97a2d636805926d9089404d2b940","reviewed":true},
+      "ru": {"text":"Операция успешно завершена.","sourceRevision":"e868f826e171d8234788d467eb4df53fcd7b97a2d636805926d9089404d2b940","reviewed":true}
+    }
+  },
+  "common.request.invalidFormat": {
+    "source": "请求格式不正确。",
+    "translations": {
+      "en": {"text":"The request format is invalid.","sourceRevision":"70368da9cc11efd30a1c71251c643898e1957060c7a2278d1207ed5ceb8bfe24","reviewed":true},
+      "ru": {"text":"Неверный формат запроса.","sourceRevision":"70368da9cc11efd30a1c71251c643898e1957060c7a2278d1207ed5ceb8bfe24","reviewed":true}
+    }
+  },
+  "common.request.invalidParams": {
+    "source": "请求参数不正确。",
+    "translations": {
+      "en": {"text":"The request parameters are invalid.","sourceRevision":"7395240b9adc70c082356c75442219934e18bacac01d8982fe53f70280251d96","reviewed":true},
+      "ru": {"text":"Недопустимые параметры запроса.","sourceRevision":"7395240b9adc70c082356c75442219934e18bacac01d8982fe53f70280251d96","reviewed":true}
+    }
+  },
+  "common.request.parseFailed": {
+    "source": "请求参数解析失败。",
+    "translations": {
+      "en": {"text":"Failed to parse the request parameters.","sourceRevision":"b6dc903845d5361503d800d2421a490d618f650196441f07737b6d2d08595004","reviewed":true},
+      "ru": {"text":"Не удалось распарсить параметры запроса.","sourceRevision":"b6dc903845d5361503d800d2421a490d618f650196441f07737b6d2d08595004","reviewed":true}
+    }
+  },
+  "markdown.mention.invalid": {
+    "source": "提及语法不正确，或提及用户超过 20 人。请检查正文。",
+    "translations": {
+      "en": {"text":"Mention syntax is invalid or exceeds 20 recipients. Check the body.","sourceRevision":"ed0217708a422eed807c0abd065e1506d36f8e48ae83f36f4126a892b3840320","reviewed":true},
+      "ru": {"text":"Проверьте формат упоминаний в тексте. Можно указать не более 20 получателей.","sourceRevision":"ed0217708a422eed807c0abd065e1506d36f8e48ae83f36f4126a892b3840320","reviewed":true}
+    }
+  },
+  "mfa.invalid": {
+    "source": "验证失败或已过期，请检查密码和验证码。",
+    "translations": {
+      "en": {"text":"Verification failed or expired. Check your password and code.","sourceRevision":"607d98351574d9b711a9afac6480d7b0fc2602edc41b27c7b46490e196610479","reviewed":true},
+      "ja": {"text":"認証に失敗したか期限切れです。パスワードとコードをご確認ください。","sourceRevision":"607d98351574d9b711a9afac6480d7b0fc2602edc41b27c7b46490e196610479","reviewed":true},
+      "it": {"text":"Verifica non riuscita o scaduta. Controlla password e codice.","sourceRevision":"607d98351574d9b711a9afac6480d7b0fc2602edc41b27c7b46490e196610479","reviewed":true},
+      "ru": {"text":"Проверка не пройдена или срок действия кода истёк. Проверьте пароль и код.","sourceRevision":"607d98351574d9b711a9afac6480d7b0fc2602edc41b27c7b46490e196610479","reviewed":true}
+    }
+  },
+  "mfa.unavailable": {
+    "source": "双因素认证暂不可用，请联系管理员。",
+    "translations": {
+      "en": {"text":"Two-factor authentication is unavailable. Contact the administrator.","sourceRevision":"7deeb87dbd3e5207b747df25c970ee479e4edcc84abed890942b33ca9f7b85ac","reviewed":true},
+      "ja": {"text":"二要素認証を利用できません。管理者にお問い合わせください。","sourceRevision":"7deeb87dbd3e5207b747df25c970ee479e4edcc84abed890942b33ca9f7b85ac","reviewed":true},
+      "it": {"text":"L'autenticazione a due fattori non è disponibile. Contatta l'amministratore.","sourceRevision":"7deeb87dbd3e5207b747df25c970ee479e4edcc84abed890942b33ca9f7b85ac","reviewed":true},
+      "ru": {"text":"Двухфакторная аутентификация недоступна. Обратитесь к администратору.","sourceRevision":"7deeb87dbd3e5207b747df25c970ee479e4edcc84abed890942b33ca9f7b85ac","reviewed":true}
+    }
+  },
+  "notification.markAllRead.failed": {
+    "source": "标记全部通知已读失败。",
+    "translations": {
+      "en": {"text":"Failed to mark all notifications as read.","sourceRevision":"486e384920c4bbfbff7e804ebfe516080900b31a97d0edd43e3290aa2dd3533c","reviewed":true},
+      "ru": {"text":"Не удалось отметить все уведомления как прочитанные.","sourceRevision":"486e384920c4bbfbff7e804ebfe516080900b31a97d0edd43e3290aa2dd3533c","reviewed":true}
+    }
+  },
+  "notification.markAllRead.success": {
+    "source": "全部通知已标记为已读。",
+    "translations": {
+      "en": {"text":"All notifications marked as read.","sourceRevision":"dec8bd7f7285b8e3f6022b80b6290e003863f84b1f8bd876e8ecb032378180f8","reviewed":true},
+      "ru": {"text":"Все уведомления отмечены как прочитанные.","sourceRevision":"dec8bd7f7285b8e3f6022b80b6290e003863f84b1f8bd876e8ecb032378180f8","reviewed":true}
+    }
+  },
+  "notification.markRead.failed": {
+    "source": "标记通知已读失败。",
+    "translations": {
+      "en": {"text":"Failed to mark the notification as read.","sourceRevision":"12c25916174dd1854fea23c43a6a92a6e1b4178e87f4d07151b27cff57906a1b","reviewed":true},
+      "ru": {"text":"Не удалось отметить уведомление как прочитанное.","sourceRevision":"12c25916174dd1854fea23c43a6a92a6e1b4178e87f4d07151b27cff57906a1b","reviewed":true}
+    }
+  },
+  "notification.markRead.success": {
+    "source": "通知已标记为已读。",
+    "translations": {
+      "en": {"text":"Notification marked as read.","sourceRevision":"97c85f55150ef7dfdd1a82bf4093b3cfacd103eea63565629c383b00cb1c7457","reviewed":true},
+      "ru": {"text":"Уведомление отмечено как прочитанное.","sourceRevision":"97c85f55150ef7dfdd1a82bf4093b3cfacd103eea63565629c383b00cb1c7457","reviewed":true}
+    }
+  },
+  "oauth.account.frozen": {
+    "source": "第三方登录关联的账号已被冻结。",
+    "translations": {
+      "en": {"text":"The account linked to this external login is suspended.","sourceRevision":"5cd1bf40adcd4d929cf4ae14acf2f836b85960bd3ad2524231752379e6482f37","reviewed":true},
+      "ru": {"text":"Учётная запись, привязанная к этому внешнему входу, заблокирована.","sourceRevision":"5cd1bf40adcd4d929cf4ae14acf2f836b85960bd3ad2524231752379e6482f37","reviewed":true}
+    }
+  },
+  "oauth.activation.updateFailed": {
+    "source": "更新第三方登录账号的验证状态失败。",
+    "translations": {
+      "en": {"text":"Failed to update the external account verification status.","sourceRevision":"d080fe1e16519c8a375528fd8cf67b799bc9879f1c6edd29e5e35e25cb197557","reviewed":true},
+      "ru": {"text":"Не удалось обновить статус подтверждения внешней учётной записи.","sourceRevision":"d080fe1e16519c8a375528fd8cf67b799bc9879f1c6edd29e5e35e25cb197557","reviewed":true}
+    }
+  },
+  "oauth.callback.failed": {
+    "source": "第三方登录回调失败。",
+    "translations": {
+      "en": {"text":"External login callback failed.","sourceRevision":"51cc5c3e74a21056f3bc7bf6e047a1065ff26a9593f7f41bd25b48b81e756736","reviewed":true},
+      "ru": {"text":"Ошибка обратного вызова при входе через внешний сервис.","sourceRevision":"51cc5c3e74a21056f3bc7bf6e047a1065ff26a9593f7f41bd25b48b81e756736","reviewed":true}
+    }
+  },
+  "oauth.process.failed": {
+    "source": "第三方登录处理失败。",
+    "translations": {
+      "en": {"text":"Failed to process external login.","sourceRevision":"1771cea00d485a850b03ca8968885fca9237c9553262f1963883b5b8104f1f20","reviewed":true},
+      "ru": {"text":"Не удалось обработать вход через внешний сервис.","sourceRevision":"1771cea00d485a850b03ca8968885fca9237c9553262f1963883b5b8104f1f20","reviewed":true}
+    }
+  },
+  "oauth.token.failed": {
+    "source": "生成第三方登录令牌失败。",
+    "translations": {
+      "en": {"text":"Failed to create the external login token.","sourceRevision":"861bb57a33e66b32256fcb7f3e11f85b3430c70b33dfe506b09bb57955eb1f58","reviewed":true},
+      "ru": {"text":"Не удалось создать токен для входа через внешний сервис.","sourceRevision":"861bb57a33e66b32256fcb7f3e11f85b3430c70b33dfe506b09bb57955eb1f58","reviewed":true}
+    }
+  },
+  "oauth.unbind.failed": {
+    "source": "解绑第三方账号失败。",
+    "translations": {
+      "en": {"text":"Failed to unlink the external account.","sourceRevision":"9df7a31f3d27915c0000f49298ad9d100db27427460ce123e6b7f72069c8f02c","reviewed":true},
+      "ru": {"text":"Не удалось отвязать внешнюю учётную запись.","sourceRevision":"9df7a31f3d27915c0000f49298ad9d100db27427460ce123e6b7f72069c8f02c","reviewed":true}
+    }
+  },
+  "oauth.unbind.success": {
+    "source": "第三方账号已解绑。",
+    "translations": {
+      "en": {"text":"External account unlinked.","sourceRevision":"56593041007fd2d7e04e64c97a01edae4caed8b99f081648bb3cd91ffad7d492","reviewed":true},
+      "ru": {"text":"Внешняя учётная запись отвязана.","sourceRevision":"56593041007fd2d7e04e64c97a01edae4caed8b99f081648bb3cd91ffad7d492","reviewed":true}
+    }
+  },
+  "page.notFound": {
+    "source": "页面不存在，或已经被删除。",
+    "translations": {
+      "en": {"text":"The page does not exist or has been deleted.","sourceRevision":"c0840e4535758437270063ad45cf7b13d5533b5d4f318337e12b05225e716e3d","reviewed":true},
+      "ja": {"text":"ページが存在しないか、削除されています。","sourceRevision":"c0840e4535758437270063ad45cf7b13d5533b5d4f318337e12b05225e716e3d","reviewed":true},
+      "it": {"text":"La pagina non esiste o è stata eliminata.","sourceRevision":"c0840e4535758437270063ad45cf7b13d5533b5d4f318337e12b05225e716e3d","reviewed":true},
+      "ru": {"text":"Страница не существует или была удалена.","sourceRevision":"c0840e4535758437270063ad45cf7b13d5533b5d4f318337e12b05225e716e3d","reviewed":true}
+    }
+  },
+  "permission.denied": {
+    "source": "您没有执行此操作的权限。",
+    "translations": {
+      "en": {"text":"You do not have permission to perform this action.","sourceRevision":"b9abf8e1b3c8dbe6e20f5a92303a936498f4d0731189b9924fc14881f3451259","reviewed":true},
+      "ru": {"text":"У вас нет прав для выполнения этого действия.","sourceRevision":"b9abf8e1b3c8dbe6e20f5a92303a936498f4d0731189b9924fc14881f3451259","reviewed":true}
+    }
+  },
+  "permission.emailRequired": {
+    "source": "完成邮箱验证后才能{action}。",
+    "translations": {
+      "en": {"text":"Verify your email address before you can {action}.","sourceRevision":"a15bd71ec34b6fe1e99408121aaa11c69fce12fc4936502b6a0c0e7373447a5c","reviewed":true},
+      "ru": {"text":"Подтвердите адрес электронной почты, прежде чем сможете {action}.","sourceRevision":"a15bd71ec34b6fe1e99408121aaa11c69fce12fc4936502b6a0c0e7373447a5c","reviewed":true}
+    }
+  },
+  "permission.resolveFailed": {
+    "source": "读取权限信息失败。",
+    "translations": {
+      "en": {"text":"Failed to load permission information.","sourceRevision":"0fcc0a173e508e9b95b3f31348cc371a7a758f31b37c5ecb8ec7ba7a62ee4434","reviewed":true},
+      "ru": {"text":"Не удалось загрузить данные о правах доступа.","sourceRevision":"0fcc0a173e508e9b95b3f31348cc371a7a758f31b37c5ecb8ec7ba7a62ee4434","reviewed":true}
+    }
+  },
+  "permission.userFrozen": {
+    "source": "账号已被冻结，无法{action}。",
+    "translations": {
+      "en": {"text":"Your account is suspended and cannot {action}.","sourceRevision":"55c3348cbceb3a7ca67821e1302ad2a64304308ccc8b299077d6aff993e291ec","reviewed":true},
+      "ru": {"text":"Ваша учётная запись заблокирована, вы не можете {action}.","sourceRevision":"55c3348cbceb3a7ca67821e1302ad2a64304308ccc8b299077d6aff993e291ec","reviewed":true}
+    }
+  },
+  "post.notFound": {
+    "source": "内容不存在。",
+    "translations": {
+      "en": {"text":"Content not found.","sourceRevision":"04884a568c43325a7b209bb8cb4ade24da07599fd017ff2a189c960e06ca3b1f","reviewed":true},
+      "ru": {"text":"Контент не найден.","sourceRevision":"04884a568c43325a7b209bb8cb4ade24da07599fd017ff2a189c960e06ca3b1f","reviewed":true}
+    }
+  },
+  "post.updateFailed": {
+    "source": "更新内容失败。",
+    "translations": {
+      "en": {"text":"Failed to update the content.","sourceRevision":"54323e730df7c3449cecb2878b55b4c8f7b748a7960c6f21712e8f3a4bfcd885","reviewed":true},
+      "ru": {"text":"Не удалось обновить контент.","sourceRevision":"54323e730df7c3449cecb2878b55b4c8f7b748a7960c6f21712e8f3a4bfcd885","reviewed":true}
+    }
+  },
+  "report.createFailed": {
+    "source": "举报提交失败，请稍后重试。",
+    "translations": {
+      "en": {"text":"Failed to submit the report. Please try again later.","sourceRevision":"4200cf89d68c0566690285c1f69695379cb84bf997d0149de871299f77b6c989","reviewed":true},
+      "ja": {"text":"通報の送信に失敗しました。しばらくしてから再試行してください。","sourceRevision":"4200cf89d68c0566690285c1f69695379cb84bf997d0149de871299f77b6c989","reviewed":true},
+      "it": {"text":"Invio della segnalazione non riuscito. Riprova più tardi.","sourceRevision":"4200cf89d68c0566690285c1f69695379cb84bf997d0149de871299f77b6c989","reviewed":true},
+      "ru": {"text":"Не удалось отправить жалобу. Попробуйте позже.","sourceRevision":"4200cf89d68c0566690285c1f69695379cb84bf997d0149de871299f77b6c989","reviewed":true}
+    }
+  },
+  "report.duplicate": {
+    "source": "已举报，等待处理。",
+    "translations": {
+      "en": {"text":"Already reported and waiting for review.","sourceRevision":"25daf5d8e66a9e3b09ea18d2029bab2d3e20a3c29a70ba47029077f1bbe05f7b","reviewed":true},
+      "ja": {"text":"すでに通報済みで、処理待ちです。","sourceRevision":"25daf5d8e66a9e3b09ea18d2029bab2d3e20a3c29a70ba47029077f1bbe05f7b","reviewed":true},
+      "it": {"text":"Già segnalato e in attesa di revisione.","sourceRevision":"25daf5d8e66a9e3b09ea18d2029bab2d3e20a3c29a70ba47029077f1bbe05f7b","reviewed":true},
+      "ru": {"text":"Жалоба уже подана, она находится на рассмотрении.","sourceRevision":"25daf5d8e66a9e3b09ea18d2029bab2d3e20a3c29a70ba47029077f1bbe05f7b","reviewed":true}
+    }
+  },
+  "report.notFound": {
+    "source": "举报不存在。",
+    "translations": {
+      "en": {"text":"Report not found.","sourceRevision":"5a80e44b199350f506299e015c55992910c5966cb782b5c7970cd00561de82ba","reviewed":true},
+      "ja": {"text":"通報が見つかりません。","sourceRevision":"5a80e44b199350f506299e015c55992910c5966cb782b5c7970cd00561de82ba","reviewed":true},
+      "it": {"text":"Segnalazione non trovata.","sourceRevision":"5a80e44b199350f506299e015c55992910c5966cb782b5c7970cd00561de82ba","reviewed":true},
+      "ru": {"text":"Жалоба не найдена.","sourceRevision":"5a80e44b199350f506299e015c55992910c5966cb782b5c7970cd00561de82ba","reviewed":true}
+    }
+  },
+  "report.ownContent": {
+    "source": "不能举报自己的内容。",
+    "translations": {
+      "en": {"text":"You cannot report your own content.","sourceRevision":"9010f14eae185552a4747e53e2404e5bbcca88619c918c66c4fc06e0ce3bd89e","reviewed":true},
+      "ja": {"text":"自分のコンテンツは通報できません。","sourceRevision":"9010f14eae185552a4747e53e2404e5bbcca88619c918c66c4fc06e0ce3bd89e","reviewed":true},
+      "it": {"text":"Non puoi segnalare i tuoi contenuti.","sourceRevision":"9010f14eae185552a4747e53e2404e5bbcca88619c918c66c4fc06e0ce3bd89e","reviewed":true},
+      "ru": {"text":"Нельзя жаловаться на собственный контент.","sourceRevision":"9010f14eae185552a4747e53e2404e5bbcca88619c918c66c4fc06e0ce3bd89e","reviewed":true}
+    }
+  },
+  "report.targetInvalid": {
+    "source": "举报对象不存在或不可举报。",
+    "translations": {
+      "en": {"text":"The reported content does not exist or cannot be reported.","sourceRevision":"0def3e84d2791efb57d3af53c7d072537d9f4c404ee3db65425dd4c79e660257","reviewed":true},
+      "ja": {"text":"通報対象が存在しないか、通報できません。","sourceRevision":"0def3e84d2791efb57d3af53c7d072537d9f4c404ee3db65425dd4c79e660257","reviewed":true},
+      "it": {"text":"Il contenuto segnalato non esiste o non può essere segnalato.","sourceRevision":"0def3e84d2791efb57d3af53c7d072537d9f4c404ee3db65425dd4c79e660257","reviewed":true},
+      "ru": {"text":"Содержимое, на которое подана жалоба, не существует или не подлежит жалобе.","sourceRevision":"0def3e84d2791efb57d3af53c7d072537d9f4c404ee3db65425dd4c79e660257","reviewed":true}
+    }
+  },
+  "route.notFound": {
+    "source": "路由未定义，请确认 URL 和请求方法是否正确。",
+    "translations": {
+      "en": {"text":"Route not found. Please check the URL and request method.","sourceRevision":"ad6c3d01b892fe45b39fb5b2e73a7728f0cd19eb86021117beae18a18ab74c69","reviewed":true},
+      "ja": {"text":"ルートが見つかりません。URL とリクエストメソッドを確認してください。","sourceRevision":"ad6c3d01b892fe45b39fb5b2e73a7728f0cd19eb86021117beae18a18ab74c69","reviewed":true},
+      "it": {"text":"Route non trovata. Controlla l’URL e il metodo della richiesta.","sourceRevision":"ad6c3d01b892fe45b39fb5b2e73a7728f0cd19eb86021117beae18a18ab74c69","reviewed":true},
+      "ru": {"text":"Маршрут не найден. Проверьте URL и метод запроса.","sourceRevision":"ad6c3d01b892fe45b39fb5b2e73a7728f0cd19eb86021117beae18a18ab74c69","reviewed":true}
+    }
+  },
+  "topic.category.restrictedSingle": {
+    "source": "受限分类必须是主题的唯一分类。",
+    "translations": {
+      "en": {"text":"A restricted category must be the topic's only category.","sourceRevision":"369555c4d5264a59827083e441167306a843e324d880bcc8d7dddf21391a09c5","reviewed":true},
+      "ru": {"text":"Ограниченную категорию можно выбрать только отдельно, без других категорий.","sourceRevision":"369555c4d5264a59827083e441167306a843e324d880bcc8d7dddf21391a09c5","reviewed":true}
+    }
+  },
+  "topic.content.tooLong": {
+    "source": "正文不能超过 {maxLength} 个字符。",
+    "translations": {
+      "en": {"text":"The content must not exceed {maxLength} characters.","sourceRevision":"5fbc42c56b7fa43afa272b97481e6bcfc49d3999cf463f7280807bf124e2094b","reviewed":true},
+      "ru": {"text":"Текст не должен превышать {maxLength} символов.","sourceRevision":"5fbc42c56b7fa43afa272b97481e6bcfc49d3999cf463f7280807bf124e2094b","reviewed":true}
+    }
+  },
+  "topic.content.tooShort": {
+    "source": "正文至少需要 {minLength} 个字符。",
+    "translations": {
+      "en": {"text":"The content must be at least {minLength} characters.","sourceRevision":"6adbb1c4f410ee4937b5199cd78dbb3c21e5b7ccacd0e1fcf5175bfe391d20a9","reviewed":true},
+      "ru": {"text":"Текст должен содержать не менее {minLength} символов.","sourceRevision":"6adbb1c4f410ee4937b5199cd78dbb3c21e5b7ccacd0e1fcf5175bfe391d20a9","reviewed":true}
+    }
+  },
+  "topic.dailyLimit": {
+    "source": "您今日发布的主题过多，请明天再试。",
+    "translations": {
+      "en": {"text":"You have posted too many topics today. Try again tomorrow.","sourceRevision":"8d36113ced7914cee3b71a26bdc64f50b7a8359e48823d52d9f3b7192beff537","reviewed":true},
+      "ru": {"text":"Сегодня вы создали слишком много тем. Попробуйте завтра.","sourceRevision":"8d36113ced7914cee3b71a26bdc64f50b7a8359e48823d52d9f3b7192beff537","reviewed":true}
+    }
+  },
+  "topic.notFound": {
+    "source": "主题不存在。",
+    "translations": {
+      "en": {"text":"Topic not found.","sourceRevision":"fb92ac5e638483aff77b5de54d5a1d04799a8f8471df0decf3936e070dedbdd1","reviewed":true},
+      "ru": {"text":"Тема не найдена.","sourceRevision":"fb92ac5e638483aff77b5de54d5a1d04799a8f8471df0decf3936e070dedbdd1","reviewed":true}
+    }
+  },
+  "topic.operationDenied": {
+    "source": "当前主题不可操作。",
+    "translations": {
+      "en": {"text":"This topic cannot be modified.","sourceRevision":"f6b62f45dbf22080d4410f8f8184b3e3ec735dc50822999c5fe3eb384b771bd0","reviewed":true},
+      "ru": {"text":"Эту тему нельзя изменять.","sourceRevision":"f6b62f45dbf22080d4410f8f8184b3e3ec735dc50822999c5fe3eb384b771bd0","reviewed":true}
+    }
+  },
+  "topic.ownerMismatch": {
+    "source": "不能修改或删除他人的主题。",
+    "translations": {
+      "en": {"text":"You cannot edit or delete another user's topic.","sourceRevision":"96608d30a6f834a0ec81b85f4d042455252c4a74c8c9aca2ac3128d58c01b144","reviewed":true},
+      "ru": {"text":"Вы не можете редактировать или удалять тему другого пользователя.","sourceRevision":"96608d30a6f834a0ec81b85f4d042455252c4a74c8c9aca2ac3128d58c01b144","reviewed":true}
+    }
+  },
+  "topic.post.cooldown": {
+    "source": "新用户暂时无法发帖，请在 {minutes} 分钟后重试。",
+    "translations": {
+      "en": {"text":"New users cannot post yet. Try again in {minutes} minutes.","sourceRevision":"def48e67009246778b22f17df422fad2fa548deedbc54b87e56f7df5cb0849ab","reviewed":true},
+      "ru": {"text":"Новые пользователи пока не могут создавать темы. Попробуйте снова через {minutes} минут.","sourceRevision":"def48e67009246778b22f17df422fad2fa548deedbc54b87e56f7df5cb0849ab","reviewed":true}
+    }
+  },
+  "topic.saveFailed": {
+    "source": "保存主题失败。",
+    "translations": {
+      "en": {"text":"Failed to save the topic.","sourceRevision":"768f2d8894ce9319a54df4cc21607f245600e2c99e2ae25122aa4f95090703c1","reviewed":true},
+      "ru": {"text":"Не удалось сохранить тему.","sourceRevision":"768f2d8894ce9319a54df4cc21607f245600e2c99e2ae25122aa4f95090703c1","reviewed":true}
+    }
+  },
+  "topic.title.tooLong": {
+    "source": "标题不能超过 {maxLength} 个字符。",
+    "translations": {
+      "en": {"text":"The title must not exceed {maxLength} characters.","sourceRevision":"b40b1e6259cb5620f71b22de9f809c4582b08ec45d12ace5dc2c57baa3ec72be","reviewed":true},
+      "ru": {"text":"Заголовок не должен превышать {maxLength} символов.","sourceRevision":"b40b1e6259cb5620f71b22de9f809c4582b08ec45d12ace5dc2c57baa3ec72be","reviewed":true}
+    }
+  },
+  "topic.title.tooShort": {
+    "source": "标题至少需要 {minLength} 个字符。",
+    "translations": {
+      "en": {"text":"The title must be at least {minLength} characters.","sourceRevision":"5a78793289c89f50661415e5290cc1a16ce0b82fac0c8a0061f1b73467c7df39","reviewed":true},
+      "ru": {"text":"Заголовок должен содержать не менее {minLength} символов.","sourceRevision":"5a78793289c89f50661415e5290cc1a16ce0b82fac0c8a0061f1b73467c7df39","reviewed":true}
+    }
+  },
+  "trust.adjustmentFailed": {
+    "source": "等级调整失败：{error}",
+    "translations": {
+      "en": {"text":"Level adjustment failed: {error}","sourceRevision":"50f9be53374b0700be598fc7c17f11d3f1915f3dc34aee3494fc3df582a10a34","reviewed":true},
+      "ja": {"text":"レベル変更に失敗しました: {error}","sourceRevision":"50f9be53374b0700be598fc7c17f11d3f1915f3dc34aee3494fc3df582a10a34","reviewed":true},
+      "it": {"text":"Modifica del livello non riuscita: {error}","sourceRevision":"50f9be53374b0700be598fc7c17f11d3f1915f3dc34aee3494fc3df582a10a34","reviewed":true},
+      "ru": {"text":"Не удалось изменить уровень: {error}","sourceRevision":"50f9be53374b0700be598fc7c17f11d3f1915f3dc34aee3494fc3df582a10a34","reviewed":true}
+    }
+  },
+  "trust.contentLimit": {
+    "source": "每篇内容的{kind}不能超过 {limit}。",
+    "translations": {
+      "en": {"text":"The {kind} limit per post is {limit}.","sourceRevision":"b380ffa03cbb6eecf6b64d55f69fc1ecdd7bd8f0551b7a20b5278fd241d8f3a1","reviewed":true},
+      "ja": {"text":"投稿の {kind} の上限は {limit} です。","sourceRevision":"b380ffa03cbb6eecf6b64d55f69fc1ecdd7bd8f0551b7a20b5278fd241d8f3a1","reviewed":true},
+      "it": {"text":"Il limite di {kind} per messaggio è {limit}.","sourceRevision":"b380ffa03cbb6eecf6b64d55f69fc1ecdd7bd8f0551b7a20b5278fd241d8f3a1","reviewed":true},
+      "ru": {"text":"Ограничение на одно сообщение ({kind}): {limit}.","sourceRevision":"b380ffa03cbb6eecf6b64d55f69fc1ecdd7bd8f0551b7a20b5278fd241d8f3a1","reviewed":true}
+    }
+  },
+  "trust.dailyReplies": {
+    "source": "当前等级每天最多新建 {limit} 条回复。",
+    "translations": {
+      "en": {"text":"Your level allows up to {limit} new replies per day.","sourceRevision":"6d178448acfacf4c8df2eef7d42a125e1fcfe3055b4ff76eca337e0da56dfb3c","reviewed":true},
+      "ja": {"text":"このレベルでは1日 {limit} 件まで返信できます。","sourceRevision":"6d178448acfacf4c8df2eef7d42a125e1fcfe3055b4ff76eca337e0da56dfb3c","reviewed":true},
+      "it": {"text":"Il tuo livello consente fino a {limit} nuove risposte al giorno.","sourceRevision":"6d178448acfacf4c8df2eef7d42a125e1fcfe3055b4ff76eca337e0da56dfb3c","reviewed":true},
+      "ru": {"text":"Ваш дневной лимит новых ответов: {limit}.","sourceRevision":"6d178448acfacf4c8df2eef7d42a125e1fcfe3055b4ff76eca337e0da56dfb3c","reviewed":true}
+    }
+  },
+  "trust.dailyTopics": {
+    "source": "当前等级每天最多新建 {limit} 个主题（含草稿）。",
+    "translations": {
+      "en": {"text":"Your level allows up to {limit} new topics per day, including drafts.","sourceRevision":"dda8e959bc27b779fac1e24bb80ceae4fbb5ae05fca8a1d132d0fef769b807f6","reviewed":true},
+      "ja": {"text":"このレベルでは下書きを含め1日 {limit} 件までトピックを作成できます。","sourceRevision":"dda8e959bc27b779fac1e24bb80ceae4fbb5ae05fca8a1d132d0fef769b807f6","reviewed":true},
+      "it": {"text":"Il tuo livello consente fino a {limit} nuovi argomenti al giorno, incluse le bozze.","sourceRevision":"dda8e959bc27b779fac1e24bb80ceae4fbb5ae05fca8a1d132d0fef769b807f6","reviewed":true},
+      "ru": {"text":"Ваш дневной лимит новых тем с учётом черновиков: {limit}.","sourceRevision":"dda8e959bc27b779fac1e24bb80ceae4fbb5ae05fca8a1d132d0fef769b807f6","reviewed":true}
+    }
+  },
+  "upload.attachment.disabled": {
+    "source": "当前站点已关闭附件上传。",
+    "translations": {
+      "en": {"text":"Attachment uploads are disabled.","sourceRevision":"624fa071a02e59e768e4906a0c3dd7114556e051b325384fddb6604cbda74494","reviewed":true},
+      "ru": {"text":"Загрузка вложений отключена.","sourceRevision":"624fa071a02e59e768e4906a0c3dd7114556e051b325384fddb6604cbda74494","reviewed":true}
+    }
+  },
+  "upload.contentReadFailed": {
+    "source": "读取文件内容失败。",
+    "translations": {
+      "en": {"text":"Failed to read the file contents.","sourceRevision":"34920f15237051aa5f0431fe9dbe7c20e6fd8000c7f8783d12ed4d566d11064a","reviewed":true},
+      "ru": {"text":"Не удалось прочитать содержимое файла.","sourceRevision":"34920f15237051aa5f0431fe9dbe7c20e6fd8000c7f8783d12ed4d566d11064a","reviewed":true}
+    }
+  },
+  "upload.cooldown": {
+    "source": "新用户暂时无法上传，请在 {minutes} 分钟后重试。",
+    "translations": {
+      "en": {"text":"New users cannot upload yet. Try again in {minutes} minutes.","sourceRevision":"4950dae2983f70ef52aa3539a06196eee7eaff29e76ca7466dd857124e6eb9dd","reviewed":true},
+      "ru": {"text":"Новые пользователи пока не могут загружать файлы. Попробуйте снова через {minutes} минут.","sourceRevision":"4950dae2983f70ef52aa3539a06196eee7eaff29e76ca7466dd857124e6eb9dd","reviewed":true}
+    }
+  },
+  "upload.dailyLimit": {
+    "source": "您今日已上传 {count} 个文件，已达到每日限制。",
+    "translations": {
+      "en": {"text":"You have uploaded {count} files today and reached the daily limit.","sourceRevision":"71459b6515cb1178f5a3a26692cfb7e7d085405af2bcc08061e8743428903ac5","reviewed":true},
+      "ja": {"text":"本日すでに {count} 個のファイルをアップロードし、上限に達しました","sourceRevision":"71459b6515cb1178f5a3a26692cfb7e7d085405af2bcc08061e8743428903ac5","reviewed":true},
+      "it": {"text":"Hai caricato {count} file oggi e hai raggiunto il limite giornaliero","sourceRevision":"71459b6515cb1178f5a3a26692cfb7e7d085405af2bcc08061e8743428903ac5","reviewed":true},
+      "ru": {"text":"Дневной лимит исчерпан. Загружено файлов сегодня: {count}.","sourceRevision":"71459b6515cb1178f5a3a26692cfb7e7d085405af2bcc08061e8743428903ac5","reviewed":true}
+    }
+  },
+  "upload.dailyLimit.avatar": {
+    "source": "您今日已上传 {count} 个文件，上传头像需要 {fileCount} 个名额，已超过每日限制。",
+    "translations": {
+      "en": {"text":"You have uploaded {count} files today. An avatar needs {fileCount} upload slots and would exceed the limit.","sourceRevision":"d4bfda78416d2220d393f60f791370dd166efa408e256d3cd767d8d93ec76374","reviewed":true},
+      "ja": {"text":"本日すでに {count} 個のファイルをアップロードしています。アバターのアップロードには {fileCount} 枠が必要で、上限を超えます","sourceRevision":"d4bfda78416d2220d393f60f791370dd166efa408e256d3cd767d8d93ec76374","reviewed":true},
+      "it": {"text":"Hai caricato {count} file oggi. Caricare un avatar richiede {fileCount} slot e supererebbe il limite giornaliero","sourceRevision":"d4bfda78416d2220d393f60f791370dd166efa408e256d3cd767d8d93ec76374","reviewed":true},
+      "ru": {"text":"Сегодня загружено файлов: {count}. Для аватара требуется мест: {fileCount}. Это превышает лимит.","sourceRevision":"d4bfda78416d2220d393f60f791370dd166efa408e256d3cd767d8d93ec76374","reviewed":true}
+    }
+  },
+  "upload.extension.unsupported": {
+    "source": "不支持该文件扩展名，允许的类型：{extensions}。",
+    "translations": {
+      "en": {"text":"This file extension is not supported. Allowed types: {extensions}.","sourceRevision":"9d53d395e5d0718bc67f27b15a54f0facfcc4d39783cfbdb410074864acc8a20","reviewed":true},
+      "ru": {"text":"Этот формат файла не поддерживается. Допустимые типы: {extensions}.","sourceRevision":"9d53d395e5d0718bc67f27b15a54f0facfcc4d39783cfbdb410074864acc8a20","reviewed":true}
+    }
+  },
+  "upload.file.missing": {
+    "source": "请选择要上传的文件。",
+    "translations": {
+      "en": {"text":"Select a file to upload.","sourceRevision":"50855420327fad2babfc2aa53e0c73df923c8b1031d4876e2b4c2609f9579926","reviewed":true},
+      "ru": {"text":"Выберите файл для загрузки.","sourceRevision":"50855420327fad2babfc2aa53e0c73df923c8b1031d4876e2b4c2609f9579926","reviewed":true}
+    }
+  },
+  "upload.file.tooLarge": {
+    "source": "文件不能超过 {maxSizeKb} KB。",
+    "translations": {
+      "en": {"text":"The file must not exceed {maxSizeKb} KB.","sourceRevision":"c1713d699131be40ee5fd4f1bb50346d1a56e26f165b757a39b3f9e004c75da8","reviewed":true},
+      "ru": {"text":"Размер файла не должен превышать {maxSizeKb} КБ.","sourceRevision":"c1713d699131be40ee5fd4f1bb50346d1a56e26f165b757a39b3f9e004c75da8","reviewed":true}
+    }
+  },
+  "upload.filename.required": {
+    "source": "文件名不能为空。",
+    "translations": {
+      "en": {"text":"The file name cannot be empty.","sourceRevision":"413644de84e75b3f253cfcc1e435555e0741dfe678aca0ac444064b6bb5aa150","reviewed":true},
+      "ru": {"text":"Имя файла не может быть пустым.","sourceRevision":"413644de84e75b3f253cfcc1e435555e0741dfe678aca0ac444064b6bb5aa150","reviewed":true}
+    }
+  },
+  "upload.image.invalidContent": {
+    "source": "文件内容不是有效图片。",
+    "translations": {
+      "en": {"text":"The file is not a valid image.","sourceRevision":"d0820ceb09a66bbafb4616b0902bf9630e59c5e0ad43249427425a450eda9c71","reviewed":true},
+      "ru": {"text":"Файл не является корректным изображением.","sourceRevision":"d0820ceb09a66bbafb4616b0902bf9630e59c5e0ad43249427425a450eda9c71","reviewed":true}
+    }
+  },
+  "upload.image.unsupported": {
+    "source": "不支持该图片格式。",
+    "translations": {
+      "en": {"text":"This image format is not supported.","sourceRevision":"ae79ea1f22dc98904aac27a021aad1907eaf03f9fc13c1148400b7d298137a79","reviewed":true},
+      "ru": {"text":"Этот формат изображения не поддерживается.","sourceRevision":"ae79ea1f22dc98904aac27a021aad1907eaf03f9fc13c1148400b7d298137a79","reviewed":true}
+    }
+  },
+  "upload.openFailed": {
+    "source": "打开上传文件失败。",
+    "translations": {
+      "en": {"text":"Failed to open the uploaded file.","sourceRevision":"d8e04474d8e4a27fcfb84e5e4ce97d3adef2fee2cf148f4ff4d20f77b1602387","reviewed":true},
+      "ru": {"text":"Не удалось открыть загруженный файл.","sourceRevision":"d8e04474d8e4a27fcfb84e5e4ce97d3adef2fee2cf148f4ff4d20f77b1602387","reviewed":true}
+    }
+  },
+  "upload.readFailed": {
+    "source": "读取上传文件失败。",
+    "translations": {
+      "en": {"text":"Failed to read the uploaded file.","sourceRevision":"b19ec815a265b78c2998426913c4d4d3d85140ae777e334a1afacdb4b8f92c35","reviewed":true},
+      "ru": {"text":"Не удалось прочитать загруженный файл.","sourceRevision":"b19ec815a265b78c2998426913c4d4d3d85140ae777e334a1afacdb4b8f92c35","reviewed":true}
+    }
+  },
+  "upload.saveFailed": {
+    "source": "保存文件失败。",
+    "translations": {
+      "en": {"text":"Failed to save the file.","sourceRevision":"4fe05b2131ee6c4dce0dec059d4056678bea4ebb72ad9fc9c7fb72060e0de4a6","reviewed":true},
+      "ru": {"text":"Не удалось сохранить файл.","sourceRevision":"4fe05b2131ee6c4dce0dec059d4056678bea4ebb72ad9fc9c7fb72060e0de4a6","reviewed":true}
+    }
+  },
+  "upload.success": {
+    "source": "上传成功。",
+    "translations": {
+      "en": {"text":"Upload completed.","sourceRevision":"036dd608654aad85840d061566293956c9df3726b8d222019d9c55f5a542ac72","reviewed":true},
+      "ru": {"text":"Загрузка завершена.","sourceRevision":"036dd608654aad85840d061566293956c9df3726b8d222019d9c55f5a542ac72","reviewed":true}
+    }
+  },
+  "user.fetchFailed": {
+    "source": "读取用户信息失败。",
+    "translations": {
+      "en": {"text":"Failed to load user information.","sourceRevision":"89e79b365c2fd5f7d7392e34cee77c870c346949502aa28a6ae05bc8423eda7b","reviewed":true},
+      "ru": {"text":"Не удалось загрузить информацию о пользователе.","sourceRevision":"89e79b365c2fd5f7d7392e34cee77c870c346949502aa28a6ae05bc8423eda7b","reviewed":true}
+    }
+  },
+  "user.notFound": {
+    "source": "用户不存在。",
+    "translations": {
+      "en": {"text":"User not found.","sourceRevision":"96ee3de5cefecb338af358515a3eaad1f340170df74366c3fa9ae1511086de27","reviewed":true},
+      "ru": {"text":"Пользователь не найден.","sourceRevision":"96ee3de5cefecb338af358515a3eaad1f340170df74366c3fa9ae1511086de27","reviewed":true}
+    }
+  },
+  "user.updateFailed": {
+    "source": "保存用户信息失败。",
+    "translations": {
+      "en": {"text":"Failed to save user information.","sourceRevision":"d585e15484c8e357ddd1cebd373badb3cb4accc26ac573c2c66b4ba1524ebebd","reviewed":true},
+      "ru": {"text":"Не удалось сохранить информацию о пользователе.","sourceRevision":"d585e15484c8e357ddd1cebd373badb3cb4accc26ac573c2c66b4ba1524ebebd","reviewed":true}
+    }
+  },
+  "user.updateSuccess": {
+    "source": "用户信息已保存。",
+    "translations": {
+      "en": {"text":"User information saved.","sourceRevision":"d83b9e50d19bb3117365d717837fc7e75d3b6e93a9db2ead4501f6a27838cc8b","reviewed":true},
+      "ru": {"text":"Информация о пользователе сохранена.","sourceRevision":"d83b9e50d19bb3117365d717837fc7e75d3b6e93a9db2ead4501f6a27838cc8b","reviewed":true}
+    }
+  }
+}

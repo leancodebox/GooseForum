@@ -1,10 +1,10 @@
-import { getAdminDictionary } from "./translation-loader";
-type EnglishDictionary = typeof import("./messages/en-shell").default;
+import { adminText, type Dictionary } from "@gooseforum/i18n/admin";
+type Messages = Dictionary<"admin.shell">;
 import type { AuthLocale } from "@gooseforum/runtime/i18n/auth";
 
-export type AdminTextKey = keyof EnglishDictionary;
+export type AdminTextKey = keyof Messages;
 
 export function createAdminText(locale: AuthLocale) {
   return (key: AdminTextKey) =>
-    getAdminDictionary<EnglishDictionary>("shell", locale)[key];
+    adminText(locale, "admin.shell")(key);
 }

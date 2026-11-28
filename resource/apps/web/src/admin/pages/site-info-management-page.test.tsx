@@ -1,9 +1,11 @@
+import { adminText, getAdminDictionary } from "@gooseforum/i18n/admin";
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
 import type { GooseAdminApi } from "@gooseforum/client";
-import text from "../messages/zh-settings";
 import { SiteInfoManagementPage } from "./site-info-management-page";
+
+const text = getAdminDictionary("admin.settings", "zh");
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
@@ -21,7 +23,7 @@ it("saves the uploaded object key and preserves it while assignment is disabled"
   const uploadImage = vi.fn().mockImplementation(async (file: File) => ({ objectName: "2026/" + file.name }));
   const api = { settings: { site: async () => ({ defaultLocale: "ja", builtinAvatarFiles: ["/static/pic/1.webp", "/static/pic/2.webp"], defaultAvatarFile: "legacy.png" }), saveSite }, pages: { uploadImage } } as unknown as GooseAdminApi;
   const user = userEvent.setup();
-  render(<SiteInfoManagementPage api={api} text={key => text[key]} />);
+  render(<SiteInfoManagementPage api={api} text={adminText("zh", "admin.settings")} />);
   const toggle = await screen.findByRole("switch", { name: text.assignAvatar });
   const manage = screen.getByRole("button", { name: text.manageAvatars });
   expect(manage.getAttribute("aria-expanded")).toBe("false");

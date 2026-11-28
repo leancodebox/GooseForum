@@ -8,9 +8,10 @@ const root = resolve(import.meta.dirname, '..')
 const layers = {
   client: [],
   markdown: [],
-  runtime: ['client'],
-  ui: ['markdown'],
-  'theme-default': ['client', 'markdown', 'runtime', 'ui'],
+  i18n: ['client'],
+  runtime: ['client', 'i18n'],
+  ui: ['i18n', 'markdown'],
+  'theme-default': ['client', 'i18n', 'markdown', 'runtime', 'ui'],
 }
 
 for (const [name, allowed] of Object.entries(layers)) {

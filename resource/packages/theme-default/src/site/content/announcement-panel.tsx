@@ -26,7 +26,7 @@ function isUnread(publishedAt?: number | string) {
 }
 
 export function AnnouncementPanel({ announcement }: { announcement: HomeProps["announcement"] }) {
-  const { t } = useTranslation("home");
+  const { t } = useTranslation("site.home");
   const items = useMemo(() => announcement.items ?? (announcement.html.trim()
     ? [{ id: "legacy", title: "", html: announcement.html }] : []), [announcement.items, announcement.html]);
   const version = `${announcement.enabled}:${announcement.publishedAt || ""}`;

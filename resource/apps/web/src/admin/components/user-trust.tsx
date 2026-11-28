@@ -1,7 +1,9 @@
+import { trustLevelName } from '@gooseforum/i18n/admin'
+import type { AuthLocale } from '@gooseforum/runtime/i18n/auth'
 import type { UserTextKey } from '../users-i18n'
 import { useLatestRequest } from '@gooseforum/runtime'
 import { useEffect, useRef, useState } from 'react'
-import { trustLevelName, trustLevels, type GooseAdminApi, type TrustProgress, type TrustHistory } from '@gooseforum/client'
+import { trustLevels, type GooseAdminApi, type TrustProgress, type TrustHistory } from '@gooseforum/client'
 import { Button } from '@gooseforum/ui/components/button'
 import { Field, FieldLabel } from '@gooseforum/ui/components/field'
 import { Input } from '@gooseforum/ui/components/input'
@@ -11,7 +13,7 @@ import { Spinner } from '@gooseforum/ui/components/spinner'
 import { Save, RefreshCw, ChevronDown } from 'lucide-react'
 import { errorMessage } from '../error-message'
 
-export function UserTrust({ api, userId, locale, text }: { api: GooseAdminApi; userId: number; locale: string; text: (key: UserTextKey) => string }) {
+export function UserTrust({ api, userId, locale, text }: { api: GooseAdminApi; userId: number; locale: AuthLocale; text: (key: UserTextKey) => string }) {
   const [progress, setProgress] = useState<TrustProgress>()
   const [history, setHistory] = useState<TrustHistory[]>([])
   const [hasMore, setHasMore] = useState(false)

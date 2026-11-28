@@ -1,0 +1,380 @@
+{
+  "activity.comment": {
+    "source": "参与回复",
+    "translations": {
+      "en": {"text":"Joined the discussion","sourceRevision":"5426cb4a148423d2f8e10a4792a43d6e6ad1a49159ce32c3a1924b337d8599ef","reviewed":true},
+      "ja": {"text":"返信に参加しました","sourceRevision":"5426cb4a148423d2f8e10a4792a43d6e6ad1a49159ce32c3a1924b337d8599ef","reviewed":true},
+      "it": {"text":"Ha partecipato alla discussione","sourceRevision":"5426cb4a148423d2f8e10a4792a43d6e6ad1a49159ce32c3a1924b337d8599ef","reviewed":true},
+      "ru": {"text":"Присоединился к обсуждению","sourceRevision":"5426cb4a148423d2f8e10a4792a43d6e6ad1a49159ce32c3a1924b337d8599ef","reviewed":true}
+    }
+  },
+  "activity.default": {
+    "source": "活动",
+    "translations": {
+      "en": {"text":"Activity","sourceRevision":"c103ddb5466b0d7c9c427005cb057039435aa6b8a7ab666fca2c310aecd2d8c6","reviewed":true},
+      "ja": {"text":"アクティビティ","sourceRevision":"c103ddb5466b0d7c9c427005cb057039435aa6b8a7ab666fca2c310aecd2d8c6","reviewed":true},
+      "it": {"text":"Attività","sourceRevision":"c103ddb5466b0d7c9c427005cb057039435aa6b8a7ab666fca2c310aecd2d8c6","reviewed":true},
+      "ru": {"text":"Активность","sourceRevision":"c103ddb5466b0d7c9c427005cb057039435aa6b8a7ab666fca2c310aecd2d8c6","reviewed":true}
+    }
+  },
+  "activity.follow": {
+    "source": "关注用户",
+    "translations": {
+      "en": {"text":"Followed a user","sourceRevision":"f213f1d1131a65053af671d42496e4a98e81401a62a933979c686da7eaeaa0d5","reviewed":true},
+      "ja": {"text":"ユーザーをフォローしました","sourceRevision":"f213f1d1131a65053af671d42496e4a98e81401a62a933979c686da7eaeaa0d5","reviewed":true},
+      "it": {"text":"Ha seguito un utente","sourceRevision":"f213f1d1131a65053af671d42496e4a98e81401a62a933979c686da7eaeaa0d5","reviewed":true},
+      "ru": {"text":"Подписался на пользователя","sourceRevision":"f213f1d1131a65053af671d42496e4a98e81401a62a933979c686da7eaeaa0d5","reviewed":true}
+    }
+  },
+  "activity.like": {
+    "source": "点赞内容",
+    "translations": {
+      "en": {"text":"Liked content","sourceRevision":"4c1623e6bbf2fade63bee726b8ade58df289f5789413ae5ad73d5d802a409280","reviewed":true},
+      "ja": {"text":"コンテンツにいいねしました","sourceRevision":"4c1623e6bbf2fade63bee726b8ade58df289f5789413ae5ad73d5d802a409280","reviewed":true},
+      "it": {"text":"Ha messo mi piace a un contenuto","sourceRevision":"4c1623e6bbf2fade63bee726b8ade58df289f5789413ae5ad73d5d802a409280","reviewed":true},
+      "ru": {"text":"Поставил лайк","sourceRevision":"4c1623e6bbf2fade63bee726b8ade58df289f5789413ae5ad73d5d802a409280","reviewed":true}
+    }
+  },
+  "activity.post": {
+    "source": "发布主题",
+    "translations": {
+      "en": {"text":"Published a topic","sourceRevision":"998ea1673dfd26e272c275860027986825b47048589aead450f1bd05c7265088","reviewed":true},
+      "ja": {"text":"トピックを投稿しました","sourceRevision":"998ea1673dfd26e272c275860027986825b47048589aead450f1bd05c7265088","reviewed":true},
+      "it": {"text":"Ha pubblicato un argomento","sourceRevision":"998ea1673dfd26e272c275860027986825b47048589aead450f1bd05c7265088","reviewed":true},
+      "ru": {"text":"Опубликовал тему","sourceRevision":"998ea1673dfd26e272c275860027986825b47048589aead450f1bd05c7265088","reviewed":true}
+    }
+  },
+  "activity.signup": {
+    "source": "加入论坛",
+    "translations": {
+      "en": {"text":"Joined the forum","sourceRevision":"bab4313b21e3747b0ad4bcd911682ee74eba9689f9cc151bd9de9cceb99e64e0","reviewed":true},
+      "ja": {"text":"フォーラムに参加しました","sourceRevision":"bab4313b21e3747b0ad4bcd911682ee74eba9689f9cc151bd9de9cceb99e64e0","reviewed":true},
+      "it": {"text":"Si è iscritto al forum","sourceRevision":"bab4313b21e3747b0ad4bcd911682ee74eba9689f9cc151bd9de9cceb99e64e0","reviewed":true},
+      "ru": {"text":"Зарегистрировался на форуме","sourceRevision":"bab4313b21e3747b0ad4bcd911682ee74eba9689f9cc151bd9de9cceb99e64e0","reviewed":true}
+    }
+  },
+  "activityNavigation": {
+    "source": "用户动态",
+    "translations": {
+      "en": {"text":"User activity","sourceRevision":"3d780307e8fa97159691a9a9d74069ad95870bcf638b0ddbeb0b64fb7d42bb67","reviewed":true},
+      "ja": {"text":"ユーザーアクティビティ","sourceRevision":"3d780307e8fa97159691a9a9d74069ad95870bcf638b0ddbeb0b64fb7d42bb67","reviewed":true},
+      "it": {"text":"Attività utente","sourceRevision":"3d780307e8fa97159691a9a9d74069ad95870bcf638b0ddbeb0b64fb7d42bb67","reviewed":true},
+      "ru": {"text":"Активность пользователя","sourceRevision":"3d780307e8fa97159691a9a9d74069ad95870bcf638b0ddbeb0b64fb7d42bb67","reviewed":true}
+    }
+  },
+  "editProfile": {
+    "source": "编辑资料",
+    "translations": {
+      "en": {"text":"Edit profile","sourceRevision":"2c99785683fb05e66f83cd2d2bb282f2b71af6d88730db08e9815d59594d8383","reviewed":true},
+      "ja": {"text":"プロフィール編集","sourceRevision":"2c99785683fb05e66f83cd2d2bb282f2b71af6d88730db08e9815d59594d8383","reviewed":true},
+      "it": {"text":"Modifica profilo","sourceRevision":"2c99785683fb05e66f83cd2d2bb282f2b71af6d88730db08e9815d59594d8383","reviewed":true},
+      "ru": {"text":"Редактировать профиль","sourceRevision":"2c99785683fb05e66f83cd2d2bb282f2b71af6d88730db08e9815d59594d8383","reviewed":true}
+    }
+  },
+  "emptyActivity": {
+    "source": "暂无动态。",
+    "translations": {
+      "en": {"text":"No activity yet.","sourceRevision":"83e0257f2342c7cd90398dc8feeb8ede6e3cdb1eeab28c2d57785f1938ef5fcc","reviewed":true},
+      "ja": {"text":"アクティビティはありません。","sourceRevision":"83e0257f2342c7cd90398dc8feeb8ede6e3cdb1eeab28c2d57785f1938ef5fcc","reviewed":true},
+      "it": {"text":"Nessuna attività.","sourceRevision":"83e0257f2342c7cd90398dc8feeb8ede6e3cdb1eeab28c2d57785f1938ef5fcc","reviewed":true},
+      "ru": {"text":"Активности пока нет.","sourceRevision":"83e0257f2342c7cd90398dc8feeb8ede6e3cdb1eeab28c2d57785f1938ef5fcc","reviewed":true}
+    }
+  },
+  "emptyBio": {
+    "source": "这个用户还没有留下简介。",
+    "translations": {
+      "en": {"text":"This user has not added a bio yet.","sourceRevision":"1c45187141ed9525a4c8ce6958f0b352dd1d370258ef622cb51812e4c9e8f8ae","reviewed":true},
+      "ja": {"text":"このユーザーはまだ自己紹介を書いていません。","sourceRevision":"1c45187141ed9525a4c8ce6958f0b352dd1d370258ef622cb51812e4c9e8f8ae","reviewed":true},
+      "it": {"text":"Questo utente non ha ancora aggiunto una biografia.","sourceRevision":"1c45187141ed9525a4c8ce6958f0b352dd1d370258ef622cb51812e4c9e8f8ae","reviewed":true},
+      "ru": {"text":"Пользователь пока не добавил биографию.","sourceRevision":"1c45187141ed9525a4c8ce6958f0b352dd1d370258ef622cb51812e4c9e8f8ae","reviewed":true}
+    }
+  },
+  "emptyData": {
+    "source": "暂无数据。",
+    "translations": {
+      "en": {"text":"No data.","sourceRevision":"31be9df5b0010122b3d960d3805d7aee0414f642cdae22ca01f211f529f63f0c","reviewed":true},
+      "ja": {"text":"データはありません。","sourceRevision":"31be9df5b0010122b3d960d3805d7aee0414f642cdae22ca01f211f529f63f0c","reviewed":true},
+      "it": {"text":"Nessun dato.","sourceRevision":"31be9df5b0010122b3d960d3805d7aee0414f642cdae22ca01f211f529f63f0c","reviewed":true},
+      "ru": {"text":"Нет данных.","sourceRevision":"31be9df5b0010122b3d960d3805d7aee0414f642cdae22ca01f211f529f63f0c","reviewed":true}
+    }
+  },
+  "emptyTopics": {
+    "source": "还没有发布主题。",
+    "translations": {
+      "en": {"text":"No topics posted yet.","sourceRevision":"6dd01752513f1d27ec319edfa2be7b9062388f62c1fa6b8eb9bc81d549eda8a2","reviewed":true},
+      "ja": {"text":"まだトピックを投稿していません。","sourceRevision":"6dd01752513f1d27ec319edfa2be7b9062388f62c1fa6b8eb9bc81d549eda8a2","reviewed":true},
+      "it": {"text":"Nessun argomento pubblicato.","sourceRevision":"6dd01752513f1d27ec319edfa2be7b9062388f62c1fa6b8eb9bc81d549eda8a2","reviewed":true},
+      "ru": {"text":"Пока нет опубликованных тем.","sourceRevision":"6dd01752513f1d27ec319edfa2be7b9062388f62c1fa6b8eb9bc81d549eda8a2","reviewed":true}
+    }
+  },
+  "follow": {
+    "source": "关注",
+    "translations": {
+      "en": {"text":"Follow","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true},
+      "ja": {"text":"フォロー","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true},
+      "it": {"text":"Segui","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true},
+      "ru": {"text":"Подписаться","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true}
+    }
+  },
+  "followFailed": {
+    "source": "关注操作失败，请稍后重试。",
+    "translations": {
+      "en": {"text":"Could not update follow status. Try again.","sourceRevision":"f1cefdf266840042445c9b4627c75c3d72dcdffa228d10bb86d017a35e5fe642","reviewed":true},
+      "ja": {"text":"フォロー状態を更新できませんでした。","sourceRevision":"f1cefdf266840042445c9b4627c75c3d72dcdffa228d10bb86d017a35e5fe642","reviewed":true},
+      "it": {"text":"Impossibile aggiornare lo stato. Riprova.","sourceRevision":"f1cefdf266840042445c9b4627c75c3d72dcdffa228d10bb86d017a35e5fe642","reviewed":true},
+      "ru": {"text":"Не удалось обновить статус подписки. Попробуйте позже.","sourceRevision":"f1cefdf266840042445c9b4627c75c3d72dcdffa228d10bb86d017a35e5fe642","reviewed":true}
+    }
+  },
+  "following": {
+    "source": "已关注",
+    "translations": {
+      "en": {"text":"Following","sourceRevision":"1010c7e312869287fef23f1ecca971bc0c9c3818c8a0f062b8593ba24bf2f69b","reviewed":true},
+      "ja": {"text":"フォロー中","sourceRevision":"1010c7e312869287fef23f1ecca971bc0c9c3818c8a0f062b8593ba24bf2f69b","reviewed":true},
+      "it": {"text":"Segue","sourceRevision":"1010c7e312869287fef23f1ecca971bc0c9c3818c8a0f062b8593ba24bf2f69b","reviewed":true},
+      "ru": {"text":"Вы подписаны","sourceRevision":"1010c7e312869287fef23f1ecca971bc0c9c3818c8a0f062b8593ba24bf2f69b","reviewed":true}
+    }
+  },
+  "joinedAt": {
+    "source": "加入于 {date}",
+    "translations": {
+      "en": {"text":"Joined {date}","sourceRevision":"9feec23aa42680678bb6e86bc77564277ea7629ad042a0b51add00915b164365","reviewed":true},
+      "ja": {"text":"{date} に参加","sourceRevision":"9feec23aa42680678bb6e86bc77564277ea7629ad042a0b51add00915b164365","reviewed":true},
+      "it": {"text":"Iscritto {date}","sourceRevision":"9feec23aa42680678bb6e86bc77564277ea7629ad042a0b51add00915b164365","reviewed":true},
+      "ru": {"text":"Зарегистрирован {date}","sourceRevision":"9feec23aa42680678bb6e86bc77564277ea7629ad042a0b51add00915b164365","reviewed":true}
+    }
+  },
+  "lastActive": {
+    "source": "最后活跃 {time}",
+    "translations": {
+      "en": {"text":"Last active {time}","sourceRevision":"b680904dd6c4e67b2708004cf5dd7dbf7290ae082a1fdf2f243362805dcabe90","reviewed":true},
+      "ja": {"text":"最終アクティブ {time}","sourceRevision":"b680904dd6c4e67b2708004cf5dd7dbf7290ae082a1fdf2f243362805dcabe90","reviewed":true},
+      "it": {"text":"Ultima attività {time}","sourceRevision":"b680904dd6c4e67b2708004cf5dd7dbf7290ae082a1fdf2f243362805dcabe90","reviewed":true},
+      "ru": {"text":"Был в сети {time}","sourceRevision":"b680904dd6c4e67b2708004cf5dd7dbf7290ae082a1fdf2f243362805dcabe90","reviewed":true}
+    }
+  },
+  "loadFailed": {
+    "source": "加载失败，请稍后重试。",
+    "translations": {
+      "en": {"text":"Could not load more. Try again.","sourceRevision":"3fd01f2fd26870b74087a4a79af59145367c0077400491f9cf0eb4cd50a963a0","reviewed":true},
+      "ja": {"text":"読み込みに失敗しました。","sourceRevision":"3fd01f2fd26870b74087a4a79af59145367c0077400491f9cf0eb4cd50a963a0","reviewed":true},
+      "it": {"text":"Caricamento non riuscito. Riprova.","sourceRevision":"3fd01f2fd26870b74087a4a79af59145367c0077400491f9cf0eb4cd50a963a0","reviewed":true},
+      "ru": {"text":"Не удалось загрузить дополнительные данные. Попробуйте позже.","sourceRevision":"3fd01f2fd26870b74087a4a79af59145367c0077400491f9cf0eb4cd50a963a0","reviewed":true}
+    }
+  },
+  "loading": {
+    "source": "加载中…",
+    "translations": {
+      "en": {"text":"Loading…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true},
+      "ja": {"text":"読み込み中…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true},
+      "it": {"text":"Caricamento…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true},
+      "ru": {"text":"Загрузка…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true}
+    }
+  },
+  "message": {
+    "source": "私信",
+    "translations": {
+      "en": {"text":"Message","sourceRevision":"640a8ce5612eff0efdf1b4f6c0aef12b78ae67614955b09804042f06039db22a","reviewed":true},
+      "ja": {"text":"メッセージ","sourceRevision":"640a8ce5612eff0efdf1b4f6c0aef12b78ae67614955b09804042f06039db22a","reviewed":true},
+      "it": {"text":"Messaggio","sourceRevision":"640a8ce5612eff0efdf1b4f6c0aef12b78ae67614955b09804042f06039db22a","reviewed":true},
+      "ru": {"text":"Написать сообщение","sourceRevision":"640a8ce5612eff0efdf1b4f6c0aef12b78ae67614955b09804042f06039db22a","reviewed":true}
+    }
+  },
+  "noBio": {
+    "source": "暂无简介",
+    "translations": {
+      "en": {"text":"No bio","sourceRevision":"10a941f14e894844bce02a81b2775fac98c5953dac5e2056cc9d89733431ac9c","reviewed":true},
+      "ja": {"text":"自己紹介なし","sourceRevision":"10a941f14e894844bce02a81b2775fac98c5953dac5e2056cc9d89733431ac9c","reviewed":true},
+      "it": {"text":"Nessuna biografia","sourceRevision":"10a941f14e894844bce02a81b2775fac98c5953dac5e2056cc9d89733431ac9c","reviewed":true},
+      "ru": {"text":"Биография отсутствует","sourceRevision":"10a941f14e894844bce02a81b2775fac98c5953dac5e2056cc9d89733431ac9c","reviewed":true}
+    }
+  },
+  "online": {
+    "source": "在线",
+    "translations": {
+      "en": {"text":"Online","sourceRevision":"6c7e098144a8eecf696a9d349d18f595fe03214b3665f1ec24c52567ac573184","reviewed":true},
+      "ja": {"text":"オンライン","sourceRevision":"6c7e098144a8eecf696a9d349d18f595fe03214b3665f1ec24c52567ac573184","reviewed":true},
+      "it": {"text":"Online","sourceRevision":"6c7e098144a8eecf696a9d349d18f595fe03214b3665f1ec24c52567ac573184","reviewed":true},
+      "ru": {"text":"В сети","sourceRevision":"6c7e098144a8eecf696a9d349d18f595fe03214b3665f1ec24c52567ac573184","reviewed":true}
+    }
+  },
+  "profileNavigation": {
+    "source": "用户资料",
+    "translations": {
+      "en": {"text":"User profile","sourceRevision":"eb77440f3bff6fe2a06d6a2d0835cef6d4158994c0c6dda76247be82d6018d9c","reviewed":true},
+      "ja": {"text":"ユーザープロフィール","sourceRevision":"eb77440f3bff6fe2a06d6a2d0835cef6d4158994c0c6dda76247be82d6018d9c","reviewed":true},
+      "it": {"text":"Profilo utente","sourceRevision":"eb77440f3bff6fe2a06d6a2d0835cef6d4158994c0c6dda76247be82d6018d9c","reviewed":true},
+      "ru": {"text":"Профиль пользователя","sourceRevision":"eb77440f3bff6fe2a06d6a2d0835cef6d4158994c0c6dda76247be82d6018d9c","reviewed":true}
+    }
+  },
+  "stats.bookmarks": {
+    "source": "收藏",
+    "translations": {
+      "en": {"text":"Bookmarks","sourceRevision":"8fa71193e00b3630f46ff38c324dd44acdafa05c30051eae027b3a7607fa35e3","reviewed":true},
+      "ja": {"text":"ブックマーク","sourceRevision":"8fa71193e00b3630f46ff38c324dd44acdafa05c30051eae027b3a7607fa35e3","reviewed":true},
+      "it": {"text":"Salvati","sourceRevision":"8fa71193e00b3630f46ff38c324dd44acdafa05c30051eae027b3a7607fa35e3","reviewed":true},
+      "ru": {"text":"Закладки","sourceRevision":"8fa71193e00b3630f46ff38c324dd44acdafa05c30051eae027b3a7607fa35e3","reviewed":true}
+    }
+  },
+  "stats.followers": {
+    "source": "粉丝",
+    "translations": {
+      "en": {"text":"Followers","sourceRevision":"b34bde03e0dc941475e5fa7821ce2e3723f1e6965b26eb3cb6ab6ef1d9175016","reviewed":true},
+      "ja": {"text":"フォロワー","sourceRevision":"b34bde03e0dc941475e5fa7821ce2e3723f1e6965b26eb3cb6ab6ef1d9175016","reviewed":true},
+      "it": {"text":"Follower","sourceRevision":"b34bde03e0dc941475e5fa7821ce2e3723f1e6965b26eb3cb6ab6ef1d9175016","reviewed":true},
+      "ru": {"text":"Подписчики","sourceRevision":"b34bde03e0dc941475e5fa7821ce2e3723f1e6965b26eb3cb6ab6ef1d9175016","reviewed":true}
+    }
+  },
+  "stats.following": {
+    "source": "关注",
+    "translations": {
+      "en": {"text":"Following","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true},
+      "ja": {"text":"フォロー中","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true},
+      "it": {"text":"Segue","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true},
+      "ru": {"text":"Подписки","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true}
+    }
+  },
+  "stats.likesGiven": {
+    "source": "点赞",
+    "translations": {
+      "en": {"text":"Liked","sourceRevision":"cb2d8c967e2249dd941463f89d0a210b4c95d20ed1899bbffb29e8b8e56ef564","reviewed":true},
+      "ja": {"text":"いいね済み","sourceRevision":"cb2d8c967e2249dd941463f89d0a210b4c95d20ed1899bbffb29e8b8e56ef564","reviewed":true},
+      "it": {"text":"Mi piace dati","sourceRevision":"cb2d8c967e2249dd941463f89d0a210b4c95d20ed1899bbffb29e8b8e56ef564","reviewed":true},
+      "ru": {"text":"Поставлено лайков","sourceRevision":"cb2d8c967e2249dd941463f89d0a210b4c95d20ed1899bbffb29e8b8e56ef564","reviewed":true}
+    }
+  },
+  "stats.likesReceived": {
+    "source": "获赞",
+    "translations": {
+      "en": {"text":"Likes","sourceRevision":"46c262b6742310046d46956f398485572b867dc35f0247c33af1d80e26a7bbd3","reviewed":true},
+      "ja": {"text":"いいね","sourceRevision":"46c262b6742310046d46956f398485572b867dc35f0247c33af1d80e26a7bbd3","reviewed":true},
+      "it": {"text":"Mi piace","sourceRevision":"46c262b6742310046d46956f398485572b867dc35f0247c33af1d80e26a7bbd3","reviewed":true},
+      "ru": {"text":"Получено лайков","sourceRevision":"46c262b6742310046d46956f398485572b867dc35f0247c33af1d80e26a7bbd3","reviewed":true}
+    }
+  },
+  "stats.replies": {
+    "source": "回复",
+    "translations": {
+      "en": {"text":"Replies","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
+      "ja": {"text":"返信","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
+      "it": {"text":"Risposte","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
+      "ru": {"text":"Ответы","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true}
+    }
+  },
+  "stats.reputation": {
+    "source": "声望",
+    "translations": {
+      "en": {"text":"Reputation","sourceRevision":"725961275047883910e4e9723b65ec78c9554fb1a2b3ed197306a3d1a0c7e6f8","reviewed":true},
+      "ja": {"text":"評判","sourceRevision":"725961275047883910e4e9723b65ec78c9554fb1a2b3ed197306a3d1a0c7e6f8","reviewed":true},
+      "it": {"text":"Reputazione","sourceRevision":"725961275047883910e4e9723b65ec78c9554fb1a2b3ed197306a3d1a0c7e6f8","reviewed":true},
+      "ru": {"text":"Репутация","sourceRevision":"725961275047883910e4e9723b65ec78c9554fb1a2b3ed197306a3d1a0c7e6f8","reviewed":true}
+    }
+  },
+  "stats.topics": {
+    "source": "主题",
+    "translations": {
+      "en": {"text":"Topics","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
+      "ja": {"text":"トピック","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
+      "it": {"text":"Argomenti","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
+      "ru": {"text":"Темы","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true}
+    }
+  },
+  "summarySections.recentActivity": {
+    "source": "近期动态",
+    "translations": {
+      "en": {"text":"Recent activity","sourceRevision":"e3d564e3f3aeb614f1f9cdb9f77e7a83246cd3587f5bbbc2ab35db5c052cc07b","reviewed":true},
+      "ja": {"text":"最近のアクティビティ","sourceRevision":"e3d564e3f3aeb614f1f9cdb9f77e7a83246cd3587f5bbbc2ab35db5c052cc07b","reviewed":true},
+      "it": {"text":"Attività recente","sourceRevision":"e3d564e3f3aeb614f1f9cdb9f77e7a83246cd3587f5bbbc2ab35db5c052cc07b","reviewed":true},
+      "ru": {"text":"Последняя активность","sourceRevision":"e3d564e3f3aeb614f1f9cdb9f77e7a83246cd3587f5bbbc2ab35db5c052cc07b","reviewed":true}
+    }
+  },
+  "summarySections.recentBadges": {
+    "source": "近期徽章",
+    "translations": {
+      "en": {"text":"Recent badges","sourceRevision":"d8df08b5d97f1e8e04046feefafd48f0c6d5d9e9a13df6b5baa035ec749c8139","reviewed":true},
+      "ja": {"text":"最近のバッジ","sourceRevision":"d8df08b5d97f1e8e04046feefafd48f0c6d5d9e9a13df6b5baa035ec749c8139","reviewed":true},
+      "it": {"text":"Badge recenti","sourceRevision":"d8df08b5d97f1e8e04046feefafd48f0c6d5d9e9a13df6b5baa035ec749c8139","reviewed":true},
+      "ru": {"text":"Последние значки","sourceRevision":"d8df08b5d97f1e8e04046feefafd48f0c6d5d9e9a13df6b5baa035ec749c8139","reviewed":true}
+    }
+  },
+  "summarySections.recentTopics": {
+    "source": "近期主题",
+    "translations": {
+      "en": {"text":"Recent topics","sourceRevision":"36d03964a612d24da56cc485c87fd52b139323a8c3bb72518e9438d735627b64","reviewed":true},
+      "ja": {"text":"最近のトピック","sourceRevision":"36d03964a612d24da56cc485c87fd52b139323a8c3bb72518e9438d735627b64","reviewed":true},
+      "it": {"text":"Argomenti recenti","sourceRevision":"36d03964a612d24da56cc485c87fd52b139323a8c3bb72518e9438d735627b64","reviewed":true},
+      "ru": {"text":"Последние темы","sourceRevision":"36d03964a612d24da56cc485c87fd52b139323a8c3bb72518e9438d735627b64","reviewed":true}
+    }
+  },
+  "tabs.activity": {
+    "source": "动态",
+    "translations": {
+      "en": {"text":"Activity","sourceRevision":"afcc6c2ed83cd2deff021c31337df50e38a08a4fb6caaa65c77a11d54a7b2e68","reviewed":true},
+      "ja": {"text":"アクティビティ","sourceRevision":"afcc6c2ed83cd2deff021c31337df50e38a08a4fb6caaa65c77a11d54a7b2e68","reviewed":true},
+      "it": {"text":"Attività","sourceRevision":"afcc6c2ed83cd2deff021c31337df50e38a08a4fb6caaa65c77a11d54a7b2e68","reviewed":true},
+      "ru": {"text":"Активность","sourceRevision":"afcc6c2ed83cd2deff021c31337df50e38a08a4fb6caaa65c77a11d54a7b2e68","reviewed":true}
+    }
+  },
+  "tabs.badges": {
+    "source": "徽章",
+    "translations": {
+      "en": {"text":"Badges","sourceRevision":"13b97bd913e71e54d7e43d5eb99cb3d50a46fdbbcaa318a7f6a79f4574c6dffe","reviewed":true},
+      "ja": {"text":"バッジ","sourceRevision":"13b97bd913e71e54d7e43d5eb99cb3d50a46fdbbcaa318a7f6a79f4574c6dffe","reviewed":true},
+      "it": {"text":"Badge","sourceRevision":"13b97bd913e71e54d7e43d5eb99cb3d50a46fdbbcaa318a7f6a79f4574c6dffe","reviewed":true},
+      "ru": {"text":"Значки","sourceRevision":"13b97bd913e71e54d7e43d5eb99cb3d50a46fdbbcaa318a7f6a79f4574c6dffe","reviewed":true}
+    }
+  },
+  "tabs.followers": {
+    "source": "粉丝",
+    "translations": {
+      "en": {"text":"Followers","sourceRevision":"b34bde03e0dc941475e5fa7821ce2e3723f1e6965b26eb3cb6ab6ef1d9175016","reviewed":true},
+      "ja": {"text":"フォロワー","sourceRevision":"b34bde03e0dc941475e5fa7821ce2e3723f1e6965b26eb3cb6ab6ef1d9175016","reviewed":true},
+      "it": {"text":"Follower","sourceRevision":"b34bde03e0dc941475e5fa7821ce2e3723f1e6965b26eb3cb6ab6ef1d9175016","reviewed":true},
+      "ru": {"text":"Подписчики","sourceRevision":"b34bde03e0dc941475e5fa7821ce2e3723f1e6965b26eb3cb6ab6ef1d9175016","reviewed":true}
+    }
+  },
+  "tabs.following": {
+    "source": "关注",
+    "translations": {
+      "en": {"text":"Following","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true},
+      "ja": {"text":"フォロー中","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true},
+      "it": {"text":"Segue","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true},
+      "ru": {"text":"Подписки","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true}
+    }
+  },
+  "tabs.likes": {
+    "source": "赞",
+    "translations": {
+      "en": {"text":"Likes","sourceRevision":"ca3a955e5f1f8afd8737c21927414b126fdd9685c6dc3af8246c743babc612a6","reviewed":true},
+      "ja": {"text":"いいね","sourceRevision":"ca3a955e5f1f8afd8737c21927414b126fdd9685c6dc3af8246c743babc612a6","reviewed":true},
+      "it": {"text":"Mi piace","sourceRevision":"ca3a955e5f1f8afd8737c21927414b126fdd9685c6dc3af8246c743babc612a6","reviewed":true},
+      "ru": {"text":"Лайки","sourceRevision":"ca3a955e5f1f8afd8737c21927414b126fdd9685c6dc3af8246c743babc612a6","reviewed":true}
+    }
+  },
+  "tabs.summary": {
+    "source": "总结",
+    "translations": {
+      "en": {"text":"Summary","sourceRevision":"3901eb715a7f68c2ddc32679020e5d3d91b691bc7481e570186b33ea6f2a4892","reviewed":true},
+      "ja": {"text":"概要","sourceRevision":"3901eb715a7f68c2ddc32679020e5d3d91b691bc7481e570186b33ea6f2a4892","reviewed":true},
+      "it": {"text":"Riepilogo","sourceRevision":"3901eb715a7f68c2ddc32679020e5d3d91b691bc7481e570186b33ea6f2a4892","reviewed":true},
+      "ru": {"text":"Обзор","sourceRevision":"3901eb715a7f68c2ddc32679020e5d3d91b691bc7481e570186b33ea6f2a4892","reviewed":true}
+    }
+  },
+  "tabs.timeline": {
+    "source": "所有",
+    "translations": {
+      "en": {"text":"All","sourceRevision":"a3d4d3c6ed728f74b8d976056b00e15064602fc8d56b59fb4a38a4e5b14cf172","reviewed":true},
+      "ja": {"text":"すべて","sourceRevision":"a3d4d3c6ed728f74b8d976056b00e15064602fc8d56b59fb4a38a4e5b14cf172","reviewed":true},
+      "it": {"text":"Tutto","sourceRevision":"a3d4d3c6ed728f74b8d976056b00e15064602fc8d56b59fb4a38a4e5b14cf172","reviewed":true},
+      "ru": {"text":"Всё","sourceRevision":"a3d4d3c6ed728f74b8d976056b00e15064602fc8d56b59fb4a38a4e5b14cf172","reviewed":true}
+    }
+  },
+  "tabs.topics": {
+    "source": "主题",
+    "translations": {
+      "en": {"text":"Topics","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
+      "ja": {"text":"トピック","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
+      "it": {"text":"Argomenti","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
+      "ru": {"text":"Темы","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true}
+    }
+  }
+}

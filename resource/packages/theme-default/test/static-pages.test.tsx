@@ -2447,8 +2447,8 @@ describe("AppShell and static pages", () => {
     expect(within(sidebar).queryByRole('link', { name: '版主管理' })).toBeNull();
     more.focus();
     await user.keyboard('{Enter}');
+    expect(await within(sidebar).findByRole('button', { name: '收起' })).toBe(more);
     expect(more.getAttribute('aria-expanded')).toBe('true');
-    expect(within(sidebar).getByRole('button', { name: '收起' })).toBe(more);
     const moderationLink = within(sidebar).getByRole('link', { name: '版主管理' });
     expect(moderationLink.querySelector('.lucide-scale')).toBeTruthy();
     expect(moderationLink.closest('ul')).toBe(

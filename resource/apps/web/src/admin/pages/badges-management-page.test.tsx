@@ -1,14 +1,17 @@
+import { adminText, getAdminDictionary } from "@gooseforum/i18n/admin";
 import { afterEach, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { AdminBadge, GooseAdminApi } from '@gooseforum/client'
-import messages from '../messages/zh-assets'
+
 import { BadgesManagementPage } from './badges-management-page'
+
+const messages = getAdminDictionary("admin.assets", "zh");
 
 vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} })
 
 const badge: AdminBadge = { code: 'helper', type: 'custom', grantMode: 'manual', name: '热心伙伴', description: '帮助社区成员', iconUrl: '/static/badges/contributor.svg', color: 'blue', level: 'bronze', isEnabled: true, isWearable: true, sortOrder: 1000, grantedCount: 2, canDelete: false }
-const text = (key: keyof typeof messages) => messages[key]
+const text = adminText("zh", "admin.assets")
 function setup(items: AdminBadge[] = [badge]) {
   const api = {
     assets: {
@@ -42,7 +45,7 @@ it('requires an explicit acknowledgement before disabling a badge already held b
   await user.click(screen.getByRole('switch', { name: messages.enabled }))
   await user.click(screen.getByRole('button', { name: messages.save }))
   expect(api.assets.saveBadge).not.toHaveBeenCalled()
-  await user.click(screen.getByRole('checkbox', { name: messages.disableConfirm.replace('{count}', '2') }))
+  await user.click(screen.getByRole('checkbox', { name: text('disableConfirm', { count: 2 }) }))
   await user.click(screen.getByRole('button', { name: messages.save }))
   await waitFor(() => expect(api.assets.saveBadge).toHaveBeenCalledWith(expect.objectContaining({ isEnabled: false })))
 })

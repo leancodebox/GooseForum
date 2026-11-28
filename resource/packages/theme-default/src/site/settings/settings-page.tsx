@@ -1,3 +1,5 @@
+import { runtimeText } from "@gooseforum/i18n";
+import type { TFunction } from "i18next";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type {
   LayoutPayload,
@@ -64,7 +66,7 @@ export function SettingsPageView({
   page: SettingsPageProps;
   layout: LayoutPayload;
 }) {
-  const { t } = useTranslation("settings");
+  const { t } = useTranslation("site.settings");
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
   const [activeTab, setActiveTab] = useState<TabKey>(readTab);
@@ -506,7 +508,7 @@ export function SettingsPageView({
 }
 
 function Stats({ page }: { page: SettingsPageProps }) {
-  const { t } = useTranslation("user");
+  const { t } = useTranslation("site.user");
   const items = [
     ["topics", page.stats.topicCount],
     ["replies", page.stats.replyCount],
@@ -551,13 +553,13 @@ function buildExternalInformation(page: SettingsPageProps) {
 function tabLabel(
   key: string,
   fallback: string | undefined,
-  t: ReturnType<typeof useTranslation>["t"],
+  t: TFunction<"site.settings">,
 ) {
   if (key === "mfa") return t("mfa.title");
   if (key === "agent-tokens") return t("agentTokens.title");
   return key === "applications"
     ? t("tabs.applications")
-    : t(`tabs.${key}`, { defaultValue: fallback || key });
+    : runtimeText(t, `tabs.${key}`, { defaultValue: fallback || key });
 }
 
 const defaultCover =

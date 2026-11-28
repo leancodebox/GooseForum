@@ -1,10 +1,9 @@
-import { getAdminDictionary } from "./translation-loader";
-type EnglishDictionary =
-  typeof import("./messages/en-content-settings").default;
+import { adminText, type Dictionary } from "@gooseforum/i18n/admin";
+type Messages = Dictionary<"admin.content-settings">;
 import type { AuthLocale } from "@gooseforum/runtime/i18n/auth";
 
-export type ContentSettingsTextKey = keyof EnglishDictionary;
+export type ContentSettingsTextKey = keyof Messages;
 export function createContentSettingsText(l: AuthLocale) {
   return (k: ContentSettingsTextKey) =>
-    getAdminDictionary<EnglishDictionary>("content-settings", l)[k];
+    adminText(l, "admin.content-settings")(k);
 }

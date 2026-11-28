@@ -39,7 +39,7 @@ import { GooseClientError } from "@gooseforum/client";
 import { useLocalDraft } from "../drafts/use-local-draft";
 
 export function PublishPageView({ page, layout }: { page: PublishPageProps; layout?: LayoutPayload }) {
-  const { t } = useTranslation("publish");
+  const { t } = useTranslation("site.publish");
   const runtime = useGooseRuntime();
   const serverError = useServerErrorMessage();
   const [attachments, setAttachments] = useState(page.topic.attachments || []);

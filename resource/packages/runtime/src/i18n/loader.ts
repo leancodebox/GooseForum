@@ -1,155 +1,46 @@
-import type { Resource, ResourceKey } from "i18next";
 import type { Locale } from "@gooseforum/client/i18n/locale";
-import { resourceLoaders } from "./resource-loaders";
+import {
+  siteNamespaces as gooseNamespaces,
+  siteTranslations,
+  type SiteNamespace,
+} from "@gooseforum/i18n/site";
 
-const namespaceFiles: Record<string, string[]> = {
-  auth: ["auth"],
-  oidcConsent: ["oidc-consent"],
-  ...Object.fromEntries(
-    [
-      "shell",
-      "links",
-      "sponsors",
-      "categories",
-      "members",
-      "home",
-      "search",
-      "user",
-      "userCard",
-    ].map((name) => [name, [`site-${name}`]]),
-  ),
-  settings: ["settings"],
-  notifications: ["notifications"],
-  messages: ["messages"],
-  drafts: ["legacy-site-pages-drafts"],
-  accessGroups: ["legacy-site-pages-accessGroups"],
-  error: ["content-error"],
-  contentCommon: ["content-common"],
-  serverMessages: ["server-messages"],
-  moderation: ["moderation", "legacy-site-pages-moderation"],
-  publish: ["publish", "legacy-site-pages-publish"],
-  topic: ["topic", "legacy-site-pages-topic"],
-  themePreview: ["theme-preview", "legacy-site-pages-themePreview"],
-};
-export const gooseNamespaces = Object.keys(namespaceFiles);
+export { gooseNamespaces };
 export const commonNamespaces = [
-  "auth",
-  "shell",
-  "home",
-  "userCard",
-  "contentCommon",
-  "serverMessages",
-];
-const resources: Resource = {};
-const pending = new Map<string, Promise<void>>();
-type Listener = (
-  locale: string,
-  namespace: string,
-  dictionary: ResourceKey,
-) => void;
-const listeners = new Set<Listener>();
+  "site.auth", "shared.shell", "site.home", "site.userCard",
+  "site.contentCommon", "shared.serverMessages",
+] as const;
 
-export function cachedGooseResources(): Resource {
-  return structuredClone(resources);
-}
-export function loadedGooseNamespaces() {
-  return [
-    ...new Set(Object.values(resources).flatMap((value) => Object.keys(value))),
-  ];
-}
-export function subscribeGooseResources(listener: Listener) {
-  listeners.add(listener);
-  for (const [locale, namespaces] of Object.entries(resources))
-    for (const [namespace, dictionary] of Object.entries(namespaces))
-      listener(locale, namespace, dictionary);
-  return () => {
-    listeners.delete(listener);
-  };
-}
+export const cachedGooseResources = siteTranslations.snapshot;
+export const loadedGooseNamespaces = siteTranslations.loadedNamespaces;
+export const subscribeGooseResources = siteTranslations.subscribe;
 
 export async function prepareGooseTranslations(
   locale: Locale,
-  namespaces: readonly string[] = commonNamespaces,
+  namespaces: readonly SiteNamespace[] = commonNamespaces,
 ) {
-  const languages = locale === "zh" ? ["zh"] : [locale, "zh"];
-  await Promise.all(
-    languages.flatMap((language) =>
-      [...new Set([...commonNamespaces, ...namespaces])].map((namespace) =>
-        loadNamespace(language, namespace),
-      ),
-    ),
-  );
-}
-function loadNamespace(locale: string, namespace: string): Promise<void> {
-  if (resources[locale]?.[namespace]) return Promise.resolve();
-  const key = `${locale}/${namespace}`;
-  const existing = pending.get(key);
-  if (existing) return existing;
-  const files = namespaceFiles[namespace];
-  if (!files)
-    return Promise.reject(
-      new Error(`Unknown translation namespace: ${namespace}`),
-    );
-  const promise = Promise.all(
-    files.map((file) => resourceLoaders[`${locale}/${file}`]()),
-  )
-    .then((modules) => {
-      const [base, legacy] = modules.map((module) => module.default);
-      let dictionary = base;
-      if (legacy) {
-        dictionary = { ...base, ...legacy };
-        if (namespace === "topic")
-          dictionary.reportReasons = {
-            ...base.reportReasons,
-            ...legacy.reportReasons,
-          };
-        if (namespace === "moderation") {
-          dictionary.blocked = base.blocked;
-          dictionary.tabs = { ...base.tabs, ...legacy.managementTabs };
-          dictionary.reports = { ...base.reports, ...legacy.reports };
-          dictionary.logs = { ...base.logs, ...legacy.logs };
-        }
-        if (namespace === "themePreview")
-          dictionary.presets = {
-            ...base.presets,
-            ...Object.fromEntries(
-              Object.entries(legacy.presets).map(([key, value]) => [
-                key,
-                (value as { label: string }).label,
-              ]),
-            ),
-          };
-      }
-      resources[locale] ??= {};
-      resources[locale][namespace] = dictionary;
-      for (const listener of listeners) listener(locale, namespace, dictionary);
-    })
-    .finally(() => {
-      pending.delete(key);
-    });
-  pending.set(key, promise);
-  return promise;
+  return siteTranslations.prepare(locale, [...commonNamespaces, ...namespaces]);
 }
 
 export function goosePageNamespaces(component: string) {
-  const pages: Record<string, string[]> = {
-    "auth.oidcConsent": ["oidcConsent"],
-    "settings.index": ["settings", "user", "publish"],
-    "notifications.index": ["notifications"],
-    "messages.index": ["messages"],
-    "drafts.index": ["drafts", "publish"],
-    "access-groups.index": ["accessGroups"],
-    "error.index": ["error"],
-    "moderation.index": ["moderation"],
-    "publish.index": ["publish", "topic"],
-    "topic.detail": ["topic", "publish"],
-    "theme.preview": ["themePreview", "topic", "publish"],
-    "links.index": ["links"],
-    "sponsors.index": ["sponsors"],
-    "categories.index": ["categories"],
-    "members.index": ["members"],
-    "search.index": ["search"],
-    "user.profile": ["user"],
+  const pages: Record<string, readonly SiteNamespace[]> = {
+    "auth.oidcConsent": ["site.oidcConsent"],
+    "settings.index": ["site.settings", "site.user", "site.publish"],
+    "notifications.index": ["site.notifications"],
+    "messages.index": ["site.messages"],
+    "drafts.index": ["site.drafts", "site.publish"],
+    "access-groups.index": ["site.accessGroups"],
+    "error.index": ["site.error"],
+    "moderation.index": ["site.moderation"],
+    "publish.index": ["site.publish", "site.topic"],
+    "topic.detail": ["site.topic", "site.publish"],
+    "theme.preview": ["site.themePreview", "site.topic", "site.publish"],
+    "links.index": ["site.links"],
+    "sponsors.index": ["site.sponsors"],
+    "categories.index": ["site.categories"],
+    "members.index": ["site.members"],
+    "search.index": ["site.search"],
+    "user.profile": ["site.user"],
   };
   return pages[component] || [];
 }

@@ -1,13 +1,13 @@
 import type { AccessGroup } from "@gooseforum/client";
-import { getAdminDictionary } from "./translation-loader";
-type EnglishDictionary = typeof import("./messages/en-access-groups").default;
+import { adminText, type Dictionary } from "@gooseforum/i18n/admin";
+type Messages = Dictionary<"admin.access-groups">;
 import type { AuthLocale } from "@gooseforum/runtime/i18n/auth";
 
-export type AccessGroupTextKey = keyof EnglishDictionary;
+export type AccessGroupTextKey = keyof Messages;
 
 export function createAccessGroupText(locale: AuthLocale) {
   return (key: AccessGroupTextKey) =>
-    getAdminDictionary<EnglishDictionary>("access-groups", locale)[key];
+    adminText(locale, "admin.access-groups")(key);
 }
 
 export function accessGroupName(group: Pick<AccessGroup, "name" | "systemKey">, text: (key: AccessGroupTextKey) => string) {

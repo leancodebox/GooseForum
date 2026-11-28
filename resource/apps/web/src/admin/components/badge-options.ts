@@ -1,7 +1,7 @@
 import type { AdminBadge } from '@gooseforum/client'
-import type { AssetTextKey } from '../assets-i18n'
+import type { AssetText, AssetTextKey } from '../assets-i18n'
 
-export type BadgeText = (key: AssetTextKey) => string
+export type BadgeText = AssetText
 
 export const badgeColors = [
   'blue', 'emerald', 'teal', 'sky', 'cyan', 'rose', 'violet',
@@ -30,8 +30,7 @@ export function badgeLevelLabel(level: string, text: BadgeText) {
 export function badgeRuleLabel(badge: AdminBadge, text: BadgeText) {
   if (badge.grantMode !== 'auto') return text('manualGrantHint')
   if (!badge.grantRule) return text('unsupportedAutomatic')
-  return text(`rule_${badge.grantRule.metric}` as AssetTextKey)
-    .replace('{count}', String(badge.grantRule.threshold))
+  return text(`rule_${badge.grantRule.metric}`, { count: badge.grantRule.threshold })
 }
 
 export const newBadge: AdminBadge = {

@@ -50,7 +50,7 @@ interface LoginPageViewProps {
 
 export function LoginPageView({ layout, page }: LoginPageViewProps) {
   const runtime = useGooseRuntime()
-  const { t } = useTranslation('auth')
+  const { t } = useTranslation('site.auth')
   const resolveError = useServerErrorMessage()
   const [mode, setMode] = useState<Mode>(page.initialMode || 'login')
   const [mfa, setMfa] = useState(() => new URL(runtime.currentUrl || '/login', 'http://localhost').searchParams.get('mfa') === '1')
@@ -185,7 +185,7 @@ export function LoginPageView({ layout, page }: LoginPageViewProps) {
         setMode('login')
         setLoginForm({ username, password: '', captcha: '' })
         setRegisterForm({ username: '', email: '', password: '', confirmPassword: '', captcha: '', invitationCode: '', agree: false })
-        setNotice(t(result.messageCode, { ns: 'serverMessages', defaultValue: result.message || t('validation.registerSuccess') }))
+        setNotice(t(result.messageCode, { ns: 'shared.serverMessages', defaultValue: result.message || t('validation.registerSuccess') }))
         if (provider === 'image') void refreshCaptcha()
         return
       }

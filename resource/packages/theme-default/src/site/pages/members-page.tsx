@@ -19,7 +19,7 @@ import { PageHeader } from "../layout/page-header";
 import { ProfileAvatar } from "../users/profile-avatar";
 
 export function MembersPageView({ page }: { page: MembersPageProps }) {
-  const { t } = useTranslation("members");
+  const { t } = useTranslation("site.members");
   return (
     <div className="pb-12">
       <PageHeader compact title={t("title")} description={t("subtitle")} />

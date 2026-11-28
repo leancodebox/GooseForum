@@ -25,8 +25,8 @@ import { Spinner } from "@gooseforum/ui/components/spinner";
 import { Textarea } from "@gooseforum/ui/components/textarea";
 import { ChevronDown, CircleMinus, FileText, Globe, Save, Upload } from "lucide-react";
 import { toast } from "@gooseforum/ui/components/sonner";
-import type { SettingsTextKey } from "../settings-i18n";
-type Text = (k: SettingsTextKey) => string;
+import type { SettingsText } from "../settings-i18n";
+type Text = SettingsText;
 const avatarImageClass = "size-full rounded-full bg-muted object-cover";
 type AvatarOption = { file: string; enabled: boolean };
 
@@ -308,7 +308,7 @@ export function SiteInfoManagementPage({
                 {enabledAvatars.length > 0 && <div aria-hidden="true" className="flex -space-x-1.5">
                   {enabledAvatars.slice(0, 3).map(({ file }) => <img key={file} src={builtins.includes(file) ? file : `/file/img/${file}`} alt="" className="size-7 rounded-full border-2 border-background bg-muted object-cover" />)}
                 </div>}
-                <span className="text-sm text-muted-foreground">{text("avatarEnabledCount").replace("{count}", String(enabledAvatars.length))}</span>
+                <span className="text-sm text-muted-foreground">{text("avatarEnabledCount", { count: enabledAvatars.length })}</span>
                 <Button type="button" variant="ghost" size="sm" aria-expanded={avatarsExpanded} aria-controls="avatar-options" onClick={() => setAvatarsExpanded(value => !value)}>
                   {text("manageAvatars")}<ChevronDown aria-hidden="true" className={avatarsExpanded ? "rotate-180" : ""} />
                 </Button>

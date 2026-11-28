@@ -20,7 +20,7 @@ export function LocalDraftPanel({ status, candidates, onRestore, onDiscard, onRe
   onRetryTarget?(): void;
   compact?: boolean;
 }) {
-  const { t } = useTranslation("publish");
+  const { t } = useTranslation("site.publish");
   const { locale } = useGooseRuntime();
   const [discarding, setDiscarding] = useState(false);
   const draft = candidates[0];
@@ -48,7 +48,7 @@ export function LocalDraftPanel({ status, candidates, onRestore, onDiscard, onRe
         </DialogHeader>
         {draft ? <div className="min-w-0 text-sm">
           <time className="text-xs text-muted-foreground" dateTime={new Date(draft.updatedAt).toISOString()}>{new Intl.DateTimeFormat(locale, { dateStyle: "short", timeStyle: "short" }).format(draft.updatedAt)}</time>
-          {available(draft) ? <p className="mt-2 line-clamp-3 break-words">{draft.title || draft.content.slice(0, 160)}</p> : checking?.(draft) ? <p role="status" className="mt-2 text-muted-foreground">{t("loadingMoreReplies", { ns: "topic" })}</p> : <p className="mt-2 text-destructive">{failed?.(draft) ? t("loadFailed", { ns: "topic" }) : t("localDraft.unavailable")}</p>}
+          {available(draft) ? <p className="mt-2 line-clamp-3 break-words">{draft.title || draft.content.slice(0, 160)}</p> : checking?.(draft) ? <p role="status" className="mt-2 text-muted-foreground">{t("loadingMoreReplies", { ns: "site.topic" })}</p> : <p className="mt-2 text-destructive">{failed?.(draft) ? t("loadFailed", { ns: "site.topic" }) : t("localDraft.unavailable")}</p>}
           {available(draft) && conflicts(draft) ? <p className="mt-2 text-destructive">{t("localDraft.conflict")}</p> : null}
           {saveFailed ? <p role="status" className="mt-2 text-destructive">{statusText}</p> : null}
         </div> : null}

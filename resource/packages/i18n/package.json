@@ -1,0 +1,20 @@
+{
+  "name": "@gooseforum/i18n",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./site": "./src/site.ts",
+    "./admin": "./src/admin.ts",
+    "./react-runtime": "./src/react-runtime.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@gooseforum/client": "workspace:*",
+    "i18next": "^27.2.2",
+    "intl-messageformat": "^12.2.1"
+  }
+}

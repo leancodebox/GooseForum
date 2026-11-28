@@ -1,6 +1,8 @@
+import { trustLevelName } from '@gooseforum/i18n/admin'
+import type { AuthLocale } from '@gooseforum/runtime/i18n/auth'
 import { useLatestRequest } from '@gooseforum/runtime';
 import { useEffect, useRef, useState } from 'react'
-import { trustLevelName, type GooseAdminApi, type TrustConfig, type TrustLimits } from '@gooseforum/client'
+import { type GooseAdminApi, type TrustConfig, type TrustLimits } from '@gooseforum/client'
 import { trustQuotaFields } from '@gooseforum/client/trust-limits'
 import { trustLimitOrderIssue } from '@gooseforum/client/trust-validation'
 import { Button } from '@gooseforum/ui/components/button'
@@ -15,7 +17,7 @@ import { toast } from '@gooseforum/ui/components/sonner'
 import type { TrustSettingsText } from '../trust-settings-i18n'
 import { errorMessage } from '../error-message'
 
-export function TrustSettingsPage({ api, locale, text }: { api: GooseAdminApi; locale: string; text: TrustSettingsText }) {
+export function TrustSettingsPage({ api, locale, text }: { api: GooseAdminApi; locale: AuthLocale; text: TrustSettingsText }) {
   const [form, setForm] = useState<TrustConfig>()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)

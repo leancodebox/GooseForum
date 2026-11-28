@@ -83,8 +83,8 @@ import {
   Upload,
 } from "lucide-react";
 import { toast } from "@gooseforum/ui/components/sonner";
-import type { SettingsTextKey } from "../settings-i18n";
-type Text = (k: SettingsTextKey) => string;
+import type { SettingsText } from "../settings-i18n";
+type Text = SettingsText;
 const fixedMain = [
   [MessageCircle, "topics"],
   [LayoutGrid, "categories"],
@@ -183,7 +183,7 @@ export function SiteChromeManagementPage({
   }
   function sidebarVisibility(id: SidebarSystemLink): VisibilityControl {
     return {
-      label: text("showInSidebar").replace("{item}", text(id)),
+      label: text("showInSidebar", { item: text(id) }),
       enabled: !config.hiddenSidebarSystemLinks?.includes(id),
       onToggle: () => update((next) => {
         const hidden = next.hiddenSidebarSystemLinks ?? [];
@@ -289,7 +289,7 @@ export function SiteChromeManagementPage({
                   items={config.header}
                   horizontal
                   visibilityLabel={(id) => isSystemHeader(id)
-                    ? text("showInHeader").replace("{item}", text(id))
+                    ? text("showInHeader", { item: text(id) })
                     : undefined}
                   onChange={(items) =>
                     update((n) => {

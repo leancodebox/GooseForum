@@ -1,0 +1,218 @@
+{
+  "accessAccount": {
+    "source": "希望访问你的 {site} 账号",
+    "translations": {
+      "en": {"text":"Wants to access your {site} account","sourceRevision":"dc9ce3b69b7bf4914d422afa09f74db7b8aaeb17a3e7d37a3a503fcb26176291","reviewed":true},
+      "ja": {"text":"あなたの {site} アカウントへのアクセスを求めています","sourceRevision":"dc9ce3b69b7bf4914d422afa09f74db7b8aaeb17a3e7d37a3a503fcb26176291","reviewed":true},
+      "it": {"text":"Vuole accedere al tuo account {site}","sourceRevision":"dc9ce3b69b7bf4914d422afa09f74db7b8aaeb17a3e7d37a3a503fcb26176291","reviewed":true},
+      "ru": {"text":"Хочет получить доступ к вашему аккаунту на {site}","sourceRevision":"dc9ce3b69b7bf4914d422afa09f74db7b8aaeb17a3e7d37a3a503fcb26176291","reviewed":true}
+    }
+  },
+  "approve": {
+    "source": "允许并继续",
+    "translations": {
+      "en": {"text":"Allow and continue","sourceRevision":"a9b97918305ce9ef7b2e4b866b869246f8d4dffa308d2b68566d7a911f9f2475","reviewed":true},
+      "ja": {"text":"許可して続行","sourceRevision":"a9b97918305ce9ef7b2e4b866b869246f8d4dffa308d2b68566d7a911f9f2475","reviewed":true},
+      "it": {"text":"Consenti e continua","sourceRevision":"a9b97918305ce9ef7b2e4b866b869246f8d4dffa308d2b68566d7a911f9f2475","reviewed":true},
+      "ru": {"text":"Разрешить и продолжить","sourceRevision":"a9b97918305ce9ef7b2e4b866b869246f8d4dffa308d2b68566d7a911f9f2475","reviewed":true}
+    }
+  },
+  "back": {
+    "source": "返回 {site}",
+    "translations": {
+      "en": {"text":"Return to {site}","sourceRevision":"33c54677248d0863aa0dafd9a32a78a87f2c0997570e2157637c2281a0647ec9","reviewed":true},
+      "ja": {"text":"{site} に戻る","sourceRevision":"33c54677248d0863aa0dafd9a32a78a87f2c0997570e2157637c2281a0647ec9","reviewed":true},
+      "it": {"text":"Torna a {site}","sourceRevision":"33c54677248d0863aa0dafd9a32a78a87f2c0997570e2157637c2281a0647ec9","reviewed":true},
+      "ru": {"text":"Вернуться на {site}","sourceRevision":"33c54677248d0863aa0dafd9a32a78a87f2c0997570e2157637c2281a0647ec9","reviewed":true}
+    }
+  },
+  "clientId": {
+    "source": "客户端 ID",
+    "translations": {
+      "en": {"text":"Client ID","sourceRevision":"c97e34a7cea344de4716246a91e3186bef3c1b6b478ae3851f706c4503832bcb","reviewed":true},
+      "ja": {"text":"クライアント ID","sourceRevision":"c97e34a7cea344de4716246a91e3186bef3c1b6b478ae3851f706c4503832bcb","reviewed":true},
+      "it": {"text":"ID client","sourceRevision":"c97e34a7cea344de4716246a91e3186bef3c1b6b478ae3851f706c4503832bcb","reviewed":true},
+      "ru": {"text":"Идентификатор клиента","sourceRevision":"c97e34a7cea344de4716246a91e3186bef3c1b6b478ae3851f706c4503832bcb","reviewed":true}
+    }
+  },
+  "decisionFailed": {
+    "source": "授权请求处理失败。",
+    "translations": {
+      "en": {"text":"Unable to process the authorization request.","sourceRevision":"838fdaa51fe37916bb629ca8e1402c8e36caf5c04708812ca3d25542b82a0ffb","reviewed":true},
+      "ja": {"text":"リクエストを処理できませんでした。","sourceRevision":"838fdaa51fe37916bb629ca8e1402c8e36caf5c04708812ca3d25542b82a0ffb","reviewed":true},
+      "it": {"text":"Impossibile elaborare la richiesta di autorizzazione.","sourceRevision":"838fdaa51fe37916bb629ca8e1402c8e36caf5c04708812ca3d25542b82a0ffb","reviewed":true},
+      "ru": {"text":"Не удалось обработать запрос авторизации.","sourceRevision":"838fdaa51fe37916bb629ca8e1402c8e36caf5c04708812ca3d25542b82a0ffb","reviewed":true}
+    }
+  },
+  "deny": {
+    "source": "拒绝",
+    "translations": {
+      "en": {"text":"Deny","sourceRevision":"1589091ee1f24e8cf0235578086de647a61c854370f414627b9d97bc4b914594","reviewed":true},
+      "ja": {"text":"拒否","sourceRevision":"1589091ee1f24e8cf0235578086de647a61c854370f414627b9d97bc4b914594","reviewed":true},
+      "it": {"text":"Rifiuta","sourceRevision":"1589091ee1f24e8cf0235578086de647a61c854370f414627b9d97bc4b914594","reviewed":true},
+      "ru": {"text":"Отказать","sourceRevision":"1589091ee1f24e8cf0235578086de647a61c854370f414627b9d97bc4b914594","reviewed":true}
+    }
+  },
+  "expired": {
+    "source": "授权请求已失效，请返回应用重新发起登录。",
+    "translations": {
+      "en": {"text":"This request has expired. Return to the app and sign in again.","sourceRevision":"feda3173e92cfeb000acadcdd22267442eb4b72352631dc28ae3a910aee1ee94","reviewed":true},
+      "ja": {"text":"リクエストの有効期限が切れました。アプリに戻り、再度ログインしてください。","sourceRevision":"feda3173e92cfeb000acadcdd22267442eb4b72352631dc28ae3a910aee1ee94","reviewed":true},
+      "it": {"text":"La richiesta è scaduta. Torna all’app e accedi di nuovo.","sourceRevision":"feda3173e92cfeb000acadcdd22267442eb4b72352631dc28ae3a910aee1ee94","reviewed":true},
+      "ru": {"text":"Срок действия этого запроса истёк. Вернитесь в приложение и войдите снова.","sourceRevision":"feda3173e92cfeb000acadcdd22267442eb4b72352631dc28ae3a910aee1ee94","reviewed":true}
+    }
+  },
+  "loadFailed": {
+    "source": "无法加载授权请求。",
+    "translations": {
+      "en": {"text":"Unable to load the authorization request.","sourceRevision":"3d99dd98718905d725310897a0789c702cb4e80f657f361b7abb2d100caab19f","reviewed":true},
+      "ja": {"text":"リクエストを読み込めませんでした。","sourceRevision":"3d99dd98718905d725310897a0789c702cb4e80f657f361b7abb2d100caab19f","reviewed":true},
+      "it": {"text":"Impossibile caricare la richiesta di autorizzazione.","sourceRevision":"3d99dd98718905d725310897a0789c702cb4e80f657f361b7abb2d100caab19f","reviewed":true},
+      "ru": {"text":"Не удалось загрузить запрос авторизации.","sourceRevision":"3d99dd98718905d725310897a0789c702cb4e80f657f361b7abb2d100caab19f","reviewed":true}
+    }
+  },
+  "loading": {
+    "source": "处理中…",
+    "translations": {
+      "en": {"text":"Working…","sourceRevision":"3c02c23d9ad5445d890d873f4266618bfb97a0e801dca8561a9eb5030c798c67","reviewed":true},
+      "ja": {"text":"処理中…","sourceRevision":"3c02c23d9ad5445d890d873f4266618bfb97a0e801dca8561a9eb5030c798c67","reviewed":true},
+      "it": {"text":"Elaborazione…","sourceRevision":"3c02c23d9ad5445d890d873f4266618bfb97a0e801dca8561a9eb5030c798c67","reviewed":true},
+      "ru": {"text":"Выполняется…","sourceRevision":"3c02c23d9ad5445d890d873f4266618bfb97a0e801dca8561a9eb5030c798c67","reviewed":true}
+    }
+  },
+  "permissions": {
+    "source": "允许后，此应用可以：",
+    "translations": {
+      "en": {"text":"This app will be allowed to:","sourceRevision":"6d3ba0480bac56ff16d1476a738a632189263a68b2ffd97d2eba886250e7d3ca","reviewed":true},
+      "ja": {"text":"許可すると、このアプリは次の操作ができます：","sourceRevision":"6d3ba0480bac56ff16d1476a738a632189263a68b2ffd97d2eba886250e7d3ca","reviewed":true},
+      "it": {"text":"Questa app potrà:","sourceRevision":"6d3ba0480bac56ff16d1476a738a632189263a68b2ffd97d2eba886250e7d3ca","reviewed":true},
+      "ru": {"text":"Это приложение сможет:","sourceRevision":"6d3ba0480bac56ff16d1476a738a632189263a68b2ffd97d2eba886250e7d3ca","reviewed":true}
+    }
+  },
+  "scopes.email": {
+    "source": "读取邮箱和验证状态",
+    "translations": {
+      "en": {"text":"Read your email and verification status","sourceRevision":"a3c5793a601405e2dcf5098702fc7ec7d87a087dff7853fa75c8c3aaad6f8d21","reviewed":true},
+      "ja": {"text":"メールアドレスと確認状態を読み取る","sourceRevision":"a3c5793a601405e2dcf5098702fc7ec7d87a087dff7853fa75c8c3aaad6f8d21","reviewed":true},
+      "it": {"text":"Leggere email e stato di verifica","sourceRevision":"a3c5793a601405e2dcf5098702fc7ec7d87a087dff7853fa75c8c3aaad6f8d21","reviewed":true},
+      "ru": {"text":"Читать ваш email и статус верификации","sourceRevision":"a3c5793a601405e2dcf5098702fc7ec7d87a087dff7853fa75c8c3aaad6f8d21","reviewed":true}
+    }
+  },
+  "scopes.forum.read": {
+    "source": "读取你有权访问的论坛内容",
+    "translations": {
+      "en": {"text":"Read forum content you can access","sourceRevision":"70dc7885d779ad078528873d3b7778273b2ef0d7ef08cfee93531f656cc2790f","reviewed":true},
+      "ja": {"text":"アクセス可能なフォーラムの内容を読む","sourceRevision":"70dc7885d779ad078528873d3b7778273b2ef0d7ef08cfee93531f656cc2790f","reviewed":true},
+      "it": {"text":"Leggere i contenuti del forum a cui puoi accedere","sourceRevision":"70dc7885d779ad078528873d3b7778273b2ef0d7ef08cfee93531f656cc2790f","reviewed":true},
+      "ru": {"text":"Читать доступные вам материалы форума","sourceRevision":"70dc7885d779ad078528873d3b7778273b2ef0d7ef08cfee93531f656cc2790f","reviewed":true}
+    }
+  },
+  "scopes.images.upload": {
+    "source": "以你的身份上传图片",
+    "translations": {
+      "en": {"text":"Upload images on your behalf","sourceRevision":"6084eac863055c35d1549477b989c12404c3af626744f4f2194ef108c6779f59","reviewed":true},
+      "ja": {"text":"あなたの名前で画像をアップロードする","sourceRevision":"6084eac863055c35d1549477b989c12404c3af626744f4f2194ef108c6779f59","reviewed":true},
+      "it": {"text":"Caricare immagini per tuo conto","sourceRevision":"6084eac863055c35d1549477b989c12404c3af626744f4f2194ef108c6779f59","reviewed":true},
+      "ru": {"text":"Загружать изображения от вашего имени","sourceRevision":"6084eac863055c35d1549477b989c12404c3af626744f4f2194ef108c6779f59","reviewed":true}
+    }
+  },
+  "scopes.offline_access": {
+    "source": "在你离开后继续保持登录",
+    "translations": {
+      "en": {"text":"Keep you signed in while you are away","sourceRevision":"97204af50757853679e6f09f71a9c46f08c75b56e97cc71bd41fe61584b55232","reviewed":true},
+      "ja": {"text":"利用していない間もログイン状態を維持する","sourceRevision":"97204af50757853679e6f09f71a9c46f08c75b56e97cc71bd41fe61584b55232","reviewed":true},
+      "it": {"text":"Mantenere l’accesso quando non sei presente","sourceRevision":"97204af50757853679e6f09f71a9c46f08c75b56e97cc71bd41fe61584b55232","reviewed":true},
+      "ru": {"text":"Поддерживать ваш вход в систему, пока вы не активны","sourceRevision":"97204af50757853679e6f09f71a9c46f08c75b56e97cc71bd41fe61584b55232","reviewed":true}
+    }
+  },
+  "scopes.openid": {
+    "source": "确认你的身份",
+    "translations": {
+      "en": {"text":"Confirm your identity","sourceRevision":"cd4a2531e8dfd35aaadb24e6d2233eb71d633b3811d9cea8df8cd58ee62a9c3a","reviewed":true},
+      "ja": {"text":"本人確認を行う","sourceRevision":"cd4a2531e8dfd35aaadb24e6d2233eb71d633b3811d9cea8df8cd58ee62a9c3a","reviewed":true},
+      "it": {"text":"Confermare la tua identità","sourceRevision":"cd4a2531e8dfd35aaadb24e6d2233eb71d633b3811d9cea8df8cd58ee62a9c3a","reviewed":true},
+      "ru": {"text":"Подтвердить вашу личность","sourceRevision":"cd4a2531e8dfd35aaadb24e6d2233eb71d633b3811d9cea8df8cd58ee62a9c3a","reviewed":true}
+    }
+  },
+  "scopes.posts.create": {
+    "source": "以你的身份回复主题",
+    "translations": {
+      "en": {"text":"Reply to topics on your behalf","sourceRevision":"9f11d2fd542af12b72125e90c3caf3d6cc7f0b31e0a146f67596b5177c3858ef","reviewed":true},
+      "ja": {"text":"あなたの名前で返信する","sourceRevision":"9f11d2fd542af12b72125e90c3caf3d6cc7f0b31e0a146f67596b5177c3858ef","reviewed":true},
+      "it": {"text":"Rispondere alle discussioni per tuo conto","sourceRevision":"9f11d2fd542af12b72125e90c3caf3d6cc7f0b31e0a146f67596b5177c3858ef","reviewed":true},
+      "ru": {"text":"Отвечать в темах от вашего имени","sourceRevision":"9f11d2fd542af12b72125e90c3caf3d6cc7f0b31e0a146f67596b5177c3858ef","reviewed":true}
+    }
+  },
+  "scopes.posts.edit": {
+    "source": "编辑自己的回复",
+    "translations": {
+      "en": {"text":"Edit your replies","sourceRevision":"0ab9d4775bf841dbfcea0ae283c95315375e4710c93444c3946090b6399e7110","reviewed":true},
+      "ja": {"text":"自分の返信を編集","sourceRevision":"0ab9d4775bf841dbfcea0ae283c95315375e4710c93444c3946090b6399e7110","reviewed":true},
+      "it": {"text":"Modificare le proprie risposte","sourceRevision":"0ab9d4775bf841dbfcea0ae283c95315375e4710c93444c3946090b6399e7110","reviewed":true},
+      "ru": {"text":"Редактировать ваши ответы","sourceRevision":"0ab9d4775bf841dbfcea0ae283c95315375e4710c93444c3946090b6399e7110","reviewed":true}
+    }
+  },
+  "scopes.profile": {
+    "source": "读取名称、用户名和头像",
+    "translations": {
+      "en": {"text":"Read your name, username, and avatar","sourceRevision":"d18d5d3d379172114662124c8e3a5f2fbfe4d8bc887e91241da9bc6da2b2da80","reviewed":true},
+      "ja": {"text":"名前、ユーザー名、アバターを読み取る","sourceRevision":"d18d5d3d379172114662124c8e3a5f2fbfe4d8bc887e91241da9bc6da2b2da80","reviewed":true},
+      "it": {"text":"Leggere nome, nome utente e avatar","sourceRevision":"d18d5d3d379172114662124c8e3a5f2fbfe4d8bc887e91241da9bc6da2b2da80","reviewed":true},
+      "ru": {"text":"Читать ваше имя, никнейм и аватар","sourceRevision":"d18d5d3d379172114662124c8e3a5f2fbfe4d8bc887e91241da9bc6da2b2da80","reviewed":true}
+    }
+  },
+  "scopes.topics.create": {
+    "source": "以你的身份发布主题",
+    "translations": {
+      "en": {"text":"Publish topics on your behalf","sourceRevision":"3429f0c3542a2a4cd007bdc5fa4840cc55a69a6d4207988342217f53a716c633","reviewed":true},
+      "ja": {"text":"あなたの名前でトピックを投稿する","sourceRevision":"3429f0c3542a2a4cd007bdc5fa4840cc55a69a6d4207988342217f53a716c633","reviewed":true},
+      "it": {"text":"Pubblicare discussioni per tuo conto","sourceRevision":"3429f0c3542a2a4cd007bdc5fa4840cc55a69a6d4207988342217f53a716c633","reviewed":true},
+      "ru": {"text":"Публиковать темы от вашего имени","sourceRevision":"3429f0c3542a2a4cd007bdc5fa4840cc55a69a6d4207988342217f53a716c633","reviewed":true}
+    }
+  },
+  "scopes.topics.edit": {
+    "source": "编辑自己的主题",
+    "translations": {
+      "en": {"text":"Edit your topics","sourceRevision":"01d7ac77aded30d13c6fe62c4e5d6d8ff2e668ac1c14cf6c61be3217a4d16ed3","reviewed":true},
+      "ja": {"text":"自分のトピックを編集","sourceRevision":"01d7ac77aded30d13c6fe62c4e5d6d8ff2e668ac1c14cf6c61be3217a4d16ed3","reviewed":true},
+      "it": {"text":"Modificare le proprie discussioni","sourceRevision":"01d7ac77aded30d13c6fe62c4e5d6d8ff2e668ac1c14cf6c61be3217a4d16ed3","reviewed":true},
+      "ru": {"text":"Редактировать ваши темы","sourceRevision":"01d7ac77aded30d13c6fe62c4e5d6d8ff2e668ac1c14cf6c61be3217a4d16ed3","reviewed":true}
+    }
+  },
+  "subtitle": {
+    "source": "授权请求",
+    "translations": {
+      "en": {"text":"Authorization request","sourceRevision":"0d5302e7da59162048525e712034e0e4bba9831e1b15d6d61ee8e60e08508b1d","reviewed":true},
+      "ja": {"text":"アクセス許可のリクエスト","sourceRevision":"0d5302e7da59162048525e712034e0e4bba9831e1b15d6d61ee8e60e08508b1d","reviewed":true},
+      "it": {"text":"Richiesta di autorizzazione","sourceRevision":"0d5302e7da59162048525e712034e0e4bba9831e1b15d6d61ee8e60e08508b1d","reviewed":true},
+      "ru": {"text":"Запрос авторизации","sourceRevision":"0d5302e7da59162048525e712034e0e4bba9831e1b15d6d61ee8e60e08508b1d","reviewed":true}
+    }
+  },
+  "title": {
+    "source": "使用 {site} 登录",
+    "translations": {
+      "en": {"text":"Sign in with {site}","sourceRevision":"3703d0817d271d5dc6de60d7b97af0d5c0029e8b54f33720ee4bcd1dfd497689","reviewed":true},
+      "ja": {"text":"{site} でログイン","sourceRevision":"3703d0817d271d5dc6de60d7b97af0d5c0029e8b54f33720ee4bcd1dfd497689","reviewed":true},
+      "it": {"text":"Accedi con {site}","sourceRevision":"3703d0817d271d5dc6de60d7b97af0d5c0029e8b54f33720ee4bcd1dfd497689","reviewed":true},
+      "ru": {"text":"Войти через {site}","sourceRevision":"3703d0817d271d5dc6de60d7b97af0d5c0029e8b54f33720ee4bcd1dfd497689","reviewed":true}
+    }
+  },
+  "trust": {
+    "source": "请确认你信任此应用。你可以随时在账号设置中撤销访问权限。",
+    "translations": {
+      "en": {"text":"Make sure you trust this app. You can revoke access in your account settings at any time.","sourceRevision":"e55d3feff75ed5461d20e6d3cbc2363206cee17a2ecc3d83fdef7e848b904a33","reviewed":true},
+      "ja": {"text":"信頼できるアプリか確認してください。アクセス権はアカウント設定からいつでも取り消せます。","sourceRevision":"e55d3feff75ed5461d20e6d3cbc2363206cee17a2ecc3d83fdef7e848b904a33","reviewed":true},
+      "it": {"text":"Assicurati di fidarti di questa app. Puoi revocare l’accesso nelle impostazioni dell’account in qualsiasi momento.","sourceRevision":"e55d3feff75ed5461d20e6d3cbc2363206cee17a2ecc3d83fdef7e848b904a33","reviewed":true},
+      "ru": {"text":"Убедитесь, что доверяете этому приложению. Вы можете отозвать доступ в настройках своего аккаунта в любое время.","sourceRevision":"e55d3feff75ed5461d20e6d3cbc2363206cee17a2ecc3d83fdef7e848b904a33","reviewed":true}
+    }
+  },
+  "verifying": {
+    "source": "正在验证授权请求…",
+    "translations": {
+      "en": {"text":"Verifying authorization request…","sourceRevision":"2470a341bd8eaddc13fada84cd5ca3a98b54f38de7b2aa124e7b62805af7d0ba","reviewed":true},
+      "ja": {"text":"リクエストを確認しています…","sourceRevision":"2470a341bd8eaddc13fada84cd5ca3a98b54f38de7b2aa124e7b62805af7d0ba","reviewed":true},
+      "it": {"text":"Verifica della richiesta…","sourceRevision":"2470a341bd8eaddc13fada84cd5ca3a98b54f38de7b2aa124e7b62805af7d0ba","reviewed":true},
+      "ru": {"text":"Проверяется запрос авторизации…","sourceRevision":"2470a341bd8eaddc13fada84cd5ca3a98b54f38de7b2aa124e7b62805af7d0ba","reviewed":true}
+    }
+  }
+}
