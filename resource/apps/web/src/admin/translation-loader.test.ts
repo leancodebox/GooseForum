@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { supportedLocales } from "@gooseforum/client/i18n/locale";
 import { adminNavGroups } from "./nav";
 
 beforeEach(() => {
   vi.resetModules();
 });
 describe("on-demand admin translations", () => {
-  it.each(["zh", "en", "ja", "it", "ru"] as const)("prepares attachment permission labels on the trust route in %s", async locale => {
+  it.each(supportedLocales)("prepares attachment permission labels on the trust route in %s", async locale => {
     const loader = await import("./translation-loader");
     const { getAdminDictionary } = await import("@gooseforum/i18n/admin");
     await loader.prepareAdminTranslations(locale, loader.adminPageNamespaces("/admin/settings/trust"));
@@ -19,6 +20,8 @@ describe("on-demand admin translations", () => {
       ja: "ファイル添付",
       it: "Allegati",
       ru: "Вложения",
+      ko: "파일 첨부",
+      fr: "Pièces jointes",
     }[locale]);
     const { createTrustSettingsText } = await import("./trust-settings-i18n");
     expect(createTrustSettingsText(locale)("orderInvalid", { higher: "H", lower: "L", field: "F" })).not.toMatch(/\{\w+\}/);
@@ -42,7 +45,7 @@ describe("on-demand admin translations", () => {
       "not prepared",
     );
   });
-  it("covers every sidebar route and preserves translated and fallback labels", async () => {
+  it("covers every sidebar route and preserves localized labels", async () => {
     const loader = await import("./translation-loader");
     const { getAdminDictionary } = await import("@gooseforum/i18n/admin");
     for (const group of adminNavGroups)
@@ -59,7 +62,7 @@ describe("on-demand admin translations", () => {
     expect(
       getAdminDictionary("admin.users", "it")
         .description,
-    ).toBe("Search users and manage account status, roles, and badges.");
+    ).toBe("Cerca utenti e gestisci lo stato degli account, i ruoli e i distintivi.");
   });
   it("deduplicates concurrent imports, caches them and retries rejected imports", async () => {
     const loader = await import("./translation-loader");

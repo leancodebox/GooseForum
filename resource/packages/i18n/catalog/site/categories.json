@@ -3,27 +3,33 @@
     "source": "目前没有你可以浏览的分类。",
     "translations": {
       "en": {"text":"There are no categories available to you right now.","sourceRevision":"22718181cb1cb1bbeca358ebdcaabffc7795eebd51d5370bf366366729008d71","reviewed":true},
-      "ja": {"text":"現在閲覧できるカテゴリーはありません。","sourceRevision":"22718181cb1cb1bbeca358ebdcaabffc7795eebd51d5370bf366366729008d71","reviewed":true},
+      "ja": {"text":"現在閲覧できるカテゴリはありません。","sourceRevision":"22718181cb1cb1bbeca358ebdcaabffc7795eebd51d5370bf366366729008d71","reviewed":true},
       "it": {"text":"Al momento non ci sono categorie disponibili.","sourceRevision":"22718181cb1cb1bbeca358ebdcaabffc7795eebd51d5370bf366366729008d71","reviewed":true},
-      "ru": {"text":"Сейчас для вас нет доступных категорий.","sourceRevision":"22718181cb1cb1bbeca358ebdcaabffc7795eebd51d5370bf366366729008d71","reviewed":true}
+      "ru": {"text":"Сейчас для вас нет доступных категорий.","sourceRevision":"22718181cb1cb1bbeca358ebdcaabffc7795eebd51d5370bf366366729008d71","reviewed":true},
+      "ko": {"text":"현재 당신은 할 수있는 분류가 없습니다.","sourceRevision":"22718181cb1cb1bbeca358ebdcaabffc7795eebd51d5370bf366366729008d71","reviewed":true},
+      "fr": {"text":"Il n’y a pas de catégories à votre disposition en ce moment.","sourceRevision":"22718181cb1cb1bbeca358ebdcaabffc7795eebd51d5370bf366366729008d71","reviewed":true}
     }
   },
   "emptyTitle": {
     "source": "暂无分类",
     "translations": {
       "en": {"text":"No categories","sourceRevision":"a0529af51b4f78d09e3fcb8c1eba316fb00965296018c4f5053df610357a69ea","reviewed":true},
-      "ja": {"text":"カテゴリーはありません","sourceRevision":"a0529af51b4f78d09e3fcb8c1eba316fb00965296018c4f5053df610357a69ea","reviewed":true},
+      "ja": {"text":"カテゴリはありません","sourceRevision":"a0529af51b4f78d09e3fcb8c1eba316fb00965296018c4f5053df610357a69ea","reviewed":true},
       "it": {"text":"Nessuna categoria","sourceRevision":"a0529af51b4f78d09e3fcb8c1eba316fb00965296018c4f5053df610357a69ea","reviewed":true},
-      "ru": {"text":"Нет категорий","sourceRevision":"a0529af51b4f78d09e3fcb8c1eba316fb00965296018c4f5053df610357a69ea","reviewed":true}
+      "ru": {"text":"Нет категорий","sourceRevision":"a0529af51b4f78d09e3fcb8c1eba316fb00965296018c4f5053df610357a69ea","reviewed":true},
+      "ko": {"text":"분류 없음","sourceRevision":"a0529af51b4f78d09e3fcb8c1eba316fb00965296018c4f5053df610357a69ea","reviewed":true},
+      "fr": {"text":"Aucune catégorie","sourceRevision":"a0529af51b4f78d09e3fcb8c1eba316fb00965296018c4f5053df610357a69ea","reviewed":true}
     }
   },
   "noDescription": {
     "source": "这个分类还没有介绍。",
     "translations": {
       "en": {"text":"This category does not have a description yet.","sourceRevision":"a9eb18553fe0cf1a12869b1e028fdbaaf871fc05ca4ffa7bd106be65c3cd148c","reviewed":true},
-      "ja": {"text":"このカテゴリーにはまだ説明がありません。","sourceRevision":"a9eb18553fe0cf1a12869b1e028fdbaaf871fc05ca4ffa7bd106be65c3cd148c","reviewed":true},
+      "ja": {"text":"このカテゴリにはまだ説明がありません。","sourceRevision":"a9eb18553fe0cf1a12869b1e028fdbaaf871fc05ca4ffa7bd106be65c3cd148c","reviewed":true},
       "it": {"text":"Questa categoria non ha ancora una descrizione.","sourceRevision":"a9eb18553fe0cf1a12869b1e028fdbaaf871fc05ca4ffa7bd106be65c3cd148c","reviewed":true},
-      "ru": {"text":"У этой категории пока нет описания.","sourceRevision":"a9eb18553fe0cf1a12869b1e028fdbaaf871fc05ca4ffa7bd106be65c3cd148c","reviewed":true}
+      "ru": {"text":"У этой категории пока нет описания.","sourceRevision":"a9eb18553fe0cf1a12869b1e028fdbaaf871fc05ca4ffa7bd106be65c3cd148c","reviewed":true},
+      "ko": {"text":"이 분류는 아직 설명이 없습니다.","sourceRevision":"a9eb18553fe0cf1a12869b1e028fdbaaf871fc05ca4ffa7bd106be65c3cd148c","reviewed":true},
+      "fr": {"text":"Cette catégorie n’a pas encore de description.","sourceRevision":"a9eb18553fe0cf1a12869b1e028fdbaaf871fc05ca4ffa7bd106be65c3cd148c","reviewed":true}
     }
   },
   "subtitle": {
@@ -32,34 +38,42 @@
       "en": {"text":"Browse community spaces and find conversations that interest you.","sourceRevision":"af7b5265699c942c6c2f8d07abd8d71c18fff299f29838996e2368bf6e0fbd09","reviewed":true},
       "ja": {"text":"コミュニティを巡り、興味のある会話を見つけましょう。","sourceRevision":"af7b5265699c942c6c2f8d07abd8d71c18fff299f29838996e2368bf6e0fbd09","reviewed":true},
       "it": {"text":"Esplora gli spazi della community e trova le discussioni che ti interessano.","sourceRevision":"af7b5265699c942c6c2f8d07abd8d71c18fff299f29838996e2368bf6e0fbd09","reviewed":true},
-      "ru": {"text":"Изучайте пространства сообщества и находите обсуждения, которые вам интересны.","sourceRevision":"af7b5265699c942c6c2f8d07abd8d71c18fff299f29838996e2368bf6e0fbd09","reviewed":true}
+      "ru": {"text":"Изучайте пространства сообщества и находите обсуждения, которые вам интересны.","sourceRevision":"af7b5265699c942c6c2f8d07abd8d71c18fff299f29838996e2368bf6e0fbd09","reviewed":true},
+      "ko": {"text":"커뮤니티 공간 검색 및 관심있는 대화 찾기.","sourceRevision":"af7b5265699c942c6c2f8d07abd8d71c18fff299f29838996e2368bf6e0fbd09","reviewed":true},
+      "fr": {"text":"Parcourez les espaces communautaires et trouvez des conversations qui vous intéressent.","sourceRevision":"af7b5265699c942c6c2f8d07abd8d71c18fff299f29838996e2368bf6e0fbd09","reviewed":true}
     }
   },
   "title": {
     "source": "全部分类",
     "translations": {
       "en": {"text":"All categories","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true},
-      "ja": {"text":"すべてのカテゴリー","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true},
+      "ja": {"text":"すべてのカテゴリ","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true},
       "it": {"text":"Tutte le categorie","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true},
-      "ru": {"text":"Все категории","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true}
+      "ru": {"text":"Все категории","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true},
+      "ko": {"text":"모든 분류","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true},
+      "fr": {"text":"Toutes les catégories","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true}
     }
   },
   "topicCount": {
     "source": "{total} 个主题",
     "translations": {
       "en": {"text":"{total} topics","sourceRevision":"f05ae47fb3f9794276a079e0573e06036be49b85cf1b0b5fd235cd4f88fbc1e3","reviewed":true},
-      "ja": {"text":"{total} トピック","sourceRevision":"f05ae47fb3f9794276a079e0573e06036be49b85cf1b0b5fd235cd4f88fbc1e3","reviewed":true},
+      "ja": {"text":"{total} スレッド","sourceRevision":"f05ae47fb3f9794276a079e0573e06036be49b85cf1b0b5fd235cd4f88fbc1e3","reviewed":true},
       "it": {"text":"{total} argomenti","sourceRevision":"f05ae47fb3f9794276a079e0573e06036be49b85cf1b0b5fd235cd4f88fbc1e3","reviewed":true},
-      "ru": {"text":"Тем: {total}","sourceRevision":"f05ae47fb3f9794276a079e0573e06036be49b85cf1b0b5fd235cd4f88fbc1e3","reviewed":true}
+      "ru": {"text":"Тем: {total}","sourceRevision":"f05ae47fb3f9794276a079e0573e06036be49b85cf1b0b5fd235cd4f88fbc1e3","reviewed":true},
+      "ko": {"text":"{total} 게시글","sourceRevision":"f05ae47fb3f9794276a079e0573e06036be49b85cf1b0b5fd235cd4f88fbc1e3","reviewed":true},
+      "fr": {"text":"{total} sujets","sourceRevision":"f05ae47fb3f9794276a079e0573e06036be49b85cf1b0b5fd235cd4f88fbc1e3","reviewed":true}
     }
   },
   "total": {
     "source": "{count} 个分类",
     "translations": {
       "en": {"text":"{count} categories","sourceRevision":"637280ce829e7dd58f85ab7fe23cca9be5e398ec157a1363eb904b212538b428","reviewed":true},
-      "ja": {"text":"{count} カテゴリー","sourceRevision":"637280ce829e7dd58f85ab7fe23cca9be5e398ec157a1363eb904b212538b428","reviewed":true},
+      "ja": {"text":"{count} カテゴリ","sourceRevision":"637280ce829e7dd58f85ab7fe23cca9be5e398ec157a1363eb904b212538b428","reviewed":true},
       "it": {"text":"{count} categorie","sourceRevision":"637280ce829e7dd58f85ab7fe23cca9be5e398ec157a1363eb904b212538b428","reviewed":true},
-      "ru": {"text":"Категорий: {count}","sourceRevision":"637280ce829e7dd58f85ab7fe23cca9be5e398ec157a1363eb904b212538b428","reviewed":true}
+      "ru": {"text":"Категорий: {count}","sourceRevision":"637280ce829e7dd58f85ab7fe23cca9be5e398ec157a1363eb904b212538b428","reviewed":true},
+      "ko": {"text":"{count}분류","sourceRevision":"637280ce829e7dd58f85ab7fe23cca9be5e398ec157a1363eb904b212538b428","reviewed":true},
+      "fr": {"text":"{count} catégories","sourceRevision":"637280ce829e7dd58f85ab7fe23cca9be5e398ec157a1363eb904b212538b428","reviewed":true}
     }
   }
 }

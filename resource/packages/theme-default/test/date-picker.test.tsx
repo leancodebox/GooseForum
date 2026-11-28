@@ -62,7 +62,13 @@ it("requires a selected date before setting a time and clears back to no deadlin
   expect(screen.getByLabelText("Date").textContent).toContain("Choose date");
 });
 
-it.each([['zh', '2026/10/6'], ['ja', '2026/10/6'], ['it', '06/10/2026']])("uses the %s calendar locale", async (locale, day) => {
+it.each([
+  ['zh', '2026/10/6'],
+  ['ja', '2026/10/6'],
+  ['it', '06/10/2026'],
+  ['ko', '2026. 10. 6.'],
+  ['fr', '06/10/2026'],
+])("uses the %s calendar locale", async (locale, day) => {
   const change = vi.fn();
   render(<Harness locale={locale} onChange={change} />);
   await userEvent.click(screen.getByLabelText("Date"));

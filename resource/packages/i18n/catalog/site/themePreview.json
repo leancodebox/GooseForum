@@ -5,42 +5,64 @@
       "en": {"text":"Restored to the built-in default themes. Save the pre-publish draft to publish site-wide.","sourceRevision":"2f456793b88114040e9f5a2339ee898c77091645cb62047deacad4458bdbdefc","reviewed":true},
       "ja": {"text":"組み込みの既定テーマに戻しました。プレ公開を保存すると全体に公開できます","sourceRevision":"2f456793b88114040e9f5a2339ee898c77091645cb62047deacad4458bdbdefc","reviewed":true},
       "it": {"text":"Ripristinati i temi predefiniti integrati. Salva la bozza di pre-pubblicazione per pubblicare su tutto il sito.","sourceRevision":"2f456793b88114040e9f5a2339ee898c77091645cb62047deacad4458bdbdefc","reviewed":true},
-      "ru": {"text":"Восстановлены встроенные темы по умолчанию. Сохраните черновик перед публикацией, чтобы применить изменения на всём сайте.","sourceRevision":"2f456793b88114040e9f5a2339ee898c77091645cb62047deacad4458bdbdefc","reviewed":true}
+      "ru": {"text":"Восстановлены встроенные темы по умолчанию. Сохраните черновик перед публикацией, чтобы применить изменения на всём сайте.","sourceRevision":"2f456793b88114040e9f5a2339ee898c77091645cb62047deacad4458bdbdefc","reviewed":true},
+      "ko": {"text":"내장 기본 테마로 복원됩니다. 사이트 전체를 게시하기 위해 사전 게시 된 초안을 저장합니다.","sourceRevision":"2f456793b88114040e9f5a2339ee898c77091645cb62047deacad4458bdbdefc","reviewed":true},
+      "fr": {"text":"Restauré dans les thèmes par défaut intégrés. Sauvegardez l’ébauche pré-publiée pour publier sur l’ensemble du site.","sourceRevision":"2f456793b88114040e9f5a2339ee898c77091645cb62047deacad4458bdbdefc","reviewed":true}
     }
   },
   "code": {
     "source": "CSS",
     "translations": {
       "en": {"text":"CSS","sourceRevision":"f2ca89b780ca2887e0f7723b50f78331351e49f4f325ff529a50eea8395920ee","reviewed":true},
-      "ru": {"text":"CSS","sourceRevision":"f2ca89b780ca2887e0f7723b50f78331351e49f4f325ff529a50eea8395920ee","reviewed":true}
+      "ja": {"text":"CSS","sourceRevision":"f2ca89b780ca2887e0f7723b50f78331351e49f4f325ff529a50eea8395920ee","reviewed":true},
+      "it": {"text":"CSS","sourceRevision":"f2ca89b780ca2887e0f7723b50f78331351e49f4f325ff529a50eea8395920ee","reviewed":true},
+      "ru": {"text":"CSS","sourceRevision":"f2ca89b780ca2887e0f7723b50f78331351e49f4f325ff529a50eea8395920ee","reviewed":true},
+      "ko": {"text":"CSS","sourceRevision":"f2ca89b780ca2887e0f7723b50f78331351e49f4f325ff529a50eea8395920ee","reviewed":true},
+      "fr": {"text":"CSS","sourceRevision":"f2ca89b780ca2887e0f7723b50f78331351e49f4f325ff529a50eea8395920ee","reviewed":true}
     }
   },
   "colors": {
     "source": "颜色",
     "translations": {
       "en": {"text":"Colors","sourceRevision":"0606a89064a9440735709dfb5ac2aaa439ddeaec6e441f590de76443ad736d79","reviewed":true},
-      "ru": {"text":"Цвета","sourceRevision":"0606a89064a9440735709dfb5ac2aaa439ddeaec6e441f590de76443ad736d79","reviewed":true}
+      "ja": {"text":"色彩色","sourceRevision":"0606a89064a9440735709dfb5ac2aaa439ddeaec6e441f590de76443ad736d79","reviewed":true},
+      "it": {"text":"Colori","sourceRevision":"0606a89064a9440735709dfb5ac2aaa439ddeaec6e441f590de76443ad736d79","reviewed":true},
+      "ru": {"text":"Цвета","sourceRevision":"0606a89064a9440735709dfb5ac2aaa439ddeaec6e441f590de76443ad736d79","reviewed":true},
+      "ko": {"text":"색깔: 회색","sourceRevision":"0606a89064a9440735709dfb5ac2aaa439ddeaec6e441f590de76443ad736d79","reviewed":true},
+      "fr": {"text":"Couleurs","sourceRevision":"0606a89064a9440735709dfb5ac2aaa439ddeaec6e441f590de76443ad736d79","reviewed":true}
     }
   },
   "components": {
     "source": "组件",
     "translations": {
       "en": {"text":"Components","sourceRevision":"0611f5ea6499f1bf5747d09d542554005a651ab86c14162a49775b3ba8d9dcaf","reviewed":true},
-      "ru": {"text":"Компоненты","sourceRevision":"0611f5ea6499f1bf5747d09d542554005a651ab86c14162a49775b3ba8d9dcaf","reviewed":true}
+      "ja": {"text":"コンポーネント","sourceRevision":"0611f5ea6499f1bf5747d09d542554005a651ab86c14162a49775b3ba8d9dcaf","reviewed":true},
+      "it": {"text":"Componenti","sourceRevision":"0611f5ea6499f1bf5747d09d542554005a651ab86c14162a49775b3ba8d9dcaf","reviewed":true},
+      "ru": {"text":"Компоненты","sourceRevision":"0611f5ea6499f1bf5747d09d542554005a651ab86c14162a49775b3ba8d9dcaf","reviewed":true},
+      "ko": {"text":"구성 요소","sourceRevision":"0611f5ea6499f1bf5747d09d542554005a651ab86c14162a49775b3ba8d9dcaf","reviewed":true},
+      "fr": {"text":"Composantes","sourceRevision":"0611f5ea6499f1bf5747d09d542554005a651ab86c14162a49775b3ba8d9dcaf","reviewed":true}
     }
   },
   "contrast": {
     "source": "对比度",
     "translations": {
       "en": {"text":"Contrast","sourceRevision":"e23116f643d39ac1796377eb3dfa6a136c13b62e7e423e12fde3790dca435d10","reviewed":true},
-      "ru": {"text":"Контраст","sourceRevision":"e23116f643d39ac1796377eb3dfa6a136c13b62e7e423e12fde3790dca435d10","reviewed":true}
+      "ja": {"text":"コントラスト","sourceRevision":"e23116f643d39ac1796377eb3dfa6a136c13b62e7e423e12fde3790dca435d10","reviewed":true},
+      "it": {"text":"Contrasto","sourceRevision":"e23116f643d39ac1796377eb3dfa6a136c13b62e7e423e12fde3790dca435d10","reviewed":true},
+      "ru": {"text":"Контраст","sourceRevision":"e23116f643d39ac1796377eb3dfa6a136c13b62e7e423e12fde3790dca435d10","reviewed":true},
+      "ko": {"text":"대비","sourceRevision":"e23116f643d39ac1796377eb3dfa6a136c13b62e7e423e12fde3790dca435d10","reviewed":true},
+      "fr": {"text":"Contraste","sourceRevision":"e23116f643d39ac1796377eb3dfa6a136c13b62e7e423e12fde3790dca435d10","reviewed":true}
     }
   },
   "copyCss": {
     "source": "复制 CSS",
     "translations": {
       "en": {"text":"Copy CSS","sourceRevision":"30fcde5b7c963d0627cb910f68f0d58afd770408c6e97a7b3d9029723c5604f5","reviewed":true},
-      "ru": {"text":"Копировать CSS","sourceRevision":"30fcde5b7c963d0627cb910f68f0d58afd770408c6e97a7b3d9029723c5604f5","reviewed":true}
+      "ja": {"text":"CSSをコピーする","sourceRevision":"30fcde5b7c963d0627cb910f68f0d58afd770408c6e97a7b3d9029723c5604f5","reviewed":true},
+      "it": {"text":"Copia CSS","sourceRevision":"30fcde5b7c963d0627cb910f68f0d58afd770408c6e97a7b3d9029723c5604f5","reviewed":true},
+      "ru": {"text":"Копировать CSS","sourceRevision":"30fcde5b7c963d0627cb910f68f0d58afd770408c6e97a7b3d9029723c5604f5","reviewed":true},
+      "ko": {"text":"CSS 복사","sourceRevision":"30fcde5b7c963d0627cb910f68f0d58afd770408c6e97a7b3d9029723c5604f5","reviewed":true},
+      "fr": {"text":"Copier le CSS","sourceRevision":"30fcde5b7c963d0627cb910f68f0d58afd770408c6e97a7b3d9029723c5604f5","reviewed":true}
     }
   },
   "cssCopied": {
@@ -49,7 +71,9 @@
       "en": {"text":"CSS copied","sourceRevision":"2fa311942290e85dea7ae040273577d57f39bcea81f4834ef6bd5e48573529fb","reviewed":true},
       "ja": {"text":"CSS をコピーしました","sourceRevision":"2fa311942290e85dea7ae040273577d57f39bcea81f4834ef6bd5e48573529fb","reviewed":true},
       "it": {"text":"CSS copiato","sourceRevision":"2fa311942290e85dea7ae040273577d57f39bcea81f4834ef6bd5e48573529fb","reviewed":true},
-      "ru": {"text":"CSS скопирован","sourceRevision":"2fa311942290e85dea7ae040273577d57f39bcea81f4834ef6bd5e48573529fb","reviewed":true}
+      "ru": {"text":"CSS скопирован","sourceRevision":"2fa311942290e85dea7ae040273577d57f39bcea81f4834ef6bd5e48573529fb","reviewed":true},
+      "ko": {"text":"CSS 복사","sourceRevision":"2fa311942290e85dea7ae040273577d57f39bcea81f4834ef6bd5e48573529fb","reviewed":true},
+      "fr": {"text":"CSS copié","sourceRevision":"2fa311942290e85dea7ae040273577d57f39bcea81f4834ef6bd5e48573529fb","reviewed":true}
     }
   },
   "cssCopyFailed": {
@@ -58,28 +82,42 @@
       "en": {"text":"Failed to copy CSS","sourceRevision":"d44f733143996513606da2178506a036d2fe8ef381371e9b929c7b67a8201997","reviewed":true},
       "ja": {"text":"CSS のコピーに失敗しました","sourceRevision":"d44f733143996513606da2178506a036d2fe8ef381371e9b929c7b67a8201997","reviewed":true},
       "it": {"text":"Copia del CSS non riuscita","sourceRevision":"d44f733143996513606da2178506a036d2fe8ef381371e9b929c7b67a8201997","reviewed":true},
-      "ru": {"text":"Не удалось скопировать CSS","sourceRevision":"d44f733143996513606da2178506a036d2fe8ef381371e9b929c7b67a8201997","reviewed":true}
+      "ru": {"text":"Не удалось скопировать CSS","sourceRevision":"d44f733143996513606da2178506a036d2fe8ef381371e9b929c7b67a8201997","reviewed":true},
+      "ko": {"text":"CSS 복사 실패","sourceRevision":"d44f733143996513606da2178506a036d2fe8ef381371e9b929c7b67a8201997","reviewed":true},
+      "fr": {"text":"Échec de la copie du CSS","sourceRevision":"d44f733143996513606da2178506a036d2fe8ef381371e9b929c7b67a8201997","reviewed":true}
     }
   },
   "dark": {
     "source": "暗色",
     "translations": {
       "en": {"text":"Dark","sourceRevision":"de9d5ec9f60c48a5b9d2b6cc4b3396c6894a8c9805ee19be7867034b382f649d","reviewed":true},
-      "ru": {"text":"Тёмная","sourceRevision":"de9d5ec9f60c48a5b9d2b6cc4b3396c6894a8c9805ee19be7867034b382f649d","reviewed":true}
+      "ja": {"text":"暗い","sourceRevision":"de9d5ec9f60c48a5b9d2b6cc4b3396c6894a8c9805ee19be7867034b382f649d","reviewed":true},
+      "it": {"text":"Scuro","sourceRevision":"de9d5ec9f60c48a5b9d2b6cc4b3396c6894a8c9805ee19be7867034b382f649d","reviewed":true},
+      "ru": {"text":"Тёмная","sourceRevision":"de9d5ec9f60c48a5b9d2b6cc4b3396c6894a8c9805ee19be7867034b382f649d","reviewed":true},
+      "ko": {"text":"어둡게","sourceRevision":"de9d5ec9f60c48a5b9d2b6cc4b3396c6894a8c9805ee19be7867034b382f649d","reviewed":true},
+      "fr": {"text":"Sombre","sourceRevision":"de9d5ec9f60c48a5b9d2b6cc4b3396c6894a8c9805ee19be7867034b382f649d","reviewed":true}
     }
   },
   "depth": {
     "source": "层次阴影",
     "translations": {
       "en": {"text":"Depth effect","sourceRevision":"afa077473d88a53fe7786538c5f43ec2dea32809ba3f4196e2a0bd44d8ca32da","reviewed":true},
-      "ru": {"text":"Эффект глубины","sourceRevision":"afa077473d88a53fe7786538c5f43ec2dea32809ba3f4196e2a0bd44d8ca32da","reviewed":true}
+      "ja": {"text":"深さの効果","sourceRevision":"afa077473d88a53fe7786538c5f43ec2dea32809ba3f4196e2a0bd44d8ca32da","reviewed":true},
+      "it": {"text":"Effetto di profondità","sourceRevision":"afa077473d88a53fe7786538c5f43ec2dea32809ba3f4196e2a0bd44d8ca32da","reviewed":true},
+      "ru": {"text":"Эффект глубины","sourceRevision":"afa077473d88a53fe7786538c5f43ec2dea32809ba3f4196e2a0bd44d8ca32da","reviewed":true},
+      "ko": {"text":"공급 능력","sourceRevision":"afa077473d88a53fe7786538c5f43ec2dea32809ba3f4196e2a0bd44d8ca32da","reviewed":true},
+      "fr": {"text":"Effet de profondeur","sourceRevision":"afa077473d88a53fe7786538c5f43ec2dea32809ba3f4196e2a0bd44d8ca32da","reviewed":true}
     }
   },
   "disabled": {
     "source": "已停用",
     "translations": {
       "en": {"text":"Disabled","sourceRevision":"f741e20fc339f30d656e140f7240e6126364bfcbe6a8ca329521e5a4d38fde56","reviewed":true},
-      "ru": {"text":"Отключено","sourceRevision":"f741e20fc339f30d656e140f7240e6126364bfcbe6a8ca329521e5a4d38fde56","reviewed":true}
+      "ja": {"text":"無効","sourceRevision":"f741e20fc339f30d656e140f7240e6126364bfcbe6a8ca329521e5a4d38fde56","reviewed":true},
+      "it": {"text":"Disattivato","sourceRevision":"f741e20fc339f30d656e140f7240e6126364bfcbe6a8ca329521e5a4d38fde56","reviewed":true},
+      "ru": {"text":"Отключено","sourceRevision":"f741e20fc339f30d656e140f7240e6126364bfcbe6a8ca329521e5a4d38fde56","reviewed":true},
+      "ko": {"text":"비활성","sourceRevision":"f741e20fc339f30d656e140f7240e6126364bfcbe6a8ca329521e5a4d38fde56","reviewed":true},
+      "fr": {"text":"Désactivé","sourceRevision":"f741e20fc339f30d656e140f7240e6126364bfcbe6a8ca329521e5a4d38fde56","reviewed":true}
     }
   },
   "draftSaved": {
@@ -88,44 +126,64 @@
       "en": {"text":"Theme draft saved. The live site is unchanged.","sourceRevision":"d9c037f00dcde3f5b28c9b4c7b75c728de7a246938e5a27f7fcb16b475e0716e","reviewed":true},
       "ja": {"text":"テーマ草稿を保存しました。サイト全体にはまだ反映されません。","sourceRevision":"d9c037f00dcde3f5b28c9b4c7b75c728de7a246938e5a27f7fcb16b475e0716e","reviewed":true},
       "it": {"text":"Bozza del tema salvata. Il sito live è invariato.","sourceRevision":"d9c037f00dcde3f5b28c9b4c7b75c728de7a246938e5a27f7fcb16b475e0716e","reviewed":true},
-      "ru": {"text":"Черновик темы сохранён. Действующий сайт не изменился.","sourceRevision":"d9c037f00dcde3f5b28c9b4c7b75c728de7a246938e5a27f7fcb16b475e0716e","reviewed":true}
+      "ru": {"text":"Черновик темы сохранён. Действующий сайт не изменился.","sourceRevision":"d9c037f00dcde3f5b28c9b4c7b75c728de7a246938e5a27f7fcb16b475e0716e","reviewed":true},
+      "ko": {"text":"테마 초안 저장. 라이브 사이트가 변경되지 않습니다.","sourceRevision":"d9c037f00dcde3f5b28c9b4c7b75c728de7a246938e5a27f7fcb16b475e0716e","reviewed":true},
+      "fr": {"text":"Le thème brouillon sauvé. Le site en direct est inchangé.","sourceRevision":"d9c037f00dcde3f5b28c9b4c7b75c728de7a246938e5a27f7fcb16b475e0716e","reviewed":true}
     }
   },
   "effects": {
     "source": "效果",
     "translations": {
       "en": {"text":"Effects","sourceRevision":"365a536fe91cbaa6ddd825919a59d575f7780a75f0b06344c905d04dc41d258f","reviewed":true},
-      "ru": {"text":"Эффекты","sourceRevision":"365a536fe91cbaa6ddd825919a59d575f7780a75f0b06344c905d04dc41d258f","reviewed":true}
+      "ja": {"text":"エフェクト","sourceRevision":"365a536fe91cbaa6ddd825919a59d575f7780a75f0b06344c905d04dc41d258f","reviewed":true},
+      "it": {"text":"Effetti","sourceRevision":"365a536fe91cbaa6ddd825919a59d575f7780a75f0b06344c905d04dc41d258f","reviewed":true},
+      "ru": {"text":"Эффекты","sourceRevision":"365a536fe91cbaa6ddd825919a59d575f7780a75f0b06344c905d04dc41d258f","reviewed":true},
+      "ko": {"text":"효과","sourceRevision":"365a536fe91cbaa6ddd825919a59d575f7780a75f0b06344c905d04dc41d258f","reviewed":true},
+      "fr": {"text":"Effets","sourceRevision":"365a536fe91cbaa6ddd825919a59d575f7780a75f0b06344c905d04dc41d258f","reviewed":true}
     }
   },
   "enableLabel": {
     "source": "启用",
     "translations": {
       "en": {"text":"Enable","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
-      "ja": {"text":"有効化","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
+      "ja": {"text":"有効にする","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
       "it": {"text":"Abilita","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
-      "ru": {"text":"Включить","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true}
+      "ru": {"text":"Включить","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
+      "ko": {"text":"사용","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
+      "fr": {"text":"Activer","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true}
     }
   },
   "enabled": {
     "source": "已启用",
     "translations": {
       "en": {"text":"Enabled","sourceRevision":"cccfa9597028b805f5265bab8528aebe9e95738362f9cbe715b2c9c2e0142faa","reviewed":true},
-      "ru": {"text":"Включено","sourceRevision":"cccfa9597028b805f5265bab8528aebe9e95738362f9cbe715b2c9c2e0142faa","reviewed":true}
+      "ja": {"text":"有効","sourceRevision":"cccfa9597028b805f5265bab8528aebe9e95738362f9cbe715b2c9c2e0142faa","reviewed":true},
+      "it": {"text":"Attivato","sourceRevision":"cccfa9597028b805f5265bab8528aebe9e95738362f9cbe715b2c9c2e0142faa","reviewed":true},
+      "ru": {"text":"Включено","sourceRevision":"cccfa9597028b805f5265bab8528aebe9e95738362f9cbe715b2c9c2e0142faa","reviewed":true},
+      "ko": {"text":"활성","sourceRevision":"cccfa9597028b805f5265bab8528aebe9e95738362f9cbe715b2c9c2e0142faa","reviewed":true},
+      "fr": {"text":"Activé","sourceRevision":"cccfa9597028b805f5265bab8528aebe9e95738362f9cbe715b2c9c2e0142faa","reviewed":true}
     }
   },
   "forum": {
     "source": "论坛",
     "translations": {
       "en": {"text":"Forum","sourceRevision":"3159c78ea776932657dff61ca1ec6d3063505506e273c2dd2022993ddd893600","reviewed":true},
-      "ru": {"text":"Форум","sourceRevision":"3159c78ea776932657dff61ca1ec6d3063505506e273c2dd2022993ddd893600","reviewed":true}
+      "ja": {"text":"フォーラム","sourceRevision":"3159c78ea776932657dff61ca1ec6d3063505506e273c2dd2022993ddd893600","reviewed":true},
+      "it": {"text":"Forum","sourceRevision":"3159c78ea776932657dff61ca1ec6d3063505506e273c2dd2022993ddd893600","reviewed":true},
+      "ru": {"text":"Форум","sourceRevision":"3159c78ea776932657dff61ca1ec6d3063505506e273c2dd2022993ddd893600","reviewed":true},
+      "ko": {"text":"학회소개","sourceRevision":"3159c78ea776932657dff61ca1ec6d3063505506e273c2dd2022993ddd893600","reviewed":true},
+      "fr": {"text":"Forum","sourceRevision":"3159c78ea776932657dff61ca1ec6d3063505506e273c2dd2022993ddd893600","reviewed":true}
     }
   },
   "light": {
     "source": "明亮",
     "translations": {
       "en": {"text":"Light","sourceRevision":"d7a716e538fa38b4d78351477eb1769e5378c75639cbcb953c80e65c5cc2e963","reviewed":true},
-      "ru": {"text":"Светлая","sourceRevision":"d7a716e538fa38b4d78351477eb1769e5378c75639cbcb953c80e65c5cc2e963","reviewed":true}
+      "ja": {"text":"明るい","sourceRevision":"d7a716e538fa38b4d78351477eb1769e5378c75639cbcb953c80e65c5cc2e963","reviewed":true},
+      "it": {"text":"Chiaro","sourceRevision":"d7a716e538fa38b4d78351477eb1769e5378c75639cbcb953c80e65c5cc2e963","reviewed":true},
+      "ru": {"text":"Светлая","sourceRevision":"d7a716e538fa38b4d78351477eb1769e5378c75639cbcb953c80e65c5cc2e963","reviewed":true},
+      "ko": {"text":"밝게","sourceRevision":"d7a716e538fa38b4d78351477eb1769e5378c75639cbcb953c80e65c5cc2e963","reviewed":true},
+      "fr": {"text":"Clair","sourceRevision":"d7a716e538fa38b4d78351477eb1769e5378c75639cbcb953c80e65c5cc2e963","reviewed":true}
     }
   },
   "pageTitle": {
@@ -134,7 +192,9 @@
       "en": {"text":"Theme preview settings","sourceRevision":"123829ee42e979961607fa2cee23ef8fd3d652ee363f0de0653dceea04dea5a7","reviewed":true},
       "ja": {"text":"テーマプレビュー設定","sourceRevision":"123829ee42e979961607fa2cee23ef8fd3d652ee363f0de0653dceea04dea5a7","reviewed":true},
       "it": {"text":"Impostazioni anteprima tema","sourceRevision":"123829ee42e979961607fa2cee23ef8fd3d652ee363f0de0653dceea04dea5a7","reviewed":true},
-      "ru": {"text":"Настройки предпросмотра темы","sourceRevision":"123829ee42e979961607fa2cee23ef8fd3d652ee363f0de0653dceea04dea5a7","reviewed":true}
+      "ru": {"text":"Настройки предпросмотра темы","sourceRevision":"123829ee42e979961607fa2cee23ef8fd3d652ee363f0de0653dceea04dea5a7","reviewed":true},
+      "ko": {"text":"테마 미리보기 설정","sourceRevision":"123829ee42e979961607fa2cee23ef8fd3d652ee363f0de0653dceea04dea5a7","reviewed":true},
+      "fr": {"text":"Paramètres d’aperçu des thèmes","sourceRevision":"123829ee42e979961607fa2cee23ef8fd3d652ee363f0de0653dceea04dea5a7","reviewed":true}
     }
   },
   "presets.aqua": {
@@ -143,7 +203,9 @@
       "en": {"text":"Aqua","sourceRevision":"936263f6229bf5e4272129e20ddf0dc5713b8be8133e383e791e3ec21e522186","reviewed":true},
       "ja": {"text":"Aqua","sourceRevision":"936263f6229bf5e4272129e20ddf0dc5713b8be8133e383e791e3ec21e522186","reviewed":true},
       "it": {"text":"Aqua","sourceRevision":"936263f6229bf5e4272129e20ddf0dc5713b8be8133e383e791e3ec21e522186","reviewed":true},
-      "ru": {"text":"Aqua","sourceRevision":"936263f6229bf5e4272129e20ddf0dc5713b8be8133e383e791e3ec21e522186","reviewed":true}
+      "ru": {"text":"Aqua","sourceRevision":"936263f6229bf5e4272129e20ddf0dc5713b8be8133e383e791e3ec21e522186","reviewed":true},
+      "ko": {"text":"아쿠아리움","sourceRevision":"936263f6229bf5e4272129e20ddf0dc5713b8be8133e383e791e3ec21e522186","reviewed":true},
+      "fr": {"text":"Aqua","sourceRevision":"936263f6229bf5e4272129e20ddf0dc5713b8be8133e383e791e3ec21e522186","reviewed":true}
     }
   },
   "presets.clean": {
@@ -152,16 +214,20 @@
       "en": {"text":"Clean","sourceRevision":"d00a4e1358258e0de3e71daeec89b557fed2060fc13997ee936f344c4c891a3e","reviewed":true},
       "ja": {"text":"Clean","sourceRevision":"d00a4e1358258e0de3e71daeec89b557fed2060fc13997ee936f344c4c891a3e","reviewed":true},
       "it": {"text":"Clean","sourceRevision":"d00a4e1358258e0de3e71daeec89b557fed2060fc13997ee936f344c4c891a3e","reviewed":true},
-      "ru": {"text":"Clean","sourceRevision":"d00a4e1358258e0de3e71daeec89b557fed2060fc13997ee936f344c4c891a3e","reviewed":true}
+      "ru": {"text":"Clean","sourceRevision":"d00a4e1358258e0de3e71daeec89b557fed2060fc13997ee936f344c4c891a3e","reviewed":true},
+      "ko": {"text":"깔끔함","sourceRevision":"d00a4e1358258e0de3e71daeec89b557fed2060fc13997ee936f344c4c891a3e","reviewed":true},
+      "fr": {"text":"Nettoyer","sourceRevision":"d00a4e1358258e0de3e71daeec89b557fed2060fc13997ee936f344c4c891a3e","reviewed":true}
     }
   },
   "presets.cupcake": {
     "source": "Cupcake",
     "translations": {
       "en": {"text":"Cupcake","sourceRevision":"4a88dce1125ade82dca471d4ff818945e336647e5b9d2df8345ac9c60d17b1e8","reviewed":true},
-      "ja": {"text":"Cupcake","sourceRevision":"4a88dce1125ade82dca471d4ff818945e336647e5b9d2df8345ac9c60d17b1e8","reviewed":true},
+      "ja": {"text":"カップケーキ","sourceRevision":"4a88dce1125ade82dca471d4ff818945e336647e5b9d2df8345ac9c60d17b1e8","reviewed":true},
       "it": {"text":"Cupcake","sourceRevision":"4a88dce1125ade82dca471d4ff818945e336647e5b9d2df8345ac9c60d17b1e8","reviewed":true},
-      "ru": {"text":"Cupcake","sourceRevision":"4a88dce1125ade82dca471d4ff818945e336647e5b9d2df8345ac9c60d17b1e8","reviewed":true}
+      "ru": {"text":"Cupcake","sourceRevision":"4a88dce1125ade82dca471d4ff818945e336647e5b9d2df8345ac9c60d17b1e8","reviewed":true},
+      "ko": {"text":"컵케이크","sourceRevision":"4a88dce1125ade82dca471d4ff818945e336647e5b9d2df8345ac9c60d17b1e8","reviewed":true},
+      "fr": {"text":"Cupcake","sourceRevision":"4a88dce1125ade82dca471d4ff818945e336647e5b9d2df8345ac9c60d17b1e8","reviewed":true}
     }
   },
   "presets.deep": {
@@ -170,7 +236,9 @@
       "en": {"text":"Deep","sourceRevision":"ebff3e530b32df53a536af0cd4c843032dd14a89cffff4cafbf35ede39f8bb36","reviewed":true},
       "ja": {"text":"Deep","sourceRevision":"ebff3e530b32df53a536af0cd4c843032dd14a89cffff4cafbf35ede39f8bb36","reviewed":true},
       "it": {"text":"Deep","sourceRevision":"ebff3e530b32df53a536af0cd4c843032dd14a89cffff4cafbf35ede39f8bb36","reviewed":true},
-      "ru": {"text":"Deep","sourceRevision":"ebff3e530b32df53a536af0cd4c843032dd14a89cffff4cafbf35ede39f8bb36","reviewed":true}
+      "ru": {"text":"Deep","sourceRevision":"ebff3e530b32df53a536af0cd4c843032dd14a89cffff4cafbf35ede39f8bb36","reviewed":true},
+      "ko": {"text":"깊은 색감","sourceRevision":"ebff3e530b32df53a536af0cd4c843032dd14a89cffff4cafbf35ede39f8bb36","reviewed":true},
+      "fr": {"text":"profond","sourceRevision":"ebff3e530b32df53a536af0cd4c843032dd14a89cffff4cafbf35ede39f8bb36","reviewed":true}
     }
   },
   "presets.forest": {
@@ -179,7 +247,9 @@
       "en": {"text":"Forest","sourceRevision":"22f03db887c426736c7d16231f2b28602b74dfea886086e52b25da83632019a7","reviewed":true},
       "ja": {"text":"Forest","sourceRevision":"22f03db887c426736c7d16231f2b28602b74dfea886086e52b25da83632019a7","reviewed":true},
       "it": {"text":"Forest","sourceRevision":"22f03db887c426736c7d16231f2b28602b74dfea886086e52b25da83632019a7","reviewed":true},
-      "ru": {"text":"Forest","sourceRevision":"22f03db887c426736c7d16231f2b28602b74dfea886086e52b25da83632019a7","reviewed":true}
+      "ru": {"text":"Forest","sourceRevision":"22f03db887c426736c7d16231f2b28602b74dfea886086e52b25da83632019a7","reviewed":true},
+      "ko": {"text":"숲","sourceRevision":"22f03db887c426736c7d16231f2b28602b74dfea886086e52b25da83632019a7","reviewed":true},
+      "fr": {"text":"Forêt","sourceRevision":"22f03db887c426736c7d16231f2b28602b74dfea886086e52b25da83632019a7","reviewed":true}
     }
   },
   "presets.goose": {
@@ -188,7 +258,9 @@
       "en": {"text":"Goose","sourceRevision":"5245e93693e235c539c6ef195fcc0fc69f92141c4b704b3fbd023801a1ec36c7","reviewed":true},
       "ja": {"text":"Goose","sourceRevision":"5245e93693e235c539c6ef195fcc0fc69f92141c4b704b3fbd023801a1ec36c7","reviewed":true},
       "it": {"text":"Goose","sourceRevision":"5245e93693e235c539c6ef195fcc0fc69f92141c4b704b3fbd023801a1ec36c7","reviewed":true},
-      "ru": {"text":"Goose","sourceRevision":"5245e93693e235c539c6ef195fcc0fc69f92141c4b704b3fbd023801a1ec36c7","reviewed":true}
+      "ru": {"text":"Goose","sourceRevision":"5245e93693e235c539c6ef195fcc0fc69f92141c4b704b3fbd023801a1ec36c7","reviewed":true},
+      "ko": {"text":"Goose","sourceRevision":"5245e93693e235c539c6ef195fcc0fc69f92141c4b704b3fbd023801a1ec36c7","reviewed":true},
+      "fr": {"text":"Oie","sourceRevision":"5245e93693e235c539c6ef195fcc0fc69f92141c4b704b3fbd023801a1ec36c7","reviewed":true}
     }
   },
   "presets.retro": {
@@ -197,16 +269,20 @@
       "en": {"text":"Retro","sourceRevision":"8a3ea82625a65e74e77a3a9f414f17b5d233ae1ecaeb4578797eb7ae57da536b","reviewed":true},
       "ja": {"text":"Retro","sourceRevision":"8a3ea82625a65e74e77a3a9f414f17b5d233ae1ecaeb4578797eb7ae57da536b","reviewed":true},
       "it": {"text":"Retro","sourceRevision":"8a3ea82625a65e74e77a3a9f414f17b5d233ae1ecaeb4578797eb7ae57da536b","reviewed":true},
-      "ru": {"text":"Retro","sourceRevision":"8a3ea82625a65e74e77a3a9f414f17b5d233ae1ecaeb4578797eb7ae57da536b","reviewed":true}
+      "ru": {"text":"Retro","sourceRevision":"8a3ea82625a65e74e77a3a9f414f17b5d233ae1ecaeb4578797eb7ae57da536b","reviewed":true},
+      "ko": {"text":"복고풍","sourceRevision":"8a3ea82625a65e74e77a3a9f414f17b5d233ae1ecaeb4578797eb7ae57da536b","reviewed":true},
+      "fr": {"text":"Rétroactivité","sourceRevision":"8a3ea82625a65e74e77a3a9f414f17b5d233ae1ecaeb4578797eb7ae57da536b","reviewed":true}
     }
   },
   "presets.synthwave": {
     "source": "Synthwave",
     "translations": {
       "en": {"text":"Synthwave","sourceRevision":"f6e082266507efbefa021700ebbab12201ea798d8f3d80d627b63c8470446dcb","reviewed":true},
-      "ja": {"text":"Synthwave","sourceRevision":"f6e082266507efbefa021700ebbab12201ea798d8f3d80d627b63c8470446dcb","reviewed":true},
-      "it": {"text":"Synthwave","sourceRevision":"f6e082266507efbefa021700ebbab12201ea798d8f3d80d627b63c8470446dcb","reviewed":true},
-      "ru": {"text":"Synthwave","sourceRevision":"f6e082266507efbefa021700ebbab12201ea798d8f3d80d627b63c8470446dcb","reviewed":true}
+      "ja": {"text":"シンセウェーブ","sourceRevision":"f6e082266507efbefa021700ebbab12201ea798d8f3d80d627b63c8470446dcb","reviewed":true},
+      "it": {"text":"Traduzione:","sourceRevision":"f6e082266507efbefa021700ebbab12201ea798d8f3d80d627b63c8470446dcb","reviewed":true},
+      "ru": {"text":"Synthwave","sourceRevision":"f6e082266507efbefa021700ebbab12201ea798d8f3d80d627b63c8470446dcb","reviewed":true},
+      "ko": {"text":"신스웨이브","sourceRevision":"f6e082266507efbefa021700ebbab12201ea798d8f3d80d627b63c8470446dcb","reviewed":true},
+      "fr": {"text":"Synthwave","sourceRevision":"f6e082266507efbefa021700ebbab12201ea798d8f3d80d627b63c8470446dcb","reviewed":true}
     }
   },
   "presets.warm": {
@@ -215,7 +291,9 @@
       "en": {"text":"Warm","sourceRevision":"0704cfc23b24e93de044f8872ee18d79deb0efa15fd6dfe6e9bd3977f0f551e1","reviewed":true},
       "ja": {"text":"Warm","sourceRevision":"0704cfc23b24e93de044f8872ee18d79deb0efa15fd6dfe6e9bd3977f0f551e1","reviewed":true},
       "it": {"text":"Warm","sourceRevision":"0704cfc23b24e93de044f8872ee18d79deb0efa15fd6dfe6e9bd3977f0f551e1","reviewed":true},
-      "ru": {"text":"Warm","sourceRevision":"0704cfc23b24e93de044f8872ee18d79deb0efa15fd6dfe6e9bd3977f0f551e1","reviewed":true}
+      "ru": {"text":"Warm","sourceRevision":"0704cfc23b24e93de044f8872ee18d79deb0efa15fd6dfe6e9bd3977f0f551e1","reviewed":true},
+      "ko": {"text":"은밀한","sourceRevision":"0704cfc23b24e93de044f8872ee18d79deb0efa15fd6dfe6e9bd3977f0f551e1","reviewed":true},
+      "fr": {"text":"Chaleur","sourceRevision":"0704cfc23b24e93de044f8872ee18d79deb0efa15fd6dfe6e9bd3977f0f551e1","reviewed":true}
     }
   },
   "presetsTitle": {
@@ -224,14 +302,20 @@
       "en": {"text":"Presets","sourceRevision":"9d98e56bccc653bc358378a7ea3c3fada667648116135ea44c64dc46b13be355","reviewed":true},
       "ja": {"text":"プリセット","sourceRevision":"9d98e56bccc653bc358378a7ea3c3fada667648116135ea44c64dc46b13be355","reviewed":true},
       "it": {"text":"Preset","sourceRevision":"9d98e56bccc653bc358378a7ea3c3fada667648116135ea44c64dc46b13be355","reviewed":true},
-      "ru": {"text":"Предустановки","sourceRevision":"9d98e56bccc653bc358378a7ea3c3fada667648116135ea44c64dc46b13be355","reviewed":true}
+      "ru": {"text":"Предустановки","sourceRevision":"9d98e56bccc653bc358378a7ea3c3fada667648116135ea44c64dc46b13be355","reviewed":true},
+      "ko": {"text":"기본 제공 테마","sourceRevision":"9d98e56bccc653bc358378a7ea3c3fada667648116135ea44c64dc46b13be355","reviewed":true},
+      "fr": {"text":"Préréglages","sourceRevision":"9d98e56bccc653bc358378a7ea3c3fada667648116135ea44c64dc46b13be355","reviewed":true}
     }
   },
   "preview": {
     "source": "预览",
     "translations": {
       "en": {"text":"Preview","sourceRevision":"62c8b3c9d9f708b67e4535f1caed4bc6e305c6ae3e0fa379ad58ea1a7c4276d5","reviewed":true},
-      "ru": {"text":"Предпросмотр","sourceRevision":"62c8b3c9d9f708b67e4535f1caed4bc6e305c6ae3e0fa379ad58ea1a7c4276d5","reviewed":true}
+      "ja": {"text":"プレビュー","sourceRevision":"62c8b3c9d9f708b67e4535f1caed4bc6e305c6ae3e0fa379ad58ea1a7c4276d5","reviewed":true},
+      "it": {"text":"Anteprima","sourceRevision":"62c8b3c9d9f708b67e4535f1caed4bc6e305c6ae3e0fa379ad58ea1a7c4276d5","reviewed":true},
+      "ru": {"text":"Предпросмотр","sourceRevision":"62c8b3c9d9f708b67e4535f1caed4bc6e305c6ae3e0fa379ad58ea1a7c4276d5","reviewed":true},
+      "ko": {"text":"미리 보기","sourceRevision":"62c8b3c9d9f708b67e4535f1caed4bc6e305c6ae3e0fa379ad58ea1a7c4276d5","reviewed":true},
+      "fr": {"text":"Aperçu","sourceRevision":"62c8b3c9d9f708b67e4535f1caed4bc6e305c6ae3e0fa379ad58ea1a7c4276d5","reviewed":true}
     }
   },
   "publishFailed": {
@@ -240,7 +324,9 @@
       "en": {"text":"Failed to publish theme","sourceRevision":"f990b69044f07b4abab09910d3b412027d333f7fb05088a69f7cd9b9589295a8","reviewed":true},
       "ja": {"text":"テーマの公開に失敗しました","sourceRevision":"f990b69044f07b4abab09910d3b412027d333f7fb05088a69f7cd9b9589295a8","reviewed":true},
       "it": {"text":"Pubblicazione del tema non riuscita","sourceRevision":"f990b69044f07b4abab09910d3b412027d333f7fb05088a69f7cd9b9589295a8","reviewed":true},
-      "ru": {"text":"Не удалось опубликовать тему","sourceRevision":"f990b69044f07b4abab09910d3b412027d333f7fb05088a69f7cd9b9589295a8","reviewed":true}
+      "ru": {"text":"Не удалось опубликовать тему","sourceRevision":"f990b69044f07b4abab09910d3b412027d333f7fb05088a69f7cd9b9589295a8","reviewed":true},
+      "ko": {"text":"테마를 게시하는 실패","sourceRevision":"f990b69044f07b4abab09910d3b412027d333f7fb05088a69f7cd9b9589295a8","reviewed":true},
+      "fr": {"text":"Échec de la publication du thème","sourceRevision":"f990b69044f07b4abab09910d3b412027d333f7fb05088a69f7cd9b9589295a8","reviewed":true}
     }
   },
   "publishSite": {
@@ -249,7 +335,9 @@
       "en": {"text":"Publish site","sourceRevision":"90e9cc524e47296607cf16dbb8dcc78849e8b17359c55d1295b05e0ace3a50a8","reviewed":true},
       "ja": {"text":"全体に公開","sourceRevision":"90e9cc524e47296607cf16dbb8dcc78849e8b17359c55d1295b05e0ace3a50a8","reviewed":true},
       "it": {"text":"Pubblica sul sito","sourceRevision":"90e9cc524e47296607cf16dbb8dcc78849e8b17359c55d1295b05e0ace3a50a8","reviewed":true},
-      "ru": {"text":"Опубликовать сайт","sourceRevision":"90e9cc524e47296607cf16dbb8dcc78849e8b17359c55d1295b05e0ace3a50a8","reviewed":true}
+      "ru": {"text":"Опубликовать сайт","sourceRevision":"90e9cc524e47296607cf16dbb8dcc78849e8b17359c55d1295b05e0ace3a50a8","reviewed":true},
+      "ko": {"text":"사이트 맵","sourceRevision":"90e9cc524e47296607cf16dbb8dcc78849e8b17359c55d1295b05e0ace3a50a8","reviewed":true},
+      "fr": {"text":"Publier le site","sourceRevision":"90e9cc524e47296607cf16dbb8dcc78849e8b17359c55d1295b05e0ace3a50a8","reviewed":true}
     }
   },
   "published": {
@@ -258,21 +346,31 @@
       "en": {"text":"Theme published to the live site.","sourceRevision":"45876806c6b5f6a44e9dba062979fa2a6e99f5fd36ddb40d7e73779871b92bac","reviewed":true},
       "ja": {"text":"テーマをサイト全体に公開しました。","sourceRevision":"45876806c6b5f6a44e9dba062979fa2a6e99f5fd36ddb40d7e73779871b92bac","reviewed":true},
       "it": {"text":"Tema pubblicato sul sito live.","sourceRevision":"45876806c6b5f6a44e9dba062979fa2a6e99f5fd36ddb40d7e73779871b92bac","reviewed":true},
-      "ru": {"text":"Тема опубликована на действующем сайте.","sourceRevision":"45876806c6b5f6a44e9dba062979fa2a6e99f5fd36ddb40d7e73779871b92bac","reviewed":true}
+      "ru": {"text":"Тема опубликована на действующем сайте.","sourceRevision":"45876806c6b5f6a44e9dba062979fa2a6e99f5fd36ddb40d7e73779871b92bac","reviewed":true},
+      "ko": {"text":"라이브 사이트로 출판된 테마.","sourceRevision":"45876806c6b5f6a44e9dba062979fa2a6e99f5fd36ddb40d7e73779871b92bac","reviewed":true},
+      "fr": {"text":"Thème publié sur le site en direct.","sourceRevision":"45876806c6b5f6a44e9dba062979fa2a6e99f5fd36ddb40d7e73779871b92bac","reviewed":true}
     }
   },
   "radius": {
     "source": "圆角",
     "translations": {
       "en": {"text":"Radius","sourceRevision":"6d1b71bf5e5d00d6d58b6e2015896c69dd8e6db9d950318b783ad45f1bbec27c","reviewed":true},
-      "ru": {"text":"Скругление","sourceRevision":"6d1b71bf5e5d00d6d58b6e2015896c69dd8e6db9d950318b783ad45f1bbec27c","reviewed":true}
+      "ja": {"text":"ラディウス","sourceRevision":"6d1b71bf5e5d00d6d58b6e2015896c69dd8e6db9d950318b783ad45f1bbec27c","reviewed":true},
+      "it": {"text":"Raggio","sourceRevision":"6d1b71bf5e5d00d6d58b6e2015896c69dd8e6db9d950318b783ad45f1bbec27c","reviewed":true},
+      "ru": {"text":"Скругление","sourceRevision":"6d1b71bf5e5d00d6d58b6e2015896c69dd8e6db9d950318b783ad45f1bbec27c","reviewed":true},
+      "ko": {"text":"라디언","sourceRevision":"6d1b71bf5e5d00d6d58b6e2015896c69dd8e6db9d950318b783ad45f1bbec27c","reviewed":true},
+      "fr": {"text":"Rayon","sourceRevision":"6d1b71bf5e5d00d6d58b6e2015896c69dd8e6db9d950318b783ad45f1bbec27c","reviewed":true}
     }
   },
   "readOnly": {
     "source": "只读",
     "translations": {
       "en": {"text":"Read only","sourceRevision":"477672946292d95bd53a8ccfa952236769505e17aa53400f98352aa687a02a8b","reviewed":true},
-      "ru": {"text":"Только для чтения","sourceRevision":"477672946292d95bd53a8ccfa952236769505e17aa53400f98352aa687a02a8b","reviewed":true}
+      "ja": {"text":"読まれただけ","sourceRevision":"477672946292d95bd53a8ccfa952236769505e17aa53400f98352aa687a02a8b","reviewed":true},
+      "it": {"text":"Leggi solo","sourceRevision":"477672946292d95bd53a8ccfa952236769505e17aa53400f98352aa687a02a8b","reviewed":true},
+      "ru": {"text":"Только для чтения","sourceRevision":"477672946292d95bd53a8ccfa952236769505e17aa53400f98352aa687a02a8b","reviewed":true},
+      "ko": {"text":"읽음","sourceRevision":"477672946292d95bd53a8ccfa952236769505e17aa53400f98352aa687a02a8b","reviewed":true},
+      "fr": {"text":"Lire seulement","sourceRevision":"477672946292d95bd53a8ccfa952236769505e17aa53400f98352aa687a02a8b","reviewed":true}
     }
   },
   "resetDefault": {
@@ -281,7 +379,9 @@
       "en": {"text":"Default","sourceRevision":"e60f7822e5537851d132840cccff573679567e20f7ecb396d8b4cc9b50012980","reviewed":true},
       "ja": {"text":"既定","sourceRevision":"e60f7822e5537851d132840cccff573679567e20f7ecb396d8b4cc9b50012980","reviewed":true},
       "it": {"text":"Predefinito","sourceRevision":"e60f7822e5537851d132840cccff573679567e20f7ecb396d8b4cc9b50012980","reviewed":true},
-      "ru": {"text":"По умолчанию","sourceRevision":"e60f7822e5537851d132840cccff573679567e20f7ecb396d8b4cc9b50012980","reviewed":true}
+      "ru": {"text":"По умолчанию","sourceRevision":"e60f7822e5537851d132840cccff573679567e20f7ecb396d8b4cc9b50012980","reviewed":true},
+      "ko": {"text":"기본 정보","sourceRevision":"e60f7822e5537851d132840cccff573679567e20f7ecb396d8b4cc9b50012980","reviewed":true},
+      "fr": {"text":"Par défaut","sourceRevision":"e60f7822e5537851d132840cccff573679567e20f7ecb396d8b4cc9b50012980","reviewed":true}
     }
   },
   "restoreToSavedTitle": {
@@ -290,7 +390,9 @@
       "en": {"text":"Restore to the saved configuration","sourceRevision":"70a60deb9622e45d78da477b05f58d39fa89378c012df4ae65f6b0f2c55c123b","reviewed":true},
       "ja": {"text":"保存済みの設定に戻す","sourceRevision":"70a60deb9622e45d78da477b05f58d39fa89378c012df4ae65f6b0f2c55c123b","reviewed":true},
       "it": {"text":"Ripristina alla configurazione salvata","sourceRevision":"70a60deb9622e45d78da477b05f58d39fa89378c012df4ae65f6b0f2c55c123b","reviewed":true},
-      "ru": {"text":"Восстановить сохранённую конфигурацию","sourceRevision":"70a60deb9622e45d78da477b05f58d39fa89378c012df4ae65f6b0f2c55c123b","reviewed":true}
+      "ru": {"text":"Восстановить сохранённую конфигурацию","sourceRevision":"70a60deb9622e45d78da477b05f58d39fa89378c012df4ae65f6b0f2c55c123b","reviewed":true},
+      "ko": {"text":"저장된 구성 복원","sourceRevision":"70a60deb9622e45d78da477b05f58d39fa89378c012df4ae65f6b0f2c55c123b","reviewed":true},
+      "fr": {"text":"Restaurer la configuration enregistrée","sourceRevision":"70a60deb9622e45d78da477b05f58d39fa89378c012df4ae65f6b0f2c55c123b","reviewed":true}
     }
   },
   "restoredToSaved": {
@@ -299,7 +401,9 @@
       "en": {"text":"Restored to the saved configuration","sourceRevision":"d8cd755c4fc4a90b7874fe8306a43793986780d10c48a7594e8f0af0f4a64652","reviewed":true},
       "ja": {"text":"保存済みの設定に戻しました","sourceRevision":"d8cd755c4fc4a90b7874fe8306a43793986780d10c48a7594e8f0af0f4a64652","reviewed":true},
       "it": {"text":"Ripristinato alla configurazione salvata","sourceRevision":"d8cd755c4fc4a90b7874fe8306a43793986780d10c48a7594e8f0af0f4a64652","reviewed":true},
-      "ru": {"text":"Восстановлена сохранённая конфигурация","sourceRevision":"d8cd755c4fc4a90b7874fe8306a43793986780d10c48a7594e8f0af0f4a64652","reviewed":true}
+      "ru": {"text":"Восстановлена сохранённая конфигурация","sourceRevision":"d8cd755c4fc4a90b7874fe8306a43793986780d10c48a7594e8f0af0f4a64652","reviewed":true},
+      "ko": {"text":"저장된 구성에 복원","sourceRevision":"d8cd755c4fc4a90b7874fe8306a43793986780d10c48a7594e8f0af0f4a64652","reviewed":true},
+      "fr": {"text":"Restauré à la configuration enregistrée","sourceRevision":"d8cd755c4fc4a90b7874fe8306a43793986780d10c48a7594e8f0af0f4a64652","reviewed":true}
     }
   },
   "sampleMessageIncoming": {
@@ -308,7 +412,9 @@
       "en": {"text":"Is this background comfortable?","sourceRevision":"ee445e50cd594264a9682b677de6f707ea722d6f04af58dd399507505ebc51a0","reviewed":true},
       "ja": {"text":"この背景は快適ですか？","sourceRevision":"ee445e50cd594264a9682b677de6f707ea722d6f04af58dd399507505ebc51a0","reviewed":true},
       "it": {"text":"Questo sfondo è comodo?","sourceRevision":"ee445e50cd594264a9682b677de6f707ea722d6f04af58dd399507505ebc51a0","reviewed":true},
-      "ru": {"text":"Комфортен ли этот фон?","sourceRevision":"ee445e50cd594264a9682b677de6f707ea722d6f04af58dd399507505ebc51a0","reviewed":true}
+      "ru": {"text":"Комфортен ли этот фон?","sourceRevision":"ee445e50cd594264a9682b677de6f707ea722d6f04af58dd399507505ebc51a0","reviewed":true},
+      "ko": {"text":"이 배경은 편안합니까?","sourceRevision":"ee445e50cd594264a9682b677de6f707ea722d6f04af58dd399507505ebc51a0","reviewed":true},
+      "fr": {"text":"Est-ce que ce fond est confortable ?","sourceRevision":"ee445e50cd594264a9682b677de6f707ea722d6f04af58dd399507505ebc51a0","reviewed":true}
     }
   },
   "sampleMessageOutgoing": {
@@ -317,16 +423,20 @@
       "en": {"text":"The contrast needs to stay solid.","sourceRevision":"ce1f47ae8f1e4aadb34c5b0c5127884954b12660c2cf52e7e6998bb29a9edd6c","reviewed":true},
       "ja": {"text":"コントラストは安定させる必要があります。","sourceRevision":"ce1f47ae8f1e4aadb34c5b0c5127884954b12660c2cf52e7e6998bb29a9edd6c","reviewed":true},
       "it": {"text":"Il contrasto deve rimanere solido.","sourceRevision":"ce1f47ae8f1e4aadb34c5b0c5127884954b12660c2cf52e7e6998bb29a9edd6c","reviewed":true},
-      "ru": {"text":"Контраст должен оставаться чётким.","sourceRevision":"ce1f47ae8f1e4aadb34c5b0c5127884954b12660c2cf52e7e6998bb29a9edd6c","reviewed":true}
+      "ru": {"text":"Контраст должен оставаться чётким.","sourceRevision":"ce1f47ae8f1e4aadb34c5b0c5127884954b12660c2cf52e7e6998bb29a9edd6c","reviewed":true},
+      "ko": {"text":"대조는 고체를 유지해야합니다.","sourceRevision":"ce1f47ae8f1e4aadb34c5b0c5127884954b12660c2cf52e7e6998bb29a9edd6c","reviewed":true},
+      "fr": {"text":"Le contraste doit rester solide.","sourceRevision":"ce1f47ae8f1e4aadb34c5b0c5127884954b12660c2cf52e7e6998bb29a9edd6c","reviewed":true}
     }
   },
   "samplePublish": {
     "source": "发布主题",
     "translations": {
       "en": {"text":"Publish topic","sourceRevision":"998ea1673dfd26e272c275860027986825b47048589aead450f1bd05c7265088","reviewed":true},
-      "ja": {"text":"トピックを投稿","sourceRevision":"998ea1673dfd26e272c275860027986825b47048589aead450f1bd05c7265088","reviewed":true},
+      "ja": {"text":"スレッドを投稿","sourceRevision":"998ea1673dfd26e272c275860027986825b47048589aead450f1bd05c7265088","reviewed":true},
       "it": {"text":"Pubblica argomento","sourceRevision":"998ea1673dfd26e272c275860027986825b47048589aead450f1bd05c7265088","reviewed":true},
-      "ru": {"text":"Опубликовать тему","sourceRevision":"998ea1673dfd26e272c275860027986825b47048589aead450f1bd05c7265088","reviewed":true}
+      "ru": {"text":"Опубликовать тему","sourceRevision":"998ea1673dfd26e272c275860027986825b47048589aead450f1bd05c7265088","reviewed":true},
+      "ko": {"text":"게시글 올리기","sourceRevision":"998ea1673dfd26e272c275860027986825b47048589aead450f1bd05c7265088","reviewed":true},
+      "fr": {"text":"Publier le sujet","sourceRevision":"998ea1673dfd26e272c275860027986825b47048589aead450f1bd05c7265088","reviewed":true}
     }
   },
   "sampleTopic1": {
@@ -335,7 +445,9 @@
       "en": {"text":"Theme system refactor discussion: colors, radius, and component states","sourceRevision":"05d527a254ccbfdf03eb57b29d6f961267bce625571014a07628533e0760223e","reviewed":true},
       "ja": {"text":"テーマシステム再構築の議論：カラー、角丸、コンポーネントの状態","sourceRevision":"05d527a254ccbfdf03eb57b29d6f961267bce625571014a07628533e0760223e","reviewed":true},
       "it": {"text":"Discussione sul refactoring del sistema di temi: colori, raggi e stati dei componenti","sourceRevision":"05d527a254ccbfdf03eb57b29d6f961267bce625571014a07628533e0760223e","reviewed":true},
-      "ru": {"text":"Обсуждение рефакторинга системы тем: цвета, скругления и состояния компонентов","sourceRevision":"05d527a254ccbfdf03eb57b29d6f961267bce625571014a07628533e0760223e","reviewed":true}
+      "ru": {"text":"Обсуждение рефакторинга системы тем: цвета, скругления и состояния компонентов","sourceRevision":"05d527a254ccbfdf03eb57b29d6f961267bce625571014a07628533e0760223e","reviewed":true},
+      "ko": {"text":"테마 시스템 재구성 토론 : 색상, 반경 및 구성 요소 상태","sourceRevision":"05d527a254ccbfdf03eb57b29d6f961267bce625571014a07628533e0760223e","reviewed":true},
+      "fr": {"text":"Discussion sur le système thématique : couleurs, rayon et états des composants","sourceRevision":"05d527a254ccbfdf03eb57b29d6f961267bce625571014a07628533e0760223e","reviewed":true}
     }
   },
   "sampleTopic2": {
@@ -344,7 +456,9 @@
       "en": {"text":"Readability of Markdown body text in dark mode","sourceRevision":"8abb80450496361bcc5903bbcc687f28c29ff2dacd10545ed0c06ac67fe7c4ae","reviewed":true},
       "ja": {"text":"ダークモードでの Markdown 本文の可読性","sourceRevision":"8abb80450496361bcc5903bbcc687f28c29ff2dacd10545ed0c06ac67fe7c4ae","reviewed":true},
       "it": {"text":"Leggibilità del testo Markdown in modalità scura","sourceRevision":"8abb80450496361bcc5903bbcc687f28c29ff2dacd10545ed0c06ac67fe7c4ae","reviewed":true},
-      "ru": {"text":"Читаемость текста в Markdown в тёмном режиме","sourceRevision":"8abb80450496361bcc5903bbcc687f28c29ff2dacd10545ed0c06ac67fe7c4ae","reviewed":true}
+      "ru": {"text":"Читаемость текста в Markdown в тёмном режиме","sourceRevision":"8abb80450496361bcc5903bbcc687f28c29ff2dacd10545ed0c06ac67fe7c4ae","reviewed":true},
+      "ko": {"text":"어두운 모드에서 Markdown 몸 텍스트의 읽기성","sourceRevision":"8abb80450496361bcc5903bbcc687f28c29ff2dacd10545ed0c06ac67fe7c4ae","reviewed":true},
+      "fr": {"text":"Lisibilité du texte du corps Markdown en mode sombre","sourceRevision":"8abb80450496361bcc5903bbcc687f28c29ff2dacd10545ed0c06ac67fe7c4ae","reviewed":true}
     }
   },
   "sampleTopic3": {
@@ -353,7 +467,9 @@
       "en": {"text":"Visual check of new-user onboarding and notifications","sourceRevision":"63829f9a33e24b74d46583011be1440ee029316075109b6380f37a476d0c5ab9","reviewed":true},
       "ja": {"text":"新規ユーザーの導線と通知のビジュアル確認","sourceRevision":"63829f9a33e24b74d46583011be1440ee029316075109b6380f37a476d0c5ab9","reviewed":true},
       "it": {"text":"Controllo visivo dell’onboarding dei nuovi utenti e delle notifiche","sourceRevision":"63829f9a33e24b74d46583011be1440ee029316075109b6380f37a476d0c5ab9","reviewed":true},
-      "ru": {"text":"Визуальная проверка онбординга новых пользователей и уведомлений","sourceRevision":"63829f9a33e24b74d46583011be1440ee029316075109b6380f37a476d0c5ab9","reviewed":true}
+      "ru": {"text":"Визуальная проверка онбординга новых пользователей и уведомлений","sourceRevision":"63829f9a33e24b74d46583011be1440ee029316075109b6380f37a476d0c5ab9","reviewed":true},
+      "ko": {"text":"새로운 사용자의 내장 및 알림의 비주얼 체크","sourceRevision":"63829f9a33e24b74d46583011be1440ee029316075109b6380f37a476d0c5ab9","reviewed":true},
+      "fr": {"text":"Contrôle visuel des nouveaux utilisateurs à bord et notifications","sourceRevision":"63829f9a33e24b74d46583011be1440ee029316075109b6380f37a476d0c5ab9","reviewed":true}
     }
   },
   "sampleTopicBody": {
@@ -362,7 +478,9 @@
       "en": {"text":"This simulates body text, links, quotes, and code blocks. Theme variables should keep content readable in both light and dark modes — especially body text, borders, and muted text.","sourceRevision":"1b73ad35c752048f2766b6bc23abda95e45e6c54c4035272f8335168e1faa6ad","reviewed":true},
       "ja": {"text":"本文・リンク・引用・コードブロックをここでシミュレートします。テーマ変数はライト／ダークの両モードで内容を読みやすく保つ必要があります。特に本文・境界線・弱いテキストです。","sourceRevision":"1b73ad35c752048f2766b6bc23abda95e45e6c54c4035272f8335168e1faa6ad","reviewed":true},
       "it": {"text":"Questo simula testo, link, citazioni e blocchi di codice. Le variabili del tema dovrebbero mantenere il contenuto leggibile sia in modalità chiara che scura, in particolare testo, bordi e testo attenuato.","sourceRevision":"1b73ad35c752048f2766b6bc23abda95e45e6c54c4035272f8335168e1faa6ad","reviewed":true},
-      "ru": {"text":"Это имитация основного текста, ссылок, цитат и блоков кода. Переменные темы должны сохранять читаемость контента в светлом и тёмном режимах — особенно основного текста, границ и приглушённых надписей.","sourceRevision":"1b73ad35c752048f2766b6bc23abda95e45e6c54c4035272f8335168e1faa6ad","reviewed":true}
+      "ru": {"text":"Это имитация основного текста, ссылок, цитат и блоков кода. Переменные темы должны сохранять читаемость контента в светлом и тёмном режимах — особенно основного текста, границ и приглушённых надписей.","sourceRevision":"1b73ad35c752048f2766b6bc23abda95e45e6c54c4035272f8335168e1faa6ad","reviewed":true},
+      "ko": {"text":"이 시뮬레이션 바디 텍스트, 링크, 인용문 및 코드 블록. 테마 변수는 빛과 어두운 모드 모두에서 읽을 수있는 콘텐츠를 유지해야합니다 - 특히 신체 텍스트, 경계, 그리고 뮤트 텍스트.","sourceRevision":"1b73ad35c752048f2766b6bc23abda95e45e6c54c4035272f8335168e1faa6ad","reviewed":true},
+      "fr": {"text":"Cela simule le texte du corps, les liens, les citations et les blocs de code. Les variables thématiques doivent garder le contenu lisible dans les modes lumineux et sombres — en particulier le texte du Corps, les bordures et le texte muet.","sourceRevision":"1b73ad35c752048f2766b6bc23abda95e45e6c54c4035272f8335168e1faa6ad","reviewed":true}
     }
   },
   "sampleTopicExcerpt": {
@@ -371,7 +489,9 @@
       "en": {"text":"Observe how muted text, dividers, tags, and hover backgrounds are layered under the current theme.","sourceRevision":"640a4e4b5993d5b63c6e2d3e47421c18ed070e868dc0c3eaf859899e9e328d9d","reviewed":true},
       "ja": {"text":"現在のテーマで、弱いテキスト・区切り線・タグ・ホバー背景の階層を確認します。","sourceRevision":"640a4e4b5993d5b63c6e2d3e47421c18ed070e868dc0c3eaf859899e9e328d9d","reviewed":true},
       "it": {"text":"Osserva come testo attenuato, divisori, tag e sfondi al passaggio del mouse si dispongono a livelli con il tema attuale.","sourceRevision":"640a4e4b5993d5b63c6e2d3e47421c18ed070e868dc0c3eaf859899e9e328d9d","reviewed":true},
-      "ru": {"text":"Посмотрите, как приглушённый текст, разделители, теги и фоны при наведении располагаются слоями в текущей теме.","sourceRevision":"640a4e4b5993d5b63c6e2d3e47421c18ed070e868dc0c3eaf859899e9e328d9d","reviewed":true}
+      "ru": {"text":"Посмотрите, как приглушённый текст, разделители, теги и фоны при наведении располагаются слоями в текущей теме.","sourceRevision":"640a4e4b5993d5b63c6e2d3e47421c18ed070e868dc0c3eaf859899e9e328d9d","reviewed":true},
+      "ko": {"text":"텍스트, 배당체, 태그 및 호버 배경이 현재 테마 아래에 계층화되는 방법을 관찰하십시오.","sourceRevision":"640a4e4b5993d5b63c6e2d3e47421c18ed070e868dc0c3eaf859899e9e328d9d","reviewed":true},
+      "fr": {"text":"Observez comment le texte, les diviseurs, les balises et les arrière-plans de vol stationnaire sont enroulés sous le thème actuel.","sourceRevision":"640a4e4b5993d5b63c6e2d3e47421c18ed070e868dc0c3eaf859899e9e328d9d","reviewed":true}
     }
   },
   "sampleTopicQuote": {
@@ -380,25 +500,31 @@
       "en": {"text":"Color hierarchy should be quiet, but never vague.","sourceRevision":"fd9480602519b308e69d2d4147dbdff9317ad72216f0e5148c81b611dfc7746f","reviewed":true},
       "ja": {"text":"カラーの階層は静かであるべきですが、曖昧にしてはいけません。","sourceRevision":"fd9480602519b308e69d2d4147dbdff9317ad72216f0e5148c81b611dfc7746f","reviewed":true},
       "it": {"text":"La gerarchia dei colori dovrebbe essere discreta, ma mai vaga.","sourceRevision":"fd9480602519b308e69d2d4147dbdff9317ad72216f0e5148c81b611dfc7746f","reviewed":true},
-      "ru": {"text":"Иерархия цветов должна быть спокойной, но не размытой.","sourceRevision":"fd9480602519b308e69d2d4147dbdff9317ad72216f0e5148c81b611dfc7746f","reviewed":true}
+      "ru": {"text":"Иерархия цветов должна быть спокойной, но не размытой.","sourceRevision":"fd9480602519b308e69d2d4147dbdff9317ad72216f0e5148c81b611dfc7746f","reviewed":true},
+      "ko": {"text":"색상 hierarchy는 조용해야하지만, 결코 vague.","sourceRevision":"fd9480602519b308e69d2d4147dbdff9317ad72216f0e5148c81b611dfc7746f","reviewed":true},
+      "fr": {"text":"La hiérarchie des couleurs devrait être silencieuse, mais jamais vague.","sourceRevision":"fd9480602519b308e69d2d4147dbdff9317ad72216f0e5148c81b611dfc7746f","reviewed":true}
     }
   },
   "sampleTopicTitle": {
     "source": "一篇主题帖的标题",
     "translations": {
       "en": {"text":"The title of a topic post","sourceRevision":"675ce2d3fa81b3caacbfd99ed677c114ed81216ee7c16885239de7eef1a65d95","reviewed":true},
-      "ja": {"text":"あるトピック投稿のタイトル","sourceRevision":"675ce2d3fa81b3caacbfd99ed677c114ed81216ee7c16885239de7eef1a65d95","reviewed":true},
+      "ja": {"text":"あるスレッド投稿のタイトル","sourceRevision":"675ce2d3fa81b3caacbfd99ed677c114ed81216ee7c16885239de7eef1a65d95","reviewed":true},
       "it": {"text":"Il titolo di un post di discussione","sourceRevision":"675ce2d3fa81b3caacbfd99ed677c114ed81216ee7c16885239de7eef1a65d95","reviewed":true},
-      "ru": {"text":"Заголовок сообщения в теме","sourceRevision":"675ce2d3fa81b3caacbfd99ed677c114ed81216ee7c16885239de7eef1a65d95","reviewed":true}
+      "ru": {"text":"Заголовок сообщения в теме","sourceRevision":"675ce2d3fa81b3caacbfd99ed677c114ed81216ee7c16885239de7eef1a65d95","reviewed":true},
+      "ko": {"text":"게시글의 제목 게시물","sourceRevision":"675ce2d3fa81b3caacbfd99ed677c114ed81216ee7c16885239de7eef1a65d95","reviewed":true},
+      "fr": {"text":"Le titre d’un article thématique","sourceRevision":"675ce2d3fa81b3caacbfd99ed677c114ed81216ee7c16885239de7eef1a65d95","reviewed":true}
     }
   },
   "saveDraft": {
     "source": "保存草稿",
     "translations": {
       "en": {"text":"Save draft","sourceRevision":"ff1c6698647a5b04d2ff4bba2f3b49629911a3cfed2ec5bcf61e41f5ae261906","reviewed":true},
-      "ja": {"text":"草稿を保存","sourceRevision":"ff1c6698647a5b04d2ff4bba2f3b49629911a3cfed2ec5bcf61e41f5ae261906","reviewed":true},
+      "ja": {"text":"下書きを保存","sourceRevision":"ff1c6698647a5b04d2ff4bba2f3b49629911a3cfed2ec5bcf61e41f5ae261906","reviewed":true},
       "it": {"text":"Salva bozza","sourceRevision":"ff1c6698647a5b04d2ff4bba2f3b49629911a3cfed2ec5bcf61e41f5ae261906","reviewed":true},
-      "ru": {"text":"Сохранить черновик","sourceRevision":"ff1c6698647a5b04d2ff4bba2f3b49629911a3cfed2ec5bcf61e41f5ae261906","reviewed":true}
+      "ru": {"text":"Сохранить черновик","sourceRevision":"ff1c6698647a5b04d2ff4bba2f3b49629911a3cfed2ec5bcf61e41f5ae261906","reviewed":true},
+      "ko": {"text":"임시 저장","sourceRevision":"ff1c6698647a5b04d2ff4bba2f3b49629911a3cfed2ec5bcf61e41f5ae261906","reviewed":true},
+      "fr": {"text":"Enregistrer le brouillon","sourceRevision":"ff1c6698647a5b04d2ff4bba2f3b49629911a3cfed2ec5bcf61e41f5ae261906","reviewed":true}
     }
   },
   "saveFailed": {
@@ -407,7 +533,9 @@
       "en": {"text":"Failed to save theme draft","sourceRevision":"098d2e3d6e2dafb30f70495506c04497525a67a83bdf3563d4a258fc89404211","reviewed":true},
       "ja": {"text":"テーマ草稿の保存に失敗しました","sourceRevision":"098d2e3d6e2dafb30f70495506c04497525a67a83bdf3563d4a258fc89404211","reviewed":true},
       "it": {"text":"Salvataggio della bozza del tema non riuscito","sourceRevision":"098d2e3d6e2dafb30f70495506c04497525a67a83bdf3563d4a258fc89404211","reviewed":true},
-      "ru": {"text":"Не удалось сохранить черновик темы","sourceRevision":"098d2e3d6e2dafb30f70495506c04497525a67a83bdf3563d4a258fc89404211","reviewed":true}
+      "ru": {"text":"Не удалось сохранить черновик темы","sourceRevision":"098d2e3d6e2dafb30f70495506c04497525a67a83bdf3563d4a258fc89404211","reviewed":true},
+      "ko": {"text":"테마 초안을 저장하는 실패","sourceRevision":"098d2e3d6e2dafb30f70495506c04497525a67a83bdf3563d4a258fc89404211","reviewed":true},
+      "fr": {"text":"Échec de l’enregistrement du projet thématique","sourceRevision":"098d2e3d6e2dafb30f70495506c04497525a67a83bdf3563d4a258fc89404211","reviewed":true}
     }
   },
   "themeRestoredDefault": {
@@ -416,14 +544,20 @@
       "en": {"text":"{name} restored to the built-in default","sourceRevision":"3959715e030c9b005bad36c27fff9c374331b8aa85e5cd462542f75650fd2da9","reviewed":true},
       "ja": {"text":"{name} を組み込みの既定に戻しました","sourceRevision":"3959715e030c9b005bad36c27fff9c374331b8aa85e5cd462542f75650fd2da9","reviewed":true},
       "it": {"text":"{name} ripristinato al valore predefinito integrato","sourceRevision":"3959715e030c9b005bad36c27fff9c374331b8aa85e5cd462542f75650fd2da9","reviewed":true},
-      "ru": {"text":"{name} восстановлена до встроенной по умолчанию","sourceRevision":"3959715e030c9b005bad36c27fff9c374331b8aa85e5cd462542f75650fd2da9","reviewed":true}
+      "ru": {"text":"{name} восстановлена до встроенной по умолчанию","sourceRevision":"3959715e030c9b005bad36c27fff9c374331b8aa85e5cd462542f75650fd2da9","reviewed":true},
+      "ko": {"text":"{name}는 내장 기본으로 복원","sourceRevision":"3959715e030c9b005bad36c27fff9c374331b8aa85e5cd462542f75650fd2da9","reviewed":true},
+      "fr": {"text":"{name} restauré à la valeur par défaut","sourceRevision":"3959715e030c9b005bad36c27fff9c374331b8aa85e5cd462542f75650fd2da9","reviewed":true}
     }
   },
   "unsaved": {
     "source": "未保存",
     "translations": {
       "en": {"text":"Unsaved","sourceRevision":"d8a6213ebecec04b08c55d82a779bda20d178ff23f2f3c0b3628c562f70025c4","reviewed":true},
-      "ru": {"text":"Не сохранено","sourceRevision":"d8a6213ebecec04b08c55d82a779bda20d178ff23f2f3c0b3628c562f70025c4","reviewed":true}
+      "ja": {"text":"不定休","sourceRevision":"d8a6213ebecec04b08c55d82a779bda20d178ff23f2f3c0b3628c562f70025c4","reviewed":true},
+      "it": {"text":"Non saltato","sourceRevision":"d8a6213ebecec04b08c55d82a779bda20d178ff23f2f3c0b3628c562f70025c4","reviewed":true},
+      "ru": {"text":"Не сохранено","sourceRevision":"d8a6213ebecec04b08c55d82a779bda20d178ff23f2f3c0b3628c562f70025c4","reviewed":true},
+      "ko": {"text":"저장되지 않음","sourceRevision":"d8a6213ebecec04b08c55d82a779bda20d178ff23f2f3c0b3628c562f70025c4","reviewed":true},
+      "fr": {"text":"Non sauvés","sourceRevision":"d8a6213ebecec04b08c55d82a779bda20d178ff23f2f3c0b3628c562f70025c4","reviewed":true}
     }
   },
   "workflowDescription": {
@@ -432,7 +566,9 @@
       "en": {"text":"You are editing a theme draft. Saving the draft does not affect the live site; after publishing, the custom theme takes over only when the enable switch on the left is on.","sourceRevision":"943e9f5f07ebd792e6ee64df418ad24df26d0835bf1d0e9d901686c4208acf69","reviewed":true},
       "ja": {"text":"現在編集しているのはテーマ草稿です。草稿の保存だけではサイト全体には反映されません。公開後、左側の有効化スイッチがオンのときだけカスタムテーマが適用されます。","sourceRevision":"943e9f5f07ebd792e6ee64df418ad24df26d0835bf1d0e9d901686c4208acf69","reviewed":true},
       "it": {"text":"Stai modificando una bozza del tema. Il salvataggio della bozza non influisce sul sito live; dopo la pubblicazione, il tema personalizzato subentra solo quando l’interruttore di abilitazione a sinistra è attivo.","sourceRevision":"943e9f5f07ebd792e6ee64df418ad24df26d0835bf1d0e9d901686c4208acf69","reviewed":true},
-      "ru": {"text":"Вы редактируете черновик темы. Сохранение черновика не влияет на действующий сайт; после публикации пользовательская тема применяется только при включённом переключателе слева.","sourceRevision":"943e9f5f07ebd792e6ee64df418ad24df26d0835bf1d0e9d901686c4208acf69","reviewed":true}
+      "ru": {"text":"Вы редактируете черновик темы. Сохранение черновика не влияет на действующий сайт; после публикации пользовательская тема применяется только при включённом переключателе слева.","sourceRevision":"943e9f5f07ebd792e6ee64df418ad24df26d0835bf1d0e9d901686c4208acf69","reviewed":true},
+      "ko": {"text":"테마 초안을 편집하고 있습니다. 초안을 저장하면 라이브 사이트에 영향을 미치지 않습니다. 게시 후, 사용자 정의 테마는 왼쪽의 활성화가 켜지면 만 걸립니다.","sourceRevision":"943e9f5f07ebd792e6ee64df418ad24df26d0835bf1d0e9d901686c4208acf69","reviewed":true},
+      "fr": {"text":"Vous modifiez un brouillon de thème. L’enregistrement du brouillon n’affecte pas le site en direct ; après publication, le thème personnalisé prend le dessus seulement lorsque l’activation sur la gauche est activée.","sourceRevision":"943e9f5f07ebd792e6ee64df418ad24df26d0835bf1d0e9d901686c4208acf69","reviewed":true}
     }
   },
   "workflowTitle": {
@@ -441,7 +577,9 @@
       "en": {"text":"How it works:","sourceRevision":"2169844b0c38d176239fba4f6652d1c4576bc1c562c6af29ef9bb27952a5eac7","reviewed":true},
       "ja": {"text":"使い方:","sourceRevision":"2169844b0c38d176239fba4f6652d1c4576bc1c562c6af29ef9bb27952a5eac7","reviewed":true},
       "it": {"text":"Come funziona:","sourceRevision":"2169844b0c38d176239fba4f6652d1c4576bc1c562c6af29ef9bb27952a5eac7","reviewed":true},
-      "ru": {"text":"Как это работает:","sourceRevision":"2169844b0c38d176239fba4f6652d1c4576bc1c562c6af29ef9bb27952a5eac7","reviewed":true}
+      "ru": {"text":"Как это работает:","sourceRevision":"2169844b0c38d176239fba4f6652d1c4576bc1c562c6af29ef9bb27952a5eac7","reviewed":true},
+      "ko": {"text":"작동 방법:","sourceRevision":"2169844b0c38d176239fba4f6652d1c4576bc1c562c6af29ef9bb27952a5eac7","reviewed":true},
+      "fr": {"text":"Comment ça marche :","sourceRevision":"2169844b0c38d176239fba4f6652d1c4576bc1c562c6af29ef9bb27952a5eac7","reviewed":true}
     }
   }
 }

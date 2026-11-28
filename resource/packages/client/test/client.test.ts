@@ -35,6 +35,8 @@ describe('i18n contracts', () => {
     ['ja,zh;q=0.9', 'ja'],
     ['it-IT', 'it'],
     ['ru-RU', 'ru'],
+    ['ko-KR', 'ko'],
+    ['fr-CA', 'fr'],
     ['unknown', undefined],
   ])('normalizes %s to %s', (input, expected) => {
     expect(normalizeLocale(input)).toBe(expected)

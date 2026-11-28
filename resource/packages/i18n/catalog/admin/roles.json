@@ -3,14 +3,22 @@
     "source": "操作",
     "translations": {
       "en": {"text":"Actions","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true},
-      "ru": {"text":"Действия","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true}
+      "ja": {"text":"操作","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true},
+      "it": {"text":"Azioni","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true},
+      "ru": {"text":"Действия","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true},
+      "ko": {"text":"작업","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true},
+      "fr": {"text":"Actions","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true}
     }
   },
   "all": {
     "source": "全部",
     "translations": {
       "en": {"text":"All","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true},
-      "ru": {"text":"Все","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true}
+      "ja": {"text":"すべて","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true},
+      "it": {"text":"Tutti","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true},
+      "ru": {"text":"Все","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true},
+      "ko": {"text":"전체","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true},
+      "fr": {"text":"Tout","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true}
     }
   },
   "cancel": {
@@ -19,7 +27,9 @@
       "en": {"text":"Cancel","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
       "ja": {"text":"キャンセル","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
       "it": {"text":"Annulla","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
-      "ru": {"text":"Отмена","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true}
+      "ru": {"text":"Отмена","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
+      "ko": {"text":"취소","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
+      "fr": {"text":"Annuler","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true}
     }
   },
   "create": {
@@ -28,21 +38,31 @@
       "en": {"text":"New role","sourceRevision":"f89fa1df2cc89b6f73c2acd244ee5762af98000b4e51fa942b6659a2521b235d","reviewed":true},
       "ja": {"text":"新規ロール","sourceRevision":"f89fa1df2cc89b6f73c2acd244ee5762af98000b4e51fa942b6659a2521b235d","reviewed":true},
       "it": {"text":"Nuovo ruolo","sourceRevision":"f89fa1df2cc89b6f73c2acd244ee5762af98000b4e51fa942b6659a2521b235d","reviewed":true},
-      "ru": {"text":"Новая роль","sourceRevision":"f89fa1df2cc89b6f73c2acd244ee5762af98000b4e51fa942b6659a2521b235d","reviewed":true}
+      "ru": {"text":"Новая роль","sourceRevision":"f89fa1df2cc89b6f73c2acd244ee5762af98000b4e51fa942b6659a2521b235d","reviewed":true},
+      "ko": {"text":"새로운 역할","sourceRevision":"f89fa1df2cc89b6f73c2acd244ee5762af98000b4e51fa942b6659a2521b235d","reviewed":true},
+      "fr": {"text":"Nouveau rôle","sourceRevision":"f89fa1df2cc89b6f73c2acd244ee5762af98000b4e51fa942b6659a2521b235d","reviewed":true}
     }
   },
   "createTitle": {
     "source": "新建角色",
     "translations": {
       "en": {"text":"Create role","sourceRevision":"f89fa1df2cc89b6f73c2acd244ee5762af98000b4e51fa942b6659a2521b235d","reviewed":true},
-      "ru": {"text":"Создать роль","sourceRevision":"f89fa1df2cc89b6f73c2acd244ee5762af98000b4e51fa942b6659a2521b235d","reviewed":true}
+      "ja": {"text":"ロールを作成する","sourceRevision":"f89fa1df2cc89b6f73c2acd244ee5762af98000b4e51fa942b6659a2521b235d","reviewed":true},
+      "it": {"text":"Creare un ruolo","sourceRevision":"f89fa1df2cc89b6f73c2acd244ee5762af98000b4e51fa942b6659a2521b235d","reviewed":true},
+      "ru": {"text":"Создать роль","sourceRevision":"f89fa1df2cc89b6f73c2acd244ee5762af98000b4e51fa942b6659a2521b235d","reviewed":true},
+      "ko": {"text":"역할 만들기","sourceRevision":"f89fa1df2cc89b6f73c2acd244ee5762af98000b4e51fa942b6659a2521b235d","reviewed":true},
+      "fr": {"text":"Créer un rôle","sourceRevision":"f89fa1df2cc89b6f73c2acd244ee5762af98000b4e51fa942b6659a2521b235d","reviewed":true}
     }
   },
   "createdAt": {
     "source": "创建时间",
     "translations": {
       "en": {"text":"Created","sourceRevision":"c0193d245fd17cb14c458e1a80fd990438c9a92140da88619d28a818bfebef7c","reviewed":true},
-      "ru": {"text":"Создана","sourceRevision":"c0193d245fd17cb14c458e1a80fd990438c9a92140da88619d28a818bfebef7c","reviewed":true}
+      "ja": {"text":"作成日","sourceRevision":"c0193d245fd17cb14c458e1a80fd990438c9a92140da88619d28a818bfebef7c","reviewed":true},
+      "it": {"text":"Creazione","sourceRevision":"c0193d245fd17cb14c458e1a80fd990438c9a92140da88619d28a818bfebef7c","reviewed":true},
+      "ru": {"text":"Создана","sourceRevision":"c0193d245fd17cb14c458e1a80fd990438c9a92140da88619d28a818bfebef7c","reviewed":true},
+      "ko": {"text":"생성일","sourceRevision":"c0193d245fd17cb14c458e1a80fd990438c9a92140da88619d28a818bfebef7c","reviewed":true},
+      "fr": {"text":"Création","sourceRevision":"c0193d245fd17cb14c458e1a80fd990438c9a92140da88619d28a818bfebef7c","reviewed":true}
     }
   },
   "delete": {
@@ -51,49 +71,75 @@
       "en": {"text":"Delete","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
       "ja": {"text":"削除","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
       "it": {"text":"Elimina","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
-      "ru": {"text":"Удалить","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true}
+      "ru": {"text":"Удалить","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
+      "ko": {"text":"삭제","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
+      "fr": {"text":"Supprimer","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true}
     }
   },
   "deleteConfirm": {
     "source": "确定删除这个角色吗？",
     "translations": {
       "en": {"text":"Delete this role?","sourceRevision":"9d79282a8644a5332b85d42a78bb322f41fe2453367723ae80a58f961368841b","reviewed":true},
-      "ru": {"text":"Удалить эту роль?","sourceRevision":"9d79282a8644a5332b85d42a78bb322f41fe2453367723ae80a58f961368841b","reviewed":true}
+      "ja": {"text":"このロールを削除しますか?","sourceRevision":"9d79282a8644a5332b85d42a78bb322f41fe2453367723ae80a58f961368841b","reviewed":true},
+      "it": {"text":"Eliminare questo ruolo?","sourceRevision":"9d79282a8644a5332b85d42a78bb322f41fe2453367723ae80a58f961368841b","reviewed":true},
+      "ru": {"text":"Удалить эту роль?","sourceRevision":"9d79282a8644a5332b85d42a78bb322f41fe2453367723ae80a58f961368841b","reviewed":true},
+      "ko": {"text":"이 역할 삭제?","sourceRevision":"9d79282a8644a5332b85d42a78bb322f41fe2453367723ae80a58f961368841b","reviewed":true},
+      "fr": {"text":"Supprimer ce rôle ?","sourceRevision":"9d79282a8644a5332b85d42a78bb322f41fe2453367723ae80a58f961368841b","reviewed":true}
     }
   },
   "deleteFailed": {
     "source": "角色删除失败",
     "translations": {
       "en": {"text":"Failed to delete role","sourceRevision":"a38a8aba08642e0986b2150c2a05a83645c1332f60d3fbce4f58a22a30eeee4a","reviewed":true},
-      "ru": {"text":"Не удалось удалить роль","sourceRevision":"a38a8aba08642e0986b2150c2a05a83645c1332f60d3fbce4f58a22a30eeee4a","reviewed":true}
+      "ja": {"text":"ロールを削除できなかった","sourceRevision":"a38a8aba08642e0986b2150c2a05a83645c1332f60d3fbce4f58a22a30eeee4a","reviewed":true},
+      "it": {"text":"Impossibile eliminare il ruolo","sourceRevision":"a38a8aba08642e0986b2150c2a05a83645c1332f60d3fbce4f58a22a30eeee4a","reviewed":true},
+      "ru": {"text":"Не удалось удалить роль","sourceRevision":"a38a8aba08642e0986b2150c2a05a83645c1332f60d3fbce4f58a22a30eeee4a","reviewed":true},
+      "ko": {"text":"작업을 삭제하는 실패","sourceRevision":"a38a8aba08642e0986b2150c2a05a83645c1332f60d3fbce4f58a22a30eeee4a","reviewed":true},
+      "fr": {"text":"Impossible de supprimer le rôle","sourceRevision":"a38a8aba08642e0986b2150c2a05a83645c1332f60d3fbce4f58a22a30eeee4a","reviewed":true}
     }
   },
   "deleteTitle": {
     "source": "删除角色",
     "translations": {
       "en": {"text":"Delete role","sourceRevision":"4fe87a283bdcdb57b84970b4b1c29834120956a9fd6e3e53ccf02bd14b68dd3d","reviewed":true},
-      "ru": {"text":"Удалить роль","sourceRevision":"4fe87a283bdcdb57b84970b4b1c29834120956a9fd6e3e53ccf02bd14b68dd3d","reviewed":true}
+      "ja": {"text":"ロール削除","sourceRevision":"4fe87a283bdcdb57b84970b4b1c29834120956a9fd6e3e53ccf02bd14b68dd3d","reviewed":true},
+      "it": {"text":"Eliminare il ruolo","sourceRevision":"4fe87a283bdcdb57b84970b4b1c29834120956a9fd6e3e53ccf02bd14b68dd3d","reviewed":true},
+      "ru": {"text":"Удалить роль","sourceRevision":"4fe87a283bdcdb57b84970b4b1c29834120956a9fd6e3e53ccf02bd14b68dd3d","reviewed":true},
+      "ko": {"text":"역할 삭제","sourceRevision":"4fe87a283bdcdb57b84970b4b1c29834120956a9fd6e3e53ccf02bd14b68dd3d","reviewed":true},
+      "fr": {"text":"Supprimer le rôle","sourceRevision":"4fe87a283bdcdb57b84970b4b1c29834120956a9fd6e3e53ccf02bd14b68dd3d","reviewed":true}
     }
   },
   "deleted": {
     "source": "角色已删除",
     "translations": {
       "en": {"text":"Role deleted","sourceRevision":"5dda2c250f88704d29100a970cf6a4c29f4a580e8b59423c1aba5ef8dbc565a3","reviewed":true},
-      "ru": {"text":"Роль удалена","sourceRevision":"5dda2c250f88704d29100a970cf6a4c29f4a580e8b59423c1aba5ef8dbc565a3","reviewed":true}
+      "ja": {"text":"削除されたロール","sourceRevision":"5dda2c250f88704d29100a970cf6a4c29f4a580e8b59423c1aba5ef8dbc565a3","reviewed":true},
+      "it": {"text":"Role cancellato","sourceRevision":"5dda2c250f88704d29100a970cf6a4c29f4a580e8b59423c1aba5ef8dbc565a3","reviewed":true},
+      "ru": {"text":"Роль удалена","sourceRevision":"5dda2c250f88704d29100a970cf6a4c29f4a580e8b59423c1aba5ef8dbc565a3","reviewed":true},
+      "ko": {"text":"역할 삭제","sourceRevision":"5dda2c250f88704d29100a970cf6a4c29f4a580e8b59423c1aba5ef8dbc565a3","reviewed":true},
+      "fr": {"text":"Rôle supprimé","sourceRevision":"5dda2c250f88704d29100a970cf6a4c29f4a580e8b59423c1aba5ef8dbc565a3","reviewed":true}
     }
   },
   "description": {
     "source": "管理后台角色及其权限集合。",
     "translations": {
       "en": {"text":"Manage administrator roles and permission sets.","sourceRevision":"3ce9a9796259e6dbe14fc3c2305daf23c157761461c2b265fbfae0779c2f5f81","reviewed":true},
-      "ru": {"text":"Управление ролями администраторов и наборами разрешений.","sourceRevision":"3ce9a9796259e6dbe14fc3c2305daf23c157761461c2b265fbfae0779c2f5f81","reviewed":true}
+      "ja": {"text":"管理者の役割と権限セットの管理","sourceRevision":"3ce9a9796259e6dbe14fc3c2305daf23c157761461c2b265fbfae0779c2f5f81","reviewed":true},
+      "it": {"text":"Gestisci ruoli e set di autorizzazioni dell’amministratore.","sourceRevision":"3ce9a9796259e6dbe14fc3c2305daf23c157761461c2b265fbfae0779c2f5f81","reviewed":true},
+      "ru": {"text":"Управление ролями администраторов и наборами разрешений.","sourceRevision":"3ce9a9796259e6dbe14fc3c2305daf23c157761461c2b265fbfae0779c2f5f81","reviewed":true},
+      "ko": {"text":"관리자 역할 및 권한 설정 관리.","sourceRevision":"3ce9a9796259e6dbe14fc3c2305daf23c157761461c2b265fbfae0779c2f5f81","reviewed":true},
+      "fr": {"text":"Gérer les rôles d’administrateur et les ensembles de permission.","sourceRevision":"3ce9a9796259e6dbe14fc3c2305daf23c157761461c2b265fbfae0779c2f5f81","reviewed":true}
     }
   },
   "disabled": {
     "source": "停用",
     "translations": {
       "en": {"text":"Disabled","sourceRevision":"2b2101dedf25167c264f41a136b105ae235c8f3aed610c3f66d17e7364350994","reviewed":true},
-      "ru": {"text":"Неактивна","sourceRevision":"2b2101dedf25167c264f41a136b105ae235c8f3aed610c3f66d17e7364350994","reviewed":true}
+      "ja": {"text":"無効","sourceRevision":"2b2101dedf25167c264f41a136b105ae235c8f3aed610c3f66d17e7364350994","reviewed":true},
+      "it": {"text":"Disattivato","sourceRevision":"2b2101dedf25167c264f41a136b105ae235c8f3aed610c3f66d17e7364350994","reviewed":true},
+      "ru": {"text":"Неактивна","sourceRevision":"2b2101dedf25167c264f41a136b105ae235c8f3aed610c3f66d17e7364350994","reviewed":true},
+      "ko": {"text":"비활성","sourceRevision":"2b2101dedf25167c264f41a136b105ae235c8f3aed610c3f66d17e7364350994","reviewed":true},
+      "fr": {"text":"Désactivé","sourceRevision":"2b2101dedf25167c264f41a136b105ae235c8f3aed610c3f66d17e7364350994","reviewed":true}
     }
   },
   "edit": {
@@ -102,133 +148,207 @@
       "en": {"text":"Edit","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true},
       "ja": {"text":"編集","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true},
       "it": {"text":"Modifica","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true},
-      "ru": {"text":"Редактировать","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true}
+      "ru": {"text":"Редактировать","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true},
+      "ko": {"text":"편집","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true},
+      "fr": {"text":"Modifier","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true}
     }
   },
   "editTitle": {
     "source": "编辑角色",
     "translations": {
       "en": {"text":"Edit role","sourceRevision":"064d0fe35eed89eed0bf4aeb773922d7d091ba7024d748dd6b9c0e446ce602de","reviewed":true},
-      "ru": {"text":"Редактировать роль","sourceRevision":"064d0fe35eed89eed0bf4aeb773922d7d091ba7024d748dd6b9c0e446ce602de","reviewed":true}
+      "ja": {"text":"ロールの編集","sourceRevision":"064d0fe35eed89eed0bf4aeb773922d7d091ba7024d748dd6b9c0e446ce602de","reviewed":true},
+      "it": {"text":"Modifica ruolo","sourceRevision":"064d0fe35eed89eed0bf4aeb773922d7d091ba7024d748dd6b9c0e446ce602de","reviewed":true},
+      "ru": {"text":"Редактировать роль","sourceRevision":"064d0fe35eed89eed0bf4aeb773922d7d091ba7024d748dd6b9c0e446ce602de","reviewed":true},
+      "ko": {"text":"편집 역할","sourceRevision":"064d0fe35eed89eed0bf4aeb773922d7d091ba7024d748dd6b9c0e446ce602de","reviewed":true},
+      "fr": {"text":"Modifier le rôle","sourceRevision":"064d0fe35eed89eed0bf4aeb773922d7d091ba7024d748dd6b9c0e446ce602de","reviewed":true}
     }
   },
   "empty": {
     "source": "没有匹配的角色",
     "translations": {
       "en": {"text":"No matching roles","sourceRevision":"88379a69a754f99d458633d7ed422c235d24d76b44e5cc9c298ae80ee8d95f50","reviewed":true},
-      "ru": {"text":"Подходящих ролей не найдено","sourceRevision":"88379a69a754f99d458633d7ed422c235d24d76b44e5cc9c298ae80ee8d95f50","reviewed":true}
+      "ja": {"text":"マッチングロールなし","sourceRevision":"88379a69a754f99d458633d7ed422c235d24d76b44e5cc9c298ae80ee8d95f50","reviewed":true},
+      "it": {"text":"Nessun ruolo corrispondente","sourceRevision":"88379a69a754f99d458633d7ed422c235d24d76b44e5cc9c298ae80ee8d95f50","reviewed":true},
+      "ru": {"text":"Подходящих ролей не найдено","sourceRevision":"88379a69a754f99d458633d7ed422c235d24d76b44e5cc9c298ae80ee8d95f50","reviewed":true},
+      "ko": {"text":"일치하지 않는 역할","sourceRevision":"88379a69a754f99d458633d7ed422c235d24d76b44e5cc9c298ae80ee8d95f50","reviewed":true},
+      "fr": {"text":"Pas de rôles correspondants","sourceRevision":"88379a69a754f99d458633d7ed422c235d24d76b44e5cc9c298ae80ee8d95f50","reviewed":true}
     }
   },
   "enabled": {
     "source": "启用",
     "translations": {
       "en": {"text":"Enabled","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
-      "ru": {"text":"Активна","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true}
+      "ja": {"text":"有効","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
+      "it": {"text":"Attivato","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
+      "ru": {"text":"Активна","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
+      "ko": {"text":"활성","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true},
+      "fr": {"text":"Activé","sourceRevision":"14c797d422529af47e0a76e21268a5c1f52c9c0278db27ec6ba076366945c1fb","reviewed":true}
     }
   },
   "formHint": {
     "source": "选择该角色拥有的后台权限。",
     "translations": {
       "en": {"text":"Select the permissions granted by this role.","sourceRevision":"c209f26fff3dce863779aa8ecbfe69f3ff039256c781ec7d317481d556dc158d","reviewed":true},
-      "ru": {"text":"Выберите разрешения, которые предоставляет эта роль.","sourceRevision":"c209f26fff3dce863779aa8ecbfe69f3ff039256c781ec7d317481d556dc158d","reviewed":true}
+      "ja": {"text":"このロールで付与された権限を選択します。","sourceRevision":"c209f26fff3dce863779aa8ecbfe69f3ff039256c781ec7d317481d556dc158d","reviewed":true},
+      "it": {"text":"Selezionare le autorizzazioni concesse da questo ruolo.","sourceRevision":"c209f26fff3dce863779aa8ecbfe69f3ff039256c781ec7d317481d556dc158d","reviewed":true},
+      "ru": {"text":"Выберите разрешения, которые предоставляет эта роль.","sourceRevision":"c209f26fff3dce863779aa8ecbfe69f3ff039256c781ec7d317481d556dc158d","reviewed":true},
+      "ko": {"text":"이 역할에 의해 부여 된 권한을 선택합니다.","sourceRevision":"c209f26fff3dce863779aa8ecbfe69f3ff039256c781ec7d317481d556dc158d","reviewed":true},
+      "fr": {"text":"Sélectionnez les permissions accordées par ce rôle.","sourceRevision":"c209f26fff3dce863779aa8ecbfe69f3ff039256c781ec7d317481d556dc158d","reviewed":true}
     }
   },
   "id": {
     "source": "ID",
     "translations": {
       "en": {"text":"ID","sourceRevision":"e99b266d95f3ae122de8bbed8bed0e676113cd4e12ed565b998e150f83ec59b6","reviewed":true},
-      "ru": {"text":"ID","sourceRevision":"e99b266d95f3ae122de8bbed8bed0e676113cd4e12ed565b998e150f83ec59b6","reviewed":true}
+      "ja": {"text":"ID","sourceRevision":"e99b266d95f3ae122de8bbed8bed0e676113cd4e12ed565b998e150f83ec59b6","reviewed":true},
+      "it": {"text":"ID","sourceRevision":"e99b266d95f3ae122de8bbed8bed0e676113cd4e12ed565b998e150f83ec59b6","reviewed":true},
+      "ru": {"text":"ID","sourceRevision":"e99b266d95f3ae122de8bbed8bed0e676113cd4e12ed565b998e150f83ec59b6","reviewed":true},
+      "ko": {"text":"ID","sourceRevision":"e99b266d95f3ae122de8bbed8bed0e676113cd4e12ed565b998e150f83ec59b6","reviewed":true},
+      "fr": {"text":"ID","sourceRevision":"e99b266d95f3ae122de8bbed8bed0e676113cd4e12ed565b998e150f83ec59b6","reviewed":true}
     }
   },
   "loadFailed": {
     "source": "角色加载失败",
     "translations": {
       "en": {"text":"Failed to load roles","sourceRevision":"021bb21b9ab8b52da098156d115cf4e05ae616390360cdcd3b0b8b826c86e6a8","reviewed":true},
-      "ru": {"text":"Не удалось загрузить роли","sourceRevision":"021bb21b9ab8b52da098156d115cf4e05ae616390360cdcd3b0b8b826c86e6a8","reviewed":true}
+      "ja": {"text":"ロールをロードできなかった","sourceRevision":"021bb21b9ab8b52da098156d115cf4e05ae616390360cdcd3b0b8b826c86e6a8","reviewed":true},
+      "it": {"text":"Non caricava ruoli","sourceRevision":"021bb21b9ab8b52da098156d115cf4e05ae616390360cdcd3b0b8b826c86e6a8","reviewed":true},
+      "ru": {"text":"Не удалось загрузить роли","sourceRevision":"021bb21b9ab8b52da098156d115cf4e05ae616390360cdcd3b0b8b826c86e6a8","reviewed":true},
+      "ko": {"text":"역할로드 실패","sourceRevision":"021bb21b9ab8b52da098156d115cf4e05ae616390360cdcd3b0b8b826c86e6a8","reviewed":true},
+      "fr": {"text":"Impossible de charger les rôles","sourceRevision":"021bb21b9ab8b52da098156d115cf4e05ae616390360cdcd3b0b8b826c86e6a8","reviewed":true}
     }
   },
   "loading": {
     "source": "正在加载…",
     "translations": {
       "en": {"text":"Loading…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
-      "ru": {"text":"Загрузка…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true}
+      "ja": {"text":"読み込み中…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
+      "it": {"text":"Caricamento…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
+      "ru": {"text":"Загрузка…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
+      "ko": {"text":"불러오는 중…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
+      "fr": {"text":"Chargement…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true}
     }
   },
   "name": {
     "source": "角色名称",
     "translations": {
       "en": {"text":"Role name","sourceRevision":"f7fd144c6ff002c8a53e737a1484e4dc6e2e70823e8a9643bf6e5145ea912ac8","reviewed":true},
-      "ru": {"text":"Название роли","sourceRevision":"f7fd144c6ff002c8a53e737a1484e4dc6e2e70823e8a9643bf6e5145ea912ac8","reviewed":true}
+      "ja": {"text":"役割名","sourceRevision":"f7fd144c6ff002c8a53e737a1484e4dc6e2e70823e8a9643bf6e5145ea912ac8","reviewed":true},
+      "it": {"text":"Nome del ruolo","sourceRevision":"f7fd144c6ff002c8a53e737a1484e4dc6e2e70823e8a9643bf6e5145ea912ac8","reviewed":true},
+      "ru": {"text":"Название роли","sourceRevision":"f7fd144c6ff002c8a53e737a1484e4dc6e2e70823e8a9643bf6e5145ea912ac8","reviewed":true},
+      "ko": {"text":"역할 이름","sourceRevision":"f7fd144c6ff002c8a53e737a1484e4dc6e2e70823e8a9643bf6e5145ea912ac8","reviewed":true},
+      "fr": {"text":"Nom du rôle","sourceRevision":"f7fd144c6ff002c8a53e737a1484e4dc6e2e70823e8a9643bf6e5145ea912ac8","reviewed":true}
     }
   },
   "namePlaceholder": {
     "source": "请输入角色名称",
     "translations": {
       "en": {"text":"Enter a role name","sourceRevision":"4549e784a8ca15b11fc87c3847da4162a078c30f7ec1920dd9346d9eb8813dce","reviewed":true},
-      "ru": {"text":"Введите название роли","sourceRevision":"4549e784a8ca15b11fc87c3847da4162a078c30f7ec1920dd9346d9eb8813dce","reviewed":true}
+      "ja": {"text":"役割名を入力してください","sourceRevision":"4549e784a8ca15b11fc87c3847da4162a078c30f7ec1920dd9346d9eb8813dce","reviewed":true},
+      "it": {"text":"Inserisci un nome di ruolo","sourceRevision":"4549e784a8ca15b11fc87c3847da4162a078c30f7ec1920dd9346d9eb8813dce","reviewed":true},
+      "ru": {"text":"Введите название роли","sourceRevision":"4549e784a8ca15b11fc87c3847da4162a078c30f7ec1920dd9346d9eb8813dce","reviewed":true},
+      "ko": {"text":"역할 이름을 입력","sourceRevision":"4549e784a8ca15b11fc87c3847da4162a078c30f7ec1920dd9346d9eb8813dce","reviewed":true},
+      "fr": {"text":"Saisissez un nom de rôle","sourceRevision":"4549e784a8ca15b11fc87c3847da4162a078c30f7ec1920dd9346d9eb8813dce","reviewed":true}
     }
   },
   "nameRequired": {
     "source": "请输入角色名称",
     "translations": {
       "en": {"text":"Enter a role name","sourceRevision":"4549e784a8ca15b11fc87c3847da4162a078c30f7ec1920dd9346d9eb8813dce","reviewed":true},
-      "ru": {"text":"Введите название роли","sourceRevision":"4549e784a8ca15b11fc87c3847da4162a078c30f7ec1920dd9346d9eb8813dce","reviewed":true}
+      "ja": {"text":"役割名を入力してください","sourceRevision":"4549e784a8ca15b11fc87c3847da4162a078c30f7ec1920dd9346d9eb8813dce","reviewed":true},
+      "it": {"text":"Inserisci un nome di ruolo","sourceRevision":"4549e784a8ca15b11fc87c3847da4162a078c30f7ec1920dd9346d9eb8813dce","reviewed":true},
+      "ru": {"text":"Введите название роли","sourceRevision":"4549e784a8ca15b11fc87c3847da4162a078c30f7ec1920dd9346d9eb8813dce","reviewed":true},
+      "ko": {"text":"역할 이름을 입력","sourceRevision":"4549e784a8ca15b11fc87c3847da4162a078c30f7ec1920dd9346d9eb8813dce","reviewed":true},
+      "fr": {"text":"Saisissez un nom de rôle","sourceRevision":"4549e784a8ca15b11fc87c3847da4162a078c30f7ec1920dd9346d9eb8813dce","reviewed":true}
     }
   },
   "next": {
     "source": "下一页",
     "translations": {
       "en": {"text":"Next","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
-      "ru": {"text":"Следующая","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true}
+      "ja": {"text":"次へ","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
+      "it": {"text":"Avanti","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
+      "ru": {"text":"Следующая","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
+      "ko": {"text":"다음","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
+      "fr": {"text":"Suivant","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true}
     }
   },
   "page": {
     "source": "第",
     "translations": {
       "en": {"text":"Page","sourceRevision":"7f8ba8bedbabac70cdab7f059889a898acc48b70afe5c1d4a0fc92ae84c3764a","reviewed":true},
-      "ru": {"text":"Страница","sourceRevision":"7f8ba8bedbabac70cdab7f059889a898acc48b70afe5c1d4a0fc92ae84c3764a","reviewed":true}
+      "ja": {"text":"ページトップへ","sourceRevision":"7f8ba8bedbabac70cdab7f059889a898acc48b70afe5c1d4a0fc92ae84c3764a","reviewed":true},
+      "it": {"text":"Pagina","sourceRevision":"7f8ba8bedbabac70cdab7f059889a898acc48b70afe5c1d4a0fc92ae84c3764a","reviewed":true},
+      "ru": {"text":"Страница","sourceRevision":"7f8ba8bedbabac70cdab7f059889a898acc48b70afe5c1d4a0fc92ae84c3764a","reviewed":true},
+      "ko": {"text":"페이지","sourceRevision":"7f8ba8bedbabac70cdab7f059889a898acc48b70afe5c1d4a0fc92ae84c3764a","reviewed":true},
+      "fr": {"text":"Page","sourceRevision":"7f8ba8bedbabac70cdab7f059889a898acc48b70afe5c1d4a0fc92ae84c3764a","reviewed":true}
     }
   },
   "perPage": {
     "source": "每页",
     "translations": {
       "en": {"text":"per page","sourceRevision":"aba3c2e6d18a177a00b348fb16a86bf2b266ed72edf42f6b828b3326128dbcb3","reviewed":true},
-      "ru": {"text":"на странице","sourceRevision":"aba3c2e6d18a177a00b348fb16a86bf2b266ed72edf42f6b828b3326128dbcb3","reviewed":true}
+      "ja": {"text":"このページの先頭へ","sourceRevision":"aba3c2e6d18a177a00b348fb16a86bf2b266ed72edf42f6b828b3326128dbcb3","reviewed":true},
+      "it": {"text":"per pagina","sourceRevision":"aba3c2e6d18a177a00b348fb16a86bf2b266ed72edf42f6b828b3326128dbcb3","reviewed":true},
+      "ru": {"text":"на странице","sourceRevision":"aba3c2e6d18a177a00b348fb16a86bf2b266ed72edf42f6b828b3326128dbcb3","reviewed":true},
+      "ko": {"text":"1 페이지","sourceRevision":"aba3c2e6d18a177a00b348fb16a86bf2b266ed72edf42f6b828b3326128dbcb3","reviewed":true},
+      "fr": {"text":"par page","sourceRevision":"aba3c2e6d18a177a00b348fb16a86bf2b266ed72edf42f6b828b3326128dbcb3","reviewed":true}
     }
   },
   "permissionRequired": {
     "source": "请至少选择一项权限",
     "translations": {
       "en": {"text":"Select at least one permission","sourceRevision":"fabd8de88517251e7fa38f4645340be81f3f4e19dc28eccd5fd53007dc0b296b","reviewed":true},
-      "ru": {"text":"Выберите хотя бы одно разрешение","sourceRevision":"fabd8de88517251e7fa38f4645340be81f3f4e19dc28eccd5fd53007dc0b296b","reviewed":true}
+      "ja": {"text":"少なくとも1つの権限を選択","sourceRevision":"fabd8de88517251e7fa38f4645340be81f3f4e19dc28eccd5fd53007dc0b296b","reviewed":true},
+      "it": {"text":"Selezionare almeno una autorizzazione","sourceRevision":"fabd8de88517251e7fa38f4645340be81f3f4e19dc28eccd5fd53007dc0b296b","reviewed":true},
+      "ru": {"text":"Выберите хотя бы одно разрешение","sourceRevision":"fabd8de88517251e7fa38f4645340be81f3f4e19dc28eccd5fd53007dc0b296b","reviewed":true},
+      "ko": {"text":"적어도 하나의 권한 선택","sourceRevision":"fabd8de88517251e7fa38f4645340be81f3f4e19dc28eccd5fd53007dc0b296b","reviewed":true},
+      "fr": {"text":"Sélectionnez au moins une autorisation","sourceRevision":"fabd8de88517251e7fa38f4645340be81f3f4e19dc28eccd5fd53007dc0b296b","reviewed":true}
     }
   },
   "permissions": {
     "source": "权限",
     "translations": {
       "en": {"text":"Permissions","sourceRevision":"cc0dd306c7d5a11bc16c3cf2e6ad35183734b0b3e8cfa6ace8978ee472d58ebb","reviewed":true},
-      "ru": {"text":"Разрешения","sourceRevision":"cc0dd306c7d5a11bc16c3cf2e6ad35183734b0b3e8cfa6ace8978ee472d58ebb","reviewed":true}
+      "ja": {"text":"権限","sourceRevision":"cc0dd306c7d5a11bc16c3cf2e6ad35183734b0b3e8cfa6ace8978ee472d58ebb","reviewed":true},
+      "it": {"text":"Permessi","sourceRevision":"cc0dd306c7d5a11bc16c3cf2e6ad35183734b0b3e8cfa6ace8978ee472d58ebb","reviewed":true},
+      "ru": {"text":"Разрешения","sourceRevision":"cc0dd306c7d5a11bc16c3cf2e6ad35183734b0b3e8cfa6ace8978ee472d58ebb","reviewed":true},
+      "ko": {"text":"권한","sourceRevision":"cc0dd306c7d5a11bc16c3cf2e6ad35183734b0b3e8cfa6ace8978ee472d58ebb","reviewed":true},
+      "fr": {"text":"Autorisations","sourceRevision":"cc0dd306c7d5a11bc16c3cf2e6ad35183734b0b3e8cfa6ace8978ee472d58ebb","reviewed":true}
     }
   },
   "previous": {
     "source": "上一页",
     "translations": {
       "en": {"text":"Previous","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
-      "ru": {"text":"Предыдущая","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true}
+      "ja": {"text":"前へ","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
+      "it": {"text":"Indietro","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
+      "ru": {"text":"Предыдущая","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
+      "ko": {"text":"이전","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
+      "fr": {"text":"Précédent","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true}
     }
   },
   "refresh": {
     "source": "刷新",
     "translations": {
       "en": {"text":"Refresh","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true},
-      "ru": {"text":"Обновить","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true}
+      "ja": {"text":"更新","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true},
+      "it": {"text":"Aggiorna","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true},
+      "ru": {"text":"Обновить","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true},
+      "ko": {"text":"새로 고침","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true},
+      "fr": {"text":"Actualiser","sourceRevision":"89da713060a9fd09d11c69ba4822831d23d2a5b831fa20b7ed5015edf84b2961","reviewed":true}
     }
   },
   "retry": {
     "source": "重试",
     "translations": {
       "en": {"text":"Retry","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true},
-      "ru": {"text":"Повторить","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true}
+      "ja": {"text":"再試行","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true},
+      "it": {"text":"Riprova","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true},
+      "ru": {"text":"Повторить","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true},
+      "ko": {"text":"다시 시도","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true},
+      "fr": {"text":"Réessayer","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true}
     }
   },
   "save": {
@@ -237,58 +357,86 @@
       "en": {"text":"Save","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
       "ja": {"text":"保存","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
       "it": {"text":"Salva","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
-      "ru": {"text":"Сохранить","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true}
+      "ru": {"text":"Сохранить","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "ko": {"text":"저장","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "fr": {"text":"Enregistrer","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true}
     }
   },
   "saveFailed": {
     "source": "角色保存失败",
     "translations": {
       "en": {"text":"Failed to save role","sourceRevision":"737846ae62120da68ea84740301658d4e30343b22ec491311ee6ce63bb1dae41","reviewed":true},
-      "ru": {"text":"Не удалось сохранить роль","sourceRevision":"737846ae62120da68ea84740301658d4e30343b22ec491311ee6ce63bb1dae41","reviewed":true}
+      "ja": {"text":"役割を節約できなかった","sourceRevision":"737846ae62120da68ea84740301658d4e30343b22ec491311ee6ce63bb1dae41","reviewed":true},
+      "it": {"text":"Non riuscito a salvare il ruolo","sourceRevision":"737846ae62120da68ea84740301658d4e30343b22ec491311ee6ce63bb1dae41","reviewed":true},
+      "ru": {"text":"Не удалось сохранить роль","sourceRevision":"737846ae62120da68ea84740301658d4e30343b22ec491311ee6ce63bb1dae41","reviewed":true},
+      "ko": {"text":"역할 절약 실패","sourceRevision":"737846ae62120da68ea84740301658d4e30343b22ec491311ee6ce63bb1dae41","reviewed":true},
+      "fr": {"text":"Échec de la sauvegarde du rôle","sourceRevision":"737846ae62120da68ea84740301658d4e30343b22ec491311ee6ce63bb1dae41","reviewed":true}
     }
   },
   "saved": {
     "source": "角色已保存",
     "translations": {
       "en": {"text":"Role saved","sourceRevision":"69a7f1c106154bdb3e616653c9bc312e1873744b9d58ff5010a8403a2e8574b9","reviewed":true},
-      "ru": {"text":"Роль сохранена","sourceRevision":"69a7f1c106154bdb3e616653c9bc312e1873744b9d58ff5010a8403a2e8574b9","reviewed":true}
+      "ja": {"text":"保存されたロール","sourceRevision":"69a7f1c106154bdb3e616653c9bc312e1873744b9d58ff5010a8403a2e8574b9","reviewed":true},
+      "it": {"text":"Role salvato","sourceRevision":"69a7f1c106154bdb3e616653c9bc312e1873744b9d58ff5010a8403a2e8574b9","reviewed":true},
+      "ru": {"text":"Роль сохранена","sourceRevision":"69a7f1c106154bdb3e616653c9bc312e1873744b9d58ff5010a8403a2e8574b9","reviewed":true},
+      "ko": {"text":"역할 저장","sourceRevision":"69a7f1c106154bdb3e616653c9bc312e1873744b9d58ff5010a8403a2e8574b9","reviewed":true},
+      "fr": {"text":"Rôle enregistré","sourceRevision":"69a7f1c106154bdb3e616653c9bc312e1873744b9d58ff5010a8403a2e8574b9","reviewed":true}
     }
   },
   "saving": {
     "source": "保存中…",
     "translations": {
       "en": {"text":"Saving…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
-      "ru": {"text":"Сохранение…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true}
+      "ja": {"text":"保存中…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
+      "it": {"text":"Salvataggio…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
+      "ru": {"text":"Сохранение…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
+      "ko": {"text":"저장 중…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
+      "fr": {"text":"Enregistrement…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true}
     }
   },
   "search": {
     "source": "搜索角色…",
     "translations": {
       "en": {"text":"Search roles…","sourceRevision":"f137b637f6076c4cc0c28e8497b2d4dff504ffa576e92826594608105b0a2330","reviewed":true},
-      "ru": {"text":"Поиск ролей…","sourceRevision":"f137b637f6076c4cc0c28e8497b2d4dff504ffa576e92826594608105b0a2330","reviewed":true}
+      "ja": {"text":"役割を検索...","sourceRevision":"f137b637f6076c4cc0c28e8497b2d4dff504ffa576e92826594608105b0a2330","reviewed":true},
+      "it": {"text":"I ruoli di ricerca...","sourceRevision":"f137b637f6076c4cc0c28e8497b2d4dff504ffa576e92826594608105b0a2330","reviewed":true},
+      "ru": {"text":"Поиск ролей…","sourceRevision":"f137b637f6076c4cc0c28e8497b2d4dff504ffa576e92826594608105b0a2330","reviewed":true},
+      "ko": {"text":"검색 역할 ...","sourceRevision":"f137b637f6076c4cc0c28e8497b2d4dff504ffa576e92826594608105b0a2330","reviewed":true},
+      "fr": {"text":"Rôles de recherche...","sourceRevision":"f137b637f6076c4cc0c28e8497b2d4dff504ffa576e92826594608105b0a2330","reviewed":true}
     }
   },
   "searchAction": {
     "source": "搜索",
     "translations": {
       "en": {"text":"Search","sourceRevision":"c9d48d8826d481e47f3011549f9671a2edb1b1ae74e0440c2495c9d3f5852710","reviewed":true},
-      "ru": {"text":"Найти","sourceRevision":"c9d48d8826d481e47f3011549f9671a2edb1b1ae74e0440c2495c9d3f5852710","reviewed":true}
+      "ja": {"text":"検索","sourceRevision":"c9d48d8826d481e47f3011549f9671a2edb1b1ae74e0440c2495c9d3f5852710","reviewed":true},
+      "it": {"text":"Cerca","sourceRevision":"c9d48d8826d481e47f3011549f9671a2edb1b1ae74e0440c2495c9d3f5852710","reviewed":true},
+      "ru": {"text":"Найти","sourceRevision":"c9d48d8826d481e47f3011549f9671a2edb1b1ae74e0440c2495c9d3f5852710","reviewed":true},
+      "ko": {"text":"검색","sourceRevision":"c9d48d8826d481e47f3011549f9671a2edb1b1ae74e0440c2495c9d3f5852710","reviewed":true},
+      "fr": {"text":"Rechercher","sourceRevision":"c9d48d8826d481e47f3011549f9671a2edb1b1ae74e0440c2495c9d3f5852710","reviewed":true}
     }
   },
   "status": {
     "source": "状态",
     "translations": {
       "en": {"text":"Status","sourceRevision":"24fd8532ed6ccaef3b2303f8ce2adbb2183437c369fe784713abdb039dac810e","reviewed":true},
-      "ru": {"text":"Статус","sourceRevision":"24fd8532ed6ccaef3b2303f8ce2adbb2183437c369fe784713abdb039dac810e","reviewed":true}
+      "ja": {"text":"状態","sourceRevision":"24fd8532ed6ccaef3b2303f8ce2adbb2183437c369fe784713abdb039dac810e","reviewed":true},
+      "it": {"text":"Stato","sourceRevision":"24fd8532ed6ccaef3b2303f8ce2adbb2183437c369fe784713abdb039dac810e","reviewed":true},
+      "ru": {"text":"Статус","sourceRevision":"24fd8532ed6ccaef3b2303f8ce2adbb2183437c369fe784713abdb039dac810e","reviewed":true},
+      "ko": {"text":"상태","sourceRevision":"24fd8532ed6ccaef3b2303f8ce2adbb2183437c369fe784713abdb039dac810e","reviewed":true},
+      "fr": {"text":"État","sourceRevision":"24fd8532ed6ccaef3b2303f8ce2adbb2183437c369fe784713abdb039dac810e","reviewed":true}
     }
   },
   "title": {
     "source": "角色",
     "translations": {
       "en": {"text":"Roles","sourceRevision":"f6e8c974a5fb318ca75e693b4e8cea0e3d732a5e026ab189f14066866eccceae","reviewed":true},
-      "ja": {"text":"ロール","sourceRevision":"f6e8c974a5fb318ca75e693b4e8cea0e3d732a5e026ab189f14066866eccceae","reviewed":true},
+      "ja": {"text":"役割","sourceRevision":"f6e8c974a5fb318ca75e693b4e8cea0e3d732a5e026ab189f14066866eccceae","reviewed":true},
       "it": {"text":"Ruoli","sourceRevision":"f6e8c974a5fb318ca75e693b4e8cea0e3d732a5e026ab189f14066866eccceae","reviewed":true},
-      "ru": {"text":"Роли","sourceRevision":"f6e8c974a5fb318ca75e693b4e8cea0e3d732a5e026ab189f14066866eccceae","reviewed":true}
+      "ru": {"text":"Роли","sourceRevision":"f6e8c974a5fb318ca75e693b4e8cea0e3d732a5e026ab189f14066866eccceae","reviewed":true},
+      "ko": {"text":"역할","sourceRevision":"f6e8c974a5fb318ca75e693b4e8cea0e3d732a5e026ab189f14066866eccceae","reviewed":true},
+      "fr": {"text":"Rôles","sourceRevision":"f6e8c974a5fb318ca75e693b4e8cea0e3d732a5e026ab189f14066866eccceae","reviewed":true}
     }
   }
 }

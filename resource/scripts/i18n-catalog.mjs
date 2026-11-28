@@ -13,8 +13,8 @@ export const sourceLocale = 'zh'
 export const serverNamespace = 'shared.serverMessages'
 export const locales = supportedLocales
 export const targetLocales = locales.filter(locale => locale !== sourceLocale)
-export const fallbackLanguages = { en: ['zh'], ja: ['en', 'zh'], it: ['en', 'zh'], ru: ['zh'], zh: [] }
-export const requiredLocales = ['en', 'ru']
+export const fallbackLanguages = { en: ['zh'], ja: ['en', 'zh'], it: ['en', 'zh'], ru: ['zh'], ko: ['en', 'zh'], fr: ['en', 'zh'], zh: [] }
+export const requiredLocales = targetLocales
 
 const segment = /^[A-Za-z0-9_-]+$/
 const reserved = new Set(['prototype', ...Object.getOwnPropertyNames(Object.prototype)])

@@ -4,7 +4,7 @@ import { useId, useState, useSyncExternalStore } from "react";
 import { format, isValid, parseISO } from "date-fns";
 import { CalendarIcon, XIcon } from "lucide-react";
 import { type DateRange } from "react-day-picker";
-import { enUS, it, ja, zhCN } from "react-day-picker/locale";
+import { enUS, fr, it, ja, ko, zhCN } from "react-day-picker/locale";
 import { cn } from "cn";
 import { Button } from "./button";
 import { Calendar } from "./calendar";
@@ -21,7 +21,7 @@ interface DateRangePickerProps {
   disabled?: boolean;
   className?: string;
 }
-const calendarLocales: Record<string, typeof enUS> = { en: enUS, zh: zhCN, ja, it };
+const calendarLocales: Record<string, typeof enUS> = { en: enUS, zh: zhCN, ja, it, ko, fr };
 const mobileQuery = "(max-width: 767px)";
 function subscribeToViewport(onChange: () => void) {
   const media = window.matchMedia?.(mobileQuery);

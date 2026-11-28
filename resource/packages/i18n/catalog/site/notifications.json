@@ -3,49 +3,77 @@
     "source": "用户",
     "translations": {
       "en": {"text":"User","sourceRevision":"1408a574ea81e4fdc7598d19e865fb4d857f9bdad2bc171d9146c35c9a285026","reviewed":true},
-      "ru": {"text":"Пользователь","sourceRevision":"1408a574ea81e4fdc7598d19e865fb4d857f9bdad2bc171d9146c35c9a285026","reviewed":true}
+      "ja": {"text":"ユーザー","sourceRevision":"1408a574ea81e4fdc7598d19e865fb4d857f9bdad2bc171d9146c35c9a285026","reviewed":true},
+      "it": {"text":"Utente","sourceRevision":"1408a574ea81e4fdc7598d19e865fb4d857f9bdad2bc171d9146c35c9a285026","reviewed":true},
+      "ru": {"text":"Пользователь","sourceRevision":"1408a574ea81e4fdc7598d19e865fb4d857f9bdad2bc171d9146c35c9a285026","reviewed":true},
+      "ko": {"text":"사용자","sourceRevision":"1408a574ea81e4fdc7598d19e865fb4d857f9bdad2bc171d9146c35c9a285026","reviewed":true},
+      "fr": {"text":"Utilisateur","sourceRevision":"1408a574ea81e4fdc7598d19e865fb4d857f9bdad2bc171d9146c35c9a285026","reviewed":true}
     }
   },
   "badgeEarned": {
     "source": "获得了「{badge}」徽章",
     "translations": {
       "en": {"text":"Earned the “{badge}” badge","sourceRevision":"a4adbc3d14c2f2f413dc228728460bd41123e592674036e0923eaa21cc7206c0","reviewed":true},
-      "ru": {"text":"Вы получили значок «{badge}»","sourceRevision":"a4adbc3d14c2f2f413dc228728460bd41123e592674036e0923eaa21cc7206c0","reviewed":true}
+      "ja": {"text":"「{badge}」バッジを獲得しました","sourceRevision":"a4adbc3d14c2f2f413dc228728460bd41123e592674036e0923eaa21cc7206c0","reviewed":true},
+      "it": {"text":"Hai ottenuto il distintivo «{badge}»","sourceRevision":"a4adbc3d14c2f2f413dc228728460bd41123e592674036e0923eaa21cc7206c0","reviewed":true},
+      "ru": {"text":"Вы получили значок «{badge}»","sourceRevision":"a4adbc3d14c2f2f413dc228728460bd41123e592674036e0923eaa21cc7206c0","reviewed":true},
+      "ko": {"text":"‘{badge}’ 배지를 받았습니다.","sourceRevision":"a4adbc3d14c2f2f413dc228728460bd41123e592674036e0923eaa21cc7206c0","reviewed":true},
+      "fr": {"text":"Vous avez reçu le badge « {badge} ».","sourceRevision":"a4adbc3d14c2f2f413dc228728460bd41123e592674036e0923eaa21cc7206c0","reviewed":true}
     }
   },
   "emptyDescription": {
     "source": "新的回复、点赞和关注会出现在这里。",
     "translations": {
       "en": {"text":"Replies, likes, and follows will show up here.","sourceRevision":"092fe6bf78f2914912640b0b279595fa6fca397fe67b250a75877785dc12458b","reviewed":true},
-      "ru": {"text":"Здесь появятся ответы, лайки и подписки.","sourceRevision":"092fe6bf78f2914912640b0b279595fa6fca397fe67b250a75877785dc12458b","reviewed":true}
+      "ja": {"text":"新しい返信や「いいね」、フォローのお知らせはここに表示されます。","sourceRevision":"092fe6bf78f2914912640b0b279595fa6fca397fe67b250a75877785dc12458b","reviewed":true},
+      "it": {"text":"Qui troverai le notifiche per risposte, «Mi piace» e nuovi follower.","sourceRevision":"092fe6bf78f2914912640b0b279595fa6fca397fe67b250a75877785dc12458b","reviewed":true},
+      "ru": {"text":"Здесь появятся ответы, лайки и подписки.","sourceRevision":"092fe6bf78f2914912640b0b279595fa6fca397fe67b250a75877785dc12458b","reviewed":true},
+      "ko": {"text":"새 답글, 좋아요, 팔로우 알림이 여기에 표시됩니다.","sourceRevision":"092fe6bf78f2914912640b0b279595fa6fca397fe67b250a75877785dc12458b","reviewed":true},
+      "fr": {"text":"Les réponses, les mentions « J’aime » et les nouveaux abonnements apparaîtront ici.","sourceRevision":"092fe6bf78f2914912640b0b279595fa6fca397fe67b250a75877785dc12458b","reviewed":true}
     }
   },
   "emptyTitle": {
     "source": "暂无通知",
     "translations": {
       "en": {"text":"No notifications","sourceRevision":"ae3c2e0e83c5c9b1d25ecb6bd72b28f853eec76417731d05842d51cc75ac0d2e","reviewed":true},
-      "ru": {"text":"Нет уведомлений","sourceRevision":"ae3c2e0e83c5c9b1d25ecb6bd72b28f853eec76417731d05842d51cc75ac0d2e","reviewed":true}
+      "ja": {"text":"通知はありません","sourceRevision":"ae3c2e0e83c5c9b1d25ecb6bd72b28f853eec76417731d05842d51cc75ac0d2e","reviewed":true},
+      "it": {"text":"Non hai notifiche","sourceRevision":"ae3c2e0e83c5c9b1d25ecb6bd72b28f853eec76417731d05842d51cc75ac0d2e","reviewed":true},
+      "ru": {"text":"Нет уведомлений","sourceRevision":"ae3c2e0e83c5c9b1d25ecb6bd72b28f853eec76417731d05842d51cc75ac0d2e","reviewed":true},
+      "ko": {"text":"알림이 없습니다","sourceRevision":"ae3c2e0e83c5c9b1d25ecb6bd72b28f853eec76417731d05842d51cc75ac0d2e","reviewed":true},
+      "fr": {"text":"Aucune notification","sourceRevision":"ae3c2e0e83c5c9b1d25ecb6bd72b28f853eec76417731d05842d51cc75ac0d2e","reviewed":true}
     }
   },
   "fallback": {
     "source": "查看通知详情",
     "translations": {
       "en": {"text":"View notification","sourceRevision":"93485260d892e5aa5f39d867db38d4062416dc48dcc1b4fc247650599c1159a8","reviewed":true},
-      "ru": {"text":"Посмотреть уведомление","sourceRevision":"93485260d892e5aa5f39d867db38d4062416dc48dcc1b4fc247650599c1159a8","reviewed":true}
+      "ja": {"text":"通知を表示","sourceRevision":"93485260d892e5aa5f39d867db38d4062416dc48dcc1b4fc247650599c1159a8","reviewed":true},
+      "it": {"text":"Visualizzazione della notifica","sourceRevision":"93485260d892e5aa5f39d867db38d4062416dc48dcc1b4fc247650599c1159a8","reviewed":true},
+      "ru": {"text":"Посмотреть уведомление","sourceRevision":"93485260d892e5aa5f39d867db38d4062416dc48dcc1b4fc247650599c1159a8","reviewed":true},
+      "ko": {"text":"알림 보기","sourceRevision":"93485260d892e5aa5f39d867db38d4062416dc48dcc1b4fc247650599c1159a8","reviewed":true},
+      "fr": {"text":"Afficher la notification","sourceRevision":"93485260d892e5aa5f39d867db38d4062416dc48dcc1b4fc247650599c1159a8","reviewed":true}
     }
   },
   "followDescription": {
     "source": "{actor} 关注了你",
     "translations": {
       "en": {"text":"{actor} followed you","sourceRevision":"001f715b913bb6435d46e81767c1ec680d8ea178f2c0bd4f78dbf7a7452f93e9","reviewed":true},
-      "ru": {"text":"{actor} подписался на вас","sourceRevision":"001f715b913bb6435d46e81767c1ec680d8ea178f2c0bd4f78dbf7a7452f93e9","reviewed":true}
+      "ja": {"text":"{actor}さんがあなたをフォローしました","sourceRevision":"001f715b913bb6435d46e81767c1ec680d8ea178f2c0bd4f78dbf7a7452f93e9","reviewed":true},
+      "it": {"text":"{actor} ha iniziato a seguirti","sourceRevision":"001f715b913bb6435d46e81767c1ec680d8ea178f2c0bd4f78dbf7a7452f93e9","reviewed":true},
+      "ru": {"text":"{actor} подписался на вас","sourceRevision":"001f715b913bb6435d46e81767c1ec680d8ea178f2c0bd4f78dbf7a7452f93e9","reviewed":true},
+      "ko": {"text":"{actor} 님이 회원님을 팔로우하기 시작했습니다.","sourceRevision":"001f715b913bb6435d46e81767c1ec680d8ea178f2c0bd4f78dbf7a7452f93e9","reviewed":true},
+      "fr": {"text":"{actor} vous suit désormais.","sourceRevision":"001f715b913bb6435d46e81767c1ec680d8ea178f2c0bd4f78dbf7a7452f93e9","reviewed":true}
     }
   },
   "loadFailed": {
     "source": "通知加载失败。",
     "translations": {
       "en": {"text":"Failed to load notifications.","sourceRevision":"5cf4c34133a702a28f062b3450864913fdfb2e11916b42c079a283128a7ed9bb","reviewed":true},
-      "ru": {"text":"Не удалось загрузить уведомления.","sourceRevision":"5cf4c34133a702a28f062b3450864913fdfb2e11916b42c079a283128a7ed9bb","reviewed":true}
+      "ja": {"text":"通知を読み込めませんでした。","sourceRevision":"5cf4c34133a702a28f062b3450864913fdfb2e11916b42c079a283128a7ed9bb","reviewed":true},
+      "it": {"text":"Impossibile caricare le notifiche.","sourceRevision":"5cf4c34133a702a28f062b3450864913fdfb2e11916b42c079a283128a7ed9bb","reviewed":true},
+      "ru": {"text":"Не удалось загрузить уведомления.","sourceRevision":"5cf4c34133a702a28f062b3450864913fdfb2e11916b42c079a283128a7ed9bb","reviewed":true},
+      "ko": {"text":"알림을 불러오지 못했습니다.","sourceRevision":"5cf4c34133a702a28f062b3450864913fdfb2e11916b42c079a283128a7ed9bb","reviewed":true},
+      "fr": {"text":"Impossible de charger les notifications.","sourceRevision":"5cf4c34133a702a28f062b3450864913fdfb2e11916b42c079a283128a7ed9bb","reviewed":true}
     }
   },
   "loadMore": {
@@ -54,7 +82,9 @@
       "en": {"text":"Load more","sourceRevision":"cebbc2883c56b7d4c8efb3aecdfa14df52a497fed9786c7d492a37cfd668b0b4","reviewed":true},
       "ja": {"text":"さらに読み込む","sourceRevision":"cebbc2883c56b7d4c8efb3aecdfa14df52a497fed9786c7d492a37cfd668b0b4","reviewed":true},
       "it": {"text":"Carica altro","sourceRevision":"cebbc2883c56b7d4c8efb3aecdfa14df52a497fed9786c7d492a37cfd668b0b4","reviewed":true},
-      "ru": {"text":"Загрузить ещё","sourceRevision":"cebbc2883c56b7d4c8efb3aecdfa14df52a497fed9786c7d492a37cfd668b0b4","reviewed":true}
+      "ru": {"text":"Загрузить ещё","sourceRevision":"cebbc2883c56b7d4c8efb3aecdfa14df52a497fed9786c7d492a37cfd668b0b4","reviewed":true},
+      "ko": {"text":"더 불러오기","sourceRevision":"cebbc2883c56b7d4c8efb3aecdfa14df52a497fed9786c7d492a37cfd668b0b4","reviewed":true},
+      "fr": {"text":"Charger la suite","sourceRevision":"cebbc2883c56b7d4c8efb3aecdfa14df52a497fed9786c7d492a37cfd668b0b4","reviewed":true}
     }
   },
   "loadingMore": {
@@ -63,23 +93,31 @@
       "en": {"text":"Loading…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true},
       "ja": {"text":"読み込み中…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true},
       "it": {"text":"Caricamento…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true},
-      "ru": {"text":"Загрузка…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true}
+      "ru": {"text":"Загрузка…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true},
+      "ko": {"text":"불러오는 중…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true},
+      "fr": {"text":"Chargement…","sourceRevision":"3aa2e67cfcce4867030c59ec592a37d34bbb6e894cc4984e21a1670395c7c1ab","reviewed":true}
     }
   },
   "markAllRead": {
     "source": "全部已读",
     "translations": {
       "en": {"text":"Mark all read","sourceRevision":"58edd604e95f8ccc95b1255ad5e71a838a2923f3193374f0223e32311c737e7a","reviewed":true},
-      "ja": {"text":"すべて既読","sourceRevision":"58edd604e95f8ccc95b1255ad5e71a838a2923f3193374f0223e32311c737e7a","reviewed":true},
+      "ja": {"text":"すべて既読にする","sourceRevision":"58edd604e95f8ccc95b1255ad5e71a838a2923f3193374f0223e32311c737e7a","reviewed":true},
       "it": {"text":"Segna tutte come lette","sourceRevision":"58edd604e95f8ccc95b1255ad5e71a838a2923f3193374f0223e32311c737e7a","reviewed":true},
-      "ru": {"text":"Отметить все как прочитанные","sourceRevision":"58edd604e95f8ccc95b1255ad5e71a838a2923f3193374f0223e32311c737e7a","reviewed":true}
+      "ru": {"text":"Отметить все как прочитанные","sourceRevision":"58edd604e95f8ccc95b1255ad5e71a838a2923f3193374f0223e32311c737e7a","reviewed":true},
+      "ko": {"text":"모두 읽음으로 표시","sourceRevision":"58edd604e95f8ccc95b1255ad5e71a838a2923f3193374f0223e32311c737e7a","reviewed":true},
+      "fr": {"text":"Tout marquer comme lu","sourceRevision":"58edd604e95f8ccc95b1255ad5e71a838a2923f3193374f0223e32311c737e7a","reviewed":true}
     }
   },
   "markAllReadFailed": {
     "source": "标记已读失败。",
     "translations": {
       "en": {"text":"Failed to mark notifications read.","sourceRevision":"b4452129b7cf3cec9bb9e7f48d655d2f6d4a1b60526b34d5e76ab4b797c8cd48","reviewed":true},
-      "ru": {"text":"Не удалось отметить уведомления как прочитанные.","sourceRevision":"b4452129b7cf3cec9bb9e7f48d655d2f6d4a1b60526b34d5e76ab4b797c8cd48","reviewed":true}
+      "ja": {"text":"すべての通知を既読にできませんでした。","sourceRevision":"b4452129b7cf3cec9bb9e7f48d655d2f6d4a1b60526b34d5e76ab4b797c8cd48","reviewed":true},
+      "it": {"text":"Non è stato possibile segnare tutte le notifiche come lette.","sourceRevision":"b4452129b7cf3cec9bb9e7f48d655d2f6d4a1b60526b34d5e76ab4b797c8cd48","reviewed":true},
+      "ru": {"text":"Не удалось отметить уведомления как прочитанные.","sourceRevision":"b4452129b7cf3cec9bb9e7f48d655d2f6d4a1b60526b34d5e76ab4b797c8cd48","reviewed":true},
+      "ko": {"text":"알림을 모두 읽음으로 표시하지 못했습니다.","sourceRevision":"b4452129b7cf3cec9bb9e7f48d655d2f6d4a1b60526b34d5e76ab4b797c8cd48","reviewed":true},
+      "fr": {"text":"Impossible de marquer toutes les notifications comme lues.","sourceRevision":"b4452129b7cf3cec9bb9e7f48d655d2f6d4a1b60526b34d5e76ab4b797c8cd48","reviewed":true}
     }
   },
   "markRead": {
@@ -88,7 +126,9 @@
       "en": {"text":"Mark read","sourceRevision":"b842e19f6b20639d0a59c74dbce0b1d6a6004512d1eab29da9fb5dfad39c0b18","reviewed":true},
       "ja": {"text":"既読にする","sourceRevision":"b842e19f6b20639d0a59c74dbce0b1d6a6004512d1eab29da9fb5dfad39c0b18","reviewed":true},
       "it": {"text":"Segna come letta","sourceRevision":"b842e19f6b20639d0a59c74dbce0b1d6a6004512d1eab29da9fb5dfad39c0b18","reviewed":true},
-      "ru": {"text":"Отметить как прочитанное","sourceRevision":"b842e19f6b20639d0a59c74dbce0b1d6a6004512d1eab29da9fb5dfad39c0b18","reviewed":true}
+      "ru": {"text":"Отметить как прочитанное","sourceRevision":"b842e19f6b20639d0a59c74dbce0b1d6a6004512d1eab29da9fb5dfad39c0b18","reviewed":true},
+      "ko": {"text":"읽음으로 표시","sourceRevision":"b842e19f6b20639d0a59c74dbce0b1d6a6004512d1eab29da9fb5dfad39c0b18","reviewed":true},
+      "fr": {"text":"Marquer comme lu","sourceRevision":"b842e19f6b20639d0a59c74dbce0b1d6a6004512d1eab29da9fb5dfad39c0b18","reviewed":true}
     }
   },
   "noMore": {
@@ -96,22 +136,32 @@
     "translations": {
       "en": {"text":"No more notifications","sourceRevision":"d768290a9776e2592097f9fde59569f86e08e26a08d3f621baee6d74695d4d3e","reviewed":true},
       "ja": {"text":"通知は以上です","sourceRevision":"d768290a9776e2592097f9fde59569f86e08e26a08d3f621baee6d74695d4d3e","reviewed":true},
-      "it": {"text":"Nessun'altra notifica","sourceRevision":"d768290a9776e2592097f9fde59569f86e08e26a08d3f621baee6d74695d4d3e","reviewed":true},
-      "ru": {"text":"Больше уведомлений нет","sourceRevision":"d768290a9776e2592097f9fde59569f86e08e26a08d3f621baee6d74695d4d3e","reviewed":true}
+      "it": {"text":"Non ci sono altre notifiche","sourceRevision":"d768290a9776e2592097f9fde59569f86e08e26a08d3f621baee6d74695d4d3e","reviewed":true},
+      "ru": {"text":"Больше уведомлений нет","sourceRevision":"d768290a9776e2592097f9fde59569f86e08e26a08d3f621baee6d74695d4d3e","reviewed":true},
+      "ko": {"text":"더 이상 알림이 없습니다","sourceRevision":"d768290a9776e2592097f9fde59569f86e08e26a08d3f621baee6d74695d4d3e","reviewed":true},
+      "fr": {"text":"Il n’y a pas d’autres notifications","sourceRevision":"d768290a9776e2592097f9fde59569f86e08e26a08d3f621baee6d74695d4d3e","reviewed":true}
     }
   },
   "notification": {
     "source": "通知",
     "translations": {
       "en": {"text":"Notification","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true},
-      "ru": {"text":"Уведомление","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true}
+      "ja": {"text":"通知","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true},
+      "it": {"text":"Notifica","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true},
+      "ru": {"text":"Уведомление","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true},
+      "ko": {"text":"알림","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true},
+      "fr": {"text":"Notification","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true}
     }
   },
   "summary": {
     "source": "已加载 {total} 条，回复、点赞、关注和系统消息会集中展示在这里。",
     "translations": {
       "en": {"text":"{total} loaded, including replies, likes, follows, and system messages.","sourceRevision":"153ce14c39522dd0a1aa0abf4de0bc24ab9cb00acf80b44fb2c516d612e12c9f","reviewed":true},
-      "ru": {"text":"Загружено уведомлений: {total}. Среди них ответы, отметки «Нравится», подписки и системные сообщения.","sourceRevision":"153ce14c39522dd0a1aa0abf4de0bc24ab9cb00acf80b44fb2c516d612e12c9f","reviewed":true}
+      "ja": {"text":"{total}件を表示中。返信や「いいね」、フォロー、運営からのお知らせをここで確認できます。","sourceRevision":"153ce14c39522dd0a1aa0abf4de0bc24ab9cb00acf80b44fb2c516d612e12c9f","reviewed":true},
+      "it": {"text":"Notifiche caricate: {total}. Qui trovi le risposte, i «Mi piace», i nuovi follower e gli avvisi di sistema.","sourceRevision":"153ce14c39522dd0a1aa0abf4de0bc24ab9cb00acf80b44fb2c516d612e12c9f","reviewed":true},
+      "ru": {"text":"Загружено уведомлений: {total}. Среди них ответы, отметки «Нравится», подписки и системные сообщения.","sourceRevision":"153ce14c39522dd0a1aa0abf4de0bc24ab9cb00acf80b44fb2c516d612e12c9f","reviewed":true},
+      "ko": {"text":"알림 {total}개를 불러왔습니다. 답글, 좋아요, 팔로우, 시스템 알림을 여기에서 확인할 수 있습니다.","sourceRevision":"153ce14c39522dd0a1aa0abf4de0bc24ab9cb00acf80b44fb2c516d612e12c9f","reviewed":true},
+      "fr": {"text":"Notifications chargées : {total}. Retrouvez ici vos réponses, vos mentions « J’aime », vos nouveaux abonnés et les messages du site.","sourceRevision":"153ce14c39522dd0a1aa0abf4de0bc24ab9cb00acf80b44fb2c516d612e12c9f","reviewed":true}
     }
   },
   "tabs.all": {
@@ -120,7 +170,9 @@
       "en": {"text":"All","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true},
       "ja": {"text":"すべて","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true},
       "it": {"text":"Tutte","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true},
-      "ru": {"text":"Все","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true}
+      "ru": {"text":"Все","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true},
+      "ko": {"text":"전체","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true},
+      "fr": {"text":"Tout","sourceRevision":"423a71a067925da5802656cf9f3257f28706c7068b99fa1cd16f6c053999dba0","reviewed":true}
     }
   },
   "tabs.unread": {
@@ -129,65 +181,97 @@
       "en": {"text":"Unread","sourceRevision":"7e4780e07bc99f343600a017f3a74c7c87299f457bca6b0f08a8be5fffe94555","reviewed":true},
       "ja": {"text":"未読","sourceRevision":"7e4780e07bc99f343600a017f3a74c7c87299f457bca6b0f08a8be5fffe94555","reviewed":true},
       "it": {"text":"Non lette","sourceRevision":"7e4780e07bc99f343600a017f3a74c7c87299f457bca6b0f08a8be5fffe94555","reviewed":true},
-      "ru": {"text":"Непрочитанные","sourceRevision":"7e4780e07bc99f343600a017f3a74c7c87299f457bca6b0f08a8be5fffe94555","reviewed":true}
+      "ru": {"text":"Непрочитанные","sourceRevision":"7e4780e07bc99f343600a017f3a74c7c87299f457bca6b0f08a8be5fffe94555","reviewed":true},
+      "ko": {"text":"읽지 않음","sourceRevision":"7e4780e07bc99f343600a017f3a74c7c87299f457bca6b0f08a8be5fffe94555","reviewed":true},
+      "fr": {"text":"Non lu","sourceRevision":"7e4780e07bc99f343600a017f3a74c7c87299f457bca6b0f08a8be5fffe94555","reviewed":true}
     }
   },
   "templates.badge": {
     "source": "获得了「{badge}」徽章",
     "translations": {
       "en": {"text":"earned the “{badge}” badge","sourceRevision":"a4adbc3d14c2f2f413dc228728460bd41123e592674036e0923eaa21cc7206c0","reviewed":true},
-      "ru": {"text":"получил значок «{badge}»","sourceRevision":"a4adbc3d14c2f2f413dc228728460bd41123e592674036e0923eaa21cc7206c0","reviewed":true}
+      "ja": {"text":"「{badge}」バッジを獲得しました","sourceRevision":"a4adbc3d14c2f2f413dc228728460bd41123e592674036e0923eaa21cc7206c0","reviewed":true},
+      "it": {"text":"Hai ottenuto il distintivo «{badge}»","sourceRevision":"a4adbc3d14c2f2f413dc228728460bd41123e592674036e0923eaa21cc7206c0","reviewed":true},
+      "ru": {"text":"получил значок «{badge}»","sourceRevision":"a4adbc3d14c2f2f413dc228728460bd41123e592674036e0923eaa21cc7206c0","reviewed":true},
+      "ko": {"text":"‘{badge}’ 배지를 받았습니다","sourceRevision":"a4adbc3d14c2f2f413dc228728460bd41123e592674036e0923eaa21cc7206c0","reviewed":true},
+      "fr": {"text":"Vous avez reçu le badge « {badge} »","sourceRevision":"a4adbc3d14c2f2f413dc228728460bd41123e592674036e0923eaa21cc7206c0","reviewed":true}
     }
   },
   "templates.comment": {
     "source": "评论了你的主题",
     "translations": {
       "en": {"text":"commented on your topic","sourceRevision":"8f34551ecc99486fcb20a25ea3a166961431cf61973d862cfd5bc4ee7a708de1","reviewed":true},
-      "ru": {"text":"прокомментировал вашу тему","sourceRevision":"8f34551ecc99486fcb20a25ea3a166961431cf61973d862cfd5bc4ee7a708de1","reviewed":true}
+      "ja": {"text":"あなたのスレッドに書き込みました","sourceRevision":"8f34551ecc99486fcb20a25ea3a166961431cf61973d862cfd5bc4ee7a708de1","reviewed":true},
+      "it": {"text":"ha risposto alla tua discussione","sourceRevision":"8f34551ecc99486fcb20a25ea3a166961431cf61973d862cfd5bc4ee7a708de1","reviewed":true},
+      "ru": {"text":"прокомментировал вашу тему","sourceRevision":"8f34551ecc99486fcb20a25ea3a166961431cf61973d862cfd5bc4ee7a708de1","reviewed":true},
+      "ko": {"text":"회원님의 글에 댓글을 남겼습니다","sourceRevision":"8f34551ecc99486fcb20a25ea3a166961431cf61973d862cfd5bc4ee7a708de1","reviewed":true},
+      "fr": {"text":"a répondu à votre sujet","sourceRevision":"8f34551ecc99486fcb20a25ea3a166961431cf61973d862cfd5bc4ee7a708de1","reviewed":true}
     }
   },
   "templates.follow": {
     "source": "关注了你",
     "translations": {
       "en": {"text":"followed you","sourceRevision":"200f5292061f5b42134d53ae7a2f2f42b33df6274cdac8adc0c959e7451087ce","reviewed":true},
-      "ru": {"text":"подписался на вас","sourceRevision":"200f5292061f5b42134d53ae7a2f2f42b33df6274cdac8adc0c959e7451087ce","reviewed":true}
+      "ja": {"text":"あなたをフォローしました","sourceRevision":"200f5292061f5b42134d53ae7a2f2f42b33df6274cdac8adc0c959e7451087ce","reviewed":true},
+      "it": {"text":"ha iniziato a seguirti","sourceRevision":"200f5292061f5b42134d53ae7a2f2f42b33df6274cdac8adc0c959e7451087ce","reviewed":true},
+      "ru": {"text":"подписался на вас","sourceRevision":"200f5292061f5b42134d53ae7a2f2f42b33df6274cdac8adc0c959e7451087ce","reviewed":true},
+      "ko": {"text":"회원님을 팔로우했습니다","sourceRevision":"200f5292061f5b42134d53ae7a2f2f42b33df6274cdac8adc0c959e7451087ce","reviewed":true},
+      "fr": {"text":"vous suit désormais","sourceRevision":"200f5292061f5b42134d53ae7a2f2f42b33df6274cdac8adc0c959e7451087ce","reviewed":true}
     }
   },
   "templates.mention": {
     "source": "提及了你",
     "translations": {
       "en": {"text":"mentioned you","sourceRevision":"55d108bd93e3547f2bdc4b10ad202fd07982698397229785db32b08879ed5bef","reviewed":true},
-      "ru": {"text":"упоминает вас","sourceRevision":"55d108bd93e3547f2bdc4b10ad202fd07982698397229785db32b08879ed5bef","reviewed":true}
+      "ja": {"text":"あなたに言及しました","sourceRevision":"55d108bd93e3547f2bdc4b10ad202fd07982698397229785db32b08879ed5bef","reviewed":true},
+      "it": {"text":"ti ha menzionato","sourceRevision":"55d108bd93e3547f2bdc4b10ad202fd07982698397229785db32b08879ed5bef","reviewed":true},
+      "ru": {"text":"упоминает вас","sourceRevision":"55d108bd93e3547f2bdc4b10ad202fd07982698397229785db32b08879ed5bef","reviewed":true},
+      "ko": {"text":"회원님을 언급했습니다","sourceRevision":"55d108bd93e3547f2bdc4b10ad202fd07982698397229785db32b08879ed5bef","reviewed":true},
+      "fr": {"text":"vous a mentionné","sourceRevision":"55d108bd93e3547f2bdc4b10ad202fd07982698397229785db32b08879ed5bef","reviewed":true}
     }
   },
   "templates.postReply": {
     "source": "回复了你",
     "translations": {
       "en": {"text":"replied to you","sourceRevision":"423dbd05b45c1a38bcc6472b8040a4236b9dcce86691f76d20a33a5ceb7a88fa","reviewed":true},
-      "ru": {"text":"ответил вам","sourceRevision":"423dbd05b45c1a38bcc6472b8040a4236b9dcce86691f76d20a33a5ceb7a88fa","reviewed":true}
+      "ja": {"text":"あなたに返信しました","sourceRevision":"423dbd05b45c1a38bcc6472b8040a4236b9dcce86691f76d20a33a5ceb7a88fa","reviewed":true},
+      "it": {"text":"ti ha risposto","sourceRevision":"423dbd05b45c1a38bcc6472b8040a4236b9dcce86691f76d20a33a5ceb7a88fa","reviewed":true},
+      "ru": {"text":"ответил вам","sourceRevision":"423dbd05b45c1a38bcc6472b8040a4236b9dcce86691f76d20a33a5ceb7a88fa","reviewed":true},
+      "ko": {"text":"회원님에게 답글을 남겼습니다","sourceRevision":"423dbd05b45c1a38bcc6472b8040a4236b9dcce86691f76d20a33a5ceb7a88fa","reviewed":true},
+      "fr": {"text":"vous a répondu","sourceRevision":"423dbd05b45c1a38bcc6472b8040a4236b9dcce86691f76d20a33a5ceb7a88fa","reviewed":true}
     }
   },
   "templates.topicPost": {
     "source": "在你关注的主题下发表了新内容",
     "translations": {
       "en": {"text":"posted in a topic you watch","sourceRevision":"319b6f81883aa24e51789d2c2f5acb8dde3c81ac223fdaae7ee9835efbea8018","reviewed":true},
-      "ru": {"text":"опубликовал сообщение в теме, за которой вы следите","sourceRevision":"319b6f81883aa24e51789d2c2f5acb8dde3c81ac223fdaae7ee9835efbea8018","reviewed":true}
+      "ja": {"text":"フォロー中のスレッドに投稿しました","sourceRevision":"319b6f81883aa24e51789d2c2f5acb8dde3c81ac223fdaae7ee9835efbea8018","reviewed":true},
+      "it": {"text":"ha pubblicato in una discussione che segui","sourceRevision":"319b6f81883aa24e51789d2c2f5acb8dde3c81ac223fdaae7ee9835efbea8018","reviewed":true},
+      "ru": {"text":"опубликовал сообщение в теме, за которой вы следите","sourceRevision":"319b6f81883aa24e51789d2c2f5acb8dde3c81ac223fdaae7ee9835efbea8018","reviewed":true},
+      "ko": {"text":"팔로우 중인 글에 새 내용을 올렸습니다","sourceRevision":"319b6f81883aa24e51789d2c2f5acb8dde3c81ac223fdaae7ee9835efbea8018","reviewed":true},
+      "fr": {"text":"a publié dans un sujet que vous suivez","sourceRevision":"319b6f81883aa24e51789d2c2f5acb8dde3c81ac223fdaae7ee9835efbea8018","reviewed":true}
     }
   },
   "templates.trustPromotion": {
     "source": "你已晋升为「{level}」，查看当前权限与额度",
     "translations": {
       "en": {"text":"Promoted to {level}. View your permissions and limits","sourceRevision":"94e75bcf94368cc18471fe5fb740689fc911355220370d045879c0463279f083","reviewed":true},
-      "ja": {"text":"「{level}」に昇格しました。権限と上限を確認","sourceRevision":"94e75bcf94368cc18471fe5fb740689fc911355220370d045879c0463279f083","reviewed":true},
-      "it": {"text":"Promozione a {level}. Visualizza permessi e limiti","sourceRevision":"94e75bcf94368cc18471fe5fb740689fc911355220370d045879c0463279f083","reviewed":true},
-      "ru": {"text":"Ваш уровень повышен до {level}. Посмотрите свои права и ограничения","sourceRevision":"94e75bcf94368cc18471fe5fb740689fc911355220370d045879c0463279f083","reviewed":true}
+      "ja": {"text":"信頼レベルが「{level}」に上がりました。利用できる機能と上限を確認できます。","sourceRevision":"94e75bcf94368cc18471fe5fb740689fc911355220370d045879c0463279f083","reviewed":true},
+      "it": {"text":"Il tuo livello di fiducia è salito a «{level}». Consulta i permessi e i limiti aggiornati.","sourceRevision":"94e75bcf94368cc18471fe5fb740689fc911355220370d045879c0463279f083","reviewed":true},
+      "ru": {"text":"Ваш уровень повышен до {level}. Посмотрите свои права и ограничения","sourceRevision":"94e75bcf94368cc18471fe5fb740689fc911355220370d045879c0463279f083","reviewed":true},
+      "ko": {"text":"신뢰 등급이 ‘{level}’(으)로 올랐습니다. 이용 권한과 한도를 확인하세요.","sourceRevision":"94e75bcf94368cc18471fe5fb740689fc911355220370d045879c0463279f083","reviewed":true},
+      "fr": {"text":"Votre niveau de confiance est passé à « {level} ». Consultez vos nouveaux droits et limites.","sourceRevision":"94e75bcf94368cc18471fe5fb740689fc911355220370d045879c0463279f083","reviewed":true}
     }
   },
   "time": {
     "source": "时间",
     "translations": {
       "en": {"text":"Time","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true},
-      "ru": {"text":"Время","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true}
+      "ja": {"text":"時刻","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true},
+      "it": {"text":"Ora","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true},
+      "ru": {"text":"Время","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true},
+      "ko": {"text":"시간","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true},
+      "fr": {"text":"Heure","sourceRevision":"773542e174666539a24f786bf022d8cbb7af46ad7382d2a674bafd3e24fba1cd","reviewed":true}
     }
   },
   "title": {
@@ -196,7 +280,9 @@
       "en": {"text":"Notifications","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true},
       "ja": {"text":"通知","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true},
       "it": {"text":"Notifiche","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true},
-      "ru": {"text":"Уведомления","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true}
+      "ru": {"text":"Уведомления","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true},
+      "ko": {"text":"알림","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true},
+      "fr": {"text":"Notifications","sourceRevision":"6d22b47c08c53a0d0cfb120f37e41828828842b2f492690481edcd2909c4af1a","reviewed":true}
     }
   },
   "trustLevel": {
@@ -205,56 +291,86 @@
       "en": {"text":"Trust level","sourceRevision":"525f0b9340360db9ce895c026d4f8beff4f5de1d725d2ab5575e57c846f30ad3","reviewed":true},
       "ja": {"text":"信頼レベル","sourceRevision":"525f0b9340360db9ce895c026d4f8beff4f5de1d725d2ab5575e57c846f30ad3","reviewed":true},
       "it": {"text":"Livello di fiducia","sourceRevision":"525f0b9340360db9ce895c026d4f8beff4f5de1d725d2ab5575e57c846f30ad3","reviewed":true},
-      "ru": {"text":"Уровень доверия","sourceRevision":"525f0b9340360db9ce895c026d4f8beff4f5de1d725d2ab5575e57c846f30ad3","reviewed":true}
+      "ru": {"text":"Уровень доверия","sourceRevision":"525f0b9340360db9ce895c026d4f8beff4f5de1d725d2ab5575e57c846f30ad3","reviewed":true},
+      "ko": {"text":"신뢰 등급","sourceRevision":"525f0b9340360db9ce895c026d4f8beff4f5de1d725d2ab5575e57c846f30ad3","reviewed":true},
+      "fr": {"text":"Niveau de confiance","sourceRevision":"525f0b9340360db9ce895c026d4f8beff4f5de1d725d2ab5575e57c846f30ad3","reviewed":true}
     }
   },
   "unread": {
     "source": "{count} 未读",
     "translations": {
       "en": {"text":"{count} unread","sourceRevision":"f7f94614ae0a858569ae8c331a98a3025f9ed7f25a870cc341de26a20c51bc95","reviewed":true},
-      "ru": {"text":"Непрочитанных: {count}","sourceRevision":"f7f94614ae0a858569ae8c331a98a3025f9ed7f25a870cc341de26a20c51bc95","reviewed":true}
+      "ja": {"text":"未読{count}件","sourceRevision":"f7f94614ae0a858569ae8c331a98a3025f9ed7f25a870cc341de26a20c51bc95","reviewed":true},
+      "it": {"text":"Da leggere: {count}","sourceRevision":"f7f94614ae0a858569ae8c331a98a3025f9ed7f25a870cc341de26a20c51bc95","reviewed":true},
+      "ru": {"text":"Непрочитанных: {count}","sourceRevision":"f7f94614ae0a858569ae8c331a98a3025f9ed7f25a870cc341de26a20c51bc95","reviewed":true},
+      "ko": {"text":"읽지 않은 알림 {count}개","sourceRevision":"f7f94614ae0a858569ae8c331a98a3025f9ed7f25a870cc341de26a20c51bc95","reviewed":true},
+      "fr": {"text":"Non lues : {count}","sourceRevision":"f7f94614ae0a858569ae8c331a98a3025f9ed7f25a870cc341de26a20c51bc95","reviewed":true}
     }
   },
   "unreadEmptyDescription": {
     "source": "新的未读通知会出现在这里。",
     "translations": {
       "en": {"text":"New unread notifications will show up here.","sourceRevision":"a82368e52d83af5432a2a55048df19618ab1531288af83433c7d85d9fe687f67","reviewed":true},
-      "ru": {"text":"Новые непрочитанные уведомления появятся здесь.","sourceRevision":"a82368e52d83af5432a2a55048df19618ab1531288af83433c7d85d9fe687f67","reviewed":true}
+      "ja": {"text":"新しい通知が届くと、ここに表示されます。","sourceRevision":"a82368e52d83af5432a2a55048df19618ab1531288af83433c7d85d9fe687f67","reviewed":true},
+      "it": {"text":"Qui compariranno le nuove notifiche.","sourceRevision":"a82368e52d83af5432a2a55048df19618ab1531288af83433c7d85d9fe687f67","reviewed":true},
+      "ru": {"text":"Новые непрочитанные уведомления появятся здесь.","sourceRevision":"a82368e52d83af5432a2a55048df19618ab1531288af83433c7d85d9fe687f67","reviewed":true},
+      "ko": {"text":"새 알림이 오면 여기에 표시됩니다.","sourceRevision":"a82368e52d83af5432a2a55048df19618ab1531288af83433c7d85d9fe687f67","reviewed":true},
+      "fr": {"text":"Vos nouvelles notifications s’afficheront ici.","sourceRevision":"a82368e52d83af5432a2a55048df19618ab1531288af83433c7d85d9fe687f67","reviewed":true}
     }
   },
   "unreadEmptyTitle": {
     "source": "暂无未读通知",
     "translations": {
       "en": {"text":"No unread notifications","sourceRevision":"0d493aeb848030686e38b3c75fc99340dc90b2c25859c45e13d9dbb5f13dd6c2","reviewed":true},
-      "ru": {"text":"Нет непрочитанных уведомлений","sourceRevision":"0d493aeb848030686e38b3c75fc99340dc90b2c25859c45e13d9dbb5f13dd6c2","reviewed":true}
+      "ja": {"text":"未読の通知はありません","sourceRevision":"0d493aeb848030686e38b3c75fc99340dc90b2c25859c45e13d9dbb5f13dd6c2","reviewed":true},
+      "it": {"text":"Non hai notifiche da leggere","sourceRevision":"0d493aeb848030686e38b3c75fc99340dc90b2c25859c45e13d9dbb5f13dd6c2","reviewed":true},
+      "ru": {"text":"Нет непрочитанных уведомлений","sourceRevision":"0d493aeb848030686e38b3c75fc99340dc90b2c25859c45e13d9dbb5f13dd6c2","reviewed":true},
+      "ko": {"text":"읽지 않은 알림이 없습니다.","sourceRevision":"0d493aeb848030686e38b3c75fc99340dc90b2c25859c45e13d9dbb5f13dd6c2","reviewed":true},
+      "fr": {"text":"Aucune notification non lue","sourceRevision":"0d493aeb848030686e38b3c75fc99340dc90b2c25859c45e13d9dbb5f13dd6c2","reviewed":true}
     }
   },
   "verb.comment": {
     "source": "评论了",
     "translations": {
       "en": {"text":"commented on","sourceRevision":"b85859df2a7289750de805b24c8689998f35d44874fda1f5c838790f6d7f4247","reviewed":true},
-      "ru": {"text":"прокомментировал","sourceRevision":"b85859df2a7289750de805b24c8689998f35d44874fda1f5c838790f6d7f4247","reviewed":true}
+      "ja": {"text":"書き込みました","sourceRevision":"b85859df2a7289750de805b24c8689998f35d44874fda1f5c838790f6d7f4247","reviewed":true},
+      "it": {"text":"ha aggiunto un commento","sourceRevision":"b85859df2a7289750de805b24c8689998f35d44874fda1f5c838790f6d7f4247","reviewed":true},
+      "ru": {"text":"прокомментировал","sourceRevision":"b85859df2a7289750de805b24c8689998f35d44874fda1f5c838790f6d7f4247","reviewed":true},
+      "ko": {"text":"댓글을 남겼습니다","sourceRevision":"b85859df2a7289750de805b24c8689998f35d44874fda1f5c838790f6d7f4247","reviewed":true},
+      "fr": {"text":"a commenté","sourceRevision":"b85859df2a7289750de805b24c8689998f35d44874fda1f5c838790f6d7f4247","reviewed":true}
     }
   },
   "verb.follow": {
     "source": "关注了你",
     "translations": {
       "en": {"text":"followed you","sourceRevision":"200f5292061f5b42134d53ae7a2f2f42b33df6274cdac8adc0c959e7451087ce","reviewed":true},
-      "ru": {"text":"подписался на","sourceRevision":"200f5292061f5b42134d53ae7a2f2f42b33df6274cdac8adc0c959e7451087ce","reviewed":true}
+      "ja": {"text":"あなたをフォローしました","sourceRevision":"200f5292061f5b42134d53ae7a2f2f42b33df6274cdac8adc0c959e7451087ce","reviewed":true},
+      "it": {"text":"ha iniziato a seguirti","sourceRevision":"200f5292061f5b42134d53ae7a2f2f42b33df6274cdac8adc0c959e7451087ce","reviewed":true},
+      "ru": {"text":"подписался на","sourceRevision":"200f5292061f5b42134d53ae7a2f2f42b33df6274cdac8adc0c959e7451087ce","reviewed":true},
+      "ko": {"text":"회원님을 팔로우했습니다","sourceRevision":"200f5292061f5b42134d53ae7a2f2f42b33df6274cdac8adc0c959e7451087ce","reviewed":true},
+      "fr": {"text":"vous suit désormais","sourceRevision":"200f5292061f5b42134d53ae7a2f2f42b33df6274cdac8adc0c959e7451087ce","reviewed":true}
     }
   },
   "verb.reply": {
     "source": "回复了",
     "translations": {
       "en": {"text":"replied to","sourceRevision":"232fb710eac8fcf5c2bede419213cd1410be831196a1820cb861b66891cc866c","reviewed":true},
-      "ru": {"text":"ответил","sourceRevision":"232fb710eac8fcf5c2bede419213cd1410be831196a1820cb861b66891cc866c","reviewed":true}
+      "ja": {"text":"返信しました","sourceRevision":"232fb710eac8fcf5c2bede419213cd1410be831196a1820cb861b66891cc866c","reviewed":true},
+      "it": {"text":"ha risposto","sourceRevision":"232fb710eac8fcf5c2bede419213cd1410be831196a1820cb861b66891cc866c","reviewed":true},
+      "ru": {"text":"ответил","sourceRevision":"232fb710eac8fcf5c2bede419213cd1410be831196a1820cb861b66891cc866c","reviewed":true},
+      "ko": {"text":"답글을 남겼습니다","sourceRevision":"232fb710eac8fcf5c2bede419213cd1410be831196a1820cb861b66891cc866c","reviewed":true},
+      "fr": {"text":"a répondu","sourceRevision":"232fb710eac8fcf5c2bede419213cd1410be831196a1820cb861b66891cc866c","reviewed":true}
     }
   },
   "viewProfile": {
     "source": "查看主页",
     "translations": {
       "en": {"text":"View profile","sourceRevision":"b4f3239adef4cb7dfc38906f488c71237f3cdb894a408822384bdd99ce59dfc9","reviewed":true},
-      "ru": {"text":"Посмотреть профиль","sourceRevision":"b4f3239adef4cb7dfc38906f488c71237f3cdb894a408822384bdd99ce59dfc9","reviewed":true}
+      "ja": {"text":"プロフィールを見る","sourceRevision":"b4f3239adef4cb7dfc38906f488c71237f3cdb894a408822384bdd99ce59dfc9","reviewed":true},
+      "it": {"text":"Visualizza il profilo","sourceRevision":"b4f3239adef4cb7dfc38906f488c71237f3cdb894a408822384bdd99ce59dfc9","reviewed":true},
+      "ru": {"text":"Посмотреть профиль","sourceRevision":"b4f3239adef4cb7dfc38906f488c71237f3cdb894a408822384bdd99ce59dfc9","reviewed":true},
+      "ko": {"text":"프로필 보기","sourceRevision":"b4f3239adef4cb7dfc38906f488c71237f3cdb894a408822384bdd99ce59dfc9","reviewed":true},
+      "fr": {"text":"Voir le profil","sourceRevision":"b4f3239adef4cb7dfc38906f488c71237f3cdb894a408822384bdd99ce59dfc9","reviewed":true}
     }
   }
 }

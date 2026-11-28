@@ -3,280 +3,440 @@
     "source": "添加",
     "translations": {
       "en": {"text":"Add","sourceRevision":"752f72d69f94884fc6d70f7d148a58ce8b7e8f621f1dce57bb2c40249ccb4016","reviewed":true},
-      "ru": {"text":"Добавить","sourceRevision":"752f72d69f94884fc6d70f7d148a58ce8b7e8f621f1dce57bb2c40249ccb4016","reviewed":true}
+      "ja": {"text":"追加","sourceRevision":"752f72d69f94884fc6d70f7d148a58ce8b7e8f621f1dce57bb2c40249ccb4016","reviewed":true},
+      "it": {"text":"Aggiungi","sourceRevision":"752f72d69f94884fc6d70f7d148a58ce8b7e8f621f1dce57bb2c40249ccb4016","reviewed":true},
+      "ru": {"text":"Добавить","sourceRevision":"752f72d69f94884fc6d70f7d148a58ce8b7e8f621f1dce57bb2c40249ccb4016","reviewed":true},
+      "ko": {"text":"추가","sourceRevision":"752f72d69f94884fc6d70f7d148a58ce8b7e8f621f1dce57bb2c40249ccb4016","reviewed":true},
+      "fr": {"text":"Ajouter","sourceRevision":"752f72d69f94884fc6d70f7d148a58ce8b7e8f621f1dce57bb2c40249ccb4016","reviewed":true}
     }
   },
   "agent": {
     "source": "Agent 接入",
     "translations": {
       "en": {"text":"Agent access","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true},
-      "ru": {"text":"Доступ агентов","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true}
+      "ja": {"text":"エージェントアクセス","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true},
+      "it": {"text":"Accesso dell’agente","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true},
+      "ru": {"text":"Доступ агентов","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true},
+      "ko": {"text":"에이전트 액세스","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true},
+      "fr": {"text":"Accès aux agents","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true}
     }
   },
   "agentAnonymousRead": {
     "source": "每个 IP 匿名读取",
     "translations": {
       "en": {"text":"Anonymous reads per IP","sourceRevision":"b0de86cdce1096e58a4efa26ec7debf2e30a70af728585aeb26402485b61e7c2","reviewed":true},
-      "ru": {"text":"Анонимных запросов на чтение с IP","sourceRevision":"b0de86cdce1096e58a4efa26ec7debf2e30a70af728585aeb26402485b61e7c2","reviewed":true}
+      "ja": {"text":"匿名 IP ごとの読み込み","sourceRevision":"b0de86cdce1096e58a4efa26ec7debf2e30a70af728585aeb26402485b61e7c2","reviewed":true},
+      "it": {"text":"Anonimo legge per IP","sourceRevision":"b0de86cdce1096e58a4efa26ec7debf2e30a70af728585aeb26402485b61e7c2","reviewed":true},
+      "ru": {"text":"Анонимных запросов на чтение с IP","sourceRevision":"b0de86cdce1096e58a4efa26ec7debf2e30a70af728585aeb26402485b61e7c2","reviewed":true},
+      "ko": {"text":"익명 IP 당 읽기","sourceRevision":"b0de86cdce1096e58a4efa26ec7debf2e30a70af728585aeb26402485b61e7c2","reviewed":true},
+      "fr": {"text":"Lectures anonymes par IP","sourceRevision":"b0de86cdce1096e58a4efa26ec7debf2e30a70af728585aeb26402485b61e7c2","reviewed":true}
     }
   },
   "agentEnabled": {
     "source": "启用 Agent API",
     "translations": {
       "en": {"text":"Enable Agent API","sourceRevision":"8a19e28bb6146f5df768fd1b4c601a3bc2ddcb7350d1c9db5696a8c986a6642d","reviewed":true},
-      "ru": {"text":"Включить Agent API","sourceRevision":"8a19e28bb6146f5df768fd1b4c601a3bc2ddcb7350d1c9db5696a8c986a6642d","reviewed":true}
+      "ja": {"text":"Agent API を有効にする","sourceRevision":"8a19e28bb6146f5df768fd1b4c601a3bc2ddcb7350d1c9db5696a8c986a6642d","reviewed":true},
+      "it": {"text":"Abilitare l’Agente API","sourceRevision":"8a19e28bb6146f5df768fd1b4c601a3bc2ddcb7350d1c9db5696a8c986a6642d","reviewed":true},
+      "ru": {"text":"Включить Agent API","sourceRevision":"8a19e28bb6146f5df768fd1b4c601a3bc2ddcb7350d1c9db5696a8c986a6642d","reviewed":true},
+      "ko": {"text":"Enable 에이전트 API","sourceRevision":"8a19e28bb6146f5df768fd1b4c601a3bc2ddcb7350d1c9db5696a8c986a6642d","reviewed":true},
+      "fr": {"text":"Activer l’API Agent","sourceRevision":"8a19e28bb6146f5df768fd1b4c601a3bc2ddcb7350d1c9db5696a8c986a6642d","reviewed":true}
     }
   },
   "agentIP": {
     "source": "每个 IP 全部请求",
     "translations": {
       "en": {"text":"All requests per IP","sourceRevision":"58738beb1109417bb630944ad8f904662fbe2135e6cd945ace659250a120a572","reviewed":true},
-      "ru": {"text":"Всего запросов с IP","sourceRevision":"58738beb1109417bb630944ad8f904662fbe2135e6cd945ace659250a120a572","reviewed":true}
+      "ja": {"text":"IPアドレスごとの全リクエスト","sourceRevision":"58738beb1109417bb630944ad8f904662fbe2135e6cd945ace659250a120a572","reviewed":true},
+      "it": {"text":"Tutte le richieste per indirizzo IP","sourceRevision":"58738beb1109417bb630944ad8f904662fbe2135e6cd945ace659250a120a572","reviewed":true},
+      "ru": {"text":"Всего запросов с IP","sourceRevision":"58738beb1109417bb630944ad8f904662fbe2135e6cd945ace659250a120a572","reviewed":true},
+      "ko": {"text":"IP 주소별 전체 요청","sourceRevision":"58738beb1109417bb630944ad8f904662fbe2135e6cd945ace659250a120a572","reviewed":true},
+      "fr": {"text":"Toutes les requêtes par adresse IP","sourceRevision":"58738beb1109417bb630944ad8f904662fbe2135e6cd945ace659250a120a572","reviewed":true}
     }
   },
   "agentLimits": {
     "source": "每分钟请求次数",
     "translations": {
       "en": {"text":"Requests per minute","sourceRevision":"a3fcf5ee323f2101d204079c63d3ce5ffcd8498c004aaec013ccbd2289a961d0","reviewed":true},
-      "ru": {"text":"Запросов в минуту","sourceRevision":"a3fcf5ee323f2101d204079c63d3ce5ffcd8498c004aaec013ccbd2289a961d0","reviewed":true}
+      "ja": {"text":"1分あたりのリクエスト","sourceRevision":"a3fcf5ee323f2101d204079c63d3ce5ffcd8498c004aaec013ccbd2289a961d0","reviewed":true},
+      "it": {"text":"Richieste al minuto","sourceRevision":"a3fcf5ee323f2101d204079c63d3ce5ffcd8498c004aaec013ccbd2289a961d0","reviewed":true},
+      "ru": {"text":"Запросов в минуту","sourceRevision":"a3fcf5ee323f2101d204079c63d3ce5ffcd8498c004aaec013ccbd2289a961d0","reviewed":true},
+      "ko": {"text":"1분당 요청","sourceRevision":"a3fcf5ee323f2101d204079c63d3ce5ffcd8498c004aaec013ccbd2289a961d0","reviewed":true},
+      "fr": {"text":"Demandes par minute","sourceRevision":"a3fcf5ee323f2101d204079c63d3ce5ffcd8498c004aaec013ccbd2289a961d0","reviewed":true}
     }
   },
   "agentManualTokens": {
     "source": "允许手动 Token",
     "translations": {
       "en": {"text":"Allow manual tokens","sourceRevision":"2124b531e45c6f38925c86a55b8c13f6f756f6c871001f6141bc0f6a9b17bf50","reviewed":true},
-      "ru": {"text":"Разрешить ручное создание токенов","sourceRevision":"2124b531e45c6f38925c86a55b8c13f6f756f6c871001f6141bc0f6a9b17bf50","reviewed":true}
+      "ja": {"text":"マニュアルトークンを許可する","sourceRevision":"2124b531e45c6f38925c86a55b8c13f6f756f6c871001f6141bc0f6a9b17bf50","reviewed":true},
+      "it": {"text":"Consentire token manuali","sourceRevision":"2124b531e45c6f38925c86a55b8c13f6f756f6c871001f6141bc0f6a9b17bf50","reviewed":true},
+      "ru": {"text":"Разрешить ручное создание токенов","sourceRevision":"2124b531e45c6f38925c86a55b8c13f6f756f6c871001f6141bc0f6a9b17bf50","reviewed":true},
+      "ko": {"text":"수동 토큰","sourceRevision":"2124b531e45c6f38925c86a55b8c13f6f756f6c871001f6141bc0f6a9b17bf50","reviewed":true},
+      "fr": {"text":"Autoriser les jetons manuels","sourceRevision":"2124b531e45c6f38925c86a55b8c13f6f756f6c871001f6141bc0f6a9b17bf50","reviewed":true}
     }
   },
   "agentRead": {
     "source": "每个授权身份",
     "translations": {
       "en": {"text":"Per authorization","sourceRevision":"d87452b8fdabe6f248a99673cb1c5029a6abff674ca3810024a884c56231039d","reviewed":true},
-      "ru": {"text":"На авторизацию","sourceRevision":"d87452b8fdabe6f248a99673cb1c5029a6abff674ca3810024a884c56231039d","reviewed":true}
+      "ja": {"text":"許可による","sourceRevision":"d87452b8fdabe6f248a99673cb1c5029a6abff674ca3810024a884c56231039d","reviewed":true},
+      "it": {"text":"Per autorizzazione","sourceRevision":"d87452b8fdabe6f248a99673cb1c5029a6abff674ca3810024a884c56231039d","reviewed":true},
+      "ru": {"text":"На авторизацию","sourceRevision":"d87452b8fdabe6f248a99673cb1c5029a6abff674ca3810024a884c56231039d","reviewed":true},
+      "ko": {"text":"저자화","sourceRevision":"d87452b8fdabe6f248a99673cb1c5029a6abff674ca3810024a884c56231039d","reviewed":true},
+      "fr": {"text":"Par autorisation","sourceRevision":"d87452b8fdabe6f248a99673cb1c5029a6abff674ca3810024a884c56231039d","reviewed":true}
     }
   },
   "agentRetry": {
     "source": "重试",
     "translations": {
       "en": {"text":"Retry","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true},
-      "ru": {"text":"Повторить","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true}
+      "ja": {"text":"再試行","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true},
+      "it": {"text":"Riprova","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true},
+      "ru": {"text":"Повторить","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true},
+      "ko": {"text":"다시 시도","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true},
+      "fr": {"text":"Réessayer","sourceRevision":"58b1f3817bf88a2b59df29cbd80faac3a689c8bea1d5914689660777815f4917","reviewed":true}
     }
   },
   "agentUserRead": {
     "source": "每个账号",
     "translations": {
       "en": {"text":"Per account","sourceRevision":"622d836f4c6cf9bd5f46a7093642ad0f431d38b503c2ae8c7e9aab5358d003c7","reviewed":true},
-      "ru": {"text":"На учётную запись","sourceRevision":"622d836f4c6cf9bd5f46a7093642ad0f431d38b503c2ae8c7e9aab5358d003c7","reviewed":true}
+      "ja": {"text":"口座ごとに","sourceRevision":"622d836f4c6cf9bd5f46a7093642ad0f431d38b503c2ae8c7e9aab5358d003c7","reviewed":true},
+      "it": {"text":"Per conto","sourceRevision":"622d836f4c6cf9bd5f46a7093642ad0f431d38b503c2ae8c7e9aab5358d003c7","reviewed":true},
+      "ru": {"text":"На учётную запись","sourceRevision":"622d836f4c6cf9bd5f46a7093642ad0f431d38b503c2ae8c7e9aab5358d003c7","reviewed":true},
+      "ko": {"text":"계정 당","sourceRevision":"622d836f4c6cf9bd5f46a7093642ad0f431d38b503c2ae8c7e9aab5358d003c7","reviewed":true},
+      "fr": {"text":"Par compte","sourceRevision":"622d836f4c6cf9bd5f46a7093642ad0f431d38b503c2ae8c7e9aab5358d003c7","reviewed":true}
     }
   },
   "agentWrite": {
     "source": "每个账号写入",
     "translations": {
       "en": {"text":"Writes per account","sourceRevision":"37ee4d9022dfa3c3eceff1eb614432f35c83ef2c8036c240c3834a0e3e1c5a69","reviewed":true},
-      "ru": {"text":"Записей на учётную запись","sourceRevision":"37ee4d9022dfa3c3eceff1eb614432f35c83ef2c8036c240c3834a0e3e1c5a69","reviewed":true}
+      "ja": {"text":"1アカウントにつき書き込み","sourceRevision":"37ee4d9022dfa3c3eceff1eb614432f35c83ef2c8036c240c3834a0e3e1c5a69","reviewed":true},
+      "it": {"text":"Scrive per conto","sourceRevision":"37ee4d9022dfa3c3eceff1eb614432f35c83ef2c8036c240c3834a0e3e1c5a69","reviewed":true},
+      "ru": {"text":"Записей на учётную запись","sourceRevision":"37ee4d9022dfa3c3eceff1eb614432f35c83ef2c8036c240c3834a0e3e1c5a69","reviewed":true},
+      "ko": {"text":"계정 당 쓰기","sourceRevision":"37ee4d9022dfa3c3eceff1eb614432f35c83ef2c8036c240c3834a0e3e1c5a69","reviewed":true},
+      "fr": {"text":"Écrit par compte","sourceRevision":"37ee4d9022dfa3c3eceff1eb614432f35c83ef2c8036c240c3834a0e3e1c5a69","reviewed":true}
     }
   },
   "captchaAltcha": {
     "source": "工作量验证（ALTCHA）",
     "translations": {
       "en": {"text":"Proof of work (ALTCHA)","sourceRevision":"95678212826d2b446b869dc5c89f6a7d3ef0a2e35a87b926825ae24738f699f6","reviewed":true},
-      "ru": {"text":"Доказательство работы (ALTCHA)","sourceRevision":"95678212826d2b446b869dc5c89f6a7d3ef0a2e35a87b926825ae24738f699f6","reviewed":true}
+      "ja": {"text":"仕事の証拠(ALTCHA)","sourceRevision":"95678212826d2b446b869dc5c89f6a7d3ef0a2e35a87b926825ae24738f699f6","reviewed":true},
+      "it": {"text":"Prova di lavoro (ALTCHA)","sourceRevision":"95678212826d2b446b869dc5c89f6a7d3ef0a2e35a87b926825ae24738f699f6","reviewed":true},
+      "ru": {"text":"Доказательство работы (ALTCHA)","sourceRevision":"95678212826d2b446b869dc5c89f6a7d3ef0a2e35a87b926825ae24738f699f6","reviewed":true},
+      "ko": {"text":"작업 증명 (ALTCHA)","sourceRevision":"95678212826d2b446b869dc5c89f6a7d3ef0a2e35a87b926825ae24738f699f6","reviewed":true},
+      "fr": {"text":"Preuve de travail (ALTCHA)","sourceRevision":"95678212826d2b446b869dc5c89f6a7d3ef0a2e35a87b926825ae24738f699f6","reviewed":true}
     }
   },
   "captchaBuiltIn": {
     "source": "站内验证",
     "translations": {
       "en": {"text":"Built-in verification","sourceRevision":"862ae774724ce49d849b55afa9a3d0ae4ba5d5663727efe79b18335a39c019f4","reviewed":true},
-      "ru": {"text":"Встроенная проверка","sourceRevision":"862ae774724ce49d849b55afa9a3d0ae4ba5d5663727efe79b18335a39c019f4","reviewed":true}
+      "ja": {"text":"ビルトイン検証","sourceRevision":"862ae774724ce49d849b55afa9a3d0ae4ba5d5663727efe79b18335a39c019f4","reviewed":true},
+      "it": {"text":"Verifica integrata","sourceRevision":"862ae774724ce49d849b55afa9a3d0ae4ba5d5663727efe79b18335a39c019f4","reviewed":true},
+      "ru": {"text":"Встроенная проверка","sourceRevision":"862ae774724ce49d849b55afa9a3d0ae4ba5d5663727efe79b18335a39c019f4","reviewed":true},
+      "ko": {"text":"내장 검증","sourceRevision":"862ae774724ce49d849b55afa9a3d0ae4ba5d5663727efe79b18335a39c019f4","reviewed":true},
+      "fr": {"text":"Vérification intégrée","sourceRevision":"862ae774724ce49d849b55afa9a3d0ae4ba5d5663727efe79b18335a39c019f4","reviewed":true}
     }
   },
   "captchaDifficulty": {
     "source": "验证难度",
     "translations": {
       "en": {"text":"Verification difficulty","sourceRevision":"27d68e18da3eb919e25f5a67a99a2990870bb5c4ecbbbd4129d0f771b4a006e5","reviewed":true},
-      "ru": {"text":"Сложность проверки","sourceRevision":"27d68e18da3eb919e25f5a67a99a2990870bb5c4ecbbbd4129d0f771b4a006e5","reviewed":true}
+      "ja": {"text":"検証難易度","sourceRevision":"27d68e18da3eb919e25f5a67a99a2990870bb5c4ecbbbd4129d0f771b4a006e5","reviewed":true},
+      "it": {"text":"Difficoltà di verifica","sourceRevision":"27d68e18da3eb919e25f5a67a99a2990870bb5c4ecbbbd4129d0f771b4a006e5","reviewed":true},
+      "ru": {"text":"Сложность проверки","sourceRevision":"27d68e18da3eb919e25f5a67a99a2990870bb5c4ecbbbd4129d0f771b4a006e5","reviewed":true},
+      "ko": {"text":"검증 어려움","sourceRevision":"27d68e18da3eb919e25f5a67a99a2990870bb5c4ecbbbd4129d0f771b4a006e5","reviewed":true},
+      "fr": {"text":"Difficulté de vérification","sourceRevision":"27d68e18da3eb919e25f5a67a99a2990870bb5c4ecbbbd4129d0f771b4a006e5","reviewed":true}
     }
   },
   "captchaDifficultyHigh": {
     "source": "高",
     "translations": {
       "en": {"text":"High","sourceRevision":"978e9fc28bb47e58808480b3fb5426d4a8927d6939d03d0e5bed3fada1e732c1","reviewed":true},
-      "ru": {"text":"Высокая","sourceRevision":"978e9fc28bb47e58808480b3fb5426d4a8927d6939d03d0e5bed3fada1e732c1","reviewed":true}
+      "ja": {"text":"高い","sourceRevision":"978e9fc28bb47e58808480b3fb5426d4a8927d6939d03d0e5bed3fada1e732c1","reviewed":true},
+      "it": {"text":"Alta","sourceRevision":"978e9fc28bb47e58808480b3fb5426d4a8927d6939d03d0e5bed3fada1e732c1","reviewed":true},
+      "ru": {"text":"Высокая","sourceRevision":"978e9fc28bb47e58808480b3fb5426d4a8927d6939d03d0e5bed3fada1e732c1","reviewed":true},
+      "ko": {"text":"높음","sourceRevision":"978e9fc28bb47e58808480b3fb5426d4a8927d6939d03d0e5bed3fada1e732c1","reviewed":true},
+      "fr": {"text":"Élevé","sourceRevision":"978e9fc28bb47e58808480b3fb5426d4a8927d6939d03d0e5bed3fada1e732c1","reviewed":true}
     }
   },
   "captchaDifficultyHint": {
     "source": "难度越高，完成验证所需的计算量越大，较慢设备可能需要更长时间。",
     "translations": {
       "en": {"text":"Higher difficulty requires more computation and may take longer on slower devices.","sourceRevision":"56058c0819f943b28312d4d878389c1a51997cf07df755d31f5a634ad5faa877","reviewed":true},
-      "ru": {"text":"Чем выше сложность, тем больше вычислений требуется. На медленных устройствах проверка может занять больше времени.","sourceRevision":"56058c0819f943b28312d4d878389c1a51997cf07df755d31f5a634ad5faa877","reviewed":true}
+      "ja": {"text":"高い難易度は、より計算を必要とし、より遅いデバイスに時間がかかることがあります。","sourceRevision":"56058c0819f943b28312d4d878389c1a51997cf07df755d31f5a634ad5faa877","reviewed":true},
+      "it": {"text":"Maggiore difficoltà richiede più computazione e può richiedere più tempo su dispositivi più lenti.","sourceRevision":"56058c0819f943b28312d4d878389c1a51997cf07df755d31f5a634ad5faa877","reviewed":true},
+      "ru": {"text":"Чем выше сложность, тем больше вычислений требуется. На медленных устройствах проверка может занять больше времени.","sourceRevision":"56058c0819f943b28312d4d878389c1a51997cf07df755d31f5a634ad5faa877","reviewed":true},
+      "ko": {"text":"더 높은 어려움은 더 많은 계산을 요구하고 더 느린 장치에 더 길지도 모릅니다.","sourceRevision":"56058c0819f943b28312d4d878389c1a51997cf07df755d31f5a634ad5faa877","reviewed":true},
+      "fr": {"text":"Une difficulté plus grande nécessite plus de calcul et peut prendre plus de temps sur les appareils plus lents.","sourceRevision":"56058c0819f943b28312d4d878389c1a51997cf07df755d31f5a634ad5faa877","reviewed":true}
     }
   },
   "captchaDifficultyLow": {
     "source": "低",
     "translations": {
       "en": {"text":"Low","sourceRevision":"54c4e1f32788f4a74b0f5914a39e7d13405aee53768dfd07c01ab71f8f4dbbf0","reviewed":true},
-      "ru": {"text":"Низкая","sourceRevision":"54c4e1f32788f4a74b0f5914a39e7d13405aee53768dfd07c01ab71f8f4dbbf0","reviewed":true}
+      "ja": {"text":"低い","sourceRevision":"54c4e1f32788f4a74b0f5914a39e7d13405aee53768dfd07c01ab71f8f4dbbf0","reviewed":true},
+      "it": {"text":"Bassa","sourceRevision":"54c4e1f32788f4a74b0f5914a39e7d13405aee53768dfd07c01ab71f8f4dbbf0","reviewed":true},
+      "ru": {"text":"Низкая","sourceRevision":"54c4e1f32788f4a74b0f5914a39e7d13405aee53768dfd07c01ab71f8f4dbbf0","reviewed":true},
+      "ko": {"text":"낮음","sourceRevision":"54c4e1f32788f4a74b0f5914a39e7d13405aee53768dfd07c01ab71f8f4dbbf0","reviewed":true},
+      "fr": {"text":"Faible","sourceRevision":"54c4e1f32788f4a74b0f5914a39e7d13405aee53768dfd07c01ab71f8f4dbbf0","reviewed":true}
     }
   },
   "captchaDifficultyMedium": {
     "source": "中",
     "translations": {
       "en": {"text":"Medium","sourceRevision":"2b3db59a99ffc5cfec558c64ae2ec5fac66bdcbb08bc73e768f4ff2dd07b1b92","reviewed":true},
-      "ru": {"text":"Средняя","sourceRevision":"2b3db59a99ffc5cfec558c64ae2ec5fac66bdcbb08bc73e768f4ff2dd07b1b92","reviewed":true}
+      "ja": {"text":"普通","sourceRevision":"2b3db59a99ffc5cfec558c64ae2ec5fac66bdcbb08bc73e768f4ff2dd07b1b92","reviewed":true},
+      "it": {"text":"Media","sourceRevision":"2b3db59a99ffc5cfec558c64ae2ec5fac66bdcbb08bc73e768f4ff2dd07b1b92","reviewed":true},
+      "ru": {"text":"Средняя","sourceRevision":"2b3db59a99ffc5cfec558c64ae2ec5fac66bdcbb08bc73e768f4ff2dd07b1b92","reviewed":true},
+      "ko": {"text":"보통","sourceRevision":"2b3db59a99ffc5cfec558c64ae2ec5fac66bdcbb08bc73e768f4ff2dd07b1b92","reviewed":true},
+      "fr": {"text":"Moyen","sourceRevision":"2b3db59a99ffc5cfec558c64ae2ec5fac66bdcbb08bc73e768f4ff2dd07b1b92","reviewed":true}
     }
   },
   "captchaImage": {
     "source": "数字图片验证码",
     "translations": {
       "en": {"text":"Numeric image CAPTCHA","sourceRevision":"28e82ab80c7f2819359b2c60ba0ce1aa0e02d5e9b6dce0821f16dd491feb7d6c","reviewed":true},
-      "ru": {"text":"Цифры на изображении","sourceRevision":"28e82ab80c7f2819359b2c60ba0ce1aa0e02d5e9b6dce0821f16dd491feb7d6c","reviewed":true}
+      "ja": {"text":"数値画像 CAPTCHA","sourceRevision":"28e82ab80c7f2819359b2c60ba0ce1aa0e02d5e9b6dce0821f16dd491feb7d6c","reviewed":true},
+      "it": {"text":"Immagine numerica CAPTCHA","sourceRevision":"28e82ab80c7f2819359b2c60ba0ce1aa0e02d5e9b6dce0821f16dd491feb7d6c","reviewed":true},
+      "ru": {"text":"Цифры на изображении","sourceRevision":"28e82ab80c7f2819359b2c60ba0ce1aa0e02d5e9b6dce0821f16dd491feb7d6c","reviewed":true},
+      "ko": {"text":"숫자 이미지 CAPTCHA","sourceRevision":"28e82ab80c7f2819359b2c60ba0ce1aa0e02d5e9b6dce0821f16dd491feb7d6c","reviewed":true},
+      "fr": {"text":"Image numérique CAPTCHA","sourceRevision":"28e82ab80c7f2819359b2c60ba0ce1aa0e02d5e9b6dce0821f16dd491feb7d6c","reviewed":true}
     }
   },
   "captchaNone": {
     "source": "不启用验证码",
     "translations": {
       "en": {"text":"No CAPTCHA","sourceRevision":"a6ef827e2389cc4c10b716876a10467a5e0cbb27b9d76beedffdfb3f0eb01d42","reviewed":true},
-      "ru": {"text":"Без капчи","sourceRevision":"a6ef827e2389cc4c10b716876a10467a5e0cbb27b9d76beedffdfb3f0eb01d42","reviewed":true}
+      "ja": {"text":"画像認証なし","sourceRevision":"a6ef827e2389cc4c10b716876a10467a5e0cbb27b9d76beedffdfb3f0eb01d42","reviewed":true},
+      "it": {"text":"Nessun CAPTCHA","sourceRevision":"a6ef827e2389cc4c10b716876a10467a5e0cbb27b9d76beedffdfb3f0eb01d42","reviewed":true},
+      "ru": {"text":"Без капчи","sourceRevision":"a6ef827e2389cc4c10b716876a10467a5e0cbb27b9d76beedffdfb3f0eb01d42","reviewed":true},
+      "ko": {"text":"CAPTCHA 사용 안 함","sourceRevision":"a6ef827e2389cc4c10b716876a10467a5e0cbb27b9d76beedffdfb3f0eb01d42","reviewed":true},
+      "fr": {"text":"Sans CAPTCHA","sourceRevision":"a6ef827e2389cc4c10b716876a10467a5e0cbb27b9d76beedffdfb3f0eb01d42","reviewed":true}
     }
   },
   "captchaRecaptchaV2": {
     "source": "reCAPTCHA v2（复选框）",
     "translations": {
       "en": {"text":"reCAPTCHA v2 (checkbox)","sourceRevision":"821419ef93faa198d1c6fba24999a5cd03932baec9d599d3ae80d9b388df375d","reviewed":true},
-      "ru": {"text":"reCAPTCHA v2 (флажок)","sourceRevision":"821419ef93faa198d1c6fba24999a5cd03932baec9d599d3ae80d9b388df375d","reviewed":true}
+      "ja": {"text":"reCAPTCHA v2（チェック式）","sourceRevision":"821419ef93faa198d1c6fba24999a5cd03932baec9d599d3ae80d9b388df375d","reviewed":true},
+      "it": {"text":"reCAPTCHA v2 (casella di controllo)","sourceRevision":"821419ef93faa198d1c6fba24999a5cd03932baec9d599d3ae80d9b388df375d","reviewed":true},
+      "ru": {"text":"reCAPTCHA v2 (флажок)","sourceRevision":"821419ef93faa198d1c6fba24999a5cd03932baec9d599d3ae80d9b388df375d","reviewed":true},
+      "ko": {"text":"reCAPTCHA v2(체크박스)","sourceRevision":"821419ef93faa198d1c6fba24999a5cd03932baec9d599d3ae80d9b388df375d","reviewed":true},
+      "fr": {"text":"reCAPTCHA v2 (case à cocher)","sourceRevision":"821419ef93faa198d1c6fba24999a5cd03932baec9d599d3ae80d9b388df375d","reviewed":true}
     }
   },
   "captchaRecaptchaV3": {
     "source": "reCAPTCHA v3（评分）",
     "translations": {
       "en": {"text":"reCAPTCHA v3 (score)","sourceRevision":"27f39b94988ad146abfac8f750b5f8100fa784fe3c3b94a7d0f2e49e96f9e888","reviewed":true},
-      "ru": {"text":"reCAPTCHA v3 (оценка)","sourceRevision":"27f39b94988ad146abfac8f750b5f8100fa784fe3c3b94a7d0f2e49e96f9e888","reviewed":true}
+      "ja": {"text":"reCAPTCHA v3（スコア式）","sourceRevision":"27f39b94988ad146abfac8f750b5f8100fa784fe3c3b94a7d0f2e49e96f9e888","reviewed":true},
+      "it": {"text":"reCAPTCHA v3 (punteggio)","sourceRevision":"27f39b94988ad146abfac8f750b5f8100fa784fe3c3b94a7d0f2e49e96f9e888","reviewed":true},
+      "ru": {"text":"reCAPTCHA v3 (оценка)","sourceRevision":"27f39b94988ad146abfac8f750b5f8100fa784fe3c3b94a7d0f2e49e96f9e888","reviewed":true},
+      "ko": {"text":"reCAPTCHA v3(점수)","sourceRevision":"27f39b94988ad146abfac8f750b5f8100fa784fe3c3b94a7d0f2e49e96f9e888","reviewed":true},
+      "fr": {"text":"reCAPTCHA v3 (score)","sourceRevision":"27f39b94988ad146abfac8f750b5f8100fa784fe3c3b94a7d0f2e49e96f9e888","reviewed":true}
     }
   },
   "captchaScore": {
     "source": "最低通过分数",
     "translations": {
       "en": {"text":"Minimum passing score","sourceRevision":"b69f72f76124226cfc9639d22e3ee4ee19b53de07460f591fcae2caf3cace481","reviewed":true},
-      "ru": {"text":"Минимальная оценка","sourceRevision":"b69f72f76124226cfc9639d22e3ee4ee19b53de07460f591fcae2caf3cace481","reviewed":true}
+      "ja": {"text":"最低の渡るスコア","sourceRevision":"b69f72f76124226cfc9639d22e3ee4ee19b53de07460f591fcae2caf3cace481","reviewed":true},
+      "it": {"text":"Punteggio di passaggio minimo","sourceRevision":"b69f72f76124226cfc9639d22e3ee4ee19b53de07460f591fcae2caf3cace481","reviewed":true},
+      "ru": {"text":"Минимальная оценка","sourceRevision":"b69f72f76124226cfc9639d22e3ee4ee19b53de07460f591fcae2caf3cace481","reviewed":true},
+      "ko": {"text":"최소 합격 점수","sourceRevision":"b69f72f76124226cfc9639d22e3ee4ee19b53de07460f591fcae2caf3cace481","reviewed":true},
+      "fr": {"text":"Score de passage minimal","sourceRevision":"b69f72f76124226cfc9639d22e3ee4ee19b53de07460f591fcae2caf3cace481","reviewed":true}
     }
   },
   "captchaSecretHint": {
     "source": "已配置，留空保留现有密钥。",
     "translations": {
       "en": {"text":"Already configured. Leave blank to keep the current secret.","sourceRevision":"d88cdfd6e7702da806b2f3b5be0291ac1cf80c24325dc03af2842b1b3610be64","reviewed":true},
-      "ru": {"text":"Ключ настроен. Оставьте поле пустым, чтобы сохранить его.","sourceRevision":"d88cdfd6e7702da806b2f3b5be0291ac1cf80c24325dc03af2842b1b3610be64","reviewed":true}
+      "ja": {"text":"すでに設定されています。空白のままにして、現在の秘密を保持します。","sourceRevision":"d88cdfd6e7702da806b2f3b5be0291ac1cf80c24325dc03af2842b1b3610be64","reviewed":true},
+      "it": {"text":"Già configurato. Lascia vuoto per mantenere il segreto corrente.","sourceRevision":"d88cdfd6e7702da806b2f3b5be0291ac1cf80c24325dc03af2842b1b3610be64","reviewed":true},
+      "ru": {"text":"Ключ настроен. Оставьте поле пустым, чтобы сохранить его.","sourceRevision":"d88cdfd6e7702da806b2f3b5be0291ac1cf80c24325dc03af2842b1b3610be64","reviewed":true},
+      "ko": {"text":"Already 구성. 현재 비밀을 유지하기 위해 공백을 남겨두십시오.","sourceRevision":"d88cdfd6e7702da806b2f3b5be0291ac1cf80c24325dc03af2842b1b3610be64","reviewed":true},
+      "fr": {"text":"Déjà configuré. Laisser vide pour garder le secret actuel.","sourceRevision":"d88cdfd6e7702da806b2f3b5be0291ac1cf80c24325dc03af2842b1b3610be64","reviewed":true}
     }
   },
   "captchaSecretKey": {
     "source": "验证密钥（Secret Key）",
     "translations": {
       "en": {"text":"Secret Key","sourceRevision":"0dd2e115d78a6d6af09bcc7317402b90da49cbf381b88038764f1bb62f346d34","reviewed":true},
-      "ru": {"text":"Секретный ключ (Secret Key)","sourceRevision":"0dd2e115d78a6d6af09bcc7317402b90da49cbf381b88038764f1bb62f346d34","reviewed":true}
+      "ja": {"text":"秘密鍵","sourceRevision":"0dd2e115d78a6d6af09bcc7317402b90da49cbf381b88038764f1bb62f346d34","reviewed":true},
+      "it": {"text":"Chiave segreta","sourceRevision":"0dd2e115d78a6d6af09bcc7317402b90da49cbf381b88038764f1bb62f346d34","reviewed":true},
+      "ru": {"text":"Секретный ключ (Secret Key)","sourceRevision":"0dd2e115d78a6d6af09bcc7317402b90da49cbf381b88038764f1bb62f346d34","reviewed":true},
+      "ko": {"text":"비밀 키","sourceRevision":"0dd2e115d78a6d6af09bcc7317402b90da49cbf381b88038764f1bb62f346d34","reviewed":true},
+      "fr": {"text":"Clé secrète","sourceRevision":"0dd2e115d78a6d6af09bcc7317402b90da49cbf381b88038764f1bb62f346d34","reviewed":true}
     }
   },
   "captchaSecretNew": {
     "source": "请填写从验证服务商控制台获取的 Secret Key。",
     "translations": {
       "en": {"text":"Enter the secret from your verification provider.","sourceRevision":"4eaabd7762474560b7760be132f062f890fc3125fd6e135b376fa9cf1cdb4969","reviewed":true},
-      "ru": {"text":"Введите секретный ключ из панели сервиса проверки.","sourceRevision":"4eaabd7762474560b7760be132f062f890fc3125fd6e135b376fa9cf1cdb4969","reviewed":true}
+      "ja": {"text":"認証プロバイダから秘密を入力してください。","sourceRevision":"4eaabd7762474560b7760be132f062f890fc3125fd6e135b376fa9cf1cdb4969","reviewed":true},
+      "it": {"text":"Inserisci il segreto dal tuo fornitore di verifica.","sourceRevision":"4eaabd7762474560b7760be132f062f890fc3125fd6e135b376fa9cf1cdb4969","reviewed":true},
+      "ru": {"text":"Введите секретный ключ из панели сервиса проверки.","sourceRevision":"4eaabd7762474560b7760be132f062f890fc3125fd6e135b376fa9cf1cdb4969","reviewed":true},
+      "ko": {"text":"인증 공급자로부터 비밀을 입력합니다.","sourceRevision":"4eaabd7762474560b7760be132f062f890fc3125fd6e135b376fa9cf1cdb4969","reviewed":true},
+      "fr": {"text":"Entrez le secret de votre fournisseur de vérification.","sourceRevision":"4eaabd7762474560b7760be132f062f890fc3125fd6e135b376fa9cf1cdb4969","reviewed":true}
     }
   },
   "captchaSiteKey": {
     "source": "站点密钥（Site Key）",
     "translations": {
       "en": {"text":"Site Key","sourceRevision":"3138c38d264e664e1f2af534894e5de224d6f702d71171f21086a4fb95113929","reviewed":true},
-      "ru": {"text":"Ключ сайта (Site Key)","sourceRevision":"3138c38d264e664e1f2af534894e5de224d6f702d71171f21086a4fb95113929","reviewed":true}
+      "ja": {"text":"サイトキー","sourceRevision":"3138c38d264e664e1f2af534894e5de224d6f702d71171f21086a4fb95113929","reviewed":true},
+      "it": {"text":"Chiave del sito","sourceRevision":"3138c38d264e664e1f2af534894e5de224d6f702d71171f21086a4fb95113929","reviewed":true},
+      "ru": {"text":"Ключ сайта (Site Key)","sourceRevision":"3138c38d264e664e1f2af534894e5de224d6f702d71171f21086a4fb95113929","reviewed":true},
+      "ko": {"text":"사이트 키","sourceRevision":"3138c38d264e664e1f2af534894e5de224d6f702d71171f21086a4fb95113929","reviewed":true},
+      "fr": {"text":"Clé du site","sourceRevision":"3138c38d264e664e1f2af534894e5de224d6f702d71171f21086a4fb95113929","reviewed":true}
     }
   },
   "captchaThirdParty": {
     "source": "第三方服务",
     "translations": {
       "en": {"text":"Third-party services","sourceRevision":"3c89c783235016b9633e52f0707fd93db6cbbee3ee6ceb50b8fb7aee00c2ea0b","reviewed":true},
-      "ru": {"text":"Сторонние сервисы","sourceRevision":"3c89c783235016b9633e52f0707fd93db6cbbee3ee6ceb50b8fb7aee00c2ea0b","reviewed":true}
+      "ja": {"text":"第三者サービス","sourceRevision":"3c89c783235016b9633e52f0707fd93db6cbbee3ee6ceb50b8fb7aee00c2ea0b","reviewed":true},
+      "it": {"text":"Servizi terzi","sourceRevision":"3c89c783235016b9633e52f0707fd93db6cbbee3ee6ceb50b8fb7aee00c2ea0b","reviewed":true},
+      "ru": {"text":"Сторонние сервисы","sourceRevision":"3c89c783235016b9633e52f0707fd93db6cbbee3ee6ceb50b8fb7aee00c2ea0b","reviewed":true},
+      "ko": {"text":"제3자 서비스","sourceRevision":"3c89c783235016b9633e52f0707fd93db6cbbee3ee6ceb50b8fb7aee00c2ea0b","reviewed":true},
+      "fr": {"text":"Services de tiers","sourceRevision":"3c89c783235016b9633e52f0707fd93db6cbbee3ee6ceb50b8fb7aee00c2ea0b","reviewed":true}
     }
   },
   "domainPlaceholder": {
     "source": "example.com",
     "translations": {
       "en": {"text":"example.com","sourceRevision":"b002b02243e277817b6eb06c1ec6645df9df6d6615a77dfb1c6b6d6ff195feee","reviewed":true},
-      "ru": {"text":"example.com","sourceRevision":"b002b02243e277817b6eb06c1ec6645df9df6d6615a77dfb1c6b6d6ff195feee","reviewed":true}
+      "ja": {"text":"例.com","sourceRevision":"b002b02243e277817b6eb06c1ec6645df9df6d6615a77dfb1c6b6d6ff195feee","reviewed":true},
+      "it": {"text":"esempio.com","sourceRevision":"b002b02243e277817b6eb06c1ec6645df9df6d6615a77dfb1c6b6d6ff195feee","reviewed":true},
+      "ru": {"text":"example.com","sourceRevision":"b002b02243e277817b6eb06c1ec6645df9df6d6615a77dfb1c6b6d6ff195feee","reviewed":true},
+      "ko": {"text":"예제.com","sourceRevision":"b002b02243e277817b6eb06c1ec6645df9df6d6615a77dfb1c6b6d6ff195feee","reviewed":true},
+      "fr": {"text":"exemple.com","sourceRevision":"b002b02243e277817b6eb06c1ec6645df9df6d6615a77dfb1c6b6d6ff195feee","reviewed":true}
     }
   },
   "domains": {
     "source": "允许的邮箱域名",
     "translations": {
       "en": {"text":"Allowed email domains","sourceRevision":"817e7768b6ceb7f49183e4753702891dd131fa472550e0e8c686949b2e5beec4","reviewed":true},
-      "ru": {"text":"Разрешённые домены почты","sourceRevision":"817e7768b6ceb7f49183e4753702891dd131fa472550e0e8c686949b2e5beec4","reviewed":true}
+      "ja": {"text":"許可されたメールドメイン","sourceRevision":"817e7768b6ceb7f49183e4753702891dd131fa472550e0e8c686949b2e5beec4","reviewed":true},
+      "it": {"text":"Domini e-mail consentiti","sourceRevision":"817e7768b6ceb7f49183e4753702891dd131fa472550e0e8c686949b2e5beec4","reviewed":true},
+      "ru": {"text":"Разрешённые домены почты","sourceRevision":"817e7768b6ceb7f49183e4753702891dd131fa472550e0e8c686949b2e5beec4","reviewed":true},
+      "ko": {"text":"이메일 도메인","sourceRevision":"817e7768b6ceb7f49183e4753702891dd131fa472550e0e8c686949b2e5beec4","reviewed":true},
+      "fr": {"text":"Domaines de messagerie autorisés","sourceRevision":"817e7768b6ceb7f49183e4753702891dd131fa472550e0e8c686949b2e5beec4","reviewed":true}
     }
   },
   "domainsHint": {
     "source": "留空表示允许所有邮箱域名。",
     "translations": {
       "en": {"text":"Leave empty to allow every domain.","sourceRevision":"fa5dbd8ded7c93f6c82afcc1d5cf9921281b2eaff52a7fcf9ad57e68629890dd","reviewed":true},
-      "ru": {"text":"Оставьте пустым, чтобы разрешить все домены.","sourceRevision":"fa5dbd8ded7c93f6c82afcc1d5cf9921281b2eaff52a7fcf9ad57e68629890dd","reviewed":true}
+      "ja": {"text":"すべてのドメインを許可する空のままにします。","sourceRevision":"fa5dbd8ded7c93f6c82afcc1d5cf9921281b2eaff52a7fcf9ad57e68629890dd","reviewed":true},
+      "it": {"text":"Lasciare vuoto per consentire ogni dominio.","sourceRevision":"fa5dbd8ded7c93f6c82afcc1d5cf9921281b2eaff52a7fcf9ad57e68629890dd","reviewed":true},
+      "ru": {"text":"Оставьте пустым, чтобы разрешить все домены.","sourceRevision":"fa5dbd8ded7c93f6c82afcc1d5cf9921281b2eaff52a7fcf9ad57e68629890dd","reviewed":true},
+      "ko": {"text":"모든 도메인을 허용하기 위해 빈번하게하십시오.","sourceRevision":"fa5dbd8ded7c93f6c82afcc1d5cf9921281b2eaff52a7fcf9ad57e68629890dd","reviewed":true},
+      "fr": {"text":"Laissez vide pour permettre à chaque domaine.","sourceRevision":"fa5dbd8ded7c93f6c82afcc1d5cf9921281b2eaff52a7fcf9ad57e68629890dd","reviewed":true}
     }
   },
   "enabled": {
     "source": "启用邮件",
     "translations": {
       "en": {"text":"Enable mail","sourceRevision":"18a6966dd974072afbe9d943cf40406f7c212b17ca3be7ef113c9815de21b508","reviewed":true},
-      "ru": {"text":"Включить почту","sourceRevision":"18a6966dd974072afbe9d943cf40406f7c212b17ca3be7ef113c9815de21b508","reviewed":true}
+      "ja": {"text":"メールの有効化","sourceRevision":"18a6966dd974072afbe9d943cf40406f7c212b17ca3be7ef113c9815de21b508","reviewed":true},
+      "it": {"text":"Abilitare la posta","sourceRevision":"18a6966dd974072afbe9d943cf40406f7c212b17ca3be7ef113c9815de21b508","reviewed":true},
+      "ru": {"text":"Включить почту","sourceRevision":"18a6966dd974072afbe9d943cf40406f7c212b17ca3be7ef113c9815de21b508","reviewed":true},
+      "ko": {"text":"메일 주소","sourceRevision":"18a6966dd974072afbe9d943cf40406f7c212b17ca3be7ef113c9815de21b508","reviewed":true},
+      "fr": {"text":"Activer le courriel","sourceRevision":"18a6966dd974072afbe9d943cf40406f7c212b17ca3be7ef113c9815de21b508","reviewed":true}
     }
   },
   "enabledHint": {
     "source": "允许 GooseForum 发送账号和通知邮件。",
     "translations": {
       "en": {"text":"Allow GooseForum to send account and notification mail.","sourceRevision":"7c64a502caad45460c9612658f543471e79ff3a6dfd647720ba406ecc5a7c5ba","reviewed":true},
-      "ru": {"text":"Разрешить GooseForum отправлять письма для аккаунтов и уведомлений.","sourceRevision":"7c64a502caad45460c9612658f543471e79ff3a6dfd647720ba406ecc5a7c5ba","reviewed":true}
+      "ja": {"text":"GooseForum でアカウントと通知メールを送信します。","sourceRevision":"7c64a502caad45460c9612658f543471e79ff3a6dfd647720ba406ecc5a7c5ba","reviewed":true},
+      "it": {"text":"Consenti a GooseForum di inviare l’account e la posta di notifica.","sourceRevision":"7c64a502caad45460c9612658f543471e79ff3a6dfd647720ba406ecc5a7c5ba","reviewed":true},
+      "ru": {"text":"Разрешить GooseForum отправлять письма для аккаунтов и уведомлений.","sourceRevision":"7c64a502caad45460c9612658f543471e79ff3a6dfd647720ba406ecc5a7c5ba","reviewed":true},
+      "ko": {"text":"GooseForum을 허용하여 계정 및 알림 메일을 보낼 수 있습니다.","sourceRevision":"7c64a502caad45460c9612658f543471e79ff3a6dfd647720ba406ecc5a7c5ba","reviewed":true},
+      "fr": {"text":"Permettre à GooseForum d’envoyer un compte et un message de notification.","sourceRevision":"7c64a502caad45460c9612658f543471e79ff3a6dfd647720ba406ecc5a7c5ba","reviewed":true}
     }
   },
   "fromEmail": {
     "source": "发件邮箱",
     "translations": {
       "en": {"text":"From email","sourceRevision":"b6b2e4b9f1c02eb73e531201c4bc686d711a63bc1f0e8397382e18d1d71233e5","reviewed":true},
-      "ru": {"text":"Email отправителя","sourceRevision":"b6b2e4b9f1c02eb73e531201c4bc686d711a63bc1f0e8397382e18d1d71233e5","reviewed":true}
+      "ja": {"text":"メールでのお問い合わせ","sourceRevision":"b6b2e4b9f1c02eb73e531201c4bc686d711a63bc1f0e8397382e18d1d71233e5","reviewed":true},
+      "it": {"text":"Dall’email","sourceRevision":"b6b2e4b9f1c02eb73e531201c4bc686d711a63bc1f0e8397382e18d1d71233e5","reviewed":true},
+      "ru": {"text":"Email отправителя","sourceRevision":"b6b2e4b9f1c02eb73e531201c4bc686d711a63bc1f0e8397382e18d1d71233e5","reviewed":true},
+      "ko": {"text":"이메일:","sourceRevision":"b6b2e4b9f1c02eb73e531201c4bc686d711a63bc1f0e8397382e18d1d71233e5","reviewed":true},
+      "fr": {"text":"De l’email","sourceRevision":"b6b2e4b9f1c02eb73e531201c4bc686d711a63bc1f0e8397382e18d1d71233e5","reviewed":true}
     }
   },
   "fromName": {
     "source": "发件人名称",
     "translations": {
       "en": {"text":"From name","sourceRevision":"89df3875d66e8a97f4e811bbc0775c09cca5ee9a75b9e9706c28152e83bfc0e6","reviewed":true},
-      "ru": {"text":"Имя отправителя","sourceRevision":"89df3875d66e8a97f4e811bbc0775c09cca5ee9a75b9e9706c28152e83bfc0e6","reviewed":true}
+      "ja": {"text":"差出人名","sourceRevision":"89df3875d66e8a97f4e811bbc0775c09cca5ee9a75b9e9706c28152e83bfc0e6","reviewed":true},
+      "it": {"text":"Nome del mittente","sourceRevision":"89df3875d66e8a97f4e811bbc0775c09cca5ee9a75b9e9706c28152e83bfc0e6","reviewed":true},
+      "ru": {"text":"Имя отправителя","sourceRevision":"89df3875d66e8a97f4e811bbc0775c09cca5ee9a75b9e9706c28152e83bfc0e6","reviewed":true},
+      "ko": {"text":"보내는 사람 이름","sourceRevision":"89df3875d66e8a97f4e811bbc0775c09cca5ee9a75b9e9706c28152e83bfc0e6","reviewed":true},
+      "fr": {"text":"Nom de l’expéditeur","sourceRevision":"89df3875d66e8a97f4e811bbc0775c09cca5ee9a75b9e9706c28152e83bfc0e6","reviewed":true}
     }
   },
   "host": {
     "source": "主机",
     "translations": {
       "en": {"text":"Host","sourceRevision":"604f234584a42c7edc0dbf583e6054c08a2769db6fe7bdfbe6a2f74726d8b1bb","reviewed":true},
-      "ru": {"text":"Хост","sourceRevision":"604f234584a42c7edc0dbf583e6054c08a2769db6fe7bdfbe6a2f74726d8b1bb","reviewed":true}
+      "ja": {"text":"ホスト","sourceRevision":"604f234584a42c7edc0dbf583e6054c08a2769db6fe7bdfbe6a2f74726d8b1bb","reviewed":true},
+      "it": {"text":"Host","sourceRevision":"604f234584a42c7edc0dbf583e6054c08a2769db6fe7bdfbe6a2f74726d8b1bb","reviewed":true},
+      "ru": {"text":"Хост","sourceRevision":"604f234584a42c7edc0dbf583e6054c08a2769db6fe7bdfbe6a2f74726d8b1bb","reviewed":true},
+      "ko": {"text":"런닝","sourceRevision":"604f234584a42c7edc0dbf583e6054c08a2769db6fe7bdfbe6a2f74726d8b1bb","reviewed":true},
+      "fr": {"text":"Hôte","sourceRevision":"604f234584a42c7edc0dbf583e6054c08a2769db6fe7bdfbe6a2f74726d8b1bb","reviewed":true}
     }
   },
   "inviteOnly": {
     "source": "仅允许邀请码注册",
     "translations": {
       "en": {"text":"Require an invitation code","sourceRevision":"f5b58391632b030e4a0098e56bc31303c58b48667ae7ff1160a1f237597b65fc","reviewed":true},
-      "ru": {"text":"Требовать код приглашения","sourceRevision":"f5b58391632b030e4a0098e56bc31303c58b48667ae7ff1160a1f237597b65fc","reviewed":true}
+      "ja": {"text":"招待コードが必要です","sourceRevision":"f5b58391632b030e4a0098e56bc31303c58b48667ae7ff1160a1f237597b65fc","reviewed":true},
+      "it": {"text":"Richiedete un codice di invito","sourceRevision":"f5b58391632b030e4a0098e56bc31303c58b48667ae7ff1160a1f237597b65fc","reviewed":true},
+      "ru": {"text":"Требовать код приглашения","sourceRevision":"f5b58391632b030e4a0098e56bc31303c58b48667ae7ff1160a1f237597b65fc","reviewed":true},
+      "ko": {"text":"초대 코드를 요구","sourceRevision":"f5b58391632b030e4a0098e56bc31303c58b48667ae7ff1160a1f237597b65fc","reviewed":true},
+      "fr": {"text":"Exiger un code d’invitation","sourceRevision":"f5b58391632b030e4a0098e56bc31303c58b48667ae7ff1160a1f237597b65fc","reviewed":true}
     }
   },
   "inviteOnlyHint": {
     "source": "只有提供有效邀请码的注册请求才会被接受。",
     "translations": {
       "en": {"text":"Only registrations with a valid invitation code will be accepted.","sourceRevision":"0434c0e2728e7afff7dc0444da1b63e730fc421f007ba4f05a9d7037c2100c52","reviewed":true},
-      "ru": {"text":"Для регистрации потребуется действующий код приглашения.","sourceRevision":"0434c0e2728e7afff7dc0444da1b63e730fc421f007ba4f05a9d7037c2100c52","reviewed":true}
+      "ja": {"text":"有効な招待状コードの登録のみ受け付けます。","sourceRevision":"0434c0e2728e7afff7dc0444da1b63e730fc421f007ba4f05a9d7037c2100c52","reviewed":true},
+      "it": {"text":"Saranno accettate solo le registrazioni con un valido codice di invito.","sourceRevision":"0434c0e2728e7afff7dc0444da1b63e730fc421f007ba4f05a9d7037c2100c52","reviewed":true},
+      "ru": {"text":"Для регистрации потребуется действующий код приглашения.","sourceRevision":"0434c0e2728e7afff7dc0444da1b63e730fc421f007ba4f05a9d7037c2100c52","reviewed":true},
+      "ko": {"text":"유효한 초대 코드로만 등록할 수 있습니다.","sourceRevision":"0434c0e2728e7afff7dc0444da1b63e730fc421f007ba4f05a9d7037c2100c52","reviewed":true},
+      "fr": {"text":"Seules les inscriptions avec un code d’invitation valide seront acceptées.","sourceRevision":"0434c0e2728e7afff7dc0444da1b63e730fc421f007ba4f05a9d7037c2100c52","reviewed":true}
     }
   },
   "loadFailed": {
     "source": "设置加载失败",
     "translations": {
       "en": {"text":"Failed to load settings","sourceRevision":"ab287d561a9abdee4c1d1e411c69f5645ddd5b999e6867d6fdcf5a3e46e4523e","reviewed":true},
-      "ru": {"text":"Не удалось загрузить настройки","sourceRevision":"ab287d561a9abdee4c1d1e411c69f5645ddd5b999e6867d6fdcf5a3e46e4523e","reviewed":true}
+      "ja": {"text":"設定をロードできなかった","sourceRevision":"ab287d561a9abdee4c1d1e411c69f5645ddd5b999e6867d6fdcf5a3e46e4523e","reviewed":true},
+      "it": {"text":"Non riuscita a caricare le impostazioni","sourceRevision":"ab287d561a9abdee4c1d1e411c69f5645ddd5b999e6867d6fdcf5a3e46e4523e","reviewed":true},
+      "ru": {"text":"Не удалось загрузить настройки","sourceRevision":"ab287d561a9abdee4c1d1e411c69f5645ddd5b999e6867d6fdcf5a3e46e4523e","reviewed":true},
+      "ko": {"text":"설정로드 실패","sourceRevision":"ab287d561a9abdee4c1d1e411c69f5645ddd5b999e6867d6fdcf5a3e46e4523e","reviewed":true},
+      "fr": {"text":"Impossible de charger les paramètres","sourceRevision":"ab287d561a9abdee4c1d1e411c69f5645ddd5b999e6867d6fdcf5a3e46e4523e","reviewed":true}
     }
   },
   "loading": {
     "source": "正在加载…",
     "translations": {
       "en": {"text":"Loading…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
-      "ru": {"text":"Загрузка…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true}
+      "ja": {"text":"読み込み中…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
+      "it": {"text":"Caricamento…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
+      "ru": {"text":"Загрузка…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
+      "ko": {"text":"불러오는 중…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true},
+      "fr": {"text":"Chargement…","sourceRevision":"e784e7e76a620b90b5c94599bcc86009b451a37cde1a077a0faa59348f9e3c9c","reviewed":true}
     }
   },
   "mail": {
@@ -285,112 +445,174 @@
       "en": {"text":"Mail","sourceRevision":"bc601861fac972e2cdb9566420e1531497e87c0ab13a243184fe3d4c48fa9b6b","reviewed":true},
       "ja": {"text":"メール","sourceRevision":"bc601861fac972e2cdb9566420e1531497e87c0ab13a243184fe3d4c48fa9b6b","reviewed":true},
       "it": {"text":"Email","sourceRevision":"bc601861fac972e2cdb9566420e1531497e87c0ab13a243184fe3d4c48fa9b6b","reviewed":true},
-      "ru": {"text":"Почта","sourceRevision":"bc601861fac972e2cdb9566420e1531497e87c0ab13a243184fe3d4c48fa9b6b","reviewed":true}
+      "ru": {"text":"Почта","sourceRevision":"bc601861fac972e2cdb9566420e1531497e87c0ab13a243184fe3d4c48fa9b6b","reviewed":true},
+      "ko": {"text":"메일","sourceRevision":"bc601861fac972e2cdb9566420e1531497e87c0ab13a243184fe3d4c48fa9b6b","reviewed":true},
+      "fr": {"text":"Messagerie","sourceRevision":"bc601861fac972e2cdb9566420e1531497e87c0ab13a243184fe3d4c48fa9b6b","reviewed":true}
     }
   },
   "mailHint": {
     "source": "配置 SMTP 发信与发件人身份。",
     "translations": {
       "en": {"text":"Configure SMTP delivery and sender identity.","sourceRevision":"54c5e8db10e20aa7095df712e059538791583b5557fccb242f254c58206d3449","reviewed":true},
-      "ru": {"text":"Настройте доставку писем через SMTP и данные отправителя.","sourceRevision":"54c5e8db10e20aa7095df712e059538791583b5557fccb242f254c58206d3449","reviewed":true}
+      "ja": {"text":"SMTP 配達および送信者 ID の構成。","sourceRevision":"54c5e8db10e20aa7095df712e059538791583b5557fccb242f254c58206d3449","reviewed":true},
+      "it": {"text":"Configurare la consegna SMTP e l’identità del mittente.","sourceRevision":"54c5e8db10e20aa7095df712e059538791583b5557fccb242f254c58206d3449","reviewed":true},
+      "ru": {"text":"Настройте доставку писем через SMTP и данные отправителя.","sourceRevision":"54c5e8db10e20aa7095df712e059538791583b5557fccb242f254c58206d3449","reviewed":true},
+      "ko": {"text":"SMTP 납품과 sender ID를 형성하십시오.","sourceRevision":"54c5e8db10e20aa7095df712e059538791583b5557fccb242f254c58206d3449","reviewed":true},
+      "fr": {"text":"Configurer la livraison SMTP et l’identité de l’expéditeur.","sourceRevision":"54c5e8db10e20aa7095df712e059538791583b5557fccb242f254c58206d3449","reviewed":true}
     }
   },
   "noDomains": {
     "source": "当前允许所有邮箱域名",
     "translations": {
       "en": {"text":"All email domains are allowed","sourceRevision":"5b89877a2704b2c8e08476d82a6e00f715da447162a992398a3de04bf89dac82","reviewed":true},
-      "ru": {"text":"Разрешены все домены почты","sourceRevision":"5b89877a2704b2c8e08476d82a6e00f715da447162a992398a3de04bf89dac82","reviewed":true}
+      "ja": {"text":"すべての電子メールドメインが許可されています","sourceRevision":"5b89877a2704b2c8e08476d82a6e00f715da447162a992398a3de04bf89dac82","reviewed":true},
+      "it": {"text":"Tutti i domini di posta elettronica sono ammessi","sourceRevision":"5b89877a2704b2c8e08476d82a6e00f715da447162a992398a3de04bf89dac82","reviewed":true},
+      "ru": {"text":"Разрешены все домены почты","sourceRevision":"5b89877a2704b2c8e08476d82a6e00f715da447162a992398a3de04bf89dac82","reviewed":true},
+      "ko": {"text":"모든 이메일 도메인 허용","sourceRevision":"5b89877a2704b2c8e08476d82a6e00f715da447162a992398a3de04bf89dac82","reviewed":true},
+      "fr": {"text":"Tous les domaines de messagerie sont autorisés","sourceRevision":"5b89877a2704b2c8e08476d82a6e00f715da447162a992398a3de04bf89dac82","reviewed":true}
     }
   },
   "password": {
     "source": "密码",
     "translations": {
       "en": {"text":"Password","sourceRevision":"e22dca658398f0bf287fa1343c495861b836631e2f0489ab30ca9a5de56bd127","reviewed":true},
-      "ru": {"text":"Пароль","sourceRevision":"e22dca658398f0bf287fa1343c495861b836631e2f0489ab30ca9a5de56bd127","reviewed":true}
+      "ja": {"text":"パスワード","sourceRevision":"e22dca658398f0bf287fa1343c495861b836631e2f0489ab30ca9a5de56bd127","reviewed":true},
+      "it": {"text":"Password","sourceRevision":"e22dca658398f0bf287fa1343c495861b836631e2f0489ab30ca9a5de56bd127","reviewed":true},
+      "ru": {"text":"Пароль","sourceRevision":"e22dca658398f0bf287fa1343c495861b836631e2f0489ab30ca9a5de56bd127","reviewed":true},
+      "ko": {"text":"비밀번호","sourceRevision":"e22dca658398f0bf287fa1343c495861b836631e2f0489ab30ca9a5de56bd127","reviewed":true},
+      "fr": {"text":"Mot de passe","sourceRevision":"e22dca658398f0bf287fa1343c495861b836631e2f0489ab30ca9a5de56bd127","reviewed":true}
     }
   },
   "port": {
     "source": "端口",
     "translations": {
       "en": {"text":"Port","sourceRevision":"0c157de594645f53e30ca48772e496ecbda888ad62b65878bc7cca2e04672e9c","reviewed":true},
-      "ru": {"text":"Порт","sourceRevision":"0c157de594645f53e30ca48772e496ecbda888ad62b65878bc7cca2e04672e9c","reviewed":true}
+      "ja": {"text":"ポートレート","sourceRevision":"0c157de594645f53e30ca48772e496ecbda888ad62b65878bc7cca2e04672e9c","reviewed":true},
+      "it": {"text":"Porto di porto","sourceRevision":"0c157de594645f53e30ca48772e496ecbda888ad62b65878bc7cca2e04672e9c","reviewed":true},
+      "ru": {"text":"Порт","sourceRevision":"0c157de594645f53e30ca48772e496ecbda888ad62b65878bc7cca2e04672e9c","reviewed":true},
+      "ko": {"text":"항구 항구","sourceRevision":"0c157de594645f53e30ca48772e496ecbda888ad62b65878bc7cca2e04672e9c","reviewed":true},
+      "fr": {"text":"Port","sourceRevision":"0c157de594645f53e30ca48772e496ecbda888ad62b65878bc7cca2e04672e9c","reviewed":true}
     }
   },
   "registrationCaptcha": {
     "source": "登录与注册验证方式",
     "translations": {
       "en": {"text":"Login and registration verification","sourceRevision":"ce61f82b948a8c7280f0b2226a976f721e82ff74020b7be3fa259aecd9a53bfd","reviewed":true},
-      "ru": {"text":"Проверка при входе и регистрации","sourceRevision":"ce61f82b948a8c7280f0b2226a976f721e82ff74020b7be3fa259aecd9a53bfd","reviewed":true}
+      "ja": {"text":"ログインと登録確認","sourceRevision":"ce61f82b948a8c7280f0b2226a976f721e82ff74020b7be3fa259aecd9a53bfd","reviewed":true},
+      "it": {"text":"Login e verifica della registrazione","sourceRevision":"ce61f82b948a8c7280f0b2226a976f721e82ff74020b7be3fa259aecd9a53bfd","reviewed":true},
+      "ru": {"text":"Проверка при входе и регистрации","sourceRevision":"ce61f82b948a8c7280f0b2226a976f721e82ff74020b7be3fa259aecd9a53bfd","reviewed":true},
+      "ko": {"text":"로그인 및 등록 검증","sourceRevision":"ce61f82b948a8c7280f0b2226a976f721e82ff74020b7be3fa259aecd9a53bfd","reviewed":true},
+      "fr": {"text":"Vérification de la connexion et de l’enregistrement","sourceRevision":"ce61f82b948a8c7280f0b2226a976f721e82ff74020b7be3fa259aecd9a53bfd","reviewed":true}
     }
   },
   "registrationEmailLimit": {
     "source": "每个邮箱地址",
     "translations": {
       "en": {"text":"Per email address","sourceRevision":"64d0a61ddfc95257baa22247a23ab2d0f8a2e9122b29d14ca5a1af70d8fc23de","reviewed":true},
-      "ru": {"text":"На адрес почты","sourceRevision":"64d0a61ddfc95257baa22247a23ab2d0f8a2e9122b29d14ca5a1af70d8fc23de","reviewed":true}
+      "ja": {"text":"電子メールアドレス","sourceRevision":"64d0a61ddfc95257baa22247a23ab2d0f8a2e9122b29d14ca5a1af70d8fc23de","reviewed":true},
+      "it": {"text":"Per indirizzo email","sourceRevision":"64d0a61ddfc95257baa22247a23ab2d0f8a2e9122b29d14ca5a1af70d8fc23de","reviewed":true},
+      "ru": {"text":"На адрес почты","sourceRevision":"64d0a61ddfc95257baa22247a23ab2d0f8a2e9122b29d14ca5a1af70d8fc23de","reviewed":true},
+      "ko": {"text":"이메일 주소","sourceRevision":"64d0a61ddfc95257baa22247a23ab2d0f8a2e9122b29d14ca5a1af70d8fc23de","reviewed":true},
+      "fr": {"text":"Par adresse électronique","sourceRevision":"64d0a61ddfc95257baa22247a23ab2d0f8a2e9122b29d14ca5a1af70d8fc23de","reviewed":true}
     }
   },
   "registrationGlobalLimit": {
     "source": "全站注册请求",
     "translations": {
       "en": {"text":"All registrations","sourceRevision":"3ca6d473e143ae7cbe79df0c3051f72ed28f5c935bf0e2e67b5e3d385e464dc9","reviewed":true},
-      "ru": {"text":"Все регистрации","sourceRevision":"3ca6d473e143ae7cbe79df0c3051f72ed28f5c935bf0e2e67b5e3d385e464dc9","reviewed":true}
+      "ja": {"text":"すべての登録","sourceRevision":"3ca6d473e143ae7cbe79df0c3051f72ed28f5c935bf0e2e67b5e3d385e464dc9","reviewed":true},
+      "it": {"text":"Tutte le registrazioni","sourceRevision":"3ca6d473e143ae7cbe79df0c3051f72ed28f5c935bf0e2e67b5e3d385e464dc9","reviewed":true},
+      "ru": {"text":"Все регистрации","sourceRevision":"3ca6d473e143ae7cbe79df0c3051f72ed28f5c935bf0e2e67b5e3d385e464dc9","reviewed":true},
+      "ko": {"text":"모든 등록","sourceRevision":"3ca6d473e143ae7cbe79df0c3051f72ed28f5c935bf0e2e67b5e3d385e464dc9","reviewed":true},
+      "fr": {"text":"Toutes les inscriptions","sourceRevision":"3ca6d473e143ae7cbe79df0c3051f72ed28f5c935bf0e2e67b5e3d385e464dc9","reviewed":true}
     }
   },
   "registrationIPLimit": {
     "source": "每个 IP 地址",
     "translations": {
       "en": {"text":"Per IP address","sourceRevision":"09d431e7a13c443c12a57e897c490eb9594916e2f67f0e6a71567c9389773b30","reviewed":true},
-      "ru": {"text":"На IP-адрес","sourceRevision":"09d431e7a13c443c12a57e897c490eb9594916e2f67f0e6a71567c9389773b30","reviewed":true}
+      "ja": {"text":"IPアドレス","sourceRevision":"09d431e7a13c443c12a57e897c490eb9594916e2f67f0e6a71567c9389773b30","reviewed":true},
+      "it": {"text":"Per indirizzo IP","sourceRevision":"09d431e7a13c443c12a57e897c490eb9594916e2f67f0e6a71567c9389773b30","reviewed":true},
+      "ru": {"text":"На IP-адрес","sourceRevision":"09d431e7a13c443c12a57e897c490eb9594916e2f67f0e6a71567c9389773b30","reviewed":true},
+      "ko": {"text":"IP 주소","sourceRevision":"09d431e7a13c443c12a57e897c490eb9594916e2f67f0e6a71567c9389773b30","reviewed":true},
+      "fr": {"text":"Par adresse IP","sourceRevision":"09d431e7a13c443c12a57e897c490eb9594916e2f67f0e6a71567c9389773b30","reviewed":true}
     }
   },
   "registrationLimits": {
     "source": "注册请求限制",
     "translations": {
       "en": {"text":"Registration limits","sourceRevision":"01c2be7a180d8fd7e2c26e86ad85a90929878f3787a1ef557ab96d2ed425b5b5","reviewed":true},
-      "ru": {"text":"Ограничения регистрации","sourceRevision":"01c2be7a180d8fd7e2c26e86ad85a90929878f3787a1ef557ab96d2ed425b5b5","reviewed":true}
+      "ja": {"text":"登録制限","sourceRevision":"01c2be7a180d8fd7e2c26e86ad85a90929878f3787a1ef557ab96d2ed425b5b5","reviewed":true},
+      "it": {"text":"Limiti di registrazione","sourceRevision":"01c2be7a180d8fd7e2c26e86ad85a90929878f3787a1ef557ab96d2ed425b5b5","reviewed":true},
+      "ru": {"text":"Ограничения регистрации","sourceRevision":"01c2be7a180d8fd7e2c26e86ad85a90929878f3787a1ef557ab96d2ed425b5b5","reviewed":true},
+      "ko": {"text":"등록 제한","sourceRevision":"01c2be7a180d8fd7e2c26e86ad85a90929878f3787a1ef557ab96d2ed425b5b5","reviewed":true},
+      "fr": {"text":"Limites d’enregistrement","sourceRevision":"01c2be7a180d8fd7e2c26e86ad85a90929878f3787a1ef557ab96d2ed425b5b5","reviewed":true}
     }
   },
   "registrationLimitsHint": {
     "source": "每小时允许的请求次数，0 表示不限制。",
     "translations": {
       "en": {"text":"Requests per hour. 0 disables a limit.","sourceRevision":"fd9fa2f26c12cc102c07de51ea20a78c77a1dcd66198cd559da44334eb2798c1","reviewed":true},
-      "ru": {"text":"Запросов в час. Значение 0 отключает ограничение.","sourceRevision":"fd9fa2f26c12cc102c07de51ea20a78c77a1dcd66198cd559da44334eb2798c1","reviewed":true}
+      "ja": {"text":"1時間あたりのリクエスト。 0 は制限を解除します。","sourceRevision":"fd9fa2f26c12cc102c07de51ea20a78c77a1dcd66198cd559da44334eb2798c1","reviewed":true},
+      "it": {"text":"Richieste all’ora. 0 disabilita un limite.","sourceRevision":"fd9fa2f26c12cc102c07de51ea20a78c77a1dcd66198cd559da44334eb2798c1","reviewed":true},
+      "ru": {"text":"Запросов в час. Значение 0 отключает ограничение.","sourceRevision":"fd9fa2f26c12cc102c07de51ea20a78c77a1dcd66198cd559da44334eb2798c1","reviewed":true},
+      "ko": {"text":"시간 당 요청. 0 제한을 비활성화합니다.","sourceRevision":"fd9fa2f26c12cc102c07de51ea20a78c77a1dcd66198cd559da44334eb2798c1","reviewed":true},
+      "fr": {"text":"Demandes par heure. 0 désactive une limite.","sourceRevision":"fd9fa2f26c12cc102c07de51ea20a78c77a1dcd66198cd559da44334eb2798c1","reviewed":true}
     }
   },
   "remove": {
     "source": "删除",
     "translations": {
       "en": {"text":"Remove","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
-      "ru": {"text":"Удалить","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true}
+      "ja": {"text":"取り除く","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
+      "it": {"text":"Rimuovi","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
+      "ru": {"text":"Удалить","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
+      "ko": {"text":"제거","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
+      "fr": {"text":"Retirer","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true}
     }
   },
   "save": {
     "source": "保存",
     "translations": {
       "en": {"text":"Save","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
-      "ru": {"text":"Сохранить","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true}
+      "ja": {"text":"保存","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "it": {"text":"Salva","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "ru": {"text":"Сохранить","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "ko": {"text":"저장","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "fr": {"text":"Enregistrer","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true}
     }
   },
   "saveFailed": {
     "source": "设置保存失败",
     "translations": {
       "en": {"text":"Failed to save settings","sourceRevision":"c819884576e7b5c3ad71d8d8b95c8bd5e96931b6f2cc8631a40f68d3d2303fa5","reviewed":true},
-      "ru": {"text":"Не удалось сохранить настройки","sourceRevision":"c819884576e7b5c3ad71d8d8b95c8bd5e96931b6f2cc8631a40f68d3d2303fa5","reviewed":true}
+      "ja": {"text":"設定を保存できなかった","sourceRevision":"c819884576e7b5c3ad71d8d8b95c8bd5e96931b6f2cc8631a40f68d3d2303fa5","reviewed":true},
+      "it": {"text":"Non riuscito a salvare le impostazioni","sourceRevision":"c819884576e7b5c3ad71d8d8b95c8bd5e96931b6f2cc8631a40f68d3d2303fa5","reviewed":true},
+      "ru": {"text":"Не удалось сохранить настройки","sourceRevision":"c819884576e7b5c3ad71d8d8b95c8bd5e96931b6f2cc8631a40f68d3d2303fa5","reviewed":true},
+      "ko": {"text":"설정을 저장하지 못했습니다","sourceRevision":"c819884576e7b5c3ad71d8d8b95c8bd5e96931b6f2cc8631a40f68d3d2303fa5","reviewed":true},
+      "fr": {"text":"Impossible d’enregistrer les paramètres","sourceRevision":"c819884576e7b5c3ad71d8d8b95c8bd5e96931b6f2cc8631a40f68d3d2303fa5","reviewed":true}
     }
   },
   "saved": {
     "source": "设置已保存",
     "translations": {
       "en": {"text":"Settings saved","sourceRevision":"ba622ac9b055d8eedb88c50e8b93a246f078b1cf8764e25d882a443f1b3dfd81","reviewed":true},
-      "ru": {"text":"Настройки сохранены","sourceRevision":"ba622ac9b055d8eedb88c50e8b93a246f078b1cf8764e25d882a443f1b3dfd81","reviewed":true}
+      "ja": {"text":"保存された設定","sourceRevision":"ba622ac9b055d8eedb88c50e8b93a246f078b1cf8764e25d882a443f1b3dfd81","reviewed":true},
+      "it": {"text":"Impostazioni salvate","sourceRevision":"ba622ac9b055d8eedb88c50e8b93a246f078b1cf8764e25d882a443f1b3dfd81","reviewed":true},
+      "ru": {"text":"Настройки сохранены","sourceRevision":"ba622ac9b055d8eedb88c50e8b93a246f078b1cf8764e25d882a443f1b3dfd81","reviewed":true},
+      "ko": {"text":"설정 저장","sourceRevision":"ba622ac9b055d8eedb88c50e8b93a246f078b1cf8764e25d882a443f1b3dfd81","reviewed":true},
+      "fr": {"text":"Paramètres enregistrés","sourceRevision":"ba622ac9b055d8eedb88c50e8b93a246f078b1cf8764e25d882a443f1b3dfd81","reviewed":true}
     }
   },
   "saving": {
     "source": "保存中…",
     "translations": {
       "en": {"text":"Saving…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
-      "ru": {"text":"Сохранение…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true}
+      "ja": {"text":"保存中…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
+      "it": {"text":"Salvataggio…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
+      "ru": {"text":"Сохранение…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
+      "ko": {"text":"저장 중…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true},
+      "fr": {"text":"Enregistrement…","sourceRevision":"0eb5d51485ec102dcb64665df92ee3f27f4fadc6cecddc82ba412006434ed1a6","reviewed":true}
     }
   },
   "security": {
@@ -399,112 +621,174 @@
       "en": {"text":"Security","sourceRevision":"eb95b793487795c7b7b76642603cb0fb570ca0ccf28da3b237a633b5fef42f56","reviewed":true},
       "ja": {"text":"セキュリティ","sourceRevision":"eb95b793487795c7b7b76642603cb0fb570ca0ccf28da3b237a633b5fef42f56","reviewed":true},
       "it": {"text":"Sicurezza","sourceRevision":"eb95b793487795c7b7b76642603cb0fb570ca0ccf28da3b237a633b5fef42f56","reviewed":true},
-      "ru": {"text":"Безопасность","sourceRevision":"eb95b793487795c7b7b76642603cb0fb570ca0ccf28da3b237a633b5fef42f56","reviewed":true}
+      "ru": {"text":"Безопасность","sourceRevision":"eb95b793487795c7b7b76642603cb0fb570ca0ccf28da3b237a633b5fef42f56","reviewed":true},
+      "ko": {"text":"보안","sourceRevision":"eb95b793487795c7b7b76642603cb0fb570ca0ccf28da3b237a633b5fef42f56","reviewed":true},
+      "fr": {"text":"Sécurité","sourceRevision":"eb95b793487795c7b7b76642603cb0fb570ca0ccf28da3b237a633b5fef42f56","reviewed":true}
     }
   },
   "securityHint": {
     "source": "配置用户注册和邮箱验证。",
     "translations": {
       "en": {"text":"Configure registration and email verification.","sourceRevision":"3888cc26983ea11f988f923381f4f8574fe26d655f2f583925e3dcad17236e65","reviewed":true},
-      "ru": {"text":"Настройте регистрацию и подтверждение почты.","sourceRevision":"3888cc26983ea11f988f923381f4f8574fe26d655f2f583925e3dcad17236e65","reviewed":true}
+      "ja": {"text":"登録とメールの検証の設定","sourceRevision":"3888cc26983ea11f988f923381f4f8574fe26d655f2f583925e3dcad17236e65","reviewed":true},
+      "it": {"text":"Configurare la registrazione e la verifica dell’email.","sourceRevision":"3888cc26983ea11f988f923381f4f8574fe26d655f2f583925e3dcad17236e65","reviewed":true},
+      "ru": {"text":"Настройте регистрацию и подтверждение почты.","sourceRevision":"3888cc26983ea11f988f923381f4f8574fe26d655f2f583925e3dcad17236e65","reviewed":true},
+      "ko": {"text":"등록 및 이메일 확인을 구성합니다.","sourceRevision":"3888cc26983ea11f988f923381f4f8574fe26d655f2f583925e3dcad17236e65","reviewed":true},
+      "fr": {"text":"Configurez l’inscription et la vérification par courriel.","sourceRevision":"3888cc26983ea11f988f923381f4f8574fe26d655f2f583925e3dcad17236e65","reviewed":true}
     }
   },
   "sendTest": {
     "source": "发送测试邮件",
     "translations": {
       "en": {"text":"Send test","sourceRevision":"6f75d70d57673b97712f65fc1136496a23329c6676cb8d55c5765ce484196c0f","reviewed":true},
-      "ru": {"text":"Отправить тест","sourceRevision":"6f75d70d57673b97712f65fc1136496a23329c6676cb8d55c5765ce484196c0f","reviewed":true}
+      "ja": {"text":"送信テスト","sourceRevision":"6f75d70d57673b97712f65fc1136496a23329c6676cb8d55c5765ce484196c0f","reviewed":true},
+      "it": {"text":"Invia prova","sourceRevision":"6f75d70d57673b97712f65fc1136496a23329c6676cb8d55c5765ce484196c0f","reviewed":true},
+      "ru": {"text":"Отправить тест","sourceRevision":"6f75d70d57673b97712f65fc1136496a23329c6676cb8d55c5765ce484196c0f","reviewed":true},
+      "ko": {"text":"시험 받기","sourceRevision":"6f75d70d57673b97712f65fc1136496a23329c6676cb8d55c5765ce484196c0f","reviewed":true},
+      "fr": {"text":"Envoyer l’essai","sourceRevision":"6f75d70d57673b97712f65fc1136496a23329c6676cb8d55c5765ce484196c0f","reviewed":true}
     }
   },
   "sender": {
     "source": "发件人",
     "translations": {
       "en": {"text":"Sender","sourceRevision":"2ef948fea7155d6d6af6a5a1daef596118d7a77a496591e3e6529f943ebc7f7c","reviewed":true},
-      "ru": {"text":"Отправитель","sourceRevision":"2ef948fea7155d6d6af6a5a1daef596118d7a77a496591e3e6529f943ebc7f7c","reviewed":true}
+      "ja": {"text":"スレンダー","sourceRevision":"2ef948fea7155d6d6af6a5a1daef596118d7a77a496591e3e6529f943ebc7f7c","reviewed":true},
+      "it": {"text":"Seduta","sourceRevision":"2ef948fea7155d6d6af6a5a1daef596118d7a77a496591e3e6529f943ebc7f7c","reviewed":true},
+      "ru": {"text":"Отправитель","sourceRevision":"2ef948fea7155d6d6af6a5a1daef596118d7a77a496591e3e6529f943ebc7f7c","reviewed":true},
+      "ko": {"text":"보낸 사람","sourceRevision":"2ef948fea7155d6d6af6a5a1daef596118d7a77a496591e3e6529f943ebc7f7c","reviewed":true},
+      "fr": {"text":"Expéditeur","sourceRevision":"2ef948fea7155d6d6af6a5a1daef596118d7a77a496591e3e6529f943ebc7f7c","reviewed":true}
     }
   },
   "signup": {
     "source": "允许注册",
     "translations": {
       "en": {"text":"Allow registration","sourceRevision":"cb65a482192ceaa98797787f4e34ac1b3f9d293d84002e822aa62303e260bf00","reviewed":true},
-      "ru": {"text":"Разрешить регистрацию","sourceRevision":"cb65a482192ceaa98797787f4e34ac1b3f9d293d84002e822aa62303e260bf00","reviewed":true}
+      "ja": {"text":"登録を許可する","sourceRevision":"cb65a482192ceaa98797787f4e34ac1b3f9d293d84002e822aa62303e260bf00","reviewed":true},
+      "it": {"text":"Consentire la registrazione","sourceRevision":"cb65a482192ceaa98797787f4e34ac1b3f9d293d84002e822aa62303e260bf00","reviewed":true},
+      "ru": {"text":"Разрешить регистрацию","sourceRevision":"cb65a482192ceaa98797787f4e34ac1b3f9d293d84002e822aa62303e260bf00","reviewed":true},
+      "ko": {"text":"가입 허용","sourceRevision":"cb65a482192ceaa98797787f4e34ac1b3f9d293d84002e822aa62303e260bf00","reviewed":true},
+      "fr": {"text":"Permettre l’enregistrement","sourceRevision":"cb65a482192ceaa98797787f4e34ac1b3f9d293d84002e822aa62303e260bf00","reviewed":true}
     }
   },
   "signupHint": {
     "source": "允许新用户创建账号。",
     "translations": {
       "en": {"text":"Allow new users to create accounts.","sourceRevision":"ebc809e1576cf4db4725cbc5313bba2b5b1cf72dabeeee72ef68ba9bbeabdfd6","reviewed":true},
-      "ru": {"text":"Позволить новым пользователям создавать аккаунты.","sourceRevision":"ebc809e1576cf4db4725cbc5313bba2b5b1cf72dabeeee72ef68ba9bbeabdfd6","reviewed":true}
+      "ja": {"text":"新しいユーザーがアカウントを作成できるようにします。","sourceRevision":"ebc809e1576cf4db4725cbc5313bba2b5b1cf72dabeeee72ef68ba9bbeabdfd6","reviewed":true},
+      "it": {"text":"Consenti ai nuovi utenti di creare account.","sourceRevision":"ebc809e1576cf4db4725cbc5313bba2b5b1cf72dabeeee72ef68ba9bbeabdfd6","reviewed":true},
+      "ru": {"text":"Позволить новым пользователям создавать аккаунты.","sourceRevision":"ebc809e1576cf4db4725cbc5313bba2b5b1cf72dabeeee72ef68ba9bbeabdfd6","reviewed":true},
+      "ko": {"text":"새 사용자를 사용하여 계정을 만들 수 있습니다.","sourceRevision":"ebc809e1576cf4db4725cbc5313bba2b5b1cf72dabeeee72ef68ba9bbeabdfd6","reviewed":true},
+      "fr": {"text":"Permettre aux nouveaux utilisateurs de créer des comptes.","sourceRevision":"ebc809e1576cf4db4725cbc5313bba2b5b1cf72dabeeee72ef68ba9bbeabdfd6","reviewed":true}
     }
   },
   "smtp": {
     "source": "SMTP 服务器",
     "translations": {
       "en": {"text":"SMTP server","sourceRevision":"c130641b4ea4eb13c34304d0ea4867d93e636ee92d566d1a4af10b9a0cc72e6d","reviewed":true},
-      "ru": {"text":"SMTP‑сервер","sourceRevision":"c130641b4ea4eb13c34304d0ea4867d93e636ee92d566d1a4af10b9a0cc72e6d","reviewed":true}
+      "ja": {"text":"SMTP サーバー","sourceRevision":"c130641b4ea4eb13c34304d0ea4867d93e636ee92d566d1a4af10b9a0cc72e6d","reviewed":true},
+      "it": {"text":"Server SMTP","sourceRevision":"c130641b4ea4eb13c34304d0ea4867d93e636ee92d566d1a4af10b9a0cc72e6d","reviewed":true},
+      "ru": {"text":"SMTP‑сервер","sourceRevision":"c130641b4ea4eb13c34304d0ea4867d93e636ee92d566d1a4af10b9a0cc72e6d","reviewed":true},
+      "ko": {"text":"SMTP 서버","sourceRevision":"c130641b4ea4eb13c34304d0ea4867d93e636ee92d566d1a4af10b9a0cc72e6d","reviewed":true},
+      "fr": {"text":"Serveur SMTP","sourceRevision":"c130641b4ea4eb13c34304d0ea4867d93e636ee92d566d1a4af10b9a0cc72e6d","reviewed":true}
     }
   },
   "ssl": {
     "source": "使用 SSL/TLS",
     "translations": {
       "en": {"text":"Use SSL/TLS","sourceRevision":"f3464c2f69aa9e9c37e093e653b994a08ea3851f61d7b65d6582162f417fa7e5","reviewed":true},
-      "ru": {"text":"Использовать SSL/TLS","sourceRevision":"f3464c2f69aa9e9c37e093e653b994a08ea3851f61d7b65d6582162f417fa7e5","reviewed":true}
+      "ja": {"text":"SSL/TLS の使用","sourceRevision":"f3464c2f69aa9e9c37e093e653b994a08ea3851f61d7b65d6582162f417fa7e5","reviewed":true},
+      "it": {"text":"Utilizzare SSL/TLS","sourceRevision":"f3464c2f69aa9e9c37e093e653b994a08ea3851f61d7b65d6582162f417fa7e5","reviewed":true},
+      "ru": {"text":"Использовать SSL/TLS","sourceRevision":"f3464c2f69aa9e9c37e093e653b994a08ea3851f61d7b65d6582162f417fa7e5","reviewed":true},
+      "ko": {"text":"SSL/TLS 사용","sourceRevision":"f3464c2f69aa9e9c37e093e653b994a08ea3851f61d7b65d6582162f417fa7e5","reviewed":true},
+      "fr": {"text":"Utiliser SSL/TLS","sourceRevision":"f3464c2f69aa9e9c37e093e653b994a08ea3851f61d7b65d6582162f417fa7e5","reviewed":true}
     }
   },
   "sslHint": {
     "source": "通过加密连接访问 SMTP 服务。",
     "translations": {
       "en": {"text":"Use an encrypted SMTP connection.","sourceRevision":"5521f1f15687becdd52c2b6ad5d0a503ce7b32c1ef70a77cb97c2d232da5155c","reviewed":true},
-      "ru": {"text":"Использовать защищённое SMTP‑соединение.","sourceRevision":"5521f1f15687becdd52c2b6ad5d0a503ce7b32c1ef70a77cb97c2d232da5155c","reviewed":true}
+      "ja": {"text":"暗号化されたSMTP接続を使用してください。","sourceRevision":"5521f1f15687becdd52c2b6ad5d0a503ce7b32c1ef70a77cb97c2d232da5155c","reviewed":true},
+      "it": {"text":"Utilizzare una connessione SMTP crittografata.","sourceRevision":"5521f1f15687becdd52c2b6ad5d0a503ce7b32c1ef70a77cb97c2d232da5155c","reviewed":true},
+      "ru": {"text":"Использовать защищённое SMTP‑соединение.","sourceRevision":"5521f1f15687becdd52c2b6ad5d0a503ce7b32c1ef70a77cb97c2d232da5155c","reviewed":true},
+      "ko": {"text":"암호화된 SMTP 연결을 사용하십시오.","sourceRevision":"5521f1f15687becdd52c2b6ad5d0a503ce7b32c1ef70a77cb97c2d232da5155c","reviewed":true},
+      "fr": {"text":"Utilisez une connexion SMTP chiffrée.","sourceRevision":"5521f1f15687becdd52c2b6ad5d0a503ce7b32c1ef70a77cb97c2d232da5155c","reviewed":true}
     }
   },
   "test": {
     "source": "连接测试",
     "translations": {
       "en": {"text":"Test connection","sourceRevision":"1eb1f3cc9d490792d25dab8580896184d2359f2671bae19834fc5e862da3afc2","reviewed":true},
-      "ru": {"text":"Проверить соединение","sourceRevision":"1eb1f3cc9d490792d25dab8580896184d2359f2671bae19834fc5e862da3afc2","reviewed":true}
+      "ja": {"text":"テスト接続","sourceRevision":"1eb1f3cc9d490792d25dab8580896184d2359f2671bae19834fc5e862da3afc2","reviewed":true},
+      "it": {"text":"Collegamento di prova","sourceRevision":"1eb1f3cc9d490792d25dab8580896184d2359f2671bae19834fc5e862da3afc2","reviewed":true},
+      "ru": {"text":"Проверить соединение","sourceRevision":"1eb1f3cc9d490792d25dab8580896184d2359f2671bae19834fc5e862da3afc2","reviewed":true},
+      "ko": {"text":"시험 연결","sourceRevision":"1eb1f3cc9d490792d25dab8580896184d2359f2671bae19834fc5e862da3afc2","reviewed":true},
+      "fr": {"text":"Raccord d’essai","sourceRevision":"1eb1f3cc9d490792d25dab8580896184d2359f2671bae19834fc5e862da3afc2","reviewed":true}
     }
   },
   "testEmail": {
     "source": "测试收件地址",
     "translations": {
       "en": {"text":"Test recipient","sourceRevision":"3e01793adcc7c0876c20a2a632e2f104feadfa26d5657ff0c008ba584442b884","reviewed":true},
-      "ru": {"text":"Email получателя для теста","sourceRevision":"3e01793adcc7c0876c20a2a632e2f104feadfa26d5657ff0c008ba584442b884","reviewed":true}
+      "ja": {"text":"試験受取人","sourceRevision":"3e01793adcc7c0876c20a2a632e2f104feadfa26d5657ff0c008ba584442b884","reviewed":true},
+      "it": {"text":"Rilevatore di prova","sourceRevision":"3e01793adcc7c0876c20a2a632e2f104feadfa26d5657ff0c008ba584442b884","reviewed":true},
+      "ru": {"text":"Email получателя для теста","sourceRevision":"3e01793adcc7c0876c20a2a632e2f104feadfa26d5657ff0c008ba584442b884","reviewed":true},
+      "ko": {"text":"테스트 수신자","sourceRevision":"3e01793adcc7c0876c20a2a632e2f104feadfa26d5657ff0c008ba584442b884","reviewed":true},
+      "fr": {"text":"Récepteur d’essai","sourceRevision":"3e01793adcc7c0876c20a2a632e2f104feadfa26d5657ff0c008ba584442b884","reviewed":true}
     }
   },
   "testHint": {
     "source": "使用当前尚未保存的表单参数发送测试邮件。",
     "translations": {
       "en": {"text":"Send a test message using the unsaved form values.","sourceRevision":"111608c822b3287b9ff9c8559636b0d41091fb18c0b5e91e73665a0731573e3a","reviewed":true},
-      "ru": {"text":"Отправить тестовое письмо с текущими значениями формы (без сохранения).","sourceRevision":"111608c822b3287b9ff9c8559636b0d41091fb18c0b5e91e73665a0731573e3a","reviewed":true}
+      "ja": {"text":"未保存のフォーム値を使用してテストメッセージを送信する。","sourceRevision":"111608c822b3287b9ff9c8559636b0d41091fb18c0b5e91e73665a0731573e3a","reviewed":true},
+      "it": {"text":"Inviare un messaggio di prova utilizzando i valori del modulo non salvati.","sourceRevision":"111608c822b3287b9ff9c8559636b0d41091fb18c0b5e91e73665a0731573e3a","reviewed":true},
+      "ru": {"text":"Отправить тестовое письмо с текущими значениями формы (без сохранения).","sourceRevision":"111608c822b3287b9ff9c8559636b0d41091fb18c0b5e91e73665a0731573e3a","reviewed":true},
+      "ko": {"text":"unsaved form 값을 사용하여 테스트 메시지를 보냅니다.","sourceRevision":"111608c822b3287b9ff9c8559636b0d41091fb18c0b5e91e73665a0731573e3a","reviewed":true},
+      "fr": {"text":"Envoyer un message de test en utilisant les valeurs de formulaire non enregistrées.","sourceRevision":"111608c822b3287b9ff9c8559636b0d41091fb18c0b5e91e73665a0731573e3a","reviewed":true}
     }
   },
   "testSent": {
     "source": "测试邮件已发送",
     "translations": {
       "en": {"text":"Test message sent","sourceRevision":"25072db76a1606c74fb653f26221cc29910cd18fc75afa4593cd9c2915ab1428","reviewed":true},
-      "ru": {"text":"Тестовое письмо отправлено","sourceRevision":"25072db76a1606c74fb653f26221cc29910cd18fc75afa4593cd9c2915ab1428","reviewed":true}
+      "ja": {"text":"送信されたテストメッセージ","sourceRevision":"25072db76a1606c74fb653f26221cc29910cd18fc75afa4593cd9c2915ab1428","reviewed":true},
+      "it": {"text":"Messaggio di prova inviato","sourceRevision":"25072db76a1606c74fb653f26221cc29910cd18fc75afa4593cd9c2915ab1428","reviewed":true},
+      "ru": {"text":"Тестовое письмо отправлено","sourceRevision":"25072db76a1606c74fb653f26221cc29910cd18fc75afa4593cd9c2915ab1428","reviewed":true},
+      "ko": {"text":"시험 메시지 전송","sourceRevision":"25072db76a1606c74fb653f26221cc29910cd18fc75afa4593cd9c2915ab1428","reviewed":true},
+      "fr": {"text":"Message d’essai envoyé","sourceRevision":"25072db76a1606c74fb653f26221cc29910cd18fc75afa4593cd9c2915ab1428","reviewed":true}
     }
   },
   "username": {
     "source": "用户名",
     "translations": {
       "en": {"text":"Username","sourceRevision":"2fa97210a2c096604f37f2f3254afdb96e13b1665d251f35a12ba8e679bf8e91","reviewed":true},
-      "ru": {"text":"Имя пользователя","sourceRevision":"2fa97210a2c096604f37f2f3254afdb96e13b1665d251f35a12ba8e679bf8e91","reviewed":true}
+      "ja": {"text":"ユーザー名","sourceRevision":"2fa97210a2c096604f37f2f3254afdb96e13b1665d251f35a12ba8e679bf8e91","reviewed":true},
+      "it": {"text":"Nome utente","sourceRevision":"2fa97210a2c096604f37f2f3254afdb96e13b1665d251f35a12ba8e679bf8e91","reviewed":true},
+      "ru": {"text":"Имя пользователя","sourceRevision":"2fa97210a2c096604f37f2f3254afdb96e13b1665d251f35a12ba8e679bf8e91","reviewed":true},
+      "ko": {"text":"사용자 이름","sourceRevision":"2fa97210a2c096604f37f2f3254afdb96e13b1665d251f35a12ba8e679bf8e91","reviewed":true},
+      "fr": {"text":"Nom d’utilisateur","sourceRevision":"2fa97210a2c096604f37f2f3254afdb96e13b1665d251f35a12ba8e679bf8e91","reviewed":true}
     }
   },
   "verification": {
     "source": "要求邮箱验证",
     "translations": {
       "en": {"text":"Require email verification","sourceRevision":"f6ea322283e295e2e2e9c62ed1c38cb3458896d9aae9cbff152264100cdc05cf","reviewed":true},
-      "ru": {"text":"Требовать подтверждение почты","sourceRevision":"f6ea322283e295e2e2e9c62ed1c38cb3458896d9aae9cbff152264100cdc05cf","reviewed":true}
+      "ja": {"text":"電子メールの検証が必要","sourceRevision":"f6ea322283e295e2e2e9c62ed1c38cb3458896d9aae9cbff152264100cdc05cf","reviewed":true},
+      "it": {"text":"Verifica e-mail richiesta","sourceRevision":"f6ea322283e295e2e2e9c62ed1c38cb3458896d9aae9cbff152264100cdc05cf","reviewed":true},
+      "ru": {"text":"Требовать подтверждение почты","sourceRevision":"f6ea322283e295e2e2e9c62ed1c38cb3458896d9aae9cbff152264100cdc05cf","reviewed":true},
+      "ko": {"text":"이메일 확인","sourceRevision":"f6ea322283e295e2e2e9c62ed1c38cb3458896d9aae9cbff152264100cdc05cf","reviewed":true},
+      "fr": {"text":"Exiger une vérification par courriel","sourceRevision":"f6ea322283e295e2e2e9c62ed1c38cb3458896d9aae9cbff152264100cdc05cf","reviewed":true}
     }
   },
   "verificationHint": {
     "source": "新账号必须验证邮箱。",
     "translations": {
       "en": {"text":"New accounts must verify their email address.","sourceRevision":"cad940104e0856ed7d78d4bc48af6e4c28db6062e42cd1efd808db031dd899a2","reviewed":true},
-      "ru": {"text":"Новые аккаунты должны подтвердить адрес электронной почты.","sourceRevision":"cad940104e0856ed7d78d4bc48af6e4c28db6062e42cd1efd808db031dd899a2","reviewed":true}
+      "ja": {"text":"新規アカウントは、メールアドレスを確認する必要があります。","sourceRevision":"cad940104e0856ed7d78d4bc48af6e4c28db6062e42cd1efd808db031dd899a2","reviewed":true},
+      "it": {"text":"I nuovi account devono verificare il loro indirizzo email.","sourceRevision":"cad940104e0856ed7d78d4bc48af6e4c28db6062e42cd1efd808db031dd899a2","reviewed":true},
+      "ru": {"text":"Новые аккаунты должны подтвердить адрес электронной почты.","sourceRevision":"cad940104e0856ed7d78d4bc48af6e4c28db6062e42cd1efd808db031dd899a2","reviewed":true},
+      "ko": {"text":"새 계정은 이메일 주소를 확인해야 합니다.","sourceRevision":"cad940104e0856ed7d78d4bc48af6e4c28db6062e42cd1efd808db031dd899a2","reviewed":true},
+      "fr": {"text":"Les nouveaux comptes doivent vérifier leur adresse électronique.","sourceRevision":"cad940104e0856ed7d78d4bc48af6e4c28db6062e42cd1efd808db031dd899a2","reviewed":true}
     }
   }
 }

@@ -5,7 +5,9 @@
       "en": {"text":"There are no members to show yet.","sourceRevision":"0713efe110aedda7b21e65a7db744e7a19c4ad79c240e87507e515fda5c203c5","reviewed":true},
       "ja": {"text":"表示できるメンバーはいません。","sourceRevision":"0713efe110aedda7b21e65a7db744e7a19c4ad79c240e87507e515fda5c203c5","reviewed":true},
       "it": {"text":"Non ci sono ancora membri da mostrare.","sourceRevision":"0713efe110aedda7b21e65a7db744e7a19c4ad79c240e87507e515fda5c203c5","reviewed":true},
-      "ru": {"text":"Здесь пока нечего показывать.","sourceRevision":"0713efe110aedda7b21e65a7db744e7a19c4ad79c240e87507e515fda5c203c5","reviewed":true}
+      "ru": {"text":"Здесь пока нечего показывать.","sourceRevision":"0713efe110aedda7b21e65a7db744e7a19c4ad79c240e87507e515fda5c203c5","reviewed":true},
+      "ko": {"text":"아직 회원이 없습니다.","sourceRevision":"0713efe110aedda7b21e65a7db744e7a19c4ad79c240e87507e515fda5c203c5","reviewed":true},
+      "fr": {"text":"Il n’y a pas encore de membres à montrer.","sourceRevision":"0713efe110aedda7b21e65a7db744e7a19c4ad79c240e87507e515fda5c203c5","reviewed":true}
     }
   },
   "emptyTitle": {
@@ -14,7 +16,9 @@
       "en": {"text":"No members yet","sourceRevision":"958e46fdb16f64dc8bc2f62b0ae2dd58e9b630f5b8d770888072269e260e18e0","reviewed":true},
       "ja": {"text":"メンバーはまだいません","sourceRevision":"958e46fdb16f64dc8bc2f62b0ae2dd58e9b630f5b8d770888072269e260e18e0","reviewed":true},
       "it": {"text":"Nessun membro","sourceRevision":"958e46fdb16f64dc8bc2f62b0ae2dd58e9b630f5b8d770888072269e260e18e0","reviewed":true},
-      "ru": {"text":"Пока нет участников","sourceRevision":"958e46fdb16f64dc8bc2f62b0ae2dd58e9b630f5b8d770888072269e260e18e0","reviewed":true}
+      "ru": {"text":"Пока нет участников","sourceRevision":"958e46fdb16f64dc8bc2f62b0ae2dd58e9b630f5b8d770888072269e260e18e0","reviewed":true},
+      "ko": {"text":"아직 회원이 없습니다.","sourceRevision":"958e46fdb16f64dc8bc2f62b0ae2dd58e9b630f5b8d770888072269e260e18e0","reviewed":true},
+      "fr": {"text":"Pas encore de membres","sourceRevision":"958e46fdb16f64dc8bc2f62b0ae2dd58e9b630f5b8d770888072269e260e18e0","reviewed":true}
     }
   },
   "joinedAt": {
@@ -23,7 +27,9 @@
       "en": {"text":"Joined {date}","sourceRevision":"2233a024fde61dad6c7b349c45a186ba568bab23247f480f7b77956d59db62d2","reviewed":true},
       "ja": {"text":"{date} に参加","sourceRevision":"2233a024fde61dad6c7b349c45a186ba568bab23247f480f7b77956d59db62d2","reviewed":true},
       "it": {"text":"Iscritto {date}","sourceRevision":"2233a024fde61dad6c7b349c45a186ba568bab23247f480f7b77956d59db62d2","reviewed":true},
-      "ru": {"text":"Зарегистрирован {date}","sourceRevision":"2233a024fde61dad6c7b349c45a186ba568bab23247f480f7b77956d59db62d2","reviewed":true}
+      "ru": {"text":"Зарегистрирован {date}","sourceRevision":"2233a024fde61dad6c7b349c45a186ba568bab23247f480f7b77956d59db62d2","reviewed":true},
+      "ko": {"text":"가입 {date}","sourceRevision":"2233a024fde61dad6c7b349c45a186ba568bab23247f480f7b77956d59db62d2","reviewed":true},
+      "fr": {"text":"Membre depuis {date}","sourceRevision":"2233a024fde61dad6c7b349c45a186ba568bab23247f480f7b77956d59db62d2","reviewed":true}
     }
   },
   "next": {
@@ -32,16 +38,20 @@
       "en": {"text":"Next","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
       "ja": {"text":"次へ","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
       "it": {"text":"Successivo","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
-      "ru": {"text":"Следующая","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true}
+      "ru": {"text":"Следующая","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
+      "ko": {"text":"다음","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true},
+      "fr": {"text":"Suivant","sourceRevision":"734ed9a1228e4411dd123405a6b2bf326a8c678446d20c7b3a1c202b12e7fe7e","reviewed":true}
     }
   },
   "noBio": {
     "source": "这位成员还没有填写个人简介。",
     "translations": {
       "en": {"text":"This member has not added a bio yet.","sourceRevision":"c211a2f8e8be373853bbc87eabe12393556bad3b84cb63a147d1eac156f0f3b2","reviewed":true},
-      "ja": {"text":"このメンバーはまだ自己紹介を追加していません。","sourceRevision":"c211a2f8e8be373853bbc87eabe12393556bad3b84cb63a147d1eac156f0f3b2","reviewed":true},
-      "it": {"text":"Questo membro non ha ancora aggiunto una biografia.","sourceRevision":"c211a2f8e8be373853bbc87eabe12393556bad3b84cb63a147d1eac156f0f3b2","reviewed":true},
-      "ru": {"text":"Участник пока не добавил биографию.","sourceRevision":"c211a2f8e8be373853bbc87eabe12393556bad3b84cb63a147d1eac156f0f3b2","reviewed":true}
+      "ja": {"text":"このメンバーはまだ自己紹介を書いていません。","sourceRevision":"c211a2f8e8be373853bbc87eabe12393556bad3b84cb63a147d1eac156f0f3b2","reviewed":true},
+      "it": {"text":"Questo membro non ha ancora scritto una presentazione.","sourceRevision":"c211a2f8e8be373853bbc87eabe12393556bad3b84cb63a147d1eac156f0f3b2","reviewed":true},
+      "ru": {"text":"Участник пока не добавил биографию.","sourceRevision":"c211a2f8e8be373853bbc87eabe12393556bad3b84cb63a147d1eac156f0f3b2","reviewed":true},
+      "ko": {"text":"이 회원은 아직 소개를 작성하지 않았습니다.","sourceRevision":"c211a2f8e8be373853bbc87eabe12393556bad3b84cb63a147d1eac156f0f3b2","reviewed":true},
+      "fr": {"text":"Ce membre n’a pas encore ajouté de présentation.","sourceRevision":"c211a2f8e8be373853bbc87eabe12393556bad3b84cb63a147d1eac156f0f3b2","reviewed":true}
     }
   },
   "pagination": {
@@ -50,7 +60,9 @@
       "en": {"text":"Member pages","sourceRevision":"bd8eacbfb8bad00dc7390db211c2bcc449027b82b9a06d6b1ca2642eaff9fb64","reviewed":true},
       "ja": {"text":"メンバー一覧のページ","sourceRevision":"bd8eacbfb8bad00dc7390db211c2bcc449027b82b9a06d6b1ca2642eaff9fb64","reviewed":true},
       "it": {"text":"Pagine dei membri","sourceRevision":"bd8eacbfb8bad00dc7390db211c2bcc449027b82b9a06d6b1ca2642eaff9fb64","reviewed":true},
-      "ru": {"text":"Страницы участников","sourceRevision":"bd8eacbfb8bad00dc7390db211c2bcc449027b82b9a06d6b1ca2642eaff9fb64","reviewed":true}
+      "ru": {"text":"Страницы участников","sourceRevision":"bd8eacbfb8bad00dc7390db211c2bcc449027b82b9a06d6b1ca2642eaff9fb64","reviewed":true},
+      "ko": {"text":"회원 페이지","sourceRevision":"bd8eacbfb8bad00dc7390db211c2bcc449027b82b9a06d6b1ca2642eaff9fb64","reviewed":true},
+      "fr": {"text":"Pages des membres","sourceRevision":"bd8eacbfb8bad00dc7390db211c2bcc449027b82b9a06d6b1ca2642eaff9fb64","reviewed":true}
     }
   },
   "prestige": {
@@ -59,7 +71,9 @@
       "en": {"text":"Prestige","sourceRevision":"725961275047883910e4e9723b65ec78c9554fb1a2b3ed197306a3d1a0c7e6f8","reviewed":true},
       "ja": {"text":"評価","sourceRevision":"725961275047883910e4e9723b65ec78c9554fb1a2b3ed197306a3d1a0c7e6f8","reviewed":true},
       "it": {"text":"Prestigio","sourceRevision":"725961275047883910e4e9723b65ec78c9554fb1a2b3ed197306a3d1a0c7e6f8","reviewed":true},
-      "ru": {"text":"Престиж","sourceRevision":"725961275047883910e4e9723b65ec78c9554fb1a2b3ed197306a3d1a0c7e6f8","reviewed":true}
+      "ru": {"text":"Престиж","sourceRevision":"725961275047883910e4e9723b65ec78c9554fb1a2b3ed197306a3d1a0c7e6f8","reviewed":true},
+      "ko": {"text":"평판","sourceRevision":"725961275047883910e4e9723b65ec78c9554fb1a2b3ed197306a3d1a0c7e6f8","reviewed":true},
+      "fr": {"text":"Réputation","sourceRevision":"725961275047883910e4e9723b65ec78c9554fb1a2b3ed197306a3d1a0c7e6f8","reviewed":true}
     }
   },
   "previous": {
@@ -68,7 +82,9 @@
       "en": {"text":"Previous","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
       "ja": {"text":"前へ","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
       "it": {"text":"Precedente","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
-      "ru": {"text":"Предыдущая","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true}
+      "ru": {"text":"Предыдущая","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
+      "ko": {"text":"이전","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true},
+      "fr": {"text":"Précédent","sourceRevision":"c5433fe3ddb8284ce3406c99ed1337660ab343b40298dde28d30de0b9f4d4975","reviewed":true}
     }
   },
   "replies": {
@@ -77,7 +93,9 @@
       "en": {"text":"Replies","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
       "ja": {"text":"返信","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
       "it": {"text":"Risposte","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
-      "ru": {"text":"Ответы","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true}
+      "ru": {"text":"Ответы","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
+      "ko": {"text":"답글","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
+      "fr": {"text":"Réponses","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true}
     }
   },
   "subtitle": {
@@ -86,7 +104,9 @@
       "en": {"text":"Meet the people building this community together.","sourceRevision":"7a025ca7752e7d44641b8bce0ea94605a2aa2ea54596808502073aec32d687fc","reviewed":true},
       "ja": {"text":"このコミュニティを一緒につくる人たちを知りましょう。","sourceRevision":"7a025ca7752e7d44641b8bce0ea94605a2aa2ea54596808502073aec32d687fc","reviewed":true},
       "it": {"text":"Conosci le persone che costruiscono insieme questa community.","sourceRevision":"7a025ca7752e7d44641b8bce0ea94605a2aa2ea54596808502073aec32d687fc","reviewed":true},
-      "ru": {"text":"Познакомьтесь с людьми, которые вместе создают это сообщество.","sourceRevision":"7a025ca7752e7d44641b8bce0ea94605a2aa2ea54596808502073aec32d687fc","reviewed":true}
+      "ru": {"text":"Познакомьтесь с людьми, которые вместе создают это сообщество.","sourceRevision":"7a025ca7752e7d44641b8bce0ea94605a2aa2ea54596808502073aec32d687fc","reviewed":true},
+      "ko": {"text":"이 지역 사회를 함께 건설하는 사람들을 만나십시오.","sourceRevision":"7a025ca7752e7d44641b8bce0ea94605a2aa2ea54596808502073aec32d687fc","reviewed":true},
+      "fr": {"text":"Rencontrez les gens qui construisent cette communauté ensemble.","sourceRevision":"7a025ca7752e7d44641b8bce0ea94605a2aa2ea54596808502073aec32d687fc","reviewed":true}
     }
   },
   "title": {
@@ -95,16 +115,20 @@
       "en": {"text":"All members","sourceRevision":"26c8371cbbc7e767f0d7f0c6c6997a4abb84cd6a7fbc1f6b88da8e57014b8605","reviewed":true},
       "ja": {"text":"すべてのメンバー","sourceRevision":"26c8371cbbc7e767f0d7f0c6c6997a4abb84cd6a7fbc1f6b88da8e57014b8605","reviewed":true},
       "it": {"text":"Tutti i membri","sourceRevision":"26c8371cbbc7e767f0d7f0c6c6997a4abb84cd6a7fbc1f6b88da8e57014b8605","reviewed":true},
-      "ru": {"text":"Все участники","sourceRevision":"26c8371cbbc7e767f0d7f0c6c6997a4abb84cd6a7fbc1f6b88da8e57014b8605","reviewed":true}
+      "ru": {"text":"Все участники","sourceRevision":"26c8371cbbc7e767f0d7f0c6c6997a4abb84cd6a7fbc1f6b88da8e57014b8605","reviewed":true},
+      "ko": {"text":"모든 회원","sourceRevision":"26c8371cbbc7e767f0d7f0c6c6997a4abb84cd6a7fbc1f6b88da8e57014b8605","reviewed":true},
+      "fr": {"text":"Tous les membres","sourceRevision":"26c8371cbbc7e767f0d7f0c6c6997a4abb84cd6a7fbc1f6b88da8e57014b8605","reviewed":true}
     }
   },
   "topics": {
     "source": "主题",
     "translations": {
       "en": {"text":"Topics","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
-      "ja": {"text":"トピック","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
-      "it": {"text":"Argomenti","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
-      "ru": {"text":"Темы","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true}
+      "ja": {"text":"スレッド","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
+      "it": {"text":"Discussioni","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
+      "ru": {"text":"Темы","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
+      "ko": {"text":"게시글","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true},
+      "fr": {"text":"Sujets","sourceRevision":"eda4d9e3f13819f10a525e245dfacf84d655f9dadd98a2061e0b1a439f61d42b","reviewed":true}
     }
   }
 }

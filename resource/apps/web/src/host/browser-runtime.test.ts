@@ -22,17 +22,25 @@ describe('browser locale resolution', () => {
 
   it('skips unsupported preferences and uses the configured site fallback', () => {
     document.documentElement.dataset.defaultLocale = 'it'
-    const languages = vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['fr-FR'])
+    const languages = vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['nl-NL'])
     expect(detectBrowserLocale()).toBe('it')
-    languages.mockReturnValue(['fr-FR', 'ja-JP'])
+    languages.mockReturnValue(['nl-NL', 'ja-JP'])
     expect(detectBrowserLocale()).toBe('ja')
     document.cookie = 'lang=en; path=/'
-    history.replaceState(null, '', '/?lang=ko')
+    history.replaceState(null, '', '/?lang=nl')
     expect(detectBrowserLocale()).toBe('en')
     history.replaceState(null, '', '/?lang=it')
     expect(detectBrowserLocale()).toBe('it')
     applyBrowserLocale(detectBrowserLocale('browser'), 'browser')
     expect(detectBrowserLocale()).toBe('ja')
+  })
+
+  it.each([['ko', 'ko-KR'], ['fr', 'fr-CA']] as const)('detects %s from a browser preference and preserves it on reload', (locale, preference) => {
+    vi.spyOn(navigator, 'languages', 'get').mockReturnValue([preference])
+    expect(detectBrowserLocale()).toBe(locale)
+    applyBrowserLocale(locale)
+    expect(document.documentElement.lang).toBe(locale)
+    expect(detectBrowserLocale()).toBe(locale)
   })
 })
 

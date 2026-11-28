@@ -69,7 +69,13 @@ it('shows one calendar month on mobile and allows a cross-month range', async ()
   expect(change).toHaveBeenCalledExactlyOnceWith({ from: '2026-10-30', to: '2026-11-05' });
 });
 
-it.each([['zh', '2026/10/6', '2026/10/7'], ['ja', '2026/10/6', '2026/10/7'], ['it', '06/10/2026', '07/10/2026']])('keeps local dates in the %s locale', async (locale, from, to) => {
+it.each([
+  ['zh', '2026/10/6', '2026/10/7'],
+  ['ja', '2026/10/6', '2026/10/7'],
+  ['it', '06/10/2026', '07/10/2026'],
+  ['ko', '2026. 10. 6.', '2026. 10. 7.'],
+  ['fr', '06/10/2026', '07/10/2026'],
+])('keeps local dates in the %s locale', async (locale, from, to) => {
   const change = vi.fn();
   render(<Harness locale={locale} onChange={change} />);
   await userEvent.click(screen.getByLabelText('Date range'));

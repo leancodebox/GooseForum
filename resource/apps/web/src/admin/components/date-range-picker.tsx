@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import { format, parseISO, startOfDay } from "date-fns";
-import { enUS, ru, it, ja, zhCN } from "date-fns/locale";
+import { enUS, fr, ru, it, ja, ko, zhCN } from "date-fns/locale";
 import { CalendarDays } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { Button } from "@gooseforum/ui/components/button";
@@ -138,5 +138,7 @@ function calendarLocale(locale: string) {
   if (locale.startsWith("ja")) return ja;
   if (locale.startsWith("ru")) return ru;
   if (locale.startsWith("it")) return it;
+  if (locale.startsWith("ko")) return ko;
+  if (locale.startsWith("fr")) return fr;
   return enUS;
 }

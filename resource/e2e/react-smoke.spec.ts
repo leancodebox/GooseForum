@@ -696,6 +696,22 @@ test('checks the browser language by default and remembers a manual selection', 
   await expect(page).toHaveURL(/keep=1/)
 })
 
+for (const [locale, preferred, newTopic] of [
+  ['ko', 'ko-KR', '새 글 쓰기'],
+  ['fr', 'fr-CA', 'Nouveau sujet'],
+] as const) {
+  test(`loads the forum in the browser’s ${locale} language`, async ({ page }) => {
+    await page.addInitScript(({ preferred }) => {
+      Object.defineProperty(navigator, 'languages', { get: () => [preferred] })
+    }, { preferred })
+    await page.goto('/')
+    await expect(page.locator('html')).toHaveAttribute('lang', locale)
+    const text = locale === 'ko' ? '아직 게시글이 없습니다' : 'Aucun sujet pour le moment'
+    await expect(page.getByText(text, { exact: true })).toBeVisible()
+    await expect(page.getByText(newTopic, { exact: true }).first()).toBeVisible()
+  })
+}
+
 test('returns to the current URL after switching language and signing out', async ({ page }) => {
   await page.route('**/__goose_page/**', route => route.fulfill({ json: {
     ...homePage, url: '/' + new URL(route.request().url()).search,
@@ -738,7 +754,7 @@ test('loads the destination topic dictionary in the URL language during SPA navi
       unrelatedLocales: Boolean(resources.it?.['site.topic'] || resources.ru?.['site.topic']),
     }
   })
-  expect(prepared).toEqual({ japanese: true, englishFallback: true, unrelatedLocales: false })
+  expect(prepared).toEqual({ japanese: true, englishFallback: false, unrelatedLocales: false })
 })
 
 test('requests role and permission labels in the page language', async ({ page }) => {
@@ -792,7 +808,7 @@ test('detects Russian on login and offers it as the site default', async ({ page
 })
 
 test('uses the site default in the admin when browser languages are unsupported', async ({ page }) => {
-  await page.addInitScript(() => Object.defineProperty(navigator, 'languages', { get: () => ['fr-FR'] }))
+  await page.addInitScript(() => Object.defineProperty(navigator, 'languages', { get: () => ['nl-NL'] }))
   await page.route('**/__goose_page/**', route => route.fulfill({ json: {
     ...adminPage, layout: { ...adminPage.layout, site: { ...adminPage.layout.site, defaultLocale: 'it' } },
   } }))

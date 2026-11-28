@@ -1,10 +1,10 @@
 // Package i18n provides lightweight server-side translation for the
 // server-rendered surfaces (SEO / no-JS templates, the activation page and
-// e-mail bodies). The React frontend has its own dictionaries under
-// resource/packages/client/src/i18n; this package covers only what the Go side renders.
+// e-mail bodies). The React frontend generates its dictionaries from
+// resource/packages/i18n/catalog.
 //
 // Supported locales mirror the frontend (resource/packages/client/src/i18n/locale.ts):
-// zh (source / fallback), en, ja, it and ru.
+// zh (source / fallback), en, ja, it, ru, ko, and fr.
 package i18n
 
 import (
@@ -18,7 +18,7 @@ import (
 var localeFS embed.FS
 
 // SupportedLocales lists the locales the server can render, in preference order.
-var SupportedLocales = []string{"zh", "en", "ja", "it", "ru"}
+var SupportedLocales = []string{"zh", "en", "ja", "it", "ru", "ko", "fr"}
 
 // Fallback is used when a locale or a key is missing. It matches the frontend
 // fallbackLocale so the two stay consistent.

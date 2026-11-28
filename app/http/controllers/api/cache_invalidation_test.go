@@ -185,7 +185,7 @@ func TestPageConfigSaveRefreshesWarmCache(t *testing.T) {
 	}
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Request = httptest.NewRequest("GET", "/", nil)
-	c.Request.Header.Set("Accept-Language", "fr-FR")
+	c.Request.Header.Set("Accept-Language", "nl-NL")
 	if lang := component.RequestLang(c); lang != "it" {
 		t.Fatalf("site default after save = %q", lang)
 	}

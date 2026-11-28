@@ -7,7 +7,7 @@ const trustLabels = {
     "grantedByAdmin": "管理者が付与",
     "cooldown": "待機時間",
     "minUploadAccountAgeMinutes": "アップロード待機（分）",
-    "maxDailyTopics": "トピック/日",
+    "maxDailyTopics": "スレッド/日",
     "unlimited": "無制限"
   },
   "it": {

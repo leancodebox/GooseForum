@@ -3,16 +3,22 @@
     "source": "操作失败。",
     "translations": {
       "en": {"text":"Action failed.","sourceRevision":"d3e48d7456ccb6d34df9301efb602b20594c66a7bec33c9189d6dbe354715eb8","reviewed":true},
-      "ru": {"text":"Действие не удалось выполнить.","sourceRevision":"d3e48d7456ccb6d34df9301efb602b20594c66a7bec33c9189d6dbe354715eb8","reviewed":true}
+      "ja": {"text":"操作できませんでした。","sourceRevision":"d3e48d7456ccb6d34df9301efb602b20594c66a7bec33c9189d6dbe354715eb8","reviewed":true},
+      "it": {"text":"Operazione non riuscita.","sourceRevision":"d3e48d7456ccb6d34df9301efb602b20594c66a7bec33c9189d6dbe354715eb8","reviewed":true},
+      "ru": {"text":"Действие не удалось выполнить.","sourceRevision":"d3e48d7456ccb6d34df9301efb602b20594c66a7bec33c9189d6dbe354715eb8","reviewed":true},
+      "ko": {"text":"작업을 완료하지 못했습니다.","sourceRevision":"d3e48d7456ccb6d34df9301efb602b20594c66a7bec33c9189d6dbe354715eb8","reviewed":true},
+      "fr": {"text":"Impossible d’effectuer cette action.","sourceRevision":"d3e48d7456ccb6d34df9301efb602b20594c66a7bec33c9189d6dbe354715eb8","reviewed":true}
     }
   },
   "activeParticipants": {
     "source": "活跃参与者",
     "translations": {
       "en": {"text":"Active participants","sourceRevision":"9390eea7c26bf289baa36d5fc54604075af8d877c48f2f239f6649e680cb1a67","reviewed":true},
-      "ja": {"text":"アクティブな参加者","sourceRevision":"9390eea7c26bf289baa36d5fc54604075af8d877c48f2f239f6649e680cb1a67","reviewed":true},
+      "ja": {"text":"よく参加する人","sourceRevision":"9390eea7c26bf289baa36d5fc54604075af8d877c48f2f239f6649e680cb1a67","reviewed":true},
       "it": {"text":"Partecipanti attivi","sourceRevision":"9390eea7c26bf289baa36d5fc54604075af8d877c48f2f239f6649e680cb1a67","reviewed":true},
-      "ru": {"text":"Активные участники","sourceRevision":"9390eea7c26bf289baa36d5fc54604075af8d877c48f2f239f6649e680cb1a67","reviewed":true}
+      "ru": {"text":"Активные участники","sourceRevision":"9390eea7c26bf289baa36d5fc54604075af8d877c48f2f239f6649e680cb1a67","reviewed":true},
+      "ko": {"text":"활발한 참여자","sourceRevision":"9390eea7c26bf289baa36d5fc54604075af8d877c48f2f239f6649e680cb1a67","reviewed":true},
+      "fr": {"text":"Participants actifs","sourceRevision":"9390eea7c26bf289baa36d5fc54604075af8d877c48f2f239f6649e680cb1a67","reviewed":true}
     }
   },
   "allRepliesShown": {
@@ -21,7 +27,9 @@
       "en": {"text":"All replies shown","sourceRevision":"50dc07ced49f38b0bcc1cbce3fc9cc0d6c1bf01cf6a57b0f73d983c2e78147fd","reviewed":true},
       "ja": {"text":"すべての返信を表示しました","sourceRevision":"50dc07ced49f38b0bcc1cbce3fc9cc0d6c1bf01cf6a57b0f73d983c2e78147fd","reviewed":true},
       "it": {"text":"Tutte le risposte mostrate","sourceRevision":"50dc07ced49f38b0bcc1cbce3fc9cc0d6c1bf01cf6a57b0f73d983c2e78147fd","reviewed":true},
-      "ru": {"text":"Все ответы показаны","sourceRevision":"50dc07ced49f38b0bcc1cbce3fc9cc0d6c1bf01cf6a57b0f73d983c2e78147fd","reviewed":true}
+      "ru": {"text":"Все ответы показаны","sourceRevision":"50dc07ced49f38b0bcc1cbce3fc9cc0d6c1bf01cf6a57b0f73d983c2e78147fd","reviewed":true},
+      "ko": {"text":"모든 답글 표시","sourceRevision":"50dc07ced49f38b0bcc1cbce3fc9cc0d6c1bf01cf6a57b0f73d983c2e78147fd","reviewed":true},
+      "fr": {"text":"Toutes les réponses indiquées","sourceRevision":"50dc07ced49f38b0bcc1cbce3fc9cc0d6c1bf01cf6a57b0f73d983c2e78147fd","reviewed":true}
     }
   },
   "body": {
@@ -30,25 +38,31 @@
       "en": {"text":"Body","sourceRevision":"960ef342a4ce2230f9c82508a30359afdb6fd63828639b229fb590a5cc220d77","reviewed":true},
       "ja": {"text":"本文","sourceRevision":"960ef342a4ce2230f9c82508a30359afdb6fd63828639b229fb590a5cc220d77","reviewed":true},
       "it": {"text":"Corpo","sourceRevision":"960ef342a4ce2230f9c82508a30359afdb6fd63828639b229fb590a5cc220d77","reviewed":true},
-      "ru": {"text":"Текст","sourceRevision":"960ef342a4ce2230f9c82508a30359afdb6fd63828639b229fb590a5cc220d77","reviewed":true}
+      "ru": {"text":"Текст","sourceRevision":"960ef342a4ce2230f9c82508a30359afdb6fd63828639b229fb590a5cc220d77","reviewed":true},
+      "ko": {"text":"본문","sourceRevision":"960ef342a4ce2230f9c82508a30359afdb6fd63828639b229fb590a5cc220d77","reviewed":true},
+      "fr": {"text":"Corps du message","sourceRevision":"960ef342a4ce2230f9c82508a30359afdb6fd63828639b229fb590a5cc220d77","reviewed":true}
     }
   },
   "bookmark": {
     "source": "收藏",
     "translations": {
       "en": {"text":"Bookmark","sourceRevision":"8fa71193e00b3630f46ff38c324dd44acdafa05c30051eae027b3a7607fa35e3","reviewed":true},
-      "ja": {"text":"ブックマーク","sourceRevision":"8fa71193e00b3630f46ff38c324dd44acdafa05c30051eae027b3a7607fa35e3","reviewed":true},
+      "ja": {"text":"お気に入りに追加","sourceRevision":"8fa71193e00b3630f46ff38c324dd44acdafa05c30051eae027b3a7607fa35e3","reviewed":true},
       "it": {"text":"Salva","sourceRevision":"8fa71193e00b3630f46ff38c324dd44acdafa05c30051eae027b3a7607fa35e3","reviewed":true},
-      "ru": {"text":"В закладки","sourceRevision":"8fa71193e00b3630f46ff38c324dd44acdafa05c30051eae027b3a7607fa35e3","reviewed":true}
+      "ru": {"text":"В закладки","sourceRevision":"8fa71193e00b3630f46ff38c324dd44acdafa05c30051eae027b3a7607fa35e3","reviewed":true},
+      "ko": {"text":"북마크 추가","sourceRevision":"8fa71193e00b3630f46ff38c324dd44acdafa05c30051eae027b3a7607fa35e3","reviewed":true},
+      "fr": {"text":"Ajouter aux favoris","sourceRevision":"8fa71193e00b3630f46ff38c324dd44acdafa05c30051eae027b3a7607fa35e3","reviewed":true}
     }
   },
   "bookmarked": {
     "source": "已收藏",
     "translations": {
       "en": {"text":"Bookmarked","sourceRevision":"3de408dc313f2c3a3b67c83c2a2e4c308eb42191f929fe26b146a31a383cdfcf","reviewed":true},
-      "ja": {"text":"ブックマーク済み","sourceRevision":"3de408dc313f2c3a3b67c83c2a2e4c308eb42191f929fe26b146a31a383cdfcf","reviewed":true},
+      "ja": {"text":"お気に入りに追加済み","sourceRevision":"3de408dc313f2c3a3b67c83c2a2e4c308eb42191f929fe26b146a31a383cdfcf","reviewed":true},
       "it": {"text":"Salvato","sourceRevision":"3de408dc313f2c3a3b67c83c2a2e4c308eb42191f929fe26b146a31a383cdfcf","reviewed":true},
-      "ru": {"text":"В закладках","sourceRevision":"3de408dc313f2c3a3b67c83c2a2e4c308eb42191f929fe26b146a31a383cdfcf","reviewed":true}
+      "ru": {"text":"В закладках","sourceRevision":"3de408dc313f2c3a3b67c83c2a2e4c308eb42191f929fe26b146a31a383cdfcf","reviewed":true},
+      "ko": {"text":"북마크에 저장됨","sourceRevision":"3de408dc313f2c3a3b67c83c2a2e4c308eb42191f929fe26b146a31a383cdfcf","reviewed":true},
+      "fr": {"text":"Ajouté aux favoris","sourceRevision":"3de408dc313f2c3a3b67c83c2a2e4c308eb42191f929fe26b146a31a383cdfcf","reviewed":true}
     }
   },
   "cancel": {
@@ -57,7 +71,9 @@
       "en": {"text":"Cancel","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
       "ja": {"text":"キャンセル","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
       "it": {"text":"Annulla","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
-      "ru": {"text":"Отмена","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true}
+      "ru": {"text":"Отмена","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
+      "ko": {"text":"취소","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true},
+      "fr": {"text":"Annuler","sourceRevision":"4080527761784af6df0fa991334e1aa81fee21a2a33afed0065303827b942023","reviewed":true}
     }
   },
   "cardFailed": {
@@ -66,14 +82,20 @@
       "en": {"text":"Could not create the image. Please try again.","sourceRevision":"6ffb374225ce2cf9e5804938eb4c64197758509027adc8c560e6906092aaa93b","reviewed":true},
       "ja": {"text":"画像を生成できませんでした。もう一度お試しください。","sourceRevision":"6ffb374225ce2cf9e5804938eb4c64197758509027adc8c560e6906092aaa93b","reviewed":true},
       "it": {"text":"Creazione immagine non riuscita. Riprova.","sourceRevision":"6ffb374225ce2cf9e5804938eb4c64197758509027adc8c560e6906092aaa93b","reviewed":true},
-      "ru": {"text":"Не удалось создать изображение. Попробуйте ещё раз.","sourceRevision":"6ffb374225ce2cf9e5804938eb4c64197758509027adc8c560e6906092aaa93b","reviewed":true}
+      "ru": {"text":"Не удалось создать изображение. Попробуйте ещё раз.","sourceRevision":"6ffb374225ce2cf9e5804938eb4c64197758509027adc8c560e6906092aaa93b","reviewed":true},
+      "ko": {"text":"이미지를 만들 수 없습니다. 다시 시도하십시오.","sourceRevision":"6ffb374225ce2cf9e5804938eb4c64197758509027adc8c560e6906092aaa93b","reviewed":true},
+      "fr": {"text":"Impossible de créer l’image. Veuillez réessayer.","sourceRevision":"6ffb374225ce2cf9e5804938eb4c64197758509027adc8c560e6906092aaa93b","reviewed":true}
     }
   },
   "close": {
     "source": "关闭",
     "translations": {
       "en": {"text":"Close","sourceRevision":"cd359a6a768eb1e10e9d6c7a6594aa7bb1e997582cceaa75e81bb1493c20bbff","reviewed":true},
-      "ru": {"text":"Закрыть","sourceRevision":"cd359a6a768eb1e10e9d6c7a6594aa7bb1e997582cceaa75e81bb1493c20bbff","reviewed":true}
+      "ja": {"text":"閉じる","sourceRevision":"cd359a6a768eb1e10e9d6c7a6594aa7bb1e997582cceaa75e81bb1493c20bbff","reviewed":true},
+      "it": {"text":"Chiudi","sourceRevision":"cd359a6a768eb1e10e9d6c7a6594aa7bb1e997582cceaa75e81bb1493c20bbff","reviewed":true},
+      "ru": {"text":"Закрыть","sourceRevision":"cd359a6a768eb1e10e9d6c7a6594aa7bb1e997582cceaa75e81bb1493c20bbff","reviewed":true},
+      "ko": {"text":"닫기","sourceRevision":"cd359a6a768eb1e10e9d6c7a6594aa7bb1e997582cceaa75e81bb1493c20bbff","reviewed":true},
+      "fr": {"text":"Fermer","sourceRevision":"cd359a6a768eb1e10e9d6c7a6594aa7bb1e997582cceaa75e81bb1493c20bbff","reviewed":true}
     }
   },
   "collapseReply": {
@@ -82,34 +104,42 @@
       "en": {"text":"Show less","sourceRevision":"279f61901f83dc4939d6bc36fa91c58b5204edbe0798fa19aa814a95af8286f5","reviewed":true},
       "ja": {"text":"折りたたむ","sourceRevision":"279f61901f83dc4939d6bc36fa91c58b5204edbe0798fa19aa814a95af8286f5","reviewed":true},
       "it": {"text":"Riduci","sourceRevision":"279f61901f83dc4939d6bc36fa91c58b5204edbe0798fa19aa814a95af8286f5","reviewed":true},
-      "ru": {"text":"Показать меньше","sourceRevision":"279f61901f83dc4939d6bc36fa91c58b5204edbe0798fa19aa814a95af8286f5","reviewed":true}
+      "ru": {"text":"Показать меньше","sourceRevision":"279f61901f83dc4939d6bc36fa91c58b5204edbe0798fa19aa814a95af8286f5","reviewed":true},
+      "ko": {"text":"접기","sourceRevision":"279f61901f83dc4939d6bc36fa91c58b5204edbe0798fa19aa814a95af8286f5","reviewed":true},
+      "fr": {"text":"Afficher moins","sourceRevision":"279f61901f83dc4939d6bc36fa91c58b5204edbe0798fa19aa814a95af8286f5","reviewed":true}
     }
   },
   "confirmDelete": {
     "source": "确认删除",
     "translations": {
       "en": {"text":"Confirm delete","sourceRevision":"199ea2a78bd01b8c8897de10485910fd3824ea108363c75c36c277587d5c16c9","reviewed":true},
-      "ja": {"text":"削除を確定","sourceRevision":"199ea2a78bd01b8c8897de10485910fd3824ea108363c75c36c277587d5c16c9","reviewed":true},
+      "ja": {"text":"削除する","sourceRevision":"199ea2a78bd01b8c8897de10485910fd3824ea108363c75c36c277587d5c16c9","reviewed":true},
       "it": {"text":"Conferma eliminazione","sourceRevision":"199ea2a78bd01b8c8897de10485910fd3824ea108363c75c36c277587d5c16c9","reviewed":true},
-      "ru": {"text":"Подтвердить удаление","sourceRevision":"199ea2a78bd01b8c8897de10485910fd3824ea108363c75c36c277587d5c16c9","reviewed":true}
+      "ru": {"text":"Подтвердить удаление","sourceRevision":"199ea2a78bd01b8c8897de10485910fd3824ea108363c75c36c277587d5c16c9","reviewed":true},
+      "ko": {"text":"삭제 확인","sourceRevision":"199ea2a78bd01b8c8897de10485910fd3824ea108363c75c36c277587d5c16c9","reviewed":true},
+      "fr": {"text":"Confirmer la suppression","sourceRevision":"199ea2a78bd01b8c8897de10485910fd3824ea108363c75c36c277587d5c16c9","reviewed":true}
     }
   },
   "confirmModerationBan": {
     "source": "确认封禁",
     "translations": {
       "en": {"text":"Confirm block","sourceRevision":"a455d687feb86b6aa8e7377f5710146a98d3f5ec0f691fcea3829f535ee8282d","reviewed":true},
-      "ja": {"text":"封禁を確定","sourceRevision":"a455d687feb86b6aa8e7377f5710146a98d3f5ec0f691fcea3829f535ee8282d","reviewed":true},
-      "it": {"text":"Conferma blocco","sourceRevision":"a455d687feb86b6aa8e7377f5710146a98d3f5ec0f691fcea3829f535ee8282d","reviewed":true},
-      "ru": {"text":"Подтвердить блокировку","sourceRevision":"a455d687feb86b6aa8e7377f5710146a98d3f5ec0f691fcea3829f535ee8282d","reviewed":true}
+      "ja": {"text":"非表示にする","sourceRevision":"a455d687feb86b6aa8e7377f5710146a98d3f5ec0f691fcea3829f535ee8282d","reviewed":true},
+      "it": {"text":"Nascondi","sourceRevision":"a455d687feb86b6aa8e7377f5710146a98d3f5ec0f691fcea3829f535ee8282d","reviewed":true},
+      "ru": {"text":"Подтвердить блокировку","sourceRevision":"a455d687feb86b6aa8e7377f5710146a98d3f5ec0f691fcea3829f535ee8282d","reviewed":true},
+      "ko": {"text":"숨기기","sourceRevision":"a455d687feb86b6aa8e7377f5710146a98d3f5ec0f691fcea3829f535ee8282d","reviewed":true},
+      "fr": {"text":"Masquer","sourceRevision":"a455d687feb86b6aa8e7377f5710146a98d3f5ec0f691fcea3829f535ee8282d","reviewed":true}
     }
   },
   "confirmModerationUnban": {
     "source": "确认解封",
     "translations": {
       "en": {"text":"Confirm restore","sourceRevision":"264e123c9a1d196bd83edd25d81ab154515f0c4f2cd8ec1bd20768111605240c","reviewed":true},
-      "ja": {"text":"解除を確定","sourceRevision":"264e123c9a1d196bd83edd25d81ab154515f0c4f2cd8ec1bd20768111605240c","reviewed":true},
-      "it": {"text":"Conferma ripristino","sourceRevision":"264e123c9a1d196bd83edd25d81ab154515f0c4f2cd8ec1bd20768111605240c","reviewed":true},
-      "ru": {"text":"Подтвердить восстановление","sourceRevision":"264e123c9a1d196bd83edd25d81ab154515f0c4f2cd8ec1bd20768111605240c","reviewed":true}
+      "ja": {"text":"再表示する","sourceRevision":"264e123c9a1d196bd83edd25d81ab154515f0c4f2cd8ec1bd20768111605240c","reviewed":true},
+      "it": {"text":"Ripristina","sourceRevision":"264e123c9a1d196bd83edd25d81ab154515f0c4f2cd8ec1bd20768111605240c","reviewed":true},
+      "ru": {"text":"Подтвердить восстановление","sourceRevision":"264e123c9a1d196bd83edd25d81ab154515f0c4f2cd8ec1bd20768111605240c","reviewed":true},
+      "ko": {"text":"다시 표시하기","sourceRevision":"264e123c9a1d196bd83edd25d81ab154515f0c4f2cd8ec1bd20768111605240c","reviewed":true},
+      "fr": {"text":"Rétablir","sourceRevision":"264e123c9a1d196bd83edd25d81ab154515f0c4f2cd8ec1bd20768111605240c","reviewed":true}
     }
   },
   "copyLink": {
@@ -118,7 +148,9 @@
       "en": {"text":"Copy link","sourceRevision":"cf67a0e68eec6eed46821fd71ded312dd8d0a89f26eea26d225b79c2b580f765","reviewed":true},
       "ja": {"text":"リンクをコピー","sourceRevision":"cf67a0e68eec6eed46821fd71ded312dd8d0a89f26eea26d225b79c2b580f765","reviewed":true},
       "it": {"text":"Copia link","sourceRevision":"cf67a0e68eec6eed46821fd71ded312dd8d0a89f26eea26d225b79c2b580f765","reviewed":true},
-      "ru": {"text":"Скопировать ссылку","sourceRevision":"cf67a0e68eec6eed46821fd71ded312dd8d0a89f26eea26d225b79c2b580f765","reviewed":true}
+      "ru": {"text":"Скопировать ссылку","sourceRevision":"cf67a0e68eec6eed46821fd71ded312dd8d0a89f26eea26d225b79c2b580f765","reviewed":true},
+      "ko": {"text":"링크 복사","sourceRevision":"cf67a0e68eec6eed46821fd71ded312dd8d0a89f26eea26d225b79c2b580f765","reviewed":true},
+      "fr": {"text":"Copier le lien","sourceRevision":"cf67a0e68eec6eed46821fd71ded312dd8d0a89f26eea26d225b79c2b580f765","reviewed":true}
     }
   },
   "copyManually": {
@@ -127,16 +159,20 @@
       "en": {"text":"Copy the link above manually.","sourceRevision":"2eccdf7991d69e58650387185613a63425dc4dbb16ee9fe9fc14831a214b3d5a","reviewed":true},
       "ja": {"text":"上のリンクを手動でコピーしてください。","sourceRevision":"2eccdf7991d69e58650387185613a63425dc4dbb16ee9fe9fc14831a214b3d5a","reviewed":true},
       "it": {"text":"Copia manualmente il link qui sopra.","sourceRevision":"2eccdf7991d69e58650387185613a63425dc4dbb16ee9fe9fc14831a214b3d5a","reviewed":true},
-      "ru": {"text":"Скопируйте ссылку выше вручную.","sourceRevision":"2eccdf7991d69e58650387185613a63425dc4dbb16ee9fe9fc14831a214b3d5a","reviewed":true}
+      "ru": {"text":"Скопируйте ссылку выше вручную.","sourceRevision":"2eccdf7991d69e58650387185613a63425dc4dbb16ee9fe9fc14831a214b3d5a","reviewed":true},
+      "ko": {"text":"위의 링크를 복사합니다.","sourceRevision":"2eccdf7991d69e58650387185613a63425dc4dbb16ee9fe9fc14831a214b3d5a","reviewed":true},
+      "fr": {"text":"Copiez manuellement le lien ci-dessus.","sourceRevision":"2eccdf7991d69e58650387185613a63425dc4dbb16ee9fe9fc14831a214b3d5a","reviewed":true}
     }
   },
   "createdAt": {
     "source": "创建于",
     "translations": {
       "en": {"text":"Created","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true},
-      "ja": {"text":"作成","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true},
+      "ja": {"text":"作成日","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true},
       "it": {"text":"Creato","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true},
-      "ru": {"text":"Создано","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true}
+      "ru": {"text":"Создано","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true},
+      "ko": {"text":"생성일","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true},
+      "fr": {"text":"Création","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true}
     }
   },
   "delete": {
@@ -145,16 +181,20 @@
       "en": {"text":"Delete","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
       "ja": {"text":"削除","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
       "it": {"text":"Elimina","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
-      "ru": {"text":"Удалить","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true}
+      "ru": {"text":"Удалить","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
+      "ko": {"text":"삭제","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true},
+      "fr": {"text":"Supprimer","sourceRevision":"4135f358a6b5b7bac119125a0e40c4bcdbcadff7af25064bf75752b4871626f4","reviewed":true}
     }
   },
   "deleteReplyDescription": {
     "source": "删除后这条回复会从主题中移除，相关回复数也会同步更新。",
     "translations": {
       "en": {"text":"After deletion, this reply will be removed from the topic and reply counts will update.","sourceRevision":"e905de7ce7858c99ab6fc7fe976aefba1f935daa18fa99b6a113298f249ec52c","reviewed":true},
-      "ja": {"text":"削除すると、この返信はトピックから削除され、返信数も更新されます。","sourceRevision":"e905de7ce7858c99ab6fc7fe976aefba1f935daa18fa99b6a113298f249ec52c","reviewed":true},
+      "ja": {"text":"削除すると、この返信はスレッドから削除され、返信数も更新されます。","sourceRevision":"e905de7ce7858c99ab6fc7fe976aefba1f935daa18fa99b6a113298f249ec52c","reviewed":true},
       "it": {"text":"Dopo l’eliminazione, questa risposta sarà rimossa dall’argomento e i conteggi delle risposte si aggiorneranno.","sourceRevision":"e905de7ce7858c99ab6fc7fe976aefba1f935daa18fa99b6a113298f249ec52c","reviewed":true},
-      "ru": {"text":"После удаления ответ исчезнет из темы, а счётчик ответов будет обновлён.","sourceRevision":"e905de7ce7858c99ab6fc7fe976aefba1f935daa18fa99b6a113298f249ec52c","reviewed":true}
+      "ru": {"text":"После удаления ответ исчезнет из темы, а счётчик ответов будет обновлён.","sourceRevision":"e905de7ce7858c99ab6fc7fe976aefba1f935daa18fa99b6a113298f249ec52c","reviewed":true},
+      "ko": {"text":"삭제 후,이 대답은 게시글에서 제거되고 응답 카운트는 업데이트됩니다.","sourceRevision":"e905de7ce7858c99ab6fc7fe976aefba1f935daa18fa99b6a113298f249ec52c","reviewed":true},
+      "fr": {"text":"Après la suppression, cette réponse sera supprimée du sujet et les comptes de réponses seront mis à jour.","sourceRevision":"e905de7ce7858c99ab6fc7fe976aefba1f935daa18fa99b6a113298f249ec52c","reviewed":true}
     }
   },
   "deleteReplyTitle": {
@@ -163,32 +203,42 @@
       "en": {"text":"Delete this reply?","sourceRevision":"2b21790e256398c1eb9113d37acf5e44b693a3e4a24496389467dffe31b75a2c","reviewed":true},
       "ja": {"text":"この返信を削除しますか？","sourceRevision":"2b21790e256398c1eb9113d37acf5e44b693a3e4a24496389467dffe31b75a2c","reviewed":true},
       "it": {"text":"Eliminare questa risposta?","sourceRevision":"2b21790e256398c1eb9113d37acf5e44b693a3e4a24496389467dffe31b75a2c","reviewed":true},
-      "ru": {"text":"Удалить этот ответ?","sourceRevision":"2b21790e256398c1eb9113d37acf5e44b693a3e4a24496389467dffe31b75a2c","reviewed":true}
+      "ru": {"text":"Удалить этот ответ?","sourceRevision":"2b21790e256398c1eb9113d37acf5e44b693a3e4a24496389467dffe31b75a2c","reviewed":true},
+      "ko": {"text":"이 답글을 삭제할까요?","sourceRevision":"2b21790e256398c1eb9113d37acf5e44b693a3e4a24496389467dffe31b75a2c","reviewed":true},
+      "fr": {"text":"Supprimer cette réponse ?","sourceRevision":"2b21790e256398c1eb9113d37acf5e44b693a3e4a24496389467dffe31b75a2c","reviewed":true}
     }
   },
   "deleteTopicDescription": {
     "source": "删除后主题将不再对普通用户显示，但管理员仍可在后台查看记录。",
     "translations": {
       "en": {"text":"The topic will no longer be visible to regular users, but administrators can still see its record.","sourceRevision":"31e4ceb069fb27839f733263ece58ef22d0e5bb82de2db08e2caedf80f1c5384","reviewed":true},
-      "ja": {"text":"一般ユーザーには表示されなくなりますが、管理者は管理画面で記録を確認できます。","sourceRevision":"31e4ceb069fb27839f733263ece58ef22d0e5bb82de2db08e2caedf80f1c5384","reviewed":true},
-      "ru": {"text":"Тема перестанет быть видимой для обычных пользователей, но администраторы по‑прежнему смогут видеть её запись.","sourceRevision":"31e4ceb069fb27839f733263ece58ef22d0e5bb82de2db08e2caedf80f1c5384","reviewed":true}
+      "ja": {"text":"削除後、このスレッドは一般のメンバーに表示されなくなります。管理者は管理画面で記録を確認できます。","sourceRevision":"31e4ceb069fb27839f733263ece58ef22d0e5bb82de2db08e2caedf80f1c5384","reviewed":true},
+      "it": {"text":"Dopo l’eliminazione, i membri non vedranno più questa discussione. Gli amministratori potranno ancora consultarne la registrazione nel pannello di amministrazione.","sourceRevision":"31e4ceb069fb27839f733263ece58ef22d0e5bb82de2db08e2caedf80f1c5384","reviewed":true},
+      "ru": {"text":"Тема перестанет быть видимой для обычных пользователей, но администраторы по‑прежнему смогут видеть её запись.","sourceRevision":"31e4ceb069fb27839f733263ece58ef22d0e5bb82de2db08e2caedf80f1c5384","reviewed":true},
+      "ko": {"text":"삭제한 게시글은 일반 회원에게 보이지 않습니다. 관리자는 관리자 화면에서 기록을 확인할 수 있습니다.","sourceRevision":"31e4ceb069fb27839f733263ece58ef22d0e5bb82de2db08e2caedf80f1c5384","reviewed":true},
+      "fr": {"text":"Après la suppression, le sujet ne sera plus visible par les membres. Les administrateurs pourront toujours consulter sa trace dans le panneau d’administration.","sourceRevision":"31e4ceb069fb27839f733263ece58ef22d0e5bb82de2db08e2caedf80f1c5384","reviewed":true}
     }
   },
   "deleteTopicTitle": {
     "source": "删除这个主题？",
     "translations": {
       "en": {"text":"Delete this topic?","sourceRevision":"de20bd37e2e78a765ec8fb5d2f75bdf7e83e8ae1cbbb3d81b804379baa8cf3e3","reviewed":true},
-      "ja": {"text":"このトピックを削除しますか？","sourceRevision":"de20bd37e2e78a765ec8fb5d2f75bdf7e83e8ae1cbbb3d81b804379baa8cf3e3","reviewed":true},
-      "ru": {"text":"Удалить эту тему?","sourceRevision":"de20bd37e2e78a765ec8fb5d2f75bdf7e83e8ae1cbbb3d81b804379baa8cf3e3","reviewed":true}
+      "ja": {"text":"このスレッドを削除しますか？","sourceRevision":"de20bd37e2e78a765ec8fb5d2f75bdf7e83e8ae1cbbb3d81b804379baa8cf3e3","reviewed":true},
+      "it": {"text":"Eliminare questa discussione?","sourceRevision":"de20bd37e2e78a765ec8fb5d2f75bdf7e83e8ae1cbbb3d81b804379baa8cf3e3","reviewed":true},
+      "ru": {"text":"Удалить эту тему?","sourceRevision":"de20bd37e2e78a765ec8fb5d2f75bdf7e83e8ae1cbbb3d81b804379baa8cf3e3","reviewed":true},
+      "ko": {"text":"이 게시글을 삭제할까요?","sourceRevision":"de20bd37e2e78a765ec8fb5d2f75bdf7e83e8ae1cbbb3d81b804379baa8cf3e3","reviewed":true},
+      "fr": {"text":"Supprimer ce sujet ?","sourceRevision":"de20bd37e2e78a765ec8fb5d2f75bdf7e83e8ae1cbbb3d81b804379baa8cf3e3","reviewed":true}
     }
   },
   "earliestContent": {
     "source": "最早内容",
     "translations": {
       "en": {"text":"Earliest content","sourceRevision":"e8ae783f21d4fb4e23e439a10a15d8c404cdf0fd0c46e368acc2cacf4bd6219f","reviewed":true},
-      "ja": {"text":"最初の内容","sourceRevision":"e8ae783f21d4fb4e23e439a10a15d8c404cdf0fd0c46e368acc2cacf4bd6219f","reviewed":true},
-      "it": {"text":"Contenuto più vecchio","sourceRevision":"e8ae783f21d4fb4e23e439a10a15d8c404cdf0fd0c46e368acc2cacf4bd6219f","reviewed":true},
-      "ru": {"text":"Самый ранний контент","sourceRevision":"e8ae783f21d4fb4e23e439a10a15d8c404cdf0fd0c46e368acc2cacf4bd6219f","reviewed":true}
+      "ja": {"text":"最初の投稿","sourceRevision":"e8ae783f21d4fb4e23e439a10a15d8c404cdf0fd0c46e368acc2cacf4bd6219f","reviewed":true},
+      "it": {"text":"Contenuto originale","sourceRevision":"e8ae783f21d4fb4e23e439a10a15d8c404cdf0fd0c46e368acc2cacf4bd6219f","reviewed":true},
+      "ru": {"text":"Самый ранний контент","sourceRevision":"e8ae783f21d4fb4e23e439a10a15d8c404cdf0fd0c46e368acc2cacf4bd6219f","reviewed":true},
+      "ko": {"text":"최초 작성 내용","sourceRevision":"e8ae783f21d4fb4e23e439a10a15d8c404cdf0fd0c46e368acc2cacf4bd6219f","reviewed":true},
+      "fr": {"text":"Contenu d’origine","sourceRevision":"e8ae783f21d4fb4e23e439a10a15d8c404cdf0fd0c46e368acc2cacf4bd6219f","reviewed":true}
     }
   },
   "edit": {
@@ -197,7 +247,9 @@
       "en": {"text":"Edit","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true},
       "ja": {"text":"編集","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true},
       "it": {"text":"Modifica","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true},
-      "ru": {"text":"Редактировать","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true}
+      "ru": {"text":"Редактировать","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true},
+      "ko": {"text":"편집","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true},
+      "fr": {"text":"Modifier","sourceRevision":"06fb1d5834458baf4aa7cd140bb1df3e8953f207ceb60fb8bbe6292dbbbb1bb6","reviewed":true}
     }
   },
   "editOwnReply": {
@@ -206,16 +258,20 @@
       "en": {"text":"Edit your reply","sourceRevision":"0ab9d4775bf841dbfcea0ae283c95315375e4710c93444c3946090b6399e7110","reviewed":true},
       "ja": {"text":"自分の返信を編集","sourceRevision":"0ab9d4775bf841dbfcea0ae283c95315375e4710c93444c3946090b6399e7110","reviewed":true},
       "it": {"text":"Modifica la tua risposta","sourceRevision":"0ab9d4775bf841dbfcea0ae283c95315375e4710c93444c3946090b6399e7110","reviewed":true},
-      "ru": {"text":"Редактировать свой ответ","sourceRevision":"0ab9d4775bf841dbfcea0ae283c95315375e4710c93444c3946090b6399e7110","reviewed":true}
+      "ru": {"text":"Редактировать свой ответ","sourceRevision":"0ab9d4775bf841dbfcea0ae283c95315375e4710c93444c3946090b6399e7110","reviewed":true},
+      "ko": {"text":"당신의 대답을 편집하십시오","sourceRevision":"0ab9d4775bf841dbfcea0ae283c95315375e4710c93444c3946090b6399e7110","reviewed":true},
+      "fr": {"text":"Modifier votre réponse","sourceRevision":"0ab9d4775bf841dbfcea0ae283c95315375e4710c93444c3946090b6399e7110","reviewed":true}
     }
   },
   "editedAt": {
     "source": "已编辑于 {time}",
     "translations": {
       "en": {"text":"Edited at {time}","sourceRevision":"17c63d1f124f8d958fa5a4d331da0d9f67605641b4e0b58f0e92d7af9dddf86c","reviewed":true},
-      "ja": {"text":"{time} に編集済み","sourceRevision":"17c63d1f124f8d958fa5a4d331da0d9f67605641b4e0b58f0e92d7af9dddf86c","reviewed":true},
+      "ja": {"text":"{time}に編集","sourceRevision":"17c63d1f124f8d958fa5a4d331da0d9f67605641b4e0b58f0e92d7af9dddf86c","reviewed":true},
       "it": {"text":"Modificato il {time}","sourceRevision":"17c63d1f124f8d958fa5a4d331da0d9f67605641b4e0b58f0e92d7af9dddf86c","reviewed":true},
-      "ru": {"text":"Отредактировано в {time}","sourceRevision":"17c63d1f124f8d958fa5a4d331da0d9f67605641b4e0b58f0e92d7af9dddf86c","reviewed":true}
+      "ru": {"text":"Отредактировано в {time}","sourceRevision":"17c63d1f124f8d958fa5a4d331da0d9f67605641b4e0b58f0e92d7af9dddf86c","reviewed":true},
+      "ko": {"text":"{time}에 수정됨","sourceRevision":"17c63d1f124f8d958fa5a4d331da0d9f67605641b4e0b58f0e92d7af9dddf86c","reviewed":true},
+      "fr": {"text":"Modifié le {time}","sourceRevision":"17c63d1f124f8d958fa5a4d331da0d9f67605641b4e0b58f0e92d7af9dddf86c","reviewed":true}
     }
   },
   "expandReply": {
@@ -224,7 +280,9 @@
       "en": {"text":"Show all","sourceRevision":"88cc9f54c8bd1e832d76b883aa5ca0bba2ced1c8c5c62aebcf0af930bb3f2c44","reviewed":true},
       "ja": {"text":"すべて表示","sourceRevision":"88cc9f54c8bd1e832d76b883aa5ca0bba2ced1c8c5c62aebcf0af930bb3f2c44","reviewed":true},
       "it": {"text":"Mostra tutto","sourceRevision":"88cc9f54c8bd1e832d76b883aa5ca0bba2ced1c8c5c62aebcf0af930bb3f2c44","reviewed":true},
-      "ru": {"text":"Показать всё","sourceRevision":"88cc9f54c8bd1e832d76b883aa5ca0bba2ced1c8c5c62aebcf0af930bb3f2c44","reviewed":true}
+      "ru": {"text":"Показать всё","sourceRevision":"88cc9f54c8bd1e832d76b883aa5ca0bba2ced1c8c5c62aebcf0af930bb3f2c44","reviewed":true},
+      "ko": {"text":"모두 보기","sourceRevision":"88cc9f54c8bd1e832d76b883aa5ca0bba2ced1c8c5c62aebcf0af930bb3f2c44","reviewed":true},
+      "fr": {"text":"Tout afficher","sourceRevision":"88cc9f54c8bd1e832d76b883aa5ca0bba2ced1c8c5c62aebcf0af930bb3f2c44","reviewed":true}
     }
   },
   "fitImage": {
@@ -233,7 +291,9 @@
       "en": {"text":"Fit to screen","sourceRevision":"772a3cae47a9f81c7bc5266087e62410ecafd497bf441b4f5f85d51fc05f99f4","reviewed":true},
       "ja": {"text":"画面に合わせる","sourceRevision":"772a3cae47a9f81c7bc5266087e62410ecafd497bf441b4f5f85d51fc05f99f4","reviewed":true},
       "it": {"text":"Adatta allo schermo","sourceRevision":"772a3cae47a9f81c7bc5266087e62410ecafd497bf441b4f5f85d51fc05f99f4","reviewed":true},
-      "ru": {"text":"По размеру экрана","sourceRevision":"772a3cae47a9f81c7bc5266087e62410ecafd497bf441b4f5f85d51fc05f99f4","reviewed":true}
+      "ru": {"text":"По размеру экрана","sourceRevision":"772a3cae47a9f81c7bc5266087e62410ecafd497bf441b4f5f85d51fc05f99f4","reviewed":true},
+      "ko": {"text":"스크린에 적합","sourceRevision":"772a3cae47a9f81c7bc5266087e62410ecafd497bf441b4f5f85d51fc05f99f4","reviewed":true},
+      "fr": {"text":"Convient à l’écran","sourceRevision":"772a3cae47a9f81c7bc5266087e62410ecafd497bf441b4f5f85d51fc05f99f4","reviewed":true}
     }
   },
   "hiddenReplyBadge": {
@@ -242,7 +302,9 @@
       "en": {"text":"Handled","sourceRevision":"bd747fe40bd5e5c76b6a228ba899fb1f4a0892f54127101885f9783306803223","reviewed":true},
       "ja": {"text":"処理済み","sourceRevision":"bd747fe40bd5e5c76b6a228ba899fb1f4a0892f54127101885f9783306803223","reviewed":true},
       "it": {"text":"Gestita","sourceRevision":"bd747fe40bd5e5c76b6a228ba899fb1f4a0892f54127101885f9783306803223","reviewed":true},
-      "ru": {"text":"Обработано","sourceRevision":"bd747fe40bd5e5c76b6a228ba899fb1f4a0892f54127101885f9783306803223","reviewed":true}
+      "ru": {"text":"Обработано","sourceRevision":"bd747fe40bd5e5c76b6a228ba899fb1f4a0892f54127101885f9783306803223","reviewed":true},
+      "ko": {"text":"처리 완료","sourceRevision":"bd747fe40bd5e5c76b6a228ba899fb1f4a0892f54127101885f9783306803223","reviewed":true},
+      "fr": {"text":"Poignée","sourceRevision":"bd747fe40bd5e5c76b6a228ba899fb1f4a0892f54127101885f9783306803223","reviewed":true}
     }
   },
   "hiddenReplyPlaceholder": {
@@ -251,74 +313,108 @@
       "en": {"text":"This reply has been handled","sourceRevision":"0c4f5f725b5fb273729f1633620e4fd8d79560bd3df6bf22c4d02d9a71d42dd6","reviewed":true},
       "ja": {"text":"この返信は処理済みです","sourceRevision":"0c4f5f725b5fb273729f1633620e4fd8d79560bd3df6bf22c4d02d9a71d42dd6","reviewed":true},
       "it": {"text":"Questa risposta è stata gestita","sourceRevision":"0c4f5f725b5fb273729f1633620e4fd8d79560bd3df6bf22c4d02d9a71d42dd6","reviewed":true},
-      "ru": {"text":"Этот ответ обработан","sourceRevision":"0c4f5f725b5fb273729f1633620e4fd8d79560bd3df6bf22c4d02d9a71d42dd6","reviewed":true}
+      "ru": {"text":"Этот ответ обработан","sourceRevision":"0c4f5f725b5fb273729f1633620e4fd8d79560bd3df6bf22c4d02d9a71d42dd6","reviewed":true},
+      "ko": {"text":"이 대답은 취급되었습니다","sourceRevision":"0c4f5f725b5fb273729f1633620e4fd8d79560bd3df6bf22c4d02d9a71d42dd6","reviewed":true},
+      "fr": {"text":"Cette réponse a été traitée","sourceRevision":"0c4f5f725b5fb273729f1633620e4fd8d79560bd3df6bf22c4d02d9a71d42dd6","reviewed":true}
     }
   },
   "historyDescription": {
     "source": "帖子 #{no} 的正文历史，最多保留最近 10 条；时间为存档时间",
     "translations": {
       "en": {"text":"Up to 10 previous body versions of post #{no}; timestamps show when archived","sourceRevision":"1d69e91daec68c9c0097ca66cb0a9b69d206f7132110e40f918060f65c11a3f0","reviewed":true},
-      "ru": {"text":"До 10 предыдущих версий сообщения №{no}. Указано время сохранения в архив.","sourceRevision":"1d69e91daec68c9c0097ca66cb0a9b69d206f7132110e40f918060f65c11a3f0","reviewed":true}
+      "ja": {"text":"投稿 #{no} の編集履歴です。直近の10件まで、保存時刻とともに表示します。","sourceRevision":"1d69e91daec68c9c0097ca66cb0a9b69d206f7132110e40f918060f65c11a3f0","reviewed":true},
+      "it": {"text":"Cronologia del post #{no}. Sono conservate le ultime 10 versioni con l’ora di salvataggio.","sourceRevision":"1d69e91daec68c9c0097ca66cb0a9b69d206f7132110e40f918060f65c11a3f0","reviewed":true},
+      "ru": {"text":"До 10 предыдущих версий сообщения №{no}. Указано время сохранения в архив.","sourceRevision":"1d69e91daec68c9c0097ca66cb0a9b69d206f7132110e40f918060f65c11a3f0","reviewed":true},
+      "ko": {"text":"게시물 #{no}의 수정 기록입니다. 최근 10개 버전과 각 버전의 저장 시각을 표시합니다.","sourceRevision":"1d69e91daec68c9c0097ca66cb0a9b69d206f7132110e40f918060f65c11a3f0","reviewed":true},
+      "fr": {"text":"Historique de la publication #{no}. Les 10 dernières versions et leur heure d’enregistrement sont conservées.","sourceRevision":"1d69e91daec68c9c0097ca66cb0a9b69d206f7132110e40f918060f65c11a3f0","reviewed":true}
     }
   },
   "historyEmpty": {
     "source": "暂无可查看的编辑历史。",
     "translations": {
       "en": {"text":"No edit history is available.","sourceRevision":"00ab183876562ba37e893152da75aac0c9d07e7e3889b58513adc7d141625a8e","reviewed":true},
-      "ru": {"text":"Истории правок нет.","sourceRevision":"00ab183876562ba37e893152da75aac0c9d07e7e3889b58513adc7d141625a8e","reviewed":true}
+      "ja": {"text":"表示できる編集履歴はありません。","sourceRevision":"00ab183876562ba37e893152da75aac0c9d07e7e3889b58513adc7d141625a8e","reviewed":true},
+      "it": {"text":"Non ci sono modifiche da mostrare.","sourceRevision":"00ab183876562ba37e893152da75aac0c9d07e7e3889b58513adc7d141625a8e","reviewed":true},
+      "ru": {"text":"Истории правок нет.","sourceRevision":"00ab183876562ba37e893152da75aac0c9d07e7e3889b58513adc7d141625a8e","reviewed":true},
+      "ko": {"text":"볼 수 있는 편집 기록이 없습니다.","sourceRevision":"00ab183876562ba37e893152da75aac0c9d07e7e3889b58513adc7d141625a8e","reviewed":true},
+      "fr": {"text":"Aucune modification à afficher.","sourceRevision":"00ab183876562ba37e893152da75aac0c9d07e7e3889b58513adc7d141625a8e","reviewed":true}
     }
   },
   "historyLoadFailed": {
     "source": "编辑历史加载失败。",
     "translations": {
       "en": {"text":"Failed to load edit history.","sourceRevision":"42575449d8625c3fb9ecf113ed09c1bbfcf79ef37171264131b81e49596e8192","reviewed":true},
-      "ru": {"text":"Не удалось загрузить историю правок.","sourceRevision":"42575449d8625c3fb9ecf113ed09c1bbfcf79ef37171264131b81e49596e8192","reviewed":true}
+      "ja": {"text":"編集履歴を読み込めませんでした。","sourceRevision":"42575449d8625c3fb9ecf113ed09c1bbfcf79ef37171264131b81e49596e8192","reviewed":true},
+      "it": {"text":"Impossibile caricare la cronologia delle modifiche.","sourceRevision":"42575449d8625c3fb9ecf113ed09c1bbfcf79ef37171264131b81e49596e8192","reviewed":true},
+      "ru": {"text":"Не удалось загрузить историю правок.","sourceRevision":"42575449d8625c3fb9ecf113ed09c1bbfcf79ef37171264131b81e49596e8192","reviewed":true},
+      "ko": {"text":"편집 기록을 불러오지 못했습니다.","sourceRevision":"42575449d8625c3fb9ecf113ed09c1bbfcf79ef37171264131b81e49596e8192","reviewed":true},
+      "fr": {"text":"Impossible de charger l’historique des modifications.","sourceRevision":"42575449d8625c3fb9ecf113ed09c1bbfcf79ef37171264131b81e49596e8192","reviewed":true}
     }
   },
   "historyLoadMore": {
     "source": "加载更多历史",
     "translations": {
       "en": {"text":"Load more history","sourceRevision":"18add9162f2e863ff17e2336591099de77a5722584091a4f5c50adb87b2b004d","reviewed":true},
-      "ru": {"text":"Загрузить ещё","sourceRevision":"18add9162f2e863ff17e2336591099de77a5722584091a4f5c50adb87b2b004d","reviewed":true}
+      "ja": {"text":"さらに履歴を読み込む","sourceRevision":"18add9162f2e863ff17e2336591099de77a5722584091a4f5c50adb87b2b004d","reviewed":true},
+      "it": {"text":"Carica altre modifiche","sourceRevision":"18add9162f2e863ff17e2336591099de77a5722584091a4f5c50adb87b2b004d","reviewed":true},
+      "ru": {"text":"Загрузить ещё","sourceRevision":"18add9162f2e863ff17e2336591099de77a5722584091a4f5c50adb87b2b004d","reviewed":true},
+      "ko": {"text":"기록 더 불러오기","sourceRevision":"18add9162f2e863ff17e2336591099de77a5722584091a4f5c50adb87b2b004d","reviewed":true},
+      "fr": {"text":"Charger la suite de l’historique","sourceRevision":"18add9162f2e863ff17e2336591099de77a5722584091a4f5c50adb87b2b004d","reviewed":true}
     }
   },
   "historyRevision": {
     "source": "修订 {no}",
     "translations": {
       "en": {"text":"Revision {no}","sourceRevision":"4023666fefe98fc1901cb8a5096cc5d11db0b349ff521ba3abffa20debf16671","reviewed":true},
-      "ru": {"text":"Версия {no}","sourceRevision":"4023666fefe98fc1901cb8a5096cc5d11db0b349ff521ba3abffa20debf16671","reviewed":true}
+      "ja": {"text":"第{no}版","sourceRevision":"4023666fefe98fc1901cb8a5096cc5d11db0b349ff521ba3abffa20debf16671","reviewed":true},
+      "it": {"text":"Versione {no}","sourceRevision":"4023666fefe98fc1901cb8a5096cc5d11db0b349ff521ba3abffa20debf16671","reviewed":true},
+      "ru": {"text":"Версия {no}","sourceRevision":"4023666fefe98fc1901cb8a5096cc5d11db0b349ff521ba3abffa20debf16671","reviewed":true},
+      "ko": {"text":"버전 {no}","sourceRevision":"4023666fefe98fc1901cb8a5096cc5d11db0b349ff521ba3abffa20debf16671","reviewed":true},
+      "fr": {"text":"Version {no}","sourceRevision":"4023666fefe98fc1901cb8a5096cc5d11db0b349ff521ba3abffa20debf16671","reviewed":true}
     }
   },
   "historyTitle": {
     "source": "编辑历史",
     "translations": {
       "en": {"text":"Edit history","sourceRevision":"457fed10498d074d7879cb9d61ee54b32d42e61c590e34248de95c5a4e897b21","reviewed":true},
-      "ru": {"text":"История правок","sourceRevision":"457fed10498d074d7879cb9d61ee54b32d42e61c590e34248de95c5a4e897b21","reviewed":true}
+      "ja": {"text":"編集履歴","sourceRevision":"457fed10498d074d7879cb9d61ee54b32d42e61c590e34248de95c5a4e897b21","reviewed":true},
+      "it": {"text":"Cronologia delle modifiche","sourceRevision":"457fed10498d074d7879cb9d61ee54b32d42e61c590e34248de95c5a4e897b21","reviewed":true},
+      "ru": {"text":"История правок","sourceRevision":"457fed10498d074d7879cb9d61ee54b32d42e61c590e34248de95c5a4e897b21","reviewed":true},
+      "ko": {"text":"편집 기록","sourceRevision":"457fed10498d074d7879cb9d61ee54b32d42e61c590e34248de95c5a4e897b21","reviewed":true},
+      "fr": {"text":"Historique des modifications","sourceRevision":"457fed10498d074d7879cb9d61ee54b32d42e61c590e34248de95c5a4e897b21","reviewed":true}
     }
   },
   "hotContent": {
     "source": "热门内容",
     "translations": {
       "en": {"text":"Hot content","sourceRevision":"1b5baec961c3b91fdc20c04a5e4047dad296d43548f370015d042fd93d7d7acc","reviewed":true},
-      "ja": {"text":"人気コンテンツ","sourceRevision":"1b5baec961c3b91fdc20c04a5e4047dad296d43548f370015d042fd93d7d7acc","reviewed":true},
-      "it": {"text":"Contenuto di tendenza","sourceRevision":"1b5baec961c3b91fdc20c04a5e4047dad296d43548f370015d042fd93d7d7acc","reviewed":true},
-      "ru": {"text":"Популярное","sourceRevision":"1b5baec961c3b91fdc20c04a5e4047dad296d43548f370015d042fd93d7d7acc","reviewed":true}
+      "ja": {"text":"人気の投稿","sourceRevision":"1b5baec961c3b91fdc20c04a5e4047dad296d43548f370015d042fd93d7d7acc","reviewed":true},
+      "it": {"text":"Contenuti popolari","sourceRevision":"1b5baec961c3b91fdc20c04a5e4047dad296d43548f370015d042fd93d7d7acc","reviewed":true},
+      "ru": {"text":"Популярное","sourceRevision":"1b5baec961c3b91fdc20c04a5e4047dad296d43548f370015d042fd93d7d7acc","reviewed":true},
+      "ko": {"text":"인기 게시물","sourceRevision":"1b5baec961c3b91fdc20c04a5e4047dad296d43548f370015d042fd93d7d7acc","reviewed":true},
+      "fr": {"text":"Contenu populaire","sourceRevision":"1b5baec961c3b91fdc20c04a5e4047dad296d43548f370015d042fd93d7d7acc","reviewed":true}
     }
   },
   "imageViewer": {
     "source": "图片预览",
     "translations": {
       "en": {"text":"Image preview","sourceRevision":"2f2e80549cd2affb1957b17afd6d1f61a922025b6218bbd241aab4170fe08a82","reviewed":true},
-      "ru": {"text":"Просмотр изображения","sourceRevision":"2f2e80549cd2affb1957b17afd6d1f61a922025b6218bbd241aab4170fe08a82","reviewed":true}
+      "ja": {"text":"画像を確認","sourceRevision":"2f2e80549cd2affb1957b17afd6d1f61a922025b6218bbd241aab4170fe08a82","reviewed":true},
+      "it": {"text":"Anteprima dell’immagine","sourceRevision":"2f2e80549cd2affb1957b17afd6d1f61a922025b6218bbd241aab4170fe08a82","reviewed":true},
+      "ru": {"text":"Просмотр изображения","sourceRevision":"2f2e80549cd2affb1957b17afd6d1f61a922025b6218bbd241aab4170fe08a82","reviewed":true},
+      "ko": {"text":"이미지 미리 보기","sourceRevision":"2f2e80549cd2affb1957b17afd6d1f61a922025b6218bbd241aab4170fe08a82","reviewed":true},
+      "fr": {"text":"Aperçu de l’image","sourceRevision":"2f2e80549cd2affb1957b17afd6d1f61a922025b6218bbd241aab4170fe08a82","reviewed":true}
     }
   },
   "joinDiscussion": {
     "source": "参与讨论",
     "translations": {
       "en": {"text":"Join the discussion","sourceRevision":"f570c00e27bff937b5b11adabf0b790c6c207f541d84b56d4b37ba7201490504","reviewed":true},
-      "ja": {"text":"議論に参加","sourceRevision":"f570c00e27bff937b5b11adabf0b790c6c207f541d84b56d4b37ba7201490504","reviewed":true},
+      "ja": {"text":"話し合いに参加","sourceRevision":"f570c00e27bff937b5b11adabf0b790c6c207f541d84b56d4b37ba7201490504","reviewed":true},
       "it": {"text":"Partecipa alla discussione","sourceRevision":"f570c00e27bff937b5b11adabf0b790c6c207f541d84b56d4b37ba7201490504","reviewed":true},
-      "ru": {"text":"Присоединиться к обсуждению","sourceRevision":"f570c00e27bff937b5b11adabf0b790c6c207f541d84b56d4b37ba7201490504","reviewed":true}
+      "ru": {"text":"Присоединиться к обсуждению","sourceRevision":"f570c00e27bff937b5b11adabf0b790c6c207f541d84b56d4b37ba7201490504","reviewed":true},
+      "ko": {"text":"토론에 참여하기","sourceRevision":"f570c00e27bff937b5b11adabf0b790c6c207f541d84b56d4b37ba7201490504","reviewed":true},
+      "fr": {"text":"Participer à la discussion","sourceRevision":"f570c00e27bff937b5b11adabf0b790c6c207f541d84b56d4b37ba7201490504","reviewed":true}
     }
   },
   "jumpGo": {
@@ -327,16 +423,20 @@
       "en": {"text":"Go","sourceRevision":"68ff7da8664e589821acba61d7fd95be44684649fbcb7b796e73231c98c7a576","reviewed":true},
       "ja": {"text":"移動","sourceRevision":"68ff7da8664e589821acba61d7fd95be44684649fbcb7b796e73231c98c7a576","reviewed":true},
       "it": {"text":"Vai","sourceRevision":"68ff7da8664e589821acba61d7fd95be44684649fbcb7b796e73231c98c7a576","reviewed":true},
-      "ru": {"text":"Перейти","sourceRevision":"68ff7da8664e589821acba61d7fd95be44684649fbcb7b796e73231c98c7a576","reviewed":true}
+      "ru": {"text":"Перейти","sourceRevision":"68ff7da8664e589821acba61d7fd95be44684649fbcb7b796e73231c98c7a576","reviewed":true},
+      "ko": {"text":"이동","sourceRevision":"68ff7da8664e589821acba61d7fd95be44684649fbcb7b796e73231c98c7a576","reviewed":true},
+      "fr": {"text":"Accéder","sourceRevision":"68ff7da8664e589821acba61d7fd95be44684649fbcb7b796e73231c98c7a576","reviewed":true}
     }
   },
   "jumpToPost": {
     "source": "跳转楼层",
     "translations": {
       "en": {"text":"Jump to post","sourceRevision":"4d4c93d1817f37ab189f8fff60cdf7bd43e607236139cb76362256ad2bb027e5","reviewed":true},
-      "ja": {"text":"投稿番号に移動","sourceRevision":"4d4c93d1817f37ab189f8fff60cdf7bd43e607236139cb76362256ad2bb027e5","reviewed":true},
-      "it": {"text":"Vai al messaggio","sourceRevision":"4d4c93d1817f37ab189f8fff60cdf7bd43e607236139cb76362256ad2bb027e5","reviewed":true},
-      "ru": {"text":"Перейти к сообщению","sourceRevision":"4d4c93d1817f37ab189f8fff60cdf7bd43e607236139cb76362256ad2bb027e5","reviewed":true}
+      "ja": {"text":"投稿番号で移動","sourceRevision":"4d4c93d1817f37ab189f8fff60cdf7bd43e607236139cb76362256ad2bb027e5","reviewed":true},
+      "it": {"text":"Vai al post","sourceRevision":"4d4c93d1817f37ab189f8fff60cdf7bd43e607236139cb76362256ad2bb027e5","reviewed":true},
+      "ru": {"text":"Перейти к сообщению","sourceRevision":"4d4c93d1817f37ab189f8fff60cdf7bd43e607236139cb76362256ad2bb027e5","reviewed":true},
+      "ko": {"text":"게시물 번호로 이동","sourceRevision":"4d4c93d1817f37ab189f8fff60cdf7bd43e607236139cb76362256ad2bb027e5","reviewed":true},
+      "fr": {"text":"Aller à une publication","sourceRevision":"4d4c93d1817f37ab189f8fff60cdf7bd43e607236139cb76362256ad2bb027e5","reviewed":true}
     }
   },
   "latestReply": {
@@ -345,7 +445,9 @@
       "en": {"text":"Latest reply","sourceRevision":"738ab21aa9d072d711a709fc98d9101b1738151c6f322b66fdad24c5365179de","reviewed":true},
       "ja": {"text":"最新の返信","sourceRevision":"738ab21aa9d072d711a709fc98d9101b1738151c6f322b66fdad24c5365179de","reviewed":true},
       "it": {"text":"Ultima risposta","sourceRevision":"738ab21aa9d072d711a709fc98d9101b1738151c6f322b66fdad24c5365179de","reviewed":true},
-      "ru": {"text":"Последний ответ","sourceRevision":"738ab21aa9d072d711a709fc98d9101b1738151c6f322b66fdad24c5365179de","reviewed":true}
+      "ru": {"text":"Последний ответ","sourceRevision":"738ab21aa9d072d711a709fc98d9101b1738151c6f322b66fdad24c5365179de","reviewed":true},
+      "ko": {"text":"가장 좋은 대답","sourceRevision":"738ab21aa9d072d711a709fc98d9101b1738151c6f322b66fdad24c5365179de","reviewed":true},
+      "fr": {"text":"Dernière réponse","sourceRevision":"738ab21aa9d072d711a709fc98d9101b1738151c6f322b66fdad24c5365179de","reviewed":true}
     }
   },
   "like": {
@@ -354,7 +456,9 @@
       "en": {"text":"Like","sourceRevision":"cb2d8c967e2249dd941463f89d0a210b4c95d20ed1899bbffb29e8b8e56ef564","reviewed":true},
       "ja": {"text":"いいね","sourceRevision":"cb2d8c967e2249dd941463f89d0a210b4c95d20ed1899bbffb29e8b8e56ef564","reviewed":true},
       "it": {"text":"Mi piace","sourceRevision":"cb2d8c967e2249dd941463f89d0a210b4c95d20ed1899bbffb29e8b8e56ef564","reviewed":true},
-      "ru": {"text":"Нравится","sourceRevision":"cb2d8c967e2249dd941463f89d0a210b4c95d20ed1899bbffb29e8b8e56ef564","reviewed":true}
+      "ru": {"text":"Нравится","sourceRevision":"cb2d8c967e2249dd941463f89d0a210b4c95d20ed1899bbffb29e8b8e56ef564","reviewed":true},
+      "ko": {"text":"좋아요","sourceRevision":"cb2d8c967e2249dd941463f89d0a210b4c95d20ed1899bbffb29e8b8e56ef564","reviewed":true},
+      "fr": {"text":"J’aime","sourceRevision":"cb2d8c967e2249dd941463f89d0a210b4c95d20ed1899bbffb29e8b8e56ef564","reviewed":true}
     }
   },
   "linkCopied": {
@@ -363,7 +467,9 @@
       "en": {"text":"Link copied","sourceRevision":"88f7efb5ec6b5be9a8fa0e0413d9cfdb839b60981a75a514ea520143852a057a","reviewed":true},
       "ja": {"text":"リンクをコピーしました","sourceRevision":"88f7efb5ec6b5be9a8fa0e0413d9cfdb839b60981a75a514ea520143852a057a","reviewed":true},
       "it": {"text":"Link copiato","sourceRevision":"88f7efb5ec6b5be9a8fa0e0413d9cfdb839b60981a75a514ea520143852a057a","reviewed":true},
-      "ru": {"text":"Ссылка скопирована","sourceRevision":"88f7efb5ec6b5be9a8fa0e0413d9cfdb839b60981a75a514ea520143852a057a","reviewed":true}
+      "ru": {"text":"Ссылка скопирована","sourceRevision":"88f7efb5ec6b5be9a8fa0e0413d9cfdb839b60981a75a514ea520143852a057a","reviewed":true},
+      "ko": {"text":"링크 복사","sourceRevision":"88f7efb5ec6b5be9a8fa0e0413d9cfdb839b60981a75a514ea520143852a057a","reviewed":true},
+      "fr": {"text":"Lien copié","sourceRevision":"88f7efb5ec6b5be9a8fa0e0413d9cfdb839b60981a75a514ea520143852a057a","reviewed":true}
     }
   },
   "loadEarlierReplies": {
@@ -372,14 +478,20 @@
       "en": {"text":"Load earlier replies","sourceRevision":"9abee007223fb4ad207ff7abdfa7facae5a5c23df154bad8a01a2b3ee9cbcf00","reviewed":true},
       "ja": {"text":"以前の返信を読み込む","sourceRevision":"9abee007223fb4ad207ff7abdfa7facae5a5c23df154bad8a01a2b3ee9cbcf00","reviewed":true},
       "it": {"text":"Carica le risposte precedenti","sourceRevision":"9abee007223fb4ad207ff7abdfa7facae5a5c23df154bad8a01a2b3ee9cbcf00","reviewed":true},
-      "ru": {"text":"Загрузить более ранние ответы","sourceRevision":"9abee007223fb4ad207ff7abdfa7facae5a5c23df154bad8a01a2b3ee9cbcf00","reviewed":true}
+      "ru": {"text":"Загрузить более ранние ответы","sourceRevision":"9abee007223fb4ad207ff7abdfa7facae5a5c23df154bad8a01a2b3ee9cbcf00","reviewed":true},
+      "ko": {"text":"이전 답글","sourceRevision":"9abee007223fb4ad207ff7abdfa7facae5a5c23df154bad8a01a2b3ee9cbcf00","reviewed":true},
+      "fr": {"text":"Charger les réponses antérieures","sourceRevision":"9abee007223fb4ad207ff7abdfa7facae5a5c23df154bad8a01a2b3ee9cbcf00","reviewed":true}
     }
   },
   "loadFailed": {
     "source": "加载回复失败。",
     "translations": {
       "en": {"text":"Failed to load replies.","sourceRevision":"4e99929ffa41eca7bbd358c3086ae56310efe1f901dad0e1877fd4fd333af20a","reviewed":true},
-      "ru": {"text":"Не удалось загрузить ответы.","sourceRevision":"4e99929ffa41eca7bbd358c3086ae56310efe1f901dad0e1877fd4fd333af20a","reviewed":true}
+      "ja": {"text":"返信を読み込めませんでした。","sourceRevision":"4e99929ffa41eca7bbd358c3086ae56310efe1f901dad0e1877fd4fd333af20a","reviewed":true},
+      "it": {"text":"Impossibile caricare le risposte.","sourceRevision":"4e99929ffa41eca7bbd358c3086ae56310efe1f901dad0e1877fd4fd333af20a","reviewed":true},
+      "ru": {"text":"Не удалось загрузить ответы.","sourceRevision":"4e99929ffa41eca7bbd358c3086ae56310efe1f901dad0e1877fd4fd333af20a","reviewed":true},
+      "ko": {"text":"답글을 불러오지 못했습니다.","sourceRevision":"4e99929ffa41eca7bbd358c3086ae56310efe1f901dad0e1877fd4fd333af20a","reviewed":true},
+      "fr": {"text":"Impossible de charger les réponses.","sourceRevision":"4e99929ffa41eca7bbd358c3086ae56310efe1f901dad0e1877fd4fd333af20a","reviewed":true}
     }
   },
   "loadMoreReplies": {
@@ -388,7 +500,9 @@
       "en": {"text":"Load more replies","sourceRevision":"a3193550b46f3336cfa4ef4b9332ef19c8aab49128b107b098465cffe7103eeb","reviewed":true},
       "ja": {"text":"さらに返信を読み込む","sourceRevision":"a3193550b46f3336cfa4ef4b9332ef19c8aab49128b107b098465cffe7103eeb","reviewed":true},
       "it": {"text":"Carica altre risposte","sourceRevision":"a3193550b46f3336cfa4ef4b9332ef19c8aab49128b107b098465cffe7103eeb","reviewed":true},
-      "ru": {"text":"Загрузить ещё ответы","sourceRevision":"a3193550b46f3336cfa4ef4b9332ef19c8aab49128b107b098465cffe7103eeb","reviewed":true}
+      "ru": {"text":"Загрузить ещё ответы","sourceRevision":"a3193550b46f3336cfa4ef4b9332ef19c8aab49128b107b098465cffe7103eeb","reviewed":true},
+      "ko": {"text":"더 많은 답글","sourceRevision":"a3193550b46f3336cfa4ef4b9332ef19c8aab49128b107b098465cffe7103eeb","reviewed":true},
+      "fr": {"text":"Charger plus de réponses","sourceRevision":"a3193550b46f3336cfa4ef4b9332ef19c8aab49128b107b098465cffe7103eeb","reviewed":true}
     }
   },
   "loadingMoreReplies": {
@@ -397,79 +511,97 @@
       "en": {"text":"Loading more replies...","sourceRevision":"22e05bff77046cb016508654eac5453ce72c3e481128ce0845669b30ee3ce0c4","reviewed":true},
       "ja": {"text":"さらに返信を読み込み中...","sourceRevision":"22e05bff77046cb016508654eac5453ce72c3e481128ce0845669b30ee3ce0c4","reviewed":true},
       "it": {"text":"Caricamento di altre risposte...","sourceRevision":"22e05bff77046cb016508654eac5453ce72c3e481128ce0845669b30ee3ce0c4","reviewed":true},
-      "ru": {"text":"Загружаются дополнительные ответы...","sourceRevision":"22e05bff77046cb016508654eac5453ce72c3e481128ce0845669b30ee3ce0c4","reviewed":true}
+      "ru": {"text":"Загружаются дополнительные ответы...","sourceRevision":"22e05bff77046cb016508654eac5453ce72c3e481128ce0845669b30ee3ce0c4","reviewed":true},
+      "ko": {"text":"더 많은 답글을로드 ...","sourceRevision":"22e05bff77046cb016508654eac5453ce72c3e481128ce0845669b30ee3ce0c4","reviewed":true},
+      "fr": {"text":"Chargement d’autres réponses...","sourceRevision":"22e05bff77046cb016508654eac5453ce72c3e481128ce0845669b30ee3ce0c4","reviewed":true}
     }
   },
   "moderationBan": {
     "source": "封禁",
     "translations": {
       "en": {"text":"Block","sourceRevision":"0270a06de279c9f03fd2333c61dcf752a3ae8b64a79350c9b7f8afd1d7210bd6","reviewed":true},
-      "ja": {"text":"封禁","sourceRevision":"0270a06de279c9f03fd2333c61dcf752a3ae8b64a79350c9b7f8afd1d7210bd6","reviewed":true},
-      "it": {"text":"Blocca","sourceRevision":"0270a06de279c9f03fd2333c61dcf752a3ae8b64a79350c9b7f8afd1d7210bd6","reviewed":true},
-      "ru": {"text":"Заблокировать","sourceRevision":"0270a06de279c9f03fd2333c61dcf752a3ae8b64a79350c9b7f8afd1d7210bd6","reviewed":true}
+      "ja": {"text":"投稿を非表示にする","sourceRevision":"0270a06de279c9f03fd2333c61dcf752a3ae8b64a79350c9b7f8afd1d7210bd6","reviewed":true},
+      "it": {"text":"Nascondi il post","sourceRevision":"0270a06de279c9f03fd2333c61dcf752a3ae8b64a79350c9b7f8afd1d7210bd6","reviewed":true},
+      "ru": {"text":"Заблокировать","sourceRevision":"0270a06de279c9f03fd2333c61dcf752a3ae8b64a79350c9b7f8afd1d7210bd6","reviewed":true},
+      "ko": {"text":"게시물 숨기기","sourceRevision":"0270a06de279c9f03fd2333c61dcf752a3ae8b64a79350c9b7f8afd1d7210bd6","reviewed":true},
+      "fr": {"text":"Masquer la publication","sourceRevision":"0270a06de279c9f03fd2333c61dcf752a3ae8b64a79350c9b7f8afd1d7210bd6","reviewed":true}
     }
   },
   "moderationBanDescription": {
     "source": "封禁后普通用户将无法继续查看这篇帖子。请确认它确实违反社区规则。",
     "translations": {
       "en": {"text":"After blocking, regular users will no longer be able to view this post. Please confirm it clearly violates the community rules.","sourceRevision":"e3fe948342d770602fe3684ef92f9c88d51bc3ffa244066a1434d99bf015ca3c","reviewed":true},
-      "ja": {"text":"封禁すると、通常ユーザーはこの投稿を閲覧できなくなります。コミュニティルールに明確に違反しているか確認してください。","sourceRevision":"e3fe948342d770602fe3684ef92f9c88d51bc3ffa244066a1434d99bf015ca3c","reviewed":true},
-      "it": {"text":"Dopo il blocco, gli utenti normali non potranno più vedere questo post. Conferma che violi chiaramente le regole della community.","sourceRevision":"e3fe948342d770602fe3684ef92f9c88d51bc3ffa244066a1434d99bf015ca3c","reviewed":true},
-      "ru": {"text":"После блокировки обычные пользователи больше не смогут видеть это сообщение. Пожалуйста, подтвердите, что оно явно нарушает правила сообщества.","sourceRevision":"e3fe948342d770602fe3684ef92f9c88d51bc3ffa244066a1434d99bf015ca3c","reviewed":true}
+      "ja": {"text":"非表示にすると、一般の利用者はこの投稿を読めなくなります。コミュニティのルールに違反していることを確認してください。","sourceRevision":"e3fe948342d770602fe3684ef92f9c88d51bc3ffa244066a1434d99bf015ca3c","reviewed":true},
+      "it": {"text":"Una volta nascosto, il post non sarà più visibile agli utenti con accesso normale. Assicurati che violi il regolamento della community.","sourceRevision":"e3fe948342d770602fe3684ef92f9c88d51bc3ffa244066a1434d99bf015ca3c","reviewed":true},
+      "ru": {"text":"После блокировки обычные пользователи больше не смогут видеть это сообщение. Пожалуйста, подтвердите, что оно явно нарушает правила сообщества.","sourceRevision":"e3fe948342d770602fe3684ef92f9c88d51bc3ffa244066a1434d99bf015ca3c","reviewed":true},
+      "ko": {"text":"숨기면 일반 사용자가 이 글을 볼 수 없습니다. 커뮤니티 규칙을 위반한 글인지 확인하세요.","sourceRevision":"e3fe948342d770602fe3684ef92f9c88d51bc3ffa244066a1434d99bf015ca3c","reviewed":true},
+      "fr": {"text":"Une fois masquée, la publication ne sera plus visible par les membres ordinaires. Vérifiez qu’elle enfreint bien les règles de la communauté.","sourceRevision":"e3fe948342d770602fe3684ef92f9c88d51bc3ffa244066a1434d99bf015ca3c","reviewed":true}
     }
   },
   "moderationBanSuccess": {
     "source": "帖子已封禁。",
     "translations": {
       "en": {"text":"Post blocked.","sourceRevision":"c52e2435b2a0691a298e2ef0d3165f229b915031738faee6dd4eaca1b26eb016","reviewed":true},
-      "ja": {"text":"投稿を封禁しました。","sourceRevision":"c52e2435b2a0691a298e2ef0d3165f229b915031738faee6dd4eaca1b26eb016","reviewed":true},
-      "it": {"text":"Post bloccato.","sourceRevision":"c52e2435b2a0691a298e2ef0d3165f229b915031738faee6dd4eaca1b26eb016","reviewed":true},
-      "ru": {"text":"Сообщение заблокировано.","sourceRevision":"c52e2435b2a0691a298e2ef0d3165f229b915031738faee6dd4eaca1b26eb016","reviewed":true}
+      "ja": {"text":"投稿を非表示にしました。","sourceRevision":"c52e2435b2a0691a298e2ef0d3165f229b915031738faee6dd4eaca1b26eb016","reviewed":true},
+      "it": {"text":"Il post è stato nascosto.","sourceRevision":"c52e2435b2a0691a298e2ef0d3165f229b915031738faee6dd4eaca1b26eb016","reviewed":true},
+      "ru": {"text":"Сообщение заблокировано.","sourceRevision":"c52e2435b2a0691a298e2ef0d3165f229b915031738faee6dd4eaca1b26eb016","reviewed":true},
+      "ko": {"text":"게시물을 숨겼습니다.","sourceRevision":"c52e2435b2a0691a298e2ef0d3165f229b915031738faee6dd4eaca1b26eb016","reviewed":true},
+      "fr": {"text":"La publication a été masquée.","sourceRevision":"c52e2435b2a0691a298e2ef0d3165f229b915031738faee6dd4eaca1b26eb016","reviewed":true}
     }
   },
   "moderationBanTitle": {
     "source": "封禁这篇帖子？",
     "translations": {
       "en": {"text":"Block this post?","sourceRevision":"c082bc590f9fbb205764211a407a437c2d8c7082d4e84814345827bb17b5cd70","reviewed":true},
-      "ja": {"text":"この投稿を封禁しますか？","sourceRevision":"c082bc590f9fbb205764211a407a437c2d8c7082d4e84814345827bb17b5cd70","reviewed":true},
-      "it": {"text":"Bloccare questo post?","sourceRevision":"c082bc590f9fbb205764211a407a437c2d8c7082d4e84814345827bb17b5cd70","reviewed":true},
-      "ru": {"text":"Заблокировать это сообщение?","sourceRevision":"c082bc590f9fbb205764211a407a437c2d8c7082d4e84814345827bb17b5cd70","reviewed":true}
+      "ja": {"text":"この投稿を非表示にしますか？","sourceRevision":"c082bc590f9fbb205764211a407a437c2d8c7082d4e84814345827bb17b5cd70","reviewed":true},
+      "it": {"text":"Nascondere questo post?","sourceRevision":"c082bc590f9fbb205764211a407a437c2d8c7082d4e84814345827bb17b5cd70","reviewed":true},
+      "ru": {"text":"Заблокировать это сообщение?","sourceRevision":"c082bc590f9fbb205764211a407a437c2d8c7082d4e84814345827bb17b5cd70","reviewed":true},
+      "ko": {"text":"이 게시물을 숨길까요?","sourceRevision":"c082bc590f9fbb205764211a407a437c2d8c7082d4e84814345827bb17b5cd70","reviewed":true},
+      "fr": {"text":"Masquer cette publication ?","sourceRevision":"c082bc590f9fbb205764211a407a437c2d8c7082d4e84814345827bb17b5cd70","reviewed":true}
     }
   },
   "moderationUnban": {
     "source": "解封",
     "translations": {
       "en": {"text":"Restore","sourceRevision":"45c194040c5616870b9ed479157cf7bf2d3fda0d15751938ce30c91139460ee1","reviewed":true},
-      "ja": {"text":"解除","sourceRevision":"45c194040c5616870b9ed479157cf7bf2d3fda0d15751938ce30c91139460ee1","reviewed":true},
-      "it": {"text":"Ripristina","sourceRevision":"45c194040c5616870b9ed479157cf7bf2d3fda0d15751938ce30c91139460ee1","reviewed":true},
-      "ru": {"text":"Восстановить","sourceRevision":"45c194040c5616870b9ed479157cf7bf2d3fda0d15751938ce30c91139460ee1","reviewed":true}
+      "ja": {"text":"投稿を再表示する","sourceRevision":"45c194040c5616870b9ed479157cf7bf2d3fda0d15751938ce30c91139460ee1","reviewed":true},
+      "it": {"text":"Ripristina il post","sourceRevision":"45c194040c5616870b9ed479157cf7bf2d3fda0d15751938ce30c91139460ee1","reviewed":true},
+      "ru": {"text":"Восстановить","sourceRevision":"45c194040c5616870b9ed479157cf7bf2d3fda0d15751938ce30c91139460ee1","reviewed":true},
+      "ko": {"text":"게시물 다시 표시하기","sourceRevision":"45c194040c5616870b9ed479157cf7bf2d3fda0d15751938ce30c91139460ee1","reviewed":true},
+      "fr": {"text":"Rétablir la publication","sourceRevision":"45c194040c5616870b9ed479157cf7bf2d3fda0d15751938ce30c91139460ee1","reviewed":true}
     }
   },
   "moderationUnbanDescription": {
     "source": "解封后普通用户将可以重新查看这篇帖子。请确认问题已经处理完毕。",
     "translations": {
       "en": {"text":"After restoring, regular users will be able to view this post again. Please confirm the issue has been resolved.","sourceRevision":"1df592dd9c6fe3821371f8248eade8669de0cc13560d850068be924420b11457","reviewed":true},
-      "ja": {"text":"解除すると、通常ユーザーがこの投稿を再び閲覧できるようになります。問題が解決済みか確認してください。","sourceRevision":"1df592dd9c6fe3821371f8248eade8669de0cc13560d850068be924420b11457","reviewed":true},
-      "it": {"text":"Dopo il ripristino, gli utenti normali potranno di nuovo vedere questo post. Conferma che il problema sia stato risolto.","sourceRevision":"1df592dd9c6fe3821371f8248eade8669de0cc13560d850068be924420b11457","reviewed":true},
-      "ru": {"text":"После восстановления обычные пользователи снова смогут видеть это сообщение. Пожалуйста, подтвердите, что проблема устранена.","sourceRevision":"1df592dd9c6fe3821371f8248eade8669de0cc13560d850068be924420b11457","reviewed":true}
+      "ja": {"text":"公開に戻すと一般の利用者もこの投稿を読めるようになります。問題が解決したことを確認してください。","sourceRevision":"1df592dd9c6fe3821371f8248eade8669de0cc13560d850068be924420b11457","reviewed":true},
+      "it": {"text":"Il post tornerà visibile a tutti gli utenti che potevano vederlo. Assicurati che il problema sia stato risolto.","sourceRevision":"1df592dd9c6fe3821371f8248eade8669de0cc13560d850068be924420b11457","reviewed":true},
+      "ru": {"text":"После восстановления обычные пользователи снова смогут видеть это сообщение. Пожалуйста, подтвердите, что проблема устранена.","sourceRevision":"1df592dd9c6fe3821371f8248eade8669de0cc13560d850068be924420b11457","reviewed":true},
+      "ko": {"text":"다시 공개하면 일반 사용자도 이 글을 볼 수 있습니다. 문제가 해결됐는지 확인하세요.","sourceRevision":"1df592dd9c6fe3821371f8248eade8669de0cc13560d850068be924420b11457","reviewed":true},
+      "fr": {"text":"La publication redeviendra visible pour les membres qui y avaient accès. Vérifiez que le problème a été résolu.","sourceRevision":"1df592dd9c6fe3821371f8248eade8669de0cc13560d850068be924420b11457","reviewed":true}
     }
   },
   "moderationUnbanSuccess": {
     "source": "帖子已解封。",
     "translations": {
       "en": {"text":"Post restored.","sourceRevision":"676f08e14422072bef9fb126ad70861b45914019c16fc5221bfa818255ad5667","reviewed":true},
-      "ja": {"text":"投稿の封禁を解除しました。","sourceRevision":"676f08e14422072bef9fb126ad70861b45914019c16fc5221bfa818255ad5667","reviewed":true},
-      "it": {"text":"Post ripristinato.","sourceRevision":"676f08e14422072bef9fb126ad70861b45914019c16fc5221bfa818255ad5667","reviewed":true},
-      "ru": {"text":"Сообщение восстановлено.","sourceRevision":"676f08e14422072bef9fb126ad70861b45914019c16fc5221bfa818255ad5667","reviewed":true}
+      "ja": {"text":"投稿を再表示しました。","sourceRevision":"676f08e14422072bef9fb126ad70861b45914019c16fc5221bfa818255ad5667","reviewed":true},
+      "it": {"text":"Il post è di nuovo visibile.","sourceRevision":"676f08e14422072bef9fb126ad70861b45914019c16fc5221bfa818255ad5667","reviewed":true},
+      "ru": {"text":"Сообщение восстановлено.","sourceRevision":"676f08e14422072bef9fb126ad70861b45914019c16fc5221bfa818255ad5667","reviewed":true},
+      "ko": {"text":"게시물을 다시 표시했습니다.","sourceRevision":"676f08e14422072bef9fb126ad70861b45914019c16fc5221bfa818255ad5667","reviewed":true},
+      "fr": {"text":"La publication est de nouveau visible.","sourceRevision":"676f08e14422072bef9fb126ad70861b45914019c16fc5221bfa818255ad5667","reviewed":true}
     }
   },
   "moderationUnbanTitle": {
     "source": "解封这篇帖子？",
     "translations": {
       "en": {"text":"Restore this post?","sourceRevision":"eee7fd5fc979e355cac51533cd575f43ab44ba8fdd86db80d41dd876a5eaa0d0","reviewed":true},
-      "ja": {"text":"この投稿の封禁を解除しますか？","sourceRevision":"eee7fd5fc979e355cac51533cd575f43ab44ba8fdd86db80d41dd876a5eaa0d0","reviewed":true},
+      "ja": {"text":"この投稿を再表示しますか？","sourceRevision":"eee7fd5fc979e355cac51533cd575f43ab44ba8fdd86db80d41dd876a5eaa0d0","reviewed":true},
       "it": {"text":"Ripristinare questo post?","sourceRevision":"eee7fd5fc979e355cac51533cd575f43ab44ba8fdd86db80d41dd876a5eaa0d0","reviewed":true},
-      "ru": {"text":"Восстановить это сообщение?","sourceRevision":"eee7fd5fc979e355cac51533cd575f43ab44ba8fdd86db80d41dd876a5eaa0d0","reviewed":true}
+      "ru": {"text":"Восстановить это сообщение?","sourceRevision":"eee7fd5fc979e355cac51533cd575f43ab44ba8fdd86db80d41dd876a5eaa0d0","reviewed":true},
+      "ko": {"text":"이 게시물을 다시 표시할까요?","sourceRevision":"eee7fd5fc979e355cac51533cd575f43ab44ba8fdd86db80d41dd876a5eaa0d0","reviewed":true},
+      "fr": {"text":"Rétablir cette publication ?","sourceRevision":"eee7fd5fc979e355cac51533cd575f43ab44ba8fdd86db80d41dd876a5eaa0d0","reviewed":true}
     }
   },
   "more": {
@@ -478,14 +610,20 @@
       "en": {"text":"More","sourceRevision":"628854dce9fb504ec61daaa4ea053338c9c722828a1b63dc0d20a057a48276db","reviewed":true},
       "ja": {"text":"もっと見る","sourceRevision":"628854dce9fb504ec61daaa4ea053338c9c722828a1b63dc0d20a057a48276db","reviewed":true},
       "it": {"text":"Altro","sourceRevision":"628854dce9fb504ec61daaa4ea053338c9c722828a1b63dc0d20a057a48276db","reviewed":true},
-      "ru": {"text":"Ещё","sourceRevision":"628854dce9fb504ec61daaa4ea053338c9c722828a1b63dc0d20a057a48276db","reviewed":true}
+      "ru": {"text":"Ещё","sourceRevision":"628854dce9fb504ec61daaa4ea053338c9c722828a1b63dc0d20a057a48276db","reviewed":true},
+      "ko": {"text":"더 보기","sourceRevision":"628854dce9fb504ec61daaa4ea053338c9c722828a1b63dc0d20a057a48276db","reviewed":true},
+      "fr": {"text":"Plus","sourceRevision":"628854dce9fb504ec61daaa4ea053338c9c722828a1b63dc0d20a057a48276db","reviewed":true}
     }
   },
   "nextImage": {
     "source": "下一张图片",
     "translations": {
       "en": {"text":"Next image","sourceRevision":"6001a114fd8a767c863dbf2f20a04704753878d1b47ef6dc5dc4efc50c80a93c","reviewed":true},
-      "ru": {"text":"Следующее изображение","sourceRevision":"6001a114fd8a767c863dbf2f20a04704753878d1b47ef6dc5dc4efc50c80a93c","reviewed":true}
+      "ja": {"text":"次の画像","sourceRevision":"6001a114fd8a767c863dbf2f20a04704753878d1b47ef6dc5dc4efc50c80a93c","reviewed":true},
+      "it": {"text":"Immagine successiva","sourceRevision":"6001a114fd8a767c863dbf2f20a04704753878d1b47ef6dc5dc4efc50c80a93c","reviewed":true},
+      "ru": {"text":"Следующее изображение","sourceRevision":"6001a114fd8a767c863dbf2f20a04704753878d1b47ef6dc5dc4efc50c80a93c","reviewed":true},
+      "ko": {"text":"다음 이미지","sourceRevision":"6001a114fd8a767c863dbf2f20a04704753878d1b47ef6dc5dc4efc50c80a93c","reviewed":true},
+      "fr": {"text":"Image suivante","sourceRevision":"6001a114fd8a767c863dbf2f20a04704753878d1b47ef6dc5dc4efc50c80a93c","reviewed":true}
     }
   },
   "originalImageSize": {
@@ -494,7 +632,9 @@
       "en": {"text":"Original size","sourceRevision":"3986f378cac3b5ea2f56054cd31105f136145123984ddddf424b5f2548b6e2d8","reviewed":true},
       "ja": {"text":"元のサイズ","sourceRevision":"3986f378cac3b5ea2f56054cd31105f136145123984ddddf424b5f2548b6e2d8","reviewed":true},
       "it": {"text":"Dimensioni originali","sourceRevision":"3986f378cac3b5ea2f56054cd31105f136145123984ddddf424b5f2548b6e2d8","reviewed":true},
-      "ru": {"text":"Исходный размер","sourceRevision":"3986f378cac3b5ea2f56054cd31105f136145123984ddddf424b5f2548b6e2d8","reviewed":true}
+      "ru": {"text":"Исходный размер","sourceRevision":"3986f378cac3b5ea2f56054cd31105f136145123984ddddf424b5f2548b6e2d8","reviewed":true},
+      "ko": {"text":"원래 크기","sourceRevision":"3986f378cac3b5ea2f56054cd31105f136145123984ddddf424b5f2548b6e2d8","reviewed":true},
+      "fr": {"text":"Taille originale","sourceRevision":"3986f378cac3b5ea2f56054cd31105f136145123984ddddf424b5f2548b6e2d8","reviewed":true}
     }
   },
   "originalPost": {
@@ -503,16 +643,20 @@
       "en": {"text":"Original post","sourceRevision":"960ef342a4ce2230f9c82508a30359afdb6fd63828639b229fb590a5cc220d77","reviewed":true},
       "ja": {"text":"本文","sourceRevision":"960ef342a4ce2230f9c82508a30359afdb6fd63828639b229fb590a5cc220d77","reviewed":true},
       "it": {"text":"Post originale","sourceRevision":"960ef342a4ce2230f9c82508a30359afdb6fd63828639b229fb590a5cc220d77","reviewed":true},
-      "ru": {"text":"Исходное сообщение","sourceRevision":"960ef342a4ce2230f9c82508a30359afdb6fd63828639b229fb590a5cc220d77","reviewed":true}
+      "ru": {"text":"Исходное сообщение","sourceRevision":"960ef342a4ce2230f9c82508a30359afdb6fd63828639b229fb590a5cc220d77","reviewed":true},
+      "ko": {"text":"원래 포스트","sourceRevision":"960ef342a4ce2230f9c82508a30359afdb6fd63828639b229fb590a5cc220d77","reviewed":true},
+      "fr": {"text":"Poste original","sourceRevision":"960ef342a4ce2230f9c82508a30359afdb6fd63828639b229fb590a5cc220d77","reviewed":true}
     }
   },
   "overview": {
     "source": "主题概览",
     "translations": {
       "en": {"text":"Topic overview","sourceRevision":"104742019cd244441e00a9f1ee74cae5fd4a9a71fd006ae6da3de162d9bc6294","reviewed":true},
-      "ja": {"text":"トピック概要","sourceRevision":"104742019cd244441e00a9f1ee74cae5fd4a9a71fd006ae6da3de162d9bc6294","reviewed":true},
-      "it": {"text":"Panoramica argomento","sourceRevision":"104742019cd244441e00a9f1ee74cae5fd4a9a71fd006ae6da3de162d9bc6294","reviewed":true},
-      "ru": {"text":"Обзор темы","sourceRevision":"104742019cd244441e00a9f1ee74cae5fd4a9a71fd006ae6da3de162d9bc6294","reviewed":true}
+      "ja": {"text":"スレッドの概要","sourceRevision":"104742019cd244441e00a9f1ee74cae5fd4a9a71fd006ae6da3de162d9bc6294","reviewed":true},
+      "it": {"text":"Panoramica della discussione","sourceRevision":"104742019cd244441e00a9f1ee74cae5fd4a9a71fd006ae6da3de162d9bc6294","reviewed":true},
+      "ru": {"text":"Обзор темы","sourceRevision":"104742019cd244441e00a9f1ee74cae5fd4a9a71fd006ae6da3de162d9bc6294","reviewed":true},
+      "ko": {"text":"게시글 개요","sourceRevision":"104742019cd244441e00a9f1ee74cae5fd4a9a71fd006ae6da3de162d9bc6294","reviewed":true},
+      "fr": {"text":"Aperçu du sujet","sourceRevision":"104742019cd244441e00a9f1ee74cae5fd4a9a71fd006ae6da3de162d9bc6294","reviewed":true}
     }
   },
   "participants": {
@@ -521,49 +665,64 @@
       "en": {"text":"Participants","sourceRevision":"f4743eee15baec5d21f5d8d730f803bf4eb5f8f769af060d82664264520e6789","reviewed":true},
       "ja": {"text":"参加者","sourceRevision":"f4743eee15baec5d21f5d8d730f803bf4eb5f8f769af060d82664264520e6789","reviewed":true},
       "it": {"text":"Partecipanti","sourceRevision":"f4743eee15baec5d21f5d8d730f803bf4eb5f8f769af060d82664264520e6789","reviewed":true},
-      "ru": {"text":"Участники","sourceRevision":"f4743eee15baec5d21f5d8d730f803bf4eb5f8f769af060d82664264520e6789","reviewed":true}
+      "ru": {"text":"Участники","sourceRevision":"f4743eee15baec5d21f5d8d730f803bf4eb5f8f769af060d82664264520e6789","reviewed":true},
+      "ko": {"text":"참여자","sourceRevision":"f4743eee15baec5d21f5d8d730f803bf4eb5f8f769af060d82664264520e6789","reviewed":true},
+      "fr": {"text":"Participants","sourceRevision":"f4743eee15baec5d21f5d8d730f803bf4eb5f8f769af060d82664264520e6789","reviewed":true}
     }
   },
   "pendingReviewBadge": {
     "source": "审核中，仅当前页面对你可见",
     "translations": {
       "en": {"text":"Pending review · visible to you on this page","sourceRevision":"98572ffaceff956a8e34b371ceb64d798b68c3f91bdc2a175cf8b511d497a59e","reviewed":true},
-      "ja": {"text":"審査中・このページでは自分だけに表示されています","sourceRevision":"98572ffaceff956a8e34b371ceb64d798b68c3f91bdc2a175cf8b511d497a59e","reviewed":true},
-      "ru": {"text":"На проверке · видно только вам на этой странице","sourceRevision":"98572ffaceff956a8e34b371ceb64d798b68c3f91bdc2a175cf8b511d497a59e","reviewed":true}
+      "ja": {"text":"確認待ち・このページでは自分にだけ表示されます","sourceRevision":"98572ffaceff956a8e34b371ceb64d798b68c3f91bdc2a175cf8b511d497a59e","reviewed":true},
+      "it": {"text":"In attesa di verifica · visibile solo a te su questa pagina","sourceRevision":"98572ffaceff956a8e34b371ceb64d798b68c3f91bdc2a175cf8b511d497a59e","reviewed":true},
+      "ru": {"text":"На проверке · видно только вам на этой странице","sourceRevision":"98572ffaceff956a8e34b371ceb64d798b68c3f91bdc2a175cf8b511d497a59e","reviewed":true},
+      "ko": {"text":"검토 대기 중 · 이 페이지에서는 본인에게만 표시됩니다.","sourceRevision":"98572ffaceff956a8e34b371ceb64d798b68c3f91bdc2a175cf8b511d497a59e","reviewed":true},
+      "fr": {"text":"En attente de modération · visible uniquement par vous sur cette page","sourceRevision":"98572ffaceff956a8e34b371ceb64d798b68c3f91bdc2a175cf8b511d497a59e","reviewed":true}
     }
   },
   "positionHelp": {
     "source": "上下拖动时间轴，松手即可跳转；也可输入楼层。",
     "translations": {
       "en": {"text":"Drag up or down and release to jump, or enter a post number.","sourceRevision":"97a35f02e0daafc63c3cf86632549907566521d50f1639119b11b95a7a17a7e6","reviewed":true},
-      "ja": {"text":"上下にドラッグし、指を離すと移動します。投稿番号でも移動できます。","sourceRevision":"97a35f02e0daafc63c3cf86632549907566521d50f1639119b11b95a7a17a7e6","reviewed":true},
-      "it": {"text":"Trascina in verticale e rilascia per spostarti, oppure inserisci il numero del messaggio.","sourceRevision":"97a35f02e0daafc63c3cf86632549907566521d50f1639119b11b95a7a17a7e6","reviewed":true},
-      "ru": {"text":"Перетащите вверх или вниз и отпустите для перехода либо введите номер сообщения.","sourceRevision":"97a35f02e0daafc63c3cf86632549907566521d50f1639119b11b95a7a17a7e6","reviewed":true}
+      "ja": {"text":"目盛りを上下に動かして、離すとその位置に移動します。投稿番号を入力して移動することもできます。","sourceRevision":"97a35f02e0daafc63c3cf86632549907566521d50f1639119b11b95a7a17a7e6","reviewed":true},
+      "it": {"text":"Trascina il cursore su o giù e rilascialo per spostarti. Puoi anche inserire il numero del post.","sourceRevision":"97a35f02e0daafc63c3cf86632549907566521d50f1639119b11b95a7a17a7e6","reviewed":true},
+      "ru": {"text":"Перетащите вверх или вниз и отпустите для перехода либо введите номер сообщения.","sourceRevision":"97a35f02e0daafc63c3cf86632549907566521d50f1639119b11b95a7a17a7e6","reviewed":true},
+      "ko": {"text":"탐색 막대를 위아래로 끌었다 놓으면 해당 위치로 이동합니다. 게시물 번호를 직접 입력할 수도 있습니다.","sourceRevision":"97a35f02e0daafc63c3cf86632549907566521d50f1639119b11b95a7a17a7e6","reviewed":true},
+      "fr": {"text":"Faites glisser le curseur vers le haut ou le bas et relâchez-le pour changer de position. Vous pouvez aussi saisir le numéro d’une publication.","sourceRevision":"97a35f02e0daafc63c3cf86632549907566521d50f1639119b11b95a7a17a7e6","reviewed":true}
     }
   },
   "previousImage": {
     "source": "上一张图片",
     "translations": {
       "en": {"text":"Previous image","sourceRevision":"b815c2b4abff13ff1efc336dabf0a68dad2bc71085d17bea4cba0e39ac70fc1f","reviewed":true},
-      "ru": {"text":"Предыдущее изображение","sourceRevision":"b815c2b4abff13ff1efc336dabf0a68dad2bc71085d17bea4cba0e39ac70fc1f","reviewed":true}
+      "ja": {"text":"前の画像","sourceRevision":"b815c2b4abff13ff1efc336dabf0a68dad2bc71085d17bea4cba0e39ac70fc1f","reviewed":true},
+      "it": {"text":"Immagine precedente","sourceRevision":"b815c2b4abff13ff1efc336dabf0a68dad2bc71085d17bea4cba0e39ac70fc1f","reviewed":true},
+      "ru": {"text":"Предыдущее изображение","sourceRevision":"b815c2b4abff13ff1efc336dabf0a68dad2bc71085d17bea4cba0e39ac70fc1f","reviewed":true},
+      "ko": {"text":"이전 이미지","sourceRevision":"b815c2b4abff13ff1efc336dabf0a68dad2bc71085d17bea4cba0e39ac70fc1f","reviewed":true},
+      "fr": {"text":"Image précédente","sourceRevision":"b815c2b4abff13ff1efc336dabf0a68dad2bc71085d17bea4cba0e39ac70fc1f","reviewed":true}
     }
   },
   "publishReply": {
     "source": "发布回复",
     "translations": {
       "en": {"text":"Post reply","sourceRevision":"051b4ee9bcf6560ac45bb1ecbd13a435ddc38200e7b8d7db874a10925b5a1fc4","reviewed":true},
-      "ja": {"text":"返信を投稿","sourceRevision":"051b4ee9bcf6560ac45bb1ecbd13a435ddc38200e7b8d7db874a10925b5a1fc4","reviewed":true},
+      "ja": {"text":"返信する","sourceRevision":"051b4ee9bcf6560ac45bb1ecbd13a435ddc38200e7b8d7db874a10925b5a1fc4","reviewed":true},
       "it": {"text":"Pubblica risposta","sourceRevision":"051b4ee9bcf6560ac45bb1ecbd13a435ddc38200e7b8d7db874a10925b5a1fc4","reviewed":true},
-      "ru": {"text":"Опубликовать ответ","sourceRevision":"051b4ee9bcf6560ac45bb1ecbd13a435ddc38200e7b8d7db874a10925b5a1fc4","reviewed":true}
+      "ru": {"text":"Опубликовать ответ","sourceRevision":"051b4ee9bcf6560ac45bb1ecbd13a435ddc38200e7b8d7db874a10925b5a1fc4","reviewed":true},
+      "ko": {"text":"답글 달기","sourceRevision":"051b4ee9bcf6560ac45bb1ecbd13a435ddc38200e7b8d7db874a10925b5a1fc4","reviewed":true},
+      "fr": {"text":"Publier la réponse","sourceRevision":"051b4ee9bcf6560ac45bb1ecbd13a435ddc38200e7b8d7db874a10925b5a1fc4","reviewed":true}
     }
   },
   "publishing": {
     "source": "发布中...",
     "translations": {
       "en": {"text":"Publishing...","sourceRevision":"4d857d3f6c466b440c9ba9748464c114e600a6a37fd3aa4c985b90671bbd8f3a","reviewed":true},
-      "ja": {"text":"投稿中...","sourceRevision":"4d857d3f6c466b440c9ba9748464c114e600a6a37fd3aa4c985b90671bbd8f3a","reviewed":true},
-      "it": {"text":"Pubblicazione...","sourceRevision":"4d857d3f6c466b440c9ba9748464c114e600a6a37fd3aa4c985b90671bbd8f3a","reviewed":true},
-      "ru": {"text":"Публикация...","sourceRevision":"4d857d3f6c466b440c9ba9748464c114e600a6a37fd3aa4c985b90671bbd8f3a","reviewed":true}
+      "ja": {"text":"投稿中…","sourceRevision":"4d857d3f6c466b440c9ba9748464c114e600a6a37fd3aa4c985b90671bbd8f3a","reviewed":true},
+      "it": {"text":"Pubblicazione in corso…","sourceRevision":"4d857d3f6c466b440c9ba9748464c114e600a6a37fd3aa4c985b90671bbd8f3a","reviewed":true},
+      "ru": {"text":"Публикация...","sourceRevision":"4d857d3f6c466b440c9ba9748464c114e600a6a37fd3aa4c985b90671bbd8f3a","reviewed":true},
+      "ko": {"text":"게시하는 중…","sourceRevision":"4d857d3f6c466b440c9ba9748464c114e600a6a37fd3aa4c985b90671bbd8f3a","reviewed":true},
+      "fr": {"text":"Publication en cours…","sourceRevision":"4d857d3f6c466b440c9ba9748464c114e600a6a37fd3aa4c985b90671bbd8f3a","reviewed":true}
     }
   },
   "reply": {
@@ -572,7 +731,9 @@
       "en": {"text":"Reply","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
       "ja": {"text":"返信","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
       "it": {"text":"Rispondi","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
-      "ru": {"text":"Ответить","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true}
+      "ru": {"text":"Ответить","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
+      "ko": {"text":"답글","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
+      "fr": {"text":"Réponse","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true}
     }
   },
   "replyAuthor": {
@@ -581,16 +742,20 @@
       "en": {"text":"Reply author","sourceRevision":"268bbe36c38a05c3e7dae8ab2ff5515c9a962e105c0f15fdddd3376680882901","reviewed":true},
       "ja": {"text":"返信の投稿者","sourceRevision":"268bbe36c38a05c3e7dae8ab2ff5515c9a962e105c0f15fdddd3376680882901","reviewed":true},
       "it": {"text":"Autore della risposta","sourceRevision":"268bbe36c38a05c3e7dae8ab2ff5515c9a962e105c0f15fdddd3376680882901","reviewed":true},
-      "ru": {"text":"Автор ответа","sourceRevision":"268bbe36c38a05c3e7dae8ab2ff5515c9a962e105c0f15fdddd3376680882901","reviewed":true}
+      "ru": {"text":"Автор ответа","sourceRevision":"268bbe36c38a05c3e7dae8ab2ff5515c9a962e105c0f15fdddd3376680882901","reviewed":true},
+      "ko": {"text":"댓글 작성자","sourceRevision":"268bbe36c38a05c3e7dae8ab2ff5515c9a962e105c0f15fdddd3376680882901","reviewed":true},
+      "fr": {"text":"Auteur de la réponse","sourceRevision":"268bbe36c38a05c3e7dae8ab2ff5515c9a962e105c0f15fdddd3376680882901","reviewed":true}
     }
   },
   "replyCount": {
     "source": "回复数",
     "translations": {
       "en": {"text":"Replies","sourceRevision":"17cd637f263fd423b9951b10e699b5c20c312fdaa65abc58b684e12d56834e0a","reviewed":true},
-      "ja": {"text":"返信数","sourceRevision":"17cd637f263fd423b9951b10e699b5c20c312fdaa65abc58b684e12d56834e0a","reviewed":true},
+      "ja": {"text":"返信","sourceRevision":"17cd637f263fd423b9951b10e699b5c20c312fdaa65abc58b684e12d56834e0a","reviewed":true},
       "it": {"text":"Risposte","sourceRevision":"17cd637f263fd423b9951b10e699b5c20c312fdaa65abc58b684e12d56834e0a","reviewed":true},
-      "ru": {"text":"Ответы","sourceRevision":"17cd637f263fd423b9951b10e699b5c20c312fdaa65abc58b684e12d56834e0a","reviewed":true}
+      "ru": {"text":"Ответы","sourceRevision":"17cd637f263fd423b9951b10e699b5c20c312fdaa65abc58b684e12d56834e0a","reviewed":true},
+      "ko": {"text":"답글","sourceRevision":"17cd637f263fd423b9951b10e699b5c20c312fdaa65abc58b684e12d56834e0a","reviewed":true},
+      "fr": {"text":"Réponses","sourceRevision":"17cd637f263fd423b9951b10e699b5c20c312fdaa65abc58b684e12d56834e0a","reviewed":true}
     }
   },
   "replyDeleted": {
@@ -599,7 +764,9 @@
       "en": {"text":"Reply deleted.","sourceRevision":"fe3ccf56b519a338ac409a041d502dc1c0b90f4aef187d0971460a53d455f94a","reviewed":true},
       "ja": {"text":"返信を削除しました。","sourceRevision":"fe3ccf56b519a338ac409a041d502dc1c0b90f4aef187d0971460a53d455f94a","reviewed":true},
       "it": {"text":"Risposta eliminata.","sourceRevision":"fe3ccf56b519a338ac409a041d502dc1c0b90f4aef187d0971460a53d455f94a","reviewed":true},
-      "ru": {"text":"Ответ удалён.","sourceRevision":"fe3ccf56b519a338ac409a041d502dc1c0b90f4aef187d0971460a53d455f94a","reviewed":true}
+      "ru": {"text":"Ответ удалён.","sourceRevision":"fe3ccf56b519a338ac409a041d502dc1c0b90f4aef187d0971460a53d455f94a","reviewed":true},
+      "ko": {"text":"댓글 삭제.","sourceRevision":"fe3ccf56b519a338ac409a041d502dc1c0b90f4aef187d0971460a53d455f94a","reviewed":true},
+      "fr": {"text":"Réponse supprimée.","sourceRevision":"fe3ccf56b519a338ac409a041d502dc1c0b90f4aef187d0971460a53d455f94a","reviewed":true}
     }
   },
   "replyPosition": {
@@ -608,7 +775,9 @@
       "en": {"text":"Reply position","sourceRevision":"305bbb6ebe28981702e357b95703602ecd86a2993f574665bf4742b8c80b8bd9","reviewed":true},
       "ja": {"text":"返信位置","sourceRevision":"305bbb6ebe28981702e357b95703602ecd86a2993f574665bf4742b8c80b8bd9","reviewed":true},
       "it": {"text":"Posizione della risposta","sourceRevision":"305bbb6ebe28981702e357b95703602ecd86a2993f574665bf4742b8c80b8bd9","reviewed":true},
-      "ru": {"text":"Позиция ответа","sourceRevision":"305bbb6ebe28981702e357b95703602ecd86a2993f574665bf4742b8c80b8bd9","reviewed":true}
+      "ru": {"text":"Позиция ответа","sourceRevision":"305bbb6ebe28981702e357b95703602ecd86a2993f574665bf4742b8c80b8bd9","reviewed":true},
+      "ko": {"text":"응답 위치","sourceRevision":"305bbb6ebe28981702e357b95703602ecd86a2993f574665bf4742b8c80b8bd9","reviewed":true},
+      "fr": {"text":"Position de réponse","sourceRevision":"305bbb6ebe28981702e357b95703602ecd86a2993f574665bf4742b8c80b8bd9","reviewed":true}
     }
   },
   "replyPosted": {
@@ -617,7 +786,9 @@
       "en": {"text":"Reply posted.","sourceRevision":"0404ca30dfa54d212aedf8b9edfa347b5e59019931dabd330cbe2ffd5b9cef0a","reviewed":true},
       "ja": {"text":"返信を投稿しました。","sourceRevision":"0404ca30dfa54d212aedf8b9edfa347b5e59019931dabd330cbe2ffd5b9cef0a","reviewed":true},
       "it": {"text":"Risposta pubblicata.","sourceRevision":"0404ca30dfa54d212aedf8b9edfa347b5e59019931dabd330cbe2ffd5b9cef0a","reviewed":true},
-      "ru": {"text":"Ответ опубликован.","sourceRevision":"0404ca30dfa54d212aedf8b9edfa347b5e59019931dabd330cbe2ffd5b9cef0a","reviewed":true}
+      "ru": {"text":"Ответ опубликован.","sourceRevision":"0404ca30dfa54d212aedf8b9edfa347b5e59019931dabd330cbe2ffd5b9cef0a","reviewed":true},
+      "ko": {"text":"댓글 게시.","sourceRevision":"0404ca30dfa54d212aedf8b9edfa347b5e59019931dabd330cbe2ffd5b9cef0a","reviewed":true},
+      "fr": {"text":"Réponse affichée.","sourceRevision":"0404ca30dfa54d212aedf8b9edfa347b5e59019931dabd330cbe2ffd5b9cef0a","reviewed":true}
     }
   },
   "replyReportTitle": {
@@ -626,7 +797,9 @@
       "en": {"text":"Reply #{no}","sourceRevision":"4dcc92087312ce632d7d6e573f5bd52855e9ba3768cf3c3ae5a92c7104b63d0a","reviewed":true},
       "ja": {"text":"返信 #{no}","sourceRevision":"4dcc92087312ce632d7d6e573f5bd52855e9ba3768cf3c3ae5a92c7104b63d0a","reviewed":true},
       "it": {"text":"Risposta #{no}","sourceRevision":"4dcc92087312ce632d7d6e573f5bd52855e9ba3768cf3c3ae5a92c7104b63d0a","reviewed":true},
-      "ru": {"text":"Ответ #{no}","sourceRevision":"4dcc92087312ce632d7d6e573f5bd52855e9ba3768cf3c3ae5a92c7104b63d0a","reviewed":true}
+      "ru": {"text":"Ответ #{no}","sourceRevision":"4dcc92087312ce632d7d6e573f5bd52855e9ba3768cf3c3ae5a92c7104b63d0a","reviewed":true},
+      "ko": {"text":"응답 #{no}","sourceRevision":"4dcc92087312ce632d7d6e573f5bd52855e9ba3768cf3c3ae5a92c7104b63d0a","reviewed":true},
+      "fr": {"text":"Réponse n° {no}","sourceRevision":"4dcc92087312ce632d7d6e573f5bd52855e9ba3768cf3c3ae5a92c7104b63d0a","reviewed":true}
     }
   },
   "replyRequired": {
@@ -635,7 +808,9 @@
       "en": {"text":"Reply content cannot be empty","sourceRevision":"32e1cfc764a79bb7ae339e308d15c7fc1d414013072bf942261b680c51d03087","reviewed":true},
       "ja": {"text":"返信内容を入力してください","sourceRevision":"32e1cfc764a79bb7ae339e308d15c7fc1d414013072bf942261b680c51d03087","reviewed":true},
       "it": {"text":"Il contenuto della risposta non può essere vuoto","sourceRevision":"32e1cfc764a79bb7ae339e308d15c7fc1d414013072bf942261b680c51d03087","reviewed":true},
-      "ru": {"text":"Текст ответа не может быть пустым","sourceRevision":"32e1cfc764a79bb7ae339e308d15c7fc1d414013072bf942261b680c51d03087","reviewed":true}
+      "ru": {"text":"Текст ответа не может быть пустым","sourceRevision":"32e1cfc764a79bb7ae339e308d15c7fc1d414013072bf942261b680c51d03087","reviewed":true},
+      "ko": {"text":"답변 내용이 비어있을 수 없습니다.","sourceRevision":"32e1cfc764a79bb7ae339e308d15c7fc1d414013072bf942261b680c51d03087","reviewed":true},
+      "fr": {"text":"Le contenu de la réponse ne peut pas être vide","sourceRevision":"32e1cfc764a79bb7ae339e308d15c7fc1d414013072bf942261b680c51d03087","reviewed":true}
     }
   },
   "replyTargetUnavailable": {
@@ -644,7 +819,9 @@
       "en": {"text":"The original reply is unavailable","sourceRevision":"56f0ee3a68201bc1b6ac082bb3c7e6783735cd9e609749356beebb4d43301666","reviewed":true},
       "ja": {"text":"元の返信は表示できません","sourceRevision":"56f0ee3a68201bc1b6ac082bb3c7e6783735cd9e609749356beebb4d43301666","reviewed":true},
       "it": {"text":"La risposta originale non è disponibile","sourceRevision":"56f0ee3a68201bc1b6ac082bb3c7e6783735cd9e609749356beebb4d43301666","reviewed":true},
-      "ru": {"text":"Исходный ответ недоступен","sourceRevision":"56f0ee3a68201bc1b6ac082bb3c7e6783735cd9e609749356beebb4d43301666","reviewed":true}
+      "ru": {"text":"Исходный ответ недоступен","sourceRevision":"56f0ee3a68201bc1b6ac082bb3c7e6783735cd9e609749356beebb4d43301666","reviewed":true},
+      "ko": {"text":"원래 답장은 사용할 수 없습니다","sourceRevision":"56f0ee3a68201bc1b6ac082bb3c7e6783735cd9e609749356beebb4d43301666","reviewed":true},
+      "fr": {"text":"La réponse originale n’est pas disponible","sourceRevision":"56f0ee3a68201bc1b6ac082bb3c7e6783735cd9e609749356beebb4d43301666","reviewed":true}
     }
   },
   "replyToPost": {
@@ -653,16 +830,20 @@
       "en": {"text":"Reply to {user} · #{no}","sourceRevision":"3b86a098a844db6ff84581103cf2934871037d6181894d98c2e74c62ba62944a","reviewed":true},
       "ja": {"text":"{user} に返信 · #{no}","sourceRevision":"3b86a098a844db6ff84581103cf2934871037d6181894d98c2e74c62ba62944a","reviewed":true},
       "it": {"text":"Rispondi a {user} · #{no}","sourceRevision":"3b86a098a844db6ff84581103cf2934871037d6181894d98c2e74c62ba62944a","reviewed":true},
-      "ru": {"text":"Ответить {user} · #{no}","sourceRevision":"3b86a098a844db6ff84581103cf2934871037d6181894d98c2e74c62ba62944a","reviewed":true}
+      "ru": {"text":"Ответить {user} · #{no}","sourceRevision":"3b86a098a844db6ff84581103cf2934871037d6181894d98c2e74c62ba62944a","reviewed":true},
+      "ko": {"text":"응답 {user} · #{no}","sourceRevision":"3b86a098a844db6ff84581103cf2934871037d6181894d98c2e74c62ba62944a","reviewed":true},
+      "fr": {"text":"Réponse à {user} · #{no}","sourceRevision":"3b86a098a844db6ff84581103cf2934871037d6181894d98c2e74c62ba62944a","reviewed":true}
     }
   },
   "replyToTopic": {
     "source": "回复主题",
     "translations": {
       "en": {"text":"Reply to topic","sourceRevision":"51e573880a8a328fe7817df29d55618645760d79cc6435d4644e1cc5772e8903","reviewed":true},
-      "ja": {"text":"トピックに返信","sourceRevision":"51e573880a8a328fe7817df29d55618645760d79cc6435d4644e1cc5772e8903","reviewed":true},
+      "ja": {"text":"スレッドに返信","sourceRevision":"51e573880a8a328fe7817df29d55618645760d79cc6435d4644e1cc5772e8903","reviewed":true},
       "it": {"text":"Rispondi alla discussione","sourceRevision":"51e573880a8a328fe7817df29d55618645760d79cc6435d4644e1cc5772e8903","reviewed":true},
-      "ru": {"text":"Ответить в теме","sourceRevision":"51e573880a8a328fe7817df29d55618645760d79cc6435d4644e1cc5772e8903","reviewed":true}
+      "ru": {"text":"Ответить в теме","sourceRevision":"51e573880a8a328fe7817df29d55618645760d79cc6435d4644e1cc5772e8903","reviewed":true},
+      "ko": {"text":"게시글에 대한 답변","sourceRevision":"51e573880a8a328fe7817df29d55618645760d79cc6435d4644e1cc5772e8903","reviewed":true},
+      "fr": {"text":"Réponse au sujet","sourceRevision":"51e573880a8a328fe7817df29d55618645760d79cc6435d4644e1cc5772e8903","reviewed":true}
     }
   },
   "replyUpdated": {
@@ -671,7 +852,9 @@
       "en": {"text":"Reply updated.","sourceRevision":"4630b4a2be7bf87a8ecf72d9909434670285e02d47cd3d290913d368bd0575a3","reviewed":true},
       "ja": {"text":"返信を更新しました。","sourceRevision":"4630b4a2be7bf87a8ecf72d9909434670285e02d47cd3d290913d368bd0575a3","reviewed":true},
       "it": {"text":"Risposta aggiornata.","sourceRevision":"4630b4a2be7bf87a8ecf72d9909434670285e02d47cd3d290913d368bd0575a3","reviewed":true},
-      "ru": {"text":"Ответ обновлён.","sourceRevision":"4630b4a2be7bf87a8ecf72d9909434670285e02d47cd3d290913d368bd0575a3","reviewed":true}
+      "ru": {"text":"Ответ обновлён.","sourceRevision":"4630b4a2be7bf87a8ecf72d9909434670285e02d47cd3d290913d368bd0575a3","reviewed":true},
+      "ko": {"text":"댓글 업데이트.","sourceRevision":"4630b4a2be7bf87a8ecf72d9909434670285e02d47cd3d290913d368bd0575a3","reviewed":true},
+      "fr": {"text":"Réponse actualisée.","sourceRevision":"4630b4a2be7bf87a8ecf72d9909434670285e02d47cd3d290913d368bd0575a3","reviewed":true}
     }
   },
   "report": {
@@ -680,7 +863,9 @@
       "en": {"text":"Report","sourceRevision":"e43b847b2e124185a38e3ec119dc03076215491955237096d31ffbc4a2b865b3","reviewed":true},
       "ja": {"text":"通報","sourceRevision":"e43b847b2e124185a38e3ec119dc03076215491955237096d31ffbc4a2b865b3","reviewed":true},
       "it": {"text":"Segnala","sourceRevision":"e43b847b2e124185a38e3ec119dc03076215491955237096d31ffbc4a2b865b3","reviewed":true},
-      "ru": {"text":"Пожаловаться","sourceRevision":"e43b847b2e124185a38e3ec119dc03076215491955237096d31ffbc4a2b865b3","reviewed":true}
+      "ru": {"text":"Пожаловаться","sourceRevision":"e43b847b2e124185a38e3ec119dc03076215491955237096d31ffbc4a2b865b3","reviewed":true},
+      "ko": {"text":"신고","sourceRevision":"e43b847b2e124185a38e3ec119dc03076215491955237096d31ffbc4a2b865b3","reviewed":true},
+      "fr": {"text":"Signaler","sourceRevision":"e43b847b2e124185a38e3ec119dc03076215491955237096d31ffbc4a2b865b3","reviewed":true}
     }
   },
   "reportNotePlaceholder": {
@@ -689,7 +874,9 @@
       "en": {"text":"Optional details","sourceRevision":"5e11f4c3fd6b97918320868ccdef5199898d7e519ce72009a3daf19670891f6f","reviewed":true},
       "ja": {"text":"補足説明（任意）","sourceRevision":"5e11f4c3fd6b97918320868ccdef5199898d7e519ce72009a3daf19670891f6f","reviewed":true},
       "it": {"text":"Dettagli facoltativi","sourceRevision":"5e11f4c3fd6b97918320868ccdef5199898d7e519ce72009a3daf19670891f6f","reviewed":true},
-      "ru": {"text":"Дополнительные детали (необязательно)","sourceRevision":"5e11f4c3fd6b97918320868ccdef5199898d7e519ce72009a3daf19670891f6f","reviewed":true}
+      "ru": {"text":"Дополнительные детали (необязательно)","sourceRevision":"5e11f4c3fd6b97918320868ccdef5199898d7e519ce72009a3daf19670891f6f","reviewed":true},
+      "ko": {"text":"옵션 정보","sourceRevision":"5e11f4c3fd6b97918320868ccdef5199898d7e519ce72009a3daf19670891f6f","reviewed":true},
+      "fr": {"text":"Détails facultatifs","sourceRevision":"5e11f4c3fd6b97918320868ccdef5199898d7e519ce72009a3daf19670891f6f","reviewed":true}
     }
   },
   "reportReasons.abuse": {
@@ -698,7 +885,9 @@
       "en": {"text":"Harassment","sourceRevision":"4b46a4011e3054343c7599667aa10facfd4c09190ade10846f5821bb0e0c1150","reviewed":true},
       "ja": {"text":"攻撃・嫌がらせ","sourceRevision":"4b46a4011e3054343c7599667aa10facfd4c09190ade10846f5821bb0e0c1150","reviewed":true},
       "it": {"text":"Molestie","sourceRevision":"4b46a4011e3054343c7599667aa10facfd4c09190ade10846f5821bb0e0c1150","reviewed":true},
-      "ru": {"text":"Оскорбления/травля","sourceRevision":"4b46a4011e3054343c7599667aa10facfd4c09190ade10846f5821bb0e0c1150","reviewed":true}
+      "ru": {"text":"Оскорбления/травля","sourceRevision":"4b46a4011e3054343c7599667aa10facfd4c09190ade10846f5821bb0e0c1150","reviewed":true},
+      "ko": {"text":"주요 특징","sourceRevision":"4b46a4011e3054343c7599667aa10facfd4c09190ade10846f5821bb0e0c1150","reviewed":true},
+      "fr": {"text":"Harcèlement","sourceRevision":"4b46a4011e3054343c7599667aa10facfd4c09190ade10846f5821bb0e0c1150","reviewed":true}
     }
   },
   "reportReasons.illegal": {
@@ -707,7 +896,9 @@
       "en": {"text":"Illegal content","sourceRevision":"1257a5bdc68fd56561dc151db5c6da28efb04a9a66be17907bec7678f9af629f","reviewed":true},
       "ja": {"text":"違法コンテンツ","sourceRevision":"1257a5bdc68fd56561dc151db5c6da28efb04a9a66be17907bec7678f9af629f","reviewed":true},
       "it": {"text":"Contenuto illegale","sourceRevision":"1257a5bdc68fd56561dc151db5c6da28efb04a9a66be17907bec7678f9af629f","reviewed":true},
-      "ru": {"text":"Незаконный контент","sourceRevision":"1257a5bdc68fd56561dc151db5c6da28efb04a9a66be17907bec7678f9af629f","reviewed":true}
+      "ru": {"text":"Незаконный контент","sourceRevision":"1257a5bdc68fd56561dc151db5c6da28efb04a9a66be17907bec7678f9af629f","reviewed":true},
+      "ko": {"text":"Illegal 내용","sourceRevision":"1257a5bdc68fd56561dc151db5c6da28efb04a9a66be17907bec7678f9af629f","reviewed":true},
+      "fr": {"text":"Contenu illégal","sourceRevision":"1257a5bdc68fd56561dc151db5c6da28efb04a9a66be17907bec7678f9af629f","reviewed":true}
     }
   },
   "reportReasons.irrelevant": {
@@ -716,7 +907,9 @@
       "en": {"text":"Off topic","sourceRevision":"35579a1568abb3a5565c0f6f3bbae1cc98da57e51ebe338372298e6d77783cd1","reviewed":true},
       "ja": {"text":"無関係な内容","sourceRevision":"35579a1568abb3a5565c0f6f3bbae1cc98da57e51ebe338372298e6d77783cd1","reviewed":true},
       "it": {"text":"Fuori tema","sourceRevision":"35579a1568abb3a5565c0f6f3bbae1cc98da57e51ebe338372298e6d77783cd1","reviewed":true},
-      "ru": {"text":"Не по теме","sourceRevision":"35579a1568abb3a5565c0f6f3bbae1cc98da57e51ebe338372298e6d77783cd1","reviewed":true}
+      "ru": {"text":"Не по теме","sourceRevision":"35579a1568abb3a5565c0f6f3bbae1cc98da57e51ebe338372298e6d77783cd1","reviewed":true},
+      "ko": {"text":"주제와 관련 없는 내용","sourceRevision":"35579a1568abb3a5565c0f6f3bbae1cc98da57e51ebe338372298e6d77783cd1","reviewed":true},
+      "fr": {"text":"Hors sujet","sourceRevision":"35579a1568abb3a5565c0f6f3bbae1cc98da57e51ebe338372298e6d77783cd1","reviewed":true}
     }
   },
   "reportReasons.other": {
@@ -725,7 +918,9 @@
       "en": {"text":"Other","sourceRevision":"4a321526acef35ec2bfe9cc1489982b01767a9b98087ae430fd1ba42593755fa","reviewed":true},
       "ja": {"text":"その他","sourceRevision":"4a321526acef35ec2bfe9cc1489982b01767a9b98087ae430fd1ba42593755fa","reviewed":true},
       "it": {"text":"Altro","sourceRevision":"4a321526acef35ec2bfe9cc1489982b01767a9b98087ae430fd1ba42593755fa","reviewed":true},
-      "ru": {"text":"Другое","sourceRevision":"4a321526acef35ec2bfe9cc1489982b01767a9b98087ae430fd1ba42593755fa","reviewed":true}
+      "ru": {"text":"Другое","sourceRevision":"4a321526acef35ec2bfe9cc1489982b01767a9b98087ae430fd1ba42593755fa","reviewed":true},
+      "ko": {"text":"기타","sourceRevision":"4a321526acef35ec2bfe9cc1489982b01767a9b98087ae430fd1ba42593755fa","reviewed":true},
+      "fr": {"text":"Autres","sourceRevision":"4a321526acef35ec2bfe9cc1489982b01767a9b98087ae430fd1ba42593755fa","reviewed":true}
     }
   },
   "reportReasons.spam": {
@@ -734,7 +929,9 @@
       "en": {"text":"Spam","sourceRevision":"19e7afea3f498646e67d19aabc9c88b2e3d01d73819fbed8c2bc93c26c1440cd","reviewed":true},
       "ja": {"text":"スパム","sourceRevision":"19e7afea3f498646e67d19aabc9c88b2e3d01d73819fbed8c2bc93c26c1440cd","reviewed":true},
       "it": {"text":"Spam","sourceRevision":"19e7afea3f498646e67d19aabc9c88b2e3d01d73819fbed8c2bc93c26c1440cd","reviewed":true},
-      "ru": {"text":"Спам","sourceRevision":"19e7afea3f498646e67d19aabc9c88b2e3d01d73819fbed8c2bc93c26c1440cd","reviewed":true}
+      "ru": {"text":"Спам","sourceRevision":"19e7afea3f498646e67d19aabc9c88b2e3d01d73819fbed8c2bc93c26c1440cd","reviewed":true},
+      "ko": {"text":"스낵 바","sourceRevision":"19e7afea3f498646e67d19aabc9c88b2e3d01d73819fbed8c2bc93c26c1440cd","reviewed":true},
+      "fr": {"text":"Pourriel","sourceRevision":"19e7afea3f498646e67d19aabc9c88b2e3d01d73819fbed8c2bc93c26c1440cd","reviewed":true}
     }
   },
   "reportSubmitted": {
@@ -743,7 +940,9 @@
       "en": {"text":"Report submitted.","sourceRevision":"b592fa9b6eef58503cabe60d82cb7ffb0c8a6d987e14445350509a0c93225992","reviewed":true},
       "ja": {"text":"通報を送信しました。","sourceRevision":"b592fa9b6eef58503cabe60d82cb7ffb0c8a6d987e14445350509a0c93225992","reviewed":true},
       "it": {"text":"Segnalazione inviata.","sourceRevision":"b592fa9b6eef58503cabe60d82cb7ffb0c8a6d987e14445350509a0c93225992","reviewed":true},
-      "ru": {"text":"Жалоба отправлена.","sourceRevision":"b592fa9b6eef58503cabe60d82cb7ffb0c8a6d987e14445350509a0c93225992","reviewed":true}
+      "ru": {"text":"Жалоба отправлена.","sourceRevision":"b592fa9b6eef58503cabe60d82cb7ffb0c8a6d987e14445350509a0c93225992","reviewed":true},
+      "ko": {"text":"제출 된 보고서.","sourceRevision":"b592fa9b6eef58503cabe60d82cb7ffb0c8a6d987e14445350509a0c93225992","reviewed":true},
+      "fr": {"text":"Rapport présenté.","sourceRevision":"b592fa9b6eef58503cabe60d82cb7ffb0c8a6d987e14445350509a0c93225992","reviewed":true}
     }
   },
   "reportTitle": {
@@ -752,7 +951,9 @@
       "en": {"text":"Report content","sourceRevision":"91cf800de143763b491e7473d3c40e7d6cf5a19b84932ab9c6ea51914a99d0c3","reviewed":true},
       "ja": {"text":"コンテンツを通報","sourceRevision":"91cf800de143763b491e7473d3c40e7d6cf5a19b84932ab9c6ea51914a99d0c3","reviewed":true},
       "it": {"text":"Segnala contenuto","sourceRevision":"91cf800de143763b491e7473d3c40e7d6cf5a19b84932ab9c6ea51914a99d0c3","reviewed":true},
-      "ru": {"text":"Пожаловаться на контент","sourceRevision":"91cf800de143763b491e7473d3c40e7d6cf5a19b84932ab9c6ea51914a99d0c3","reviewed":true}
+      "ru": {"text":"Пожаловаться на контент","sourceRevision":"91cf800de143763b491e7473d3c40e7d6cf5a19b84932ab9c6ea51914a99d0c3","reviewed":true},
+      "ko": {"text":"내용 신고","sourceRevision":"91cf800de143763b491e7473d3c40e7d6cf5a19b84932ab9c6ea51914a99d0c3","reviewed":true},
+      "fr": {"text":"Contenu du rapport","sourceRevision":"91cf800de143763b491e7473d3c40e7d6cf5a19b84932ab9c6ea51914a99d0c3","reviewed":true}
     }
   },
   "retryLoadReplies": {
@@ -761,14 +962,20 @@
       "en": {"text":"Retry loading replies","sourceRevision":"475efa87e0efeb1895d5a7057d111aaaa62f41ac2035934d2305960b8fe1eecb","reviewed":true},
       "ja": {"text":"返信の読み込みを再試行","sourceRevision":"475efa87e0efeb1895d5a7057d111aaaa62f41ac2035934d2305960b8fe1eecb","reviewed":true},
       "it": {"text":"Riprova a caricare le risposte","sourceRevision":"475efa87e0efeb1895d5a7057d111aaaa62f41ac2035934d2305960b8fe1eecb","reviewed":true},
-      "ru": {"text":"Повторить загрузку ответов","sourceRevision":"475efa87e0efeb1895d5a7057d111aaaa62f41ac2035934d2305960b8fe1eecb","reviewed":true}
+      "ru": {"text":"Повторить загрузку ответов","sourceRevision":"475efa87e0efeb1895d5a7057d111aaaa62f41ac2035934d2305960b8fe1eecb","reviewed":true},
+      "ko": {"text":"답글 다시 불러오기","sourceRevision":"475efa87e0efeb1895d5a7057d111aaaa62f41ac2035934d2305960b8fe1eecb","reviewed":true},
+      "fr": {"text":"Réessayer les réponses au chargement","sourceRevision":"475efa87e0efeb1895d5a7057d111aaaa62f41ac2035934d2305960b8fe1eecb","reviewed":true}
     }
   },
   "save": {
     "source": "保存",
     "translations": {
       "en": {"text":"Save","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
-      "ru": {"text":"Сохранить","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true}
+      "ja": {"text":"保存","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "it": {"text":"Salva","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "ru": {"text":"Сохранить","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "ko": {"text":"저장","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true},
+      "fr": {"text":"Enregistrer","sourceRevision":"8883f38db27862a4e005e8b0adf07db7b4ddd3b95f7e7f3b6ef024a6a613e2ca","reviewed":true}
     }
   },
   "saveCard": {
@@ -777,7 +984,9 @@
       "en": {"text":"Save card","sourceRevision":"adaa74a8bb58dfbf1983af62a74af62259ead2152de2bafc5fda76fa79e2b711","reviewed":true},
       "ja": {"text":"カードを保存","sourceRevision":"adaa74a8bb58dfbf1983af62a74af62259ead2152de2bafc5fda76fa79e2b711","reviewed":true},
       "it": {"text":"Salva scheda","sourceRevision":"adaa74a8bb58dfbf1983af62a74af62259ead2152de2bafc5fda76fa79e2b711","reviewed":true},
-      "ru": {"text":"Сохранить карточку","sourceRevision":"adaa74a8bb58dfbf1983af62a74af62259ead2152de2bafc5fda76fa79e2b711","reviewed":true}
+      "ru": {"text":"Сохранить карточку","sourceRevision":"adaa74a8bb58dfbf1983af62a74af62259ead2152de2bafc5fda76fa79e2b711","reviewed":true},
+      "ko": {"text":"카드 저장","sourceRevision":"adaa74a8bb58dfbf1983af62a74af62259ead2152de2bafc5fda76fa79e2b711","reviewed":true},
+      "fr": {"text":"Enregistrer la carte","sourceRevision":"adaa74a8bb58dfbf1983af62a74af62259ead2152de2bafc5fda76fa79e2b711","reviewed":true}
     }
   },
   "scanToRead": {
@@ -786,7 +995,9 @@
       "en": {"text":"Scan to read","sourceRevision":"e5c34bc827104f12d0b5b1607e586550c73777d2ab2ec91f7e8172533002e2ee","reviewed":true},
       "ja": {"text":"原文を読む","sourceRevision":"e5c34bc827104f12d0b5b1607e586550c73777d2ab2ec91f7e8172533002e2ee","reviewed":true},
       "it": {"text":"Scansiona per leggere","sourceRevision":"e5c34bc827104f12d0b5b1607e586550c73777d2ab2ec91f7e8172533002e2ee","reviewed":true},
-      "ru": {"text":"Сканируйте, чтобы прочитать","sourceRevision":"e5c34bc827104f12d0b5b1607e586550c73777d2ab2ec91f7e8172533002e2ee","reviewed":true}
+      "ru": {"text":"Сканируйте, чтобы прочитать","sourceRevision":"e5c34bc827104f12d0b5b1607e586550c73777d2ab2ec91f7e8172533002e2ee","reviewed":true},
+      "ko": {"text":"읽을 수있는 스캔","sourceRevision":"e5c34bc827104f12d0b5b1607e586550c73777d2ab2ec91f7e8172533002e2ee","reviewed":true},
+      "fr": {"text":"Scanner pour lire","sourceRevision":"e5c34bc827104f12d0b5b1607e586550c73777d2ab2ec91f7e8172533002e2ee","reviewed":true}
     }
   },
   "shareCard": {
@@ -795,7 +1006,9 @@
       "en": {"text":"Share card","sourceRevision":"896d9c7479a67d805ec0081d1ff1e65510602f7dadd54c44e50df5cfcf2dd844","reviewed":true},
       "ja": {"text":"カードを共有","sourceRevision":"896d9c7479a67d805ec0081d1ff1e65510602f7dadd54c44e50df5cfcf2dd844","reviewed":true},
       "it": {"text":"Condividi scheda","sourceRevision":"896d9c7479a67d805ec0081d1ff1e65510602f7dadd54c44e50df5cfcf2dd844","reviewed":true},
-      "ru": {"text":"Поделиться карточкой","sourceRevision":"896d9c7479a67d805ec0081d1ff1e65510602f7dadd54c44e50df5cfcf2dd844","reviewed":true}
+      "ru": {"text":"Поделиться карточкой","sourceRevision":"896d9c7479a67d805ec0081d1ff1e65510602f7dadd54c44e50df5cfcf2dd844","reviewed":true},
+      "ko": {"text":"공유 카드","sourceRevision":"896d9c7479a67d805ec0081d1ff1e65510602f7dadd54c44e50df5cfcf2dd844","reviewed":true},
+      "fr": {"text":"Carte de partage","sourceRevision":"896d9c7479a67d805ec0081d1ff1e65510602f7dadd54c44e50df5cfcf2dd844","reviewed":true}
     }
   },
   "shareReply": {
@@ -804,16 +1017,20 @@
       "en": {"text":"Share reply","sourceRevision":"b4fda003571b7488bfce708bf86d9df59fe9b71ce089993dd46b74edf318e0f2","reviewed":true},
       "ja": {"text":"返信を共有","sourceRevision":"b4fda003571b7488bfce708bf86d9df59fe9b71ce089993dd46b74edf318e0f2","reviewed":true},
       "it": {"text":"Condividi risposta","sourceRevision":"b4fda003571b7488bfce708bf86d9df59fe9b71ce089993dd46b74edf318e0f2","reviewed":true},
-      "ru": {"text":"Поделиться ответом","sourceRevision":"b4fda003571b7488bfce708bf86d9df59fe9b71ce089993dd46b74edf318e0f2","reviewed":true}
+      "ru": {"text":"Поделиться ответом","sourceRevision":"b4fda003571b7488bfce708bf86d9df59fe9b71ce089993dd46b74edf318e0f2","reviewed":true},
+      "ko": {"text":"답글 공유","sourceRevision":"b4fda003571b7488bfce708bf86d9df59fe9b71ce089993dd46b74edf318e0f2","reviewed":true},
+      "fr": {"text":"Partager la réponse","sourceRevision":"b4fda003571b7488bfce708bf86d9df59fe9b71ce089993dd46b74edf318e0f2","reviewed":true}
     }
   },
   "shareTopic": {
     "source": "分享主题",
     "translations": {
       "en": {"text":"Share topic","sourceRevision":"2ce9dce305a48976618b8c5fc006e9ede67499544d3186ddfd0a76879e1bee1e","reviewed":true},
-      "ja": {"text":"トピックを共有","sourceRevision":"2ce9dce305a48976618b8c5fc006e9ede67499544d3186ddfd0a76879e1bee1e","reviewed":true},
+      "ja": {"text":"スレッドを共有","sourceRevision":"2ce9dce305a48976618b8c5fc006e9ede67499544d3186ddfd0a76879e1bee1e","reviewed":true},
       "it": {"text":"Condividi discussione","sourceRevision":"2ce9dce305a48976618b8c5fc006e9ede67499544d3186ddfd0a76879e1bee1e","reviewed":true},
-      "ru": {"text":"Поделиться темой","sourceRevision":"2ce9dce305a48976618b8c5fc006e9ede67499544d3186ddfd0a76879e1bee1e","reviewed":true}
+      "ru": {"text":"Поделиться темой","sourceRevision":"2ce9dce305a48976618b8c5fc006e9ede67499544d3186ddfd0a76879e1bee1e","reviewed":true},
+      "ko": {"text":"게시글 공유","sourceRevision":"2ce9dce305a48976618b8c5fc006e9ede67499544d3186ddfd0a76879e1bee1e","reviewed":true},
+      "fr": {"text":"Partager le sujet","sourceRevision":"2ce9dce305a48976618b8c5fc006e9ede67499544d3186ddfd0a76879e1bee1e","reviewed":true}
     }
   },
   "submitReport": {
@@ -822,16 +1039,20 @@
       "en": {"text":"Submit report","sourceRevision":"8eff040f56c1bbda530780068e4144fa51f2df7b6d908774d99314c85dba7b5d","reviewed":true},
       "ja": {"text":"通報を送信","sourceRevision":"8eff040f56c1bbda530780068e4144fa51f2df7b6d908774d99314c85dba7b5d","reviewed":true},
       "it": {"text":"Invia segnalazione","sourceRevision":"8eff040f56c1bbda530780068e4144fa51f2df7b6d908774d99314c85dba7b5d","reviewed":true},
-      "ru": {"text":"Отправить жалобу","sourceRevision":"8eff040f56c1bbda530780068e4144fa51f2df7b6d908774d99314c85dba7b5d","reviewed":true}
+      "ru": {"text":"Отправить жалобу","sourceRevision":"8eff040f56c1bbda530780068e4144fa51f2df7b6d908774d99314c85dba7b5d","reviewed":true},
+      "ko": {"text":"신고 보내기","sourceRevision":"8eff040f56c1bbda530780068e4144fa51f2df7b6d908774d99314c85dba7b5d","reviewed":true},
+      "fr": {"text":"Soumettre le rapport","sourceRevision":"8eff040f56c1bbda530780068e4144fa51f2df7b6d908774d99314c85dba7b5d","reviewed":true}
     }
   },
   "topicAuthor": {
     "source": "主题作者",
     "translations": {
       "en": {"text":"Topic author","sourceRevision":"6a9370e586981d01195a6b8b6b07019bcd186068a5647c1f80e2950d8947d3a2","reviewed":true},
-      "ja": {"text":"トピックの投稿者","sourceRevision":"6a9370e586981d01195a6b8b6b07019bcd186068a5647c1f80e2950d8947d3a2","reviewed":true},
+      "ja": {"text":"スレッドの投稿者","sourceRevision":"6a9370e586981d01195a6b8b6b07019bcd186068a5647c1f80e2950d8947d3a2","reviewed":true},
       "it": {"text":"Autore della discussione","sourceRevision":"6a9370e586981d01195a6b8b6b07019bcd186068a5647c1f80e2950d8947d3a2","reviewed":true},
-      "ru": {"text":"Автор темы","sourceRevision":"6a9370e586981d01195a6b8b6b07019bcd186068a5647c1f80e2950d8947d3a2","reviewed":true}
+      "ru": {"text":"Автор темы","sourceRevision":"6a9370e586981d01195a6b8b6b07019bcd186068a5647c1f80e2950d8947d3a2","reviewed":true},
+      "ko": {"text":"게시글 저자","sourceRevision":"6a9370e586981d01195a6b8b6b07019bcd186068a5647c1f80e2950d8947d3a2","reviewed":true},
+      "fr": {"text":"Auteur du sujet","sourceRevision":"6a9370e586981d01195a6b8b6b07019bcd186068a5647c1f80e2950d8947d3a2","reviewed":true}
     }
   },
   "viewCount": {
@@ -840,14 +1061,20 @@
       "en": {"text":"Views","sourceRevision":"40d0bc78171f355436b40c7d6f9ebe1815d4d7ca445598aa39edb8d8ee36459b","reviewed":true},
       "ja": {"text":"閲覧数","sourceRevision":"40d0bc78171f355436b40c7d6f9ebe1815d4d7ca445598aa39edb8d8ee36459b","reviewed":true},
       "it": {"text":"Visualizzazioni","sourceRevision":"40d0bc78171f355436b40c7d6f9ebe1815d4d7ca445598aa39edb8d8ee36459b","reviewed":true},
-      "ru": {"text":"Просмотры","sourceRevision":"40d0bc78171f355436b40c7d6f9ebe1815d4d7ca445598aa39edb8d8ee36459b","reviewed":true}
+      "ru": {"text":"Просмотры","sourceRevision":"40d0bc78171f355436b40c7d6f9ebe1815d4d7ca445598aa39edb8d8ee36459b","reviewed":true},
+      "ko": {"text":"조회 수","sourceRevision":"40d0bc78171f355436b40c7d6f9ebe1815d4d7ca445598aa39edb8d8ee36459b","reviewed":true},
+      "fr": {"text":"Vues","sourceRevision":"40d0bc78171f355436b40c7d6f9ebe1815d4d7ca445598aa39edb8d8ee36459b","reviewed":true}
     }
   },
   "viewHistory": {
     "source": "查看编辑历史",
     "translations": {
       "en": {"text":"View edit history","sourceRevision":"2b034477b19772469f1a64fdb9084d1b53356ac41e479df3c24f828a56c69983","reviewed":true},
-      "ru": {"text":"Посмотреть историю правок","sourceRevision":"2b034477b19772469f1a64fdb9084d1b53356ac41e479df3c24f828a56c69983","reviewed":true}
+      "ja": {"text":"編集履歴を見る","sourceRevision":"2b034477b19772469f1a64fdb9084d1b53356ac41e479df3c24f828a56c69983","reviewed":true},
+      "it": {"text":"Visualizza la cronologia delle modifiche","sourceRevision":"2b034477b19772469f1a64fdb9084d1b53356ac41e479df3c24f828a56c69983","reviewed":true},
+      "ru": {"text":"Посмотреть историю правок","sourceRevision":"2b034477b19772469f1a64fdb9084d1b53356ac41e479df3c24f828a56c69983","reviewed":true},
+      "ko": {"text":"편집 기록 보기","sourceRevision":"2b034477b19772469f1a64fdb9084d1b53356ac41e479df3c24f828a56c69983","reviewed":true},
+      "fr": {"text":"Affichage de l’historique d’édition","sourceRevision":"2b034477b19772469f1a64fdb9084d1b53356ac41e479df3c24f828a56c69983","reviewed":true}
     }
   },
   "watch": {
@@ -856,7 +1083,9 @@
       "en": {"text":"Watch comments","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true},
       "ja": {"text":"コメントをウォッチ","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true},
       "it": {"text":"Segui i commenti","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true},
-      "ru": {"text":"Следить за комментариями","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true}
+      "ru": {"text":"Следить за комментариями","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true},
+      "ko": {"text":"댓글보기","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true},
+      "fr": {"text":"Regarder les commentaires","sourceRevision":"8f383a557881b3a877879c69c17fb5cef7d30a15112ec27bd3cc2d2f844406a3","reviewed":true}
     }
   },
   "watched": {
@@ -865,7 +1094,9 @@
       "en": {"text":"Watching comments","sourceRevision":"1010c7e312869287fef23f1ecca971bc0c9c3818c8a0f062b8593ba24bf2f69b","reviewed":true},
       "ja": {"text":"コメントをウォッチ中","sourceRevision":"1010c7e312869287fef23f1ecca971bc0c9c3818c8a0f062b8593ba24bf2f69b","reviewed":true},
       "it": {"text":"Stai seguendo i commenti","sourceRevision":"1010c7e312869287fef23f1ecca971bc0c9c3818c8a0f062b8593ba24bf2f69b","reviewed":true},
-      "ru": {"text":"Слежу за комментариями","sourceRevision":"1010c7e312869287fef23f1ecca971bc0c9c3818c8a0f062b8593ba24bf2f69b","reviewed":true}
+      "ru": {"text":"Слежу за комментариями","sourceRevision":"1010c7e312869287fef23f1ecca971bc0c9c3818c8a0f062b8593ba24bf2f69b","reviewed":true},
+      "ko": {"text":"댓글보기","sourceRevision":"1010c7e312869287fef23f1ecca971bc0c9c3818c8a0f062b8593ba24bf2f69b","reviewed":true},
+      "fr": {"text":"Regarder les commentaires","sourceRevision":"1010c7e312869287fef23f1ecca971bc0c9c3818c8a0f062b8593ba24bf2f69b","reviewed":true}
     }
   }
 }

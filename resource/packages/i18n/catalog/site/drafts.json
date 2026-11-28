@@ -3,9 +3,11 @@
     "source": "已封禁",
     "translations": {
       "en": {"text":"Blocked","sourceRevision":"9baa0430a8d4f7316906c7f5b142f56190fbcf8417002724bdf7d7a3ccd1dd27","reviewed":true},
-      "ja": {"text":"停止中","sourceRevision":"9baa0430a8d4f7316906c7f5b142f56190fbcf8417002724bdf7d7a3ccd1dd27","reviewed":true},
+      "ja": {"text":"非表示","sourceRevision":"9baa0430a8d4f7316906c7f5b142f56190fbcf8417002724bdf7d7a3ccd1dd27","reviewed":true},
       "it": {"text":"Bloccata","sourceRevision":"9baa0430a8d4f7316906c7f5b142f56190fbcf8417002724bdf7d7a3ccd1dd27","reviewed":true},
-      "ru": {"text":"Заблокировано","sourceRevision":"9baa0430a8d4f7316906c7f5b142f56190fbcf8417002724bdf7d7a3ccd1dd27","reviewed":true}
+      "ru": {"text":"Заблокировано","sourceRevision":"9baa0430a8d4f7316906c7f5b142f56190fbcf8417002724bdf7d7a3ccd1dd27","reviewed":true},
+      "ko": {"text":"차단됨","sourceRevision":"9baa0430a8d4f7316906c7f5b142f56190fbcf8417002724bdf7d7a3ccd1dd27","reviewed":true},
+      "fr": {"text":"Bloqué","sourceRevision":"9baa0430a8d4f7316906c7f5b142f56190fbcf8417002724bdf7d7a3ccd1dd27","reviewed":true}
     }
   },
   "edit": {
@@ -14,7 +16,9 @@
       "en": {"text":"Continue editing","sourceRevision":"a0fca08351b9d1053877a45764d62d4b67f5cda345e38eea51d0e8d772d31bf1","reviewed":true},
       "ja": {"text":"編集を続ける","sourceRevision":"a0fca08351b9d1053877a45764d62d4b67f5cda345e38eea51d0e8d772d31bf1","reviewed":true},
       "it": {"text":"Continua a modificare","sourceRevision":"a0fca08351b9d1053877a45764d62d4b67f5cda345e38eea51d0e8d772d31bf1","reviewed":true},
-      "ru": {"text":"Продолжить редактирование","sourceRevision":"a0fca08351b9d1053877a45764d62d4b67f5cda345e38eea51d0e8d772d31bf1","reviewed":true}
+      "ru": {"text":"Продолжить редактирование","sourceRevision":"a0fca08351b9d1053877a45764d62d4b67f5cda345e38eea51d0e8d772d31bf1","reviewed":true},
+      "ko": {"text":"계속 편집","sourceRevision":"a0fca08351b9d1053877a45764d62d4b67f5cda345e38eea51d0e8d772d31bf1","reviewed":true},
+      "fr": {"text":"Continuer la modification","sourceRevision":"a0fca08351b9d1053877a45764d62d4b67f5cda345e38eea51d0e8d772d31bf1","reviewed":true}
     }
   },
   "emptyDescription": {
@@ -23,16 +27,20 @@
       "en": {"text":"This draft has no summary yet. Continue editing to generate one.","sourceRevision":"cecee9fef61222287b26ce367e181c055dc5db419211efca87c3e1c1a11b912d","reviewed":true},
       "ja": {"text":"この下書きにはまだ概要がありません。編集を続けると自動生成されます。","sourceRevision":"cecee9fef61222287b26ce367e181c055dc5db419211efca87c3e1c1a11b912d","reviewed":true},
       "it": {"text":"Questa bozza non ha ancora un riepilogo. Continua a modificarla per generarne uno.","sourceRevision":"cecee9fef61222287b26ce367e181c055dc5db419211efca87c3e1c1a11b912d","reviewed":true},
-      "ru": {"text":"У этого черновика пока нет краткого описания. Продолжите редактирование, чтобы оно сформировалось.","sourceRevision":"cecee9fef61222287b26ce367e181c055dc5db419211efca87c3e1c1a11b912d","reviewed":true}
+      "ru": {"text":"У этого черновика пока нет краткого описания. Продолжите редактирование, чтобы оно сформировалось.","sourceRevision":"cecee9fef61222287b26ce367e181c055dc5db419211efca87c3e1c1a11b912d","reviewed":true},
+      "ko": {"text":"이 초안은 아직 요약이 없습니다. 계속 편집을 생성하기 위해.","sourceRevision":"cecee9fef61222287b26ce367e181c055dc5db419211efca87c3e1c1a11b912d","reviewed":true},
+      "fr": {"text":"Ce projet n’a pas encore de résumé. Continuer à éditer pour en générer un.","sourceRevision":"cecee9fef61222287b26ce367e181c055dc5db419211efca87c3e1c1a11b912d","reviewed":true}
     }
   },
   "emptyHint": {
     "source": "写到一半的主题可以先存成草稿，之后再回来继续。",
     "translations": {
       "en": {"text":"Save unfinished topics as drafts and come back later.","sourceRevision":"fb1d50bb5e1dc7227c36770670a93352bf2bd502301fdd85422fd3ac662bcc30","reviewed":true},
-      "ja": {"text":"書きかけのトピックは下書きとして保存して、あとで続けられます。","sourceRevision":"fb1d50bb5e1dc7227c36770670a93352bf2bd502301fdd85422fd3ac662bcc30","reviewed":true},
+      "ja": {"text":"書きかけのスレッドは下書きとして保存して、あとで続けられます。","sourceRevision":"fb1d50bb5e1dc7227c36770670a93352bf2bd502301fdd85422fd3ac662bcc30","reviewed":true},
       "it": {"text":"Salva gli argomenti non finiti come bozze e riprendili più tardi.","sourceRevision":"fb1d50bb5e1dc7227c36770670a93352bf2bd502301fdd85422fd3ac662bcc30","reviewed":true},
-      "ru": {"text":"Сохраняйте незавершённые темы как черновики и возвращайтесь к ним позже.","sourceRevision":"fb1d50bb5e1dc7227c36770670a93352bf2bd502301fdd85422fd3ac662bcc30","reviewed":true}
+      "ru": {"text":"Сохраняйте незавершённые темы как черновики и возвращайтесь к ним позже.","sourceRevision":"fb1d50bb5e1dc7227c36770670a93352bf2bd502301fdd85422fd3ac662bcc30","reviewed":true},
+      "ko": {"text":"고급스럽고 고급스러운 게시글를 저장하십시오.","sourceRevision":"fb1d50bb5e1dc7227c36770670a93352bf2bd502301fdd85422fd3ac662bcc30","reviewed":true},
+      "fr": {"text":"Enregistrer les sujets inachevés comme brouillons et revenir plus tard.","sourceRevision":"fb1d50bb5e1dc7227c36770670a93352bf2bd502301fdd85422fd3ac662bcc30","reviewed":true}
     }
   },
   "emptyTitle": {
@@ -41,16 +49,20 @@
       "en": {"text":"No drafts yet","sourceRevision":"434c5daf7ad775aad556670f4827b7b8330f75327a40796c96e40cc3836adee8","reviewed":true},
       "ja": {"text":"下書きはまだありません","sourceRevision":"434c5daf7ad775aad556670f4827b7b8330f75327a40796c96e40cc3836adee8","reviewed":true},
       "it": {"text":"Ancora nessuna bozza","sourceRevision":"434c5daf7ad775aad556670f4827b7b8330f75327a40796c96e40cc3836adee8","reviewed":true},
-      "ru": {"text":"Пока нет черновиков","sourceRevision":"434c5daf7ad775aad556670f4827b7b8330f75327a40796c96e40cc3836adee8","reviewed":true}
+      "ru": {"text":"Пока нет черновиков","sourceRevision":"434c5daf7ad775aad556670f4827b7b8330f75327a40796c96e40cc3836adee8","reviewed":true},
+      "ko": {"text":"아직 초안 없음","sourceRevision":"434c5daf7ad775aad556670f4827b7b8330f75327a40796c96e40cc3836adee8","reviewed":true},
+      "fr": {"text":"Pas encore de projets","sourceRevision":"434c5daf7ad775aad556670f4827b7b8330f75327a40796c96e40cc3836adee8","reviewed":true}
     }
   },
   "meta.createdAt": {
     "source": "创建于",
     "translations": {
       "en": {"text":"Created","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true},
-      "ja": {"text":"作成","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true},
+      "ja": {"text":"作成日","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true},
       "it": {"text":"Creata","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true},
-      "ru": {"text":"Создано","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true}
+      "ru": {"text":"Создано","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true},
+      "ko": {"text":"생성일","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true},
+      "fr": {"text":"Création","sourceRevision":"bf9b00d1d71911229a7184ff8f3dbe764df2867e55e784151290036a704fa488","reviewed":true}
     }
   },
   "meta.replies": {
@@ -59,16 +71,20 @@
       "en": {"text":"Replies","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
       "ja": {"text":"返信","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
       "it": {"text":"Risposte","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
-      "ru": {"text":"Ответы","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true}
+      "ru": {"text":"Ответы","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
+      "ko": {"text":"답글","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true},
+      "fr": {"text":"Réponses","sourceRevision":"2d64581acca763a08e0c82abe4f75e0f01f9b24941260edb2d36e02f11616f19","reviewed":true}
     }
   },
   "meta.views": {
     "source": "浏览",
     "translations": {
       "en": {"text":"Views","sourceRevision":"367ca7f3fdf617ba0a6adbbd0c589870e017c4ef5650fc5c6116bbd2dcef38ed","reviewed":true},
-      "ja": {"text":"閲覧","sourceRevision":"367ca7f3fdf617ba0a6adbbd0c589870e017c4ef5650fc5c6116bbd2dcef38ed","reviewed":true},
+      "ja": {"text":"閲覧数","sourceRevision":"367ca7f3fdf617ba0a6adbbd0c589870e017c4ef5650fc5c6116bbd2dcef38ed","reviewed":true},
       "it": {"text":"Visualizzazioni","sourceRevision":"367ca7f3fdf617ba0a6adbbd0c589870e017c4ef5650fc5c6116bbd2dcef38ed","reviewed":true},
-      "ru": {"text":"Просмотры","sourceRevision":"367ca7f3fdf617ba0a6adbbd0c589870e017c4ef5650fc5c6116bbd2dcef38ed","reviewed":true}
+      "ru": {"text":"Просмотры","sourceRevision":"367ca7f3fdf617ba0a6adbbd0c589870e017c4ef5650fc5c6116bbd2dcef38ed","reviewed":true},
+      "ko": {"text":"조회 수","sourceRevision":"367ca7f3fdf617ba0a6adbbd0c589870e017c4ef5650fc5c6116bbd2dcef38ed","reviewed":true},
+      "fr": {"text":"Vues","sourceRevision":"367ca7f3fdf617ba0a6adbbd0c589870e017c4ef5650fc5c6116bbd2dcef38ed","reviewed":true}
     }
   },
   "newDraft": {
@@ -77,43 +93,53 @@
       "en": {"text":"New draft","sourceRevision":"1e6a43155e07a2438b31f5ab35337fd94892a8b0f27cde9689133b51b02c2a29","reviewed":true},
       "ja": {"text":"下書きを作成","sourceRevision":"1e6a43155e07a2438b31f5ab35337fd94892a8b0f27cde9689133b51b02c2a29","reviewed":true},
       "it": {"text":"Nuova bozza","sourceRevision":"1e6a43155e07a2438b31f5ab35337fd94892a8b0f27cde9689133b51b02c2a29","reviewed":true},
-      "ru": {"text":"Новый черновик","sourceRevision":"1e6a43155e07a2438b31f5ab35337fd94892a8b0f27cde9689133b51b02c2a29","reviewed":true}
+      "ru": {"text":"Новый черновик","sourceRevision":"1e6a43155e07a2438b31f5ab35337fd94892a8b0f27cde9689133b51b02c2a29","reviewed":true},
+      "ko": {"text":"새로운 초안","sourceRevision":"1e6a43155e07a2438b31f5ab35337fd94892a8b0f27cde9689133b51b02c2a29","reviewed":true},
+      "fr": {"text":"Nouveau projet","sourceRevision":"1e6a43155e07a2438b31f5ab35337fd94892a8b0f27cde9689133b51b02c2a29","reviewed":true}
     }
   },
   "summary": {
     "source": "这里保存你尚未发布的主题，可以随时继续编辑。",
     "translations": {
       "en": {"text":"Unpublished topics stay here so you can continue editing anytime.","sourceRevision":"3b0979c8e248dca1c9fa7c0126147af44f02a01098c914da013c14d4a8180551","reviewed":true},
-      "ja": {"text":"未公開のトピックをここに保存し、あとで編集を続けられます。","sourceRevision":"3b0979c8e248dca1c9fa7c0126147af44f02a01098c914da013c14d4a8180551","reviewed":true},
+      "ja": {"text":"未公開のスレッドをここに保存し、あとで編集を続けられます。","sourceRevision":"3b0979c8e248dca1c9fa7c0126147af44f02a01098c914da013c14d4a8180551","reviewed":true},
       "it": {"text":"Gli argomenti non pubblicati restano qui, così puoi continuare a modificarli quando vuoi.","sourceRevision":"3b0979c8e248dca1c9fa7c0126147af44f02a01098c914da013c14d4a8180551","reviewed":true},
-      "ru": {"text":"Неопубликованные темы хранятся здесь — вы можете продолжить редактирование в любое время.","sourceRevision":"3b0979c8e248dca1c9fa7c0126147af44f02a01098c914da013c14d4a8180551","reviewed":true}
+      "ru": {"text":"Неопубликованные темы хранятся здесь — вы можете продолжить редактирование в любое время.","sourceRevision":"3b0979c8e248dca1c9fa7c0126147af44f02a01098c914da013c14d4a8180551","reviewed":true},
+      "ko": {"text":"이 문서는 아직 번역되지 않았습니다. 아래 원문을 제공합니다.","sourceRevision":"3b0979c8e248dca1c9fa7c0126147af44f02a01098c914da013c14d4a8180551","reviewed":true},
+      "fr": {"text":"Les sujets non publiés restent ici pour que vous puissiez continuer à éditer à tout moment.","sourceRevision":"3b0979c8e248dca1c9fa7c0126147af44f02a01098c914da013c14d4a8180551","reviewed":true}
     }
   },
   "table.action": {
     "source": "操作",
     "translations": {
       "en": {"text":"Action","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true},
-      "ja": {"text":"Action","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true},
+      "ja": {"text":"操作","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true},
       "it": {"text":"Azione","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true},
-      "ru": {"text":"Действие","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true}
+      "ru": {"text":"Действие","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true},
+      "ko": {"text":"작업","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true},
+      "fr": {"text":"Action","sourceRevision":"5aa7ccce8292ed7b1836940ad038d2a69d0ee6aa0011c7ff792d1edea2cb8f5b","reviewed":true}
     }
   },
   "table.draft": {
     "source": "草稿",
     "translations": {
       "en": {"text":"Draft","sourceRevision":"53f2aa44b0f1ebcbd767769482580456bce31ce1b2344c86f36ab58abbb7d615","reviewed":true},
-      "ja": {"text":"Draft","sourceRevision":"53f2aa44b0f1ebcbd767769482580456bce31ce1b2344c86f36ab58abbb7d615","reviewed":true},
+      "ja": {"text":"下書き","sourceRevision":"53f2aa44b0f1ebcbd767769482580456bce31ce1b2344c86f36ab58abbb7d615","reviewed":true},
       "it": {"text":"Bozza","sourceRevision":"53f2aa44b0f1ebcbd767769482580456bce31ce1b2344c86f36ab58abbb7d615","reviewed":true},
-      "ru": {"text":"Черновик","sourceRevision":"53f2aa44b0f1ebcbd767769482580456bce31ce1b2344c86f36ab58abbb7d615","reviewed":true}
+      "ru": {"text":"Черновик","sourceRevision":"53f2aa44b0f1ebcbd767769482580456bce31ce1b2344c86f36ab58abbb7d615","reviewed":true},
+      "ko": {"text":"임시 저장","sourceRevision":"53f2aa44b0f1ebcbd767769482580456bce31ce1b2344c86f36ab58abbb7d615","reviewed":true},
+      "fr": {"text":"Brouillon","sourceRevision":"53f2aa44b0f1ebcbd767769482580456bce31ce1b2344c86f36ab58abbb7d615","reviewed":true}
     }
   },
   "table.updatedAt": {
     "source": "最近更新",
     "translations": {
       "en": {"text":"Updated","sourceRevision":"aff70c249ec4f4244e9fc496c47dcec278f637bb4539ffda2b4b1325dd35c495","reviewed":true},
-      "ja": {"text":"Updated","sourceRevision":"aff70c249ec4f4244e9fc496c47dcec278f637bb4539ffda2b4b1325dd35c495","reviewed":true},
+      "ja": {"text":"更新情報","sourceRevision":"aff70c249ec4f4244e9fc496c47dcec278f637bb4539ffda2b4b1325dd35c495","reviewed":true},
       "it": {"text":"Aggiornata","sourceRevision":"aff70c249ec4f4244e9fc496c47dcec278f637bb4539ffda2b4b1325dd35c495","reviewed":true},
-      "ru": {"text":"Обновлено","sourceRevision":"aff70c249ec4f4244e9fc496c47dcec278f637bb4539ffda2b4b1325dd35c495","reviewed":true}
+      "ru": {"text":"Обновлено","sourceRevision":"aff70c249ec4f4244e9fc496c47dcec278f637bb4539ffda2b4b1325dd35c495","reviewed":true},
+      "ko": {"text":"의 모든 것","sourceRevision":"aff70c249ec4f4244e9fc496c47dcec278f637bb4539ffda2b4b1325dd35c495","reviewed":true},
+      "fr": {"text":"Mise à jour","sourceRevision":"aff70c249ec4f4244e9fc496c47dcec278f637bb4539ffda2b4b1325dd35c495","reviewed":true}
     }
   },
   "title": {
@@ -122,16 +148,20 @@
       "en": {"text":"Drafts","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
       "ja": {"text":"下書き","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
       "it": {"text":"Bozze","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
-      "ru": {"text":"Черновики","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true}
+      "ru": {"text":"Черновики","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
+      "ko": {"text":"임시 저장 글","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
+      "fr": {"text":"Brouillons","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true}
     }
   },
   "total": {
     "source": "{count} 条草稿",
     "translations": {
       "en": {"text":"{count} drafts","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true},
-      "ja": {"text":"{count} 件の下書き","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true},
+      "ja": {"text":"{count}件の下書き","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true},
       "it": {"text":"{count} bozze","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true},
-      "ru": {"text":"Черновиков: {count}","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true}
+      "ru": {"text":"Черновиков: {count}","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true},
+      "ko": {"text":"{count}초안","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true},
+      "fr": {"text":"{count} projets","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true}
     }
   },
   "untitled": {
@@ -140,7 +170,9 @@
       "en": {"text":"Untitled draft","sourceRevision":"4ea619a3422ade362d81295b8813ab9c874d4de473a2fe738b54b96db37edf43","reviewed":true},
       "ja": {"text":"無題の下書き","sourceRevision":"4ea619a3422ade362d81295b8813ab9c874d4de473a2fe738b54b96db37edf43","reviewed":true},
       "it": {"text":"Bozza senza titolo","sourceRevision":"4ea619a3422ade362d81295b8813ab9c874d4de473a2fe738b54b96db37edf43","reviewed":true},
-      "ru": {"text":"Черновик без названия","sourceRevision":"4ea619a3422ade362d81295b8813ab9c874d4de473a2fe738b54b96db37edf43","reviewed":true}
+      "ru": {"text":"Черновик без названия","sourceRevision":"4ea619a3422ade362d81295b8813ab9c874d4de473a2fe738b54b96db37edf43","reviewed":true},
+      "ko": {"text":"관련 글","sourceRevision":"4ea619a3422ade362d81295b8813ab9c874d4de473a2fe738b54b96db37edf43","reviewed":true},
+      "fr": {"text":"Projet sans titre","sourceRevision":"4ea619a3422ade362d81295b8813ab9c874d4de473a2fe738b54b96db37edf43","reviewed":true}
     }
   }
 }

@@ -25,8 +25,11 @@ func TestRequestLangCachesResultOnContext(t *testing.T) {
 func TestRequestLangPriority(t *testing.T) {
 	for _, tc := range []struct{ query, cookie, header, want string }{
 		{"it", "en", "ja", "it"},
-		{"ko", "en", "ja", "en"},
-		{"ko", "ko", "fr-FR, en;q=0.3, ja-JP;q=0.8", "ja"},
+		{"nl", "en", "ja", "en"},
+		{"nl", "nl", "nl-NL, en;q=0.3, ja-JP;q=0.8", "ja"},
+		{"ko-KR", "en", "ja", "ko"},
+		{"", "fr-CA", "en", "fr"},
+		{"", "", "nl-NL, fr-FR;q=0.9", "fr"},
 		{"", "", "zh;q=0, it;q=0.5", "it"},
 	} {
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())

@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import { CalendarIcon, XIcon } from "lucide-react";
-import { enUS, it, ja, zhCN } from "react-day-picker/locale";
+import { enUS, fr, it, ja, ko, zhCN } from "react-day-picker/locale";
 import { format, isValid, parseISO } from "date-fns";
 import { cn } from "cn";
 import { Button } from "./button";
@@ -24,7 +24,7 @@ type DatePickerProps = DatePickerBaseProps & (
   | { withTime: true; timeLabel: string }
   | { withTime?: false; timeLabel?: never }
 );
-const calendarLocales: Record<string, typeof enUS> = { en: enUS, zh: zhCN, ja, it };
+const calendarLocales: Record<string, typeof enUS> = { en: enUS, zh: zhCN, ja, it, ko, fr };
 
 function localDate(value: string) {
   if (!value) return undefined;

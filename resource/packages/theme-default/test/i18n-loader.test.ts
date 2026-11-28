@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { supportedLocales } from "@gooseforum/client/i18n/locale";
 
 beforeEach(() => {
   vi.resetModules();
 });
 describe("on-demand C translations", () => {
-  it.each(["zh", "en", "ja", "it", "ru"] as const)("loads attachment errors and publishing labels in %s", async locale => {
+  it.each(supportedLocales)("loads attachment errors and publishing labels in %s", async locale => {
     const loader = await import("@gooseforum/runtime/i18n/loader");
     await loader.prepareGooseTranslations(locale, ["site.publish"]);
     const resources = loader.cachedGooseResources()[locale];
@@ -13,14 +14,16 @@ describe("on-demand C translations", () => {
     const expected = {
       zh: { invalidFile: "文件类型不支持，或文件名、内容不合法。", upload: "上传附件" },
       en: { invalidFile: "Unsupported file type or invalid filename/content.", upload: "Upload attachment" },
-      ja: { invalidFile: "未対応のファイル形式、または無効なファイル名・内容です。", upload: "ファイルを添付" },
+      ja: { invalidFile: "対応していないファイル形式か、ファイル名または内容が無効です。", upload: "ファイルを添付" },
       ru: { invalidFile: "Неподдерживаемый тип файла, неверное имя или содержимое.", upload: "Загрузить вложение" },
-      it: { invalidFile: "Tipo di file non supportato o nome/contenuto non valido.", upload: "Carica allegato" },
+      it: { invalidFile: "Tipo di file non supportato o nome/contenuto non valido.", upload: "Allega un file" },
+      ko: { invalidFile: "지원하지 않는 파일 형식이거나 파일 이름 또는 내용이 올바르지 않습니다.", upload: "파일 첨부" },
+      fr: { invalidFile: "Format de fichier non pris en charge, ou nom ou contenu du fichier non valide.", upload: "Joindre un fichier" },
     }[locale];
     expect(resources["shared.serverMessages"]).toMatchObject({ "attachment.invalidFile": expected.invalidFile });
     expect(resources["site.publish"]).toMatchObject({ attachmentUpload: expected.upload });
   });
-  it.each(["zh", "en", "ja", "it", "ru"] as const)("preserves moderation action dictionaries in %s", async (locale) => {
+  it.each(supportedLocales)("preserves moderation action dictionaries in %s", async (locale) => {
     const loader = await import("@gooseforum/runtime/i18n/loader");
     const { siteLoaders } = await import("@gooseforum/i18n/site");
     await loader.prepareGooseTranslations(locale, ["site.moderation"]);

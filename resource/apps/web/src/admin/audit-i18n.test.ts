@@ -1,6 +1,7 @@
 /// <reference types="node" />
 
 import { getAdminDictionary } from "@gooseforum/i18n/admin";
+import { supportedLocales } from "@gooseforum/client/i18n/locale";
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -15,7 +16,7 @@ import {
 
 beforeAll(async () => {
   await Promise.all(
-    (["zh", "en", "ja", "it", "ru"] as const).map((locale) =>
+    supportedLocales.map((locale) =>
       prepareAdminTranslations(locale, ["admin.audit", "admin.audit-extra"]),
     ),
   );
@@ -55,12 +56,11 @@ describe("admin audit i18n", () => {
   });
 
   it("keeps every audit dictionary structurally complete across locales", () => {
-    const locales = ["zh", "en", "ja", "it", "ru"] as const;
     const baseKeys = sortedKeys(getAdminDictionary("admin.audit", "en"));
     const extra = getAdminDictionary("admin.audit-extra",
       "en",
     );
-    for (const locale of locales) {
+    for (const locale of supportedLocales) {
       expect(sortedKeys(getAdminDictionary("admin.audit", locale))).toEqual(baseKeys);
       const dictionary = getAdminDictionary("admin.audit-extra", locale);
       expect(sortedKeys(dictionary)).toEqual(sortedKeys(extra));
@@ -101,7 +101,7 @@ describe("admin audit i18n", () => {
         },
         "",
       ),
-    ).toBe("トピック #9 を審査：承認、バージョン 2：確認済み");
+    ).toBe("スレッド #9 を審査：承認、バージョン 2：確認済み");
   });
 
   it.each([
