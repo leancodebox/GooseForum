@@ -191,10 +191,10 @@
     "translations": {
       "en": {"text":"All categories","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true},
       "ja": {"text":"すべてのカテゴリ","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true},
-      "it": {"text":"Tutte le categorie","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true},
+      "it": {"text":"Categorie","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true},
       "ru": {"text":"Все категории","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true},
       "ko": {"text":"모든 분류","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true},
-      "fr": {"text":"Toutes les catégories","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true}
+      "fr": {"text":"Catégories","sourceRevision":"ed0a0e9871e2f473f2b39b5b0d1d4fb2408cd646b2eb5c70fd6eaa25acf9e44c","reviewed":true}
     }
   },
   "nav.drafts": {
@@ -204,7 +204,7 @@
       "ja": {"text":"下書き","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
       "it": {"text":"Bozze","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
       "ru": {"text":"Черновики","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
-      "ko": {"text":"임시 저장 글","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
+      "ko": {"text":"임시저장","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
       "fr": {"text":"Brouillons","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true}
     }
   },
@@ -213,7 +213,7 @@
     "translations": {
       "en": {"text":"Hot","sourceRevision":"3cad43213bfa16d20b243814d4bd8b46a9ca36cc751bb7fd320d76a3bd5a995b","reviewed":true},
       "ja": {"text":"人気のスレッド","sourceRevision":"3cad43213bfa16d20b243814d4bd8b46a9ca36cc751bb7fd320d76a3bd5a995b","reviewed":true},
-      "it": {"text":"Discussioni popolari","sourceRevision":"3cad43213bfa16d20b243814d4bd8b46a9ca36cc751bb7fd320d76a3bd5a995b","reviewed":true},
+      "it": {"text":"Popolari","sourceRevision":"3cad43213bfa16d20b243814d4bd8b46a9ca36cc751bb7fd320d76a3bd5a995b","reviewed":true},
       "ru": {"text":"Популярное сейчас","sourceRevision":"3cad43213bfa16d20b243814d4bd8b46a9ca36cc751bb7fd320d76a3bd5a995b","reviewed":true},
       "ko": {"text":"인기 게시글","sourceRevision":"3cad43213bfa16d20b243814d4bd8b46a9ca36cc751bb7fd320d76a3bd5a995b","reviewed":true},
       "fr": {"text":"Sujets populaires","sourceRevision":"3cad43213bfa16d20b243814d4bd8b46a9ca36cc751bb7fd320d76a3bd5a995b","reviewed":true}
@@ -279,10 +279,10 @@
     "translations": {
       "en": {"text":"Popular","sourceRevision":"073c57f014d2500409653f2c4070b751d809e7276d794f1cc12e378dddb01ff4","reviewed":true},
       "ja": {"text":"注目のスレッド","sourceRevision":"073c57f014d2500409653f2c4070b751d809e7276d794f1cc12e378dddb01ff4","reviewed":true},
-      "it": {"text":"Discussioni in evidenza","sourceRevision":"073c57f014d2500409653f2c4070b751d809e7276d794f1cc12e378dddb01ff4","reviewed":true},
+      "it": {"text":"In evidenza","sourceRevision":"073c57f014d2500409653f2c4070b751d809e7276d794f1cc12e378dddb01ff4","reviewed":true},
       "ru": {"text":"Популярное","sourceRevision":"073c57f014d2500409653f2c4070b751d809e7276d794f1cc12e378dddb01ff4","reviewed":true},
       "ko": {"text":"주목받는 게시글","sourceRevision":"073c57f014d2500409653f2c4070b751d809e7276d794f1cc12e378dddb01ff4","reviewed":true},
-      "fr": {"text":"Sujets en vue","sourceRevision":"073c57f014d2500409653f2c4070b751d809e7276d794f1cc12e378dddb01ff4","reviewed":true}
+      "fr": {"text":"Tendances","sourceRevision":"073c57f014d2500409653f2c4070b751d809e7276d794f1cc12e378dddb01ff4","reviewed":true}
     }
   },
   "nav.sponsors": {

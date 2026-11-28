@@ -3,6 +3,7 @@ import { test } from 'node:test'
 import { messageId, parseJson, requiresIcu, revision, translationStatus, validateEntry, validateNamespace } from './i18n-catalog.mjs'
 import { formatMessage, prepareIcuFormat } from '../packages/i18n/src/format.ts'
 import { parseBackendMessageCodes, validateServerMessages } from './check-server-message-i18n.mjs'
+import { auditLength, estimatedWidth } from './i18n-audit-length.mjs'
 
 test('tracks missing, draft, approved and stale translations against the source and context', () => {
   const entry = { source: '{count, number} 条回复', context: 'Topic counter', translations: {} }
@@ -49,4 +50,40 @@ test('loads the ICU formatter only for messages that need it and uses the fallba
   assert.equal(formatMessage(message, 'en', { count: 1 }), '1 reply')
   assert.equal(formatMessage(message, 'en', { count: 2 }), '2 replies')
   assert.equal(formatMessage("A quoted '{name}'", 'en', { name: 'Ada' }), 'A quoted {name}')
+})
+
+test('estimates width by grapheme and uses the longest line', () => {
+  assert.equal(estimatedWidth('日本語'), 6)
+  assert.equal(estimatedWidth('ｶﾞ'), 1)
+  assert.equal(estimatedWidth('e\u0301 👩‍💻'), 3.5)
+  assert.equal(estimatedWidth('abc\n中文'), 4)
+})
+
+test('flags unusually long and short translations and samples ICU plural forms', async () => {
+  function entry(english, french = 'Codes créés', source = '邀请码列表') {
+    const result = { source, translations: {} }
+    const sourceRevision = revision(result)
+    result.translations.en = { text: english, sourceRevision, reviewed: true }
+    result.translations.fr = { text: french, sourceRevision, reviewed: true }
+    return result
+  }
+  const entries = Object.fromEntries(Array.from({ length: 8 }, (_, i) => ['label' + i, entry('Invite codes')]))
+  for (const key of ['dashboard', 'authLogs', 'badges', 'posts']) entries[key] = entry('Invite codes')
+  entries.registrationInvitations = entry('Invitation codes to use when signing up for this particular website')
+  entries.users = entry('I')
+  entries.roles = entry(
+    '{mode, select, preview {{n, plural, =101 {Extraordinarily long choice with # items in the list} other {# roles}}} other {{n} roles}}',
+    '{mode, select, preview {{n} rôles à vérifier} other {{n} rôles}}',
+    '{mode, select, preview {待核对的角色 {n, number} 个} other {{n, number} 个角色}}',
+  )
+  const catalog = new Map([['admin.shell', entries], ['admin.assets', { registrationInvitations: entry('Invite codes') }]])
+  const report = await auditLength(catalog, { scope: 'navigation', locale: 'en', limit: 10 })
+  assert.equal(report.checked, 7)
+  assert.equal(report.flagged, 3)
+  const [long, short, plural] = ['registrationInvitations', 'users', 'roles']
+    .map(key => report.findings.find(row => row.id === 'admin.shell:' + key))
+  assert.ok(long.signals.includes('long compared with other navigation labels'))
+  assert.equal(long.related[0].id, 'admin.assets:registrationInvitations')
+  assert.ok(short.signals.includes('shorter than comparable translations'))
+  assert.equal(plural.width, estimatedWidth('Extraordinarily long choice with 101 items in the list'))
 })

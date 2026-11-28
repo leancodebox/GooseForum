@@ -4,6 +4,8 @@ import { expect, test } from './fixtures'
 import { generateKeyPairSync } from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 
+const languageMenuLabels = ['简体中文', 'English', '日本語', '한국어', 'Français', 'Italiano', 'Русский']
+
 const systemHeaderLinks = [
   { key: 'sponsors', label: 'Sponsors', url: '/sponsors' },
   { key: 'links', label: 'Links', url: '/links' },
@@ -684,6 +686,7 @@ test('checks the browser language by default and remembers a manual selection', 
   })
   await page.goto('/?keep=1')
   await page.getByRole('button', { name: 'Switch language' }).click()
+  await expect(page.getByRole('menuitemradio')).toHaveText(languageMenuLabels)
   await expect(page.getByRole('menuitemradio', { name: 'English' })).toHaveAttribute('aria-checked', 'true')
   await expect.poll(() => page.evaluate(() => document.cookie)).not.toMatch(/(?:^|; )lang=/)
   await page.getByRole('menuitemradio', { name: 'Italiano' }).click()
@@ -778,6 +781,7 @@ test('selects and saves the default site language', async ({ page }) => {
   const selector = page.getByRole('combobox', { name: 'Default site language' })
   await expect(selector).toHaveText('English')
   await selector.click()
+  await expect(page.getByRole('listbox').getByRole('option')).toHaveText(languageMenuLabels)
   await page.getByRole('option', { name: '日本語' }).click()
   await expect(selector).toHaveText('日本語')
   const saved = page.waitForRequest('**/api/admin/save-site-settings')
@@ -2062,6 +2066,7 @@ for (const mode of ['login', 'register']) {
     await page.goto('/login')
     await page.getByRole('button', { name: 'Switch language' }).click()
     const dialog = page.getByRole('dialog', { name: 'Switch language' })
+    await expect(dialog.getByRole('button')).toHaveText(languageMenuLabels)
     await expect(dialog.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'true')
     await dialog.getByRole('button', { name: '日本語' }).click()
     await expect(dialog).toBeHidden()
@@ -2335,6 +2340,7 @@ test('admin uses the forum header for navigation, preferences and search', async
   await page.getByRole('menuitemradio', { name: 'Dark', exact: true }).click()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'gf-dark')
   await header.getByRole('button', { name: 'Switch language' }).press('Enter')
+  await expect(page.getByRole('menuitemradio')).toHaveText(languageMenuLabels)
   await page.getByRole('menuitemradio', { name: 'Italiano' }).click()
   await expect(page.locator('html')).toHaveAttribute('lang', 'it')
   await header.getByRole('button', { name: 'Cambia lingua' }).press('Enter')
@@ -2352,6 +2358,42 @@ test('admin uses the forum header for navigation, preferences and search', async
   await page.goBack()
   await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible()
 })
+
+for (const [locale, menu, label, heading] of [
+  ['it', 'Apri menu', 'Inviti', 'Codici di invito'],
+  ['fr', 'Ouvrir le menu', 'Invitations', 'Codes d’invitation'],
+] as const) {
+  test(`keeps the ${locale} invitation menu entry on one line`, async ({ page, isMobile }) => {
+    const path = '/admin/registration-invitations'
+    await page.addInitScript(language => {
+      Object.defineProperty(navigator, 'languages', { get: () => [language] })
+    }, locale)
+    await page.route('**/__goose_page/admin**', route => route.fulfill({ json: {
+      ...adminPage, url: new URL(route.request().url()).pathname,
+    } }))
+    await page.route('**/api/admin/registration-invitations**', route => route.fulfill({
+      json: { code: 0, result: { list: [], total: 0 } },
+    }))
+    await page.goto('/admin')
+    if (isMobile) await page.getByRole('button', { name: menu, exact: true }).click()
+    const navigation = isMobile ? page.getByRole('dialog') : page.locator('#goose-desktop-sidebar')
+    const link = navigation.locator(`a[href="${path}"]`)
+    const title = link.locator('span')
+    await expect(title).toBeVisible()
+    const bounds = await title.evaluate(element => {
+      const range = document.createRange()
+      range.selectNodeContents(element)
+      return {
+        lines: range.getClientRects().length,
+        fits: range.getBoundingClientRect().right <= element.closest('a')!.getBoundingClientRect().right,
+      }
+    })
+    expect(bounds).toEqual({ lines: 1, fits: true })
+    await expect(link).toHaveAccessibleName(label)
+    await link.click()
+    await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible()
+  })
+}
 
 test('header search opens a popover and submits a keyword', async ({ page, isMobile }) => {
   const queries: string[] = []

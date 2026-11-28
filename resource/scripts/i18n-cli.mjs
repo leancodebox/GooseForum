@@ -17,6 +17,7 @@ const help = 'Usage (from resource/):\n' +
   '  pnpm i18n remove <namespace:key>\n' +
   '  pnpm i18n rename <namespace:key> <new-namespace:key>\n' +
   '  pnpm i18n status [<namespace:key>] [--locale <locale>] [--json]\n' +
+  '  pnpm i18n audit-length [--scope all|navigation] [--locale <locale>] [--limit <count>] [--json]\n' +
   '  pnpm i18n translate --locale <locale> [--json]\n' +
   '  pnpm i18n translate <namespace:key> --locale <locale> --text <text> [--revision <hash>]\n' +
   '  pnpm i18n translate <namespace:key> --locale <locale> --clear\n' +
@@ -148,12 +149,14 @@ async function main() {
       source: { type: 'string' }, context: { type: 'string' }, text: { type: 'string' },
       locale: { type: 'string' }, revision: { type: 'string' }, import: { type: 'string' },
       json: { type: 'boolean' }, strict: { type: 'boolean' }, clear: { type: 'boolean' },
+      scope: { type: 'string' }, limit: { type: 'string' },
     },
   })
   const accepted = {
     add: ['source', 'context'], update: ['source', 'context'], remove: [], rename: [],
     translate: ['locale', 'text', 'revision', 'import', 'json', 'clear'],
     review: ['locale', 'revision', 'import'], generate: [], check: ['strict'], status: ['locale', 'json'], watch: [],
+    'audit-length': ['scope', 'locale', 'limit', 'json'],
   }
   if (!Object.hasOwn(accepted, command) || Object.keys(values).some(option => !accepted[command].includes(option)))
     throw Error(help)
@@ -200,6 +203,25 @@ async function main() {
     }
     console.log('Catalog validated: ' + [...catalog.values()].reduce((count, entries) => count + Object.keys(entries).length, 0) +
       ' messages across ' + catalog.size + ' namespaces.')
+    return
+  }
+  if (command === 'audit-length') {
+    const scope = values.scope ?? 'all'
+    const limit = Number(values.limit ?? 50)
+    if (scope !== 'all' && scope !== 'navigation') throw Error('Expected --scope all|navigation')
+    if (!Number.isSafeInteger(limit) || limit < 1) throw Error('Expected a positive integer for --limit')
+    const locale = values.locale === undefined ? undefined : requireLocale(values.locale)
+    const catalog = await withCatalogLock(readCatalog)
+    const { auditLength } = await import('./i18n-audit-length.mjs')
+    const report = await auditLength(catalog, { scope, locale, limit })
+    if (values.json) return console.log(JSON.stringify(report, null, 2))
+    console.log(`Flagged ${report.flagged} of ${report.checked} translations (showing ${report.findings.length}). Widths are estimates.`)
+    for (const row of report.findings) {
+      console.log(`\n${row.id} [${row.locale}] ${row.width} units (expected ${row.expectedWidth}, source ${row.sourceWidth})`)
+      console.log(`  ${row.signals.join('; ')}${row.navigationMedian === undefined ? '' : ` (navigation median ${row.navigationMedian})`}`)
+      console.log(`  ${JSON.stringify(row.source)} → ${JSON.stringify(row.text)}`)
+      for (const related of row.related) console.log(`  ${related.id}: ${JSON.stringify(related.text)}`)
+    }
     return
   }
 

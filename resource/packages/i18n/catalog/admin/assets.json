@@ -586,10 +586,10 @@
     "source": "复制注册链接",
     "translations": {
       "en": {"text":"Copy registration link","sourceRevision":"4eb09239edd937a7c65ee465def977a81a240e83b2c6583878246bcad89789b7","reviewed":true},
-      "ja": {"text":"コピー登録リンク","sourceRevision":"4eb09239edd937a7c65ee465def977a81a240e83b2c6583878246bcad89789b7","reviewed":true},
-      "it": {"text":"Copiare il link di registrazione","sourceRevision":"4eb09239edd937a7c65ee465def977a81a240e83b2c6583878246bcad89789b7","reviewed":true},
+      "ja": {"text":"登録リンクをコピー","sourceRevision":"4eb09239edd937a7c65ee465def977a81a240e83b2c6583878246bcad89789b7","reviewed":true},
+      "it": {"text":"Copia il link di iscrizione","sourceRevision":"4eb09239edd937a7c65ee465def977a81a240e83b2c6583878246bcad89789b7","reviewed":true},
       "ru": {"text":"Скопировать ссылку на регистрацию","sourceRevision":"4eb09239edd937a7c65ee465def977a81a240e83b2c6583878246bcad89789b7","reviewed":true},
-      "ko": {"text":"등록 링크","sourceRevision":"4eb09239edd937a7c65ee465def977a81a240e83b2c6583878246bcad89789b7","reviewed":true},
+      "ko": {"text":"가입 링크 복사","sourceRevision":"4eb09239edd937a7c65ee465def977a81a240e83b2c6583878246bcad89789b7","reviewed":true},
       "fr": {"text":"Copier le lien d’inscription","sourceRevision":"4eb09239edd937a7c65ee465def977a81a240e83b2c6583878246bcad89789b7","reviewed":true}
     }
   },
@@ -597,11 +597,11 @@
     "source": "创建邀请码",
     "translations": {
       "en": {"text":"Create invitation","sourceRevision":"bc5df2cfc624c5df24cc0c0dd791f346132c05c9afdca26ad6eda92d512148ed","reviewed":true},
-      "ja": {"text":"招待状を作成する","sourceRevision":"bc5df2cfc624c5df24cc0c0dd791f346132c05c9afdca26ad6eda92d512148ed","reviewed":true},
-      "it": {"text":"Crea invito","sourceRevision":"bc5df2cfc624c5df24cc0c0dd791f346132c05c9afdca26ad6eda92d512148ed","reviewed":true},
+      "ja": {"text":"招待コードを発行","sourceRevision":"bc5df2cfc624c5df24cc0c0dd791f346132c05c9afdca26ad6eda92d512148ed","reviewed":true},
+      "it": {"text":"Crea codice","sourceRevision":"bc5df2cfc624c5df24cc0c0dd791f346132c05c9afdca26ad6eda92d512148ed","reviewed":true},
       "ru": {"text":"Создать приглашение","sourceRevision":"bc5df2cfc624c5df24cc0c0dd791f346132c05c9afdca26ad6eda92d512148ed","reviewed":true},
-      "ko": {"text":"초대 만들기","sourceRevision":"bc5df2cfc624c5df24cc0c0dd791f346132c05c9afdca26ad6eda92d512148ed","reviewed":true},
-      "fr": {"text":"Créer une invitation","sourceRevision":"bc5df2cfc624c5df24cc0c0dd791f346132c05c9afdca26ad6eda92d512148ed","reviewed":true}
+      "ko": {"text":"초대 코드 만들기","sourceRevision":"bc5df2cfc624c5df24cc0c0dd791f346132c05c9afdca26ad6eda92d512148ed","reviewed":true},
+      "fr": {"text":"Créer le code","sourceRevision":"bc5df2cfc624c5df24cc0c0dd791f346132c05c9afdca26ad6eda92d512148ed","reviewed":true}
     }
   },
   "created": {
@@ -875,8 +875,8 @@
       "ja": {"text":"ファイル","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
       "it": {"text":"File","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
       "ru": {"text":"Файловые ресурсы","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
-      "ko": {"text":"파일 리소스","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
-      "fr": {"text":"Ressources du fichier","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true}
+      "ko": {"text":"파일","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
+      "fr": {"text":"Fichiers","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true}
     }
   },
   "filesHint": {
@@ -1158,32 +1158,32 @@
     "source": "请现在复制邀请码，之后不会再次显示明文。",
     "translations": {
       "en": {"text":"Copy this code now. It will not be shown again.","sourceRevision":"6d68252fdfd6e9f6dc37607a9426084043db9dfd187c1ff5dfe5efdbf16a9cfa","reviewed":true},
-      "ja": {"text":"このコードをコピーします。再度表示されません。","sourceRevision":"6d68252fdfd6e9f6dc37607a9426084043db9dfd187c1ff5dfe5efdbf16a9cfa","reviewed":true},
-      "it": {"text":"Copia questo codice ora, non verrà mostrato di nuovo.","sourceRevision":"6d68252fdfd6e9f6dc37607a9426084043db9dfd187c1ff5dfe5efdbf16a9cfa","reviewed":true},
+      "ja": {"text":"今のうちに招待コードをコピーしてください。あとから表示することはできません。","sourceRevision":"6d68252fdfd6e9f6dc37607a9426084043db9dfd187c1ff5dfe5efdbf16a9cfa","reviewed":true},
+      "it": {"text":"Copia ora il codice di invito. Non verrà mostrato di nuovo.","sourceRevision":"6d68252fdfd6e9f6dc37607a9426084043db9dfd187c1ff5dfe5efdbf16a9cfa","reviewed":true},
       "ru": {"text":"Скопируйте код сейчас. Позже он будет недоступен.","sourceRevision":"6d68252fdfd6e9f6dc37607a9426084043db9dfd187c1ff5dfe5efdbf16a9cfa","reviewed":true},
-      "ko": {"text":"이 코드를 지금 복사하십시오. 다시 표시되지 않습니다.","sourceRevision":"6d68252fdfd6e9f6dc37607a9426084043db9dfd187c1ff5dfe5efdbf16a9cfa","reviewed":true},
-      "fr": {"text":"Copiez ce code maintenant. Il ne sera plus affiché.","sourceRevision":"6d68252fdfd6e9f6dc37607a9426084043db9dfd187c1ff5dfe5efdbf16a9cfa","reviewed":true}
+      "ko": {"text":"지금 초대 코드를 복사하세요. 나중에는 다시 볼 수 없습니다.","sourceRevision":"6d68252fdfd6e9f6dc37607a9426084043db9dfd187c1ff5dfe5efdbf16a9cfa","reviewed":true},
+      "fr": {"text":"Copiez le code d’invitation maintenant. Il ne sera plus affiché.","sourceRevision":"6d68252fdfd6e9f6dc37607a9426084043db9dfd187c1ff5dfe5efdbf16a9cfa","reviewed":true}
     }
   },
   "invitationCreated": {
     "source": "邀请码已创建",
     "translations": {
       "en": {"text":"Invitation created","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
-      "ja": {"text":"招待状作成","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
-      "it": {"text":"Invito creato","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
+      "ja": {"text":"招待コードを発行しました","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
+      "it": {"text":"Codice creato","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
       "ru": {"text":"Приглашение создано","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
-      "ko": {"text":"초대를 만들었습니다","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
-      "fr": {"text":"Invitation créée","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true}
+      "ko": {"text":"초대 코드를 만들었습니다","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
+      "fr": {"text":"Code créé","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true}
     }
   },
   "invitationEmail": {
     "source": "收件人邮箱（可选）",
     "translations": {
       "en": {"text":"Recipient email (optional)","sourceRevision":"04ab5ea25bd8e55bd520dbd8b07a23f3120cb81cd0d01292d1094b2e3882ae19","reviewed":true},
-      "ja": {"text":"受信者メール(オプション)","sourceRevision":"04ab5ea25bd8e55bd520dbd8b07a23f3120cb81cd0d01292d1094b2e3882ae19","reviewed":true},
-      "it": {"text":"E-mail sensibile (facoltativo)","sourceRevision":"04ab5ea25bd8e55bd520dbd8b07a23f3120cb81cd0d01292d1094b2e3882ae19","reviewed":true},
+      "ja": {"text":"宛先メールアドレス（任意）","sourceRevision":"04ab5ea25bd8e55bd520dbd8b07a23f3120cb81cd0d01292d1094b2e3882ae19","reviewed":true},
+      "it": {"text":"Email del destinatario (facoltativa)","sourceRevision":"04ab5ea25bd8e55bd520dbd8b07a23f3120cb81cd0d01292d1094b2e3882ae19","reviewed":true},
       "ru": {"text":"Почта получателя (необязательно)","sourceRevision":"04ab5ea25bd8e55bd520dbd8b07a23f3120cb81cd0d01292d1094b2e3882ae19","reviewed":true},
-      "ko": {"text":"이메일 (선택 사항)","sourceRevision":"04ab5ea25bd8e55bd520dbd8b07a23f3120cb81cd0d01292d1094b2e3882ae19","reviewed":true},
+      "ko": {"text":"받는 사람 이메일 (선택)","sourceRevision":"04ab5ea25bd8e55bd520dbd8b07a23f3120cb81cd0d01292d1094b2e3882ae19","reviewed":true},
       "fr": {"text":"Courriel du destinataire (facultatif)","sourceRevision":"04ab5ea25bd8e55bd520dbd8b07a23f3120cb81cd0d01292d1094b2e3882ae19","reviewed":true}
     }
   },
@@ -1191,43 +1191,43 @@
     "source": "留空则手动复制注册链接",
     "translations": {
       "en": {"text":"Leave empty to copy the link manually","sourceRevision":"6d642d98dbd2f13b61f7afc9ec421030efd890acbf2141b9a8abeb18aa189ee8","reviewed":true},
-      "ja": {"text":"手動でリンクをコピーするために空の残します","sourceRevision":"6d642d98dbd2f13b61f7afc9ec421030efd890acbf2141b9a8abeb18aa189ee8","reviewed":true},
-      "it": {"text":"Lasciare vuoto per copiare il link manualmente","sourceRevision":"6d642d98dbd2f13b61f7afc9ec421030efd890acbf2141b9a8abeb18aa189ee8","reviewed":true},
+      "ja": {"text":"空欄にすると、登録リンクをコピーして手動で共有できます","sourceRevision":"6d642d98dbd2f13b61f7afc9ec421030efd890acbf2141b9a8abeb18aa189ee8","reviewed":true},
+      "it": {"text":"Lascia il campo vuoto per copiare e condividere il link di iscrizione","sourceRevision":"6d642d98dbd2f13b61f7afc9ec421030efd890acbf2141b9a8abeb18aa189ee8","reviewed":true},
       "ru": {"text":"Оставьте поле пустым, чтобы скопировать ссылку вручную","sourceRevision":"6d642d98dbd2f13b61f7afc9ec421030efd890acbf2141b9a8abeb18aa189ee8","reviewed":true},
-      "ko": {"text":"비워 두면 링크를 직접 복사할 수 있습니다.","sourceRevision":"6d642d98dbd2f13b61f7afc9ec421030efd890acbf2141b9a8abeb18aa189ee8","reviewed":true},
-      "fr": {"text":"Laisser vide pour copier le lien manuellement","sourceRevision":"6d642d98dbd2f13b61f7afc9ec421030efd890acbf2141b9a8abeb18aa189ee8","reviewed":true}
+      "ko": {"text":"비워 두면 가입 링크를 복사해 직접 공유할 수 있습니다","sourceRevision":"6d642d98dbd2f13b61f7afc9ec421030efd890acbf2141b9a8abeb18aa189ee8","reviewed":true},
+      "fr": {"text":"Laissez ce champ vide pour copier et partager le lien d’inscription","sourceRevision":"6d642d98dbd2f13b61f7afc9ec421030efd890acbf2141b9a8abeb18aa189ee8","reviewed":true}
     }
   },
   "invitationEmailQueued": {
     "source": "邀请码已创建，邮件已进入队列",
     "translations": {
       "en": {"text":"Invitation created and email queued","sourceRevision":"4a268d52f46374f6463c0e3ebb386e238151a266b21d56287ca36df01d53562d","reviewed":true},
-      "ja": {"text":"招待状の作成とメールキュー作成","sourceRevision":"4a268d52f46374f6463c0e3ebb386e238151a266b21d56287ca36df01d53562d","reviewed":true},
-      "it": {"text":"Invito creato e posta in coda","sourceRevision":"4a268d52f46374f6463c0e3ebb386e238151a266b21d56287ca36df01d53562d","reviewed":true},
+      "ja": {"text":"招待コードを発行し、メールを送信予約しました","sourceRevision":"4a268d52f46374f6463c0e3ebb386e238151a266b21d56287ca36df01d53562d","reviewed":true},
+      "it": {"text":"Codice creato. L’email è in coda per l’invio.","sourceRevision":"4a268d52f46374f6463c0e3ebb386e238151a266b21d56287ca36df01d53562d","reviewed":true},
       "ru": {"text":"Приглашение создано, письмо поставлено в очередь","sourceRevision":"4a268d52f46374f6463c0e3ebb386e238151a266b21d56287ca36df01d53562d","reviewed":true},
-      "ko": {"text":"이메일 queued","sourceRevision":"4a268d52f46374f6463c0e3ebb386e238151a266b21d56287ca36df01d53562d","reviewed":true},
-      "fr": {"text":"Invitation créée et courriel en attente","sourceRevision":"4a268d52f46374f6463c0e3ebb386e238151a266b21d56287ca36df01d53562d","reviewed":true}
+      "ko": {"text":"초대 코드를 만들고 이메일을 발송 대기열에 추가했습니다","sourceRevision":"4a268d52f46374f6463c0e3ebb386e238151a266b21d56287ca36df01d53562d","reviewed":true},
+      "fr": {"text":"Code créé. L’e-mail est en attente d’envoi.","sourceRevision":"4a268d52f46374f6463c0e3ebb386e238151a266b21d56287ca36df01d53562d","reviewed":true}
     }
   },
   "invitationEmailRetryQueued": {
     "source": "邀请邮件已重新排队",
     "translations": {
       "en": {"text":"Invitation email requeued","sourceRevision":"c707439e75d0cd8c4da68e74cafe05cda99647113adbcd3e254dfd3e0f766a00","reviewed":true},
-      "ja": {"text":"招待状メールの再配布","sourceRevision":"c707439e75d0cd8c4da68e74cafe05cda99647113adbcd3e254dfd3e0f766a00","reviewed":true},
-      "it": {"text":"E-mail di invito riqueued","sourceRevision":"c707439e75d0cd8c4da68e74cafe05cda99647113adbcd3e254dfd3e0f766a00","reviewed":true},
+      "ja": {"text":"招待メールを再送予約しました","sourceRevision":"c707439e75d0cd8c4da68e74cafe05cda99647113adbcd3e254dfd3e0f766a00","reviewed":true},
+      "it": {"text":"L’email di invito è di nuovo in coda per l’invio.","sourceRevision":"c707439e75d0cd8c4da68e74cafe05cda99647113adbcd3e254dfd3e0f766a00","reviewed":true},
       "ru": {"text":"Письмо с приглашением снова в очереди","sourceRevision":"c707439e75d0cd8c4da68e74cafe05cda99647113adbcd3e254dfd3e0f766a00","reviewed":true},
-      "ko": {"text":"이메일 requeued","sourceRevision":"c707439e75d0cd8c4da68e74cafe05cda99647113adbcd3e254dfd3e0f766a00","reviewed":true},
-      "fr": {"text":"Invitation email requeue","sourceRevision":"c707439e75d0cd8c4da68e74cafe05cda99647113adbcd3e254dfd3e0f766a00","reviewed":true}
+      "ko": {"text":"초대 이메일을 발송 대기열에 다시 추가했습니다","sourceRevision":"c707439e75d0cd8c4da68e74cafe05cda99647113adbcd3e254dfd3e0f766a00","reviewed":true},
+      "fr": {"text":"L’e-mail d’invitation est de nouveau en attente d’envoi.","sourceRevision":"c707439e75d0cd8c4da68e74cafe05cda99647113adbcd3e254dfd3e0f766a00","reviewed":true}
     }
   },
   "invitationLinkCopied": {
     "source": "注册链接已复制",
     "translations": {
       "en": {"text":"Registration link copied","sourceRevision":"0901062ddb23df6cc5fd0a340979f19a73cf63e80162a84de9c308b875afc31a","reviewed":true},
-      "ja": {"text":"登録リンクのコピー","sourceRevision":"0901062ddb23df6cc5fd0a340979f19a73cf63e80162a84de9c308b875afc31a","reviewed":true},
-      "it": {"text":"Collegamento di registrazione copiato","sourceRevision":"0901062ddb23df6cc5fd0a340979f19a73cf63e80162a84de9c308b875afc31a","reviewed":true},
+      "ja": {"text":"登録リンクをコピーしました","sourceRevision":"0901062ddb23df6cc5fd0a340979f19a73cf63e80162a84de9c308b875afc31a","reviewed":true},
+      "it": {"text":"Link di iscrizione copiato","sourceRevision":"0901062ddb23df6cc5fd0a340979f19a73cf63e80162a84de9c308b875afc31a","reviewed":true},
       "ru": {"text":"Ссылка на регистрацию скопирована","sourceRevision":"0901062ddb23df6cc5fd0a340979f19a73cf63e80162a84de9c308b875afc31a","reviewed":true},
-      "ko": {"text":"등록 링크 복사","sourceRevision":"0901062ddb23df6cc5fd0a340979f19a73cf63e80162a84de9c308b875afc31a","reviewed":true},
+      "ko": {"text":"가입 링크를 복사했습니다","sourceRevision":"0901062ddb23df6cc5fd0a340979f19a73cf63e80162a84de9c308b875afc31a","reviewed":true},
       "fr": {"text":"Lien d’inscription copié","sourceRevision":"0901062ddb23df6cc5fd0a340979f19a73cf63e80162a84de9c308b875afc31a","reviewed":true}
     }
   },
@@ -1235,22 +1235,22 @@
     "source": "邀请码已撤销",
     "translations": {
       "en": {"text":"Invitation revoked","sourceRevision":"f1a906f578bfe7a4234bd3101d3b6e241915d9896e44d6b1053bb19b046c7f84","reviewed":true},
-      "ja": {"text":"招待状の再発","sourceRevision":"f1a906f578bfe7a4234bd3101d3b6e241915d9896e44d6b1053bb19b046c7f84","reviewed":true},
-      "it": {"text":"Invito revocato","sourceRevision":"f1a906f578bfe7a4234bd3101d3b6e241915d9896e44d6b1053bb19b046c7f84","reviewed":true},
+      "ja": {"text":"招待コードを無効にしました","sourceRevision":"f1a906f578bfe7a4234bd3101d3b6e241915d9896e44d6b1053bb19b046c7f84","reviewed":true},
+      "it": {"text":"Codice revocato","sourceRevision":"f1a906f578bfe7a4234bd3101d3b6e241915d9896e44d6b1053bb19b046c7f84","reviewed":true},
       "ru": {"text":"Приглашение отозвано","sourceRevision":"f1a906f578bfe7a4234bd3101d3b6e241915d9896e44d6b1053bb19b046c7f84","reviewed":true},
-      "ko": {"text":"안내사항","sourceRevision":"f1a906f578bfe7a4234bd3101d3b6e241915d9896e44d6b1053bb19b046c7f84","reviewed":true},
-      "fr": {"text":"Invitation révoquée","sourceRevision":"f1a906f578bfe7a4234bd3101d3b6e241915d9896e44d6b1053bb19b046c7f84","reviewed":true}
+      "ko": {"text":"초대 코드를 취소했습니다","sourceRevision":"f1a906f578bfe7a4234bd3101d3b6e241915d9896e44d6b1053bb19b046c7f84","reviewed":true},
+      "fr": {"text":"Code révoqué","sourceRevision":"f1a906f578bfe7a4234bd3101d3b6e241915d9896e44d6b1053bb19b046c7f84","reviewed":true}
     }
   },
   "invitationSaved": {
     "source": "邀请码已创建",
     "translations": {
       "en": {"text":"Invitation created","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
-      "ja": {"text":"招待状作成","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
-      "it": {"text":"Invito creato","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
+      "ja": {"text":"招待コードを発行しました","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
+      "it": {"text":"Codice creato","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
       "ru": {"text":"Приглашение создано","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
-      "ko": {"text":"초대를 만들었습니다","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
-      "fr": {"text":"Invitation créée","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true}
+      "ko": {"text":"초대 코드를 만들었습니다","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true},
+      "fr": {"text":"Code créé","sourceRevision":"53ab960fe4414f0bff2a3d2e35539503387c9b068d5ab263bfec3abbee4044b8","reviewed":true}
     }
   },
   "level": {
@@ -1455,11 +1455,11 @@
     "source": "新建邀请码",
     "translations": {
       "en": {"text":"New invitation","sourceRevision":"9500d5d2386650b024e809ce6e077e717c507e26a96aa624d9f28de49c28c7fa","reviewed":true},
-      "ja": {"text":"新規招待状","sourceRevision":"9500d5d2386650b024e809ce6e077e717c507e26a96aa624d9f28de49c28c7fa","reviewed":true},
-      "it": {"text":"Nuovo invito","sourceRevision":"9500d5d2386650b024e809ce6e077e717c507e26a96aa624d9f28de49c28c7fa","reviewed":true},
+      "ja": {"text":"招待コードを発行","sourceRevision":"9500d5d2386650b024e809ce6e077e717c507e26a96aa624d9f28de49c28c7fa","reviewed":true},
+      "it": {"text":"Nuovo codice","sourceRevision":"9500d5d2386650b024e809ce6e077e717c507e26a96aa624d9f28de49c28c7fa","reviewed":true},
       "ru": {"text":"Новое приглашение","sourceRevision":"9500d5d2386650b024e809ce6e077e717c507e26a96aa624d9f28de49c28c7fa","reviewed":true},
-      "ko": {"text":"새로운 초대장","sourceRevision":"9500d5d2386650b024e809ce6e077e717c507e26a96aa624d9f28de49c28c7fa","reviewed":true},
-      "fr": {"text":"Nouvelle invitation","sourceRevision":"9500d5d2386650b024e809ce6e077e717c507e26a96aa624d9f28de49c28c7fa","reviewed":true}
+      "ko": {"text":"새 초대 코드","sourceRevision":"9500d5d2386650b024e809ce6e077e717c507e26a96aa624d9f28de49c28c7fa","reviewed":true},
+      "fr": {"text":"Nouveau code","sourceRevision":"9500d5d2386650b024e809ce6e077e717c507e26a96aa624d9f28de49c28c7fa","reviewed":true}
     }
   },
   "next": {
@@ -1652,23 +1652,23 @@
   "registrationInvitations": {
     "source": "注册邀请码",
     "translations": {
-      "en": {"text":"Registration invitations","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
-      "ja": {"text":"参加申し込みフォーム","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
-      "it": {"text":"Inviti di registrazione","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
-      "ru": {"text":"Приглашения на регистрацию","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
-      "ko": {"text":"등록 초대장","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
-      "fr": {"text":"Invitations d’inscription","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true}
+      "en": {"text":"Invite codes","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
+      "ja": {"text":"招待コード","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
+      "it": {"text":"Codici di invito","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
+      "ru": {"text":"Коды приглашений","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
+      "ko": {"text":"초대 코드","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
+      "fr": {"text":"Codes d’invitation","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true}
     }
   },
   "registrationInvitationsHint": {
     "source": "创建和撤销邀请注册使用的邀请码。",
     "translations": {
       "en": {"text":"Create and revoke codes for invited registrations.","sourceRevision":"7000111f8d09fbb4f11e21e5e990bf5fe9c1da856db967f20925d7f66e3b2051","reviewed":true},
-      "ja": {"text":"招待された登録のためのコードを作成し、再発行します。","sourceRevision":"7000111f8d09fbb4f11e21e5e990bf5fe9c1da856db967f20925d7f66e3b2051","reviewed":true},
-      "it": {"text":"Creare e revocare i codici per le registrazioni invitate.","sourceRevision":"7000111f8d09fbb4f11e21e5e990bf5fe9c1da856db967f20925d7f66e3b2051","reviewed":true},
+      "ja": {"text":"登録用の招待コードを発行・無効化できます。","sourceRevision":"7000111f8d09fbb4f11e21e5e990bf5fe9c1da856db967f20925d7f66e3b2051","reviewed":true},
+      "it": {"text":"Crea e revoca i codici di invito per iscriversi al forum.","sourceRevision":"7000111f8d09fbb4f11e21e5e990bf5fe9c1da856db967f20925d7f66e3b2051","reviewed":true},
       "ru": {"text":"Создавайте и отзывайте коды регистрации по приглашению.","sourceRevision":"7000111f8d09fbb4f11e21e5e990bf5fe9c1da856db967f20925d7f66e3b2051","reviewed":true},
-      "ko": {"text":"초대 등록에 대한 코드 생성 및 수정.","sourceRevision":"7000111f8d09fbb4f11e21e5e990bf5fe9c1da856db967f20925d7f66e3b2051","reviewed":true},
-      "fr": {"text":"Créer et révoquer des codes pour les inscriptions sollicitées.","sourceRevision":"7000111f8d09fbb4f11e21e5e990bf5fe9c1da856db967f20925d7f66e3b2051","reviewed":true}
+      "ko": {"text":"포럼 가입에 쓰는 초대 코드를 만들거나 취소할 수 있습니다.","sourceRevision":"7000111f8d09fbb4f11e21e5e990bf5fe9c1da856db967f20925d7f66e3b2051","reviewed":true},
+      "fr": {"text":"Créez et révoquez les codes d’invitation au forum.","sourceRevision":"7000111f8d09fbb4f11e21e5e990bf5fe9c1da856db967f20925d7f66e3b2051","reviewed":true}
     }
   },
   "replaceImage": {
@@ -1752,22 +1752,22 @@
     "source": "撤销邀请码",
     "translations": {
       "en": {"text":"Revoke invitation","sourceRevision":"9bae1c90eb7de232ba94fc2ec996ee0b86eb83c88e247f4954baff497f6d6000","reviewed":true},
-      "ja": {"text":"Revoke 招待状","sourceRevision":"9bae1c90eb7de232ba94fc2ec996ee0b86eb83c88e247f4954baff497f6d6000","reviewed":true},
-      "it": {"text":"Invito di voto","sourceRevision":"9bae1c90eb7de232ba94fc2ec996ee0b86eb83c88e247f4954baff497f6d6000","reviewed":true},
+      "ja": {"text":"招待コードを無効にする","sourceRevision":"9bae1c90eb7de232ba94fc2ec996ee0b86eb83c88e247f4954baff497f6d6000","reviewed":true},
+      "it": {"text":"Revoca codice","sourceRevision":"9bae1c90eb7de232ba94fc2ec996ee0b86eb83c88e247f4954baff497f6d6000","reviewed":true},
       "ru": {"text":"Отозвать приглашение","sourceRevision":"9bae1c90eb7de232ba94fc2ec996ee0b86eb83c88e247f4954baff497f6d6000","reviewed":true},
-      "ko": {"text":"초대 회수","sourceRevision":"9bae1c90eb7de232ba94fc2ec996ee0b86eb83c88e247f4954baff497f6d6000","reviewed":true},
-      "fr": {"text":"Invitation de révocation","sourceRevision":"9bae1c90eb7de232ba94fc2ec996ee0b86eb83c88e247f4954baff497f6d6000","reviewed":true}
+      "ko": {"text":"초대 코드 취소","sourceRevision":"9bae1c90eb7de232ba94fc2ec996ee0b86eb83c88e247f4954baff497f6d6000","reviewed":true},
+      "fr": {"text":"Révoquer le code","sourceRevision":"9bae1c90eb7de232ba94fc2ec996ee0b86eb83c88e247f4954baff497f6d6000","reviewed":true}
     }
   },
   "revokeInvitationConfirm": {
     "source": "撤销此邀请码？剩余未使用次数将立即失效。",
     "translations": {
       "en": {"text":"Revoke this invitation? Existing unused capacity will no longer work.","sourceRevision":"23c19915368d742e2a698aa8c5dac43dad0ceac004ee60a0e144eaacfb447464","reviewed":true},
-      "ja": {"text":"この招待状を復活させるか?未使用の容量を主張することはもはや機能しません。","sourceRevision":"23c19915368d742e2a698aa8c5dac43dad0ceac004ee60a0e144eaacfb447464","reviewed":true},
-      "it": {"text":"Rivolgere questo invito? L’esistenza di capacità non utilizzate non funzionerà più.","sourceRevision":"23c19915368d742e2a698aa8c5dac43dad0ceac004ee60a0e144eaacfb447464","reviewed":true},
+      "ja": {"text":"この招待コードを無効にしますか？残りの利用回数があっても、すぐに使えなくなります。","sourceRevision":"23c19915368d742e2a698aa8c5dac43dad0ceac004ee60a0e144eaacfb447464","reviewed":true},
+      "it": {"text":"Vuoi revocare questo codice di invito? Gli utilizzi rimanenti saranno annullati subito.","sourceRevision":"23c19915368d742e2a698aa8c5dac43dad0ceac004ee60a0e144eaacfb447464","reviewed":true},
       "ru": {"text":"Отозвать приглашение? Оставшиеся попытки использования станут недоступны.","sourceRevision":"23c19915368d742e2a698aa8c5dac43dad0ceac004ee60a0e144eaacfb447464","reviewed":true},
-      "ko": {"text":"이 초대를 되찾습니까? 사용되지 않은 용량은 더 이상 작동하지 않습니다.","sourceRevision":"23c19915368d742e2a698aa8c5dac43dad0ceac004ee60a0e144eaacfb447464","reviewed":true},
-      "fr": {"text":"Révoquer cette invitation ? La capacité inutilisée existante ne fonctionnera plus.","sourceRevision":"23c19915368d742e2a698aa8c5dac43dad0ceac004ee60a0e144eaacfb447464","reviewed":true}
+      "ko": {"text":"이 초대 코드를 취소할까요? 남아 있는 사용 횟수는 즉시 무효가 됩니다.","sourceRevision":"23c19915368d742e2a698aa8c5dac43dad0ceac004ee60a0e144eaacfb447464","reviewed":true},
+      "fr": {"text":"Révoquer ce code d’invitation ? Les utilisations restantes seront immédiatement annulées.","sourceRevision":"23c19915368d742e2a698aa8c5dac43dad0ceac004ee60a0e144eaacfb447464","reviewed":true}
     }
   },
   "revokeReason": {

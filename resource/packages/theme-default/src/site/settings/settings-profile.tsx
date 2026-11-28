@@ -1,4 +1,4 @@
-import { supportedLocales, localeLabels } from "@gooseforum/client/i18n/locale";
+import { localeMenuOrder, localeLabels } from "@gooseforum/client/i18n/locale";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import type { SaveUserInfoInput, SettingsPageProps } from "@gooseforum/client";
 import { Link as LinkIcon, Mail, Pencil, UserRound } from "lucide-react";
@@ -267,7 +267,7 @@ export function ProfileSettings({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {supportedLocales.map((locale) => (
+                    {localeMenuOrder.map((locale) => (
                       <SelectItem key={locale} value={locale}>
                         {localeLabels[locale].label}
                       </SelectItem>

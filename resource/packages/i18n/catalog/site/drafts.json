@@ -28,8 +28,8 @@
       "ja": {"text":"この下書きにはまだ概要がありません。編集を続けると自動生成されます。","sourceRevision":"cecee9fef61222287b26ce367e181c055dc5db419211efca87c3e1c1a11b912d","reviewed":true},
       "it": {"text":"Questa bozza non ha ancora un riepilogo. Continua a modificarla per generarne uno.","sourceRevision":"cecee9fef61222287b26ce367e181c055dc5db419211efca87c3e1c1a11b912d","reviewed":true},
       "ru": {"text":"У этого черновика пока нет краткого описания. Продолжите редактирование, чтобы оно сформировалось.","sourceRevision":"cecee9fef61222287b26ce367e181c055dc5db419211efca87c3e1c1a11b912d","reviewed":true},
-      "ko": {"text":"이 초안은 아직 요약이 없습니다. 계속 편집을 생성하기 위해.","sourceRevision":"cecee9fef61222287b26ce367e181c055dc5db419211efca87c3e1c1a11b912d","reviewed":true},
-      "fr": {"text":"Ce projet n’a pas encore de résumé. Continuer à éditer pour en générer un.","sourceRevision":"cecee9fef61222287b26ce367e181c055dc5db419211efca87c3e1c1a11b912d","reviewed":true}
+      "ko": {"text":"아직 요약이 없습니다. 계속 편집하면 요약이 자동으로 만들어집니다.","sourceRevision":"cecee9fef61222287b26ce367e181c055dc5db419211efca87c3e1c1a11b912d","reviewed":true},
+      "fr": {"text":"Ce brouillon n’a pas encore de résumé. Reprenez la rédaction pour en générer un.","sourceRevision":"cecee9fef61222287b26ce367e181c055dc5db419211efca87c3e1c1a11b912d","reviewed":true}
     }
   },
   "emptyHint": {
@@ -50,8 +50,8 @@
       "ja": {"text":"下書きはまだありません","sourceRevision":"434c5daf7ad775aad556670f4827b7b8330f75327a40796c96e40cc3836adee8","reviewed":true},
       "it": {"text":"Ancora nessuna bozza","sourceRevision":"434c5daf7ad775aad556670f4827b7b8330f75327a40796c96e40cc3836adee8","reviewed":true},
       "ru": {"text":"Пока нет черновиков","sourceRevision":"434c5daf7ad775aad556670f4827b7b8330f75327a40796c96e40cc3836adee8","reviewed":true},
-      "ko": {"text":"아직 초안 없음","sourceRevision":"434c5daf7ad775aad556670f4827b7b8330f75327a40796c96e40cc3836adee8","reviewed":true},
-      "fr": {"text":"Pas encore de projets","sourceRevision":"434c5daf7ad775aad556670f4827b7b8330f75327a40796c96e40cc3836adee8","reviewed":true}
+      "ko": {"text":"임시저장 글이 없습니다","sourceRevision":"434c5daf7ad775aad556670f4827b7b8330f75327a40796c96e40cc3836adee8","reviewed":true},
+      "fr": {"text":"Aucun brouillon pour le moment","sourceRevision":"434c5daf7ad775aad556670f4827b7b8330f75327a40796c96e40cc3836adee8","reviewed":true}
     }
   },
   "meta.createdAt": {
@@ -149,7 +149,7 @@
       "ja": {"text":"下書き","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
       "it": {"text":"Bozze","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
       "ru": {"text":"Черновики","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
-      "ko": {"text":"임시 저장 글","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
+      "ko": {"text":"임시저장 글","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true},
       "fr": {"text":"Brouillons","sourceRevision":"ec9373d4e662e8f94644edeff216177aa0aaf52a30d2055561b6914245bd1d21","reviewed":true}
     }
   },
@@ -160,8 +160,8 @@
       "ja": {"text":"{count}件の下書き","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true},
       "it": {"text":"{count} bozze","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true},
       "ru": {"text":"Черновиков: {count}","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true},
-      "ko": {"text":"{count}초안","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true},
-      "fr": {"text":"{count} projets","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true}
+      "ko": {"text":"임시저장 글 {count}개","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true},
+      "fr": {"text":"Nombre de brouillons : {count}","sourceRevision":"1378eb886fb63ac7de650f718cd65679e2ee822ccc44ceeedbe1b9bb821e32d3","reviewed":true}
     }
   },
   "untitled": {

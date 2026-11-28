@@ -1,4 +1,4 @@
-import { supportedLocales, localeLabels } from "@gooseforum/client/i18n/locale";
+import { localeMenuOrder, localeLabels } from "@gooseforum/client/i18n/locale";
 import { defaultAvatarFile } from "../default-avatar-file";
 import { errorMessage } from "../error-message";
 import { AdminPage } from '../components/admin-page'
@@ -191,7 +191,7 @@ export function SiteInfoManagementPage({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        {supportedLocales.map(locale => (
+                        {localeMenuOrder.map(locale => (
                           <SelectItem key={locale} value={locale}>{localeLabels[locale].label}</SelectItem>
                         ))}
                       </SelectGroup>

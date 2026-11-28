@@ -28,3 +28,11 @@
 - `pnpm check:i18n` 检查目录格式、完整性、ICU 语法和参数，以及前端 API 消息码与服务端契约的一致性。当前七种发布语言均要求完整。`pnpm i18n:check --strict` 用于要求所有已配置语言完整的检查。
 
 日语界面使用「スレッド」「返信」「権限グループ」「投稿の管理」等论坛用语。意大利语使用 discussione、risposta、allegato，韩语使用 게시글、답글、권한 그룹，法语使用 sujet、réponse、pièce jointe。保留常见技术缩写和产品名。
+
+## 文案长度审计
+
+运行 `pnpm i18n audit-length` 全量扫描当前发布译文。`--scope navigation` 聚焦后台侧栏和主站的公共导航词条，`--locale it` 筛选意大利语，`--limit 20` 控制显示条数，`--json` 输出完整的报告字段。
+
+报告按估算显示宽度标记过长或过短的译文。比较基线考虑语言和中文原文的长度，也会比较同语言的其他导航项。ICU 文案共用一组代表参数，取测得的最宽一行。参数组合过多时，逐个参数抽样。报告列出同功能的同名词条及说明，便于一起复核。审计只读，异常用于安排审阅，实际换行、截断和溢出由浏览器复现。
+
+翻译导航时先选目标语言的社区产品常用词。以邀请码为例，意大利语侧栏用 **Inviti**，页面标题用 **Codici di invito**，说明再写清楚可创建和撤销用于论坛注册的码。日语对应「招待」和「招待コード」，法语对应 **Invitations** 和 **Codes d’invitation**。[Discord 意大利语界面用语](https://support.discord.com/hc/it/articles/218485407-Modalit%C3%A0-Streamer-101) · [Discord 日语界面用语](https://support.discord.com/hc/ja/articles/208866998-%E6%8B%9B%E5%BE%85-101)

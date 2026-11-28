@@ -102,8 +102,8 @@
     "source": "Agent 接入",
     "translations": {
       "en": {"text":"Agent access","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true},
-      "ja": {"text":"エージェントアクセス","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true},
-      "it": {"text":"Accesso dell’agente","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true},
+      "ja": {"text":"エージェント連携","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true},
+      "it": {"text":"Integrazione agenti","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true},
       "ru": {"text":"Доступ агентов","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true},
       "ko": {"text":"에이전트 액세스","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true},
       "fr": {"text":"Accès aux agents","sourceRevision":"8770323afecad5695b4c441a2be95a58b3f76c3e26a8c6c984deb8c9c7ac3226","reviewed":true}
@@ -477,7 +477,7 @@
     "translations": {
       "en": {"text":"Mail","sourceRevision":"bc601861fac972e2cdb9566420e1531497e87c0ab13a243184fe3d4c48fa9b6b","reviewed":true},
       "ja": {"text":"メール","sourceRevision":"bc601861fac972e2cdb9566420e1531497e87c0ab13a243184fe3d4c48fa9b6b","reviewed":true},
-      "it": {"text":"Posta elettronica","sourceRevision":"bc601861fac972e2cdb9566420e1531497e87c0ab13a243184fe3d4c48fa9b6b","reviewed":true},
+      "it": {"text":"Email","sourceRevision":"bc601861fac972e2cdb9566420e1531497e87c0ab13a243184fe3d4c48fa9b6b","reviewed":true},
       "ru": {"text":"Почта","sourceRevision":"bc601861fac972e2cdb9566420e1531497e87c0ab13a243184fe3d4c48fa9b6b","reviewed":true},
       "ko": {"text":"메일","sourceRevision":"bc601861fac972e2cdb9566420e1531497e87c0ab13a243184fe3d4c48fa9b6b","reviewed":true},
       "fr": {"text":"Messagerie","sourceRevision":"bc601861fac972e2cdb9566420e1531497e87c0ab13a243184fe3d4c48fa9b6b","reviewed":true}
@@ -697,7 +697,7 @@
     "translations": {
       "en": {"text":"Audit log","sourceRevision":"6b6f7b79988d966ab9681d641d2d8c5f8171256e0c569a46915224bec4361785","reviewed":true},
       "ja": {"text":"操作履歴","sourceRevision":"6b6f7b79988d966ab9681d641d2d8c5f8171256e0c569a46915224bec4361785","reviewed":true},
-      "it": {"text":"Registro delle operazioni","sourceRevision":"6b6f7b79988d966ab9681d641d2d8c5f8171256e0c569a46915224bec4361785","reviewed":true},
+      "it": {"text":"Registro attività","sourceRevision":"6b6f7b79988d966ab9681d641d2d8c5f8171256e0c569a46915224bec4361785","reviewed":true},
       "ru": {"text":"Журнал аудита","sourceRevision":"6b6f7b79988d966ab9681d641d2d8c5f8171256e0c569a46915224bec4361785","reviewed":true},
       "ko": {"text":"관리 기록","sourceRevision":"6b6f7b79988d966ab9681d641d2d8c5f8171256e0c569a46915224bec4361785","reviewed":true},
       "fr": {"text":"Journal des opérations","sourceRevision":"6b6f7b79988d966ab9681d641d2d8c5f8171256e0c569a46915224bec4361785","reviewed":true}
@@ -706,12 +706,12 @@
   "registrationInvitations": {
     "source": "注册邀请码",
     "translations": {
-      "en": {"text":"Registration invitations","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
-      "ja": {"text":"登録用の招待コード","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
-      "it": {"text":"Codici di invito per la registrazione","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
-      "ru": {"text":"Приглашения на регистрацию","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
-      "ko": {"text":"가입 초대 코드","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
-      "fr": {"text":"Codes d’invitation à l’inscription","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true}
+      "en": {"text":"Invites","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
+      "ja": {"text":"招待","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
+      "it": {"text":"Inviti","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
+      "ru": {"text":"Приглашения","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
+      "ko": {"text":"초대","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true},
+      "fr": {"text":"Invitations","sourceRevision":"7fcd46c0b5169f094d73200426353cc95df4dfd49576b0cdab5d862318888773","reviewed":true}
     }
   },
   "remove": {
@@ -739,12 +739,12 @@
   "resources": {
     "source": "文件资源",
     "translations": {
-      "en": {"text":"File resources","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
-      "ja": {"text":"ファイルリソース","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
-      "it": {"text":"Risorse di file","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
-      "ru": {"text":"Файловые ресурсы","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
-      "ko": {"text":"파일 리소스","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
-      "fr": {"text":"Ressources du fichier","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true}
+      "en": {"text":"Files","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
+      "ja": {"text":"ファイル","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
+      "it": {"text":"File","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
+      "ru": {"text":"Файлы","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
+      "ko": {"text":"파일","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true},
+      "fr": {"text":"Fichiers","sourceRevision":"2357d19c842b65094dfb74c93871e432499bc2c650e06ca63c6e45c6fc03454a","reviewed":true}
     }
   },
   "restricted": {
@@ -839,9 +839,9 @@
     "source": "敏感词",
     "translations": {
       "en": {"text":"Sensitive words","sourceRevision":"a9c3723a538d4d2bc5d0d5b59437db585a72748264704750e642224519331425","reviewed":true},
-      "ja": {"text":"センシティブな言葉","sourceRevision":"a9c3723a538d4d2bc5d0d5b59437db585a72748264704750e642224519331425","reviewed":true},
+      "ja": {"text":"禁止語句","sourceRevision":"a9c3723a538d4d2bc5d0d5b59437db585a72748264704750e642224519331425","reviewed":true},
       "it": {"text":"Parole sensibili","sourceRevision":"a9c3723a538d4d2bc5d0d5b59437db585a72748264704750e642224519331425","reviewed":true},
-      "ru": {"text":"Чувствительные слова","sourceRevision":"a9c3723a538d4d2bc5d0d5b59437db585a72748264704750e642224519331425","reviewed":true},
+      "ru": {"text":"Фильтр слов","sourceRevision":"a9c3723a538d4d2bc5d0d5b59437db585a72748264704750e642224519331425","reviewed":true},
       "ko": {"text":"민감한 단어","sourceRevision":"a9c3723a538d4d2bc5d0d5b59437db585a72748264704750e642224519331425","reviewed":true},
       "fr": {"text":"Mots sensibles","sourceRevision":"a9c3723a538d4d2bc5d0d5b59437db585a72748264704750e642224519331425","reviewed":true}
     }
